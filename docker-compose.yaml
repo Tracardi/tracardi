@@ -1,25 +1,16 @@
 version: "3.7"
 services:
 
-  mongo:
-    image: mongo:4-xenial
-    hostname: mongo
-    user: root
+  tracardi:
+    image: tracardi-free
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
+      REACT_APP_API_URL: http://tracardi:8000
+      UNOMI_PROTOCOL: http
+      UNOMI_HOST: 192.168.1.103
+      UNOMI_PORT: 8181
+      UNOMI_USERNAME: karaf
+      UNOMI_PASSWORD: karaf
+      ELASTIC_HOST: 192.168.1.103
+      ELASTIC_PORT: 9200
     ports:
-      - 27017:27017
-    networks:
-      - prodi-backend
-    volumes:
-      - mongo_data:/data/db
-    restart: always
-
-
-volumes:
-  mongo_data:
-    driver: local
-
-networks:
-  prodi-backend:
+      - 80:80
