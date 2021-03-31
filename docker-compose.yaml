@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+
+  mongo:
+    image: mongo:4-xenial
+    hostname: mongo
+    user: root
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - 27017:27017
+    networks:
+      - prodi-backend
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  prodi-backend:
