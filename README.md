@@ -1,3 +1,7 @@
+# Tracardi
+Tracardi is a Graphic User Interface you can use to interact with Apache Unomi.
+Unomi is an open source Customer Data Platform that allows anyone to collect user profiles and manage them in a very robust way.
+
 # Installation
 
 ## Docker build
@@ -5,7 +9,7 @@ docker build . -t tracardi-free
 
 ## Set connection to elastic and unomi
 
-Edit docer-compose.yaml and set connection to elastic and unomi.
+Edit docker-compose.yaml and set connection to elastic and unomi.
 
 
 ```
