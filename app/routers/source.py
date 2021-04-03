@@ -2,43 +2,46 @@ from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
 from .. import config
-from ..domain.scope import Scope
+from ..domain.source import Source
 from ..errors.errors import NullResponseError
-from ..filters.elastic import filter_scope
+from ..filters.elastic import filter_source
 from ..globals.authentication import get_current_user
 from ..globals.elastic_client import elastic_client
 
 router = APIRouter(
-    prefix="/scope",
+    prefix="/source",
     # dependencies=[Depends(get_current_user)]
 )
 
 
 @router.get("/{id}")
-def scope_get(id: str, elastic=Depends(elastic_client)):
-    scope_index = config.index['scopes']
-    result = elastic.get(scope_index, id)
-    return {
-        "meta": {
-            "id": result['_source']['doc']["_id"],
-        },
-        "doc": result['_source']['doc']
-    }
+def source_get(id: str, elastic=Depends(elastic_client)):
+    source_index = config.index['sources']
+    result = elastic.get(source_index, id)
+    return result['_source']
 
 
 @router.post("/")
-def insert_scope(scope: Scope, elastic=Depends(elastic_client)):
-    scope_index = config.index['scopes']
-    scope = {
-        '_id': scope.get_id(),
-        'name': scope.name,
-        'hostname': scope.host,
+def insert_source(source: Source, elastic=Depends(elastic_client)):
+    source_index = config.index['sources']
+    source = {
+        '_id': source.get_id(),
+        'itemId': source.get_id(),
+        'itemType': "source",
+        'name': source.name,
+        'hostname': source.hostname,
+        'metadata': {
+            'scope': source.scope,
+            'systemTags': [],
+            'tags': [],
+            'enabled': True
+        }
     }
-    return elastic.insert(scope_index, [scope])
+    return elastic.insert(source_index, [source])
 
 
 @router.post("/select")
-async def segment_select(request: Request, elastic=Depends(elastic_client)):
+async def source_select(request: Request, elastic=Depends(elastic_client)):
     try:
         q = await request.body()
         q = q.decode('utf-8')
@@ -61,11 +64,11 @@ async def segment_select(request: Request, elastic=Depends(elastic_client)):
                 }
             }
 
-        scope_index = config.index['scopes']
+        source_index = config.index['sources']
 
-        result = elastic.scan(scope_index, q)
+        result = elastic.scan(source_index, q)
 
-        return list(filter_scope(result))
+        return list(filter_source(result))
 
     except NullResponseError as e:
         raise HTTPException(status_code=e.response_status, detail=str(e))

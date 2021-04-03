@@ -29,23 +29,22 @@ class Elastic:
         bulk = []
 
         for record in records:
+
             if '_id' in record:
                 _id = record['_id']
-
+                del(record['_id'])
                 record = {
                     "_index": index,
                     "_id": _id,
-                    "_source": {"doc": record}
+                    "_source": record
                 }
             else:
                 record = {
                     "_index": index,
-                    "_source": {"doc": record}
+                    "_source": record
                 }
 
             bulk.append(record)
-        print()
-        print(bulk)
         return helpers.bulk(self._client, bulk)
 
     def update(self, index, records):

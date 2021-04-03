@@ -6,10 +6,10 @@ elastic = {
 }
 
 index = {
-    "segments": "uql-segments",
-    "rules": "uql-rules",
-    "goals": "uql-goals",
-    "scopes": "uql-scopes",
+    "segments": "tracardi-segments",
+    "rules": "tracardi-rules",
+    "goals": "tracardi-goals",
+    "sources": "tracardi-sources",
 }
 
 unomi = {

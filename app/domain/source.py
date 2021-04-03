@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 
 
-class Scope(BaseModel):
+class Source(BaseModel):
     name: str
-    host: str
+    hostname: str
+    scope: str
 
     def get_id(self):
         return self.name.lower().replace(" ", "-").replace("_", '-')
