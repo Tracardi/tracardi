@@ -45,13 +45,11 @@ async def rule_get(id: str,
         result['unomi']['synchronized'] = True if not isinstance(elastic_result, RecordNotFound) else False
 
         if not isinstance(elastic_result, RecordNotFound):
-            result['doc'] = {
-                "condition": elastic_result['_source']['doc']["condition"],
-                "actions": elastic_result['_source']['doc']["actions"],
-                "uql": elastic_result['_source']['doc']["uql"],
+            result['uql'] = {
+                "condition": elastic_result['_source']["condition"],
+                "actions": elastic_result['_source']["actions"],
+                "uql": elastic_result['_source']["uql"],
             }
-        else:
-            result['error'] = elastic_result.message
 
         return result
 

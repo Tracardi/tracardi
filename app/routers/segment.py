@@ -42,12 +42,10 @@ async def segment_get(id: str, uql=Depends(context_server_via_uql), elastic=Depe
         result['meta']['synchronized'] = True if not isinstance(elastic_result, RecordNotFound) else False
 
         if not isinstance(elastic_result, RecordNotFound):
-            result['doc'] = {
-                "condition": elastic_result['_source']['doc']["condition"],
-                "uql": elastic_result['_source']['doc']["uql"],
+            result['uql'] = {
+                "condition": elastic_result['_source']["condition"],
+                "uql": elastic_result['_source']["uql"],
             }
-        else:
-            result['meta']['error'] = elastic_result.message
 
         return result
 
