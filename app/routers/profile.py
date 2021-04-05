@@ -7,7 +7,7 @@ from ..globals.context_server import context_server_via_uql
 
 router = APIRouter(
     prefix="/profile",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 
@@ -31,9 +31,9 @@ async def select_profiles(request: Request, uql=Depends(context_server_via_uql))
         q = await request.body()
         q = q.decode('utf-8')
         if q:
-            q = f"SELECT PROFILE WHERE {q}"
+            q = f"SELECT PROFILE WHERE {q} SORT BY systemProperties.lastUpdated DESC"
         else:
-            q = "SELECT PROFILE"
+            q = "SELECT PROFILE SORT BY properties.lastVisit DESC"
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
         result = list(filter_profile(result))

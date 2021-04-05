@@ -13,7 +13,7 @@ from ..globals.elastic_client import elastic_client
 
 router = APIRouter(
     prefix="/source",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 
@@ -32,6 +32,17 @@ def source_get(id: str, elastic=Depends(elastic_client)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail={"message": str(e), "info": {}})
+
+
+@router.delete("/{id}")
+async def source_delete(id: str,
+                        elastic=Depends(elastic_client)):
+    try:
+        index = config.index['sources']
+        return elastic.delete(index, id)
+    except elasticsearch.exceptions.NotFoundError:
+        # todo logging
+        print("Record {} not found in elastic.".format(id))
 
 
 @router.post("/")

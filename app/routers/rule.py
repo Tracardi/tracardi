@@ -12,10 +12,11 @@ from ..globals.context_server import context_server_via_uql
 from ..globals.elastic_client import elastic_client
 from ..routers.misc import query
 from ..storage.actions.rule import upsert_rule
+from ..storage.helpers import update_record
 
 router = APIRouter(
     prefix="/rule",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 
@@ -75,6 +76,15 @@ async def rule_delete(id: str,
     response_tuple = uql.delete(q)
     print(response_tuple)
     return uql.respond(response_tuple)
+
+
+@router.put("/{id}")
+async def rule_update(id: str,
+                      request: Request,
+                      elastic=Depends(elastic_client)):
+    index = config.unomi_index['rule']
+    record = await request.json()
+    return update_record(elastic, index, id, record)
 
 
 @router.post("/")

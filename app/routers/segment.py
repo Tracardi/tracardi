@@ -11,10 +11,11 @@ from ..globals.context_server import context_server_via_uql
 from ..globals.elastic_client import elastic_client
 from ..routers.misc import query
 from ..storage.actions.segment import upsert_segment
+from ..storage.helpers import update_record
 
 router = APIRouter(
     prefix="/segment",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 
@@ -67,6 +68,15 @@ async def segment_create(segment: Segment, uql=Depends(context_server_via_uql), 
     print(upserted_records, errors)
 
     return unomi_result
+
+
+@router.put("/{id}")
+async def segment_update(id: str,
+                      request: Request,
+                      elastic=Depends(elastic_client)):
+    index = config.unomi_index['segment']
+    record = await request.json()
+    return update_record(elastic, index, id, record)
 
 
 @router.delete("/{id}")

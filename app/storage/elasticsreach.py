@@ -44,23 +44,12 @@ class Elastic:
                     "_source": record
                 }
 
+
             bulk.append(record)
         return helpers.bulk(self._client, bulk)
 
-    def update(self, index, records):
-        bulk = []
-
-        for record in records:
-            _id = record['_id']
-            del (record['_id'])
-            bulk.append({
-                "_index": index,
-                "_id": _id,
-                "_source": {"doc": record},
-                "_op_type": "update"
-            })
-
-        return helpers.bulk(self._client, bulk)
+    def update(self, index, id, record):
+        return self._client.update(index, doc_type="_doc", body=record, id=id)
 
     def remove_index(self, index):
         return self._client.indices.delete(index=index)

@@ -7,7 +7,7 @@ from ..globals.context_server import context_server_via_uql
 
 router = APIRouter(
     prefix="/event",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 
@@ -31,9 +31,9 @@ async def event_select(request: Request, uql=Depends(context_server_via_uql)):
         q = await request.body()
         q = q.decode('utf-8')
         if q:
-            q = f"SELECT EVENT WHERE {q}"
+            q = f"SELECT EVENT WHERE {q} SORT BY timeStamp DESC"
         else:
-            q = "SELECT EVENT LIMIT 20"
+            q = "SELECT EVENT SORT BY timestamp DESC LIMIT 20"
 
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)

@@ -5,6 +5,12 @@ elastic = {
     'port': os.environ['ELASTIC_PORT'] if 'ELASTIC_PORT' in os.environ else 9200,
 }
 
+unomi_index = {
+    "segment": "context-segment",
+    "rule": "context-rule",
+    "goal": "context-goal",
+}
+
 index = {
     "segments": "tracardi-segments",
     "rules": "tracardi-rules",
