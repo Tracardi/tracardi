@@ -4,9 +4,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='profilo_community',
-    version='0.1.0',
-    description='Profilo for Unomi. Profilo is GUI for Apache Unomi.',
+    name='tracardi_community',
+    version='0.2.0',
+    description='Tracardi for Unomi. Tracardi is GUI for Apache Unomi.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Risto Kowaczewski',
