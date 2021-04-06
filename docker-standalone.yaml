@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+
+  tracardi:
+    build: .
+    environment:
+      UNOMI_PROTOCOL: http
+      UNOMI_HOST: 192.168.1.103
+      UNOMI_PORT: 8181
+      UNOMI_USERNAME: karaf
+      UNOMI_PASSWORD: karaf
+      ELASTIC_HOST: 192.168.1.103
+      ELASTIC_PORT: 9200
+    ports:
+      - 80:80

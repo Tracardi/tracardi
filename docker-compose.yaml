@@ -2,15 +2,49 @@ version: "3.7"
 services:
 
   tracardi:
-    image: tracardi-free
+    build: .
     environment:
-      REACT_APP_API_URL: http://tracardi:8000
       UNOMI_PROTOCOL: http
-      UNOMI_HOST: 192.168.1.103
+      UNOMI_HOST: unomi
       UNOMI_PORT: 8181
       UNOMI_USERNAME: karaf
       UNOMI_PASSWORD: karaf
-      ELASTIC_HOST: 192.168.1.103
+      ELASTIC_HOST: elasticsearch
       ELASTIC_PORT: 9200
     ports:
       - 80:80
+    depends_on:
+      - unomi
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+    volumes: # Persist ES data in seperate "esdata" volume
+      - esdata:/usr/share/elasticsearch/data
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - cluster.name=contextElasticSearch
+    ports:
+      - 9300:9300
+      - 9200:9200
+
+  unomi:
+    image: apache/unomi:1.5.4
+    environment:
+      - UNOMI_ELASTICSEARCH_ADDRESSES=elasticsearch:9200
+      - ELASTICSEARCH_PORT=9300
+    ports:
+      - 8181:8181
+      - 9443:9443
+      - 8102:8102
+    links:
+      - elasticsearch
+    depends_on:
+      - elasticsearch
+
+volumes: # Define seperate volume for Elasticsearch data
+  esdata:
+    driver: local
