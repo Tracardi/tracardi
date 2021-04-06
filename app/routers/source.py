@@ -42,7 +42,7 @@ async def source_delete(id: str,
         return elastic.delete(index, id)
     except elasticsearch.exceptions.NotFoundError:
         # todo logging
-        print("Record {} not found in elastic.".format(id))
+        print("Record `{}` not found in elastic.".format(id))
 
 
 @router.post("/")
@@ -67,7 +67,7 @@ def insert_source(source: Source, elastic=Depends(elastic_client)):
         raise HTTPException(status_code=e.response_status, detail={"message": str(e), "info": {}})
 
     except elasticsearch.exceptions.NotFoundError as e:
-        raise HTTPException(status_code=e.status_code, detail={"message": "Record not found.", "info": e.info})
+        raise HTTPException(status_code=e.status_code, detail={"message": "Record not found in elastic.", "info": e.info})
 
     except Exception as e:
         raise HTTPException(status_code=500, detail={"message": str(e), "info": {}})
@@ -107,7 +107,7 @@ async def source_select(request: Request, elastic=Depends(elastic_client)):
         raise HTTPException(status_code=e.response_status, detail={"message": str(e), "info": {}})
 
     except elasticsearch.exceptions.NotFoundError as e:
-        raise HTTPException(status_code=e.status_code, detail={"message": "Record not found.", "info": e.info})
+        raise HTTPException(status_code=e.status_code, detail={"message": "Records not found in elastic.", "info": e.info})
 
     except Exception as e:
         raise HTTPException(status_code=500, detail={"message": str(e), "info": {}})

@@ -66,15 +66,13 @@ async def rule_delete(id: str,
                       elastic=Depends(elastic_client)):
     try:
         index = config.index['rules']
-        elastic_result = elastic.delete(index, id)
-        print(elastic_result)
+        return elastic.delete(index, id)
     except elasticsearch.exceptions.NotFoundError:
         # todo logging
         print("Record {} not found in elastic.".format(id))
 
     q = f"DELETE RULE \"{id}\""
     response_tuple = uql.delete(q)
-    print(response_tuple)
     return uql.respond(response_tuple)
 
 
@@ -93,9 +91,7 @@ async def create_query(rule: Rule, uql=Depends(context_server_via_uql), elastic=
         f"WHEN {rule.condition} THEN {rule.action}"
 
     unomi_result = query(q, uql)
-
     upserted_records, errors = upsert_rule(elastic, q, rule)
-    print(upserted_records, errors)
 
     return unomi_result
 
@@ -118,9 +114,7 @@ async def rule_select(request: Request, uql=Depends(context_server_via_uql)):
         else:
             q = "SELECT RULE LIMIT 20"
         response_tuple = uql.select(q)
-        print(response_tuple)
         result = uql.respond(response_tuple)
-        # result = list(filter_rule(result))
         return result['list'] if 'list' in result else []
     except NullResponseError as e:
         raise HTTPException(status_code=e.response_status, detail=str(e))
