@@ -12,6 +12,7 @@ unomi_index = {
 }
 
 index = {
+    "tokens": "tracardi-tokens",
     "segments": "tracardi-segments",
     "rules": "tracardi-rules",
     "goals": "tracardi-goals",

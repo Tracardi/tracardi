@@ -14,3 +14,4 @@ RUN pip install -r requirements.txt
 ## Copy application
 COPY app app/
 ENV VARIABLE_NAME="application"
+ENV MAX_WORKERS=5

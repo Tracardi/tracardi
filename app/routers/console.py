@@ -13,7 +13,7 @@ from ..routers.misc import query
 
 router = APIRouter(
     prefix="/console",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 

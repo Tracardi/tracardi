@@ -14,6 +14,9 @@ class Elastic:
     def delete(self, index, id):
         return self._client.delete(index=index, doc_type="_doc", id=id)
 
+    def exists(self, index, id):
+        return self._client.exists(index=index, doc_type="_doc", id=id)
+
     def scan(self, index, query):
 
         _generator = scan(
@@ -49,7 +52,7 @@ class Elastic:
         return helpers.bulk(self._client, bulk)
 
     def update(self, index, id, record):
-        return self._client.update(index, doc_type="_doc", body=record, id=id)
+        return self._client.update(index, body=record, id=id)
 
     def remove_index(self, index):
         return self._client.indices.delete(index=index)

@@ -20,6 +20,7 @@ async def login(login_form_data: OAuth2PasswordRequestForm = Depends(),
     return token
 
 
-@router.get("/auth")
-async def auth(user: User = Depends(User.factory)):
-    return user
+# @router.get("/auth")
+# async def auth(user: User = Depends(User.factory)):
+#     print("AUTH")
+#     return user
