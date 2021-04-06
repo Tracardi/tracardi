@@ -37,9 +37,7 @@ class UQL:
         tree = self.parsers[grammar].parse(q)
 
         unomi_tuple = SelectTransformer().transform(tree)
-        print(unomi_tuple)
         data_type, uri, method, query, status = unomi_tuple
-        print(query)
         result = self.dispatcher.fetch(unomi_tuple)
         response, expected_status = result
 
@@ -56,9 +54,7 @@ class UQL:
         tree = self.parsers[grammar].parse(q)
 
         unomi_tuple = DeleteTransformer().transform(tree)
-        print(unomi_tuple)
         data_type, uri, method, query, status = unomi_tuple
-        print(query)
         result = self.dispatcher.fetch(unomi_tuple)
         response, expected_status = result
 
