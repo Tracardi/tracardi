@@ -17,6 +17,9 @@ class Elastic:
     def exists(self, index, id):
         return self._client.exists(index=index, doc_type="_doc", id=id)
 
+    def search(self, index, query):
+        return self._client.search(index=index, body=query)
+
     def scan(self, index, query):
 
         _generator = scan(

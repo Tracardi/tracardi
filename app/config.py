@@ -9,6 +9,7 @@ unomi_index = {
     "segment": "context-segment",
     "rule": "context-rule",
     "goal": "context-goal",
+    "event": "context-event-*",
 }
 
 index = {
