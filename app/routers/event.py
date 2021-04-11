@@ -1,6 +1,8 @@
+import json
 from datetime import datetime
 from time import sleep
 
+import requests
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
@@ -10,6 +12,7 @@ from ..filters.datagrid import filter_event
 from ..globals.authentication import get_current_user
 from ..globals.context_server import context_server_via_uql
 from ..globals.elastic_client import elastic_client
+from ..storage.sql import event_sql
 
 router = APIRouter(
     prefix="/event",
@@ -19,20 +22,14 @@ router = APIRouter(
 
 @router.get("/chart/data")
 async def event_data(min: datetime, max: datetime, offset: int = 0, limit: int = 20,
-                     elastic=Depends(elastic_client)):
-    sleep(2)
-    event_index = config.unomi_index['event']
+                     elastic=Depends(elastic_client), query: str = ""):
+    query = event_sql(min, max, query)
+    translated_query = elastic.sql.translate(query)
+
     query = {
         "from": offset,
         "size": limit,
-        "query": {
-            "range": {
-                "timeStamp": {
-                    "gte": min,
-                    "lt": max
-                }
-            }
-        },
+        "query": translated_query['query'],
         "sort": [
             {
                 "timeStamp": "asc"
@@ -42,6 +39,7 @@ async def event_data(min: datetime, max: datetime, offset: int = 0, limit: int =
 
     print(query)
 
+    event_index = config.unomi_index['event']
     result = elastic.search(event_index, query)
 
     return {
@@ -51,9 +49,7 @@ async def event_data(min: datetime, max: datetime, offset: int = 0, limit: int =
 
 
 @router.get("/chart/histogram")
-async def event_histogram(min: datetime, max: datetime, elastic=Depends(elastic_client), filter: str = ""):
-    sleep(2)
-
+async def event_histogram(min: datetime, max: datetime, elastic=Depends(elastic_client), query: str = ""):
     def __interval(min: datetime, max: datetime):
 
         max_interval = 50
@@ -88,42 +84,54 @@ async def event_histogram(min: datetime, max: datetime, elastic=Depends(elastic_
                 "events": row["doc_count"]
             }
 
-    interval, unit, format = __interval(min, max)
+    try:
+        interval, unit, format = __interval(min, max)
 
-    event_index = config.unomi_index['event']
-    query = {
-        "size": 0,
-        "query": {
-            "range": {
-                "timeStamp": {
-                    "gte": min,
-                    "lt": max
-                }
-            }
-        },
-        "aggs": {
-            "events_over_time": {
-                "date_histogram": {
-                    "min_doc_count": 0,
-                    "field": "timeStamp",
-                    "fixed_interval": f"{interval}{unit}",
-                    "extended_bounds": {
-                        "min": min,
-                        "max": max
+        query = event_sql(min, max, query)
+        translated_query = elastic.sql.translate(query)
+
+        event_index = config.unomi_index['event']
+        query = {
+            "size": 0,
+            "query": translated_query['query'],
+            "aggs": {
+                "events_over_time": {
+                    "date_histogram": {
+                        "min_doc_count": 0,
+                        "field": "timeStamp",
+                        "fixed_interval": f"{interval}{unit}",
+                        "extended_bounds": {
+                            "min": min,
+                            "max": max
+                        }
                     }
                 }
             }
         }
-    }
 
-    print(query)
+        print(query)
 
-    result = elastic.search(event_index, query)
+        result = elastic.search(event_index, query)
 
-    return {
-        'total': result['hits']['total']['value'],
-        'data': list(__format(result['aggregations']['events_over_time']['buckets'], unit, interval, format))
-    }
+        return {
+            'total': result['hits']['total']['value'],
+            'data': list(__format(result['aggregations']['events_over_time']['buckets'], unit, interval, format))
+        }
+    except Exception:
+        return {
+            "total": 0,
+            "data": [
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0}
+            ]
+        }
 
 
 @router.get("/{id}")
