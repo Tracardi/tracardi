@@ -1,9 +1,6 @@
-from app import config
 
-
-def event_sql(min, max, query=""):
-    event_index = config.unomi_index['event']
-    sql = """SELECT * FROM "{}" WHERE timeStamp BETWEEN '{}' AND '{}'""".format(event_index, min.isoformat(),
+def to_sql(index, time, min, max, query=""):
+    sql = """SELECT * FROM "{}" WHERE {} BETWEEN '{}' AND '{}'""".format(index, time, min.isoformat(),
                                                                                 max.isoformat())
 
     if query:

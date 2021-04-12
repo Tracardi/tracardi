@@ -6,7 +6,7 @@ from fastapi import HTTPException, Depends
 
 from .. import config
 from ..domain.rule import Rule
-from ..errors.errors import NullResponseError, RecordNotFound
+from ..errors.errors import NullResponseError, RecordNotFound, convert_exception_to_json
 from ..globals.authentication import get_current_user
 from ..globals.context_server import context_server_via_uql
 from ..globals.elastic_client import elastic_client
@@ -31,7 +31,7 @@ async def rule_get(id: str,
         result = uql.respond(response_tuple)
 
         if not result or 'list' not in result or not result['list']:
-            raise HTTPException(status_code=404, detail="Item not found")
+            raise RecordNotFound("Item not found")
 
         try:
             elastic_result = elastic.get(config.index['rules'], id)
@@ -55,9 +55,9 @@ async def rule_get(id: str,
         return result
 
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=str(e))
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
 @router.delete("/{id}")
@@ -117,6 +117,6 @@ async def rule_select(request: Request, uql=Depends(context_server_via_uql)):
         result = uql.respond(response_tuple)
         return result['list'] if 'list' in result else []
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=str(e))
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))

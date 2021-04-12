@@ -10,6 +10,7 @@ unomi_index = {
     "rule": "context-rule",
     "goal": "context-goal",
     "event": "context-event-*",
+    "profile": "context-profile",
 }
 
 index = {

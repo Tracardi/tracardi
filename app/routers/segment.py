@@ -4,7 +4,7 @@ from fastapi import HTTPException, Depends
 
 from .. import config
 from ..domain.segment import Segment
-from ..errors.errors import NullResponseError, RecordNotFound
+from ..errors.errors import NullResponseError, RecordNotFound, convert_exception_to_json
 from ..filters.datagrid import filter_segment
 from ..globals.authentication import get_current_user
 from ..globals.context_server import context_server_via_uql
@@ -28,7 +28,7 @@ async def segment_get(id: str, uql=Depends(context_server_via_uql), elastic=Depe
         result = uql.respond(response_tuple)
 
         if not result or 'list' not in result or not result['list']:
-            raise HTTPException(status_code=404, detail="Item not found")
+            raise RecordNotFound("Item not found")
 
         try:
             elastic_result = elastic.get(config.index['segments'], id)
@@ -51,9 +51,9 @@ async def segment_get(id: str, uql=Depends(context_server_via_uql), elastic=Depe
         return result
 
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=str(e))
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
 @router.post("/")
@@ -61,12 +61,8 @@ async def segment_create(segment: Segment, uql=Depends(context_server_via_uql), 
     q = f"CREATE SEGMENT \"{segment.name}\" DESCRIBE \"{segment.desc}\" IN SCOPE \"{segment.scope}\" " + \
         f"WHEN {segment.condition}"
 
-    print(q)
     unomi_result = query(q, uql)
-    print(unomi_result)
     upserted_records, errors = upsert_segment(elastic, q, segment)
-    print(upserted_records, errors)
-
     return unomi_result
 
 
@@ -111,6 +107,6 @@ async def segment_select(request: Request, uql=Depends(context_server_via_uql)):
         result = list(filter_segment(result))
         return result
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=str(e))
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
