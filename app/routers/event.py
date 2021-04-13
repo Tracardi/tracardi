@@ -1,22 +1,18 @@
-import json
 from datetime import datetime
-from time import sleep
 
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
-from .. import config
 from ..errors.errors import NullResponseError, convert_exception_to_json, RecordNotFound
 from ..filters.datagrid import filter_event
 from ..globals.authentication import get_current_user
 from ..globals.context_server import context_server_via_uql
 from ..globals.elastic_client import elastic_client
 from ..storage.helpers import data_histogram, object_data
-from ..storage.sql import to_sql
 
 router = APIRouter(
     prefix="/event",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 

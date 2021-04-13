@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 
-from .routers import console, event, rule, source, profile, segment, auth
+from .routers import console, event, rule, source, profile, segment, auth, session, action
 
 
 _local_dir = os.path.dirname(__file__)
@@ -21,7 +21,9 @@ application.include_router(rule.router)
 application.include_router(source.router)
 application.include_router(profile.router)
 application.include_router(segment.router)
+application.include_router(session.router)
 application.include_router(auth.router)
+application.include_router(action.router)
 
 application.add_middleware(
     CORSMiddleware,
