@@ -27,13 +27,39 @@ action_mapper = {
             "description": "Copy selected property from event to profile property. " +
                            "This function requires 3 parameters an event property name, profile property name and " +
                            "type of assignment (default is equals).",
-            "signature": "unomi:CopyProperty(eventPropertyField, profilePropertyField, [, op=\"equals\"])",
+
             "form": {
-                "template": "Make $1 equal to $2",
-                "components": {
-                    "$1": {"type": "input", "props": {"label": "event property field name"}},
-                    "$2": {"type": "input", "props": {"label": "profile property field name"}}
-                }
+                "params": {
+                    "eventProperty": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^(?!\.)[a-zA-Z0-9\._]+(?<!\.)$",
+                            "error": "Field name must not start and end with dot and must contain only letters and numbers or underscore"
+                        },
+                        "props": {
+                            "label": "event property field"
+                        }
+                    },
+                    "profileProperty": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^(?!\.)[a-zA-Z0-9\._]+(?<!\.)$",
+                            "error": "Field name must not start and end with dot and must contain only letters and numbers or underscore"
+                        },
+                        "props": {
+                            "label": "profile property field"
+                        }
+                    }
+                },
+                "signature": "unomi:CopyProperty(\"${eventProperty}\", \"${profileProperty}\")",
+                "steps": [
+                    {
+                        "template": "Create profile property if does not exist",
+                    },
+                    {
+                        "template": "Make ${profileProperty} equal to ${eventProperty}",
+                    }
+                ]
             },
             "parameters": [
                 {"name": "eventPropertyField", "defaultValue": None, "description": "Name of event property"},
