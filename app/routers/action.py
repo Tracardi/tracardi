@@ -12,16 +12,24 @@ router = APIRouter(
 
 action_mapper = {
     # This one is working
-    "unomi:CopyAllProperties": {
+    "profile:copyAllProperties": {
         "metadata": {
             "enabled": True,
             "description": "Copy all properties from event to profile properties.",
-            "signature": "unomi:CopyAllProperties()",
-            "parameters": []
+            "parameters": [],
+            "form": {
+                "params": {},
+                "signature": "unomi:CopyAllProperties()",
+                "steps": [
+                    {
+                        "template": "Copy all event properties to profile",
+                    }
+                ]
+            },
         },
     },
     # This one works
-    "unomi:CopyProperty": {
+    "profile.copyProperty": {
         "metadata": {
             "enabled": True,
             "description": "Copy selected property from event to profile property. " +
@@ -68,13 +76,50 @@ action_mapper = {
         },
     },
     # This one works
-    "unomi:SetProperty": {
+    "profile.setProperty": {
         "metadata": {
             "enabled": True,
             "description": "Sets profile property to given value of type string, int, bool, list. " +
                            "This function requires 3 parameters a profile property name, event property name and " +
                            "type of assignment (default is equals).",
-            "signature": "unomi:SetProperty(profilePropertyField, value, [, op=\"equals\"])"
+            "parameters": [
+                {"name": "profilePropertyField", "defaultValue": None, "description": "Name of profile property"},
+                {"name": "value", "defaultValue": None, "description": "Value of profile property"}
+            ],
+            "form": {
+                "signature": "unomi:SetProperty(\"${profileProperty}\", \"${value}\")",
+                "params": {
+                     "profileProperty": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^(?!\.)[a-zA-Z0-9\._]+(?<!\.)$",
+                            "error": "Field name must not start and end with dot and must contain only letters and numbers or underscore"
+                        },
+                        "props": {
+                            "label": "profile property field"
+                        }
+                    },
+                    "value": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^[^\"]+$",
+                            "error": "Field name must have quote character"
+                        },
+                        "props": {
+                            "label": "value"
+                        }
+                    }
+                },
+                "steps": [
+                    {
+                        "template": "Create profile property if does not exist",
+                    },
+                    {
+                        "template": "Make ${profileProperty} equal to ${value}",
+                    }
+                ]
+            },
+
         },
     },
     # This one works
@@ -122,21 +167,26 @@ action_mapper = {
 
 def __search_actions(query):
     for function_name, data in action_mapper.items():
-        query = query.lower()
-        if ('description' in data['metadata'] and query in data['metadata']['description'].lower()) or \
-                (query in function_name.lower()):
-            if data['metadata']['enabled']:
-                yield {
-                    "function": function_name,
-                    "metadata": data['metadata']
-                }
+
+        if not query:
+            yield {
+                "function": function_name,
+                "metadata": data['metadata']
+            }
+        else:
+            query = query.lower()
+            if ('description' in data['metadata'] and query in data['metadata']['description'].lower()) or \
+                    (query in function_name.lower()):
+                if 'enabled' in data['metadata'] and data['metadata']['enabled']:
+                    yield {
+                        "function": function_name,
+                        "metadata": data['metadata']
+                    }
 
 
 @router.get("/search")
 async def event_data(query: str = None):
     # try:
-    if not query:
-        return []
     return list(__search_actions(query))
 # except Exception as e:
 #     raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
