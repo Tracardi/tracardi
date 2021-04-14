@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi_community',
-    version='0.2.0',
+    version='0.2.1',
     description='Tracardi for Unomi. Tracardi is GUI for Apache Unomi.',
     long_description=long_description,
     long_description_content_type="text/markdown",
