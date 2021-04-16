@@ -26,7 +26,7 @@ async def rule_get(id: str,
                    uql=Depends(context_server_via_uql),
                    elastic=Depends(elastic_client)):
     q = f"SELECT RULE WHERE id=\"{id}\""
-    time.sleep(1)
+
     try:
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
@@ -47,11 +47,7 @@ async def rule_get(id: str,
         result['unomi']['synchronized'] = True if not isinstance(elastic_result, RecordNotFound) else False
 
         if not isinstance(elastic_result, RecordNotFound):
-            result['uql'] = {
-                "condition": elastic_result['_source']["condition"],
-                "actions": elastic_result['_source']["actions"],
-                "uql": elastic_result['_source']["uql"],
-            }
+            result['uql'] = elastic_result['_source']
 
         return result
 
@@ -118,7 +114,7 @@ async def get_unomi_query(request: Request, uql=Depends(context_server_via_uql))
 
 @router.post("/select")
 async def rule_select(request: Request, uql=Depends(context_server_via_uql)):
-    # try:
+    try:
         q = await request.body()
         q = q.decode('utf-8')
         if q:
@@ -129,7 +125,7 @@ async def rule_select(request: Request, uql=Depends(context_server_via_uql)):
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
         return result['list'] if 'list' in result else []
-    # except NullResponseError as e:
-    #     raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
+    except NullResponseError as e:
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))

@@ -1,19 +1,17 @@
+import json
+
 from ...errors import ActionParamsError, ActionParamError
 
 
-def copy_events_to_profile_properties_stmt(params):
+def copy_events_to_profile_properties_stmt(params, template):
     if len(params) != 0:
         params = [v for k, v in params]
-        raise ValueError("unomi:CopyAllProperties() does not tage any params. Given `{}`.".format(params))
-    return {
-        "type": "allEventToProfilePropertiesAction",
-        "parameterValues": {},
-
-    }
+        raise ValueError("profile.CopyAllProperties() does not take any params. Given `{}`.".format(params))
+    return json.loads(template)
 
 
 # TODO not working
-def increment_profile_property_stmt(params):
+def increment_profile_property_stmt(params, template):
     profile_value_type, profile_property_name = params[0]
 
     if profile_value_type != "ESCAPED_STRING":
@@ -29,7 +27,7 @@ def increment_profile_property_stmt(params):
     }
 
 
-def new_user_since(params):
+def new_user_since(params, template):
     since_value_type, since_property_value = params[0]
 
     if since_value_type != "NUMBER":
@@ -46,10 +44,10 @@ def new_user_since(params):
 
 
 # this works
-def set_profile_property_from_event_stmt(params):
+def set_profile_property_from_event_stmt(params, template):
     if 3 < len(params) or len(params) < 2:
         raise ActionParamsError(
-            "Invalid number of parameters in action unomi:CopyProperty. Required parameters 2 or 3. Given {}".format(
+            "Invalid number of parameters. Required parameters 2 or 3. Given {}".format(
                 len(params)))
 
     if len(params) == 2:
@@ -61,41 +59,35 @@ def set_profile_property_from_event_stmt(params):
 
     if profile_value_type != "DOTTED_FIELD":
         raise ActionParamError(
-            "First param (profilePropertyField) of action unomi:CopyProperty must be field. Type of `{}:{}` given.".format(
+            "First param (profilePropertyField) must be field. Type of `{}:{}` given.".format(
                 profile_property_name, profile_value_type))
 
     if event_value_type != "DOTTED_FIELD":
         raise ActionParamError(
-            "Second param (eventPropertyField) of action unomi:CopyProperty must be string. Type of `{}:{}` given.".format(
+            "Second param (eventPropertyField) must be string. Type of `{}:{}` given.".format(
                 event_property_name, event_value_type))
 
     if op_value_type != "ESCAPED_STRING":
         raise ActionParamError(
-            "Third param of action unomi:CopyProperty must be string. Type of `{}` given.".format(
+            "Third param must be string. Type of `{}` given.".format(
                 op_value_type))
 
-    return {
-        "type": "setPropertyAction",
-        "parameterValues": {
-            "setPropertyName": "properties({})".format(profile_property_name),
-            "setPropertyValue": "eventProperty::properties({})".format(event_property_name),
-            "setPropertyStrategy": op_property_name
-        }
-    }
+    template = template % (profile_property_name, event_property_name)
+    return json.loads(template)
 
 
 # This one works
-def add_to_profile_property_stmt(params):
+def add_to_profile_property_stmt(params, template):
     op = ('ESCAPED_STRING', 'addValue')
     if len(params) == 2:
         params.append(op)
     else:
         params[2] = op
-    return set_profile_property_stmt(params)
+    return set_profile_property_stmt(params, template)
 
 
 # This one not working
-def remove_from_profile_property_stmt(params):
+def remove_from_profile_property_stmt(params, template):
     if len(params) != 2:
         raise ActionParamsError(
             "Invalid number of parameters in action RemoveFromProfileProperty. Required parameters 2. Given {}".format(
@@ -146,10 +138,10 @@ def remove_from_profile_property_stmt(params):
 
 
 # is working
-def set_profile_property_stmt(params):
+def set_profile_property_stmt(params, template):
     if 3 < len(params) or len(params) < 2:
         raise ActionParamsError(
-            "Invalid number of parameters in action unomi:SetProperty. Required parameters 2 or 3. Given {}".format(
+            "Invalid number of parameters. Required parameters 2 or 3. Given {}".format(
                 len(params)))
 
     if len(params) == 2:
@@ -161,7 +153,7 @@ def set_profile_property_stmt(params):
 
     if profile_property_name_type != "DOTTED_FIELD":
         raise ActionParamError(
-            "First param of action unomi:SetProperty must be field. Type of `{}:{}` given.".format(
+            "First param must be field. Type of `{}:{}` given.".format(
                 profile_property_name, profile_property_name_type))
 
     if property_value_type == "ESCAPED_STRING":
@@ -178,25 +170,27 @@ def set_profile_property_stmt(params):
         set_property_value = "setPropertyValueDate"
     else:
         raise ActionParamError(
-            "Second param of action unomi:SetProperty must be string or number or array or bool. Type of `{}:{}` given.".format(
+            "Second param must be string or number or array or bool. Type of `{}:{}` given.".format(
                 property_value, property_value_type))
 
     if op_value_type != "ESCAPED_STRING":
         raise ActionParamError(
-            "Third param of action unomi:SetProperty must be string. Type of `{}:{}` given.".format(
+            "Third param of action must be string. Type of `{}:{}` given.".format(
                 op_property_name, op_value_type))
 
-    return {
-        "type": "setPropertyAction",
-        "parameterValues": {
-            "setPropertyName": "properties({})".format(profile_property_name),
-            set_property_value: property_value,
-            "setPropertyStrategy": op_property_name
-        }
-    }
+    template = template % (profile_property_name, set_property_value, property_value)
+    return json.loads(template)
+    # return {
+    #     "type": "setPropertyAction",
+    #     "parameterValues": {
+    #         "setPropertyName": "properties({})".format(profile_property_name),
+    #         set_property_value: property_value,
+    #         "setPropertyStrategy": op_property_name
+    #     }
+    # }
 
 
-def profile_property_equals_event_property_stmt(params):
+def profile_property_equals_event_property_stmt(params, template):
     if len(params) != 2:
         raise ActionParamsError(
             "Invalid number of parameters in action ProfilePropertyEqualsEventProperty. Required parameters 2. Given {}".format(
@@ -224,7 +218,7 @@ def profile_property_equals_event_property_stmt(params):
     }
 
 
-def _add_to_profile_property_list_stmt(params):
+def _add_to_profile_property_list_stmt(params, template):
     if len(params) != 1:
         raise ActionParamsError(
             "Invalid number of parameters in action AddToProfilePropertyList. Required parameters 1. Given {}".format(

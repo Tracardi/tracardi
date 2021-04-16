@@ -20,6 +20,7 @@ def create_actions_group_stmt(actions):
 
     for function_elements in actions:
         function_name, function_params = get_function_meta(function_elements)
-        template = action_controller.run(function_name)(function_params)
-        _actions.append(template)
+        unomi_template = action_controller.get_unomi_template(function_name)
+        unomi_template = action_controller.run(function_name)(function_params, unomi_template)
+        _actions.append(unomi_template)
     return _actions
