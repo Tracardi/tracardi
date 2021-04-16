@@ -1,0 +1,7 @@
+%import common.NEWLINE
+
+WHEN_TERMINAL: /(\r? \n|\s)+WHEN(\r? \n|\s)+/i
+THEN_TERMINAL: /(\r? \n|\s)+THEN(\r? \n|\s)+/i
+BETWEEN_TERMINAL: /(\r? \n|\s)+BETWEEN\s+/i
+AND_TERMINAL: /(\r? \n|\s)+AND(\r? \n|\s)+/i
+OR_TERMINAL: /(\r? \n|\s)+OR(\r? \n|\s)+/i

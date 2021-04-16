@@ -1,10 +1,10 @@
 import json
 import time
 
-import requests
+# import requests
 from fastapi import APIRouter, Request, HTTPException
 from fastapi import Depends
-from unomi_query_language.query.dispatcher import Dispatcher, Host
+# from ..uql.query.dispatcher import Dispatcher, Host
 
 from ..errors.errors import NullResponseError
 from ..globals.authentication import get_current_user

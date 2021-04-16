@@ -1,0 +1,14 @@
+%import .uql_expr (expr, NUMBER, WS, COMMENT_VALUE)
+%import .uql_sort (sort)
+
+// SELECT
+select: "SELECT"i FRESH? data_type where? sort? offset? limit?
+
+FRESH: "FRESH"i
+data_type: /(EVENT|RULE|PROFILE|SEGMENT|GOAL|SCORING|SESSION)/i
+offset: "OFFSET"i NUMBER
+limit: "LIMIT"i NUMBER
+where: "WHERE"i expr
+
+%ignore COMMENT_VALUE
+%ignore WS

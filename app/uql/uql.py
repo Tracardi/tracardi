@@ -1,8 +1,8 @@
-from unomi_query_language.query.dispatcher import Dispatcher
-from unomi_query_language.query.parser import Parser
-from unomi_query_language.query.grammar.grammars import read
-from unomi_query_language.query.transformers.delete_transformer import DeleteTransformer
-from unomi_query_language.query.transformers.select_transformer import SelectTransformer
+from .query.dispatcher import Dispatcher
+from .query.parser import Parser
+from .query.grammar.grammars import read
+from .query.transformers.delete_transformer import DeleteTransformer
+from .query.transformers.select_transformer import SelectTransformer
 
 from ..errors.errors import NullResponseError
 from .router import UqlRouter

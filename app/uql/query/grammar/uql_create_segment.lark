@@ -1,0 +1,10 @@
+%import .uql_expr (expr, ESCAPED_STRING, WS, COMMENT_VALUE)
+%import .uql_meta (READ_ONLY, DISABLED, HIDDEN, NAME, describe, in_scope, with_tags)
+
+create_segment: "CREATE"i READ_ONLY? DISABLED? HIDDEN? data_type with_tags? NAME describe? in_scope when
+
+data_type: /SEGMENT/i
+when: "WHEN"i expr
+
+%ignore WS
+%ignore COMMENT_VALUE

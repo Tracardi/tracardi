@@ -108,7 +108,6 @@ async def create_query(rule: Rule, uql=Depends(context_server_via_uql), elastic=
     return unomi_result
 
 
-
 @router.post("/query/json")
 async def get_unomi_query(request: Request, uql=Depends(context_server_via_uql)):
     q = await request.body()
@@ -119,17 +118,18 @@ async def get_unomi_query(request: Request, uql=Depends(context_server_via_uql))
 
 @router.post("/select")
 async def rule_select(request: Request, uql=Depends(context_server_via_uql)):
-    try:
+    # try:
         q = await request.body()
         q = q.decode('utf-8')
         if q:
             q = f"SELECT RULE WHERE {q}"
         else:
             q = "SELECT RULE LIMIT 20"
+
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
         return result['list'] if 'list' in result else []
-    except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
+    # except NullResponseError as e:
+    #     raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=convert_exception_to_json(e))

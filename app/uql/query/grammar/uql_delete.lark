@@ -1,0 +1,11 @@
+%import .uql_common (ESCAPED_STRING, WS, COMMENT_VALUE)
+
+// DELETE
+delete: "DELETE"i data_type create_name
+
+data_type: /(RULE|SEGMENT|PROFILE|GOAL|SCORING|SCOPE|CAMPAIGN)/i
+create_name: ESCAPED_STRING
+
+%ignore COMMENT_VALUE
+%ignore WS
+

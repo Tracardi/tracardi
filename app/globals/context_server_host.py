@@ -1,4 +1,4 @@
-from unomi_query_language.query.dispatcher import Host
+from ..uql.query.dispatcher import Host
 
 from .. import config
 from ..auth.user_db import UserDb

@@ -7,7 +7,7 @@ from ..globals.elastic_client import elastic_client
 
 router = APIRouter(
     prefix="/action",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 action_mapper = {

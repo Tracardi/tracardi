@@ -17,7 +17,6 @@ setup(
         'uvicorn',
         'pydantic',
         'python-multipart',
-        'unomi_query_language',
         'httpx',
         'elasticsearch==7.9.1',
         'requests'
