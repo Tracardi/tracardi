@@ -8,6 +8,7 @@ action_mapper = {
     "profile.CopyAll": {
         "metadata": {
             "enabled": True,
+            'icon': "copy",
             "description": "Copy all properties from event to profile properties.",
             "parameters": [],
             "form": {
@@ -33,6 +34,7 @@ action_mapper = {
     "profile.Copy": {
         "metadata": {
             "enabled": True,
+            'icon': "copy",
             "description": "Copy selected property from event to profile property. " +
                            "This function requires 3 parameters an event property name, profile property name and " +
                            "type of assignment (default is equals).",
@@ -91,6 +93,7 @@ action_mapper = {
     "profile.SetString": {
         "metadata": {
             "enabled": True,
+            'icon': "json",
             "description": "Sets profile property to given value of type string. " +
                            "This function requires 2 parameters a profile property name and string value",
             "parameters": [
@@ -138,7 +141,7 @@ action_mapper = {
                 "type": "setPropertyAction",
                 "parameterValues": {
                     "setPropertyName": "properties(%s)",  # profile_property_name
-                    "%s": "%s",                           # set_property_value: property_value,
+                    "%s": "%s",  # set_property_value: property_value,
                     "setPropertyStrategy": "alwaysSet"
                 }
             }
@@ -148,6 +151,7 @@ action_mapper = {
     "profile.SetInteger": {
         "metadata": {
             "enabled": True,
+            'icon': "json",
             "description": "Sets profile property to given value of type integer. " +
                            "This function requires 2 parameters a profile property name and integer value",
             "parameters": [
@@ -206,6 +210,7 @@ action_mapper = {
     "profile.AddStringToList": {
         "metadata": {
             "enabled": True,
+            'icon': "addToList",
             "description": "Add value to profile property. Property must be array and be of the same type as value. " +
                            "This function requires 2 parameters a profile property name and property value to add.",
 
@@ -252,8 +257,8 @@ action_mapper = {
             "template": {
                 "type": "setPropertyAction",
                 "parameterValues": {
-                    "setPropertyName": "%s",   # profile_property_name
-                    "%s":"%s",                 # set_property_value: property_value,
+                    "setPropertyName": "%s",  # profile_property_name
+                    "%s": "%s",  # set_property_value: property_value,
                     "setPropertyStrategy": 'addValue'
                 }
             }
@@ -261,8 +266,10 @@ action_mapper = {
     },
     # This one not working
     "profile.Remove": {
-        "enabled": False,
+
         "metadata": {
+            "enabled": False,
+            'icon': "removeFromList",
             "description": "Removes value from profile property. Property must be array and be of the same type as value. " +
                            "This function requires 2 parameters a profile property name and property value to remove.",
             "signature": "profile.Remove(profilePropertyName:string, propertyToRemove:any)"
