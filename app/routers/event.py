@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
+from ..domain.time_range_query import TimeRangeQuery
 from ..errors.errors import NullResponseError, convert_exception_to_json, RecordNotFound
 from ..filters.datagrid import filter_event
 from ..globals.authentication import get_current_user
@@ -16,19 +17,23 @@ router = APIRouter(
 )
 
 
-@router.get("/chart/data")
-async def event_data(min: datetime, max: datetime, offset: int = 0, limit: int = 20,
-                     elastic=Depends(elastic_client), query: str = ""):
+@router.post("/chart/data")
+async def event_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
-        return object_data(elastic, 'event', 'timeStamp', min, max, offset, limit, query)
+        return object_data(elastic, 'event', 'timeStamp',
+                           query.min, query.max,
+                           query.offset, query.limit,
+                           query.query)
     except Exception as e:
         raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
-@router.get("/chart/histogram")
-async def event_histogram(min: datetime, max: datetime, elastic=Depends(elastic_client), query: str = ""):
+@router.post("/chart/histogram")
+async def event_histogram(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
-        return data_histogram(elastic, 'event', 'timeStamp', min, max, query)
+        return data_histogram(elastic, 'event', 'timeStamp',
+                              query.min, query.max,
+                              query.query)
     except Exception:
         return {
             "total": 0,
@@ -65,19 +70,25 @@ async def event_get(id: str, uql=Depends(context_server_via_uql)):
 
 
 @router.post("/select")
-async def event_select(request: Request, uql=Depends(context_server_via_uql)):
+async def event_select(request: Request, simplified: int = 1, limit: int=20, uql=Depends(context_server_via_uql)):
     try:
         q = await request.body()
         q = q.decode('utf-8')
         if q:
-            q = f"SELECT EVENT WHERE {q} SORT BY timeStamp DESC"
+            q = q.strip()
+            q = f"SELECT EVENT WHERE {q} SORT BY timestamp DESC LIMIT {limit} "
         else:
-            q = "SELECT EVENT SORT BY timestamp DESC LIMIT 20"
-
+            q = f"SELECT EVENT SORT BY timestamp DESC LIMIT {limit}"
+        print(q)
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
-        result = list(filter_event(result))
-        return result
+        if simplified:
+            return list(filter_event(result))
+        else:
+            return {
+                'total': result['totalSize'],
+                'data': result['list']
+            }
     except NullResponseError as e:
         raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:

@@ -2,6 +2,8 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
+
+from ..domain.time_range_query import TimeRangeQuery
 from ..errors.errors import NullResponseError, convert_exception_to_json
 from ..filters.datagrid import filter_profile
 from ..globals.authentication import get_current_user
@@ -48,10 +50,12 @@ async def select_profiles(request: Request, uql=Depends(context_server_via_uql))
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/chart/histogram")
-async def profile_histogram(min: datetime, max: datetime, elastic=Depends(elastic_client), query: str = ""):
+@router.post("/chart/histogram")
+async def profile_histogram(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
-        return data_histogram(elastic, 'profile', 'properties.lastVisit', min, max, query)
+        return data_histogram(elastic, 'profile', 'properties.lastVisit',
+                              query.min, query.max,
+                              query.query)
     except Exception:
         return {
             "total": 0,
@@ -69,10 +73,12 @@ async def profile_histogram(min: datetime, max: datetime, elastic=Depends(elasti
         }
 
 
-@router.get("/chart/data")
-async def profile_data(min: datetime, max: datetime, offset: int = 0, limit: int = 20,
-                       elastic=Depends(elastic_client), query: str = ""):
+@router.post("/chart/data")
+async def profile_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
-        return object_data(elastic, 'profile', 'properties.lastVisit', min, max, offset, limit, query)
+        return object_data(elastic, 'profile', 'properties.lastVisit',
+                           query.min, query.max,
+                           query.offset, query.limit,
+                           query.query)
     except Exception as e:
         raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
