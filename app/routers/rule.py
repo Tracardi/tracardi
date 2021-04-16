@@ -1,6 +1,7 @@
 import time
 
 import elasticsearch
+from elasticsearch import ElasticsearchException
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
@@ -87,13 +88,25 @@ async def rule_update(id: str,
 
 @router.post("/")
 async def create_query(rule: Rule, uql=Depends(context_server_via_uql), elastic=Depends(elastic_client)):
-    q = f"CREATE RULE \"{rule.name}\" DESCRIBE \"{rule.desc}\" IN SCOPE \"{rule.scope}\" " + \
-        f"WHEN {rule.condition} THEN {rule.action}"
+    if not rule.name:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty name.", "type": "Missing data"}])
 
+    if not rule.condition:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty condition.", "type": "Missing data"}])
+
+    if not rule.actions:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty actions.", "type": "Missing data"}])
+
+    actions = ",".join(rule.actions)
+
+    q = f"CREATE RULE \"{rule.name}\" DESCRIBE \"{rule.description}\" IN SCOPE \"{rule.scope}\" " + \
+        f"WHEN {rule.condition} THEN {actions}"
+    print(q)
     unomi_result = query(q, uql)
     upserted_records, errors = upsert_rule(elastic, q, rule)
 
     return unomi_result
+
 
 
 @router.post("/query/json")
