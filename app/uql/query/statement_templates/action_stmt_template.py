@@ -3,6 +3,51 @@ import json
 from ...errors import ActionParamsError, ActionParamError
 
 
+def _validate(params):
+    if 3 < len(params) or len(params) < 2:
+        raise ActionParamsError(
+            "Invalid number of parameters. Required parameters 2 or 3. Given {}".format(
+                len(params)))
+
+    if len(params) == 2:
+        params.append(('ESCAPED_STRING', 'alwaysSet'))
+
+    profile_property_name_type, profile_property_name = params[0]
+    property_value_type, property_value = params[1]
+    op_value_type, op_property_name = params[2]
+
+    if profile_property_name_type != "DOTTED_FIELD":
+        raise ActionParamError(
+            "First param must be field. Type of `{}:{}` given.".format(
+                profile_property_name, profile_property_name_type))
+
+    if property_value_type == "ESCAPED_STRING":
+        set_property_value_type = "setPropertyValue"
+    elif property_value_type == "INTEGER":
+        set_property_value_type = "setPropertyValueInteger"
+    elif property_value_type == "FLOAT":
+        set_property_value_type = "setPropertyValueDouble"
+    elif property_value_type == "array":
+        set_property_value_type = "setPropertyValueMultiple"
+    elif property_value_type == "BOOL":
+        set_property_value_type = "setPropertyValueBoolean"
+    elif property_value_type == "date":
+        set_property_value_type = "setPropertyValueDate"
+    else:
+        raise ActionParamError(
+            "Second param must be string or number or array or bool. Type of `{}:{}` given.".format(
+                property_value, property_value_type))
+
+    if op_value_type != "ESCAPED_STRING":
+        raise ActionParamError(
+            "Third param of action must be string. Type of `{}:{}` given.".format(
+                op_property_name, op_value_type))
+
+    return profile_property_name, set_property_value_type, \
+           property_value, property_value_type, \
+           op_value_type, op_property_name
+
+
 def copy_events_to_profile_properties_stmt(params, template):
     if len(params) != 0:
         params = [v for k, v in params]
@@ -139,55 +184,26 @@ def remove_from_profile_property_stmt(params, template):
 
 # is working
 def set_profile_property_stmt(params, template):
-    if 3 < len(params) or len(params) < 2:
-        raise ActionParamsError(
-            "Invalid number of parameters. Required parameters 2 or 3. Given {}".format(
-                len(params)))
+    profile_property_name, set_property_value_type, property_value, property_value_type, _, _ = _validate(params)
 
-    if len(params) == 2:
-        params.append(('ESCAPED_STRING', 'alwaysSet'))
-
-    profile_property_name_type, profile_property_name = params[0]
-    property_value_type, property_value = params[1]
-    op_value_type, op_property_name = params[2]
-
-    if profile_property_name_type != "DOTTED_FIELD":
-        raise ActionParamError(
-            "First param must be field. Type of `{}:{}` given.".format(
-                profile_property_name, profile_property_name_type))
-
-    if property_value_type == "ESCAPED_STRING":
-        set_property_value = "setPropertyValue"
-    elif property_value_type == "INTEGER":
-        set_property_value = "setPropertyValueInteger"
-    elif property_value_type == "FLOAT":
-        set_property_value = "setPropertyValueDouble"
-    elif property_value_type == "array":
-        set_property_value = "setPropertyValueMultiple"
-    elif property_value_type == "BOOL":
-        set_property_value = "setPropertyValueBoolean"
-    elif property_value_type == "date":
-        set_property_value = "setPropertyValueDate"
-    else:
-        raise ActionParamError(
-            "Second param must be string or number or array or bool. Type of `{}:{}` given.".format(
-                property_value, property_value_type))
-
-    if op_value_type != "ESCAPED_STRING":
-        raise ActionParamError(
-            "Third param of action must be string. Type of `{}:{}` given.".format(
-                op_property_name, op_value_type))
-
-    template = template % (profile_property_name, set_property_value, property_value)
+    template = template % (profile_property_name, set_property_value_type, property_value)
     return json.loads(template)
-    # return {
-    #     "type": "setPropertyAction",
-    #     "parameterValues": {
-    #         "setPropertyName": "properties({})".format(profile_property_name),
-    #         set_property_value: property_value,
-    #         "setPropertyStrategy": op_property_name
-    #     }
-    # }
+
+
+def increment_profile_property_stmt(params, template):
+    profile_property_name, set_property_value_type, property_value, property_value_type, _, _ = _validate(params)
+    profile_property_name_chunks = profile_property_name.split(".")
+    profile_property_name_chunks[-1] = "?" + profile_property_name_chunks[-1]
+    profile_property_name_script = ".".join(profile_property_name_chunks)
+
+    template = template % (
+        profile_property_name,
+        profile_property_name_script,
+        profile_property_name,
+        property_value,
+        property_value
+    )
+    return json.loads(template)
 
 
 def profile_property_equals_event_property_stmt(params, template):

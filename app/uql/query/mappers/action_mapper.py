@@ -1,7 +1,7 @@
 from ...query.statement_templates.action_stmt_template import copy_events_to_profile_properties_stmt, \
     set_profile_property_from_event_stmt, profile_property_equals_event_property_stmt, \
     new_user_since, set_profile_property_stmt, _add_to_profile_property_list_stmt, add_to_profile_property_stmt, \
-    remove_from_profile_property_stmt
+    remove_from_profile_property_stmt, increment_profile_property_stmt
 
 action_mapper = {
     # This one is working
@@ -36,8 +36,7 @@ action_mapper = {
             "enabled": True,
             'icon': "copy",
             "description": "Copy selected property from event to profile property. " +
-                           "This function requires 3 parameters an event property name, profile property name and " +
-                           "type of assignment (default is equals).",
+                           "This function requires 2 parameters an event property name and profile property name",
 
             "form": {
                 "params": {
@@ -206,6 +205,127 @@ action_mapper = {
         }
 
     },
+    # This one not working
+    "profile.Increment": {
+        "metadata": {
+            "enabled": True,
+            'icon': "increment",
+            "description": "Increments profile property by given value. " +
+                           "This function requires 2 parameters a profile property name and integer value",
+            "parameters": [
+                {"name": "profilePropertyField", "defaultValue": None, "description": "Name of profile property"},
+                {"name": "value", "defaultValue": None, "description": "Value of profile property"}
+            ],
+            "form": {
+                "signature": "profile.Increment(${profileProperty}, ${value})",
+                "params": {
+                    "profileProperty": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^(?!\.)[a-zA-Z0-9\._]+(?<!\.)$",
+                            "error": "Field name must not start and end with dot and must contain only letters and numbers or underscore"
+                        },
+                        "props": {
+                            "label": "profile property field"
+                        }
+                    },
+                    "value": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^\d+$",
+                            "error": "Field name be integer"
+                        },
+                        "props": {
+                            "label": "value"
+                        }
+                    }
+                },
+                "steps": [
+                    {
+                        "template": "Create profile property if does not exist",
+                    },
+                    {
+                        "template": "Increment ${profileProperty} by ${value}",
+                    }
+                ]
+            },
+
+        },
+        "exec": increment_profile_property_stmt,
+        "unomi": {
+            "template": {
+                "parameterValues": {
+                    "setPropertyName": "%s",  # profile_property_name
+                    "setPropertyValue": "script::%s != null ? (%s + %s) : %s",
+                    # profile_property_name_script, profile_property_name, property_value, property_value
+                    "storeInSession": False
+                },
+                "type": "setPropertyAction"
+            }
+        }
+
+    },
+    # This one not working
+    "profile.Decrement": {
+        "metadata": {
+            "enabled": True,
+            'icon': "decrement",
+            "description": "Decrements profile property by given value. " +
+                           "This function requires 2 parameters a profile property name and integer value",
+            "parameters": [
+                {"name": "profilePropertyField", "defaultValue": None, "description": "Name of profile property"},
+                {"name": "value", "defaultValue": None, "description": "Value of profile property"}
+            ],
+            "form": {
+                "signature": "profile.Decrement(${profileProperty}, ${value})",
+                "params": {
+                    "profileProperty": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^(?!\.)[a-zA-Z0-9\._]+(?<!\.)$",
+                            "error": "Field name must not start and end with dot and must contain only letters and numbers or underscore"
+                        },
+                        "props": {
+                            "label": "profile property field"
+                        }
+                    },
+                    "value": {
+                        "type": "input",
+                        "validate": {
+                            "regexp": r"^\d+$",
+                            "error": "Field name be integer"
+                        },
+                        "props": {
+                            "label": "value"
+                        }
+                    }
+                },
+                "steps": [
+                    {
+                        "template": "Create profile property if does not exist",
+                    },
+                    {
+                        "template": "Decrement ${profileProperty} by ${value}",
+                    }
+                ]
+            },
+
+        },
+        "exec": increment_profile_property_stmt,
+        "unomi": {
+            "template": {
+                "parameterValues": {
+                    "setPropertyName": "%s",  # profile_property_name
+                    "setPropertyValue": "script::%s != null ? (%s - %s) : %s",
+                    # profile_property_name_script, profile_property_name, property_value, property_value
+                    "storeInSession": False
+                },
+                "type": "setPropertyAction"
+            }
+        }
+
+    },
+
     # This one works
     "profile.AddStringToList": {
         "metadata": {
@@ -265,7 +385,7 @@ action_mapper = {
         }
     },
     # This one not working
-    "profile.Remove": {
+    "profile.RemoveFromList": {
 
         "metadata": {
             "enabled": False,
@@ -276,22 +396,14 @@ action_mapper = {
         },
         "exec": remove_from_profile_property_stmt
     },
-    # "ProfilePropertyEqualsEventProperty": {
-    #     "enabled": False,
-    #     "metadata": {
-    #         "description": "Copy property from event to profile property. " +
-    #                        "This function requires 2 parameters an profile property name, event property name.",
-    #         "signature": "ProfilePropertyEqualsEventProperty(profilePropertyName:string, eventPropertyName:string)"
-    #     },
-    #     'exec': profile_property_equals_event_property_stmt
-    # },
-    # "NewUserSince": {
-    #     "enabled": False,
-    #     "metadata": {
-    #         "signature": "NewUserSince(numberOfDays:number)"
-    #     },
-    #     'exec': new_user_since
-    # },
+    "profile.NotSeenSince": {
+
+        "metadata": {
+            "enabled": False,
+            "signature": "profile.NotSeenSince(${numberOfDays})"
+        },
+        'exec': new_user_since
+    },
     # # This one not working
     # "_AddToProfilePropertyList": {
     #     "enabled": False,

@@ -10,7 +10,8 @@ def upsert_segment(elastic, q, segment: Segment):
         'scope': segment.scope,
         'name': segment.name,
         'description': segment.description,
-        'condition': segment.condition
+        'condition': segment.condition,
+        'tags': segment.tags
     }
     return elastic.insert(segment_index, [segment])
 
