@@ -87,6 +87,9 @@ async def create_query(rule: Rule, uql=Depends(context_server_via_uql), elastic=
     if not rule.name:
         raise HTTPException(status_code=412, detail=[{"msg": "Empty name.", "type": "Missing data"}])
 
+    if not rule.scope:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty scope.", "type": "Missing data"}])
+
     if not rule.condition:
         raise HTTPException(status_code=412, detail=[{"msg": "Empty condition.", "type": "Missing data"}])
 

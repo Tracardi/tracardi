@@ -58,9 +58,19 @@ async def segment_get(id: str, uql=Depends(context_server_via_uql), elastic=Depe
 
 @router.post("/")
 async def segment_create(segment: Segment, uql=Depends(context_server_via_uql), elastic=Depends(elastic_client)):
-    q = f"CREATE SEGMENT \"{segment.name}\" DESCRIBE \"{segment.desc}\" IN SCOPE \"{segment.scope}\" " + \
-        f"WHEN {segment.condition}"
 
+    if not segment.name:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty name.", "type": "Missing data"}])
+
+    if not segment.scope:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty scope.", "type": "Missing data"}])
+
+    if not segment.condition:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty condition.", "type": "Missing data"}])
+
+    q = f"CREATE SEGMENT \"{segment.name}\" DESCRIBE \"{segment.description}\" IN SCOPE \"{segment.scope}\" " + \
+        f"WHEN {segment.condition}"
+    print(q)
     unomi_result = query(q, uql)
     upserted_records, errors = upsert_segment(elastic, q, segment)
     return unomi_result

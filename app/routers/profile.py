@@ -32,22 +32,30 @@ async def profile_get(id: str, uql=Depends(context_server_via_uql)):
 
 
 @router.post("/select")
-async def select_profiles(request: Request, uql=Depends(context_server_via_uql)):
+async def select_profiles(request: Request, simplified: int = 1, limit: int = 20, uql=Depends(context_server_via_uql)):
     try:
         q = await request.body()
         q = q.decode('utf-8')
         if q:
-            q = f"SELECT PROFILE WHERE {q} SORT BY systemProperties.lastUpdated DESC"
+            q = f"SELECT PROFILE WHERE {q} SORT BY systemProperties.lastUpdated DESC LIMIT {limit}"
         else:
-            q = "SELECT PROFILE SORT BY properties.lastVisit DESC"
+            q = f"SELECT PROFILE SORT BY properties.lastVisit DESC LIMIT {limit}"
+
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
-        result = list(filter_profile(result))
-        return result
+
+        if simplified:
+            return list(filter_profile(result))
+        else:
+            return {
+                'total': result['totalSize'],
+                'data': result['list']
+            }
+
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=str(e))
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
 @router.post("/chart/histogram")

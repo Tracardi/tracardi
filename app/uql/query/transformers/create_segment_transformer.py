@@ -9,6 +9,7 @@ class CreateSegmentTransformer(MetaTransformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.namespace('uql_expr__', ConditionTransformer())
+        self.namespace('uql_meta__', MetaTransformer())
 
     def create_segment(self, args):
         elements = {k: v for k, v in args}
@@ -27,12 +28,16 @@ class CreateSegmentTransformer(MetaTransformer):
         return query_data_type, uri, method, query, status
 
     def when(self, args):
-        return 'WHEN', args[0]
+        return 'WHEN', args[1]
 
     def then(self, args):
         return 'THEN', args[0]
 
     def data_type(self, args):
         return 'DATA_TYPE', args[0].value.lower()
+
+    def expr(self, args):
+        return args
+
 
 

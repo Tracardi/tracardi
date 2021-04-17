@@ -39,14 +39,23 @@ condition_mapper = {
         "fields": {
             'id': "itemId",
             'timestamp': 'systemProperties.lastUpdated',
-            'visits': 'properties.nbOfVisits'
+            'visits': 'properties.nbOfVisits',
+
+            # original
+            'itemType': 'itemType',
+            'itemId': 'itemId',
+            'version': 'version',
+            'mergedWith': 'mergedWith'
         },
         "namespaces": {
-            'systemProperties': "systemProperties",
             'system.properties': "systemProperties",
+
+            # original
+            'systemProperties': "systemProperties",
             'properties': "properties",
             'segments': "segments",
             'scores': "scores",
+            'consents': 'consents'
         },
     },
     "session": {

@@ -70,7 +70,7 @@ async def event_get(id: str, uql=Depends(context_server_via_uql)):
 
 
 @router.post("/select")
-async def event_select(request: Request, simplified: int = 1, limit: int=20, uql=Depends(context_server_via_uql)):
+async def event_select(request: Request, simplified: int = 1, limit: int = 20, uql=Depends(context_server_via_uql)):
     try:
         q = await request.body()
         q = q.decode('utf-8')
