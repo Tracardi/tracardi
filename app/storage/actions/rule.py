@@ -1,3 +1,5 @@
+import datetime
+
 from ... import config
 from ...domain.rule import Rule
 
@@ -12,6 +14,9 @@ def upsert_rule(elastic, q, rule: Rule):
         'description': rule.description,
         'tags': rule.tags,
         'condition': rule.condition,
-        'actions': rule.actions
+        'actions': rule.actions,
+        'metadata': {
+            'timestamp': datetime.datetime.now().timestamp()
+        }
     }
     return elastic.insert(rule_index, [rule])

@@ -61,16 +61,19 @@ async def rule_get(id: str,
 async def rule_delete(id: str,
                       uql=Depends(context_server_via_uql),
                       elastic=Depends(elastic_client)):
+
+    q = f"DELETE RULE \"{id}\""
+    response_tuple = uql.delete(q)
+    result = uql.respond(response_tuple)
+
     try:
         index = config.index['rules']
-        return elastic.delete(index, id)
+        elastic.delete(index, id)
     except elasticsearch.exceptions.NotFoundError:
         # todo logging
         print("Record {} not found in elastic.".format(id))
 
-    q = f"DELETE RULE \"{id}\""
-    response_tuple = uql.delete(q)
-    return uql.respond(response_tuple)
+    return result
 
 
 @router.put("/{id}")
@@ -97,9 +100,14 @@ async def create_query(rule: Rule, uql=Depends(context_server_via_uql), elastic=
         raise HTTPException(status_code=412, detail=[{"msg": "Empty actions.", "type": "Missing data"}])
 
     actions = ",".join(rule.actions)
+    if 'uql' not in rule.tags:
+        rule.tags += ["uql"]
 
-    q = f"CREATE RULE \"{rule.name}\" DESCRIBE \"{rule.description}\" IN SCOPE \"{rule.scope}\" " + \
+    tags = '"{}"'.format('","'.join(rule.tags))
+
+    q = f"CREATE RULE WITH TAGS [{tags}] \"{rule.name}\" DESCRIBE \"{rule.description.strip()}\" IN SCOPE \"{rule.scope}\" " + \
         f"WHEN {rule.condition} THEN {actions}"
+
     print(q)
     unomi_result = query(q, uql)
     upserted_records, errors = upsert_rule(elastic, q, rule)

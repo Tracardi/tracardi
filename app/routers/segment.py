@@ -88,8 +88,7 @@ async def segment_delete(id: str,
                          elastic=Depends(elastic_client)):
     try:
         index = config.index['segments']
-        elastic_result = elastic.delete(index, id)
-        print(elastic_result)
+        elastic.delete(index, id)
     except elasticsearch.exceptions.NotFoundError:
         # todo logging
         print("Record {} not found in elastic.".format(id))

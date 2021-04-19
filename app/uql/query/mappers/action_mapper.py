@@ -81,11 +81,19 @@ action_mapper = {
             "template": {
                 "type": "setPropertyAction",
                 "parameterValues": {
-                    "setPropertyName": "properties(%s)",  # first param
-                    "setPropertyValue": "eventProperty::properties(%s)",  # second param
+                    "setPropertyName": "%s",  # first param
+                    "setPropertyValue": "%s",  # second param
                     "setPropertyStrategy": "alwaysSet"
                 }
-            }
+            },
+# "template": {
+#                 "type": "setPropertyAction",
+#                 "parameterValues": {
+#                     "setPropertyName": "properties(%s)",  # first param
+#                     "setPropertyValue": "eventProperty::properties(%s)",  # second param
+#                     "setPropertyStrategy": "alwaysSet"
+#                 }
+#             }
         }
     },
     # This one works
@@ -128,7 +136,7 @@ action_mapper = {
                         "template": "Create profile property if does not exist",
                     },
                     {
-                        "template": "Make ${profileProperty} equal to ${value}",
+                        "template": "Make profile attribute properties.${profileProperty} equal to ${value}",
                     }
                 ]
             },
@@ -186,7 +194,7 @@ action_mapper = {
                         "template": "Create profile property if does not exist",
                     },
                     {
-                        "template": "Make ${profileProperty} equal to ${value}",
+                        "template": "Make profile attribute properties.${profileProperty} equal to ${value}",
                     }
                 ]
             },
@@ -367,7 +375,7 @@ action_mapper = {
                         "template": "Create profile property if does not exist",
                     },
                     {
-                        "template": "Add string ${value} to list ${profileProperty}",
+                        "template": "Add string ${value} to list properties.${profileProperty}",
                     }
                 ]
             }
@@ -377,7 +385,7 @@ action_mapper = {
             "template": {
                 "type": "setPropertyAction",
                 "parameterValues": {
-                    "setPropertyName": "%s",  # profile_property_name
+                    "setPropertyName": "properties(%s)",  # profile_property_name
                     "%s": "%s",  # set_property_value: property_value,
                     "setPropertyStrategy": 'addValue'
                 }
