@@ -61,8 +61,9 @@ async def select_profiles(request: Request, simplified: int = 1, limit: int = 20
 @router.post("/chart/histogram")
 async def profile_histogram(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
         return data_histogram(elastic, 'profile', 'properties.lastVisit',
-                              query.min, query.max,
+                              from_date_time, to_date_time,
                               query.query)
     except Exception:
         return {
@@ -84,8 +85,9 @@ async def profile_histogram(query: TimeRangeQuery, elastic=Depends(elastic_clien
 @router.post("/chart/data")
 async def profile_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
         return object_data(elastic, 'profile', 'properties.lastVisit',
-                           query.min, query.max,
+                           from_date_time, to_date_time,
                            query.offset, query.limit,
                            query.query)
     except Exception as e:

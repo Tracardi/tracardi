@@ -19,9 +19,12 @@ router = APIRouter(
 
 @router.post("/chart/data")
 async def event_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
+
     try:
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
+
         return object_data(elastic, 'event', 'timeStamp',
-                           query.min, query.max,
+                           from_date_time, to_date_time,
                            query.offset, query.limit,
                            query.query)
     except Exception as e:
@@ -31,8 +34,10 @@ async def event_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
 @router.post("/chart/histogram")
 async def event_histogram(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
+        fromDateTime, toDateTime = query.get_dates()  # type: datetime, datetime
+
         return data_histogram(elastic, 'event', 'timeStamp',
-                              query.min, query.max,
+                              fromDateTime, toDateTime,
                               query.query)
     except Exception:
         return {

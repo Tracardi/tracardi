@@ -18,8 +18,9 @@ router = APIRouter(
 @router.post("/chart/data")
 async def session_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
         return object_data(elastic, 'session', 'timeStamp',
-                           query.min, query.max,
+                           from_date_time, to_date_time,
                            query.offset, query.limit,
                            query.query)
     except Exception as e:
@@ -29,7 +30,9 @@ async def session_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
 @router.post("/chart/histogram")
 async def session_histogram(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
-        return data_histogram(elastic, 'session', 'timeStamp', query.min, query.max, query.query)
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
+        return data_histogram(elastic, 'session', 'timeStamp',
+                              from_date_time, to_date_time, query.query)
     except Exception:
         return {
             "total": 0,

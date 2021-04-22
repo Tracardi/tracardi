@@ -29,14 +29,14 @@ def data_histogram(elastic, index, group_by, min: datetime, max: datetime, query
             # down
             interval = int((span.days * 24) / max_interval)
             if interval > 0:
-                return interval, 'h', "%H:%M"
+                return interval, 'h', "%d/%m %H:%M"
 
             # minutes
             interval = int((span.days * 24 * 60) / max_interval)
             if interval > 0:
                 return interval, 'm', "%H:%M"
 
-            return 10, 'm', "%H:%M"
+            return 1, 'm', "%H:%M"
 
         return 1, 'd', "%y-%m-%d"
 
@@ -82,12 +82,12 @@ def data_histogram(elastic, index, group_by, min: datetime, max: datetime, query
     }
 
 
-def object_data(elastic, index, group_by, min: datetime, max: datetime,
+def object_data(elastic, index, group_by, from_date_time: datetime, to_date_time: datetime,
                 offset: int = 0,
                 limit: int = 20,
                 query: str = ""):
     index = config.unomi_index[index]
-    query = to_sql(index, group_by, min, max, query)
+    query = to_sql(index, group_by, from_date_time, to_date_time, query)
     translated_query = elastic.sql.translate(query)
 
     query = {
