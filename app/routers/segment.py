@@ -36,11 +36,15 @@ async def segment_get(id: str, uql=Depends(context_server_via_uql), elastic=Depe
             elastic_result = RecordNotFound()
             elastic_result.message = "UQL Segment not found."
 
-        result = {
-            'meta': result['list'][0],
-        }
+        segment = result['list'][0]
 
-        result['meta']['synchronized'] = True if not isinstance(elastic_result, RecordNotFound) else False
+        result = {
+            'unomi': {
+                'metadata': segment,
+                'itemId': segment['id'],
+                'itemType': 'segment'
+            }
+        }
 
         if not isinstance(elastic_result, RecordNotFound):
             result['uql'] = elastic_result['_source']
@@ -110,8 +114,9 @@ async def segment_select(request: Request, uql=Depends(context_server_via_uql)):
             q = "SELECT SEGMENT LIMIT 20"
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
-        result = list(filter_segment(result))
-        return result
+        result = result['list'] if 'list' in result else []
+        return list(filter_segment(result))
+
     except NullResponseError as e:
         raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:

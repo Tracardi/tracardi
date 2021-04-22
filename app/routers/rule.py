@@ -1,7 +1,6 @@
 import time
 
 import elasticsearch
-from elasticsearch import ElasticsearchException
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
@@ -17,7 +16,7 @@ from ..storage.helpers import update_record
 
 router = APIRouter(
     prefix="/rule",
-    dependencies=[Depends(get_current_user)]
+    # dependencies=[Depends(get_current_user)]
 )
 
 
@@ -43,8 +42,6 @@ async def rule_get(id: str,
         result = {
             'unomi': result['list'][0],
         }
-
-        result['unomi']['synchronized'] = True if not isinstance(elastic_result, RecordNotFound) else False
 
         if not isinstance(elastic_result, RecordNotFound):
             result['uql'] = elastic_result['_source']
@@ -140,3 +137,14 @@ async def rule_select(request: Request, uql=Depends(context_server_via_uql)):
         raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
+
+
+@router.get("/stats/{id}")
+async def rule_stats(id: str,
+                   elastic=Depends(elastic_client)):
+    try:
+        index = config.unomi_index['rulestats']
+        result = elastic.get(index, id)
+        return result['_source']
+    except elasticsearch.exceptions.TransportError as e:
+        raise HTTPException(status_code=e.status_code, detail=convert_exception_to_json(e))

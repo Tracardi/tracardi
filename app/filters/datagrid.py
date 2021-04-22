@@ -13,13 +13,9 @@ def filter_event(result):
 
 
 def filter_segment(result):
-    for i, rule in enumerate(result['list']):
+    for i, segment in enumerate(result):
         yield {
-            "id": i,
-            "segmentId": rule['id'] if 'id' in rule else 0,
-            'scope': rule['scope'],
-            "name": rule['name'],
-            'description': rule['description']
+            "metadata": segment
         }
 
 
