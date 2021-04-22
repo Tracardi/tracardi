@@ -12,6 +12,5 @@ def to_sql(index, time, min:datetime, max:datetime, query=""):
     query = {
         "query": sql
     }
-    print('data')
     print(query)
     return query

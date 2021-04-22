@@ -19,14 +19,20 @@ router = APIRouter(
 
 @router.post("/chart/data")
 async def event_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
-
     try:
         from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
 
-        return object_data(elastic, 'event', 'timeStamp',
-                           from_date_time, to_date_time,
-                           query.offset, query.limit,
-                           query.query)
+        return object_data(
+            elastic,
+            'event',
+            'timeStamp',
+            from_date_time,
+            to_date_time,
+            query.offset,
+            query.limit,
+            time_zone=query.timeZone,
+            query=query.query)
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
@@ -34,15 +40,31 @@ async def event_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
 @router.post("/chart/histogram")
 async def event_histogram(query: TimeRangeQuery, elastic=Depends(elastic_client)):
     try:
-        fromDateTime, toDateTime = query.get_dates()  # type: datetime, datetime
 
-        return data_histogram(elastic, 'event', 'timeStamp',
-                              fromDateTime, toDateTime,
-                              query.query)
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
+
+        return data_histogram(
+            elastic,
+            'event',
+            'timeStamp',
+            from_date_time,
+            to_date_time,
+            time_zone=query.timeZone,
+            query=query.query)
+
     except Exception:
         return {
             "total": 0,
             "data": [
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
                 {"time": 0,
                  "interval": 0,
                  "events": 0},

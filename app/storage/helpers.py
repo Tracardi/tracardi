@@ -1,4 +1,5 @@
 from datetime import datetime
+from pprint import pprint
 
 import elasticsearch
 from fastapi import HTTPException
@@ -14,7 +15,7 @@ def update_record(elastic, index, id, record):
         raise HTTPException(status_code=e.status_code, detail=e.info)
 
 
-def data_histogram(elastic, index, group_by, min: datetime, max: datetime, query: str = ""):
+def data_histogram(elastic, index, group_by, min: datetime, max: datetime, time_zone: str = None, query: str = ""):
     def __interval(min: datetime, max: datetime):
 
         max_interval = 50
@@ -52,13 +53,20 @@ def data_histogram(elastic, index, group_by, min: datetime, max: datetime, query
     interval, unit, format = __interval(min, max)
     event_index = config.unomi_index[index]
     query = to_sql(event_index, group_by, min, max, query)
+
     translated_query = elastic.sql.translate(query)
+
+    if time_zone:
+        if 'range' in translated_query['query']:
+            translated_query['query']['range'][group_by]['time_zone'] = time_zone
+        elif 'bool' in translated_query['query'] and 'must' in translated_query['query']['bool']:
+            translated_query['query']['bool']['must'][0]['range'][group_by]['time_zone'] = time_zone
 
     query = {
         "size": 0,
         "query": translated_query['query'],
         "aggs": {
-            "events_over_time": {
+            "items_over_time": {
                 "date_histogram": {
                     "min_doc_count": 0,
                     "field": group_by,
@@ -72,23 +80,35 @@ def data_histogram(elastic, index, group_by, min: datetime, max: datetime, query
         }
     }
 
-    print(query)
+    if time_zone:
+        query['aggs']['items_over_time']['date_histogram']['time_zone'] = time_zone
+
+    pprint(query)
 
     result = elastic.search(event_index, query)
 
     return {
         'total': result['hits']['total']['value'],
-        'data': list(__format(result['aggregations']['events_over_time']['buckets'], unit, interval, format))
+        'data': list(__format(result['aggregations']['items_over_time']['buckets'], unit, interval, format))
     }
 
 
 def object_data(elastic, index, group_by, from_date_time: datetime, to_date_time: datetime,
                 offset: int = 0,
                 limit: int = 20,
+                time_zone: str = None,
                 query: str = ""):
     index = config.unomi_index[index]
     query = to_sql(index, group_by, from_date_time, to_date_time, query)
     translated_query = elastic.sql.translate(query)
+
+    # Add time zone
+
+    if time_zone:
+        if 'range' in translated_query['query']:
+            translated_query['query']['range'][group_by]['time_zone'] = time_zone
+        elif 'bool' in translated_query['query'] and 'must' in translated_query['query']['bool']:
+            translated_query['query']['bool']['must'][0]['range'][group_by]['time_zone'] = time_zone
 
     query = {
         "from": offset,
@@ -101,6 +121,8 @@ def object_data(elastic, index, group_by, from_date_time: datetime, to_date_time
         ]
     }
 
+
+    pprint(query)
     result = elastic.search(index, query)
 
     return {

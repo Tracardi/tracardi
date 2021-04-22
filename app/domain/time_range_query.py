@@ -7,6 +7,7 @@ class TimeRangeQuery(BaseModel):
     fromDate: dict
     toDate: dict
     query: Optional[str] = ""
+    timeZone: Optional[str] = None
     offset: int = 0
     limit: int = 20
     rand: Optional[float] = 0
