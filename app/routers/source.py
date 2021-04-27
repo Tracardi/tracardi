@@ -1,5 +1,3 @@
-from time import sleep
-
 import elasticsearch
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
@@ -20,7 +18,6 @@ router = APIRouter(
 @router.get("/{id}")
 def source_get(id: str, elastic=Depends(elastic_client)):
     try:
-        sleep(1)
         source_index = config.index['sources']
         result = elastic.get(source_index, id)
         return result['_source']

@@ -113,11 +113,13 @@ condition_mapper = {
 
             # Original
             'itemType': 'itemType',
+            'scope': 'metadata.scope',
         },
         "namespaces": {
             'properties': "properties",
             'segments': "segments",
             'scores': "scores",
+            'metadata': 'metadata'
         }
     }
 }

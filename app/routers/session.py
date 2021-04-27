@@ -11,7 +11,7 @@ from ..storage.helpers import data_histogram, object_data
 
 router = APIRouter(
     prefix="/session",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 

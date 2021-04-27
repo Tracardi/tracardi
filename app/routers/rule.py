@@ -1,5 +1,3 @@
-import time
-
 import elasticsearch
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
@@ -16,7 +14,7 @@ from ..storage.helpers import update_record
 
 router = APIRouter(
     prefix="/rule",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 

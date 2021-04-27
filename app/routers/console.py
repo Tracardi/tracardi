@@ -1,10 +1,6 @@
 import json
-import time
-
-# import requests
 from fastapi import APIRouter, Request, HTTPException
 from fastapi import Depends
-# from ..uql.query.dispatcher import Dispatcher, Host
 
 from ..errors.errors import NullResponseError
 from ..globals.authentication import get_current_user

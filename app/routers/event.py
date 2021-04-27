@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
@@ -106,7 +105,7 @@ async def event_select(request: Request, simplified: int = 1, limit: int = 20, u
             q = f"SELECT EVENT WHERE {q} SORT BY timestamp DESC LIMIT {limit} "
         else:
             q = f"SELECT EVENT SORT BY timestamp DESC LIMIT {limit}"
-        print(q)
+
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
         if simplified:
