@@ -69,6 +69,10 @@ Browsing events
 
 Editing rules
 
+## Video introduction
+
+[YOUTUBE Tracardi](https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q)
+
 ## Trouble shooting
 
 If you experience:
