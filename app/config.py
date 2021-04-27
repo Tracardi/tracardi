@@ -8,8 +8,11 @@ elastic = {
 unomi_index = {
     "segment": "context-segment",
     "rule": "context-rule",
+    "rulestats": "context-rulestats",
     "goal": "context-goal",
     "event": "context-event-*",
+    "session": "context-session-*",
+    "profile": "context-profile",
 }
 
 index = {

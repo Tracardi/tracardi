@@ -5,9 +5,10 @@ from pydantic import BaseModel
 class Rule(BaseModel):
     scope: str
     name: str
-    desc: Optional[str] = "No description"
+    description: Optional[str] = "No description"
     condition: str
-    action: str
+    actions: list
+    tags: Optional[list] = []
 
     def get_id(self):
         return self.name.lower().replace(" ", "-").replace("_", '-')

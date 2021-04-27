@@ -1,0 +1,21 @@
+%import common.ESCAPED_STRING
+%import common.DECIMAL
+%import common.NUMBER
+%import common.WS
+%import common.NEWLINE
+
+value: BOOL
+        | compound_value
+        | INTEGER
+        | FLOAT
+        | ESCAPED_STRING
+        | DOTTED_FIELD
+array: "[" [value ("," value)*] "]"
+INTEGER: /\d+/
+FLOAT: NUMBER
+BOOL: /(TRUE|FALSE)/i
+compound_parser: /[a-zA-Z0-9]+/
+compound_value: compound_parser "(" ESCAPED_STRING ")"
+DOTTED_FIELD: /[a-zA-Z0-9\._\-:]+/
+
+COMMENT_VALUE: ("//"|"#") /[^\n]/*

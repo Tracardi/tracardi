@@ -1,0 +1,5 @@
+%import .uql_select (select)
+%import .uql_create_rule (create_rule)
+
+start: select
+    | url_create_rule

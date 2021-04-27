@@ -1,0 +1,14 @@
+%import .uql_expr (expr, NUMBER, WS, COMMENT_VALUE)
+%import .uql_meta (in_scope)
+
+// SELECT
+select: "INSERT"i data_type NAME in_scope
+
+FRESH: "FRESH"i
+data_type: /EVENT/i
+properties: "PROPERTIES"i
+dict : "{" [pair ("," pair)*] "}"
+pair : OP_STRING ":" op_value
+
+%ignore COMMENT_VALUE
+%ignore WS

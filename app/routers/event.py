@@ -1,129 +1,80 @@
 from datetime import datetime
-from time import sleep
-
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
-from .. import config
-from ..errors.errors import NullResponseError
+from ..domain.time_range_query import TimeRangeQuery
+from ..errors.errors import NullResponseError, convert_exception_to_json, RecordNotFound
 from ..filters.datagrid import filter_event
 from ..globals.authentication import get_current_user
 from ..globals.context_server import context_server_via_uql
 from ..globals.elastic_client import elastic_client
+from ..storage.helpers import data_histogram, object_data
 
 router = APIRouter(
     prefix="/event",
-    # dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 
-@router.get("/chart/data")
-async def event_data(min: datetime, max: datetime, offset: int = 0, limit: int = 20,
-                     elastic=Depends(elastic_client)):
-    sleep(2)
-    event_index = config.unomi_index['event']
-    query = {
-        "from": offset,
-        "size": limit,
-        "query": {
-            "range": {
-                "timeStamp": {
-                    "gte": min,
-                    "lt": max
-                }
-            }
-        },
-        "sort": [
-            {
-                "timeStamp": "asc"
-            }
-        ]
-    }
+@router.post("/chart/data")
+async def event_data(query: TimeRangeQuery, elastic=Depends(elastic_client)):
+    try:
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
 
-    print(query)
+        return object_data(
+            elastic,
+            'event',
+            'timeStamp',
+            from_date_time,
+            to_date_time,
+            query.offset,
+            query.limit,
+            time_zone=query.timeZone,
+            query=query.query)
 
-    result = elastic.search(event_index, query)
-
-    return {
-        'total': result['hits']['total']['value'],
-        'data': [row['_source'] for row in result['hits']['hits']]
-    }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
-@router.get("/chart/histogram")
-async def event_histogram(min: datetime, max: datetime, elastic=Depends(elastic_client), filter: str = ""):
-    sleep(2)
+@router.post("/chart/histogram")
+async def event_histogram(query: TimeRangeQuery, elastic=Depends(elastic_client)):
+    try:
 
-    def __interval(min: datetime, max: datetime):
+        from_date_time, to_date_time = query.get_dates()  # type: datetime, datetime
 
-        max_interval = 50
-        min_interval = 20
+        return data_histogram(
+            elastic,
+            'event',
+            'timeStamp',
+            from_date_time,
+            to_date_time,
+            time_zone=query.timeZone,
+            query=query.query)
 
-        span = max - min
-
-        if span.days > max_interval:
-            # up
-            return int(span.days / max_interval), 'd', "%y-%m-%d"
-        elif min_interval > span.days:
-            # down
-            interval = int((span.days * 24) / max_interval)
-            if interval > 0:
-                return interval, 'h', "%H:%M"
-
-            # minutes
-            interval = int((span.days * 24 * 60) / max_interval)
-            if interval > 0:
-                return interval, 'm', "%H:%M"
-
-            return 10, 'm', "%H:%M"
-
-        return 1, 'd', "%y-%m-%d"
-
-    def __format(data, unit, interval, format):
-        for row in data:
-            timestamp = datetime.fromisoformat(row["key_as_string"].replace('Z', '+00:00'))
-            yield {
-                "time": "{}".format(timestamp.strftime(format)),
-                'interval': "+{}{}".format(interval, unit),
-                "events": row["doc_count"]
-            }
-
-    interval, unit, format = __interval(min, max)
-
-    event_index = config.unomi_index['event']
-    query = {
-        "size": 0,
-        "query": {
-            "range": {
-                "timeStamp": {
-                    "gte": min,
-                    "lt": max
-                }
-            }
-        },
-        "aggs": {
-            "events_over_time": {
-                "date_histogram": {
-                    "min_doc_count": 0,
-                    "field": "timeStamp",
-                    "fixed_interval": f"{interval}{unit}",
-                    "extended_bounds": {
-                        "min": min,
-                        "max": max
-                    }
-                }
-            }
+    except Exception:
+        return {
+            "total": 0,
+            "data": [
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0},
+                {"time": 0,
+                 "interval": 0,
+                 "events": 0}
+            ]
         }
-    }
-
-    print(query)
-
-    result = elastic.search(event_index, query)
-
-    return {
-        'total': result['hits']['total']['value'],
-        'data': list(__format(result['aggregations']['events_over_time']['buckets'], unit, interval, format))
-    }
 
 
 @router.get("/{id}")
@@ -133,28 +84,38 @@ async def event_get(id: str, uql=Depends(context_server_via_uql)):
     try:
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
+
+        if not result or 'list' not in result or not result['list']:
+            raise RecordNotFound("Item not found")
+
         return result["list"][0]
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=str(e))
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
 @router.post("/select")
-async def event_select(request: Request, uql=Depends(context_server_via_uql)):
+async def event_select(request: Request, simplified: int = 1, limit: int = 20, uql=Depends(context_server_via_uql)):
     try:
         q = await request.body()
         q = q.decode('utf-8')
         if q:
-            q = f"SELECT EVENT WHERE {q} SORT BY timeStamp DESC"
+            q = q.strip()
+            q = f"SELECT EVENT WHERE {q} SORT BY timestamp DESC LIMIT {limit} "
         else:
-            q = "SELECT EVENT SORT BY timestamp DESC LIMIT 20"
+            q = f"SELECT EVENT SORT BY timestamp DESC LIMIT {limit}"
 
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
-        result = list(filter_event(result))
-        return result
+        if simplified:
+            return list(filter_event(result))
+        else:
+            return {
+                'total': result['totalSize'],
+                'data': result['list']
+            }
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail=str(e))
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))

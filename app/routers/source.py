@@ -1,12 +1,10 @@
-from time import sleep
-
 import elasticsearch
 from fastapi import APIRouter, Request
 from fastapi import HTTPException, Depends
 
 from .. import config
 from ..domain.source import Source
-from ..errors.errors import NullResponseError
+from ..errors.errors import NullResponseError, convert_exception_to_json
 from ..filters.elastic import filter_source
 from ..globals.authentication import get_current_user
 from ..globals.elastic_client import elastic_client
@@ -20,18 +18,17 @@ router = APIRouter(
 @router.get("/{id}")
 def source_get(id: str, elastic=Depends(elastic_client)):
     try:
-        sleep(1)
         source_index = config.index['sources']
         result = elastic.get(source_index, id)
         return result['_source']
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail={"message": str(e), "info": {}})
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
 
     except elasticsearch.exceptions.NotFoundError as e:
-        raise HTTPException(status_code=e.status_code, detail={"message": "Record not found.", "info": e.info})
+        raise HTTPException(status_code=e.status_code, detail=convert_exception_to_json(e))
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail={"message": str(e), "info": {}})
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
 @router.delete("/{id}")
@@ -64,13 +61,13 @@ def insert_source(source: Source, elastic=Depends(elastic_client)):
         }
         return elastic.insert(source_index, [source])
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail={"message": str(e), "info": {}})
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
 
     except elasticsearch.exceptions.NotFoundError as e:
-        raise HTTPException(status_code=e.status_code, detail={"message": "Record not found in elastic.", "info": e.info})
+        raise HTTPException(status_code=e.status_code, detail=convert_exception_to_json(e))
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail={"message": str(e), "info": {}})
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))
 
 
 @router.post("/select")
@@ -80,9 +77,10 @@ async def source_select(request: Request, elastic=Depends(elastic_client)):
         q = q.decode('utf-8')
         if q:
             q = {
+                "size": 20,
                 "query": {
                     "regexp": {
-                        "doc.name": {
+                        "name": {
                             "value": q + ".*",
                             "flags": "ALL",
                             "max_determinized_states": 1000,
@@ -92,6 +90,7 @@ async def source_select(request: Request, elastic=Depends(elastic_client)):
             }
         else:
             q = {
+                "size": 20,
                 "query": {
                     "match_all": {}
                 }
@@ -99,15 +98,14 @@ async def source_select(request: Request, elastic=Depends(elastic_client)):
 
         source_index = config.index['sources']
 
-        result = elastic.scan(source_index, q)
-
-        return list(filter_source(result))
+        result = elastic.search(source_index, q)
+        return list(filter_source(result['hits']['hits']))
 
     except NullResponseError as e:
-        raise HTTPException(status_code=e.response_status, detail={"message": str(e), "info": {}})
+        raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
 
     except elasticsearch.exceptions.NotFoundError as e:
-        raise HTTPException(status_code=e.status_code, detail={"message": "Records not found in elastic.", "info": e.info})
+        raise HTTPException(status_code=e.status_code, detail=convert_exception_to_json(e))
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail={"message": str(e), "info": {}})
+        raise HTTPException(status_code=500, detail=convert_exception_to_json(e))

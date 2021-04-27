@@ -7,6 +7,7 @@ class Elastic:
     def __init__(self, host, port=9200):
         self._cache = {}
         self._client = Elasticsearch([{'host': host, 'port': port}])
+        self.sql = self._client.sql
 
     def get(self, index, id):
         return self._client.get(index=index, doc_type='_doc', id=id)
@@ -49,7 +50,6 @@ class Elastic:
                     "_index": index,
                     "_source": record
                 }
-
 
             bulk.append(record)
         return helpers.bulk(self._client, bulk)

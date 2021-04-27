@@ -5,7 +5,8 @@ from pydantic import BaseModel
 class Segment(BaseModel):
     scope: str
     name: str
-    desc: Optional[str] = "No description"
+    description: Optional[str] = "No description"
+    tags: Optional[list] = []
     condition: str
 
     def get_id(self):
