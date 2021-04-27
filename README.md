@@ -10,6 +10,7 @@ to see how to install docker.
 One the docker is installed run go to main folder of tracardi and run.
 
 ```
+docker-compose build
 docker-compose up
 ```
 
