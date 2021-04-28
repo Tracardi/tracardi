@@ -1,3 +1,5 @@
+[![header.jpg](https://i.postimg.cc/9XRJYRqY/header.jpg)](https://postimg.cc/23YQz5G1)
+
 # Tracardi Customer Data Platform
 
 [Tracardi](http://www.tracardi.com) is a Graphic User Interface based on [Apache Unomi](https://unomi.apache.org).
@@ -58,6 +60,19 @@ Login with:
 * UNOMI_USERNAME (default: karaf) and 
 * UNOMI_PASSWORD(default: karaf)
 
+## Screenshots
+
+![Screenshot 1](https://scontent.fpoz4-1.fna.fbcdn.net/v/t1.6435-9/176281298_116889430506445_8902050899484618905_n.png?_nc_cat=103&ccb=1-3&_nc_sid=730e14&_nc_ohc=qehNGVOamjoAX8JKEXJ&_nc_ht=scontent.fpoz4-1.fna&oh=9419256671a7058fac91911c447e73a5&oe=60ADAEC3)
+
+Browsing events
+
+![Screenshot 2](https://scontent.fpoz4-1.fna.fbcdn.net/v/t1.6435-9/175559890_116889497173105_1808472980796796178_n.png?_nc_cat=111&ccb=1-3&_nc_sid=730e14&_nc_ohc=oJ3KuoD5VRUAX8DfexE&_nc_oc=AQmE0kCdaLRYwJYtc9HQRLJlPNSl-zBxxi7tG4hv7sZTuInCc0rBZtleTf3sTh_EmoY&_nc_ht=scontent.fpoz4-1.fna&oh=39a60c561d5f27c4e7f04863650ae2d3&oe=60AE3690)
+
+Editing rules
+
+## Video introduction
+
+[YOUTUBE Tracardi](https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q)
 
 ## Trouble shooting
 
