@@ -19,6 +19,9 @@ setup(
         'python-multipart',
         'httpx',
         'elasticsearch==7.9.1',
+        'aiofiles',
+        'lark',
+        'dateparser',
         'requests'
     ],
     classifiers=[
