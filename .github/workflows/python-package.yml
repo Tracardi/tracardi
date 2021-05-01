@@ -5,9 +5,9 @@ name: Tracardi 0.3.0-dev
 
 on:
   push:
-    branches: [ 0.3.0-dev ]
+    branches: [ 0.3.0-dev, master ]
   pull_request:
-    branches: [ 0.3.0-dev ]
+    branches: [ 0.3.0-dev, master ]
 
 jobs:
   build:
