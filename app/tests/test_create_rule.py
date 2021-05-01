@@ -20,7 +20,7 @@ def test_create_rule():
     )
 
     query = CreateRuleTransformer().transform(t)
-    pprint(query)
+    # pprint(query)
 
     assert len(query) == 5
 
