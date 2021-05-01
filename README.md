@@ -1,5 +1,7 @@
 [![header.jpg](https://i.postimg.cc/9XRJYRqY/header.jpg)](https://postimg.cc/23YQz5G1)
 
+[![Tests of Tracardi 0.3.0-dev](https://github.com/atompie/tracardi/actions/workflows/python-package.yml/badge.svg?branch=master)](https://github.com/atompie/tracardi/actions/workflows/python-package.yml)
+
 # Tracardi Customer Data Platform
 
 [Tracardi](http://www.tracardi.com) is a Graphic User Interface based on [Apache Unomi](https://unomi.apache.org).
