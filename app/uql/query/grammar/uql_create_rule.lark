@@ -1,0 +1,17 @@
+%import .uql_common (ESCAPED_STRING, NUMBER, WS, COMMENT_VALUE)
+%import .uql_expr (expr)
+%import .uql_meta (READ_ONLY, DISABLED, HIDDEN, NAME, describe, in_scope, with_tags)
+%import .uql_terminals (WHEN_TERMINAL, THEN_TERMINAL)
+%import .uql_function (function)
+
+// CREATE RULE
+create_rule: "CREATE"i READ_ONLY? DISABLED? HIDDEN? data_type with_tags? NAME describe? in_scope when then
+
+data_type: /RULE/i
+
+when: WHEN_TERMINAL expr
+then: THEN_TERMINAL functions
+functions: [function ("," function)*]
+
+%ignore COMMENT_VALUE
+%ignore WS

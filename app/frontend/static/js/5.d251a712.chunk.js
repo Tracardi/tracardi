@@ -1,2 +1,0 @@
-(this.webpackJsonptracardi=this.webpackJsonptracardi||[]).push([[5],{561:function(t,a,e){"use strict";e.r(a),a.default=e.p+"static/media/delete.2efa9d62.md"}}]);
-//# sourceMappingURL=5.d251a712.chunk.js.map

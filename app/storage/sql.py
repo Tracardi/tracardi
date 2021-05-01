@@ -1,5 +1,7 @@
+from datetime import datetime
 
-def to_sql(index, time, min, max, query=""):
+
+def to_sql(index, time, min:datetime, max:datetime, query=""):
     sql = """SELECT * FROM "{}" WHERE {} BETWEEN '{}' AND '{}'""".format(index, time, min.isoformat(),
                                                                                 max.isoformat())
 

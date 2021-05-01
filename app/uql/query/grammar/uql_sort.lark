@@ -1,0 +1,10 @@
+%import .uql_common (WS, COMMENT_VALUE)
+
+sort: "SORT BY"i [sort_expr ("," sort_expr)*]
+sort_expr: SORT_FIELD DIR
+
+DIR: /(ASC|DESC)/i
+SORT_FIELD: /[a-zA-Z0-9\._\-:]+/
+
+%ignore WS
+%ignore COMMENT_VALUE

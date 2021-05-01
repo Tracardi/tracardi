@@ -4,7 +4,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from ..auth.authentication import Authentication
 from ..globals.authentication import get_authentication
-from ..domain.user import User
 
 router = APIRouter()
 
@@ -19,8 +18,3 @@ async def login(login_form_data: OAuth2PasswordRequestForm = Depends(),
 
     return token
 
-
-# @router.get("/auth")
-# async def auth(user: User = Depends(User.factory)):
-#     print("AUTH")
-#     return user

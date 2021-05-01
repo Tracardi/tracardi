@@ -1,8 +1,8 @@
 import httpx
 from fastapi import APIRouter
 from fastapi import HTTPException, Depends
-from unomi_query_language.query.dispatcher import Host
-from unomi_query_language.query.mappers.action_mapper import action_mapper
+from ..uql.query.dispatcher import Host
+from ..uql.query.mappers.action_mapper import action_mapper
 from ..globals.authentication import get_current_user
 from ..globals.context_server_host import get_context_server_host
 

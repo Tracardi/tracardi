@@ -12,8 +12,9 @@ application = FastAPI()
 application.mount("/app",
                   StaticFiles(
                       html=True,
-                      directory=os.path.join(_local_dir, "frontend")),
-                  name="frontend"),
+                      directory=os.path.join(_local_dir, "frontend")
+                  ),
+                  name="frontend")
 
 application.include_router(console.router)
 application.include_router(event.router)

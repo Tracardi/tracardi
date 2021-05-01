@@ -9,8 +9,9 @@ def upsert_segment(elastic, q, segment: Segment):
         'uql': q,
         'scope': segment.scope,
         'name': segment.name,
-        'description': segment.desc,
-        'condition': segment.condition
+        'description': segment.description,
+        'condition': segment.condition,
+        'tags': segment.tags
     }
     return elastic.insert(segment_index, [segment])
 

@@ -36,17 +36,18 @@ async def segment_get(id: str, uql=Depends(context_server_via_uql), elastic=Depe
             elastic_result = RecordNotFound()
             elastic_result.message = "UQL Segment not found."
 
+        segment = result['list'][0]
+
         result = {
-            'meta': result['list'][0],
+            'unomi': {
+                'metadata': segment,
+                'itemId': segment['id'],
+                'itemType': 'segment'
+            }
         }
 
-        result['meta']['synchronized'] = True if not isinstance(elastic_result, RecordNotFound) else False
-
         if not isinstance(elastic_result, RecordNotFound):
-            result['uql'] = {
-                "condition": elastic_result['_source']["condition"],
-                "uql": elastic_result['_source']["uql"],
-            }
+            result['uql'] = elastic_result['_source']
 
         return result
 
@@ -58,9 +59,19 @@ async def segment_get(id: str, uql=Depends(context_server_via_uql), elastic=Depe
 
 @router.post("/")
 async def segment_create(segment: Segment, uql=Depends(context_server_via_uql), elastic=Depends(elastic_client)):
-    q = f"CREATE SEGMENT \"{segment.name}\" DESCRIBE \"{segment.desc}\" IN SCOPE \"{segment.scope}\" " + \
-        f"WHEN {segment.condition}"
 
+    if not segment.name:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty name.", "type": "Missing data"}])
+
+    if not segment.scope:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty scope.", "type": "Missing data"}])
+
+    if not segment.condition:
+        raise HTTPException(status_code=412, detail=[{"msg": "Empty condition.", "type": "Missing data"}])
+
+    q = f"CREATE SEGMENT \"{segment.name}\" DESCRIBE \"{segment.description}\" IN SCOPE \"{segment.scope}\" " + \
+        f"WHEN {segment.condition}"
+    print(q)
     unomi_result = query(q, uql)
     upserted_records, errors = upsert_segment(elastic, q, segment)
     return unomi_result
@@ -81,8 +92,7 @@ async def segment_delete(id: str,
                          elastic=Depends(elastic_client)):
     try:
         index = config.index['segments']
-        elastic_result = elastic.delete(index, id)
-        print(elastic_result)
+        elastic.delete(index, id)
     except elasticsearch.exceptions.NotFoundError:
         # todo logging
         print("Record {} not found in elastic.".format(id))
@@ -104,8 +114,9 @@ async def segment_select(request: Request, uql=Depends(context_server_via_uql)):
             q = "SELECT SEGMENT LIMIT 20"
         response_tuple = uql.select(q)
         result = uql.respond(response_tuple)
-        result = list(filter_segment(result))
-        return result
+        result = result['list'] if 'list' in result else []
+        return list(filter_segment(result))
+
     except NullResponseError as e:
         raise HTTPException(status_code=e.response_status, detail=convert_exception_to_json(e))
     except Exception as e:

@@ -1,9 +1,9 @@
 from collections import namedtuple
 
-from unomi_query_language.query.transformers.create_rule_transformer import CreateRuleTransformer
-from unomi_query_language.query.transformers.create_segment_transformer import CreateSegmentTransformer
-from unomi_query_language.query.transformers.delete_transformer import DeleteTransformer
-from unomi_query_language.query.transformers.select_transformer import SelectTransformer
+from .query.transformers.create_rule_transformer import CreateRuleTransformer
+from .query.transformers.create_segment_transformer import CreateSegmentTransformer
+from .query.transformers.delete_transformer import DeleteTransformer
+from .query.transformers.select_transformer import SelectTransformer
 
 
 class UqlRouter:
