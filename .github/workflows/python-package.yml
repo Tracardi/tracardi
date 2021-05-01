@@ -1,13 +1,13 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Tests
+name: API Tests
 
 on:
   push:
-    branches: [ 0.3.0-dev, master ]
+    branches: [ master ]
   pull_request:
-    branches: [ 0.3.0-dev, master ]
+    branches: [ master ]
 
 jobs:
   build:
