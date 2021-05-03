@@ -148,7 +148,7 @@ File docker-standalone.yaml
       - elasticsearch
 ```
 
-If you still experience problems with connection to elastic search, below you can find the section on how to configure a connection to elastic search cluster. 
+If you still experience problems with connection to elastic search, you can find the section on how to configure a connection to elastic search cluster below. 
 
 ## Tracardi without unomi and eleastic
 

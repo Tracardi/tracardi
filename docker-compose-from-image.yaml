@@ -2,7 +2,7 @@ version: "3.7"
 services:
 
   tracardi:
-    build: .
+    image: docker.pkg.github.com/atompie/tracardi/tracardi:latest
     environment:
       UNOMI_PROTOCOL: http
       UNOMI_HOST: unomi
