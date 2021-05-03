@@ -4,9 +4,8 @@
 
 # Tracardi Customer Data Platform
 
-[Tracardi](http://www.tracardi.com) is a Graphic User Interface based on [Apache Unomi](https://unomi.apache.org).
-
-Unomi is an open source Customer Data Platform that allows anyone to collect user profiles and manage them in a very robust way.
+[Tracardi](http://www.tracardi.com)  is a Graphic User Interface based on [Apache Unomi](https://unomi.apache.org).
+Unomi is an open-source Customer Data Platform that allows anyone to collect user-profiles and manage them in a very robust way.
 
 # Installation
 
@@ -34,7 +33,7 @@ Login with default:
 ```
 
 ## User interface authentication
-Default user and password are configured in docker compose file:
+Default user and password are configured in a docker compose file:
 
 * UNOMI_USERNAME (default: karaf) and 
 * UNOMI_PASSWORD(default: karaf)
@@ -79,6 +78,8 @@ Editing rules
 
 ## Trouble shooting
 
+#### Address already in use
+
 If you experience:
 
 ```
@@ -89,7 +90,8 @@ Error starting userland proxy: listen tcp4 0.0.0.0:80:
 bind: address already in use
 ``` 
 
-That means you have something running on port 80. Change docker-compose.yaml to map tracardi to different port.
+That means you have something running on port 80. Change docker-compose.yaml to map 
+Tracardi to different port.
 
 ```yaml
   tracardi:
@@ -109,11 +111,42 @@ That means you have something running on port 80. Change docker-compose.yaml to 
       - elasticsearch
 ```
 
-And open browser and do to url:
+#### Nof found exception
 
+If you see error in source section similar to this screenshot:
+
+[![source_error](https://i.postimg.cc/qvNDnF20/scope-error.png)](https://i.postimg.cc/qvNDnF20/scope-error.png)
+
+This can be ignored. Once you create first source it disapears. Next version will display information about empty source index.
+
+#### Authentication Exception
+
+If you experience Authentication Error 
+
+[![Auth_exception](https://i.postimg.cc/y6WL25rR/auth-exception.png)](https://i.postimg.cc/y6WL25rR/auth-exception.png)
+
+This means there is something wrong with the connection to elastic search. 
+Please take a close look at Tracardi configuration. You probably need to provide username and password for elastic search connection. 
+
+File docker-standalone.yaml
 ```yaml
-http://0.0.0.0:8081/app
+  tracardi:
+    build: .
+    environment:
+      UNOMI_PROTOCOL: http
+      UNOMI_HOST: unomi
+      UNOMI_PORT: 8181
+      UNOMI_USERNAME: karaf
+      UNOMI_PASSWORD: karaf
+      ELASTIC_HOST: https://user:name@elastic-search-ip:443  <- change here
+    ports:
+      - 80:80  
+    depends_on:
+      - unomi
+      - elasticsearch
 ```
+
+If you still experience problems with connection to elastic search, below you can find the section on how to configure a connection to elastic search cluster. 
 
 ## Tracardi without unomi and eleastic
 
