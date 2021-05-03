@@ -111,13 +111,15 @@ Tracardi to different port.
       - elasticsearch
 ```
 
-#### Nof found exception
+#### Not found exception
 
 If you see error in source section similar to this screenshot:
 
 [![source_error](https://i.postimg.cc/qvNDnF20/scope-error.png)](https://i.postimg.cc/qvNDnF20/scope-error.png)
 
-This can be ignored. Once you create first source it disapears. Next version will display information about empty source index.
+This can be ignored. Once you create first source it disappears. Next version of Tracardi will 
+display only and alert about empty source index. Currently we are not enforcing creation of empty indexes. 
+Index is created with the first created record. 
 
 #### Authentication Exception
 
@@ -125,8 +127,8 @@ If you experience Authentication Error
 
 [![Auth_exception](https://i.postimg.cc/y6WL25rR/auth-exception.png)](https://i.postimg.cc/y6WL25rR/auth-exception.png)
 
-This means there is something wrong with the connection to elastic search. 
-Please take a close look at Tracardi configuration. You probably need to provide username and password for elastic search connection. 
+Please take a closer look at the Tracardi configuration. You probably need to provide a username and password for an 
+elastic-search connection. 
 
 File docker-standalone.yaml
 ```yaml
