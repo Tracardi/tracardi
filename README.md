@@ -10,17 +10,20 @@ Unomi is an open source Customer Data Platform that allows anyone to collect use
 
 # Installation
 
-In order to run tracardi you must have docker installed on your linux machine. Please refer to [docker installation manual](https://docs.docker.com/engine/install/) 
+In order to run [Tracardi](http://www.tracardi.com) you must have docker installed on your linux machine. Please refer to [docker installation manual](https://docs.docker.com/engine/install/) 
 to see how to install docker. 
 
-One the docker is installed run go to main folder of tracardi and run.
+Once the docker is installed go to main folder of tracardi and run.
 
 ```
 docker-compose build
 docker-compose up
 ```
 
-This will build and install tracardi and all required dependencies such as unomi and elastic on your computer.
+This will build and install tracardi and all required dependencies such as unomi and elastic on your computer. 
+Hence that this type of setup is for demonstration purpose only.
+
+# Running Tracardi
 
 After a while when everything is downloaded and installed open browser and go to http://0.0.0.0/app
 Login with default:
@@ -30,38 +33,36 @@ Login with default:
  password: karaf
 ```
 
-## Tracardi without unomi and eleastic
-
-When you have unomi and elastic already installed you can use a standalone version of tracardi.
-File docker-standalone.yaml has everything you need. 
-
-Edit docker-standalone.yaml and set connection to elastic and unomi.
-
-
-```yaml
-      UNOMI_PROTOCOL: http
-      UNOMI_HOST: <unomi-ip-address>
-      UNOMI_PORT: <unomi-port, either 8181 or 9443>
-      UNOMI_USERNAME: <unomi-username>
-      UNOMI_PASSWORD: <unomi-password>
-      ELASTIC_HOST: <elastic-ip-address>
-      ELASTIC_PORT: 9200
-```
-
-To start tracardi, run this command from the same directory where the docker-standalone.yaml file exists:
-
-```
-docker-compose -f docker-standalone.yaml up
-```
-
-## User interface
-Open browser and go to http://0.0.0.0/app
-
-Login with:
+## User interface authentication
+Default user and password are configured in docker compose file:
 
 * UNOMI_USERNAME (default: karaf) and 
 * UNOMI_PASSWORD(default: karaf)
 
+Access to Tracardi interface is restricted by the Unomi password. 
+If you change Unomi password you will have to change it in Tracardi 
+as well.
+
+## Features
+
+Tracardi allows for:
+
+ * **Customer Data Integration** - You can ingest, aggregate and store customer data
+   from multiple sources in real time at any scale and speed due to elastic search backend.
+   
+ * **Customer Data Modelling** -  You can manage data. Define rules that will model data delivered
+   from your page and copy it into user profile. You can segment customers into custom segments.
+   
+ * **User Experience Personalization** - You can personalize user experience with
+   real-time customer segmentation and targeting.
+   
+ * **Profile Unification** - You can merge customer data from various sources to
+   single profile. Auto de-duplicate customer records. Blend customers in one account.
+   
+ * **Automation** - TRACARDI is a great framework for creating
+   marketing automation apps. You can send your data to other systems easily
+ 
+ 
 ## Screenshots
 
 ![Screenshot 1](https://scontent.fpoz4-1.fna.fbcdn.net/v/t1.6435-9/176281298_116889430506445_8902050899484618905_n.png?_nc_cat=103&ccb=1-3&_nc_sid=730e14&_nc_ohc=qehNGVOamjoAX8JKEXJ&_nc_ht=scontent.fpoz4-1.fna&oh=9419256671a7058fac91911c447e73a5&oe=60ADAEC3)
@@ -113,3 +114,124 @@ And open browser and do to url:
 ```yaml
 http://0.0.0.0:8081/app
 ```
+
+## Tracardi without unomi and eleastic
+
+When you have unomi and elastic already installed you can use a 
+standalone version of Tracardi. This is usually a production type of configuration. 
+
+File docker-standalone.yaml has everything you need. 
+
+Edit docker-standalone.yaml and set connection to elastic and unomi.
+
+
+```yaml
+      UNOMI_PROTOCOL: http
+      UNOMI_HOST: <unomi-ip-address>
+      UNOMI_PORT: <unomi-port, either 8181 or 9443>
+      UNOMI_USERNAME: <unomi-username>
+      UNOMI_PASSWORD: <unomi-password>
+      ELASTIC_HOST: <elastic-ip-address>
+      ELASTIC_PORT: 9200
+```
+
+To start Tracardi, run this command from the same directory where the docker-standalone.yaml file exists:
+
+```
+docker-compose -f docker-standalone.yaml up
+```
+
+## Advanced configuration
+
+### Long running service
+
+Tracardi can be configured to inspect the elastic state to get 
+a list of nodes upon startup, periodically and/or on failure. 
+
+To do that add the following to Tracardi configuration. 
+I hope the config is self-explanatory
+
+```yaml
+    ELASTIC_SNIFFER_TIMEOUT: 60,
+    ELASTIC_SNIFF_ON_START: True,
+    ELASTIC_SNIFF_ON_CONNECTION_FAIL: True,
+```
+
+### Max connections to elastic
+
+By default there are open up to 10 connections to each node, 
+if you require more  calls the ELASTIC_MAX_CONN parameter to raise the limit:
+
+Add the following to Tracardi configuration.
+
+```yaml
+    ELASTIC_MAX_CONN: 10
+```
+
+
+## Connecting to elastic cluster
+
+To connect to elastic cluster you must provide location to all cluster nodes.
+To configure Tracardi connection to elastic change ELASTIC_HOST in docker-standalone.yaml file.
+
+```yaml
+    ELASTIC_HOST: "node-1,node-2,node-3"
+```
+ 
+### SSL and Authentication
+You can configure Tracardi to use SSL for connecting to your 
+elasticsearch cluster:
+
+```yaml
+    ELASTIC_HOST: "node-1,node-2,node-3",
+    ELASTIC_PORT: 443,
+    ELASTIC_SCHEME: "https",
+    ELASTIC_HTTP_AUTH_USERNAME: "user",
+    ELASTIC_HTTP_AUTH_PASSWORD: "pass",
+```
+
+or you can use RFC-1738 to specify the url:
+
+```yaml
+    ELASTIC_HOST: "https://user:secret@node-1:443,https://user:secret@node-2:443,https://user:secret@node-3:443"
+```
+
+To include certificate verification and HTTP auth if needed add the following line:
+
+```yaml
+    ELASTIC_CAFILE: "path to certificate",
+```
+
+### Connect using API_KEY
+
+Here is the configuration for connection with API_KEY
+
+```yaml
+    ELASTIC_HOST: "site-1.local,site-2,site-3.com",
+    ELASTIC_HTTP_AUTH_USERNAME: "user",
+    ELASTIC_HTTP_AUTH_PASSWORD: "pass",
+    ELASTIC_API_KEY: 'api-key',
+```
+
+### Connect using CLOUD_ID
+
+Here is the configuration for connection with CLOUD_ID
+
+```yaml
+    ELASTIC_HOST: "site-1.local,site-2,site-3.com",
+    ELASTIC_CLOUD_ID: 'cluster-1:dXMa5Fx...',
+```
+
+### Other connection types
+
+If there is a need for more advanced connection configuration the change in /app/globals/elastic_client.py
+should handle all mare advanced connection types from Tracardi to elastic. 
+
+
+# Support us
+
+If you would like to support us please follow us on [Facebook](https://www.facebook.com/TRACARDI/) or [Twitter](https://twitter.com/tracardi), tag us and leave your comments. Subscribe to our [Youtube channel](https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q) to see development process and new upcoming features.
+
+Spread the news about TRACARDI so anyone interested get to know TRACARDI.
+
+We appreciate any help that helps make TRACARDI popular. 
