@@ -118,7 +118,7 @@ If you see error in source section similar to this screenshot:
 [![source_error](https://i.postimg.cc/qvNDnF20/scope-error.png)](https://i.postimg.cc/qvNDnF20/scope-error.png)
 
 This can be ignored. Once you create first source it disappears. Next version of Tracardi will 
-display only and alert about empty source index. Currently we are not enforcing creation of empty indexes. 
+display alert about empty source index. Currently we are not enforcing creation of empty indexes. 
 Index is created with the first created record. 
 
 #### Authentication Exception
