@@ -11,12 +11,8 @@ class ElasticConfig:
         if 'ELASTIC_HOST' in env and isinstance(env['ELASTIC_HOST'], str) and env['ELASTIC_HOST'].isnumeric():
             raise ValueError("Env ELASTIC_HOST must be sting")
 
-        if 'ELASTIC_PORT' in env and isinstance(env['ELASTIC_PORT'], str) and not env['ELASTIC_PORT'].isnumeric():
-            raise ValueError("Env ELASTIC_PORT must be number")
-
         self.host = env['ELASTIC_HOST'] if 'ELASTIC_HOST' in env else '127.0.0.1'
         self.host = self.host.split(",")
-        self.port = env['ELASTIC_PORT'] if 'ELASTIC_PORT' in env else 9200
         self.sniff_on_start = env['ELASTIC_SNIFF_ON_START'] if 'ELASTIC_SNIFF_ON_START' in env else None
         self.sniff_on_connection_fail = env[
             'ELASTIC_SNIFF_ON_CONNECTION_FAIL'] if 'ELASTIC_SNIFF_ON_CONNECTION_FAIL' in env else None
@@ -29,6 +25,11 @@ class ElasticConfig:
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None
         self.maxsize = env['ELASTIC_MAX_CONN'] if 'ELASTIC_MAX_CONN' in env else None
         self.http_compress = env['ELASTIC_HTTP_COMPRESS'] if 'ELASTIC_HTTP_COMPRESS' in env else None
+
+        self.sql_translate_url = env[
+            'ELASTIC_SQL_TRANSLATE_URL'] if 'ELASTIC_SQL_TRANSLATE_URL' in env else "/_sql/translate"
+        self.sql_translate_method = env[
+            'ELASTIC_SQL_TRANSLATE_METHOD'] if 'ELASTIC_SQL_TRANSLATE_METHOD' in env else "POST"
 
 
 elastic = ElasticConfig(os.environ)

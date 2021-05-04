@@ -1,12 +1,31 @@
 from elasticsearch import Elasticsearch, helpers
+from elasticsearch.client import SqlClient
+from elasticsearch.client.utils import query_params, SKIP_IN_PATH
 from elasticsearch.helpers import scan
+
+from app import config
+
+
+class AwsCompatibleSqlClient(SqlClient):
+
+    @query_params()
+    def translate(self, body, params=None, headers=None):
+
+        if body in SKIP_IN_PATH:
+            raise ValueError("Empty value passed for a required argument 'body'.")
+
+        return self.transport.perform_request(
+            config.elastic.sql_translate_method, config.elastic.sql_translate_url, params=params, headers=headers,
+            body=body
+        )
 
 
 class Elastic:
 
-    def __init__(self, host, port=9200):
+    def __init__(self, **kwargs):
         self._cache = {}
-        self._client = Elasticsearch([{'host': host, 'port': port}])
+        self._client = Elasticsearch(**kwargs)
+        self._client.sql = AwsCompatibleSqlClient(self._client)
         self.sql = self._client.sql
 
     def get(self, index, id):
@@ -39,7 +58,7 @@ class Elastic:
 
             if '_id' in record:
                 _id = record['_id']
-                del(record['_id'])
+                del (record['_id'])
                 record = {
                     "_index": index,
                     "_id": _id,

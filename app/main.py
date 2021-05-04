@@ -5,7 +5,6 @@ from starlette.staticfiles import StaticFiles
 
 from .routers import console, event, rule, source, profile, segment, auth, session, action
 
-
 _local_dir = os.path.dirname(__file__)
 
 application = FastAPI()

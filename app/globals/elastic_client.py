@@ -11,8 +11,9 @@ def elastic_client():
     def get_elastic_client():
 
         kwargs = {}
-        if config.elastic.port:
-            kwargs['port'] = config.elastic.port
+
+        if config.elastic.host:
+            kwargs['hosts'] = config.elastic.host
         if config.elastic.scheme:
             kwargs['scheme'] = config.elastic.scheme
         if config.elastic.sniffer_timeout:
@@ -40,7 +41,7 @@ def elastic_client():
         if config.elastic.http_compress:
             kwargs['http_compress'] = config.elastic.http_compress
 
-        return Elastic(config.elastic.host, **kwargs)
+        return Elastic(**kwargs)
 
     if _singleton is None:
         _singleton = get_elastic_client()
