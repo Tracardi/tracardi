@@ -269,6 +269,31 @@ If there is a need for more advanced connection configuration the change in /app
 should handle all mare advanced connection types from Tracardi to elastic. 
 
 
+## SQL translation configuration
+
+Some cloud providers have different Elastic Search _sql/translate endpoints.
+AWS use its own endpoint so there may be a need to change how Tracardi queries elastic search.
+To set new SQL translate endpoint add additional variable in docker 
+compose file. 
+
+```yaml
+  tracardi:
+    ...
+    environment:
+      ELASTIC_SQL_TRANSLATE_URL: "/_opendistro/_sql/translate"
+    ...
+```
+
+If there is a need for a change of default "POST" SQL translation method add:
+
+```yaml
+  tracardi:
+    ...
+    environment:
+      ELASTIC_SQL_TRANSLATE_METHOD: "PUT"
+    ...
+```
+
 # Support us
 
 If you would like to support us please follow us on [Facebook](https://www.facebook.com/TRACARDI/) or [Twitter](https://twitter.com/tracardi), tag us and leave your comments. Subscribe to our [Youtube channel](https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q) to see development process and new upcoming features.
