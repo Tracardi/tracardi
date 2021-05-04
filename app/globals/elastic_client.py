@@ -1,3 +1,6 @@
+from elasticsearch import ElasticsearchException
+from fastapi import HTTPException
+
 from .. import config
 from ..storage.elasticsreach import Elastic
 from ssl import create_default_context
@@ -44,6 +47,9 @@ def elastic_client():
         return Elastic(**kwargs)
 
     if _singleton is None:
-        _singleton = get_elastic_client()
+        try:
+            _singleton = get_elastic_client()
+        except ElasticsearchException as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     return _singleton

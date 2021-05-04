@@ -13,7 +13,7 @@ async def login(login_form_data: OAuth2PasswordRequestForm = Depends(),
                 auth: Authentication = Depends(get_authentication)):
     try:
         token = auth.login(login_form_data.username, login_form_data.password)
-    except ValueError as e:
+    except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     return token

@@ -1,4 +1,5 @@
 import os
+# os.environ["ELASTIC_HOST"] = "http://elastic:word@localhost:9200"
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
