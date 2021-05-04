@@ -123,12 +123,9 @@ Index is created with the first created record.
 
 #### Authentication Exception
 
-If you experience Authentication Error 
+If you experience Authentication Error please take a closer look at the Tracardi configuration. 
+You probably need to provide a username and password for an elastic-search connection. 
 
-[![Auth_exception](https://i.postimg.cc/y6WL25rR/auth-exception.png)](https://i.postimg.cc/y6WL25rR/auth-exception.png)
-
-Please take a closer look at the Tracardi configuration. You probably need to provide a username and password for an 
-elastic-search connection. 
 
 File docker-standalone.yaml
 ```yaml
@@ -140,12 +137,21 @@ File docker-standalone.yaml
       UNOMI_PORT: 8181
       UNOMI_USERNAME: karaf
       UNOMI_PASSWORD: karaf
-      ELASTIC_HOST: https://user:name@elastic-search-ip:443  <- change here
+      ELASTIC_HOST: https://user:name@elastic-search-ip:443  <- change here for ssl connection
     ports:
       - 80:80  
     depends_on:
       - unomi
       - elasticsearch
+```
+For unencrypted connection set ELASTIC_HOST in docker-standalone.yaml to:
+
+```yaml
+  tracardi:
+    ...
+    environment:
+      ELASTIC_HOST: user:name@elastic-search-ip:9200
+    ...
 ```
 
 If you still experience problems with connection to elastic search, you can find the section on how to configure a connection to elastic search cluster below. 
