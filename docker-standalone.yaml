@@ -9,7 +9,6 @@ services:
       UNOMI_PORT: 8181
       UNOMI_USERNAME: karaf
       UNOMI_PASSWORD: karaf
-      ELASTIC_HOST: 192.168.1.103
-      ELASTIC_PORT: 9200
+      ELASTIC_HOST: http://elastic:word@192.168.1.103:9200
     ports:
       - 80:80

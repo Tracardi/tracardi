@@ -1,10 +1,10 @@
 import os
+# os.environ["ELASTIC_HOST"] = "http://elastic:word@localhost:9200"
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 
 from .routers import console, event, rule, source, profile, segment, auth, session, action
-
 
 _local_dir = os.path.dirname(__file__)
 

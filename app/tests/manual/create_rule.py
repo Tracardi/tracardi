@@ -10,14 +10,14 @@ p = Parser(read('uql_create_rule.lark'), start='create_rule')
 t = p.parse(
     """
     
-    CREATE RULE 
-        WITH TAGS ["długa","bśćółęńć-"] 
-        "if identify the event properties to profile" 
-        # DESCRIBE "Copies user data from events target properties to profile"
-        IN SCOPE "kuptoo" 
-        WHEN eventType="identify"
-        THEN 
-            profile.AddStringToList(a,"1"),profile.SetString(a,"1")
+    # CREATE RULE 
+    #     WITH TAGS ["długa","bśćółęńć-"] 
+    #     "if identify the event properties to profile" 
+    #     # DESCRIBE "Copies user data from events target properties to profile"
+    #     IN SCOPE "kuptoo" 
+    #     WHEN eventType="identify"
+    #     THEN 
+    #         profile.AddStringToList(a,"1"),profile.SetString(a,"1")
     
     # CREATE RULE 
     #     # WITH TAGS ["analytics"] 
@@ -43,12 +43,12 @@ t = p.parse(
      #    WHEN event:type="view"
      #    THEN IncrementProfileProperty("nbOfViews1")
         
-    # CREATE RULE 
-    #     "if identify event then copy event properties to profile" 
-    #     DESCRIBE "Copies user data from events target properties to profile"
-    #     IN SCOPE "my-site" 
-    #     WHEN event:type="identify" AND event:scope = "my-site"  
-    #     THEN CopyEventsToProfileProperties()
+    CREATE RULE 
+        "name" 
+        DESCRIBE "description"
+        IN SCOPE "scope" 
+        WHEN event:type="identify" AND event:scope = "my-site"  
+        THEN profile.CopyAll()
     
     # CREATE RULE "Example: add to list" 
     # DESCRIBE "Uses AddToProfilePropertyList" 
@@ -71,11 +71,11 @@ t = p.parse(
 query = CreateRuleTransformer().transform(t)
 pprint(query)
 
-host = Host('localhost', port=8181, protocol='http').credentials('karaf','karaf')
-dispatcher = Dispatcher(host)
-response, _ = dispatcher.fetch(query)
-if response.status_code == 200:
-    pprint(json.loads(response.content))
-else:
-    print(response.content)
-print(response.status_code)
+# host = Host('localhost', port=8181, protocol='http').credentials('karaf','karaf')
+# dispatcher = Dispatcher(host)
+# response, _ = dispatcher.fetch(query)
+# if response.status_code == 200:
+#     pprint(json.loads(response.content))
+# else:
+#     print(response.content)
+# print(response.status_code)
