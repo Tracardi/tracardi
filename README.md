@@ -294,6 +294,11 @@ If there is a need for a change of default "POST" SQL translation method add:
     ...
 ```
 
+# Open source version of Frontend
+
+This repository comes with compiled version of react scripts. If you want to self compile the frontend 
+scripts head to https://github.com/atompie/tracardi-unomi-gui.
+
 # Support us
 
 If you would like to support us please follow us on [Facebook](https://www.facebook.com/TRACARDI/) or [Twitter](https://twitter.com/tracardi), tag us and leave your comments. Subscribe to our [Youtube channel](https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q) to see development process and new upcoming features.
