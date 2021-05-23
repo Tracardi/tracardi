@@ -306,3 +306,7 @@ If you would like to support us please follow us on [Facebook](https://www.faceb
 Spread the news about TRACARDI so anyone interested get to know TRACARDI.
 
 We appreciate any help that helps make TRACARDI popular. 
+
+# Donate
+
+YOu can support us on [BOUNTUSOURCE](https://www.bountysource.com/teams/tracardi)
