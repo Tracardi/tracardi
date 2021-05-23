@@ -309,4 +309,4 @@ We appreciate any help that helps make TRACARDI popular.
 
 # Donate
 
-YOu can support us on [BOUNTUSOURCE](https://www.bountysource.com/teams/tracardi)
+YOu can support us on [BOUNTY-SOURCE](https://www.bountysource.com/teams/tracardi)
