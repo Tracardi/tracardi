@@ -110,14 +110,18 @@ Tracardi allows for:
  
 ## Screenshots
 
-![Screenshot 1](raw/0.4.0-dev/screenshots/main.png)
+###Browsing events
 
-Browsing events
+![Screenshot 1](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main.png)
 
-![Screenshot 2](raw/0.4.0-dev/screenshots/main1.png)
-![Screenshot 3](raw/0.4.0-dev/screenshots/main2.png)
+###Browsing rules
 
-Editing rules
+![Screenshot 2](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main1.png)
+
+###Editing rules
+
+![Screenshot 3](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main2.png)
+
 
 ## Video introduction
 
