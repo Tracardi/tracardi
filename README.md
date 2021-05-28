@@ -153,8 +153,7 @@ Tracardi to different port.
       UNOMI_PORT: 8181
       UNOMI_USERNAME: karaf
       UNOMI_PASSWORD: karaf
-      ELASTIC_HOST: elasticsearch
-      ELASTIC_PORT: 9200
+      ELASTIC_HOST: http://elasticsearch:9200
     ports:
       - 8081:80  <- CHANGE HERE
     depends_on:
@@ -223,8 +222,7 @@ Edit docker-standalone.yaml and set connection to elastic and unomi.
       UNOMI_PORT: <unomi-port, either 8181 or 9443>
       UNOMI_USERNAME: <unomi-username>
       UNOMI_PASSWORD: <unomi-password>
-      ELASTIC_HOST: <elastic-ip-address>
-      ELASTIC_PORT: 9200
+      ELASTIC_HOST: <elastic-ip-address>:9200
 ```
 
 To start Tracardi, run this command from the same directory where the docker-standalone.yaml file exists:
