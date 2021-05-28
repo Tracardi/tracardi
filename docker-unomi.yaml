@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  unomi:
+    image: apache/unomi:1.5.4
+    container_name: unomi
+    environment:
+      - UNOMI_ELASTICSEARCH_ADDRESSES=192.168.1.103:9200
+      - ELASTICSEARCH_PORT=9300
+    ports:
+      - 8181:8181
+      - 9443:9443
+      - 8102:8102
