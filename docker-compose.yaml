@@ -9,18 +9,16 @@ services:
       UNOMI_PORT: 8181
       UNOMI_USERNAME: karaf
       UNOMI_PASSWORD: karaf
-      ELASTIC_HOST: elasticsearch
-      ELASTIC_PORT: 9200
+      ELASTIC_HOST: http://elastic:9200
+
     ports:
       - 80:80
     depends_on:
       - unomi
-      - elasticsearch
+      - elastic
 
-  elasticsearch:
+  elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
-    volumes: # Persist ES data in seperate "esdata" volume
-      - esdata:/usr/share/elasticsearch/data
     environment:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -33,16 +31,13 @@ services:
 
   unomi:
     image: apache/unomi:1.5.4
+    container_name: unomi
     environment:
-      - UNOMI_ELASTICSEARCH_ADDRESSES=elasticsearch:9200
+      - UNOMI_ELASTICSEARCH_ADDRESSES=elastic:9200
       - ELASTICSEARCH_PORT=9300
     ports:
       - 8181:8181
       - 9443:9443
       - 8102:8102
     depends_on:
-      - elasticsearch
-
-volumes: # Define seperate volume for Elasticsearch data
-  esdata:
-    driver: local
+      - elastic

@@ -7,6 +7,9 @@
 [Tracardi](http://www.tracardi.com)  is a Graphic User Interface based on [Apache Unomi](https://unomi.apache.org).
 Unomi is an open-source Customer Data Platform that allows anyone to collect user-profiles and manage them in a very robust way.
 
+This repository contains source for tracardi-unomi-api. You must run it with [https://github.com/atompie/tracardi-unomi-gui] 
+to see the frontend. 
+
 # Installation
 
 In order to run [Tracardi](http://www.tracardi.com) you must have docker installed on your linux machine. Please refer to [docker installation manual](https://docs.docker.com/engine/install/) 
@@ -15,16 +18,57 @@ to see how to install docker.
 Once the docker is installed go to main folder of tracardi and run.
 
 ```
+git clone https://github.com/atompie/tracardi.git
 docker-compose build
 docker-compose up
 ```
 
-This will build and install tracardi and all required dependencies such as unomi and elastic on your computer. 
+This will build and install Tracardi and all required API dependencies such as unomi and elastic on your computer. 
 Hence that this type of setup is for demonstration purpose only.
 
-# Running Tracardi
+If you do not have docker-compose installed you can run it one by one:
+You will need for that your laptop IP. On linux machine you may run ifconfig or other similar command to get IP. 
+Then replace ```<your-laptop-ip>``` with that IP
 
-After a while when everything is downloaded and installed open browser and go to http://0.0.0.0/app
+Start Elasticsearch
+```
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+```
+
+Start Unomi
+
+```
+docker run -p 8181:8181 -p 9443:9443 -p 8102:8102 -e UNOMI_ELASTICSEARCH_ADDRESSES=<your-laptop-ip>:9200 \
+      -e ELASTICSEARCH_PORT=9300 apache/unomi:1.5.4
+```
+
+Start Tracardi API
+
+```
+git clone https://github.com/atompie/tracardi.git
+docker build . -t tracardi-unomi-api
+docker run -p 8686:80 -e UNOMI_PROTOCOL=http -e UNOMI_HOST=<your-laptop-ip> -e UNOMI_PORT=8181 \
+       -e UNOMI_USERNAME=karaf -e UNOMI_PASSWORD=karaf -e ELASTIC_HOST=http://<your-laptop-ip>:9200 \
+        tracardi-unomi-api
+```
+
+# Test if Tracardi API is running
+
+Go to http://localhost:8686/docs and see if you get the API documentation
+
+
+# Running Tracardi GUI
+
+Now its time to run Frontend.
+
+```
+git clone https://github.com/atompie/tracardi-unomi-gui.git
+docker build . -t tracardi-unomi-gui
+docker run -p 80:80 -e API_URL=http://127.0.0.1:8686 tracardi-unomi-gui
+```
+
+
+After a while when everything is downloaded and installed open browser and go to http://127.0.0.1
 Login with default:
 
 ```

@@ -1,2 +1,0 @@
-(this.webpackJsonptracardi=this.webpackJsonptracardi||[]).push([[4],{884:function(a,t,c){"use strict";c.r(t),t.default=c.p+"static/media/create.48cdaedb.md"}}]);
-//# sourceMappingURL=4.5771f21c.chunk.js.map
