@@ -30,19 +30,21 @@ If you do not have docker-compose installed you can run it one by one:
 You will need for that your laptop IP. On linux machine you may run ifconfig or other similar command to get IP. 
 Then replace ```<your-laptop-ip>``` with that IP
 
-Start Elasticsearch
+###Start Elasticsearch
 ```
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.5.2
 ```
 
-Start Unomi
+###Start Unomi
+Remember to replace ```<your-laptop-ip>``` with IP
 
 ```
 docker run -p 8181:8181 -p 9443:9443 -p 8102:8102 -e UNOMI_ELASTICSEARCH_ADDRESSES=<your-laptop-ip>:9200 \
       -e ELASTICSEARCH_PORT=9300 apache/unomi:1.5.4
 ```
 
-Start Tracardi API
+###Start Tracardi API
+Remember to replace ```<your-laptop-ip>``` with IP
 
 ```
 git clone https://github.com/atompie/tracardi.git
