@@ -61,7 +61,7 @@ Go to http://localhost:8686/docs and see if you get the API documentation
 
 # Running Tracardi GUI
 
-Now its time to run Frontend.
+Now its time to run Frontend. Building may take some time up to 15min. 
 
 ```
 git clone https://github.com/atompie/tracardi-unomi-gui.git
