@@ -1,4 +1,4 @@
-[![header.jpg](https://i.postimg.cc/9XRJYRqY/header.jpg)](https://postimg.cc/23YQz5G1)
+[![header.jpg](https://github.com/atompie/tracardi/blob/master/screenshots/github-splash.png)](https://github.com/atompie/tracardi/blob/master/screenshots/github-splash.png)
 
 [![Tests of Tracardi 0.3.0-dev](https://github.com/atompie/tracardi/actions/workflows/python-package.yml/badge.svg?branch=master)](https://github.com/atompie/tracardi/actions/workflows/python-package.yml)
 
