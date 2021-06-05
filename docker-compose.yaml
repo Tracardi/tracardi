@@ -12,7 +12,7 @@ services:
       ELASTIC_HOST: http://elastic:9200
 
     ports:
-      - 80:80
+      - 8686:80
     depends_on:
       - unomi
       - elastic

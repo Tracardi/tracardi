@@ -19,6 +19,7 @@ Once the docker is installed go to main folder of tracardi and run.
 
 ```
 git clone https://github.com/atompie/tracardi.git
+cd tracardi
 docker-compose build
 docker-compose up
 ```
@@ -48,6 +49,7 @@ Remember to replace ```<your-laptop-ip>``` with IP
 
 ```
 git clone https://github.com/atompie/tracardi.git
+cd tracardi/
 docker build . -t tracardi-unomi-api
 docker run -p 8686:80 -e UNOMI_PROTOCOL=http -e UNOMI_HOST=<your-laptop-ip> -e UNOMI_PORT=8181 \
        -e UNOMI_USERNAME=karaf -e UNOMI_PASSWORD=karaf -e ELASTIC_HOST=http://<your-laptop-ip>:9200 \
@@ -65,6 +67,7 @@ Now its time to run Frontend. Building may take some time up to 15min.
 
 ```
 git clone https://github.com/atompie/tracardi-unomi-gui.git
+cd tracardi-unomi-gui/
 docker build . -t tracardi-unomi-gui
 docker run -p 80:80 -e API_URL=http://127.0.0.1:8686 tracardi-unomi-gui
 ```
