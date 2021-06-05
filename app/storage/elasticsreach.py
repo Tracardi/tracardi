@@ -78,3 +78,9 @@ class Elastic:
 
     def remove_index(self, index):
         return self._client.indices.delete(index=index)
+
+    def exists_index(self, index):
+        return self._client.indices.exists(index=index)
+
+    def create_index(self, index, mapping):
+        return self._client.indices.create(index, body=mapping)

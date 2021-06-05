@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
 from .routers import console, event, rule, source, profile, segment, auth, session, action
+from .setup.indices_setup import create_indices
 
 _local_dir = os.path.dirname(__file__)
 
@@ -24,3 +25,8 @@ application.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@application.on_event("startup")
+def app_starts():
+    create_indices()
