@@ -56,9 +56,9 @@ Take a look at [YouTube channel](https://bit.ly/3pbdbPR) and see what Tracardi c
 ![Screenshot 3](https://pbs.twimg.com/media/E4FqslsVEAgRS6d?format=jpg&name=large)
 
 
-# Frontend
+# Front-End
 
-This repository contains source for tracardi-api. You must run it with [https://github.com/atompie/tracardi-gui] 
+This repository contains source for tracardi backend API. You must run it with [https://github.com/atompie/tracardi-gui] 
 to see the frontend. 
 
 
