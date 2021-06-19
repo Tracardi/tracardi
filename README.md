@@ -1,7 +1,5 @@
 [![header.jpg](https://raw.githubusercontent.com/atompie/tracardi/master/screenshots/github-splash.png)](https://raw.githubusercontent.com/atompie/tracardi/master/screenshots/github-splash.png)
 
-[![Tests of Tracardi 0.3.0-dev](https://github.com/atompie/tracardi/actions/workflows/python-package.yml/badge.svg?branch=master)](https://github.com/atompie/tracardi/actions/workflows/python-package.yml)
-
 # Tracardi Open-source Customer Data Platform
 
 [Tracardi](http://www.tracardi.com)  is a open-source Customer Data Platform.
