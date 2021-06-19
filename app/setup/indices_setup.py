@@ -1,21 +1,45 @@
 import json
 import os
-
-from app import config
-from app.globals.elastic_client import elastic_client
+from app.service.storage.elastic import Elastic
+from app.service.storage.index import resources
+from app.setup.on_start import add_plugins
 
 __local_dir = os.path.dirname(__file__)
 
+index_mapping = {
+    'event': {
+        "mapping": "mappings/event-index.json",
+        "on-start": None  # Callable to fill the index
+    },
+    'action': {
+        "on-start": add_plugins  # Callable to fill the index
+    },
+}
 
-def create_indices():
-    es = elastic_client()
-    for key, index in config.index.items():
 
-        map_file = 'mappings/default-dynamic-index.json'
+async def create_indices():
+    es = Elastic.instance()
+    for key, index in resources.resources.items():
+
+        if key in index_mapping:
+            if 'mapping' in index_mapping[key]:
+                map_file = index_mapping[key]['mapping']
+            else:
+                map_file = 'mappings/default-dynamic-index.json'
+        else:
+            map_file = 'mappings/default-dynamic-index.json'
 
         with open(os.path.join(__local_dir, map_file)) as file:
             map = json.load(file)
-            if not es.exists_index(index):
-                es.create_index(index, map)
+            if not await es.exists_index(index.name):
+                await es.create_index(index.name, map)
+                if key in index_mapping and 'on-start' in index_mapping[key]:
+                    if index_mapping[key]['on-start'] is not None:
+                        on_start = index_mapping[key]['on-start']
+                        if callable(on_start):
+                            await on_start()
 
 
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(create_indices())

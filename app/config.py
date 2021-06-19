@@ -1,6 +1,11 @@
 import os
 
 
+class MemoryCacheConfig:
+    def __init__(self, env):
+        self.source_ttl = env['SOURCE_TTL'] if 'SOURCE_TTL' in env else 60
+
+
 class ElasticConfig:
 
     def __init__(self, env):
@@ -33,29 +38,4 @@ class ElasticConfig:
 
 
 elastic = ElasticConfig(os.environ)
-
-unomi_index = {
-    "segment": "context-segment",
-    "rule": "context-rule",
-    "rulestats": "context-rulestats",
-    "goal": "context-goal",
-    "event": "context-event-*",
-    "session": "context-session-*",
-    "profile": "context-profile",
-}
-
-index = {
-    "tokens": "tracardi-tokens",
-    "segments": "tracardi-segments",
-    "rules": "tracardi-rules",
-    "goals": "tracardi-goals",
-    "sources": "tracardi-sources",
-}
-
-unomi = {
-    'host': os.environ['UNOMI_HOST'] if 'UNOMI_HOST' in os.environ else '127.0.0.1',
-    'protocol': os.environ['UNOMI_PROTOCOL'] if 'UNOMI_PROTOCOL' in os.environ else 'http',
-    'port': os.environ['UNOMI_PORT'] if 'UNOMI_PORT' in os.environ else 8181,
-    'username': os.environ['UNOMI_USERNAME'] if 'UNOMI_USERNAME' in os.environ else 'karaf',
-    'password': os.environ['UNOMI_PASSWORD'] if 'UNOMI_PASSWORD' in os.environ else 'karaf',
-}
+memory_cache = MemoryCacheConfig(os.environ)

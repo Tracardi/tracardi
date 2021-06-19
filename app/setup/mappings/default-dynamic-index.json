@@ -4,6 +4,23 @@
     "number_of_replicas": 1
   },
   "mappings": {
-    "dynamic": true
+    "dynamic": true,
+    "properties": {
+      "metadata": {
+        "dynamic": false,
+        "properties": {
+          "time": {
+            "properties": {
+              "insert": {
+                "type": "date"
+              },
+              "update": {
+                "type": "date"
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,62 @@
+%import .uql_common (ESCAPED_STRING, NUMBER, WS, COMMENT_VALUE, compound_value)
+%import .uql_function (function)
+
+expr: and_expr
+        | or_expr
+?op_value:  OP_NULL
+        | OP_BOOL
+        | OP_INTEGER
+        | OP_FLOAT
+        | OP_STRING
+        | op_array
+        | op_range
+        | OP_TIME
+?and_expr: op_condition
+        | "(" expr ")"
+        | and_expr AND_TERMINAL and_expr
+?or_expr: op_condition
+        | "(" expr ")"
+        | or_expr OR_TERMINAL or_expr
+?op_condition: op_field_sig OP op_value_sig
+        | op_between
+        | op_is_null
+        | op_not_exists
+        | op_exists
+        | op_field_sig OP function
+        | op_field_eq_field
+
+op_field_sig: OP_FIELD
+        | op_compound_field
+
+op_value_sig: op_value
+    | op_compound_value
+
+op_field_eq_field: op_field_sig OP op_field_sig
+op_between: op_field_sig BETWEEN_TERMINAL op_range
+op_is_null: op_field_sig "IS NULL"i
+op_exists: OP_FIELD EXISTS_TERMINAL
+op_not_exists: OP_FIELD "NOT"i EXISTS_TERMINAL
+
+OP: /(!=|<=|>=|=>|=<|==|>|<)/
+
+// FIELDS FOR CONDITION
+
+op_range: op_value_sig " AND "i op_value_sig
+op_array: "[" [op_value ("," op_value)*] "]"
+OP_NULL: "NULL"i
+OP_BOOL: /(TRUE|FALSE)/i
+OP_FIELD: /[a-zA-Z0-9\._\-]+/
+OP_STRING: ESCAPED_STRING
+OP_VALUE_TYPE: /[a-zA-Z0-9]+/
+op_compound_value: OP_VALUE_TYPE "(" op_value ")"
+op_compound_field: OP_VALUE_TYPE "(" OP_FIELD ")"
+OP_INTEGER: /\d+/
+OP_FLOAT: NUMBER
+OP_TIME: /\d+(m|s|h|d)/
+
+BETWEEN_TERMINAL: /(\r? \n|\s)+BETWEEN\s+/i
+AND_TERMINAL: /(\r? \n|\s)+AND(\r? \n|\s)+/i
+OR_TERMINAL: /(\r? \n|\s)+OR(\r? \n|\s)+/i
+EXISTS_TERMINAL: /EXISTS/i
+
+%ignore WS

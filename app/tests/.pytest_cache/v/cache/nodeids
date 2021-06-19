@@ -1,0 +1,7 @@
+[
+  "unit/test_context_service.py::test_get_context_session_exists_profile_exists_conflict",
+  "unit/test_context_service.py::test_get_context_session_exists_profile_not_exists",
+  "unit/test_context_service.py::test_get_context_session_not_exists_profile_exists",
+  "unit/test_context_service.py::test_get_context_session_not_exists_profile_not_exists",
+  "unit/test_context_service.py::test_load_session_with_error"
+]

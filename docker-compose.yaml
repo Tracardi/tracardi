@@ -1,43 +1,37 @@
 version: "3.7"
 services:
 
-  tracardi:
-    build: .
-    environment:
-      UNOMI_PROTOCOL: http
-      UNOMI_HOST: unomi
-      UNOMI_PORT: 8181
-      UNOMI_USERNAME: karaf
-      UNOMI_PASSWORD: karaf
-      ELASTIC_HOST: http://elastic:9200
+#  tracardi:
+#    build: .
+##    image: tracardi-event-server
+#    environment:
+#      ELASTIC_HOST: http://elasticsearch:9200
+#    ports:
+#      - 8484:80
 
-    ports:
-      - 8686:80
-    depends_on:
-      - unomi
-      - elastic
-
-  elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
+    volumes: # Persist ES data in seperate "esdata" volume
+      - esdata1:/usr/share/elasticsearch/data
     environment:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
       - xpack.security.enabled=false
       - cluster.name=contextElasticSearch
-    ports:
+    ports: # Expose Elasticsearch ports
       - 9300:9300
       - 9200:9200
 
-  unomi:
-    image: apache/unomi:1.5.4
-    container_name: unomi
-    environment:
-      - UNOMI_ELASTICSEARCH_ADDRESSES=elastic:9200
-      - ELASTICSEARCH_PORT=9300
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.13.1
+    hostname: kibana
     ports:
-      - 8181:8181
-      - 9443:9443
-      - 8102:8102
-    depends_on:
-      - elastic
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+
+volumes: # Define seperate volume for Elasticsearch data
+  esdata1:
+    driver: local

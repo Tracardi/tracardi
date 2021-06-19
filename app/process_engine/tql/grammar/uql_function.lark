@@ -1,0 +1,7 @@
+%import .uql_common (value, WS)
+
+function: FUNCTION_NAME "(" params? ")"
+FUNCTION_NAME: /[a-zA-z_0-9\.]+/
+params: [value ("," value)*]
+
+%ignore WS

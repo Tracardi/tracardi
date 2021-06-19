@@ -1,0 +1,55 @@
+site_name: Tracardi Documentation
+site_description: Open-source Data Platform
+site_url: https://www.tracardi.com
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.top
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+extra:
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/tracardi
+    - icon: fontawesome/brands/facebook
+      link: https://facebook.com/tracardi
+    - icon: fontawesome/brands/github
+      link: https://github.com/atopmie/tracardi
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q
+copyright: Copyright &copy; 2020 - 2021 Tracardi
+repo_url: https://github.com/atompie/tracardi
+repo_name: atompie/tracardi
+nav:
+  - index.md
+  - introduction.md
+  - installation.md
+  - running.md
+  - truble_shooting.md
+  - Notations:
+      - notations/index.md
+      - notations/dot_notation.md
+      - notations/logic.md
+      - notations/math.md
+  - Api:
+    - api/index.md
+    - api/event_server.md
+  - Flow:
+    - flow/index.md
+    - Actions:
+      - flow/actions/raise_event_action.md
+  - support_us.md
+  - attribution.md
+  - software_license.md
+  - documentation_license.md
+

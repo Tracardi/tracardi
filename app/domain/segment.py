@@ -1,13 +1,11 @@
-from typing import Optional
-from pydantic import BaseModel
+from app.domain.named_entity import NamedEntity
+from app.service.storage.crud import StorageCrud
 
 
-class Segment(BaseModel):
-    scope: str
-    name: str
-    description: Optional[str] = "No description"
-    tags: Optional[list] = []
-    condition: str
+class Segment(NamedEntity):
+    enabled: bool = True
 
-    def get_id(self):
-        return self.name.lower().replace(" ", "-").replace("_", '-')
+    # Persistence
+
+    def storage(self) -> StorageCrud:
+        return StorageCrud("credential", Segment, entity=self)

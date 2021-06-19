@@ -1,0 +1,18 @@
+[
+  "test_context_service.py::test_get_context_session_exists_profile_exists_conflict",
+  "test_context_service.py::test_get_context_session_exists_profile_not_exists",
+  "test_context_service.py::test_get_context_session_not_exists_profile_exists",
+  "test_context_service.py::test_get_context_session_not_exists_profile_not_exists",
+  "test_context_service.py::test_load_session_with_error",
+  "test_copy_properties.py::test_copy_properties",
+  "test_flow_encoding.py::test_flow_encoding",
+  "test_memory_cache.py::test_memory_cache_add",
+  "test_memory_cache.py::test_memory_cache_ttl",
+  "test_memory_cache.py::test_memory_cache_usage_scenario",
+  "test_profile_service.py::test_new_profile_returns_correct_data",
+  "test_profile_service.py::test_new_profile_throw_error_when_no_id",
+  "test_tql.py::test_tql_bool_operations",
+  "test_tql.py::test_tql_false_operations",
+  "test_tql.py::test_tql_operations",
+  "test_tql.py::test_tql_operations1"
+]
