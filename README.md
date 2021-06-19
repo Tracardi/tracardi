@@ -64,7 +64,8 @@ to see the frontend.
 
 # Call for contributors
 
-We are looking for contributors. Would you like to help with Tracardi development contact us at tracardi.cdp@gmail.com or any social platform.
+We are looking for contributors. Would you like to help with Tracardi development fork Tracardi or contact us at 
+tracardi.cdp@gmail.com or any social platform.
 
 # Support us
 
