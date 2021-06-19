@@ -1,4 +1,4 @@
-[![header.jpg](https://raw.githubusercontent.com/atompie/tracardi/master/screenshots/github-splash.png)](https://raw.githubusercontent.com/atompie/tracardi/master/screenshots/github-splash.png)
+[![header.jpg](https://raw.githubusercontent.com/atompie/tracardi/tracardi-unomi-master/screenshots/github-splash.png)](https://raw.githubusercontent.com/atompie/tracardi/tracardi-unomi-master/screenshots/github-splash.png)
 
 # Tracardi Open-source Customer Data Platform
 
