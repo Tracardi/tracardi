@@ -65,6 +65,43 @@ to see the frontend.
 We are looking for contributors. Would you like to help with Tracardi development fork Tracardi or contact us at 
 tracardi.cdp@gmail.com or any social platform.
 
+# Read-map
+
+### Version 0.4.0
+
+#### Use cases
+- [x] Collecting events from web-page by JavaScript
+- [x] Binding events to elements on the page
+- [x] Gathering user properties
+- [ ] Merging user profiles
+- [ ] Simple segmentation
+
+#### Features
+- [x] Defining user data enhancement by workflow
+- [ ] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
+- [x] Simple workflow debugging
+- [x] Triggering workflow by rules
+- [x] Source configuration
+- [ ] Credentials inside source
+- [ ] Source should have type of query storage or event sourcing.
+- [x] Plugins configuration
+- [ ] Schema for PII
+
+### Version 0.5.0
+
+#### Use cases
+
+- [ ] Proof of concept for dynamic front-end loading
+
+#### Features:
+- [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
+- [ ] Reading data from external sources – use source configuration to fetch data
+- [ ] If Action – Should use plain/text editor not application/json
+- [ ] Join Node
+- [ ] GraphQL Endpoint for profile fetching
+- [ ] Global state of profile, session, event visible in Debugger.
+- [ ] Profiler as part of debugger
+
 # Support us
 
 If you would like to support us please follow us on [Facebook](https://bit.ly/3uPwP5a) or [Twitter](https://bit.ly/3uVJwLJ), tag us and leave your comments. Subscribe to our [Youtube channel](https://bit.ly/3pbdbPR) to see development process and new upcoming features.
