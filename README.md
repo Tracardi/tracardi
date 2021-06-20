@@ -22,7 +22,87 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
    
  * **Automation** - TRACARDI is a great framework for creating
    marketing automation apps. You can send your data to other systems easily
- 
+
+# Read-map
+
+### Version 0.4.0
+
+#### Use cases
+- [x] Collecting events from web-page by JavaScript
+- [x] Binding events to elements on the page
+- [x] Gathering user properties
+- [ ] Merging user profiles
+- [ ] Simple segmentation
+
+#### Features
+- [x] Defining user data enhancement by workflow
+- [ ] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
+- [x] Simple workflow debugging
+- [x] Triggering workflow by rules
+- [x] Source configuration
+- [ ] Credentials inside source
+- [ ] Source should have type of query storage or event sourcing.
+- [x] Plugins configuration
+- [ ] Schema for PII
+
+### Version 0.5.0
+
+#### Use cases
+
+- [ ] Proof of concept for dynamic front-end loading
+
+#### Features:
+- [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
+- [ ] Reading data from external sources – use source configuration to fetch data
+- [ ] If Action – Should use plain/text editor not application/json
+- [ ] Join Node
+- [ ] GraphQL Endpoint for profile fetching
+- [ ] Global state of profile, session, event visible in Debugger.
+- [ ] Profiler as part of debugger
+
+
+# Installation
+
+In order to run Tracardi you must have docker installed on your linux machine. Please refer to docker installation manual to see how to install docker.
+
+## Start Elasticsearch
+
+```
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+```
+
+## Start Tracardi API
+
+Tracardi uses elastic search as its storage. Tracardi must connect to elastic.
+Above commad runs elastic on your laptop thats why you must provide laptop's IP for Tracardi to
+connect to elastic. 
+
+```
+git clone https://github.com/atompie/tracardi.git
+cd tracardi/
+docker build . -t tracardi-api
+docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi-api
+```
+
+## Test Tracardi API
+
+Go to http://localhost:8686/docs and see if you get the API documentation.
+
+## Start Tracardi GUI
+
+Building may take some time  - up to 15min.
+
+```
+git clone https://github.com/atompie/tracardi-gui.git
+cd tracardi-gui/
+docker build . -t tracardi-gui
+docker run -p 80:80 -e API_URL=http://127.0.0.1:8686 tracardi-gui
+```
+
+## Tracardi GUI
+
+Open browser and go to http://127.0.0.1 Login with default user admin and password admin.
+
 # Scaling Tracardi for heavy load. 
  
 TRACARDI was developed with scalability in mind. Scaling is as easy as scaling a docker container. 
@@ -64,43 +144,6 @@ to see the frontend.
 
 We are looking for contributors. Would you like to help with Tracardi development fork Tracardi or contact us at 
 tracardi.cdp@gmail.com or any social platform.
-
-# Read-map
-
-### Version 0.4.0
-
-#### Use cases
-- [x] Collecting events from web-page by JavaScript
-- [x] Binding events to elements on the page
-- [x] Gathering user properties
-- [ ] Merging user profiles
-- [ ] Simple segmentation
-
-#### Features
-- [x] Defining user data enhancement by workflow
-- [ ] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
-- [x] Simple workflow debugging
-- [x] Triggering workflow by rules
-- [x] Source configuration
-- [ ] Credentials inside source
-- [ ] Source should have type of query storage or event sourcing.
-- [x] Plugins configuration
-- [ ] Schema for PII
-
-### Version 0.5.0
-
-#### Use cases
-
-- [ ] Proof of concept for dynamic front-end loading
-
-#### Features:
-- [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
-- [ ] Reading data from external sources – use source configuration to fetch data
-- [ ] If Action – Should use plain/text editor not application/json
-- [ ] Join Node
-- [ ] GraphQL Endpoint for profile fetching
-- [ ] Global state of profile, session, event visible in Debugger.
-- [ ] Profiler as part of debugger
 
 # Support us
 
