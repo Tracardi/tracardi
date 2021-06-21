@@ -1,8 +1,6 @@
 # Tracardi Customer Data Platform
 
-[Tracardi](http://www.tracardi.com)  is a Graphic User Interface based on [Apache Unomi](https://unomi.apache.org).
-Unomi is an open-source Customer Data Platform that allows anyone to collect user-profiles and manage them in a very robust way.
-
+[Tracardi](http://www.tracardi.com)  is the Customer Data Platform
 
 
 ## Features
@@ -11,60 +9,27 @@ Unomi is an open-source Customer Data Platform that allows anyone to collect use
  
 ## Screenshots
 
-![Screenshot 1](https://scontent.fpoz4-1.fna.fbcdn.net/v/t1.6435-9/176281298_116889430506445_8902050899484618905_n.png?_nc_cat=103&ccb=1-3&_nc_sid=730e14&_nc_ohc=qehNGVOamjoAX8JKEXJ&_nc_ht=scontent.fpoz4-1.fna&oh=9419256671a7058fac91911c447e73a5&oe=60ADAEC3)
+### Browsing events
 
-Browsing events
+![Screenshot 1](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main.png)
 
-![Screenshot 2](https://scontent.fpoz4-1.fna.fbcdn.net/v/t1.6435-9/175559890_116889497173105_1808472980796796178_n.png?_nc_cat=111&ccb=1-3&_nc_sid=730e14&_nc_ohc=oJ3KuoD5VRUAX8DfexE&_nc_oc=AQmE0kCdaLRYwJYtc9HQRLJlPNSl-zBxxi7tG4hv7sZTuInCc0rBZtleTf3sTh_EmoY&_nc_ht=scontent.fpoz4-1.fna&oh=39a60c561d5f27c4e7f04863650ae2d3&oe=60AE3690)
+### Workflow of consumer data collection and enhancement 
 
-Editing rules
+![Workflow](https://pbs.twimg.com/media/E3WHL7nWUAA7men?format=jpg&name=large)
+
+### Trigger rules
+
+![Screenshot 2](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main1.png)
+
+### Editing plugins
+
+![Screenshot 3](https://pbs.twimg.com/media/E4FqslsVEAgRS6d?format=jpg&name=large)
 
 ## Video introduction
 
 [YOUTUBE Tracardi](https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q)
 
 
-## Tracardi without unomi and eleastic
-
-When you have unomi and elastic already installed you can use a 
-standalone version of Tracardi. This is usually a production type of configuration. 
-
-File docker-standalone.yaml has everything you need. 
-
-Edit docker-standalone.yaml and set connection to elastic and unomi.
-
-
-```yaml
-      UNOMI_PROTOCOL: http
-      UNOMI_HOST: <unomi-ip-address>
-      UNOMI_PORT: <unomi-port, either 8181 or 9443>
-      UNOMI_USERNAME: <unomi-username>
-      UNOMI_PASSWORD: <unomi-password>
-      ELASTIC_HOST: <elastic-ip-address>
-      ELASTIC_PORT: 9200
-```
-
-To start Tracardi, run this command from the same directory where the docker-standalone.yaml file exists:
-
-```
-docker-compose -f docker-standalone.yaml up
-```
-
-## Advanced configuration
-
-### Long running service
-
-Tracardi can be configured to inspect the elastic state to get 
-a list of nodes upon startup, periodically and/or on failure. 
-
-To do that add the following to Tracardi configuration. 
-I hope the config is self-explanatory
-
-```yaml
-    ELASTIC_SNIFFER_TIMEOUT: 60,
-    ELASTIC_SNIFF_ON_START: True,
-    ELASTIC_SNIFF_ON_CONNECTION_FAIL: True,
-```
 
 ### Max connections to elastic
 

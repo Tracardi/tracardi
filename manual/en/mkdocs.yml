@@ -33,7 +33,9 @@ repo_name: atompie/tracardi
 nav:
   - index.md
   - introduction.md
+  - code_definitions.md
   - installation.md
+  - elastic_authentication.md
   - running.md
   - truble_shooting.md
   - Notations:

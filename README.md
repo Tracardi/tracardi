@@ -64,6 +64,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Global state of profile, session, event visible in Debugger.
 - [ ] Profiler as part of debugger
 - [ ] Refactor menu to take less space
+- [ ] Finish manual
 
 
 # Installation

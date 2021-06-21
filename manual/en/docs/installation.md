@@ -8,5 +8,5 @@ docker-compose build
 docker-compose up
 ```
 
-This will build and install tracardi and all required dependencies such as unomi and elastic on your computer. 
+This will build and install Tracardi and all required dependencies such as elastic search on your computer. 
 Hence that this type of setup is for demonstration purpose only.
