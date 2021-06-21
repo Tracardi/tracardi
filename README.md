@@ -45,6 +45,10 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Plugins configuration
 - [ ] Schema for PII
 
+#### Removals
+
+- [ ] Remove UQL Manual
+
 ### Version 0.5.0
 
 #### Use cases
@@ -59,6 +63,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] GraphQL Endpoint for profile fetching
 - [ ] Global state of profile, session, event visible in Debugger.
 - [ ] Profiler as part of debugger
+- [ ] Refactor menu to take less space
 
 
 # Installation
@@ -68,7 +73,7 @@ In order to run Tracardi you must have docker installed on your linux machine. P
 ## Start Elasticsearch
 
 ```
-docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.13.2
 ```
 
 ## Start Tracardi API
@@ -96,12 +101,12 @@ Building may take some time  - up to 15min.
 git clone https://github.com/atompie/tracardi-gui.git
 cd tracardi-gui/
 docker build . -t tracardi-gui
-docker run -p 80:80 -e API_URL=http://127.0.0.1:8686 tracardi-gui
+docker run -p 8787:80 -e API_URL=http://127.0.0.1:8686 tracardi-gui
 ```
 
 ## Tracardi GUI
 
-Open browser and go to http://127.0.0.1 Login with default user admin and password admin.
+Open browser and go to http://127.0.0.1:8787 Login with default user admin and password admin.
 
 # Scaling Tracardi for heavy load. 
  
