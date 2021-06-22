@@ -40,7 +40,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Simple workflow debugging
 - [x] Triggering workflow by rules
 - [x] Source configuration
-- [ ] Credentials inside source
+- [x] Credentials inside source
 - [ ] Source should have type of query storage or event sourcing.
 - [x] Plugins configuration
 - [ ] Schema for PII
@@ -65,6 +65,12 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Profiler as part of debugger
 - [ ] Refactor menu to take less space
 - [ ] Finish manual
+
+
+### Version 0.6.0
+
+#### Features:
+   - [ ] Scheduler
 
 
 # Installation
