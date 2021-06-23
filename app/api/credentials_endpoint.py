@@ -4,10 +4,8 @@ from fastapi import APIRouter
 from fastapi import HTTPException, Depends
 from .auth.authentication import get_current_user
 from .grouper import search
-from ..domain.credential import CredentialRecords, Credential, CredentialRecord
-from ..domain.project import Project, Projects
-from ..domain.entity import Entity
-from ..domain.value_object.bulk_insert_result import BulkInsertResult
+from ..domain.source import SourceRecord, Source
+from ..domain.sources import Sources
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
@@ -17,10 +15,10 @@ router = APIRouter(
 @router.get("/credentials/by_type", tags=["credential"])
 async def get_credentials(query: str = None):
     try:
-        credentials = CredentialRecords()
-        result = await credentials.bulk().load()
+        sources = Sources()
+        result = await sources.bulk().load()
         total = result.total
-        result = CredentialRecords.decode(result)
+        result = [SourceRecord.construct(Source.__fields_set__, **r).decode() for r in result]
 
         # Filtering
         if query is not None and len(query) > 0:
@@ -30,12 +28,12 @@ async def get_credentials(query: str = None):
 
         # Grouping
         groups = defaultdict(list)
-        for credential in result:  # type: Credential
-            if isinstance(credential.group, list):
-                for group in credential.group:
-                    groups[group].append(credential)
-            elif isinstance(credential.group, str):
-                groups[credential.group].append(credential)
+        for source in result:  # type: Source
+            if isinstance(source.type, list):
+                for group in source.type:
+                    groups[group].append(source)
+            elif isinstance(source.type, str):
+                groups[source.type].append(source)
 
         # Sort
         groups = {k: sorted(v, key=lambda r: r.name, reverse=False) for k, v in groups.items()}
@@ -44,34 +42,6 @@ async def get_credentials(query: str = None):
             "total": total,
             "grouped": groups
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-
-@router.get("/credential/{id}", tags=["credential"], response_model=Project)
-async def get_credential_by_id(id: str):
-    try:
-        credential = Entity(id=id)
-        record = await credential.storage('credential').load()  # type: CredentialRecord
-        credential = record.decode()
-        return credential
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/credential", tags=["credential"], response_model=BulkInsertResult)
-async def add_credential(credential: Credential):
-    try:
-        record = CredentialRecord.encode(credential)
-        return await record.storage().save()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/credential/{id}", tags=["credential"], response_model=dict)
-async def delete_project(id: str):
-    try:
-        credential = Entity(id=id)
-        return await credential.storage('credential').delete()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

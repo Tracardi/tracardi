@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from starlette.staticfiles import StaticFiles
 from .api import token_endpoint, rule_endpoint, source_endpoint, consent_endpoint, event_endpoint, \
-    profile_endpoint, flow_endpoint, generic_endpoint, project_endpoint, credentials_endpoint
+    profile_endpoint, flow_endpoint, generic_endpoint, project_endpoint, credentials_endpoint, segments_endpoint
 from .domain.flow_action_plugins import FlowActionPlugins
 from .event_server import event_server_endpoint
 from app.service.storage.elastic import Elastic
@@ -91,6 +91,7 @@ application.mount("/manual",
                       directory=os.path.join(_local_dir, "../manual")),
                   name="manual")
 
+application.include_router(segments_endpoint.router)
 application.include_router(credentials_endpoint.router)
 application.include_router(project_endpoint.router)
 application.include_router(event_server_endpoint.router)

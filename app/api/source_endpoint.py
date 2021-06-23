@@ -46,9 +46,11 @@ async def list_sources():
     try:
         sources = Sources()
         result = await sources.bulk().load()
+        total = result.total
+        result = [SourceRecord.construct(Source.__fields_set__, **r).decode() for r in result]
 
         return {
-            "total": result.total,
+            "total": total,
             "result": list(result)
         }
     except Exception as e:
@@ -82,11 +84,11 @@ async def list_sources(query: str = None):
         # Grouping
         groups = defaultdict(list)
         for source in result:  # type: Source
-            if isinstance(source.type, list):
-                for group in source.type:
+            if isinstance(source.origin, list):
+                for group in source.origin:
                     groups[group].append(source)
-            elif isinstance(source.type, str):
-                groups[source.type].append(source)
+            elif isinstance(source.origin, str):
+                groups[source.origin].append(source)
 
         # Sort
         groups = {k: sorted(v, key=lambda r: r.name, reverse=False) for k, v in groups.items()}

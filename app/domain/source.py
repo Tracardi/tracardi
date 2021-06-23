@@ -13,6 +13,7 @@ class Source(Entity):
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     config: Optional[dict] = {}
+    origin: str = "event"
     enabled: Optional[bool] = True
     consent: bool = False
 
@@ -35,6 +36,7 @@ class SourceRecord(Entity):
     description: Optional[str] = "No description provided"
     config: Optional[str] = None
     enabled: Optional[bool] = True
+    origin: str = "event"
     consent: bool = False
 
     def __init__(self, **data: Any):
@@ -51,6 +53,7 @@ class SourceRecord(Entity):
             name=source.name,
             description=source.description,
             type=source.type,
+            origin=source.origin,
             enabled=source.enabled,
             consent=source.consent,
             config=encrypt(source.config)
@@ -62,6 +65,7 @@ class SourceRecord(Entity):
             name=self.name,
             description=self.description,
             type=self.type,
+            origin=self.origin,
             enabled=self.enabled,
             consent=self.consent,
             config=decrypt(self.config)
