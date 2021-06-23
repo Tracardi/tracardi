@@ -15,7 +15,7 @@ from ..domain.enum.yes_no import YesNo
 from ..domain.flow_meta_data import FlowMetaData
 from ..domain.entity import Entity
 from ..domain.event import Event
-from ..domain.flow import Flow
+from ..domain.flow import Flow, FlowGraphDataRecord
 from ..domain.flow_action_plugin import FlowActionPlugin
 from ..domain.record.flow_action_plugin_record import FlowActionPluginRecord
 from ..domain.flow_action_plugins import FlowActionPlugins
@@ -188,7 +188,7 @@ async def upsert_flow(flow: Flow):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/flow/description", tags=["flow"], response_model=BulkInsertResult)
+@router.post("/flow/metadata", tags=["flow"], response_model=BulkInsertResult)
 async def upsert_flow_details(flow_metadata: FlowMetaData):
     try:
         entity = Entity(id=flow_metadata.id)
@@ -205,9 +205,32 @@ async def upsert_flow_details(flow_metadata: FlowMetaData):
                 name=flow_metadata.name,
                 description=flow_metadata.description,
                 enabled=flow_metadata.enabled,
+                flowGraph=FlowGraphDataRecord(nodes=[], edges=[]),
                 projects=flow_metadata.projects
             )
 
+        return await flow_record.storage().save()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/flow/draft/metadata", tags=["flow"], response_model=BulkInsertResult)
+async def upsert_flow_details(flow_metadata: FlowMetaData):
+    try:
+        entity = Entity(id=flow_metadata.id)
+        flow_record = await entity.storage("flow").load(FlowRecord)  # type: FlowRecord
+
+        if flow_record is None:
+            raise ValueError("Flow `{}` does not exist.".format(flow_metadata.id))
+
+        draft = flow_record.decode_draft()
+
+        draft.name = flow_metadata.name
+        draft.description = flow_metadata.description
+        draft.enabled = flow_metadata.enabled
+        draft.projects = flow_metadata.projects
+
+        flow_record.encode_draft(draft)
         return await flow_record.storage().save()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

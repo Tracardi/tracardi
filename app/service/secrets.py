@@ -7,8 +7,9 @@ def b64_encoder(data):
     if data is None:
         data = {}
     json_init = json.dumps(data)
-    b64_gziped = gzip.compress(bytes(json_init, 'utf-8'))
-    return base64.b64encode(b64_gziped)
+    gziped = gzip.compress(bytes(json_init, 'utf-8'))
+    b64 = base64.b64encode(gziped)
+    return b64.decode("utf-8")
 
 
 def encrypt(data):
@@ -25,7 +26,6 @@ def decode_b64(data):
         pass
     finally:
         return json.loads(decoded)
-
 
 
 def decrypt(data):

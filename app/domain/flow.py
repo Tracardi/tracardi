@@ -196,3 +196,6 @@ class FlowRecord(NamedEntity):
     def decode_draft(self) -> 'Flow':
         flow = decrypt(self.draft)
         return Flow.construct(_fields_set=self.__fields_set__, **flow)
+
+    def encode_draft(self, draft: 'Flow'):
+        self.draft = encrypt(draft.dict())
