@@ -17,9 +17,9 @@ from ..domain.entity import Entity
 from ..domain.event import Event
 from ..domain.flow import Flow
 from ..domain.flow_action_plugin import FlowActionPlugin
-from app.domain.record.flow_action_plugin_record import FlowActionPluginRecord
+from ..domain.record.flow_action_plugin_record import FlowActionPluginRecord
 from ..domain.flow_action_plugins import FlowActionPlugins
-from app.domain.record.flow_record import FlowRecord
+from ..domain.flow import FlowRecord
 from ..domain.flows import Flows
 
 from ..domain.profile import Profile
@@ -35,6 +35,56 @@ from ..setup.on_start import add_plugin
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
 )
+
+
+@router.post("/flow/draft", tags=["flow"], response_model=BulkInsertResult)
+async def upsert_flow_draft(draft: Flow):
+    try:
+
+        # Check if origin flow exists
+
+        entity = Entity(id=draft.id)
+        draft_record = await entity.storage('flow').load(FlowRecord)  # type: FlowRecord
+
+        if draft_record is None:
+            # If not exists create new one
+            origin = Flow.new(draft.id)
+            origin.description = "Created during workflow draft save."
+            record = FlowRecord.encode(origin)
+            await record.storage().save()
+        else:
+            # If exists decode origin flow
+            origin = draft_record.decode()
+
+        # Append draft
+        origin.encode_draft(draft)
+        flow_record = FlowRecord.encode(origin)
+        return await flow_record.storage().save()
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/flow/draft/{id}", tags=["flow"], response_model=Flow)
+async def load_flow_draft(id: str):
+    try:
+
+        # Check if origin flow exists
+
+        entity = Entity(id=id)
+        draft_record = await entity.storage('flow').load(FlowRecord)  # type: FlowRecord
+
+        if draft_record is None:
+            raise ValueError("Flow `{}` does not exists.".format(id))
+
+        # Return draft if exists
+        if draft_record.draft:
+            return draft_record.decode_draft()
+
+        return draft_record.decode()
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/flows", tags=["flow"])

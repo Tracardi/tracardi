@@ -2,11 +2,9 @@ from pprint import pprint
 from uuid import uuid4
 
 from app.domain.context import Context
-from app.domain.entity import Entity
 from app.domain.event import Event
 from app.domain.events import Events
-from app.domain.payload.tracker_payload import TrackerPayload
-from app.domain.record.flow_record import FlowRecord
+from app.domain.flow import FlowRecord
 from app.domain.named_entity import NamedEntity
 from app.domain.profile import Profile
 from app.domain.rule import Rule

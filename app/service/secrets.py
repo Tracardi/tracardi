@@ -1,16 +1,17 @@
 import base64
 import json
+import gzip
 
 
 def b64_encoder(data):
     if data is None:
         data = {}
     json_init = json.dumps(data)
-    return base64.b64encode(json_init.encode('utf-8'))
+    b64_gziped = gzip.compress(bytes(json_init, 'utf-8'))
+    return base64.b64encode(b64_gziped)
 
 
 def encrypt(data):
-    # This is for future encryptor
     return b64_encoder(data)
 
 
@@ -18,7 +19,13 @@ def decode_b64(data):
     if data is None:
         return {}
     decoded = base64.b64decode(data)
-    return json.loads(decoded)
+    try:
+        decoded = gzip.decompress(decoded)
+    except OSError:
+        pass
+    finally:
+        return json.loads(decoded)
+
 
 
 def decrypt(data):

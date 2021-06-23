@@ -3,7 +3,7 @@ from typing import Optional, Any
 from app.service.storage.crud import StorageCrud
 from ..entity import Entity
 from ..flow_action_plugin import FlowActionPlugin
-from ..record.flow_record import PluginRecord
+from app.domain.flow import PluginRecord
 from ..metadata import Metadata
 from ..settings import Settings
 from ..time import Time

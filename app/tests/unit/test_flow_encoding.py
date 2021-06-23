@@ -1,6 +1,6 @@
 from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Node, Edge
 import app.domain.flow as f
-from app.domain.record.flow_record import FlowRecord
+from app.domain.flow import FlowRecord
 
 
 def test_flow_encoding():
