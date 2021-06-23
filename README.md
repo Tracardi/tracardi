@@ -41,7 +41,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Triggering workflow by rules
 - [x] Source configuration
 - [x] Credentials inside source
-- [ ] Source should have type of query storage or event sourcing.
+- [x] Source should have type of query storage or event sourcing.
 - [x] Plugins configuration
 - [ ] Schema for PII
 
