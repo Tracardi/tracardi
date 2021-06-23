@@ -36,7 +36,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 #### Features
 - [x] Defining user data enhancement by workflow
-- [ ] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
+- [x] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
 - [x] Simple workflow debugging
 - [x] Triggering workflow by rules
 - [x] Source configuration
@@ -45,10 +45,11 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Plugins configuration
 - [ ] Schema for PII
 - [ ] Standard Error Reporting
+- [ ] Filtering of action plugins
 
 #### Removals
 
-- [ ] Remove UQL Manual
+- [x] Remove UQL Manual
 
 ### Version 0.5.0
 
