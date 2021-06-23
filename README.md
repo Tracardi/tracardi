@@ -44,6 +44,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Source should have type of query storage or event sourcing.
 - [x] Plugins configuration
 - [ ] Schema for PII
+- [ ] Standard Error Reporting
 
 #### Removals
 
@@ -65,6 +66,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Profiler as part of debugger
 - [ ] Refactor menu to take less space
 - [ ] Finish manual
+- [ ] Error log
 
 
 ### Version 0.6.0
