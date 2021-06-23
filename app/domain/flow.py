@@ -18,6 +18,7 @@ from ..service.secrets import decrypt, encrypt
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ""
+    lock: bool = False
 
     # Persistence
 
@@ -162,6 +163,7 @@ class FlowRecord(NamedEntity):
     enabled: Optional[bool] = True
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
+    lock: bool = False
 
     # Persistence
 
@@ -177,7 +179,8 @@ class FlowRecord(NamedEntity):
             enabled=flow.enabled,
             flowGraph=FlowGraphDataRecord.encode(flow.flowGraph),
             projects=flow.projects,
-            draft=flow.draft
+            draft=flow.draft,
+            lock=flow.lock
 
         )
 
@@ -189,6 +192,7 @@ class FlowRecord(NamedEntity):
             "enabled": self.enabled,
             "projects": self.projects,
             "draft": self.draft,
+            "lock": self.lock,
             "flowGraph": self.flowGraph.decode() if self.flowGraph else None,
         }
         return Flow.construct(_fields_set=self.__fields_set__, **data)
