@@ -1,8 +1,10 @@
+from collections import defaultdict
 from time import sleep
 
 from fastapi import APIRouter
 from fastapi import HTTPException, Depends
 from .auth.authentication import get_current_user
+from .grouper import search
 from ..domain.entity import Entity
 from ..domain.segment import Segment
 from ..domain.segments import Segments
@@ -43,11 +45,26 @@ async def get_segments(query: str = None):
         if query is not None and len(query) > 0:
             query = query.lower()
             if query:
-                result = [r for r in result if query in r.name.lower()]
+                result = [r for r in result if
+                          query in r.name.lower() or (r.eventType is not None and search(query, [r.eventType]))]
+
+        # Grouping
+        groups = defaultdict(list)
+        for segment in result:  # type: Segment
+            if isinstance(segment.eventType, list):
+                for group in segment.eventType:
+                    groups[group].append(segment)
+            elif isinstance(segment.eventType, str):
+                groups[segment.eventType].append(segment)
+            else:
+                groups["Global"].append(segment)
+
+        # Sort
+        groups = {k: sorted(v, key=lambda r: r.name, reverse=False) for k, v in groups.items()}
 
         return {
             "total": total,
-            "result": result
+            "grouped": groups
         }
 
     except Exception as e:

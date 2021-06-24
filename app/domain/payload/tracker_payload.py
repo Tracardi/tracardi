@@ -1,13 +1,8 @@
 from datetime import datetime
 from typing import Optional, List, Tuple, Dict, Any
 from pydantic import BaseModel
-from tracardi_graph_runner.domain.debug_info import DebugInfo
-
-from ..context import Context
-from ..record.event_debug_record import EventDebugRecord
 from ..value_object.collect_result import CollectResult
 from ..entity import Entity
-from ..event import Event
 from ..events import Events
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
@@ -18,7 +13,6 @@ from ..value_object.bulk_insert_result import BulkInsertResult
 from ..value_object.save_result import SaveResult
 from ..value_object.tracker_payload_result import TrackerPayloadResult
 from ...process_engine.rules_engine import RulesEngine
-from ...service.storage.collection_crud import CollectionCrud
 
 
 class TrackerPayload(BaseModel):
@@ -176,7 +170,7 @@ class TrackerPayload(BaseModel):
 
         return profile, session
 
-    async def process(self):
+    async def process(self) -> Tuple[dict, Profile]:
 
         profile, session, events, collect_result = await self.collect()
 
@@ -216,4 +210,4 @@ class TrackerPayload(BaseModel):
         else:
             result['context']["profile"] = profile.dict(include={"id": ...})
 
-        return result
+        return result, profile

@@ -1,10 +1,6 @@
-import asyncio
-import traceback
 from collections import defaultdict
-from datetime import datetime
 from time import time
 from typing import Dict, List
-from uuid import uuid4
 
 from pydantic import ValidationError
 from tracardi_graph_runner.domain.debug_info import DebugInfo
@@ -13,7 +9,6 @@ from tracardi_graph_runner.domain.flow_debug_info import FlowDebugInfo
 from tracardi_graph_runner.domain.flow_history import FlowHistory
 from tracardi_graph_runner.domain.work_flow import WorkFlow
 
-from ..domain.context import Context
 from ..domain.entity import Entity
 from ..domain.flow import Flow
 from ..domain.metadata import Metadata
@@ -69,8 +64,7 @@ class RulesEngine:
         memory_cache = MemoryCache()
 
         if 'rules' not in memory_cache:
-            rules = Rules()
-            flows_data = await rules.storage().filter(query)
+            flows_data = await Rules.storage().filter(query)
             memory_cache['rules'] = CacheItem(data=flows_data, ttl=1)
 
         rules = list(memory_cache['rules'].data)
@@ -105,7 +99,7 @@ class RulesEngine:
                         event=Entity(id=event.id),
                         flow=FlowDebugInfo(
                             id=rule.flow.id,
-                            error=[ErrorDebugInfo(msg=str(e), file=__file__, line=108)]
+                            error=[ErrorDebugInfo(msg=str(e), file=__file__, line=103)]
                         )
                     )
                     results[event.type].append({rule.name: result})
@@ -170,6 +164,8 @@ class RulesEngine:
 
         # Save profile
         if self.profile.metadata.updated:
+            # event = flow_task_store.keys()
+            #todo move to endpoint
             await self.profile.storage().save()
 
         return results

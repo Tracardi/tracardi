@@ -45,7 +45,9 @@ class ExprTransformer(TransformerNamespace):
         return value1 or value2
 
     def OP_FIELD(self, args):
-        value = self._data[args.value] if args.value in self._data else None
+        if args.value not in self._data:
+            raise ValueError("Field `{}` does not exist".format(args.value))
+        value = self._data[args.value]
         return Field(args.value, value)
 
     def OP(self, args):

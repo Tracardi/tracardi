@@ -8,5 +8,6 @@ rules_logger = logging.getLogger('Rules')
 
 class Rules(list):
 
-    def storage(self) -> PersistenceService:
+    @staticmethod
+    def storage() -> PersistenceService:
         return PersistenceService(ElasticStorage(index_key="rule"))

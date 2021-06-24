@@ -1,3 +1,5 @@
+from time import sleep
+
 from fastapi import APIRouter, Depends
 from fastapi import HTTPException
 
@@ -16,6 +18,7 @@ router = APIRouter(
 
 @router.get("/events/metadata/type", tags=["event", "event server"])
 async def event_types():
+    sleep(2)
     events = Events()
     result = await events.bulk().uniq_field_value("type.keyword")
     return {

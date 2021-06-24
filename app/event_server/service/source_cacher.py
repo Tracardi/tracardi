@@ -3,7 +3,7 @@ from fastapi import HTTPException
 
 from app.config import memory_cache
 from app.domain.entity import Entity
-from app.domain.source import Source
+from app.domain.source import Source, SourceRecord
 from app.event_server.utils.memory_cache import MemoryCache, CacheItem
 
 
@@ -33,7 +33,7 @@ class SourceCacher:
             return source
         else:
             # Expired
-            source = await source.storage("source").load(Source)  # type: Source
+            source = await source.storage("source").load(SourceRecord)  # type: SourceRecord
             if source is not None:
                 self._cache['source'] = CacheItem(data=source, ttl=memory_cache.source_ttl)
                 return source

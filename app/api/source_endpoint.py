@@ -1,4 +1,5 @@
 from collections import defaultdict
+from time import sleep
 from typing import Dict
 
 from fastapi import APIRouter
@@ -157,6 +158,7 @@ async def get_source_by_id(id: str) -> Source:
 
 @router.post("/source", tags=["source"], response_model=BulkInsertResult)
 async def upsert_source(source: Source):
+    sleep(2)
     try:
         record = SourceRecord.encode(source)
         return await record.storage().save()
