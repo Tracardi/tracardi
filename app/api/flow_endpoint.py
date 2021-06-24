@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 from collections import defaultdict
+from time import sleep
 from typing import Optional
 
 from fastapi import APIRouter
@@ -39,6 +40,7 @@ router = APIRouter(
 
 @router.post("/flow/draft", tags=["flow"], response_model=BulkInsertResult)
 async def upsert_flow_draft(draft: Flow):
+    sleep(2)
     try:
 
         # Check if origin flow exists
@@ -67,6 +69,7 @@ async def upsert_flow_draft(draft: Flow):
 
 @router.get("/flow/draft/{id}", tags=["flow"], response_model=Flow)
 async def load_flow_draft(id: str):
+    sleep(2)
     try:
 
         # Check if origin flow exists
@@ -253,6 +256,7 @@ async def upsert_flow_details(id: str, lock: str):
 
 @router.post("/flow/{id}/debug", tags=["flow"])
 async def debug_flow(id: str):
+    sleep(2)
     # Load flow
     try:
         profile = Profile(id="@debug-profile-id")
