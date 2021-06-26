@@ -45,6 +45,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Plugins configuration
 - [ ] Schema for PII
 - [x] User and password configurable by ENV
+- [ ] Tracardi user profile domain object
 
 #### Removals
 
@@ -57,7 +58,8 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Proof of concept for dynamic front-end loading
 
 #### Features:
-- [ ] Setting user and password from interface
+- [ ] Setting user and password from interface (user profile)
+- [ ] Forgot password functionality
 - [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
 - [ ] Reading data from external sources – use source configuration to fetch data
 - [ ] If Action – Should use plain/text editor not application/json
