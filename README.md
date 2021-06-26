@@ -36,20 +36,22 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 #### Features
 - [x] Defining user data enhancement by workflow
-- [ ] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
+- [x] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
 - [x] Simple workflow debugging
 - [x] Triggering workflow by rules
 - [x] Source configuration
-- [ ] Credentials inside source
-- [ ] Source should have type of query storage or event sourcing.
+- [x] Credentials inside source
+- [x] Source should have type of query storage or event sourcing.
 - [x] Plugins configuration
 - [ ] Schema for PII
+- [ ] Standard Error Reporting
+- [ ] Filtering of action plugins
 - [x] User and password configurable by ENV
 - [ ] Tracardi user profile domain object
 
 #### Removals
 
-- [ ] Remove UQL Manual
+- [x] Remove UQL Manual
 
 ### Version 0.5.0
 
@@ -66,9 +68,16 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Join Node
 - [ ] GraphQL Endpoint for profile fetching.
 - [ ] Global state of profile, session, event visible in Debugger.
-- [ ] Profiler as part of debugger.
-- [ ] Refactor menu to take less space.
-- [ ] Finish manual.
+- [ ] Profiler as part of debugger
+- [ ] Refactor menu to take less space
+- [ ] Finish manual
+- [ ] Error log
+
+
+### Version 0.6.0
+
+#### Features:
+   - [ ] Scheduler
 
 
 # Installation
