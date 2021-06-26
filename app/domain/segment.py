@@ -10,7 +10,7 @@ class Segment(NamedEntity):
     condition: str
     enabled: bool = True
 
-    def get_id(self):
+    def get_id(self) -> str:
         return self.name.replace(" ", "-").lower()
 
     # Persistence

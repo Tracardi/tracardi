@@ -17,8 +17,8 @@ COPY ssl ssl/
 COPY manual manual/
 ENV VARIABLE_NAME="application"
 
-# GUNICORN_CMD_ARGS="--keyfile=ssl/key.pem --certfile=ssl/cert.pem"
-# PORT 443
+# ENV GUNICORN_CMD_ARGS="--keyfile=ssl/key.pem --certfile=ssl/cert.pem"
+# ENV PORT 443
 
 EXPOSE 433
 CMD ["gunicorn", "-b", "0.0.0.0:433", "--keyfile", "ssl/key.pem", "--certfile", "ssl/cert.pem", "-k", "uvicorn.workers.UvicornWorker", "app.main:application"]

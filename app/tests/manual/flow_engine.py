@@ -69,9 +69,9 @@ if __name__ == "__main__":
             profile,
             events)
 
-        result = await rules_engine.execute(source.id)
+        flow_result, segmentation_result = await rules_engine.execute(source.id)
         # print(stats.to_json())
-        print(result)
+        print(flow_result, segmentation_result)
 
         await rule.storage().delete()
 

@@ -12,6 +12,7 @@ from ..time import Time
 from ..value_object.bulk_insert_result import BulkInsertResult
 from ..value_object.save_result import SaveResult
 from ..value_object.tracker_payload_result import TrackerPayloadResult
+from ...config import tracardi
 from ...process_engine.rules_engine import RulesEngine
 
 
@@ -179,7 +180,8 @@ class TrackerPayload(BaseModel):
             profile,
             events)
 
-        flow_result = await rules_engine.execute(self.source.id)
+        flow_result, segmentation_result = await rules_engine.execute(self.source.id)
+
         flow_response = []
         for event_type, debugging in flow_result.items():
             for debug_infos in debugging:
@@ -190,24 +192,24 @@ class TrackerPayload(BaseModel):
                         rule_id,
                         debug_info.flow.id,
                         debug_info.dict(include={"flow": {"error": ...}})
-                        ]
+                    ]
                     )
 
         # Prepare response
-        result = TrackerPayloadResult(**collect_result.dict())
-        result = result.dict()
-        result['execution'] = flow_response
-        result = {
-            "context": dict(),
-            "metadata": {
-                "time": self.metadata.time,
-                "result": result,
-            }
-        }
+        result = {}
 
+        # Debugging
+        if tracardi.track_debug:
+            debug_result = TrackerPayloadResult(**collect_result.dict())
+            debug_result = debug_result.dict()
+            debug_result['execution'] = flow_response
+            debug_result['segmentation'] = segmentation_result
+            result['debugging'] = debug_result
+
+        # Profile
         if self.return_profile():
-            result['context']["profile"] = profile.dict(exclude={"properties": {"private": ...}})
+            result["profile"] = profile.dict(exclude={"properties": {"private": ...}})
         else:
-            result['context']["profile"] = profile.dict(include={"id": ...})
+            result["profile"] = profile.dict(include={"id": ...})
 
         return result, profile

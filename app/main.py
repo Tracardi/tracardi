@@ -6,13 +6,13 @@ import elasticsearch
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from starlette.staticfiles import StaticFiles
-from .api import token_endpoint, rule_endpoint, source_endpoint, consent_endpoint, event_endpoint, \
+from app.api import token_endpoint, rule_endpoint, source_endpoint, consent_endpoint, event_endpoint, \
     profile_endpoint, flow_endpoint, generic_endpoint, project_endpoint, credentials_endpoint, segments_endpoint, \
     tql_endpoint, graphql_endpoint
-from .domain.flow_action_plugins import FlowActionPlugins
-from .event_server import event_server_endpoint
+from app.domain.flow_action_plugins import FlowActionPlugins
+from app.event_server import event_server_endpoint
 from app.service.storage.elastic import Elastic
-from .setup.indices_setup import create_indices
+from app.setup.indices_setup import create_indices
 
 logging.basicConfig(level=logging.INFO)
 
@@ -140,3 +140,7 @@ async def track(r: Request):
 async def plugins():
     plugins = FlowActionPlugins()
     return await plugins.bulk().load()
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:application", host="0.0.0.0", port=8001, log_level="info")

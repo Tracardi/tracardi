@@ -1,6 +1,6 @@
 from collections import defaultdict
 from time import time
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from pydantic import ValidationError
 from tracardi_graph_runner.domain.debug_info import DebugInfo
@@ -25,6 +25,12 @@ from ..domain.rules import Rules
 from ..service.storage.collection_crud import CollectionCrud
 import asyncio
 import traceback
+
+import copy
+from app.domain.segment import Segment
+from app.domain.segments import Segments
+from app.process_engine.tql.condition import Condition
+from app.process_engine.tql.utils.dictonary import flatten
 
 
 class RulesEngine:
@@ -70,7 +76,39 @@ class RulesEngine:
         rules = list(memory_cache['rules'].data)
         return rules
 
-    async def invoke(self, source_id=None) -> Dict[str, List[Dict[str, DebugInfo]]]:
+    async def segmentation(self, event_types):
+
+        # todo cache segments for 30 sec
+        flat_payload = flatten(copy.deepcopy(self.profile.dict()))
+
+        for event_type in event_types:  # type: str
+
+            # Segmentation is run for every event
+
+            # todo segments are loaded one by one - maybe it is possible to load it at once
+            segments = await Segments.storage().load_by('eventType.keyword', event_type)
+            for segment in segments:
+
+                segment = Segment(**segment)
+                segment_id = segment.get_id()
+
+                try:
+
+                    if Condition.evaluate(segment.condition, flat_payload):
+                        segments = set(self.profile.segments)
+                        segments.add(segment_id)
+                        self.profile.segments = list(segments)
+
+                        # Yield only if segmentation triggered
+                        yield event_type, segment_id, None
+
+                except Exception as e:
+                    msg = 'Condition id `{}` could not evaluate `{}`. The following error was raised: `{}`'.format(
+                        segment_id, segment.condition, str(e).replace("\n", " "))
+
+                    yield event_type, segment_id, msg
+
+    async def invoke(self, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list]]:
 
         flow_task_store = defaultdict(list)
         results = defaultdict(list)
@@ -139,17 +177,6 @@ class RulesEngine:
                 try:
                     result = await task  # type: DebugInfo
                 except Exception as e:
-                    print(str(e))
-                    # session_copy = self.session.copy(deep=True)
-                    # profile_copy = self.profile.copy(deep=True)
-                    #
-                    # await self.raise_event("flow-error", {
-                    #             "error": {
-                    #                 "msg": str(e),
-                    #                 "trace": str(traceback.extract_tb(e.__traceback__))
-                    #             }
-                    #         }, session_copy, profile_copy, source_id)
-
                     # todo log error
                     result = DebugInfo(
                         timestamp=time(),
@@ -163,18 +190,26 @@ class RulesEngine:
                 results[event_type].append({rule_name: result})
 
         # Save profile
+        # todo updated might be unnecessary - we could check if profile changed.
+        segmentation_info = {
+            "errors": [],
+            "ids": []
+        }
         if self.profile.metadata.updated:
-            # event = flow_task_store.keys()
-            #todo move to endpoint
+            async for event_type, segment_id, error in self.segmentation(event_types=flow_task_store.keys()):
+                # Segmentation triggered
+                if error:
+                    segmentation_info['errors'].append(error)
+                segmentation_info['ids'].append(segment_id)
             await self.profile.storage().save()
 
-        return results
+        return results, segmentation_info
 
-    async def execute(self, source_id) -> Dict[str, List[Dict[str, DebugInfo]]]:
+    async def execute(self, source_id) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list]]:
 
         """Runs rules and flow and saves debug info """
 
-        flow_result_by_event = await self.invoke(source_id)
+        flow_result_by_event, segmentation_info = await self.invoke(source_id)
 
         # Collect debug info
         record = []
@@ -185,7 +220,7 @@ class RulesEngine:
         bulk = CollectionCrud("debug-info", record)
         await bulk.save()
 
-        return flow_result_by_event
+        return flow_result_by_event, segmentation_info
 
     @staticmethod
     async def raise_event(event_type, properties, session, profile, source_id):
