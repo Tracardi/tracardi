@@ -1,6 +1,12 @@
 import os
 
 
+class TracardiConfig:
+    def __init__(self, env):
+        self.user = env['USER'] if 'USER' in env else 'admin'
+        self.password = env['PASSWORD'] if 'PASSWORD' in env else 'admin'
+
+
 class MemoryCacheConfig:
     def __init__(self, env):
         self.source_ttl = env['SOURCE_TTL'] if 'SOURCE_TTL' in env else 60
@@ -39,3 +45,4 @@ class ElasticConfig:
 
 elastic = ElasticConfig(os.environ)
 memory_cache = MemoryCacheConfig(os.environ)
+tracardi = TracardiConfig(os.environ)

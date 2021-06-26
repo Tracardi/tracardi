@@ -1,3 +1,4 @@
+from ...config import tracardi
 from ...service.storage import index
 from app.service.storage.elastic import Elastic
 
@@ -6,8 +7,8 @@ class UserDb:
     def __init__(self):
         self.users_db = [
             {
-                "username": "admin",
-                "password": "admin",
+                "username": tracardi.user,
+                "password": tracardi.password,
                 "full_name": "Admin",
                 "email": "johndoe@example.com",
                 "roles": ["admin"],
