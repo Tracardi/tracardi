@@ -13,9 +13,6 @@
             "properties": {
               "insert": {
                 "type": "date"
-              },
-              "update": {
-                "type": "date"
               }
             }
           }
@@ -27,6 +24,9 @@
       "profile": {
         "dynamic": false,
         "properties": {
+          "id": {
+            "type": "keyword"
+          },
           "properties": {
             "properties": {
               "private": {
@@ -41,6 +41,10 @@
           },
           "segments": {
             "type": "keyword"
+          },
+          "consents": {
+            "dynamic": true,
+            "properties": {}
           }
         }
       }

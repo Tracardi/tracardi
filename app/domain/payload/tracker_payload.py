@@ -199,6 +199,7 @@ class TrackerPayload(BaseModel):
         result = {}
 
         # Debugging
+        #todo save result to different index
         if tracardi.track_debug:
             debug_result = TrackerPayloadResult(**collect_result.dict())
             debug_result = debug_result.dict()

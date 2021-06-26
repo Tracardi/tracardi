@@ -7,13 +7,9 @@ from app.setup.on_start import add_plugins
 __local_dir = os.path.dirname(__file__)
 
 index_mapping = {
-    'event': {
-        "mapping": "mappings/event-index.json",
-        "on-start": None  # Callable to fill the index
-    },
     'action': {
         "on-start": add_plugins  # Callable to fill the index
-    },
+    }
 }
 
 
@@ -21,11 +17,8 @@ async def create_indices():
     es = Elastic.instance()
     for key, index in resources.resources.items():
 
-        if key in index_mapping:
-            if 'mapping' in index_mapping[key]:
-                map_file = index_mapping[key]['mapping']
-            else:
-                map_file = 'mappings/default-dynamic-index.json'
+        if index.mapping:
+            map_file = index.mapping
         else:
             map_file = 'mappings/default-dynamic-index.json'
 
