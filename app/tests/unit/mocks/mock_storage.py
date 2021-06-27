@@ -8,8 +8,8 @@ sessions = [{
 }]
 
 profiles = [
-    {"1": {'id': "1", "properties": {}}},
-    {"2": {'id': "2", "properties": {}}},
+    {"1": {'id': "1", "traits": {}}},
+    {"2": {'id': "2", "traits": {}}},
 ]
 
 

@@ -173,10 +173,11 @@ class RulesEngine:
         # Run and report async
         for event_type, tasks in flow_task_store.items():
             for flow_id, event_id, rule_name, task in tasks:
-
+                # result = await task  # type: DebugInfo
                 try:
                     result = await task  # type: DebugInfo
                 except Exception as e:
+                    print(str(e))
                     # todo log error
                     result = DebugInfo(
                         timestamp=time(),
@@ -195,12 +196,18 @@ class RulesEngine:
             "errors": [],
             "ids": []
         }
-        if self.profile.metadata.updated:
+        if self.profile.operation.needs_segmentation():
+            # Segmentation runs only if profile was updated or flow forced it
             async for event_type, segment_id, error in self.segmentation(event_types=flow_task_store.keys()):
                 # Segmentation triggered
                 if error:
                     segmentation_info['errors'].append(error)
                 segmentation_info['ids'].append(segment_id)
+            self.profile.operation.update = True
+
+        # todo merge
+
+        if self.profile.operation.needs_update():
             await self.profile.storage().save()
 
         return results, segmentation_info
@@ -231,7 +238,7 @@ class RulesEngine:
         )
 
         error_event = error_event.to_event(
-            Metadata(time=Time(), new=True, updated=False),
+            Metadata(time=Time()),
             Entity(id=source_id),
             session,
             profile,

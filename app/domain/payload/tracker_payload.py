@@ -1,6 +1,9 @@
 from datetime import datetime
 from typing import Optional, List, Tuple, Dict, Any
 from pydantic import BaseModel
+from tracardi_graph_runner.domain.debug_call_info import DebugCallInfo
+from tracardi_graph_runner.domain.debug_info import DebugInfo
+
 from ..value_object.collect_result import CollectResult
 from ..entity import Entity
 from ..events import Events
@@ -55,13 +58,13 @@ class TrackerPayload(BaseModel):
         # Presistence
 
         # Save profile
-        if save_profile and profile.metadata.new:
+        if save_profile and profile.operation.new:
             profile_result = await profile.storage().save()
         else:
             profile_result = BulkInsertResult()
 
         # Save session
-        if save_session and (session.metadata.new or session.profile is None or session.profile.id != profile.id):
+        if save_session and (session.operation.new or session.profile is None or session.profile.id != profile.id):
             # save only profile Entity
             session.profile = Entity(id=profile.id)
             session_result = await session.storage().save()
@@ -165,9 +168,9 @@ class TrackerPayload(BaseModel):
         # source.properties = self.event_server
         session.context = self.context
         session.properties = self.properties
-        session.metadata.new = is_new_session
+        session.operation.new = is_new_session
 
-        profile.metadata.new = is_new_profile
+        profile.operation.new = is_new_profile
 
         return profile, session
 
@@ -182,25 +185,50 @@ class TrackerPayload(BaseModel):
 
         flow_result, segmentation_result = await rules_engine.execute(self.source.id)
 
+        # todo proper result debugging
+
         flow_response = []
         for event_type, debugging in flow_result.items():
+
+            item = {
+                "event": {
+                    "type": event_type,
+                    "exec": []
+                }
+            }
+
             for debug_infos in debugging:
-                for rule_id, debug_info in debug_infos.items():
-                    flow_response.append([
-                        debug_info.event.id,
-                        event_type,
-                        rule_id,
-                        debug_info.flow.id,
-                        debug_info.dict(include={"flow": {"error": ...}})
-                    ]
+                for rule_id, debug_info in debug_infos.items():  # type: str, DebugInfo
+                    item['event']['id'] = debug_info.event.id
+
+                    call_statuses = []
+                    for debug_call in debug_info.calls:  # type: DebugCallInfo
+                        call_statuses.append({
+                            "node": {
+                                "id": debug_call.node.id,
+                                "error": debug_call.error
+                            }
+                        })
+
+                    item['event']['exec'].append(
+                        {
+                            "rule": {"id": rule_id},
+                            "flow": {
+                                "id": debug_info.flow.id,
+                                "errors": debug_info.dict(include={"flow": {"error": ...}}),
+                                "nodes": call_statuses
+                            }
+                        }
                     )
+
+            flow_response.append(item)
 
         # Prepare response
         result = {}
 
         # Debugging
-        #todo save result to different index
-        if tracardi.track_debug:
+        # todo save result to different index
+        if not tracardi.track_debug:
             debug_result = TrackerPayloadResult(**collect_result.dict())
             debug_result = debug_result.dict()
             debug_result['execution'] = flow_response
@@ -209,7 +237,12 @@ class TrackerPayload(BaseModel):
 
         # Profile
         if self.return_profile():
-            result["profile"] = profile.dict(exclude={"properties": {"private": ...}})
+            result["profile"] = profile.dict(
+                exclude={
+                    "traits": {"private": ...},
+                    "pii": ...,
+                    "operation": ...
+                })
         else:
             result["profile"] = profile.dict(include={"id": ...})
 

@@ -2,9 +2,8 @@ import asyncio
 from uuid import uuid4
 import app.domain.entity as entity
 from app.domain.profile import Profile
-from app.domain.profile_properties import ProfileProperties
+from app.domain.profile_traits import ProfileTraits
 from app.domain.response import Response, ResponseItem
-import app.service.storage.crud as crud
 from app.event_server.service.persistence_service import PersistenceService
 from app.service.storage.elastic_storage import ElasticStorage
 from app.service.storage.index import resources
@@ -13,7 +12,7 @@ from app.service.storage.index import resources
 async def response_data():
     profile_id = str(uuid4())
 
-    profile = Profile(id=profile_id, properties=ProfileProperties(public={"a":1}))
+    profile = Profile(id=profile_id, traits=ProfileTraits(public={"a": 1}))
     await profile.storage().save()
 
     pr = entity.Entity(id=profile_id)
@@ -21,7 +20,7 @@ async def response_data():
 
     response_id = str(uuid4())
     response_entity = Response(id=response_id,
-                               data=[ResponseItem(index='profile', slices=['properties.public'])])
+                               data=[ResponseItem(index='profile', slices=['traits.public'])])
 
     await response_entity.storage().save()
 

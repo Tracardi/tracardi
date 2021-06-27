@@ -15,7 +15,7 @@ class IncreaseVisitsAction(ActionRunner):
         if self.profile.stats is None:
             self.profile.stats = ProfileStats()
 
-        if self.session.metadata.new:
+        if self.session.operation.new:
             self.profile.increase_visits()
 
         return Result(port="profile", value=self.profile.dict())

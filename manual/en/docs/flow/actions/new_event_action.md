@@ -38,7 +38,7 @@ RAISE EVENT configuration
 {
   "event": {
     "type": "merge-profile",
-    "properties": "@properties.private"
+    "properties": "@traits.private"
   }
 }
 ```

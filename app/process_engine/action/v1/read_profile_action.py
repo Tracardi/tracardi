@@ -30,6 +30,6 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='profile',
-            group=["Customer Data", "Read"]
+            group=["Read"]
         )
     )

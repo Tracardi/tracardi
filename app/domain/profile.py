@@ -3,16 +3,20 @@ from datetime import datetime
 from typing import Optional, Any
 from .entity import Entity
 from .metadata import Metadata
-from .profile_properties import ProfileProperties
+from .pii import PII
+from .profile_traits import ProfileTraits
 from .profile_stats import ProfileStats
 from .time import Time
 from app.service.storage.crud import StorageCrud
+from .value_object.operation import Operation
 
 
 class Profile(Entity):
     metadata: Optional[Metadata]
+    operation: Operation = Operation()
     stats: ProfileStats = ProfileStats()
-    properties: Optional[ProfileProperties] = ProfileProperties()
+    traits: Optional[ProfileTraits] = ProfileTraits()
+    pii: PII = PII()
     segments: Optional[list] = []
     consents: Optional[dict] = {}
 
@@ -26,7 +30,8 @@ class Profile(Entity):
     def replace(self, profile):
         self.metadata = profile.metadata
         self.stats = profile.stats
-        self.properties = profile.properties
+        self.traits = profile.traits
+        self.pii = profile.pii
         self.id = profile.id
         self.segments = profile.segments
         self.consents = profile.consents
@@ -38,7 +43,7 @@ class Profile(Entity):
         self.stats.views += value
 
     def storage(self) -> StorageCrud:
-        return StorageCrud("profile", Profile, entity=self)
+        return StorageCrud("profile", Profile, entity=self, exclude={"operation": ...})
 
     @staticmethod
     def new() -> 'Profile':

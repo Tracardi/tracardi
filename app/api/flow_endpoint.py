@@ -256,12 +256,12 @@ async def upsert_flow_details(id: str, lock: str):
 
 @router.post("/flow/{id}/debug", tags=["flow"])
 async def debug_flow(id: str):
-    sleep(2)
+    sleep(1)
     # Load flow
     try:
         profile = Profile(id="@debug-profile-id")
         session = Session(id="@debug-session-id")
-        session.metadata.new = True
+        session.operation.new = True
         event = Event(
             id='@debug-event-id',
             type="@debug-event-type",
@@ -280,7 +280,7 @@ async def debug_flow(id: str):
         )
         debug_info = await workflow.invoke(flow, debug=True)
 
-        if profile.metadata.updated:
+        if profile.operation.needs_update():
             profile_save_result = await profile.storage().save()
         else:
             profile_save_result = None

@@ -16,7 +16,7 @@ class Resource:
             "token":        Index(name="tracardi-token",               object=None, mapping=None, rel=None),
             "source":       Index(name="tracardi-source",              object=None, mapping=None, rel=None),
             "session":      Index(name="tracardi-session",             object=None, mapping=None, rel='profile.id'),
-            "profile":      Index(name="tracardi-profile",             object=None, mapping=None, rel='_id'),
+            "profile":      Index(name="tracardi-profile",             object=None, mapping="mappings/profile-index.json", rel='_id'),
             "event":        Index(name="tracardi-event",               object=None, mapping="mappings/event-index.json", rel=None),
             "flow":         Index(name="tracardi-flow",                object=None, mapping=None, rel=None),
             "rule":         Index(name="tracardi-rule",                object=None, mapping=None, rel=None),

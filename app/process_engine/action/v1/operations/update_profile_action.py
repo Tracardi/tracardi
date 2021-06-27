@@ -8,8 +8,7 @@ class UpdateProfileAction(ActionRunner):
         pass
 
     async def run(self, void):
-        self.profile.metadata.updated = True
-        print("meta", self.profile.metadata)
+        self.profile.operation.update = True
         return None
 
 
@@ -17,7 +16,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='app.process_engine.action.v1.update_profile_action',
+            module='app.process_engine.action.v1.operations.update_profile_action',
             className='UpdateProfileAction',
             inputs=["void"],
             outputs=[],
@@ -31,6 +30,6 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='store',
-            group=["Customer Data"]
+            group=["Operations"]
         )
     )

@@ -9,6 +9,6 @@ class Private(BaseModel):
     pii: Optional[PII] = None
 
 
-class ProfileProperties(BaseModel):
+class ProfileTraits(BaseModel):
     private: Optional[dict] = {}
     public: Optional[dict] = {}

@@ -18,7 +18,7 @@ def test_copy_properties():
     }
 
     config = {
-        # event.property -> profile.properties
+        # event.property -> profile.traits
         'a.b.c': ['a.b.d'],
         'a.d': ["d"]
     }

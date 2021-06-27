@@ -6,10 +6,12 @@ from .entity import Entity
 from .metadata import Metadata
 from .time import Time
 from app.service.storage.crud import StorageCrud
+from .value_object.operation import Operation
 
 
 class Session(Entity):
     metadata: Optional[Metadata]
+    operation: Operation = Operation()
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}

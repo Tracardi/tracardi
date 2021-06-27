@@ -8,7 +8,7 @@ from app.domain.session import Session
 from app.process_engine.dot_accessor import DotAccessor
 
 
-class CopyPropertyAction(ActionRunner):
+class CopyTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
         if 'copy' not in kwargs:
@@ -21,9 +21,16 @@ class CopyPropertyAction(ActionRunner):
     async def run(self, payload: dict):
 
         dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
-
         for destination, value in self.mapping.items():
             dot[destination] = value
+
+        if not isinstance(dot.profile['traits']['private'], dict):
+            raise ValueError("Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
+                             "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
+
+        if not isinstance(dot.profile['traits']['public'], dict):
+            raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
+                             "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
 
         profile = Profile(**dot.profile)
         event = Event(**dot.event)
@@ -40,8 +47,8 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='app.process_engine.action.v1.properties.copy_property_action',
-            className='CopyPropertyAction',
+            module='app.process_engine.action.v1.traits.copy_trait_action',
+            className='CopyTraitAction',
             inputs=['payload'],
             outputs=["payload"],
             init={
@@ -52,12 +59,12 @@ def register() -> Plugin:
             }
         ),
         metadata=MetaData(
-            name='Copy Property',
-            desc='Returns payload with copied properties.',
+            name='Copy Trait',
+            desc='Returns payload with copied traits.',
             type='flowNode',
             width=100,
             height=100,
             icon='copy',
-            group=["Customer Data"]
+            group=["Traits"]
         )
     )
