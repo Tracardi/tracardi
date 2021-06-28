@@ -17,6 +17,7 @@ from ..domain.flow_meta_data import FlowMetaData
 from ..domain.entity import Entity
 from ..domain.event import Event
 from ..domain.flow import Flow, FlowGraphDataRecord
+from tracardi_graph_runner.domain.flow import Flow as GraphFlow
 from ..domain.flow_action_plugin import FlowActionPlugin
 from ..domain.record.flow_action_plugin_record import FlowActionPluginRecord
 from ..domain.flow_action_plugins import FlowActionPlugins
@@ -176,7 +177,6 @@ async def get_flow(id: str):
         if flow_record is None:
             raise ValueError("Flow does not exist.")
         result = flow_record.decode()
-        print(result)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -254,8 +254,59 @@ async def upsert_flow_details(id: str, lock: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/flow/debug", tags=["flow"])
+async def debug_flow(flow: GraphFlow):
+    sleep(1)
+    """
+        Debugs flow sent in request body
+    """
+    try:
+
+        profile = Profile(id="@debug-profile-id")
+        session = Session(id="@debug-session-id")
+        session.operation.new = True
+        event = Event(
+            id='@debug-event-id',
+            type="@debug-event-type",
+            source=Source(id="@debug-source-id", type="web-page"),
+            session=session,
+            profile=profile,
+            context=Context()
+        )
+
+        workflow = WorkFlow(
+            FlowHistory(history=[]),
+            session,
+            profile,
+            event
+        )
+        debug_info = await workflow.invoke(flow, debug=True)
+
+        if profile.operation.needs_update():
+            profile_save_result = await profile.storage().save()
+        else:
+            profile_save_result = None
+
+        debug_info_by_id = defaultdict(list)
+        for info in debug_info.calls:
+            debug_info_by_id[info.node.id].append(info)
+
+        return {
+            "calls": debug_info_by_id,
+            "update": profile_save_result
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/flow/{id}/debug", tags=["flow"])
-async def debug_flow(id: str):
+async def debug_flow_by_id(id: str):
+
+    """
+    Debugs flow by reading it from storage
+    """
+
     sleep(1)
     # Load flow
     try:
@@ -271,7 +322,10 @@ async def debug_flow(id: str):
             context=Context()
         )
 
-        flow = await Flow.decode(id)
+        flow_record_entity = Entity(id=id)
+        flow_record = await flow_record_entity.storage("flow").load(FlowRecord)  # type: FlowRecord
+        flow = flow_record.decode_draft()
+
         workflow = WorkFlow(
             FlowHistory(history=[]),
             session,
