@@ -158,7 +158,7 @@ async def get_source_by_id(id: str) -> Source:
 
 @router.post("/source", tags=["source"], response_model=BulkInsertResult)
 async def upsert_source(source: Source):
-    sleep(2)
+    sleep(1)
     try:
         record = SourceRecord.encode(source)
         return await record.storage().save()

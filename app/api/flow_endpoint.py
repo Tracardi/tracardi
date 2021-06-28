@@ -40,7 +40,7 @@ router = APIRouter(
 
 @router.post("/flow/draft", tags=["flow"], response_model=BulkInsertResult)
 async def upsert_flow_draft(draft: Flow):
-    sleep(2)
+    sleep(1)
     try:
 
         # Check if origin flow exists
@@ -69,7 +69,7 @@ async def upsert_flow_draft(draft: Flow):
 
 @router.get("/flow/draft/{id}", tags=["flow"], response_model=Flow)
 async def load_flow_draft(id: str):
-    sleep(2)
+    sleep(1)
     try:
 
         # Check if origin flow exists

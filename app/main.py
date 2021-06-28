@@ -79,6 +79,15 @@ application = FastAPI(
     version="0.4.0",
     openapi_tags=tags_metadata
 )
+
+application.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 application.mount("/tracker",
                   StaticFiles(
                       html=True,
@@ -106,14 +115,6 @@ application.include_router(profile_endpoint.router)
 application.include_router(token_endpoint.router)
 application.include_router(generic_endpoint.router)
 
-application.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 @application.on_event("startup")
 async def app_starts():
@@ -122,7 +123,7 @@ async def app_starts():
             await create_indices()
             break
         except elasticsearch.exceptions.ConnectionError:
-            sleep(2)
+            sleep(5)
 
 
 @application.on_event("shutdown")
