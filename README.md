@@ -32,7 +32,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Binding events to elements on the page
 - [x] Gathering user properties
 - [ ] Merging user profiles
-- [ ] Simple segmentation
+- [x] Simple segmentation
 
 #### Features
 - [x] Defining user data enhancement by workflow
@@ -43,11 +43,12 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Credentials inside source
 - [x] Source should have type of query storage or event sourcing.
 - [x] Plugins configuration
-- [ ] Schema for PII
+- [x] Schema for PII
 - [ ] Standard Error Reporting
-- [ ] Filtering of action plugins
+- [x] Filtering of action plugins
 - [x] User and password configurable by ENV
 - [ ] Tracardi user profile domain object
+- [ ] Cleaner debug information
 
 #### Removals
 
