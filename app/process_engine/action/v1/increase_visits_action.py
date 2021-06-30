@@ -29,7 +29,7 @@ def register() -> Plugin:
             className='IncreaseVisitsAction',
             inputs=["void"],
             outputs=['profile'],
-            init={},
+            init=None,
             manual="increase_visits_action"
         ),
         metadata=MetaData(

@@ -20,7 +20,7 @@ def register() -> Plugin:
             className='SegmentProfileAction',
             inputs=["void"],
             outputs=[],
-            init={},
+            init=None,
             manual="segment_profiles_action"
         ),
         metadata=MetaData(

@@ -28,7 +28,7 @@ def register() -> Plugin:
             className='IncreaseViewsAction',
             inputs=["void"],
             outputs=['profile'],
-            init={},
+            init=None,
             manual="increase_views_action"
         ),
         metadata=MetaData(

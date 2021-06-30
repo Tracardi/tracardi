@@ -20,7 +20,7 @@ def register() -> Plugin:
             className='MergeProfilesAction',
             inputs=["void"],
             outputs=[],
-            init={},
+            init={"onField": None},
             manual="merge_profiles_action"
         ),
         metadata=MetaData(

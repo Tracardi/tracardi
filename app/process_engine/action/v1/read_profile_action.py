@@ -20,7 +20,7 @@ def register() -> Plugin:
             className='ReadProfileAction',
             inputs=["void"],
             outputs=['profile'],
-            init={},
+            init=None,
             manual="read_profile_action"
         ),
         metadata=MetaData(

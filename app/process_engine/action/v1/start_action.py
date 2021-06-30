@@ -22,7 +22,8 @@ def register() -> Plugin:
             module='app.process_engine.action.v1.start_action',
             className='StartAction',
             inputs=["void"],
-            outputs=["payload"]
+            outputs=["payload"],
+            init=None
         ),
         metadata=MetaData(
             name='Start',

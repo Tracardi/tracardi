@@ -49,6 +49,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] User and password configurable by ENV
 - [ ] Tracardi user profile domain object
 - [ ] Cleaner debug information
+- [ ] text/plain - editor in config
 
 #### Removals
 

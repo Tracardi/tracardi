@@ -20,7 +20,7 @@ def register() -> Plugin:
             className='ReadSessionAction',
             inputs=["void"],
             outputs=['session'],
-            init={},
+            init=None,
             manual="read_session_action"
         ),
         metadata=MetaData(

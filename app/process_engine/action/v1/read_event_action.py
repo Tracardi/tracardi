@@ -19,7 +19,8 @@ def register() -> Plugin:
             module='app.process_engine.action.v1.read_event_action',
             className='ReadEventAction',
             inputs=['void'],
-            outputs=["event"]
+            outputs=["event"],
+            init=None
         ),
         metadata=MetaData(
             name='Read event',

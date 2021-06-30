@@ -20,7 +20,7 @@ def register() -> Plugin:
             className='UpdateProfileAction',
             inputs=["void"],
             outputs=[],
-            init={},
+            init=None,
             manual="update_profile_action"
         ),
         metadata=MetaData(
