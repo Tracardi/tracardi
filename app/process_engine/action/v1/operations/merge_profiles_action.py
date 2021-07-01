@@ -5,7 +5,9 @@ from tracardi_plugin_sdk.action_runner import ActionRunner
 class MergeProfilesAction(ActionRunner):
 
     def __init__(self, *args, **kwargs):
-        pass
+        if 'mergeBy' not in kwargs:
+            raise ValueError("Field mergeBy is not set. Define it in config section.")
+        self.merge_key = kwargs['mergeBy']
 
     async def run(self, void):
         self.profile.operation.merge = True
@@ -20,7 +22,7 @@ def register() -> Plugin:
             className='MergeProfilesAction',
             inputs=["void"],
             outputs=[],
-            init={"onField": None},
+            init={"mergeBy": None},
             manual="merge_profiles_action"
         ),
         metadata=MetaData(

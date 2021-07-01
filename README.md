@@ -48,8 +48,9 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Filtering of action plugins
 - [x] User and password configurable by ENV
 - [ ] Tracardi user profile domain object
-- [ ] Cleaner debug information
+- [x] Cleaner debug information
 - [ ] text/plain - editor in config
+- [ ] Documentation for all delivered actions
 
 #### Removals
 

@@ -19,7 +19,6 @@ async def add_plugin(module):
     action_id = hashlib.md5(action_id.encode()).hexdigest()
 
     action_plugin = FlowActionPlugin(id=action_id, plugin=plugin_data)
-    print(action_plugin)
     record = FlowActionPluginRecord.encode(action_plugin)
     return await record.storage().save()
 

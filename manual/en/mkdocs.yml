@@ -44,12 +44,17 @@ nav:
       - notations/logic.md
       - notations/math.md
   - Api:
-    - api/index.md
-    - api/event_server.md
+      - api/index.md
+      - api/event_server.md
   - Flow:
-    - flow/index.md
-    - Actions:
-      - flow/actions/raise_event_action.md
+      - flow/index.md
+      - Actions:
+          - flow/actions/update_profiles_action.md
+          - flow/actions/merge_profiles_action.md
+          - flow/actions/segment_profiles_action.md
+      - flow/actions/increase_views_action.md
+      - flow/actions/increase_visits_action.md
+      - flow/actions/new_event_action.md
   - support_us.md
   - attribution.md
   - software_license.md

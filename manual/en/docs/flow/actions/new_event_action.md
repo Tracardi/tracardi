@@ -1,4 +1,4 @@
-# Raise Event Action
+# New Event Action
 
 Raise event action triggers defined event type as if it was triggered for web-site or any other device.
 This event can be intercepted by TRACARDI to run defined flow. Event can also send defined event properties.
