@@ -1,6 +1,8 @@
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
+from app.process_engine.dot_accessor import DotAccessor
+
 
 class MergeProfilesAction(ActionRunner):
 
@@ -8,9 +10,15 @@ class MergeProfilesAction(ActionRunner):
         if 'mergeBy' not in kwargs:
             raise ValueError("Field mergeBy is not set. Define it in config section.")
         self.merge_key = kwargs['mergeBy']
+        self.merge_key = [key.lower() for key in self.merge_key]
 
-    async def run(self, void):
-        self.profile.operation.merge = True
+        for key in self.merge_key:
+            if not key.startswith('profile@'):
+                raise ValueError(
+                    f"Field mergeBy must define profile fields. Dot notation `{key}` does not start with profile@...")
+
+    async def run(self, payload):
+        self.profile.operation.merge = self.merge_key
         return None
 
 
@@ -20,9 +28,9 @@ def register() -> Plugin:
         spec=Spec(
             module='app.process_engine.action.v1.operations.merge_profiles_action',
             className='MergeProfilesAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=[],
-            init={"mergeBy": None},
+            init={"mergeBy": []},
             manual="merge_profiles_action"
         ),
         metadata=MetaData(

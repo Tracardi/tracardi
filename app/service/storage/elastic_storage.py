@@ -1,3 +1,5 @@
+from typing import List
+
 import elasticsearch
 
 from app.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -51,3 +53,23 @@ class ElasticStorage:
             }
         }
         return await self.storage.delete_by_query(self.index, query)
+
+    async def load_by_values(self, fields_and_values: List[tuple]):
+
+        terms = []
+        for field, value in fields_and_values:
+            terms.append({
+                "term": {
+                    f"{field}.keyword": value
+                }
+            })
+
+        query = {
+            "query": {
+                "bool": {
+                    "must": terms
+                }
+            }
+        }
+
+        return await self.search(query)

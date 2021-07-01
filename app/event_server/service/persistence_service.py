@@ -1,3 +1,5 @@
+from typing import List
+
 import elasticsearch
 import logging
 from app.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -22,6 +24,12 @@ class PersistenceService:
     async def load_by(self, field: str, value: str) -> StorageResult:
         try:
             return StorageResult(await self.storage.load_by(field, value))
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            raise StorageException(str(e))
+
+    async def load_by_values(self, field_value_pairs: List[tuple]) -> StorageResult:
+        try:
+            return StorageResult(await self.storage.load_by_values(field_value_pairs))
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 

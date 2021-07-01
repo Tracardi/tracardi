@@ -1,7 +1,4 @@
-from time import sleep
 from uuid import uuid4
-
-import elasticsearch
 from elasticsearch import helpers, ElasticsearchException, AsyncElasticsearch
 from elasticsearch._async.client.sql import SqlClient
 from elasticsearch._async.client.utils import SKIP_IN_PATH, query_params

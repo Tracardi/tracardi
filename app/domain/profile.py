@@ -12,6 +12,7 @@ from .value_object.operation import Operation
 
 
 class Profile(Entity):
+    mergedWith: Optional[str] = None
     metadata: Optional[Metadata]
     operation: Operation = Operation()
     stats: ProfileStats = ProfileStats()
@@ -35,6 +36,13 @@ class Profile(Entity):
         self.id = profile.id
         self.segments = profile.segments
         self.consents = profile.consents
+
+    def merge(self, profile):
+        self.stats.merge(profile.stats)
+        self.traits.merge(profile.traits)
+        self.pii.merge(profile.pii)
+        self.segments = list(set(profile.segments + self.segments))
+        # todo self.consents =
 
     def increase_visits(self, value=1):
         self.stats.visits += value

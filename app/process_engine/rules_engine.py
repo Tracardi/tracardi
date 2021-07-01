@@ -9,6 +9,7 @@ from tracardi_graph_runner.domain.flow_debug_info import FlowDebugInfo
 from tracardi_graph_runner.domain.flow_history import FlowHistory
 from tracardi_graph_runner.domain.work_flow import WorkFlow
 
+from .dot_accessor import DotAccessor
 from ..domain.entity import Entity
 from ..domain.flow import Flow
 from ..domain.metadata import Metadata
@@ -17,11 +18,13 @@ from ..domain.profile import Profile
 from ..domain.record.event_debug_record import EventDebugRecord
 from ..domain.session import Session
 from ..domain.time import Time
+from ..event_server.service.persistence_service import PersistenceService
 from ..event_server.utils.memory_cache import MemoryCache, CacheItem
 from ..domain.event import Event
 from ..domain.events import Events
 from ..domain.rule import Rule
 from ..domain.rules import Rules
+from ..service.dot_notation_converter import DotNotationConverter
 from ..service.storage.collection_crud import CollectionCrud
 import asyncio
 import traceback
@@ -31,6 +34,7 @@ from app.domain.segment import Segment
 from app.domain.segments import Segments
 from app.process_engine.tql.condition import Condition
 from app.process_engine.tql.utils.dictonary import flatten
+from ..service.storage.elastic_storage import ElasticStorage
 
 
 class RulesEngine:
@@ -206,6 +210,25 @@ class RulesEngine:
             self.profile.operation.update = True
 
         # todo merge
+        if self.profile.operation.needs_merging():
+            converter = DotNotationConverter(self.profile)
+            merge_values = [converter.get_profile_fiel_value_pair(key) for key in self.profile.operation.merge]
+            print(merge_values)
+            profiles = await PersistenceService(ElasticStorage('profile')).load_by_values(merge_values)
+
+            for i, profile in enumerate(profiles):
+
+                profile = Profile(**profile)
+                print(i, profile.id)
+                if self.profile.id != profile.id:
+                    self.profile.merge(profile)
+                    profile.mergedWith = self.profile.id
+                    print(self.profile)
+                    # old_profile_task = profile.storage().save()
+                    # new_profile_task = self.profile.storage().save()
+                    #
+                    # await old_profile_task
+                    # await new_profile_task
 
         if self.profile.operation.needs_update():
             await self.profile.storage().save()

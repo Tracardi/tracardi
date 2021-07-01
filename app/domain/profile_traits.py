@@ -12,3 +12,6 @@ class Private(BaseModel):
 class ProfileTraits(BaseModel):
     private: Optional[dict] = {}
     public: Optional[dict] = {}
+
+    def merge(self, traits: 'ProfileTraits'):
+        pass

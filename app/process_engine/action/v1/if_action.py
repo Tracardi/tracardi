@@ -35,7 +35,8 @@ def register() -> Plugin:
             className='IfAction',
             inputs=["payload"],
             outputs=["TRUE", "FALSE"],
-            init={"condition": "please-configure-condition"}
+            init={"condition": "please-configure-condition"},
+            manual="if_action"
         ),
         metadata=MetaData(
             name='If',
