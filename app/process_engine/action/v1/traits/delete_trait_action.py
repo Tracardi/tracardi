@@ -46,7 +46,8 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Delete Trait',
-            desc='Returns payload with deleted traits.',
+            desc='Deletes traits from profile or payload. Accepts dotted notation as definition of a filed to be '
+                 'deleted. Returns payload.',
             type='flowNode',
             width=100,
             height=100,
