@@ -1,3 +1,4 @@
+from app.domain.storage_result import StorageResult
 from app.event_server.service.persistence_service import PersistenceService
 from app.domain.value_object.bulk_insert_result import BulkInsertResult
 from app.service.storage.elastic_storage import ElasticStorage
@@ -33,7 +34,7 @@ class EntityStorageCrud(BaseStorageCrud):
 
         return None
 
-    async def load_by(self, field, value):
+    async def load_by(self, field, value) -> StorageResult:
         service = self._get_storage_service()
         return await service.load_by(field, value)
 
@@ -44,6 +45,7 @@ class EntityStorageCrud(BaseStorageCrud):
     async def save(self, row=None):
         if row is None:
             row = {}
+        row['id'] = self.entity.id
         service = self._get_storage_service()
         return await service.upsert(row)
 
@@ -56,10 +58,10 @@ class StorageCrud(BaseStorageCrud):
 
     async def load(self):
         service = self._get_storage_service()
-        consent_data = await service.load(self.entity.id)
+        data = await service.load(self.entity.id)
 
-        if consent_data:
-            return self.domain_class_ref(**consent_data)
+        if data:
+            return self.domain_class_ref(**data)
 
         return None
 

@@ -22,7 +22,7 @@ class EventPayload(BaseModel):
         return Event.new({
             "metadata": metadata,
             "session": session,
-            "profile": profile,
+            "profile": profile.dict(exclude={"operation": ...}),
             "user": self.user,
             "type": self.type,
             "properties": self.properties,

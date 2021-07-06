@@ -14,7 +14,7 @@ from .value_object.operation import Operation
 class Profile(Entity):
     mergedWith: Optional[str] = None
     metadata: Optional[Metadata]
-    operation: Operation = Operation()
+    operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()
     pii: PII = PII()

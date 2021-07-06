@@ -18,7 +18,6 @@ router = APIRouter(
 
 @router.get("/events/metadata/type", tags=["event", "event server"])
 async def event_types():
-    sleep(2)
     events = Events()
     result = await events.bulk().uniq_field_value("type.keyword")
     return {
@@ -47,8 +46,6 @@ async def get_event(id: str):
             }
         }
 
-        print(query)
-
         index = PersistenceService(ElasticStorage(index_key="stat-log"))
         event_result = await index.filter(query)
 
@@ -58,6 +55,8 @@ async def get_event(id: str):
         }
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e))
 
 

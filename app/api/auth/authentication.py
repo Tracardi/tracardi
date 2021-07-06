@@ -41,7 +41,6 @@ class Authentication:
 
     async def login(self, username, password):
         user_record = self.authorize(username, password)
-        print(user_record)
         token = self._generate_token()
         # save token, match token with user in token2user
         await self.token2user.set(token, username)

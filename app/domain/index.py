@@ -16,7 +16,7 @@ class Index:
 
     def __init__(self, index: str):
         self.index = index
-        self.elastic_index = index_2_elastic.resources[index].name
+        self.read_index = index_2_elastic.resources[index].get_read_index()
         self.storage_service = PersistenceService(ElasticStorage(index_key=self.index))
         self.time_fields_map = {
             'event': 'metadata.time.insert',
@@ -25,7 +25,7 @@ class Index:
         }
 
     async def search(self, query: str = None, limit: int = 20):
-        query = to_sql_query(self.elastic_index, query=query, limit=limit)
+        query = to_sql_query(self.read_index, query=query, limit=limit)
         return (await self.storage_service.sql(query)).dict()
 
     async def time_range(self, query: DatetimeRangePayload) -> QueryResult:
@@ -40,7 +40,7 @@ class Index:
         sql = query.where
         time_field = self.time_fields_map[self.index]
 
-        sql = to_time_range_sql_query(self.elastic_index, time_field, min_date_time, max_date_time, sql)
+        sql = to_time_range_sql_query(self.read_index, time_field, min_date_time, max_date_time, sql)
         try:
             translated_query = await self.storage_service.translate(sql)
         except StorageException as e:
@@ -120,7 +120,7 @@ class Index:
 
         interval, unit, format = __interval(min_date_time, max_date_time)
 
-        sql = to_time_range_sql_query(self.elastic_index, time_field, min_date_time, max_date_time, sql)
+        sql = to_time_range_sql_query(self.read_index, time_field, min_date_time, max_date_time, sql)
         try:
             translated_query = await self.storage_service.translate(sql)
         except StorageException as e:

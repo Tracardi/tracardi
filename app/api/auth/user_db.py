@@ -30,23 +30,24 @@ class TokenDb:
 
     def __init__(self):
         self._elastic = Elastic.instance()
-        self._index = index.resources['token'].name
+        self._index_read = index.resources['token'].get_read_index()
+        self._index_write = index.resources['token'].get_write_index()
 
     async def delete(self, key):
-        await self._elastic.delete(self._index, key)
+        await self._elastic.delete(self._index_write, key)
 
     async def has(self, item):
-        return await self._elastic.exists(self._index, item)
+        return await self._elastic.exists(self._index_read, item)
 
     async def get(self, item):
-        return await self._elastic.get(self._index, item)
+        return await self._elastic.get(self._index_read, item)
 
     async def set(self, key, value):
         record = {
             "doc": {"user": value},
             'doc_as_upsert': True
         }
-        await self._elastic.update(self._index, key, record)
+        await self._elastic.update(self._index_write, key, record)
 
 
 token2user = TokenDb()
