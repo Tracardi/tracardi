@@ -44,17 +44,24 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Source should have type of query storage or event sourcing.
 - [x] Plugins configuration
 - [x] Schema for PII
-- [ ] Standard Error Reporting
 - [x] Filtering of action plugins
 - [x] User and password configurable by ENV
-- [ ] Tracardi user profile domain object
 - [x] Cleaner debug information
-- [ ] text/plain - editor in config
 - [ ] Documentation for all delivered actions
+- [x] Global state of profile, session, event visible in Debugger.
 
 #### Removals
 
 - [x] Remove UQL Manual
+
+### Version 0.4.1
+
+Feature freeze. Fixes and testing.
+
+- [ ] Performance tests
+- [ ] Scaling test
+- [ ] Unit tests
+- [ ] Integration tests
 
 ### Version 0.5.0
 
@@ -63,6 +70,8 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Proof of concept for dynamic front-end loading
 
 #### Features:
+- [ ] Standard Error Reporting
+- [ ] Tracardi user profile domain object
 - [ ] Setting user and password from interface (user profile)
 - [ ] Forgot password functionality
 - [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
@@ -70,11 +79,11 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] If Action – Should use plain/text editor not application/json
 - [ ] Join Node
 - [ ] GraphQL Endpoint for profile fetching.
-- [ ] Global state of profile, session, event visible in Debugger.
 - [ ] Profiler as part of debugger
-- [ ] Refactor menu to take less space
+- [x] Refactor menu to take less space
 - [ ] Finish manual
 - [ ] Error log
+- [ ] text/plain - editor in config
 
 
 ### Version 0.6.0
