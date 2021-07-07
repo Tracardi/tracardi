@@ -36,7 +36,7 @@
         }
       },
       "pii": {
-        "dynamic": true,
+        "dynamic": false,
         "properties": {
           "name": {
             "type": "text",
@@ -68,6 +68,9 @@
       },
       "consents": {
         "dynamic": true
+      },
+      "active": {
+        "type": "boolean"
       }
     }
   }

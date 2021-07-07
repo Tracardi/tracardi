@@ -1,25 +1,31 @@
 import uuid
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, List
 from .entity import Entity
 from .metadata import Metadata
 from .pii import PII
 from .profile_traits import ProfileTraits
-from .profile_stats import ProfileStats
 from .time import Time
-from app.service.storage.crud import StorageCrud
-from .value_object.operation import Operation
+from ..service.dot_notation_converter import DotNotationConverter
+from ..service.storage.collection_crud import CollectionCrud
+from ..service.storage.crud import StorageCrud
+import app.domain.value_object.operation
+from typing import List
+from uuid import uuid4
+from .profile_stats import ProfileStats
+from ..service.merger import merge
 
 
 class Profile(Entity):
-    mergedWith: Optional[str] = None
+    mergedWith: Optional[List[str]] = []
     metadata: Optional[Metadata]
-    operation: Optional[Operation] = Operation()
+    operation: Optional[app.domain.value_object.operation.Operation] = app.domain.value_object.operation.Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()
     pii: PII = PII()
     segments: Optional[list] = []
     consents: Optional[dict] = {}
+    active: bool = True
 
     def __init__(self, **data: Any):
         data['metadata'] = Metadata(
@@ -37,12 +43,20 @@ class Profile(Entity):
         self.segments = profile.segments
         self.consents = profile.consents
 
+    def get_merge_key_values(self) -> List[tuple]:
+        converter = DotNotationConverter(self)
+        return [converter.get_profile_fiel_value_pair(key) for key in self.operation.merge]
+
     def merge(self, profile):
-        self.stats.merge(profile.stats)
-        self.traits.merge(profile.traits)
-        self.pii.merge(profile.pii)
+        """
+        Merges profiles. Merged properties are: stats, traits, pii, segments, consents.
+        """
+
+        self.stats = self.stats.merge(profile.stats)
+        self.traits = self.traits.merge(profile.traits)
+        self.pii = self.pii.merge(profile.pii)
         self.segments = list(set(profile.segments + self.segments))
-        # todo self.consents =
+        self.consents.update(profile.consents)
 
     def increase_visits(self, value=1):
         self.stats.visits += value
@@ -59,3 +73,49 @@ class Profile(Entity):
         @return Profile
         """
         return Profile(id=str(uuid.uuid4()))
+
+
+class Profiles(list):
+
+    @staticmethod
+    def merge(profiles: List[Profile]) -> Profile:
+        traits = [profile.traits.dict() for profile in profiles]
+        traits = merge({}, traits)
+
+        piis = [profile.pii.dict() for profile in profiles]
+        piis = merge({}, piis)
+
+        consents = {}
+        segments = []
+        stats = ProfileStats()
+        # merged_with = []
+        for profile in profiles:
+            stats.visits += profile.stats.visits
+            stats.views += profile.stats.views
+
+            if isinstance(profile.mergedWith, list):
+                segments += profile.segments
+
+            # if isinstance(profile.mergedWith, list):
+            #     merged_with += profile.mergedWith
+            # else:
+            #     merged_with.append(profile.id)
+
+            consents.update(profile.consents)
+
+            # make uniq
+            segments = list(set(segments))
+            # merged_with = list(set(merged_with))
+
+        return Profile(
+            id=str(uuid4()),
+            # mergedWith=merged_with,
+            stats=stats,
+            traits=traits,
+            pii=piis,
+            segments=segments,
+            consents=consents
+        )
+
+    def bulk(self) -> CollectionCrud:
+        return CollectionCrud("profile", self)

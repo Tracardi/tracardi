@@ -14,10 +14,11 @@ from ..domain.entity import Entity
 from ..domain.flow import Flow
 from ..domain.metadata import Metadata
 from ..domain.payload.event_payload import EventPayload
-from ..domain.profile import Profile
+from ..domain.profile import Profile, Profiles
 from ..domain.record.event_debug_record import EventDebugRecord
 from ..domain.session import Session
 from ..domain.time import Time
+from ..domain.value_object.operation import Operation
 from ..event_server.service.persistence_service import PersistenceService
 from ..event_server.utils.memory_cache import MemoryCache, CacheItem
 from ..domain.event import Event
@@ -181,7 +182,6 @@ class RulesEngine:
                 try:
                     result = await task  # type: DebugInfo
                 except Exception as e:
-                    print(str(e))
                     # todo log error
                     result = DebugInfo(
                         timestamp=time(),
@@ -209,26 +209,46 @@ class RulesEngine:
                 segmentation_info['ids'].append(segment_id)
             self.profile.operation.update = True
 
+        print(self.profile.operation)
+        print("merge", self.profile.operation.needs_merging())
+
         # todo merge
         if self.profile.operation.needs_merging():
-            converter = DotNotationConverter(self.profile)
-            merge_values = [converter.get_profile_fiel_value_pair(key) for key in self.profile.operation.merge]
-            print(merge_values)
-            profiles = await PersistenceService(ElasticStorage('profile')).load_by_values(merge_values)
+            merge_key_values = self.profile.get_merge_key_values()
 
-            for i, profile in enumerate(profiles):
+            # Add keyword
+            merge_key_values = [(f"{field}.keyword", value) for field, value in merge_key_values]
 
-                profile = Profile(**profile)
-                print(i, profile.id)
-                if self.profile.id != profile.id:
-                    self.profile.merge(profile)
-                    profile.mergedWith = self.profile.id
-                    print(self.profile)
-                    # old_profile_task = profile.storage().save()
-                    # new_profile_task = self.profile.storage().save()
-                    #
-                    # await old_profile_task
-                    # await new_profile_task
+            # Add only active profiles
+            merge_key_values.append(('active', True))
+            print(merge_key_values)
+
+            profiles = await Operation.get_merge_profiles(merge_key_values)
+            print("found", profiles)
+
+            if len(profiles) > 0:
+
+                # Get merged profile
+                mergerd_profile = Profiles.merge(profiles)
+
+                # Deactivate all profiles
+                disabled_profiles = []
+                for p in profiles:
+
+                    p.active = False
+                    p.mergedWith = [mergerd_profile.id]
+
+                    disabled_profiles.append(p)
+
+                print("new", mergerd_profile.id)
+                print("disabled", [(x.id, x.active) for x in disabled_profiles])
+
+                profiles = Profiles(disabled_profiles)
+                save_old_profiles_task = asyncio.create_task(profiles.bulk().save())
+                save_profile_task = asyncio.create_task(mergerd_profile.storage().save())
+
+                await save_profile_task
+                await save_old_profiles_task
 
         if self.profile.operation.needs_update():
             await self.profile.storage().save()

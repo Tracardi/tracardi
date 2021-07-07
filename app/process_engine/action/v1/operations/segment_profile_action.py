@@ -25,7 +25,8 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Segment profile',
-            desc='Segment profile when flow ends.This action forces segmentation on profile after flow ends.',
+            desc='Segment profile when flow ends.This action forces segmentation on profile after flow ends. See '
+                 'documentation for more information.',
             type='flowNode',
             width=200,
             height=100,

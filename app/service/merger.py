@@ -51,6 +51,8 @@ def append(base, key, value):
     # make uniq
     if isinstance(base[key], list):
         base[key] = list(set(base[key]))
+        if len(base[key]) == 1:
+            base[key] = base[key][0]
 
     return base
 
@@ -79,33 +81,3 @@ def merge(base, dict_list):
                     raise ValueError("Unknown type `{}: {}`".format(key, type(data[key])))
 
     return base
-
-
-if __name__ == "__main__":
-    a = {
-        "a": 1,
-        "b": [1, 2],
-        "c": None,
-        "f": {"a": 1},
-        "g": {"a": 1},
-        "conflict": {"ccc": 1}
-    }
-
-    b = {
-        "a": "2",
-        "b": "3",
-        # "c": 1,
-        "d": 1,
-        "e": [1, 2],
-        "f": {
-            "b": 1
-        },
-        "c": {"aaa": 1},
-        "g": {"a": ["1", 2]},
-        "conflict": "a",
-    }
-
-    c = merge({}, [a, b])
-    # d = merge_candidates([a, b])
-    print(c)
-    # print(d)

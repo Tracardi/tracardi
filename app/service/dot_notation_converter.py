@@ -1,11 +1,9 @@
 from dotty_dict import dotty
 
-from app.domain.profile import Profile
-
 
 class DotNotationConverter:
 
-    def __init__(self, profile: Profile):
+    def __init__(self, profile):
         self.profile = profile
 
     def get_profile_fiel_value_pair(self, dot_notation):

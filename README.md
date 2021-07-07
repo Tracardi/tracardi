@@ -58,10 +58,13 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 Feature freeze. Fixes and testing.
 
+- [ ] Review todos
 - [ ] Performance tests
 - [ ] Scaling test
 - [ ] Unit tests
 - [ ] Integration tests
+- [ ] Feature list for contributors
+- [ ] Configure removal of merged profiles.
 
 ### Version 0.5.0
 

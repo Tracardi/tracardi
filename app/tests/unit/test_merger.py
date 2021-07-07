@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.process_engine.action.v1.operations.merger import merge
+from app.service.merger import merge
 
 
 def test_merger_multiple_values():
@@ -79,7 +79,7 @@ def test_merger_bool_values():
     assert c == {"a": [False, True], "b": True}
 
     a = {"a": [True]}
-    b = {"a": (False,) , "b": True}
+    b = {"a": (False,), "b": True}
     c = merge({}, [a, b])
     assert c == {"a": [False, True], "b": True}
 
@@ -144,6 +144,41 @@ def test_merger_uniq():
     b = {"a": {"b": ["2", "1"]}}
     c = merge({}, [a, b])
     assert c == {"a": {"b": ["2", "1"]}} or c == {"a": {"b": ["1", "2"]}}
+
+
+def test_merger_immutable():
+    a = {"a": {"b": ["1", "2", "1"]}}
+    b = {"a": {"b": "2"}}
+    c = merge({}, [a, b])
+    assert a == {"a": {"b": ["1", "2", "1"]}} and b == {"a": {"b": "2"}}
+
+
+def test_merger_same_value():
+
+    a = {"b": 1}
+    b = {"b": 1}
+    c = merge({}, [a, b])
+    assert c == {"b": 1}
+
+    a = {"a": {"b": 1}}
+    b = {"a": {"b": 1}}
+    c = merge({}, [a, b])
+    assert c == {"a": {"b": 1}}
+
+    a = {"a": {"b": [1]}}
+    b = {"a": {"b": 1}}
+    c = merge({}, [a, b])
+    assert c == {"a": {"b": 1}}
+
+    a = {"a": {"b": 1}}
+    b = {"a": {"b": [1]}}
+    c = merge({}, [a, b])
+    assert c == {"a": {"b": 1}}
+
+    a = {"a": {"b": [1]}}
+    b = {"a": {"b": [1]}}
+    c = merge({}, [a, b])
+    assert c == {"a": {"b": 1}}
 
 
 def test_merger_dict_single_values():

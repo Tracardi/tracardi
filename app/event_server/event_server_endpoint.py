@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/track", tags=['event server'])
 async def track(tracker_payload: TrackerPayload):
-    try:
+    # try:
         source = await source_cache.validate_source(source_id=tracker_payload.source.id)
 
         result, profile = await tracker_payload.process()
@@ -22,5 +22,5 @@ async def track(tracker_payload: TrackerPayload):
 
         return result
 
-    except TracardiException as e:
-        raise HTTPException(detail=str(e), status_code=500)
+    # except TracardiException as e:
+    #     raise HTTPException(detail=str(e), status_code=500)

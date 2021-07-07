@@ -12,6 +12,10 @@ class MergeProfilesAction(ActionRunner):
         self.merge_key = kwargs['mergeBy']
         self.merge_key = [key.lower() for key in self.merge_key]
 
+        if len(self.merge_key) == 0:
+            raise ValueError("Field mergeBy is empty and has no effect on merging. "
+                             "Add merging key or remove this action from flow.")
+
         for key in self.merge_key:
             if not key.startswith('profile@'):
                 raise ValueError(

@@ -82,7 +82,7 @@ class ElasticStorage:
         for field, value in fields_and_values:
             terms.append({
                 "term": {
-                    f"{field}.keyword": value
+                    f"{field}": value
                 }
             })
 
@@ -93,5 +93,7 @@ class ElasticStorage:
                 }
             }
         }
+
+        print(query)
 
         return await self.search(query)
