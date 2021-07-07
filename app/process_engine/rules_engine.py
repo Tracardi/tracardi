@@ -195,65 +195,86 @@ class RulesEngine:
                 results[event_type].append({rule_name: result})
 
         # Save profile
-        # todo updated might be unnecessary - we could check if profile changed.
-        segmentation_info = {
-            "errors": [],
-            "ids": []
-        }
-        if self.profile.operation.needs_segmentation():
+
+        save_tasks = []
+
+        # Segmentation
+
+        segmentation_info = {"errors": [], "ids": []}
+        if self.profile.operation.needs_update() or self.profile.operation.needs_segmentation():
             # Segmentation runs only if profile was updated or flow forced it
             async for event_type, segment_id, error in self.segmentation(event_types=flow_task_store.keys()):
                 # Segmentation triggered
                 if error:
                     segmentation_info['errors'].append(error)
                 segmentation_info['ids'].append(segment_id)
-            self.profile.operation.update = True
 
-        print(self.profile.operation)
-        print("merge", self.profile.operation.needs_merging())
+        # Merging, schedule save only if there is an update in flow.
+        print("loaded profile id", self.profile.id)
+        print("loaded profile merged_with", self.profile.mergedWith)
 
-        # todo merge
-        if self.profile.operation.needs_merging():
-            merge_key_values = self.profile.get_merge_key_values()
+        if self.profile.operation.needs_merging() and self.profile.operation.needs_update():
+            merge_key_values = self._get_merging_keys_and_values()
 
-            # Add keyword
-            merge_key_values = [(f"{field}.keyword", value) for field, value in merge_key_values]
+            # Are there any non-empty values in current profile
 
-            # Add only active profiles
-            merge_key_values.append(('active', True))
-            print(merge_key_values)
+            if len(merge_key_values) > 0:
 
-            profiles = await Operation.get_merge_profiles(merge_key_values)
-            print("found", profiles)
+                # Load all profiles that match merging criteria
+                existing_profiles = await Operation.load_profiles_to_merge(merge_key_values, limit=2000)
 
-            if len(profiles) > 0:
+                # Filter only profiles that are not current profile and where not merged
+                profiles_to_merge = [p for p in existing_profiles if p.id != self.profile.id and p.active is True]
 
-                # Get merged profile
-                mergerd_profile = Profiles.merge(profiles)
+                # Are there any profiles to merge?
+                print("found profiles to merge with true", len(profiles_to_merge))
+                if len(profiles_to_merge) > 0:
 
-                # Deactivate all profiles
-                disabled_profiles = []
-                for p in profiles:
+                    # Add current profile to existing ones and get merged profile
+                    merged_profile = Profiles.merge(profiles_to_merge, self.profile)
 
-                    p.active = False
-                    p.mergedWith = [mergerd_profile.id]
+                    # Replace current profile with merged profile
+                    self.profile.replace(merged_profile)
 
-                    disabled_profiles.append(p)
+                    print("new", self.profile.id, self.profile.mergedWith, self.profile.active)
 
-                print("new", mergerd_profile.id)
-                print("disabled", [(x.id, x.active) for x in disabled_profiles])
+                    # Deactivate all other profiles except merged one
 
-                profiles = Profiles(disabled_profiles)
-                save_old_profiles_task = asyncio.create_task(profiles.bulk().save())
-                save_profile_task = asyncio.create_task(mergerd_profile.storage().save())
+                    profiles_to_disable = [p for p in existing_profiles if p.id != self.profile.id]
+                    disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable, merge_with=self.profile.id)
 
-                await save_profile_task
-                await save_old_profiles_task
+                    print("disabled", [(x.id, x.active) for x in disabled_profiles])
+                    save_old_profiles_task = asyncio.create_task(Profiles(disabled_profiles).bulk().save())
+                    save_tasks.append(save_old_profiles_task)
 
+        # Must be the last operation
         if self.profile.operation.needs_update():
-            await self.profile.storage().save()
+            save_tasks.append(asyncio.create_task(self.profile.storage().save()))
+
+        # run save tasks
+        await asyncio.gather(*save_tasks)
 
         return results, segmentation_info
+
+    def _mark_profiles_as_merged(self, profiles, merge_with) -> List[Profile]:
+        disabled_profiles = []
+
+        for profile in profiles:
+            profile.active = False
+            profile.mergedWith = merge_with
+            disabled_profiles.append(profile)
+
+            # todo check if profile.id not in mergerd_with in db
+
+        return disabled_profiles
+
+    def _get_merging_keys_and_values(self):
+        merge_key_values = self.profile.get_merge_key_values()
+
+        # Add keyword
+        merge_key_values = [(f"{field}.keyword", value) for field, value in merge_key_values if value is not None]
+
+        return merge_key_values
 
     async def execute(self, source_id) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list]]:
 

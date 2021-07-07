@@ -64,7 +64,7 @@ Feature freeze. Fixes and testing.
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] Feature list for contributors
-- [ ] Configure removal of merged profiles.
+- [ ] Configure removal of merged profiles ???
 
 ### Version 0.5.0
 

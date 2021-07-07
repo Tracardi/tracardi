@@ -56,14 +56,14 @@ def test_profile_merge():
         consents={"all": "not-granted"}
     )
 
-    profiles = [p1, p2, p3]
-    p = Profiles.merge(profiles)
+    profiles = [p1, p2]
+    p = Profiles.merge(profiles, p3)
 
     assert p.consents == {'all': 'not-granted'}
     assert p.traits.private == {'b': 2, 'a': [1, 2, 3], 'c': 1}
     assert p.traits.public == {'b': [2, 3], 'a': 1}
     assert set(p.pii.name).intersection({'john', 'jonathan'}) == {'john', 'jonathan'}
     assert p.pii.surname == 'doe'
-    assert set(p.mergedWith).intersection({'1', '2', '3'}) == {'1', '2', '3'}
+    assert p.mergedWith is None
     assert p.stats.views == 3
     assert p.stats.visits == 6

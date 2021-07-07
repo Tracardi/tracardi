@@ -76,7 +76,7 @@ class ElasticStorage:
         }
         return await self.storage.delete_by_query(self.index.get_read_index(), query)
 
-    async def load_by_values(self, fields_and_values: List[tuple]):
+    async def load_by_values(self, fields_and_values: List[tuple], limit=1000):
 
         terms = []
         for field, value in fields_and_values:
@@ -87,6 +87,7 @@ class ElasticStorage:
             })
 
         query = {
+            "size": limit,
             "query": {
                 "bool": {
                     "must": terms

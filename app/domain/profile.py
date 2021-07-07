@@ -17,7 +17,7 @@ from ..service.merger import merge
 
 
 class Profile(Entity):
-    mergedWith: Optional[List[str]] = []
+    mergedWith: Optional[str] = None
     metadata: Optional[Metadata]
     operation: Optional[app.domain.value_object.operation.Operation] = app.domain.value_object.operation.Operation()
     stats: ProfileStats = ProfileStats()
@@ -42,6 +42,8 @@ class Profile(Entity):
         self.id = profile.id
         self.segments = profile.segments
         self.consents = profile.consents
+        self.active = profile.active
+        self.mergedWith = profile.mergedWith
 
     def get_merge_key_values(self) -> List[tuple]:
         converter = DotNotationConverter(self)
@@ -78,7 +80,10 @@ class Profile(Entity):
 class Profiles(list):
 
     @staticmethod
-    def merge(profiles: List[Profile]) -> Profile:
+    def merge(existing_profiles: List[Profile], current_profile: Profile) -> Profile:
+
+        profiles = existing_profiles + [current_profile]
+
         traits = [profile.traits.dict() for profile in profiles]
         traits = merge({}, traits)
 
@@ -88,33 +93,30 @@ class Profiles(list):
         consents = {}
         segments = []
         stats = ProfileStats()
-        # merged_with = []
         for profile in profiles:
             stats.visits += profile.stats.visits
             stats.views += profile.stats.views
 
-            if isinstance(profile.mergedWith, list):
+            if isinstance(profile.segments, list):
                 segments += profile.segments
-
-            # if isinstance(profile.mergedWith, list):
-            #     merged_with += profile.mergedWith
-            # else:
-            #     merged_with.append(profile.id)
 
             consents.update(profile.consents)
 
             # make uniq
             segments = list(set(segments))
-            # merged_with = list(set(merged_with))
+
+        # Set id to merged id or current profile id.
+        id = current_profile.mergedWith if current_profile.mergedWith is not None else current_profile.id
 
         return Profile(
-            id=str(uuid4()),
-            # mergedWith=merged_with,
+            id=id,
+            mergedWith=None,
             stats=stats,
             traits=traits,
             pii=piis,
             segments=segments,
-            consents=consents
+            consents=consents,
+            active=True
         )
 
     def bulk(self) -> CollectionCrud:

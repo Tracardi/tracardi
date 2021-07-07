@@ -27,9 +27,9 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
-    async def load_by_values(self, field_value_pairs: List[tuple]) -> StorageResult:
+    async def load_by_values(self, field_value_pairs: List[tuple], limit=1000) -> StorageResult:
         try:
-            return StorageResult(await self.storage.load_by_values(field_value_pairs))
+            return StorageResult(await self.storage.load_by_values(field_value_pairs, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 

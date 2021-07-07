@@ -1,5 +1,6 @@
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi_plugin_sdk.domain.result import Result
 
 
 class SegmentProfileAction(ActionRunner):
@@ -9,7 +10,7 @@ class SegmentProfileAction(ActionRunner):
 
     async def run(self, void):
         self.profile.operation.segment = True
-        return None
+        return Result(value={}, port="void")
 
 
 def register() -> Plugin:
@@ -19,7 +20,7 @@ def register() -> Plugin:
             module='app.process_engine.action.v1.operations.segment_profile_action',
             className='SegmentProfileAction',
             inputs=["void"],
-            outputs=[],
+            outputs=["void"],
             init=None,
             manual="segment_profiles_action"
         ),
