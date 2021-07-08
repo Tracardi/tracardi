@@ -37,6 +37,9 @@ nav:
   - installation.md
   - elastic_authentication.md
   - running.md
+  - event_tracking.md
+  - profile_merging.md
+  - profile_segmentation.md
   - truble_shooting.md
   - Notations:
       - notations/index.md

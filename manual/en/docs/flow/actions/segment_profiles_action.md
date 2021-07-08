@@ -1,4 +1,5 @@
 # Segment Profile Action
+
 After the flow is finished a procedure of Customer Segmentation is run. 
 
 Segmentation is the practice of dividing a customers into groups that reflect similarity among them. 
