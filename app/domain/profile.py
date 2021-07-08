@@ -70,6 +70,19 @@ class Profile(Entity):
         return StorageCrud("profile", Profile, entity=self, exclude={"operation": ...})
 
     @staticmethod
+    async def load_current(id) -> 'Profile':
+
+        """
+        Loads current profile. If profile was merged then it loads merged profile.
+        """
+
+        entity = Entity(id=id)
+        profile = await entity.storage('profile').load(Profile)  # type: Profile
+        if profile.mergedWith is not None:
+            profile = await Profile.load_current(profile.mergedWith)
+        return profile
+
+    @staticmethod
     def new() -> 'Profile':
         """
         @return Profile

@@ -103,7 +103,7 @@ class TrackerPayload(BaseModel):
 
         # Load session from storage
         if isinstance(self.session, Entity):
-            session = await self.session.storage("session").load(Session)
+            session = await self.session.storage("session").load(Session) # type: Session
         else:
             raise ValueError(
                 "Session has unknown type. Available types Entity, Session. `{}` given".format(type(self.session)))
@@ -128,12 +128,11 @@ class TrackerPayload(BaseModel):
 
             else:
 
-                # Id exists load profile
-
-                profile = await self.profile.storage("profile").load(Profile)  # type: Profile
+                # Id exists load profile from storage
+                profile = await Profile.load_current(id=self.profile.id)  # type: Profile
 
                 if profile is None:
-                    # Id exists but profile not exist in storage.
+                    # Profile id delivered but profile does not exist in storage.
                     # Id was forged
 
                     profile = Profile.new()
@@ -148,8 +147,19 @@ class TrackerPayload(BaseModel):
             if session.profile is not None:
                 # Loaded session has profile
 
-                profile = Profile(id=session.profile.id)
-                profile = await profile.storage().load()  # type: Profile
+                # Load profile based on profile id saved in session
+                profile = await Profile.load_current(id=session.profile.id)  # type: Profile
+
+                if session.profile.id != profile.id:
+                    # Profile in session id has been merged. Change profile in session.
+
+                    session.profile.id = profile.id
+                    session.metadata.time = Time(insert=datetime.utcnow())
+
+                    is_new_session = True
+
+                # profile = await profile.storage().load()  # type: Profile
+
             else:
                 # Corrupted session
 
@@ -163,9 +173,6 @@ class TrackerPayload(BaseModel):
                 # Create new profile
                 is_new_profile = True
 
-        # Fill with data
-        # source = Source(id=self.source.id)
-        # source.properties = self.event_server
         session.context = self.context
         session.properties = self.properties
         session.operation.new = is_new_session
