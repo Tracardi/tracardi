@@ -16,7 +16,11 @@ class IfAction(ActionRunner):
         self.condition = kwargs['condition']
 
     async def run(self, payload: dict):
-        flat_payload = flatten(copy.deepcopy(payload))
+
+        try:
+            flat_payload = flatten(copy.deepcopy(payload))
+        except Exception as e:
+            raise ValueError("Could not flatten payload. The following error occurred: `{}`".format(str(e)))
 
         if self.condition is None or self.condition == "please-configure-condition":
             raise ValueError("Condition is not set. Define it in config section.")

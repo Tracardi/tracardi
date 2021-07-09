@@ -1,5 +1,52 @@
 # Detect client agent action
 
+This action will parse any user agent and detect the browser, operating system, device used (desktop, 
+tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands 
+of user agent strings, even from rare and obscure browsers and devices. 
+
+It returns an object containing all the information.
+
+## Output example
+
+```json
+{
+  "status": {
+    "code": 200,
+    "message": "OK"
+  },
+  "device": {
+    "model": {
+      "name": "",
+      "brand": {
+        "name": "UNK"
+      },
+      "type": "desktop"
+    },
+    "os": {
+      "name": "GNU/Linux",
+      "version": ""
+    },
+    "client": {
+      "type": "browser",
+      "name": "Chrome",
+      "version": "",
+      "engine": {
+        "default": "WebKit",
+        "versions": {
+          "28": "Blink"
+        }
+      }
+    },
+    "type": {
+      "mobile": false,
+      "desktop": true,
+      "bot": false,
+      "tv": false
+    }
+  }
+}
+```
+
 ## Detected operating systems
 
 * AIX

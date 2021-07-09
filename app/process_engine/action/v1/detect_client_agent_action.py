@@ -1,3 +1,4 @@
+from device_detector import DeviceDetector
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -9,9 +10,82 @@ class DetectClientAgentAction(ActionRunner):
         pass
 
     async def run(self, void):
-        if self.debug and self.profile.id == '@debug-profile-id':
-            raise ValueError("Start action can not run in debug mode without connection to Debug action.")
-        return Result(port="payload", value=self.event.dict())
+
+        try:
+            if not isinstance(self.session.context, dict):
+                raise KeyError("No session context defined.")
+
+            ua = self.session.context['browser']['browser']['userAgent']
+
+            detector = DeviceDetector(ua, skip_bot_detection=False)
+            device = detector.parse()
+
+            response = {
+                'status': {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "device": {
+                    "model": {
+                        "name": device.device_model(),
+                        "brand": {
+                            "name": device.device_brand_name(),
+                        },
+                        "type": device.device_type()
+                    },
+                    "os": {
+                        "name": device.os_name(),
+                        "version": device.os_version(),
+                    },
+                    "client": {
+                        "type": device.client_type(),
+                        "name": device.client_name(),
+                        "version": device.secondary_client_version(),
+                        "engine": device.engine(),
+                    },
+                    "type": {
+                        "mobile": device.is_mobile(),
+                        "desktop": device.is_desktop(),
+                        "bot": device.is_bot(),
+                        "tv": device.is_television(),
+                    }
+
+                }
+            }
+        except KeyError as e:
+            response = {
+                'status': {
+                    "code": 500,
+                    "message": str(e)
+                },
+                "device": {
+                    "model": {
+                        "name": 'Unknown',
+                        "brand": {
+                            "name": 'Unknown',
+                        },
+                        "type": 'Unknown'
+                    },
+                    "os": {
+                        "name": 'Unknown',
+                        "version": 'Unknown',
+                    },
+                    "client": {
+                        "type": 'Unknown',
+                        "name": 'Unknown',
+                        "version": 'Unknown',
+                        "engine": 'Unknown',
+                    },
+                    "type": {
+                        "mobile": 'Unknown',
+                        "desktop": 'Unknown',
+                        "bot": 'Unknown',
+                        "tv": 'Unknown',
+                    }
+                }
+            }
+
+        return Result(port="client-info", value=response)
 
 
 def register() -> Plugin:
@@ -31,11 +105,11 @@ def register() -> Plugin:
             desc='It will parse any user agent and detect the browser, operating system, device used (desktop, '
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
                  'of user agent strings, even from rare and obscure browsers and devices. It returns an object containing '
-                 'all te information',
+                 'all the information',
             type='flowNode',
             width=100,
             height=100,
             icon='start',
-            group=["Input/Output"]
+            group=["Processing"]
         )
     )
