@@ -21,6 +21,3 @@ class PII(BaseModel):
     telephone: Optional[Any] = None
     other: Optional[dict] = {}
 
-    def merge(self, pii: 'PII') -> 'PII':
-        pii = merge({}, [self.dict(), pii.dict()])
-        return PII(**pii)

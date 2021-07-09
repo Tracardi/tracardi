@@ -49,6 +49,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Cleaner debug information
 - [ ] Documentation for all delivered actions
 - [x] Global state of profile, session, event visible in Debugger.
+- [ ] Branding
 
 #### Removals
 
@@ -63,8 +64,11 @@ Feature freeze. Fixes and testing.
 - [ ] Scaling test
 - [ ] Unit tests
 - [ ] Integration tests
-- [ ] Feature list for contributors
-- [ ] Configure removal of merged profiles ???
+- [ ] Project management: Feature list for contributors
+- [ ] UX: Simplify selecting event for debugging
+- [ ] 
+
+
 
 ### Version 0.5.0
 
@@ -73,6 +77,7 @@ Feature freeze. Fixes and testing.
 - [ ] Proof of concept for dynamic front-end loading
 
 #### Features:
+- [ ] Every time segments raises error log that error to tracardi-segment-error index - so we can see that this segment is not right. 
 - [ ] Standard Error Reporting
 - [ ] Tracardi user profile domain object
 - [ ] Setting user and password from interface (user profile)

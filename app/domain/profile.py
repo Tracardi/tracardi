@@ -1,6 +1,8 @@
+import copy
 import uuid
 from datetime import datetime
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Tuple, Union
+
 from .entity import Entity
 from .metadata import Metadata
 from .pii import PII
@@ -10,10 +12,13 @@ from ..service.dot_notation_converter import DotNotationConverter
 from ..service.storage.collection_crud import CollectionCrud
 from ..service.storage.crud import StorageCrud
 import app.domain.value_object.operation
-from typing import List
-from uuid import uuid4
+
 from .profile_stats import ProfileStats
 from ..service.merger import merge
+from .segment import Segment
+from .segments import Segments
+from ..process_engine.tql.condition import Condition
+from ..process_engine.tql.utils.dictonary import flatten
 
 
 class Profile(Entity):
@@ -49,16 +54,113 @@ class Profile(Entity):
         converter = DotNotationConverter(self)
         return [converter.get_profile_fiel_value_pair(key) for key in self.operation.merge]
 
-    def merge(self, profile):
+    # def merge(self, profile):
+    #     """
+    #     Merges profiles. Merged properties are: stats, traits, pii, segments, consents.
+    #     """
+    #
+    #     self.stats = self.stats.merge(profile.stats)
+    #     self.traits = self.traits.merge(profile.traits)
+    #     self.pii = self.pii.merge(profile.pii)
+    #     self.segments = list(set(profile.segments + self.segments))
+    #     self.consents.update(profile.consents)
+
+    def _get_merging_keys_and_values(self):
+        merge_key_values = self.get_merge_key_values()
+
+        # Add keyword
+        merge_key_values = [(f"{field}.keyword", value) for field, value in merge_key_values if value is not None]
+
+        return merge_key_values
+
+    @staticmethod
+    def _mark_profiles_as_merged(profiles, merge_with) -> List['Profile']:
+        disabled_profiles = []
+
+        for profile in profiles:
+            profile.active = False
+            profile.mergedWith = merge_with
+            disabled_profiles.append(profile)
+
+        return disabled_profiles
+
+    async def segment(self, event_types):
+
         """
-        Merges profiles. Merged properties are: stats, traits, pii, segments, consents.
+        This method mutates current profile. Loads segments and adds segments to current profile.
         """
 
-        self.stats = self.stats.merge(profile.stats)
-        self.traits = self.traits.merge(profile.traits)
-        self.pii = self.pii.merge(profile.pii)
-        self.segments = list(set(profile.segments + self.segments))
-        self.consents.update(profile.consents)
+        # todo cache segments for 30 sec
+        flat_payload = flatten(copy.deepcopy(self.dict()))
+
+        for event_type in event_types:  # type: str
+
+            # Segmentation is run for every event
+
+            # todo segments are loaded one by one - maybe it is possible to load it at once
+            segments = await Segments.storage().load_by('eventType.keyword', event_type)
+            for segment in segments:
+
+                segment = Segment(**segment)
+                segment_id = segment.get_id()
+
+                try:
+
+                    if Condition.evaluate(segment.condition, flat_payload):
+                        segments = set(self.segments)
+                        segments.add(segment_id)
+                        self.segments = list(segments)
+
+                        # Yield only if segmentation triggered
+                        yield event_type, segment_id, None
+
+                except Exception as e:
+                    msg = 'Condition id `{}` could not evaluate `{}`. The following error was raised: `{}`'.format(
+                        segment_id, segment.condition, str(e).replace("\n", " "))
+
+                    yield event_type, segment_id, msg
+
+    async def merge(self, limit=2000) -> Union['Profiles', None]:
+
+        """
+        This method mutates current profile.
+        Merges profiles on keys set in profile.operation.merge. Loads profiles from database and
+        combines its data into current profile. Returns Profiles object with profiles to be disables.
+        It does not disable profiles or saves merged profile.
+        """
+
+        merge_key_values = self._get_merging_keys_and_values()
+
+        # Are there any non-empty values in current profile
+
+        if len(merge_key_values) > 0:
+
+            # Load all profiles that match merging criteria
+            existing_profiles = await app.domain.value_object.operation.Operation.load_profiles_to_merge(
+                merge_key_values,
+                limit=limit)
+
+            # Filter only profiles that are not current profile and where not merged
+            profiles_to_merge = [p for p in existing_profiles if p.id != self.id and p.active is True]
+
+            print('profiles_to_merge',profiles_to_merge)
+
+            # Are there any profiles to merge?
+            if len(profiles_to_merge) > 0:
+                # Add current profile to existing ones and get merged profile
+                merged_profile = Profiles.merge(profiles_to_merge, self)
+
+                # Replace current profile with merged profile
+                self.replace(merged_profile)
+
+                # Deactivate all other profiles except merged one
+
+                profiles_to_disable = [p for p in existing_profiles if p.id != self.id]
+                disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable, merge_with=self.id)
+
+                return Profiles(disabled_profiles)
+
+        return None
 
     def increase_visits(self, value=1):
         self.stats.visits += value
@@ -107,6 +209,7 @@ class Profiles(list):
         segments = []
         stats = ProfileStats()
         for profile in profiles:
+
             stats.visits += profile.stats.visits
             stats.views += profile.stats.views
 

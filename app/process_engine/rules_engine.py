@@ -81,37 +81,37 @@ class RulesEngine:
         rules = list(memory_cache['rules'].data)
         return rules
 
-    async def segmentation(self, event_types):
-
-        # todo cache segments for 30 sec
-        flat_payload = flatten(copy.deepcopy(self.profile.dict()))
-
-        for event_type in event_types:  # type: str
-
-            # Segmentation is run for every event
-
-            # todo segments are loaded one by one - maybe it is possible to load it at once
-            segments = await Segments.storage().load_by('eventType.keyword', event_type)
-            for segment in segments:
-
-                segment = Segment(**segment)
-                segment_id = segment.get_id()
-
-                try:
-
-                    if Condition.evaluate(segment.condition, flat_payload):
-                        segments = set(self.profile.segments)
-                        segments.add(segment_id)
-                        self.profile.segments = list(segments)
-
-                        # Yield only if segmentation triggered
-                        yield event_type, segment_id, None
-
-                except Exception as e:
-                    msg = 'Condition id `{}` could not evaluate `{}`. The following error was raised: `{}`'.format(
-                        segment_id, segment.condition, str(e).replace("\n", " "))
-
-                    yield event_type, segment_id, msg
+    # async def segmentation(self, event_types):
+    #
+    #     # todo cache segments for 30 sec
+    #     flat_payload = flatten(copy.deepcopy(self.profile.dict()))
+    #
+    #     for event_type in event_types:  # type: str
+    #
+    #         # Segmentation is run for every event
+    #
+    #         # todo segments are loaded one by one - maybe it is possible to load it at once
+    #         segments = await Segments.storage().load_by('eventType.keyword', event_type)
+    #         for segment in segments:
+    #
+    #             segment = Segment(**segment)
+    #             segment_id = segment.get_id()
+    #
+    #             try:
+    #
+    #                 if Condition.evaluate(segment.condition, flat_payload):
+    #                     segments = set(self.profile.segments)
+    #                     segments.add(segment_id)
+    #                     self.profile.segments = list(segments)
+    #
+    #                     # Yield only if segmentation triggered
+    #                     yield event_type, segment_id, None
+    #
+    #             except Exception as e:
+    #                 msg = 'Condition id `{}` could not evaluate `{}`. The following error was raised: `{}`'.format(
+    #                     segment_id, segment.condition, str(e).replace("\n", " "))
+    #
+    #                 yield event_type, segment_id, msg
 
     async def invoke(self, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list]]:
 
@@ -203,49 +203,48 @@ class RulesEngine:
         segmentation_info = {"errors": [], "ids": []}
         if self.profile.operation.needs_update() or self.profile.operation.needs_segmentation():
             # Segmentation runs only if profile was updated or flow forced it
-            async for event_type, segment_id, error in self.segmentation(event_types=flow_task_store.keys()):
+            async for event_type, segment_id, error in self.profile.segment(event_types=flow_task_store.keys()):
                 # Segmentation triggered
                 if error:
                     segmentation_info['errors'].append(error)
                 segmentation_info['ids'].append(segment_id)
 
         # Merging, schedule save only if there is an update in flow.
-        print("loaded profile id", self.profile.id)
-        print("loaded profile merged_with", self.profile.mergedWith)
 
         if self.profile.operation.needs_merging() and self.profile.operation.needs_update():
-            merge_key_values = self._get_merging_keys_and_values()
 
-            # Are there any non-empty values in current profile
+            disabled_profiles = await self.profile.merge(limit=2000)
+            if disabled_profiles is not None:
+                save_old_profiles_task = asyncio.create_task(disabled_profiles.bulk().save())
+                save_tasks.append(save_old_profiles_task)
 
-            if len(merge_key_values) > 0:
-
-                # Load all profiles that match merging criteria
-                existing_profiles = await Operation.load_profiles_to_merge(merge_key_values, limit=2000)
-
-                # Filter only profiles that are not current profile and where not merged
-                profiles_to_merge = [p for p in existing_profiles if p.id != self.profile.id and p.active is True]
-
-                # Are there any profiles to merge?
-                print("found profiles to merge with true", len(profiles_to_merge))
-                if len(profiles_to_merge) > 0:
-
-                    # Add current profile to existing ones and get merged profile
-                    merged_profile = Profiles.merge(profiles_to_merge, self.profile)
-
-                    # Replace current profile with merged profile
-                    self.profile.replace(merged_profile)
-
-                    print("new", self.profile.id, self.profile.mergedWith, self.profile.active)
-
-                    # Deactivate all other profiles except merged one
-
-                    profiles_to_disable = [p for p in existing_profiles if p.id != self.profile.id]
-                    disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable, merge_with=self.profile.id)
-
-                    print("disabled", [(x.id, x.active) for x in disabled_profiles])
-                    save_old_profiles_task = asyncio.create_task(Profiles(disabled_profiles).bulk().save())
-                    save_tasks.append(save_old_profiles_task)
+            # merge_key_values = self._get_merging_keys_and_values()
+            #
+            # # Are there any non-empty values in current profile
+            #
+            # if len(merge_key_values) > 0:
+            #
+            #     # Load all profiles that match merging criteria
+            #     existing_profiles = await Operation.load_profiles_to_merge(merge_key_values, limit=2000)
+            #
+            #     # Filter only profiles that are not current profile and where not merged
+            #     profiles_to_merge = [p for p in existing_profiles if p.id != self.profile.id and p.active is True]
+            #
+            #     # Are there any profiles to merge?
+            #     if len(profiles_to_merge) > 0:
+            #         # Add current profile to existing ones and get merged profile
+            #         merged_profile = Profiles.merge(profiles_to_merge, self.profile)
+            #
+            #         # Replace current profile with merged profile
+            #         self.profile.replace(merged_profile)
+            #
+            #         # Deactivate all other profiles except merged one
+            #
+            #         profiles_to_disable = [p for p in existing_profiles if p.id != self.profile.id]
+            #         disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable, merge_with=self.profile.id)
+            #
+            #         save_old_profiles_task = asyncio.create_task(Profiles(disabled_profiles).bulk().save())
+            #         save_tasks.append(save_old_profiles_task)
 
         # Must be the last operation
         if self.profile.operation.needs_update():
@@ -256,15 +255,14 @@ class RulesEngine:
 
         return results, segmentation_info
 
-    def _mark_profiles_as_merged(self, profiles, merge_with) -> List[Profile]:
+    @staticmethod
+    def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
         disabled_profiles = []
 
         for profile in profiles:
             profile.active = False
             profile.mergedWith = merge_with
             disabled_profiles.append(profile)
-
-            # todo check if profile.id not in mergerd_with in db
 
         return disabled_profiles
 
