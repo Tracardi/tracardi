@@ -5,24 +5,24 @@ from app.domain.profile import Profile
 from app.process_engine.dot_accessor import DotAccessor
 
 
-class IncrementAction(ActionRunner):
+class DecrementAction(ActionRunner):
 
     def __init__(self, **kwargs):
 
         if 'field' not in kwargs or kwargs['field'] is None:
             raise ValueError("Field is not set. Define it in config section.")
 
-        if 'increment' not in kwargs or kwargs['increment'] is None:
-            raise ValueError("Increment is not set. Define it in config section.")
+        if 'decrement' not in kwargs or kwargs['decrement'] is None:
+            raise ValueError("Decrement is not set. Define it in config section.")
 
         self.field = kwargs['field']
-        self.increment = kwargs['increment']
+        self.decrement = kwargs['decrement']
 
-        if type(self.increment) != int and type(self.increment) != float:
-            raise ValueError("Increment must be a number. {} given.".format(type(self.increment)))
+        if type(self.decrement) != int and type(self.decrement) != float:
+            raise ValueError("Decrement must be a number. {} given.".format(type(self.decrement)))
 
         if not self.field.startswith('profile@stats.counters'):
-            raise ValueError("Only fields inside `profile@stats.counters` can be incremented. Field `{}` given.".format(self.field))
+            raise ValueError("Only fields inside `profile@stats.counters` can be decremented. Field `{}` given.".format(self.field))
 
     async def run(self, payload):
 
@@ -41,7 +41,7 @@ class IncrementAction(ActionRunner):
         if type(value) != int:
             raise ValueError("Filed `{}` value is not numeric.".format(self.field))
 
-        value += self.increment
+        value -= self.decrement
 
         dot[self.field] = value
 
@@ -54,20 +54,20 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='app.process_engine.action.v1.increment_action',
-            className='IncrementAction',
+            module='app.process_engine.action.v1.decrement_action',
+            className='DecrementAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"field": None, "increment": 1},
-            manual="increment_action"
+            init={"field": None, "decrement": 1},
+            manual="decrement_action"
         ),
         metadata=MetaData(
-            name='Increment counter',
-            desc='Increment profile stats.counters value. Returns payload',
+            name='Decrement counter',
+            desc='Decrement profile stats.counters value. Returns payload',
             type='flowNode',
             width=200,
             height=100,
-            icon='plus'
+            icon='minus'
         )
     )
 
