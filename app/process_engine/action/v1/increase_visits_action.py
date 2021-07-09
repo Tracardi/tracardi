@@ -10,7 +10,7 @@ class IncreaseVisitsAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, **kwargs):
+    async def run(self, payload):
 
         if self.profile.stats is None:
             self.profile.stats = ProfileStats()
@@ -18,7 +18,7 @@ class IncreaseVisitsAction(ActionRunner):
         if self.session.operation.new:
             self.profile.increase_visits()
 
-        return Result(port="profile", value=self.profile.dict())
+        return Result(port="payload", value=payload)
 
 
 def register() -> Plugin:
@@ -27,14 +27,14 @@ def register() -> Plugin:
         spec=Spec(
             module='app.process_engine.action.v1.increase_visits_action',
             className='IncreaseVisitsAction',
-            inputs=["void"],
-            outputs=['profile'],
+            inputs=["payload"],
+            outputs=['payload'],
             init=None,
             manual="increase_visits_action"
         ),
         metadata=MetaData(
             name='Increase visits',
-            desc='Increases visit field in profile and returns profile.',
+            desc='Increases visit field in profile and returns payload.',
             type='flowNode',
             width=200,
             height=100,

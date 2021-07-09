@@ -79,7 +79,6 @@ def test_flow_encoding():
     )
 
     record = FlowRecord.encode(flow)
-    assert record.flowGraph.nodes[0].data.spec.init == 'eyJhbGEtbWEta290YSI6ICJhLWtvdCJ9'
     new_flow = record.decode()
     assert new_flow.flowGraph.nodes[0].data.spec.init == {"ala-ma-kota": "a-kot"}
 

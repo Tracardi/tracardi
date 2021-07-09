@@ -10,15 +10,14 @@ class IncreaseViewsAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, **kwargs):
+    async def run(self, payload):
 
         if self.profile.stats is None:
             self.profile.stats = ProfileStats()
 
         self.profile.increase_views()
 
-        return Result(port="profile", value=self.profile.dict())
-
+        return Result(port="payload", value=payload)
 
 def register() -> Plugin:
     return Plugin(
@@ -26,8 +25,8 @@ def register() -> Plugin:
         spec=Spec(
             module='app.process_engine.action.v1.increase_views_action',
             className='IncreaseViewsAction',
-            inputs=["void"],
-            outputs=['profile'],
+            inputs=["payload"],
+            outputs=['payload'],
             init=None,
             manual="increase_views_action"
         ),
@@ -40,3 +39,4 @@ def register() -> Plugin:
             icon='plus'
         )
     )
+
