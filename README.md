@@ -31,7 +31,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Collecting events from web-page by JavaScript
 - [x] Binding events to elements on the page
 - [x] Gathering user properties
-- [ ] Merging user profiles
+- [x] Merging user profiles
 - [x] Simple segmentation
 
 #### Features
@@ -50,6 +50,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Documentation for all delivered actions
 - [x] Global state of profile, session, event visible in Debugger.
 - [ ] Branding
+- [ ] Join Node
 
 #### Removals
 
@@ -85,13 +86,14 @@ Feature freeze. Fixes and testing.
 - [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
 - [ ] Reading data from external sources – use source configuration to fetch data
 - [ ] If Action – Should use plain/text editor not application/json
-- [ ] Join Node
+
 - [ ] GraphQL Endpoint for profile fetching.
 - [ ] Profiler as part of debugger
 - [x] Refactor menu to take less space
 - [ ] Finish manual
 - [ ] Error log
 - [ ] text/plain - editor in config
+- [ ] Editable name for node in flow
 
 
 ### Version 0.6.0

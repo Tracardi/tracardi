@@ -90,7 +90,7 @@ class DetectClientAgentAction(ActionRunner):
 
 def register() -> Plugin:
     return Plugin(
-        start=True,
+        start=False,
         debug=False,
         spec=Spec(
             module='app.process_engine.action.v1.detect_client_agent_action',
@@ -109,7 +109,7 @@ def register() -> Plugin:
             type='flowNode',
             width=100,
             height=100,
-            icon='start',
+            icon='browser',
             group=["Processing"]
         )
     )

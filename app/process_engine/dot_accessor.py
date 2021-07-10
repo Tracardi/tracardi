@@ -84,6 +84,12 @@ class DotAccessor:
                     raise KeyError("Invalid dot notation. Could not find value for `{}` in event.".format(value))
         return dot_notation
 
+    def __contains__(self, item):
+        try:
+            self.__getitem__(item)
+            return True
+        except KeyError:
+            return False
 
     @staticmethod
     def get(dot_notation, payload, prefix):

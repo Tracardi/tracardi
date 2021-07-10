@@ -36,7 +36,8 @@ def register() -> Plugin:
             type='flowNode',
             width=200,
             height=100,
-            icon='plus'
+            icon='plus',
+            group=["Stats"]
         )
     )
 

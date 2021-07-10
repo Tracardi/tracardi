@@ -36,3 +36,17 @@ def test_value_read():
     assert dot['profile@other.a'] == 2
 
     assert dot.profile['other']['a'] == 2
+
+
+def test_value_exists():
+    profile = Profile(id="1")
+    session = Session(id="2")
+    payload = {"a": 3}
+    source = Source(id="3", type="event")
+    context = Context()
+    event = Event(id="event-id", type="type", source=source, context=context, profile=profile, session=session)
+    flow = Flow(id="flow-id", name="flow")
+    dot = DotAccessor(profile, session, payload, event, flow)
+
+    assert 'profile@id' in dot
+    assert 'profile@missing' not in dot

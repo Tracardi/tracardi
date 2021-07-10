@@ -8,28 +8,35 @@ from app.domain.session import Session
 from app.process_engine.dot_accessor import DotAccessor
 
 
-class CopyTraitAction(ActionRunner):
+class AppendTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'copy' not in kwargs:
-            raise ValueError("Please define copy in config section.")
-        if not isinstance(kwargs['copy'], dict):
-            raise ValueError("Please define copy as dictionary not {}.".format(type(kwargs['copy'])))
+        if 'append' not in kwargs:
+            raise ValueError("Please define `append` in config section.")
+        if not isinstance(kwargs['append'], dict):
+            raise ValueError("Please define `append` as dictionary not {}.".format(type(kwargs['append'])))
 
-        self.mapping = kwargs['copy']
+        self.mapping = kwargs['append']
 
     async def run(self, payload: dict):
 
         dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
         for destination, value in self.mapping.items():
-            dot[destination] = value
+            if destination in dot:
+                if not isinstance(dot[destination], list):
+                    dot[destination] = [dot[destination]]
+
+                if value not in dot[destination]:
+                    dot[destination].append(value)
+            else:
+                dot[destination] = value
 
         if not isinstance(dot.profile['traits']['private'], dict):
-            raise ValueError("Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
+            raise ValueError("Error when appending profile@traits.private to value `{}`. Private must have key:value pair. "
                              "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
 
         if not isinstance(dot.profile['traits']['public'], dict):
-            raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
+            raise ValueError("Error when appending profile@traits.public to value `{}`. Public must have key:value pair. "
                              "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
 
         profile = Profile(**dot.profile)
@@ -47,24 +54,24 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='app.process_engine.action.v1.traits.copy_trait_action',
-            className='CopyTraitAction',
+            module='app.process_engine.action.v1.traits.append_trait_action',
+            className='AppendTraitAction',
             inputs=['payload'],
             outputs=["payload"],
             init={
-                "copy": {
+                "append": {
                     "target1": "source1",
                     "target2": "source2",
                 }
             }
         ),
         metadata=MetaData(
-            name='Copy/Set Trait',
-            desc='Returns payload with copied/set traits.',
+            name='Append Trait',
+            desc='Appends trait if it a value already exists or sets trait if it does not.',
             type='flowNode',
             width=100,
             height=100,
-            icon='copy',
+            icon='append',
             group=["Traits"]
         )
     )
