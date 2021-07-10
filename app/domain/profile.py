@@ -49,21 +49,11 @@ class Profile(Entity):
         self.consents = profile.consents
         self.active = profile.active
         self.mergedWith = profile.mergedWith
+        self.operation = profile.operation
 
     def get_merge_key_values(self) -> List[tuple]:
         converter = DotNotationConverter(self)
         return [converter.get_profile_fiel_value_pair(key) for key in self.operation.merge]
-
-    # def merge(self, profile):
-    #     """
-    #     Merges profiles. Merged properties are: stats, traits, pii, segments, consents.
-    #     """
-    #
-    #     self.stats = self.stats.merge(profile.stats)
-    #     self.traits = self.traits.merge(profile.traits)
-    #     self.pii = self.pii.merge(profile.pii)
-    #     self.segments = list(set(profile.segments + self.segments))
-    #     self.consents.update(profile.consents)
 
     def _get_merging_keys_and_values(self):
         merge_key_values = self.get_merge_key_values()

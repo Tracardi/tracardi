@@ -28,12 +28,20 @@ async def add_plugins():
         'app.process_engine.action.v1.debug_payload_action',
         'app.process_engine.action.v1.start_action',
         'app.process_engine.action.v1.end_action',
-        'app.process_engine.action.v1.if_action',
+
         'app.process_engine.action.v1.increase_views_action',
         'app.process_engine.action.v1.increase_visits_action',
+        'app.process_engine.action.v1.increment_action',
+        'app.process_engine.action.v1.decrement_action',
+
         'app.process_engine.action.v1.read_session_action',
         'app.process_engine.action.v1.read_profile_action',
         'app.process_engine.action.v1.read_event_action',
+
+        'app.process_engine.action.v1.if_action',
+        'app.process_engine.action.v1.new_visit_action',
+
+        'app.process_engine.action.v1.detect_client_agent_action',
 
         'app.process_engine.action.v1.traits.copy_trait_action',
         'app.process_engine.action.v1.traits.cut_out_trait_action',

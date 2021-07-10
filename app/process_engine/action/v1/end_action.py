@@ -8,6 +8,7 @@ class EndAction(ActionRunner):
         pass
 
     async def run(self, void):
+        print("end input", void)
         return None
 
 

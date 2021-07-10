@@ -29,6 +29,7 @@ class Session(Entity):
         self.context = session.context
         self.id = session.id
         self.properties = session.properties
+        self.operation = session.operation
 
     def storage(self, **kwargs) -> StorageCrud:
         return StorageCrud("session", Session, entity=self)
