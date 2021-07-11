@@ -10,17 +10,21 @@ __local_dir = os.path.dirname(__file__)
 
 
 async def add_plugin(module):
-    plugin = load_callable(module, 'register')
-    plugin_data = plugin()
+    try:
+        plugin = load_callable(module, 'register')
+        plugin_data = plugin()
 
-    # Action plugin id is a hash of its module and className
+        # Action plugin id is a hash of its module and className
 
-    action_id = plugin_data.spec.module + plugin_data.spec.className
-    action_id = hashlib.md5(action_id.encode()).hexdigest()
+        action_id = plugin_data.spec.module + plugin_data.spec.className
+        action_id = hashlib.md5(action_id.encode()).hexdigest()
 
-    action_plugin = FlowActionPlugin(id=action_id, plugin=plugin_data)
-    record = FlowActionPluginRecord.encode(action_plugin)
-    return await record.storage().save()
+        action_plugin = FlowActionPlugin(id=action_id, plugin=plugin_data)
+        record = FlowActionPluginRecord.encode(action_plugin)
+        return await record.storage().save()
+    except ModuleNotFoundError as e:
+        print(str(e))
+        # todo log.
 
 
 async def add_plugins():
@@ -44,6 +48,7 @@ async def add_plugins():
         'app.process_engine.action.v1.detect_client_agent_action',
 
         'app.process_engine.action.v1.traits.copy_trait_action',
+        'app.process_engine.action.v1.traits.append_trait_action',
         'app.process_engine.action.v1.traits.cut_out_trait_action',
         'app.process_engine.action.v1.traits.delete_trait_action',
 
@@ -60,4 +65,3 @@ async def add_plugins():
         tasks.append(asyncio.create_task(add_plugin(plugin)))
 
     await asyncio.gather(*tasks)
-
