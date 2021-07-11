@@ -51,9 +51,9 @@ class DebugPayloadAction(ActionRunner):
 
             self.profile.replace(profile)
 
-            return Result(port="payload", value={})
+            return Result(port="event", value=self.event.dict())
 
-        return Result(port="payload", value={})
+        return Result(port="event", value=self.event.dict())
 
 
 def register() -> Plugin:
@@ -64,7 +64,7 @@ def register() -> Plugin:
             module='app.process_engine.action.v1.debug_payload_action',
             className='DebugPayloadAction',
             inputs=[],
-            outputs=["payload"],
+            outputs=["event"],
             init={
                 "event": {
                     "id": "undefined",

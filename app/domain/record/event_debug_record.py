@@ -20,7 +20,7 @@ class EventDebugRecord(BaseModel):
 
         for event_type, debugging in stat.items():
             for debug_infos in debugging:
-                for rule_id, debug_info in debug_infos.items():
+                for rule_id, debug_info in debug_infos.items():  # type: DebugInfo
                     # todo - to pole jest za małe (wyskakuje błąd gdy debug infor ma powyżej 32000 znaków)
                     b64 = b64_encoder(debug_info.dict())
                     yield EventDebugRecord(event=Entity(id=debug_info.event.id), content=b64)

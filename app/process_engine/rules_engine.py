@@ -5,11 +5,9 @@ from typing import Dict, List, Tuple
 from pydantic import ValidationError
 from tracardi_graph_runner.domain.debug_info import DebugInfo
 from tracardi_graph_runner.domain.error_debug_info import ErrorDebugInfo
-from tracardi_graph_runner.domain.flow_debug_info import FlowDebugInfo
+from tracardi_graph_runner.domain.debug_info import FlowDebugInfo
 from tracardi_graph_runner.domain.flow_history import FlowHistory
 from tracardi_graph_runner.domain.work_flow import WorkFlow
-
-from .dot_accessor import DotAccessor
 from ..domain.entity import Entity
 from ..domain.flow import Flow
 from ..domain.metadata import Metadata
@@ -18,24 +16,13 @@ from ..domain.profile import Profile, Profiles
 from ..domain.record.event_debug_record import EventDebugRecord
 from ..domain.session import Session
 from ..domain.time import Time
-from ..domain.value_object.operation import Operation
-from ..event_server.service.persistence_service import PersistenceService
 from ..event_server.utils.memory_cache import MemoryCache, CacheItem
 from ..domain.event import Event
 from ..domain.events import Events
 from ..domain.rule import Rule
 from ..domain.rules import Rules
-from ..service.dot_notation_converter import DotNotationConverter
 from ..service.storage.collection_crud import CollectionCrud
 import asyncio
-import traceback
-
-import copy
-from app.domain.segment import Segment
-from app.domain.segments import Segments
-from app.process_engine.tql.condition import Condition
-from app.process_engine.tql.utils.dictonary import flatten
-from ..service.storage.elastic_storage import ElasticStorage
 
 
 class RulesEngine:
@@ -108,11 +95,11 @@ class RulesEngine:
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(
                         timestamp=time(),
-                        event=Entity(id=event.id),
                         flow=FlowDebugInfo(
                             id=rule.flow.id,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=103)]
-                        )
+                        ),
+                        event=Entity(id=event.id)
                     )
                     debug_info_by_event_type_and_rule_name[event.type].append({rule.name: debug_info})
                     continue
@@ -154,11 +141,11 @@ class RulesEngine:
                     # todo log error
                     debug_info = DebugInfo(
                         timestamp=time(),
-                        event=Entity(id=event_id),
                         flow=FlowDebugInfo(
                             id=flow_id,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=86)]
-                        )
+                        ),
+                        event=Entity(id=event_id)
                     )
 
                 debug_info_by_event_type_and_rule_name[event_type].append({rule_name: debug_info})

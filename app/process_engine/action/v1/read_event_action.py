@@ -15,6 +15,7 @@ class ReadEventAction(ActionRunner):
 def register() -> Plugin:
     return Plugin(
         start=False,
+        debug=False,
         spec=Spec(
             module='app.process_engine.action.v1.read_event_action',
             className='ReadEventAction',

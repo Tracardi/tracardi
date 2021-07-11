@@ -11,7 +11,7 @@ class StartAction(ActionRunner):
     async def run(self, void):
         if self.debug and self.profile.id == '@debug-profile-id':
             raise ValueError("Start action can not run in debug mode without connection to Debug action.")
-        return Result(port="payload", value=self.event.dict())
+        return Result(port="payload", value={})
 
 
 def register() -> Plugin:
@@ -27,7 +27,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Start',
-            desc='Starts workflow and copies event to payload.',
+            desc='Starts workflow and returns empty payload.',
             type='flowNode',
             width=100,
             height=100,
