@@ -256,11 +256,10 @@ async def upsert_flow_details(id: str, lock: str):
 
 @router.post("/flow/debug", tags=["flow"])
 async def debug_flow(flow: GraphFlow):
-    sleep(1)
-    """
-        Debugs flow sent in request body
-    """
-    try:
+    # """
+    #     Debugs flow sent in request body
+    # """
+    # try:
 
         profile = Profile(id="@debug-profile-id")
         session = Session(id="@debug-session-id")
@@ -287,69 +286,65 @@ async def debug_flow(flow: GraphFlow):
         else:
             profile_save_result = None
 
-        debug_info_by_id = defaultdict(list)
-        for info in debug_info.calls:
-            debug_info_by_id[info.node.id].append(info)
-
         return {
-            "calls": debug_info_by_id,
+            "debugInfo": debug_info.dict(),
             "update": profile_save_result
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/flow/{id}/debug", tags=["flow"])
-async def debug_flow_by_id(id: str):
-
-    """
-    Debugs flow by reading it from storage
-    """
-
-    sleep(1)
-    # Load flow
-    try:
-        profile = Profile(id="@debug-profile-id")
-        session = Session(id="@debug-session-id")
-        session.operation.new = True
-        event = Event(
-            id='@debug-event-id',
-            type="@debug-event-type",
-            source=Source(id="@debug-source-id", type="web-page"),
-            session=session,
-            profile=profile,
-            context=Context()
-        )
-
-        flow_record_entity = Entity(id=id)
-        flow_record = await flow_record_entity.storage("flow").load(FlowRecord)  # type: FlowRecord
-        flow = flow_record.decode_draft()
-
-        workflow = WorkFlow(
-            FlowHistory(history=[]),
-            session,
-            profile,
-            event
-        )
-        debug_info = await workflow.invoke(flow, debug=True)
-
-        if profile.operation.needs_update():
-            profile_save_result = await profile.storage().save()
-        else:
-            profile_save_result = None
-
-        debug_info_by_id = defaultdict(list)
-        for info in debug_info.calls:
-            debug_info_by_id[info.node.id].append(info)
-
-        return {
-            "calls": debug_info_by_id,
-            "update": profile_save_result
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# @router.post("/flow/{id}/debug", tags=["flow"])
+# async def debug_flow_by_id(id: str):
+#
+#     """
+#     Debugs flow by reading it from storage
+#     """
+#
+#     sleep(1)
+#     # Load flow
+#     try:
+#         profile = Profile(id="@debug-profile-id")
+#         session = Session(id="@debug-session-id")
+#         session.operation.new = True
+#         event = Event(
+#             id='@debug-event-id',
+#             type="@debug-event-type",
+#             source=Source(id="@debug-source-id", type="web-page"),
+#             session=session,
+#             profile=profile,
+#             context=Context()
+#         )
+#
+#         flow_record_entity = Entity(id=id)
+#         flow_record = await flow_record_entity.storage("flow").load(FlowRecord)  # type: FlowRecord
+#         flow = flow_record.decode_draft()
+#
+#         workflow = WorkFlow(
+#             FlowHistory(history=[]),
+#             session,
+#             profile,
+#             event
+#         )
+#         debug_info = await workflow.invoke(flow, debug=True)
+#
+#         if profile.operation.needs_update():
+#             profile_save_result = await profile.storage().save()
+#         else:
+#             profile_save_result = None
+#
+#         debug_info_by_id = defaultdict(list)
+#         for info in debug_info.calls:
+#             debug_info_by_id[info.node.id].append(info)
+#
+#         return {
+#             "calls": debug_info_by_id,
+#             "update": profile_save_result
+#         }
+#
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/flow/action/plugin/{id}", tags=["flow", "action", "plugin"], response_model=FlowActionPlugin)

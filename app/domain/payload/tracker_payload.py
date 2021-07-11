@@ -190,45 +190,7 @@ class TrackerPayload(BaseModel):
             profile,
             events)
 
-        flow_result, segmentation_result = await rules_engine.execute(self.source.id)
-
-        # todo proper result debugging
-
-        flow_response = []
-        for event_type, debugging in flow_result.items():
-
-            item = {
-                "event": {
-                    "type": event_type,
-                    "exec": []
-                }
-            }
-
-            for debug_infos in debugging:
-                for rule_id, debug_info in debug_infos.items():  # type: str, DebugInfo
-                    item['event']['id'] = debug_info.event.id
-
-                    call_statuses = []
-                    for debug_call in debug_info.calls:  # type: DebugCallInfo
-                        call_statuses.append({
-                            "node": {
-                                "id": debug_call.node.id,
-                                "error": debug_call.error
-                            }
-                        })
-
-                    item['event']['exec'].append(
-                        {
-                            "rule": {"id": rule_id},
-                            "flow": {
-                                "id": debug_info.flow.id,
-                                "errors": debug_info.dict(include={"flow": {"error": ...}}),
-                                "nodes": call_statuses
-                            }
-                        }
-                    )
-
-            flow_response.append(item)
+        debug_info_by_event_type_and_rule_name, segmentation_result = await rules_engine.execute(self.source.id)
 
         # Prepare response
         result = {}
@@ -238,7 +200,7 @@ class TrackerPayload(BaseModel):
         if not tracardi.track_debug:
             debug_result = TrackerPayloadResult(**collect_result.dict())
             debug_result = debug_result.dict()
-            debug_result['execution'] = flow_response
+            debug_result['execution'] = debug_info_by_event_type_and_rule_name
             debug_result['segmentation'] = segmentation_result
             result['debugging'] = debug_result
 

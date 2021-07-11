@@ -81,42 +81,10 @@ class RulesEngine:
         rules = list(memory_cache['rules'].data)
         return rules
 
-    # async def segmentation(self, event_types):
-    #
-    #     # todo cache segments for 30 sec
-    #     flat_payload = flatten(copy.deepcopy(self.profile.dict()))
-    #
-    #     for event_type in event_types:  # type: str
-    #
-    #         # Segmentation is run for every event
-    #
-    #         # todo segments are loaded one by one - maybe it is possible to load it at once
-    #         segments = await Segments.storage().load_by('eventType.keyword', event_type)
-    #         for segment in segments:
-    #
-    #             segment = Segment(**segment)
-    #             segment_id = segment.get_id()
-    #
-    #             try:
-    #
-    #                 if Condition.evaluate(segment.condition, flat_payload):
-    #                     segments = set(self.profile.segments)
-    #                     segments.add(segment_id)
-    #                     self.profile.segments = list(segments)
-    #
-    #                     # Yield only if segmentation triggered
-    #                     yield event_type, segment_id, None
-    #
-    #             except Exception as e:
-    #                 msg = 'Condition id `{}` could not evaluate `{}`. The following error was raised: `{}`'.format(
-    #                     segment_id, segment.condition, str(e).replace("\n", " "))
-    #
-    #                 yield event_type, segment_id, msg
-
     async def invoke(self, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list]]:
 
         flow_task_store = defaultdict(list)
-        results = defaultdict(list)
+        debug_info_by_event_type_and_rule_name = defaultdict(list)
 
         for event in self.events:  # type: Event
 
@@ -137,7 +105,8 @@ class RulesEngine:
                 try:
                     flow = await Flow.decode(rule.flow.id)
                 except Exception as e:
-                    result = DebugInfo(
+                    # This is empty DebugInfo without nodes
+                    debug_info = DebugInfo(
                         timestamp=time(),
                         event=Entity(id=event.id),
                         flow=FlowDebugInfo(
@@ -145,7 +114,7 @@ class RulesEngine:
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=103)]
                         )
                     )
-                    results[event.type].append({rule.name: result})
+                    debug_info_by_event_type_and_rule_name[event.type].append({rule.name: debug_info})
                     continue
 
                 if not flow.enabled:
@@ -180,10 +149,10 @@ class RulesEngine:
             for flow_id, event_id, rule_name, task in tasks:
                 # result = await task  # type: DebugInfo
                 try:
-                    result = await task  # type: DebugInfo
+                    debug_info = await task  # type: DebugInfo
                 except Exception as e:
                     # todo log error
-                    result = DebugInfo(
+                    debug_info = DebugInfo(
                         timestamp=time(),
                         event=Entity(id=event_id),
                         flow=FlowDebugInfo(
@@ -192,7 +161,7 @@ class RulesEngine:
                         )
                     )
 
-                results[event_type].append({rule_name: result})
+                debug_info_by_event_type_and_rule_name[event_type].append({rule_name: debug_info})
 
         # Save profile
 
@@ -218,34 +187,6 @@ class RulesEngine:
                 save_old_profiles_task = asyncio.create_task(disabled_profiles.bulk().save())
                 save_tasks.append(save_old_profiles_task)
 
-            # merge_key_values = self._get_merging_keys_and_values()
-            #
-            # # Are there any non-empty values in current profile
-            #
-            # if len(merge_key_values) > 0:
-            #
-            #     # Load all profiles that match merging criteria
-            #     existing_profiles = await Operation.load_profiles_to_merge(merge_key_values, limit=2000)
-            #
-            #     # Filter only profiles that are not current profile and where not merged
-            #     profiles_to_merge = [p for p in existing_profiles if p.id != self.profile.id and p.active is True]
-            #
-            #     # Are there any profiles to merge?
-            #     if len(profiles_to_merge) > 0:
-            #         # Add current profile to existing ones and get merged profile
-            #         merged_profile = Profiles.merge(profiles_to_merge, self.profile)
-            #
-            #         # Replace current profile with merged profile
-            #         self.profile.replace(merged_profile)
-            #
-            #         # Deactivate all other profiles except merged one
-            #
-            #         profiles_to_disable = [p for p in existing_profiles if p.id != self.profile.id]
-            #         disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable, merge_with=self.profile.id)
-            #
-            #         save_old_profiles_task = asyncio.create_task(Profiles(disabled_profiles).bulk().save())
-            #         save_tasks.append(save_old_profiles_task)
-
         # Must be the last operation
         if self.profile.operation.needs_update():
             save_tasks.append(asyncio.create_task(self.profile.storage().save()))
@@ -253,7 +194,7 @@ class RulesEngine:
         # run save tasks
         await asyncio.gather(*save_tasks)
 
-        return results, segmentation_info
+        return debug_info_by_event_type_and_rule_name, segmentation_info
 
     @staticmethod
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
@@ -278,18 +219,19 @@ class RulesEngine:
 
         """Runs rules and flow and saves debug info """
 
-        flow_result_by_event, segmentation_info = await self.invoke(source_id)
+        debug_info_by_event_type_and_rule_name, segmentation_info = await self.invoke(source_id)
 
         # Collect debug info
+
         record = []
-        for debug_info_record in EventDebugRecord.encode(flow_result_by_event):  # type: EventDebugRecord
+        for debug_info_record in EventDebugRecord.encode(debug_info_by_event_type_and_rule_name):  # type: EventDebugRecord
             record.append(debug_info_record)
 
         # Save in debug index
         bulk = CollectionCrud("debug-info", record)
         await bulk.save()
 
-        return flow_result_by_event, segmentation_info
+        return debug_info_by_event_type_and_rule_name, segmentation_info
 
     @staticmethod
     async def raise_event(event_type, properties, session, profile, source_id):

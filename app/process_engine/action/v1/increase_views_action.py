@@ -11,13 +11,13 @@ class IncreaseViewsAction(ActionRunner):
         pass
 
     async def run(self, payload):
-
         if self.profile.stats is None:
             self.profile.stats = ProfileStats()
 
         self.profile.increase_views()
 
         return Result(port="payload", value=payload)
+
 
 def register() -> Plugin:
     return Plugin(
@@ -40,4 +40,3 @@ def register() -> Plugin:
             group=["Stats"]
         )
     )
-
