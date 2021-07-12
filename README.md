@@ -67,7 +67,7 @@ Feature freeze. Fixes and testing.
 - [ ] Integration tests
 - [ ] Project management: Feature list for contributors
 - [ ] UX: Simplify selecting event for debugging
-- [ ] 
+- [ ] Console log
 
 
 
