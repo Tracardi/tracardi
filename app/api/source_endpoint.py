@@ -12,6 +12,8 @@ from ..domain.enum.indexes_source_bool import IndexesSourceBool
 from ..domain.sources import Sources
 from ..domain.storage_result import StorageResult
 from ..domain.value_object.bulk_insert_result import BulkInsertResult
+from ..event_server.service.persistence_service import PersistenceService
+from ..service.storage.elastic_storage import ElasticStorage
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
@@ -26,7 +28,7 @@ async def get_source_types() -> dict:
     """
 
     try:
-        return {"total": 10, "result": ["web-page", "mysql", "elastic-search", "mongodb"]}
+        return {"total": 3, "result": ["web-page", "storage", "queue"]}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -173,3 +175,9 @@ async def delete_source(id: str):
         return await entity.storage("source").delete()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/sources/refresh", tags=["source"])
+async def refresh_sources():
+    service = PersistenceService(ElasticStorage(index_key='source'))
+    return await service.refresh()

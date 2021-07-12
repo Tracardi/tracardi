@@ -98,6 +98,18 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
+    async def refresh(self, params=None, headers=None):
+        try:
+            return await self.storage.refresh(params, headers)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            raise StorageException(str(e))
+
+    async def flush(self, params=None, headers=None):
+        try:
+            return await self.storage.flush(params, headers)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            raise StorageException(str(e))
+
     async def sql(self, sql):
         try:
             query = await self.storage.translate(sql)

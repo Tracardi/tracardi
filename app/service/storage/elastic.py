@@ -160,6 +160,13 @@ class Elastic:
     async def list_indices(self):
         return await self._client.indices.get("*")
 
+    async def refresh(self, index, params=None, headers=None):
+        return await self._client.indices.refresh(index=index, params=params, headers=headers)
+
+    async def flush(self, index, params=None, headers=None):
+        return await self._client.indices.flush(index=index, params=params, headers=headers)
+
+
     @staticmethod
     def _get_elastic_config():
 

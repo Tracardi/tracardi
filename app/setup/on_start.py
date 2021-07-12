@@ -44,6 +44,7 @@ async def add_plugins():
 
         'app.process_engine.action.v1.if_action',
         'app.process_engine.action.v1.new_visit_action',
+        'app.process_engine.action.v1.new_profile_action',
 
         'app.process_engine.action.v1.detect_client_agent_action',
 

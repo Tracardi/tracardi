@@ -9,6 +9,8 @@ from ..domain.entity import Entity
 from ..domain.segment import Segment
 from ..domain.segments import Segments
 from ..domain.value_object.bulk_insert_result import BulkInsertResult
+from ..event_server.service.persistence_service import PersistenceService
+from ..service.storage.elastic_storage import ElasticStorage
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
@@ -31,6 +33,12 @@ async def delete_segment(id: str):
         return await entity.storage('segment').delete()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/segments/refresh", tags=["segment"])
+async def refresh_segments():
+    service = PersistenceService(ElasticStorage(index_key='segment'))
+    return await service.refresh()
 
 
 @router.get("/segments", tags=["segment"])

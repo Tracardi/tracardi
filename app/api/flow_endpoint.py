@@ -30,8 +30,10 @@ from ..domain.session import Session
 from ..domain.settings import Settings
 from ..domain.source import Source
 from ..domain.value_object.bulk_insert_result import BulkInsertResult
+from ..event_server.service.persistence_service import PersistenceService
 
 from ..service.storage.crud import EntityStorageCrud
+from ..service.storage.elastic_storage import ElasticStorage
 from ..setup.on_start import add_plugin
 
 router = APIRouter(
@@ -193,6 +195,7 @@ async def upsert_flow(flow: Flow):
 
 @router.post("/flow/metadata", tags=["flow"], response_model=BulkInsertResult)
 async def upsert_flow_details(flow_metadata: FlowMetaData):
+    sleep(1)
     try:
         entity = Entity(id=flow_metadata.id)
         flow_record = await entity.storage("flow").load(FlowRecord)  # type: FlowRecord
@@ -215,6 +218,18 @@ async def upsert_flow_details(flow_metadata: FlowMetaData):
         return await flow_record.storage().save()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/flow/metadata/refresh", tags=["flow"])
+async def flow_refresh():
+    service = PersistenceService(ElasticStorage(index_key='flow'))
+    return await service.refresh()
+
+
+@router.get("/flow/metadata/flush", tags=["flow"])
+async def flow_refresh():
+    service = PersistenceService(ElasticStorage(index_key='flow'))
+    return await service.flush()
 
 
 @router.post("/flow/draft/metadata", tags=["flow"], response_model=BulkInsertResult)
@@ -261,38 +276,39 @@ async def debug_flow(flow: GraphFlow):
     # """
     # try:
 
-        profile = Profile(id="@debug-profile-id")
-        session = Session(id="@debug-session-id")
-        session.operation.new = True
-        event = Event(
-            id='@debug-event-id',
-            type="@debug-event-type",
-            source=Source(id="@debug-source-id", type="web-page"),
-            session=session,
-            profile=profile,
-            context=Context()
-        )
+    profile = Profile(id="@debug-profile-id")
+    session = Session(id="@debug-session-id")
+    session.operation.new = True
+    event = Event(
+        id='@debug-event-id',
+        type="@debug-event-type",
+        source=Source(id="@debug-source-id", type="web-page"),
+        session=session,
+        profile=profile,
+        context=Context()
+    )
 
-        workflow = WorkFlow(
-            FlowHistory(history=[]),
-            session,
-            profile,
-            event
-        )
-        debug_info = await workflow.invoke(flow, debug=True)
+    workflow = WorkFlow(
+        FlowHistory(history=[]),
+        session,
+        profile,
+        event
+    )
+    debug_info = await workflow.invoke(flow, debug=True)
 
-        if profile.operation.needs_update():
-            profile_save_result = await profile.storage().save()
-        else:
-            profile_save_result = None
+    if profile.operation.needs_update():
+        profile_save_result = await profile.storage().save()
+    else:
+        profile_save_result = None
 
-        return {
-            "debugInfo": debug_info.dict(),
-            "update": profile_save_result
-        }
+    return {
+        "debugInfo": debug_info.dict(),
+        "update": profile_save_result
+    }
 
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=str(e))
+
+# except Exception as e:
+#     raise HTTPException(status_code=500, detail=str(e))
 
 
 # @router.post("/flow/{id}/debug", tags=["flow"])
@@ -361,7 +377,7 @@ async def get_plugin(id: str):
 
 
 @router.get("/flow/action/plugin/{id}/hide/{state}", tags=["flow", "action", "plugin"], response_model=BulkInsertResult)
-async def get_plugin(id: str, state: YesNo):
+async def get_plugin_state(id: str, state: YesNo):
     """
     Returns FlowActionPlugin object.
     """
@@ -380,7 +396,7 @@ async def get_plugin(id: str, state: YesNo):
 
 @router.get("/flow/action/plugin/{id}/enable/{state}", tags=["flow", "action", "plugin"],
             response_model=BulkInsertResult)
-async def get_plugin(id: str, state: YesNo):
+async def get_plugin_enabled(id: str, state: YesNo):
     """
     Returns FlowActionPlugin object.
     """
@@ -496,6 +512,9 @@ async def register_plugin_by_module(module: str):
     """
 
     try:
-        return await add_plugin(module)
+        result = await add_plugin(module)
+        service = PersistenceService(ElasticStorage(index_key='action'))
+        await service.refresh()
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -56,6 +56,9 @@ class ElasticStorage:
     async def translate(self, sql):
         return await self.storage.translate(sql)
 
+    async def refresh(self, params=None, headers=None):
+        return await self.storage.refresh(self.index.get_write_index(), params, headers)
+
     async def load_by(self, field, value):
         query = {
             "query": {
@@ -95,6 +98,7 @@ class ElasticStorage:
             }
         }
 
-        print(query)
-
         return await self.search(query)
+
+    async def flush(self, params, headers):
+        return await self.storage.flush(self.index.get_write_index(), params, headers)

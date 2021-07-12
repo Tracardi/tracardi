@@ -19,7 +19,6 @@ router = APIRouter(
 
 @router.get("/rule/{id}", tags=["rule"], response_model=Rule)
 async def get_rule(id: str):
-
     """
     Returns rule or None if rule does not exist.
     """
@@ -70,3 +69,9 @@ async def get_rules_attached_to_flow(id: str):
         return rules
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/rules/refresh", tags=["rules"])
+async def refresh_rules():
+    service = PersistenceService(ElasticStorage(index_key='rule'))
+    return await service.refresh()
