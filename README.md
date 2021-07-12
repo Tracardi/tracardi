@@ -49,8 +49,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [x] Cleaner debug information
 - [ ] Documentation for all delivered actions
 - [x] Global state of profile, session, event visible in Debugger.
-- [ ] Branding
-- [ ] Join Node
+- [x] Branding
 
 #### Removals
 
