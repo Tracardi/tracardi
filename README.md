@@ -50,6 +50,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Documentation for all delivered actions
 - [x] Global state of profile, session, event visible in Debugger.
 - [x] Branding
+- [ ] Custom nodes naming
 
 #### Removals
 
@@ -67,6 +68,7 @@ Feature freeze. Fixes and testing.
 - [ ] Project management: Feature list for contributors
 - [ ] UX: Simplify selecting event for debugging
 - [ ] Console log
+- [ ] Search
 
 
 
