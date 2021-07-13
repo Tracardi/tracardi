@@ -46,7 +46,7 @@ def register() -> Plugin:
             name='If',
             desc='This a conditional action that conditionally runs a branch of workflow.',
             type='flowNode',
-            width=100,
+            width=200,
             height=100,
             icon='if',
             editor='text',

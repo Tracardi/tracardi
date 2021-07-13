@@ -118,6 +118,7 @@ async def get_flows(query: str = None):
 
 @router.get("/flows/by_tag", tags=["flow"])
 async def get_grouped_flows(query: str = None):
+    sleep(1)
     try:
         flows = Flows()
         result = await flows.bulk().load()
@@ -271,44 +272,43 @@ async def upsert_flow_details(id: str, lock: str):
 
 @router.post("/flow/debug", tags=["flow"])
 async def debug_flow(flow: GraphFlow):
-    # """
-    #     Debugs flow sent in request body
-    # """
-    # try:
+    """
+        Debugs flow sent in request body
+    """
+    try:
 
-    profile = Profile(id="@debug-profile-id")
-    session = Session(id="@debug-session-id")
-    session.operation.new = True
-    event = Event(
-        id='@debug-event-id',
-        type="@debug-event-type",
-        source=Source(id="@debug-source-id", type="web-page"),
-        session=session,
-        profile=profile,
-        context=Context()
-    )
+        profile = Profile(id="@debug-profile-id")
+        session = Session(id="@debug-session-id")
+        session.operation.new = True
+        event = Event(
+            id='@debug-event-id',
+            type="@debug-event-type",
+            source=Source(id="@debug-source-id", type="web-page"),
+            session=session,
+            profile=profile,
+            context=Context()
+        )
 
-    workflow = WorkFlow(
-        FlowHistory(history=[]),
-        session,
-        profile,
-        event
-    )
-    debug_info = await workflow.invoke(flow, debug=True)
+        workflow = WorkFlow(
+            FlowHistory(history=[]),
+            session,
+            profile,
+            event
+        )
+        debug_info = await workflow.invoke(flow, debug=True)
 
-    if profile.operation.needs_update():
-        profile_save_result = await profile.storage().save()
-    else:
-        profile_save_result = None
+        if profile.operation.needs_update():
+            profile_save_result = await profile.storage().save()
+        else:
+            profile_save_result = None
 
-    return {
-        "debugInfo": debug_info.dict(),
-        "update": profile_save_result
-    }
+        return {
+            "debugInfo": debug_info.dict(),
+            "update": profile_save_result
+        }
 
-
-# except Exception as e:
-#     raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # @router.post("/flow/{id}/debug", tags=["flow"])

@@ -27,7 +27,7 @@ def register() -> Plugin:
             name='Read event',
             desc='Loads event into workflow.',
             type='flowNode',
-            width=100,
+            width=200,
             height=100,
             icon='event',
             group=["Read"]
