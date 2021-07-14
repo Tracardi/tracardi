@@ -44,7 +44,7 @@ nav:
         - installation/elasticsearch/elastic_max_connections.md
       - installation/truble_shooting.md
   - Running:
-      - index.md
+      - running/index.md
   - Getting started:
     - getting_started/index.md
     - getting_started/code_definitions.md
