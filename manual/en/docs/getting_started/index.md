@@ -1,3 +1,5 @@
+# What is Tracardi?
+
 TRACARDI open-source customer data platform offers you excellent control over your customer data with its broad set of features.
 
 ## Features

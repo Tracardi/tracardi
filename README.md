@@ -94,7 +94,7 @@ Feature freeze. Fixes and testing.
 - [ ] Finish manual
 - [ ] Error log
 - [ ] text/plain - editor in config
-- [ ] Editable name for node in flow
+- [x] Editable name for node in flow
 
 
 ### Version 0.6.0
@@ -105,9 +105,14 @@ Feature freeze. Fixes and testing.
 
 # Installation
 
-In order to run Tracardi you must have docker installed on your linux machine. Please refer to docker installation manual to see how to install docker.
+In order to run Tracardi you must have docker installed on your linux machine. Please refer to 
+docker installation manual to see how to install docker.
 
-## Start Elasticsearch
+## Dependencies
+
+Tracardi need elasticsearch as its backend. Please run elasticsearch single node docker before you start Tracardi. 
+
+### Start Elasticsearch docker
 
 ```
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.13.2
@@ -115,16 +120,12 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 
 ## Start Tracardi API
 
-Tracardi uses elastic search as its storage. Tracardi must connect to elastic.
-Above commad runs elastic on your laptop thats why you must provide laptop's IP for Tracardi to
-connect to elastic. 
+Tracardi must connect to elastic. To do that we will set ELASTIC_HOST variable to your laptop's IP. 
 
 ```
-git clone https://github.com/atompie/tracardi.git
-cd tracardi/
-docker build . -t tracardi-api
-docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi-api
+docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi/tracardi:0.5.0.rc-1
 ```
+
 
 ## Test Tracardi API
 

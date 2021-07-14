@@ -10,7 +10,7 @@ customer actions and help them, e.g. in the purchasing process.
 Events consist of: 
 
 * the event name, 
-* event proprties, and 
+* event properties, and 
 * context.
 
 `The name` is a simple string of characters that identifies the event. An example event may be, 
@@ -33,7 +33,6 @@ on the source and session.
 Example of track data payload.
 
 ```json
-
 {
    "source": {
      "id": "source-id"
@@ -57,7 +56,6 @@ Example of track data payload.
 Not all data is required. Below you can find only required data.
 
 ```json
-
 {
    "source": {
      "id": "source-id"
@@ -92,7 +90,6 @@ may have any schema.
 Example of event data payload with context `attached`.
 
 ```json
-
 {
    "source": {
      "id": "source-id"

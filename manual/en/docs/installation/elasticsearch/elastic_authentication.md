@@ -1,9 +1,12 @@
 # Elastic search authentication
 
-Demendong on you production installation you may need to authenticate to elastic search.
+When preparing on you production installation you may need to authenticate to 
+elastic search.
 
-We provide different types of elastic search authentication. If you experience Authentication Error please take a closer look at the Tracardi configuration. 
-You probably need to provide a username and password for an elastic-search connection. 
+We provide different types of elastic search authentication. If you experience 
+Authentication Error please take a closer look at the Tracardi configuration. 
+You probably need to provide a username and password for an elastic-search 
+connection. 
 
 
 ## Basic Authentication

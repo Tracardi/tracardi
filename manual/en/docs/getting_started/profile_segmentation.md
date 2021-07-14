@@ -41,7 +41,7 @@ Segment named: `Frequent visitor`.
 He has a criterion that looks like this:
 
 ``
-profile@stats.visits> 10
+profile@stats.visits > 10
 ``
 
 #### Result of segmentation

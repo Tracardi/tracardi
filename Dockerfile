@@ -7,11 +7,17 @@ RUN apt-get install -y git
 RUN mkdir app/
 WORKDIR /app
 
-## Install dependencies
-COPY app/requirements.txt .
-RUN pip install -r requirements.txt
 
 ## Copy application
 COPY app app/
+## Install dependencies
+RUN pip install -r app/requirements.txt
+
+## Copy manual
 COPY manual manual/
+## Install dependencies
+RUN pip install -r manual/requirements.txt
+WORKDIR /app/manual/en
+RUN mkdocs build
+
 ENV VARIABLE_NAME="application"
