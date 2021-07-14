@@ -23,6 +23,24 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
  * **Automation** - TRACARDI is a great framework for creating
    marketing automation apps. You can send your data to other systems easily
 
+## Screenshots
+
+### Browsing events
+
+![Screenshot 1](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main.png)
+
+### Workflow of consumer data collection and enhancement 
+
+![Workflow](https://pbs.twimg.com/media/E3WHL7nWUAA7men?format=jpg&name=large)
+
+### Trigger rules
+
+![Screenshot 2](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main1.png)
+
+### Editing plugins
+
+![Screenshot 3](https://pbs.twimg.com/media/E4FqslsVEAgRS6d?format=jpg&name=large)
+
 # Read-map
 
 ### Version 0.4.0
@@ -50,7 +68,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 - [ ] Documentation for all delivered actions
 - [x] Global state of profile, session, event visible in Debugger.
 - [x] Branding
-- [ ] Custom nodes naming
+- [x] Custom nodes naming
 
 #### Removals
 
@@ -69,8 +87,6 @@ Feature freeze. Fixes and testing.
 - [ ] UX: Simplify selecting event for debugging
 - [ ] Console log
 - [ ] Search
-
-
 
 ### Version 0.5.0
 
@@ -95,52 +111,55 @@ Feature freeze. Fixes and testing.
 - [ ] Error log
 - [ ] text/plain - editor in config
 - [x] Editable name for node in flow
-
-
-### Version 0.6.0
-
-#### Features:
-   - [ ] Scheduler
+- [ ] Scheduler
 
 
 # Installation
 
-In order to run Tracardi you must have docker installed on your linux machine. Please refer to 
-docker installation manual to see how to install docker.
+The easiest way to run Tracardi is to run it as a docker container. 
+
+In order to do that you must have docker installed on your local machine. 
+Please refer to docker installation manual to see how to install docker.
 
 ## Dependencies
 
-Tracardi need elasticsearch as its backend. Please run elasticsearch single node docker before you start Tracardi. 
+Tracardi need elasticsearch as its backend. Please pull and run elasticsearch single node docker before you start Tracardi. 
 
-### Start Elasticsearch docker
-
+You can do it with this command.
 ```
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.13.2
 ```
 
 ## Start Tracardi API
 
-Tracardi must connect to elastic. To do that we will set ELASTIC_HOST variable to your laptop's IP. 
+Now pull and run Tracardi backend.
 
 ```
 docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi/tracardi:0.5.0.rc-1
 ```
 
-
-## Test Tracardi API
-
-Go to http://localhost:8686/docs and see if you get the API documentation.
+Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variable to reference your laptop's IP. 
 
 ## Start Tracardi GUI
 
-Building may take some time  - up to 15min.
+Now pull and run Tracardi Graphical User Interface.
 
 ```
-git clone https://github.com/atompie/tracardi-gui.git
-cd tracardi-gui/
-docker build . -t tracardi-gui
-docker run -p 8787:80 -e API_URL=http://127.0.0.1:8686 tracardi-gui
+docker run -p 8787:80 -e API_URL=http://127.0.0.1:8686 tracardi/tracardi-gui:0.5.0.rc-1
 ```
+
+## Log-in
+
+Visit http://127.0.0.1:8787 and login to Tracardi GUI with default username: admin and password: admin. 
+
+# Running Tracardi with docker compose
+
+```
+docker-compose up
+```
+
+This will build and install Tracardi and all required dependencies such as elastic search on your computer. 
+Hence that this type of setup is for demonstration purpose only.
 
 ## Tracardi GUI
 
@@ -151,37 +170,11 @@ Open browser and go to http://127.0.0.1:8787 Login with default user admin and p
 TRACARDI was developed with scalability in mind. Scaling is as easy as scaling a docker container. 
 No additional configuration is needed. 
 
-# Developement tracking
+# Development tracking
 
 TRACARDI is #buildinpublic that means that you can track and influence its development. 
 
 Take a look at [YouTube channel](https://bit.ly/3pbdbPR) and see what Tracardi can do for you.
-
-
-## Screenshots
-
-### Browsing events
-
-![Screenshot 1](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main.png)
-
-### Workflow of consumer data collection and enhancement 
-
-![Workflow](https://pbs.twimg.com/media/E3WHL7nWUAA7men?format=jpg&name=large)
-
-### Trigger rules
-
-![Screenshot 2](https://github.com/atompie/tracardi/raw/0.4.0-dev/screenshots/main1.png)
-
-### Editing plugins
-
-![Screenshot 3](https://pbs.twimg.com/media/E4FqslsVEAgRS6d?format=jpg&name=large)
-
-
-# Front-End
-
-This repository contains source for tracardi backend API. You must run it with [https://github.com/atompie/tracardi-gui] 
-to see the frontend. 
-
 
 # Call for contributors
 
