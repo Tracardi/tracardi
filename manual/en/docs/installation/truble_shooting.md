@@ -1,4 +1,8 @@
-#### Address already in use
+# Trouble shooting
+
+Known issues that may come up while running Tracardi.
+
+## Address already in use
 
 If you experience:
 
@@ -26,3 +30,15 @@ Tracardi to different port.
       - elasticsearch
 ```
 
+
+## Connecting to Elasticsearch
+
+```
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host elasticsearch:9200 ssl:default [Connection refused]
+```
+
+This information may come up if elasticsearch is not running. When elasticsearch 
+starts Tracardi will resume automatically. This information is usually displayed 
+when Tracardi starts before elastic is ready. Tracardi waits for elastic to start and checks
+if it's ready every 5 seconds.
+ 

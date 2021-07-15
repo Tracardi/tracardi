@@ -29,7 +29,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 # Read-map
 
-### Version 0.4.0
+### Version 0.5.0
 
 #### Use cases
 - [x] Collecting events from web-page by JavaScript
@@ -60,7 +60,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 - [x] Remove UQL Manual
 
-### Version 0.4.1
+### Version 0.5.1
 
 Feature freeze. Fixes and testing.
 
@@ -69,12 +69,13 @@ Feature freeze. Fixes and testing.
 - [ ] Scaling test
 - [ ] Unit tests
 - [ ] Integration tests
+- [ ] Full profile, event, and sessions details page
 - [ ] Project management: Feature list for contributors
 - [ ] UX: Simplify selecting event for debugging
 - [ ] Console log
 - [ ] Search
 
-### Version 0.5.0
+### Version 0.6.0
 
 #### Use cases
 
@@ -84,7 +85,7 @@ Feature freeze. Fixes and testing.
 - [ ] Every time segments raises error log that error to tracardi-segment-error index - so we can see that this segment is not right. 
 - [ ] Standard Error Reporting
 - [ ] Tracardi user profile domain object
-- [ ] Setting user and password from interface (user profile)
+- [ ] Setting user and password from interface (user profile), use keycloak
 - [ ] Forgot password functionality
 - [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
 - [ ] Reading data from external sources – use source configuration to fetch data
