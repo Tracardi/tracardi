@@ -170,7 +170,7 @@ class Profile(Entity):
 
         entity = Entity(id=id)
         profile = await entity.storage('profile').load(Profile)  # type: Profile
-        if profile.mergedWith is not None:
+        if profile is not None and profile.mergedWith is not None:
             profile = await Profile.load_current(profile.mergedWith)
         return profile
 

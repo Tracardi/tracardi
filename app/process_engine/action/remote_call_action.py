@@ -82,7 +82,8 @@ def register() -> Plugin:
                 "method": "undefined",
                 "url": "undefined",
                 "payloadIn": "body|params"
-            }
+            },
+            manual="remote_call_action"
         ),
         metadata=MetaData(
             name='Remote call',

@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from starlette.staticfiles import StaticFiles
 from app.api import token_endpoint, rule_endpoint, source_endpoint, event_endpoint, \
     profile_endpoint, flow_endpoint, generic_endpoint, project_endpoint, credentials_endpoint, segments_endpoint, \
-    tql_endpoint, graphql_endpoint
+    tql_endpoint, graphql_endpoint, health_endpoint
 from app.domain.flow_action_plugins import FlowActionPlugins
 from app.event_server import event_server_endpoint
 from app.service.storage.elastic import Elastic
@@ -113,6 +113,7 @@ application.include_router(event_endpoint.router)
 application.include_router(profile_endpoint.router)
 application.include_router(token_endpoint.router)
 application.include_router(generic_endpoint.router)
+application.include_router(health_endpoint.router)
 
 
 @application.on_event("startup")
@@ -129,11 +130,6 @@ async def app_starts():
 async def app_shutdown():
     elastic = Elastic.instance()
     await elastic.close()
-
-
-@application.post("/json")
-async def track(r: Request):
-    return await r.json()
 
 
 @application.get("/action/plugins")
