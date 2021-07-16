@@ -167,8 +167,6 @@ class Index:
         if time_zone:
             es_query['aggs']['items_over_time']['date_histogram']['time_zone'] = time_zone
 
-        print(es_query)
-
         try:
             result = await self.storage_service.query(es_query)
         except StorageException as e:
