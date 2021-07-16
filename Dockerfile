@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 RUN apt-get update
 RUN apt-get install -y git
@@ -6,7 +6,6 @@ RUN apt-get install -y git
 # set the working directory in the container
 RUN mkdir app/
 WORKDIR /app
-
 
 ## Copy application
 COPY app app/

@@ -28,13 +28,24 @@ class Index:
         query = to_sql_query(self.read_index, query=query, limit=limit)
         return (await self.storage_service.sql(query)).dict()
 
+    @staticmethod
+    def _convert_time_zone(query, min_date_time, max_date_time):
+        time_zone = "UTC" if query.timeZone is None or query.timeZone == "" else query.timeZone
+
+        if time_zone != "UTC":
+            min_date_time, time_zone = query.convert_to_local_datetime(min_date_time, time_zone)
+            max_date_time, time_zone = query.convert_to_local_datetime(max_date_time, time_zone)
+
+        return min_date_time, max_date_time, time_zone
+
     async def time_range(self, query: DatetimeRangePayload) -> QueryResult:
 
         if self.index not in self.time_fields_map:
             raise ValueError("No time_field available on `{}`".format(self.index))
 
         min_date_time, max_date_time = query.get_dates()  # type: datetime, datetime
-        time_zone = query.timeZone
+        min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
+
         limit = query.limit
         offset = query.offset
         sql = query.where
@@ -112,7 +123,8 @@ class Index:
                 }
 
         min_date_time, max_date_time = query.get_dates()  # type: datetime, datetime
-        time_zone = query.timeZone
+        min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
+
         # limit = query.limit
         # offset = query.offset
         sql = query.where
@@ -121,6 +133,7 @@ class Index:
         interval, unit, format = __interval(min_date_time, max_date_time)
 
         sql = to_time_range_sql_query(self.read_index, time_field, min_date_time, max_date_time, sql)
+
         try:
             translated_query = await self.storage_service.translate(sql)
         except StorageException as e:
@@ -153,6 +166,8 @@ class Index:
 
         if time_zone:
             es_query['aggs']['items_over_time']['date_histogram']['time_zone'] = time_zone
+
+        print(es_query)
 
         try:
             result = await self.storage_service.query(es_query)

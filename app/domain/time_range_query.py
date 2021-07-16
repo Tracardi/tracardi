@@ -1,5 +1,6 @@
+import pytz
 from _datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Tuple
 from pydantic import BaseModel
 from enum import Enum
 
@@ -52,7 +53,7 @@ class DatetimePayload(BaseModel):
 
     @staticmethod
     def now():
-        now = datetime.now()
+        now = datetime.utcnow()
         return DatetimePayload(year=now.year, month=now.month, date=now.day,
                                hour=now.hour, minute=now.minute, second=now.second,
                                meridiem=now.strftime("%p"))
@@ -126,7 +127,7 @@ class DatetimeRangePayload(BaseModel):
     minDate: Optional[DatePayload] = None
     maxDate: Optional[DatePayload] = None
     where: Optional[str] = ""
-    timeZone: Optional[str] = "+00"
+    timeZone: Optional[str] = None
     offset: int = 0
     limit: int = 20
     rand: Optional[float] = 0
@@ -170,3 +171,13 @@ class DatetimeRangePayload(BaseModel):
 
     def _is_max_date_absolute(self):
         return self.maxDate is None or self.maxDate.is_absolute()
+
+    @staticmethod
+    def convert_to_local_datetime(utc_datetime, timezone) -> Tuple[datetime, Optional[str]]:
+        try:
+            local_tz = pytz.timezone(timezone)
+            local_dt = utc_datetime.replace(tzinfo=pytz.utc).astimezone(local_tz)
+            return local_tz.normalize(local_dt), timezone  # .normalize might be unnecessary
+        except pytz.exceptions.UnknownTimeZoneError as e:
+            # todo log error
+            return utc_datetime, None
