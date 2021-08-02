@@ -41,6 +41,7 @@ async def add_plugins():
         'app.process_engine.action.v1.debug_payload_action',
         'app.process_engine.action.v1.start_action',
         'app.process_engine.action.v1.end_action',
+        'app.process_engine.action.v1.inject_action',
 
         'app.process_engine.action.v1.increase_views_action',
         'app.process_engine.action.v1.increase_visits_action',
