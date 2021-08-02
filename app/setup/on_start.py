@@ -2,6 +2,8 @@ import asyncio
 import hashlib
 import os
 
+from tracardi_plugin_sdk.domain.register import Plugin
+
 from app.domain.flow_action_plugin import FlowActionPlugin
 from app.domain.record.flow_action_plugin_record import FlowActionPluginRecord
 from app.process_engine.module_loader import load_callable
@@ -12,7 +14,14 @@ __local_dir = os.path.dirname(__file__)
 async def add_plugin(module):
     try:
         plugin = load_callable(module, 'register')
-        plugin_data = plugin()
+        plugin_data = plugin()  # type: Plugin
+
+        if len(plugin_data.spec.inputs) > 1:
+            raise ValueError(
+                "Node can not have more then 1 input port. Found {} that is {}".format(
+                    plugin_data.spec.inputs,
+                    len(plugin_data.spec.inputs)
+                ))
 
         # Action plugin id is a hash of its module and className
 

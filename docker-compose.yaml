@@ -29,15 +29,6 @@ services:
       - 9300:9300
       - 9200:9200
 
-#  kibana:
-#    image: docker.elastic.co/kibana/kibana:7.13.1
-#    hostname: kibana
-#    ports:
-#      - 5601:5601
-#    environment:
-#      ELASTICSEARCH_URL: http://elasticsearch:9200
-#      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-
 volumes: # Define seperate volume for Elasticsearch data
   esdata1:
     driver: local
