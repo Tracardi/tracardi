@@ -19,6 +19,7 @@ from ..domain.event import Event
 from ..domain.flow import Flow, FlowGraphDataRecord
 from tracardi_graph_runner.domain.flow import Flow as GraphFlow
 from ..domain.flow_action_plugin import FlowActionPlugin
+from ..domain.plugin_import import PluginImport
 from ..domain.record.flow_action_plugin_record import FlowActionPluginRecord
 from ..domain.flow_action_plugins import FlowActionPlugins
 from ..domain.flow import FlowRecord
@@ -505,14 +506,14 @@ async def get_plugins_list(query: Optional[str] = None):
 
 
 @router.post("/flow/action/plugin/register", tags=["flow", "action", "plugin"], response_model=BulkInsertResult)
-async def register_plugin_by_module(module: str):
+async def register_plugin_by_module(plugin: PluginImport):
     """
     Registers action plugin by its module. Module must have register method that returns Plugin
     class filled with plugin metadata.
     """
 
     try:
-        result = await add_plugin(module)
+        result = await add_plugin(plugin.module, upgrade=plugin.upgrade)
         service = PersistenceService(ElasticStorage(index_key='action'))
         await service.refresh()
         return result

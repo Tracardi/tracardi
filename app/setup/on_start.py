@@ -11,9 +11,10 @@ from app.process_engine.module_loader import load_callable
 __local_dir = os.path.dirname(__file__)
 
 
-async def add_plugin(module):
+async def add_plugin(module, upgrade=False):
     try:
-        plugin = load_callable(module, 'register')
+        # loads and installs dependencies
+        plugin = load_callable(module, 'register', upgrade)
         plugin_data = plugin()  # type: Plugin
 
         if len(plugin_data.spec.inputs) > 1:
