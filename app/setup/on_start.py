@@ -13,6 +13,7 @@ __local_dir = os.path.dirname(__file__)
 
 async def add_plugin(module):
     try:
+        # loads and installs dependencies
         plugin = load_callable(module, 'register')
         plugin_data = plugin()  # type: Plugin
 
