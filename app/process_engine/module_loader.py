@@ -14,6 +14,6 @@ def import_and_install(package, upgrade=False):
     return importlib.import_module(package)
 
 
-def load_callable(module, className):
-    module = import_and_install(module)
+def load_callable(module, className, upgrade=False):
+    module = import_and_install(module, upgrade)
     return getattr(module, className)
