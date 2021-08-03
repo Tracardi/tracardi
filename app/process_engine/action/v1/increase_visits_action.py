@@ -30,7 +30,10 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             init=None,
-            manual="increase_visits_action"
+            manual="increase_visits_action",
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Increase visits',

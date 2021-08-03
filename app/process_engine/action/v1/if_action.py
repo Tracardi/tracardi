@@ -40,11 +40,15 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["TRUE", "FALSE"],
             init={"condition": "please-configure-condition"},
-            manual="if_action"
+            manual="if_action",
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='If',
             desc='This a conditional action that conditionally runs a branch of workflow.',
+            keywords=['condition'],
             type='flowNode',
             width=200,
             height=100,

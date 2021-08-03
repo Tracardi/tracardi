@@ -21,7 +21,10 @@ def register() -> Plugin:
             inputs=["void"],
             outputs=['session'],
             init=None,
-            manual="read_session_action"
+            manual="read_session_action",
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Read session',

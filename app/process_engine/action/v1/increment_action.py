@@ -59,7 +59,10 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             init={"field": None, "increment": 1},
-            manual="increment_action"
+            manual="increment_action",
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Increment counter',

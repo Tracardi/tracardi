@@ -59,7 +59,10 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             init={"field": None, "decrement": 1},
-            manual="decrement_action"
+            manual="decrement_action",
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Decrement counter',

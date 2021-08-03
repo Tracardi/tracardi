@@ -21,7 +21,10 @@ def register() -> Plugin:
             className='ReadEventAction',
             inputs=['void'],
             outputs=["event"],
-            init=None
+            init=None,
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Read event',

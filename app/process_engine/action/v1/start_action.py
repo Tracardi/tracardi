@@ -23,12 +23,16 @@ def register() -> Plugin:
             className='StartAction',
             inputs=["void"],
             outputs=["payload"],
-            init=None
+            init=None,
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Start',
             desc='Starts workflow and returns empty payload.',
             type='flowNode',
+            keywords=['start node'],
             width=200,
             height=100,
             icon='start',

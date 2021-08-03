@@ -21,7 +21,10 @@ def register() -> Plugin:
             className='JoinAction',
             inputs=["payload"],
             outputs=["payload"],
-            init=None
+            init=None,
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Join',

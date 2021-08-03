@@ -56,7 +56,10 @@ def register() -> Plugin:
                     "target1": "source1",
                     "target2": "source2",
                 }
-            }
+            },
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Copy/Set Trait',
