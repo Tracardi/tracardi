@@ -69,12 +69,16 @@ def register() -> Plugin:
                 "event": {
                     "id": "undefined",
                 }
-            }
+            },
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Debug',
             desc='Loads debug payload into flow. This action is executed only in debug mode. ' +
                  'Use it to inject payload defined it config to analyse you workflow.',
+            keywords=['start node'],
             type='flowNode',
             width=100,
             height=100,

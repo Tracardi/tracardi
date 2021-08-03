@@ -31,7 +31,10 @@ def register() -> Plugin:
             outputs=["trait"],
             init={
                 "trait": "undefined"
-            }
+            },
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Cut out trait',

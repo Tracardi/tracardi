@@ -24,11 +24,15 @@ def register() -> Plugin:
             inputs=["void"],
             outputs=['TRUE', 'FALSE'],
             init=None,
-            manual="new_profile_action"
+            manual="new_profile_action",
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='New profile',
             desc='If new profile then it returns true on TRUE output, otherwise returns false on FALSE port.',
+            keywords=['condition'],
             type='flowNode',
             width=200,
             height=100,

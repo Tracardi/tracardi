@@ -98,7 +98,10 @@ def register() -> Plugin:
             inputs=["void"],
             outputs=["client-info"],
             init=None,
-            manual="detect_client_agent_action"
+            manual="detect_client_agent_action",
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Get client agent',

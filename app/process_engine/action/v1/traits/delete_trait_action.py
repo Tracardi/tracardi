@@ -42,7 +42,10 @@ def register() -> Plugin:
                     "payload@undefied",
                     "profile@undefined",
                 ]
-            }
+            },
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Delete Trait',

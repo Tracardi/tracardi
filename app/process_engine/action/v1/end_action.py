@@ -19,7 +19,11 @@ def register() -> Plugin:
             module='app.process_engine.action.v1.end_action',
             className='EndAction',
             inputs=["void"],
-            outputs=[]
+            outputs=[],
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
+
         ),
         metadata=MetaData(
             name='End',

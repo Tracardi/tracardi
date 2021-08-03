@@ -24,11 +24,15 @@ def register() -> Plugin:
             inputs=[],
             outputs=["value"],
             init={"inject": {}},
-            manual='inject_action'
+            manual='inject_action',
+            version='0.1',
+            license="MIT",
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Inject',
             desc='Injector.',
+            keywords=['start node'],
             type='flowNode',
             width=100,
             height=100,
