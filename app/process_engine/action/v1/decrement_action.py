@@ -2,7 +2,7 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from app.domain.profile import Profile
-from app.process_engine.dot_accessor import DotAccessor
+from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
 class DecrementAction(ActionRunner):
