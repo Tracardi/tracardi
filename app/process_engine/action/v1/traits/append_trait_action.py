@@ -5,7 +5,7 @@ from tracardi_plugin_sdk.action_runner import ActionRunner
 from app.domain.event import Event
 from app.domain.profile import Profile
 from app.domain.session import Session
-from app.process_engine.dot_accessor import DotAccessor
+from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
 class AppendTraitAction(ActionRunner):
