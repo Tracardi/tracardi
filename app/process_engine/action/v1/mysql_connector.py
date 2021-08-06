@@ -15,15 +15,16 @@ class MySQL(ActionRunner):
         self.password = kwargs['password'] if 'password' in kwargs else None
         self.host = kwargs['host'] if 'host' in kwargs else None
         self.database = kwargs['database'] if 'database' in kwargs else None
-        self.engine = create_engine(f'mysql://'+self.user+":"+self.password+"@"+self.host+"/"+self.database, encoding='utf-8', echo=True)
+
+    async def run(self, void):
+        self.engine = create_engine(
+            f'mysql://' + self.user + ":" + self.password + "@" + self.host + "/" + self.database, encoding='utf-8',
+            echo=True)
         try:
             print(self.engine.connect())
             self.connection_status = True
         except:
             self.connection_status = False
-
-    async def run(self, void):
-        print("end input", void)
         return Result(port='session', value=self.connection_status)
 
 
@@ -38,7 +39,7 @@ def register() -> Plugin:
             init={'host': None,
                   'user': None,
                   'password': None,
-                  'database': 'jazda'},
+                  'database': None},
             version='0.1',
             license="MIT",
             author="iLLu"
