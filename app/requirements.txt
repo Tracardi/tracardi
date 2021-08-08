@@ -1,7 +1,4 @@
-fastapi==0.68.0
-uvicorn==0.14.0
 pydantic==1.8.2
-aiofiles==0.7.0
 aiohttp==3.7.4.post0
 elasticsearch==7.13.4
 prodict==0.8.18
