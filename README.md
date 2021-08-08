@@ -25,7 +25,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 ## Screenshots
 
-![Screenshot 1](https://raw.githubusercontent.com/atompie/tracardi/0.5.0-dev/raw/intro5.png)
+![Screenshot 1](https://photos.app.goo.gl/WGeRtN3xN45dakcf7)
 
 # Read-map
 
