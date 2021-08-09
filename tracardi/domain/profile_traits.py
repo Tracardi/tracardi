@@ -1,9 +1,6 @@
 from typing import Optional
-
 from pydantic import BaseModel
-
 from tracardi.domain.pii import PII
-from tracardi.service.merger import merge
 
 
 class Private(BaseModel):

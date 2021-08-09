@@ -12,3 +12,4 @@ tracardi-plugin-sdk>=0.1.26
 tracardi_graph_runner
 device_detector==0.10
 tracardi-dot-notation
+pip==21.2.3

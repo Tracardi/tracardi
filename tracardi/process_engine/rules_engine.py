@@ -12,7 +12,7 @@ from ..domain.entity import Entity
 from ..domain.flow import Flow
 from ..domain.metadata import Metadata
 from ..domain.payload.event_payload import EventPayload
-from ..domain.profile import Profile, Profiles
+from ..domain.profile import Profile
 from ..domain.record.event_debug_record import EventDebugRecord
 from ..domain.session import Session
 from ..domain.time import Time

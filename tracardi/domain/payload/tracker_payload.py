@@ -1,8 +1,6 @@
 from datetime import datetime
-from typing import Optional, List, Tuple, Dict, Any
+from typing import Optional, List, Tuple, Any
 from pydantic import BaseModel
-from tracardi_graph_runner.domain.debug_call_info import DebugCallInfo
-from tracardi_graph_runner.domain.debug_info import DebugInfo
 
 from ..value_object.collect_result import CollectResult
 from ..entity import Entity

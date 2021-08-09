@@ -1,8 +1,5 @@
 from typing import Optional, Any
-
 from pydantic import BaseModel
-
-from tracardi.service.merger import merge
 
 
 class PII(BaseModel):

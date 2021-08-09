@@ -1,7 +1,7 @@
 import copy
 import uuid
 from datetime import datetime
-from typing import Optional, Any, List, Tuple, Union
+from typing import Optional, Any, List, Union
 
 from .entity import Entity
 from .metadata import Metadata

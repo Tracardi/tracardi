@@ -27,6 +27,7 @@ setup(
         'tracardi_graph_runner',
         'device_detector==0.10',
         'tracardi-dot-notation',
+        'pip'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
