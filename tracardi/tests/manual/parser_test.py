@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # t = p.parse("a.b == a.f")
     # t = p.parse("a.g == TRUE")
     # t = p.parse("a.h == null")
-    t = p.parse("profile@id == \"1\"")
+    # t = p.parse("profile@id == \"1\"")
     t = p.parse("payload@a.h exists")
     # t = p.parse("payload@a.h == 1")
     # pprint(t)
