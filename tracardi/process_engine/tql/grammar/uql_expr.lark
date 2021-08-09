@@ -45,7 +45,7 @@ op_range: op_value_sig " AND "i op_value_sig
 op_array: "[" [op_value ("," op_value)*] "]"
 OP_NULL: "NULL"i
 OP_BOOL: /(TRUE|FALSE)/i
-OP_FIELD: /[a-zA-Z0-9\._\-]+/
+OP_FIELD: /(payload|session|event|profile)\@[a-zA-Z0-9\._\-]+/
 OP_STRING: ESCAPED_STRING
 OP_VALUE_TYPE: /[a-zA-Z0-9]+/
 op_compound_value: OP_VALUE_TYPE "(" op_value ")"

@@ -1,4 +1,5 @@
 import dateparser
+from tracardi_dot_notation.dot_accessor import DotAccessor
 
 from ..domain.field import Field
 from .function_transformer import FunctionTransformer
@@ -26,10 +27,12 @@ operation_mapper = {
 
 class ExprTransformer(TransformerNamespace):
 
-    def __init__(self, data, *args, **kwargs):
+    def __init__(self, dot, *args, **kwargs):
+        if not isinstance(dot, DotAccessor):
+            raise ValueError("Data passed to ExprTransformer must be type of DotAccessor.")
         super().__init__(*args, **kwargs)
         self.namespace('uql_function__', FunctionTransformer())
-        self._data = data
+        self._dot = dot
 
     def expr(self, args):
         return args[0]
@@ -45,10 +48,7 @@ class ExprTransformer(TransformerNamespace):
         return value1 or value2
 
     def OP_FIELD(self, args):
-        if args.value not in self._data:
-            raise ValueError("Field `{}` does not exist".format(args.value))
-        value = self._data[args.value]
-        return Field(args.value, value)
+        return Field(args.value, self._dot)
 
     def OP(self, args):
         return args.value
@@ -150,7 +150,7 @@ class ExprTransformer(TransformerNamespace):
         return args[0].value is None
 
     def op_exists(self, args):
-        return args[0].label in self._data
+        return args[0].label in self._dot
 
     def op_not_exists(self, args):
-        return args[0].label not in self._data
+        return args[0].label not in self._dot

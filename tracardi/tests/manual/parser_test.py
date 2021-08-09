@@ -1,5 +1,13 @@
 from pprint import pprint
 
+from tracardi_dot_notation.dot_accessor import DotAccessor
+
+from tracardi.domain.context import Context
+from tracardi.domain.event import Event
+from tracardi.domain.flow import Flow
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
+from tracardi.domain.source import Source
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.utils.dictonary import flatten
@@ -27,9 +35,20 @@ if __name__ == "__main__":
     # t = p.parse("a.b == a.f")
     # t = p.parse("a.g == TRUE")
     # t = p.parse("a.h == null")
-    # t = p.parse("a.b <= 1")
-    t = p.parse("a.h.h not exists")
-    pprint(t)
-    query = ExprTransformer(data=flatten(data)).transform(t)
+    t = p.parse("profile@id == \"1\"")
+    t = p.parse("payload@a.h exists")
+    # t = p.parse("payload@a.h == 1")
+    # pprint(t)
+
+    profile = Profile(id="1")
+    session = Session(id="2")
+    payload = data
+    source = Source(id="3", type="event")
+    context = Context()
+    event = Event(id="event-id", type="type", source=source, context=context, profile=profile, session=session)
+    flow = Flow(id="flow-id", name="flow")
+    dot = DotAccessor(profile, session, payload, event, flow)
+
+    query = ExprTransformer(dot=dot).transform(t)
     pprint(query)
-    print(data)
+    # print(data)

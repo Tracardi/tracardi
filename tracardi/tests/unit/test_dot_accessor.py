@@ -50,3 +50,16 @@ def test_value_exists():
 
     assert 'profile@id' in dot
     assert 'profile@missing' not in dot
+
+
+def test_no_source():
+    profile = Profile(id="1")
+    session = Session(id="2")
+    payload = {"a": 3}
+    source = Source(id="3", type="event")
+    context = Context()
+    event = Event(id="event-id", type="type", source=source, context=context, profile=profile, session=session)
+    flow = Flow(id="flow-id", name="flow")
+    dot = DotAccessor(profile, session, payload, event, flow)
+
+    assert 'test.id' == dot['test.id']
