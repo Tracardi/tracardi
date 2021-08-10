@@ -34,17 +34,7 @@ async def get_source_types() -> dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/sources", tags=["source"], responses={
-    200: {
-        "description": "Returns list of sources. With all its data",
-        "content": {
-            "application/json": {
-                "total": 100,
-                "result": [StorageResult]
-            }
-        },
-    },
-})
+@router.get("/sources", tags=["source"])
 async def list_sources():
     try:
         sources = Sources()
@@ -60,17 +50,7 @@ async def list_sources():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/sources/by_tag", tags=["source"], responses={
-    200: {
-        "description": "Returns list of sources. With all its data grouped by source type",
-        "content": {
-            "application/json": {
-                "total": 100,
-                "grouped": Dict[str, Source]
-            }
-        },
-    },
-})
+@router.get("/sources/by_tag", tags=["source"])
 async def list_sources(query: str = None):
     try:
         sources = Sources()
