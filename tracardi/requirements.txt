@@ -11,5 +11,5 @@ pytz==2021.1
 tracardi-plugin-sdk>=0.1.26
 tracardi_graph_runner
 device_detector==0.10
-tracardi-dot-notation
+tracardi-dot-notation>=0.1.1
 pip==21.2.3

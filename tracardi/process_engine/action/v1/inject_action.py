@@ -6,9 +6,7 @@ from tracardi_plugin_sdk.domain.result import Result
 class InjectAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'inject' not in kwargs:
-            raise ValueError("Inject value not defined. Please define inject key.")
-        self.value = kwargs['inject']
+        self.value = kwargs
 
     async def run(self, void):
         return Result(value=self.value, port="value")
@@ -23,7 +21,7 @@ def register() -> Plugin:
             className='InjectAction',
             inputs=[],
             outputs=["value"],
-            init={"inject": {}},
+            init={},
             manual='inject_action',
             version='0.1',
             license="MIT",
