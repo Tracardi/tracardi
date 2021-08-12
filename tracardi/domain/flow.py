@@ -56,6 +56,9 @@ class SpecRecord(BaseModel):
     outputs: Optional[List[str]] = []
     init: Optional[str] = ""
     manual: Optional[str] = None
+    author: Optional[str] = None
+    license: Optional[str] = "MIT"
+    version: Optional[str] = '0.0.1'
 
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':
@@ -65,7 +68,10 @@ class SpecRecord(BaseModel):
             inputs=spec.inputs,
             outputs=spec.outputs,
             init=encrypt(spec.init),
-            manual=spec.manual
+            manual=spec.manual,
+            author=spec.author,
+            license=spec.license,
+            version=spec.version
         )
 
     def decode(self) -> Spec:
@@ -75,7 +81,10 @@ class SpecRecord(BaseModel):
             inputs=self.inputs,
             outputs=self.outputs,
             init=decrypt(self.init),
-            manual=self.manual
+            manual=self.manual,
+            author=self.author,
+            license=self.license,
+            version=self.version
         )
 
 

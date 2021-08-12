@@ -1,9 +1,8 @@
 from uuid import uuid4
-from elasticsearch import helpers, ElasticsearchException, AsyncElasticsearch
+from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch._async.client.sql import SqlClient
 from elasticsearch._async.client.utils import SKIP_IN_PATH, query_params
-from elasticsearch.exceptions import NotFoundError, ConnectionError
-from fastapi import HTTPException
+from elasticsearch.exceptions import NotFoundError
 
 from ssl import create_default_context
 
@@ -166,7 +165,6 @@ class Elastic:
     async def flush(self, index, params=None, headers=None):
         return await self._client.indices.flush(index=index, params=params, headers=headers)
 
-
     @staticmethod
     def _get_elastic_config():
 
@@ -213,9 +211,6 @@ class Elastic:
             return Elastic(**kwargs)
 
         if _singleton is None:
-            try:
-                _singleton = get_elastic_client()
-            except (ElasticsearchException, ConnectionError) as e:
-                raise HTTPException(status_code=500, detail=str(e))
+            _singleton = get_elastic_client()
 
         return _singleton
