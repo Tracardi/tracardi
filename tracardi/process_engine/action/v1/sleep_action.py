@@ -12,7 +12,7 @@ class SleepAction(ActionRunner):
 
     async def run(self, payload):
         await sleep(self.sleep)
-        return Result(port="void", value=payload)
+        return Result(port="payload", value=payload)
 
 
 def register() -> Plugin:
