@@ -1,5 +1,6 @@
 import copy
 
+from tracardi_dot_notation.dot_accessor import DotAccessor
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -17,15 +18,12 @@ class IfAction(ActionRunner):
 
     async def run(self, payload: dict):
 
-        try:
-            flat_payload = flatten(copy.deepcopy(payload))
-        except Exception as e:
-            raise ValueError("Could not flatten payload. The following error occurred: `{}`".format(str(e)))
-
         if self.condition is None or self.condition == "please-configure-condition":
             raise ValueError("Condition is not set. Define it in config section.")
 
-        if Condition.evaluate(self.condition, flat_payload):
+        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+
+        if Condition.evaluate(self.condition, dot):
             return Result(port="TRUE", value=payload)
         else:
             return Result(port="FALSE", value=payload)

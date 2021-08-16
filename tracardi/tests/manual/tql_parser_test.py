@@ -15,6 +15,7 @@ from tracardi.process_engine.tql.utils.dictonary import flatten
 if __name__ == "__main__":
 
     data = {
+        "n": 1,
         "a": {
             "b": 1,
             "c": [1,2,3],
@@ -36,8 +37,9 @@ if __name__ == "__main__":
     # t = p.parse("a.g == TRUE")
     # t = p.parse("a.h == null")
     # t = p.parse("profile@id == \"1\"")
-    t = p.parse("payload@a.h exists")
+    # t = p.parse("payload@a.h exists")
     # t = p.parse("payload@a.h == 1")
+    t = p.parse("payload@n == 1")
     # pprint(t)
 
     profile = Profile(id="1")
