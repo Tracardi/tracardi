@@ -1,12 +1,9 @@
-import copy
-
 from tracardi_dot_notation.dot_accessor import DotAccessor
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.process_engine.tql.utils.dictonary import flatten
 
 
 class IfAction(ActionRunner):
@@ -18,7 +15,7 @@ class IfAction(ActionRunner):
 
     async def run(self, payload: dict):
 
-        if self.condition is None or self.condition == "please-configure-condition":
+        if self.condition is None:
             raise ValueError("Condition is not set. Define it in config section.")
 
         dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
@@ -37,7 +34,7 @@ def register() -> Plugin:
             className='IfAction',
             inputs=["payload"],
             outputs=["TRUE", "FALSE"],
-            init={"condition": "please-configure-condition"},
+            init={"condition": None},
             manual="if_action",
             version='0.1',
             license="MIT",
