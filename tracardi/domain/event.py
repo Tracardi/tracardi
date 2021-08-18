@@ -22,10 +22,16 @@ class Event(Entity):
     context: Context
 
     def __init__(self, **data: Any):
-        data['metadata'] = Metadata(
-            time=Time(
+        if 'metadata' in data and isinstance(data['metadata'], Metadata):
+            data['metadata'].time = Time(
                 insert=datetime.utcnow()
-            ))
+            )
+        else:
+            data['metadata'] = Metadata(
+                time=Time(
+                    insert=datetime.utcnow()
+                )
+            )
         super().__init__(**data)
 
     def replace(self, event):
