@@ -12,7 +12,13 @@ class ReshapePayloadAction(ActionRunner):
 
     async def run(self, payload):
 
-        source = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+        source = DotAccessor(
+            self.profile,
+            self.session,
+            payload if isinstance(payload, dict) else None,
+            self.event,
+            self.flow)
+
         config = dotty(self.mapping)
 
         destination = dotty()

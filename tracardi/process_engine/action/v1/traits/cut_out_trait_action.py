@@ -17,7 +17,14 @@ class CutOutTraitAction(ActionRunner):
         self.property = kwargs['trait']
 
     async def run(self, payload: dict):
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+
+        dot = DotAccessor(
+            self.profile,
+            self.session,
+            payload if isinstance(payload, dict) else None,
+            self.event,
+            self.flow)
+
         return Result(port="trait", value=dot[self.property])
 
 

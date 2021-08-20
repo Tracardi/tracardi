@@ -5,8 +5,8 @@ from tracardi_plugin_sdk.domain.result import Result
 
 class InjectAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.value = kwargs
+    def __init__(self, value):
+        self.value = value
 
     async def run(self, void):
         return Result(value=self.value, port="value")
@@ -21,7 +21,7 @@ def register() -> Plugin:
             className='InjectAction',
             inputs=[],
             outputs=["value"],
-            init={},
+            init={"value": None},
             manual='inject_action',
             version='0.1',
             license="MIT",

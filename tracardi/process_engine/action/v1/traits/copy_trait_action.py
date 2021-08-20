@@ -20,7 +20,13 @@ class CopyTraitAction(ActionRunner):
 
     async def run(self, payload: dict):
 
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+        dot = DotAccessor(
+            self.profile,
+            self.session,
+            payload if isinstance(payload, dict) else None,
+            self.event,
+            self.flow)
+
         for destination, value in self.mapping.items():
             dot[destination] = value
 

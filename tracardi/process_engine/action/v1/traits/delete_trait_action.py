@@ -17,7 +17,12 @@ class DeleteTraitAction(ActionRunner):
 
     async def run(self, payload: dict):
 
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+        dot = DotAccessor(
+            self.profile,
+            self.session,
+            payload if isinstance(payload, dict) else None,
+            self.event,
+            self.flow)
 
         for value in self.delete:
             del dot[value]

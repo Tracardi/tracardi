@@ -19,3 +19,4 @@ tracardi_rabbitmq_publisher
 tracardi_weather
 tracardi_mongodb_connector
 tracardi_maxmind_geolite2
+tracardi_day_night_split

@@ -35,7 +35,7 @@ def register() -> Plugin:
             type='flowNode',
             width=100,
             height=100,
-            icon='stop',
-            group=["Input/Output"]
+            icon='sleep',
+            group=["Time"]
         )
     )

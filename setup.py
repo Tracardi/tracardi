@@ -34,6 +34,7 @@ setup(
         'tracardi-weather',
         'tracardi-mongodb-connector',
         'tracardi-maxmind-geolite2',
+        'tracardi_day_night_split',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
