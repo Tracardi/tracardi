@@ -5,7 +5,7 @@ from tracardi_plugin_sdk.domain.result import Result
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
-class DataMapperAction(ActionRunner):
+class ReshapePayloadAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.mapping = kwargs
@@ -26,12 +26,12 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.data_mapper_action',
-            className='DataMapperAction',
+            module='tracardi.process_engine.action.v1.reshape_payload_action',
+            className='ReshapePayloadAction',
             inputs=["payload"],
             outputs=['payload'],
             init={},
-            manual="data_mapper_action",
+            manual="reshape_payload_action",
             version='0.1',
             license="MIT",
             author="Risto Kowaczewski"

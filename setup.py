@@ -27,7 +27,13 @@ setup(
         'tracardi_graph_runner',
         'device_detector==0.10',
         'tracardi-dot-notation',
-        'pip'
+        'pip',
+
+        'tracardi-key-counter',
+        'tracardi-rabbitmq-publisher',
+        'tracardi-weather',
+        'tracardi-mongodb-connector',
+        'tracardi-maxmind-geolite2',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

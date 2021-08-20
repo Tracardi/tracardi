@@ -13,3 +13,9 @@ tracardi_graph_runner>=0.4.35
 device_detector==0.10
 tracardi-dot-notation>=0.1.1
 pip==21.2.3
+
+tracardi_key_counter
+tracardi_rabbitmq_publisher
+tracardi_weather
+tracardi_mongodb_connector
+tracardi_maxmind_geolite2
