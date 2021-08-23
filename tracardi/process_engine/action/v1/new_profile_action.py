@@ -30,13 +30,13 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='New profile',
+            name='Is it a new profile',
             desc='If new profile then it returns true on TRUE output, otherwise returns false on FALSE port.',
             keywords=['condition'],
             type='flowNode',
             width=200,
             height=100,
             icon='question',
-            group=["Processing"]
+            group=["Conditions"]
         )
     )

@@ -15,6 +15,7 @@ setup(
     install_requires=[
         'pydantic==1.8.2',
         'aiohttp==3.7.4.post0',
+        'aiohttp[speedups]',
         'elasticsearch==7.13.4',
         'prodict==0.8.18',
         'tzlocal==2.1',
@@ -34,7 +35,10 @@ setup(
         'tracardi-weather',
         'tracardi-mongodb-connector',
         'tracardi-maxmind-geolite2',
-        'tracardi_day_night_split',
+        'tracardi-day-night-split',
+        'tracardi-discord-webhook',
+        'tracardi-remote-call',
+        'tracardi-zapier-webhook'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -49,6 +49,6 @@ def register() -> Plugin:
             height=100,
             icon='if',
             editor='text',
-            group=['Processing']
+            group=['Conditions']
         )
     )
