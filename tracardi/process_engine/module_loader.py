@@ -1,19 +1,34 @@
-import pip
+import subprocess
 import importlib
+import importlib.util
+import sys
 
 
-def import_and_install(package, upgrade=False):
-
+def pip_install(package, upgrade=False):
     if upgrade:
-        pip.main(['install', '--upgrade', package.split(".")[0]])
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', package, '-U'])
+    else:
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
+
+
+async def import_and_install(package, upgrade=False):
+    if upgrade:
+        pip_install(package.split(".")[0], upgrade=True)
 
     try:
         return importlib.import_module(package)
     except ImportError:
-        pip.main(['install', package.split(".")[0]])
+        pip_install(package.split(".")[0])
     return importlib.import_module(package)
 
 
-def load_callable(module, className, upgrade=False):
-    module = import_and_install(module, upgrade)
+async def load_callable(module, className, upgrade=False):
+    module = await import_and_install(module, upgrade)
     return getattr(module, className)
+
+
+def is_installed(package_name):
+    if package_name in sys.modules or importlib.util.find_spec(package_name) is not None:
+        return True
+    else:
+        return False
