@@ -11,9 +11,8 @@ from tracardi.service.secrets import b64_encoder, b64_decoder
 from tracardi.service.storage.crud import StorageCrud
 
 
-class EventDebugRecord(BaseModel):
-    event: Entity
-    content: str
+class EventDebugRecord(Entity):
+    content: str = None
 
     @staticmethod
     def encode(stat: Dict[str, List[Dict[str, DebugInfo]]]) -> List['EventDebugRecord']:
@@ -23,7 +22,7 @@ class EventDebugRecord(BaseModel):
                 for rule_id, debug_info in debug_infos.items():  # type: DebugInfo
                     # todo - to pole jest za małe (wyskakuje błąd gdy debug infor ma powyżej 32000 znaków)
                     b64 = b64_encoder(debug_info.dict())
-                    yield EventDebugRecord(event=Entity(id=debug_info.event.id), content=b64)
+                    yield EventDebugRecord(id=debug_info.event.id, content=b64)
 
     def decode(self) -> DebugInfo:
         # todo - to pole jest za małe (wyskakuje błąd gdy debug infor ma powyżej 32000 znaków)
@@ -36,4 +35,4 @@ class EventDebugRecord(BaseModel):
     # Persistence
 
     def storage(self) -> StorageCrud:
-        return StorageCrud("debug-info", TrackerPayloadResult, entity=self)
+        return StorageCrud("debug-info", EventDebugRecord, entity=self)

@@ -11,7 +11,7 @@ def pip_install(package, upgrade=False):
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
 
 
-async def import_and_install(package, upgrade=False):
+def import_and_install(package, upgrade=False):
     if upgrade:
         pip_install(package.split(".")[0], upgrade=True)
 
@@ -22,8 +22,8 @@ async def import_and_install(package, upgrade=False):
     return importlib.import_module(package)
 
 
-async def load_callable(module, className, upgrade=False):
-    module = await import_and_install(module, upgrade)
+def load_callable(module, className, upgrade=False):
+    module = import_and_install(module, upgrade)
     return getattr(module, className)
 
 
