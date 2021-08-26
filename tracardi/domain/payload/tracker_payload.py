@@ -47,8 +47,14 @@ class TrackerPayload(BaseModel):
     def return_profile(self):
         return self.options and "profile" in self.options and self.options['profile'] is True
 
-    async def collect(self, save_session=True, save_events=True, save_profile=True) -> Tuple[
-        Profile, Session, Events, CollectResult]:
+    def is_disabled(self, key):
+        return key in self.options and self.options[key] is False
+
+    async def collect(self) -> Tuple[Profile, Session, Events, CollectResult]:
+
+        save_session = False if self.is_disabled('saveSession') else True
+        save_events = False if self.is_disabled('saveEvents') else True
+        save_profile = True
 
         # Get profile, session objects
         profile, session = await self._get_profile_and_session()
