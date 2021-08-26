@@ -32,7 +32,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.reshape_payload_action',
+            module='tracardi.process_engine.action.v1.traits.reshape_payload_action',
             className='ReshapePayloadAction',
             inputs=["payload"],
             outputs=['payload'],
@@ -49,7 +49,7 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='copy-property',
-            group=["Processing"]
+            group=["Traits"]
         )
     )
 
