@@ -29,37 +29,6 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 # Read-map
 
-### Version 0.5.0
-
-#### Use cases
-- [x] Collecting events from web-page by JavaScript
-- [x] Binding events to elements on the page
-- [x] Gathering user properties
-- [x] Merging user profiles
-- [x] Simple segmentation
-
-#### Features
-- [x] Defining user data enhancement by workflow
-- [x] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
-- [x] Simple workflow debugging
-- [x] Triggering workflow by rules
-- [x] Source configuration
-- [x] Credentials inside source
-- [x] Source should have type of query storage or event sourcing.
-- [x] Plugins configuration
-- [x] Schema for PII
-- [x] Filtering of action plugins
-- [x] User and password configurable by ENV
-- [x] Cleaner debug information
-- [ ] Documentation for all delivered actions
-- [x] Global state of profile, session, event visible in Debugger.
-- [x] Branding
-- [x] Custom nodes naming
-
-#### Removals
-
-- [x] Remove UQL Manual
-
 ### Version 0.5.1
 
 Feature freeze. Fixes and testing.
@@ -70,7 +39,7 @@ Feature freeze. Fixes and testing.
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] Full profile, event, and sessions details page
-- [ ] Project management: Feature list for contributors
+- [x] Project management: Feature list for contributors
 - [ ] UX: Simplify selecting event for debugging
 - [ ] Console log
 - [ ] Search
@@ -82,6 +51,7 @@ Feature freeze. Fixes and testing.
 - [ ] Proof of concept for dynamic front-end loading
 
 #### Features:
+- [x] Workflow profiling
 - [ ] Every time segments raises error log that error to tracardi-segment-error index - so we can see that this segment is not right. 
 - [ ] Standard Error Reporting
 - [ ] Tracardi user profile domain object
@@ -132,7 +102,7 @@ Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variab
 Now pull and run Tracardi Graphical User Interface.
 
 ```
-docker run -p 8787:80 -e API_URL=http://127.0.0.1:8686 tracardi/tracardi-gui:0.5.0.rc-1
+docker run -p 8787:80 -e API_URL=http://127.0.0.1:8686 tracardi/tracardi-gui:0.6.0
 ```
 
 ## Log-in
