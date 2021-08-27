@@ -8,10 +8,10 @@ from .metadata import Metadata
 from .pii import PII
 from .profile_traits import ProfileTraits
 from .time import Time
+from .value_object.operation import Operation
 from ..service.dot_notation_converter import DotNotationConverter
 from ..service.storage.collection_crud import CollectionCrud
 from ..service.storage.crud import StorageCrud
-import tracardi.domain.value_object.operation
 
 from .profile_stats import ProfileStats
 from ..service.merger import merge
@@ -24,7 +24,7 @@ from ..process_engine.tql.utils.dictonary import flatten
 class Profile(Entity):
     mergedWith: Optional[str] = None
     metadata: Optional[Metadata]
-    operation: Optional[tracardi.domain.value_object.operation.Operation] = tracardi.domain.value_object.operation.Operation()
+    operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()
     pii: PII = PII()

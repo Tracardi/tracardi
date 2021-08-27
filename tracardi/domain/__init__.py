@@ -6,5 +6,6 @@ __all__ = [
     'segment',
     'source',
     'rule',
-    'entity'
+    'entity',
+    'value_object'
 ]
