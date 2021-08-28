@@ -14,9 +14,10 @@ class Metadata(BaseModel):
 
 
 class Console(BaseModel):
+    metadata: Metadata = Metadata()
     event_id: str
     flow_id: str
-    metadata: Metadata = Metadata()
+    origin: str
     class_name: str
     module: str
     type: str

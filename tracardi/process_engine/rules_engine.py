@@ -141,6 +141,7 @@ class RulesEngine:
                     # Store logs in one console log
                     for log in log_list:  # type: Log
                         console = Console(
+                            origin="node",
                             event_id=event_id,
                             flow_id=flow_id,
                             module=log.module,
@@ -154,6 +155,7 @@ class RulesEngine:
                     # todo log error
 
                     console = Console(
+                        origin="workflow",
                         event_id=event_id,
                         flow_id=flow_id,
                         module='tracardi.process_engine.rules_engine',
