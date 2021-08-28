@@ -8,6 +8,7 @@ class EndAction(ActionRunner):
         pass
 
     async def run(self, void):
+        self.console.error("test")
         return None
 
 

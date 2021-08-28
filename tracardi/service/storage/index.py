@@ -38,6 +38,7 @@ class Resource:
             "rule":         Index(multi_index=False, index="tracardi-rule",                mapping=None, rel=None),
             "segment":      Index(multi_index=False, index="tracardi-segment",             mapping=None, rel=None),
             # "consent":      Index(multi_index=False, index="tracardi-consent",             mapping=None, rel=None),
+            "console-log":  Index(multi_index=False, index="tracardi-console-log",         mapping="mappings/console-log-index.json", rel=None),
             "stat-log":     Index(multi_index=False, index="tracardi-stat-log",            mapping=None, rel=None),
             "debug-info":   Index(multi_index=False, index="tracardi-debug-info",          mapping="mappings/debug-info-index.json", rel=None),
             # "response":     Index(multi_index=False, index="tracardi-response",            mapping=None, rel=None),

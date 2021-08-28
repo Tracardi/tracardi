@@ -194,7 +194,9 @@ class TrackerPayload(BaseModel):
             profile,
             events)
 
-        debug_info_by_event_type_and_rule_name, segmentation_result = await rules_engine.execute(self.source.id)
+        debug_info_by_event_type_and_rule_name, segmentation_result, console_log = await rules_engine.execute(
+            self.source.id
+        )
 
         # Prepare response
         result = {}
@@ -206,6 +208,7 @@ class TrackerPayload(BaseModel):
             debug_result = debug_result.dict()
             debug_result['execution'] = debug_info_by_event_type_and_rule_name
             debug_result['segmentation'] = segmentation_result
+            debug_result['console'] = console_log
             result['debugging'] = debug_result
 
         # Profile

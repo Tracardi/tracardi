@@ -8,14 +8,13 @@ from tracardi_graph_runner.domain.error_debug_info import ErrorDebugInfo
 from tracardi_graph_runner.domain.debug_info import FlowDebugInfo
 from tracardi_graph_runner.domain.flow_history import FlowHistory
 from tracardi_graph_runner.domain.work_flow import WorkFlow
+from tracardi_plugin_sdk.domain.console import Log
+from ..domain.console import Console, ConsoleLog
 from ..domain.entity import Entity
 from ..domain.flow import Flow
-from ..domain.metadata import Metadata
-from ..domain.payload.event_payload import EventPayload
 from ..domain.profile import Profile
 from ..domain.record.event_debug_record import EventDebugRecord
 from ..domain.session import Session
-from ..domain.time import Time
 from ..event_server.utils.memory_cache import MemoryCache, CacheItem
 from ..domain.event import Event
 from ..domain.events import Events
@@ -68,7 +67,7 @@ class RulesEngine:
         rules = list(memory_cache['rules'].data)
         return rules
 
-    async def invoke(self, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list]]:
+    async def invoke(self, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list], ConsoleLog]:
 
         flow_task_store = defaultdict(list)
         debug_info_by_event_type_and_rule_name = defaultdict(list)
@@ -82,7 +81,8 @@ class RulesEngine:
 
                 try:
                     rule = Rule(**rule)
-                except ValidationError:
+                except ValidationError as e:
+                    print(str(e))
                     # todo log error and disable rule
                     continue
 
@@ -132,13 +132,37 @@ class RulesEngine:
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
         # Run and report async
+        console_log = ConsoleLog()
         for event_type, tasks in flow_task_store.items():
             for flow_id, event_id, rule_name, task in tasks:
-                # result = await task  # type: DebugInfo
                 try:
-                    debug_info = await task  # type: DebugInfo
+                    debug_info, log_list = await task  # type: DebugInfo, List[Log]
+
+                    # Store logs in one console log
+                    for log in log_list:  # type: Log
+                        console = Console(
+                            event_id=event_id,
+                            flow_id=flow_id,
+                            module=log.module,
+                            class_name=log.class_name,
+                            type=log.type,
+                            message=log.message
+                        )
+                        console_log.append(console)
+
                 except Exception as e:
                     # todo log error
+
+                    console = Console(
+                        event_id=event_id,
+                        flow_id=flow_id,
+                        module='tracardi.process_engine.rules_engine',
+                        class_name="RulesEngine",
+                        type="error",
+                        message=str(e)
+                    )
+                    console_log.append(console)
+
                     debug_info = DebugInfo(
                         timestamp=time(),
                         flow=FlowDebugInfo(
@@ -152,36 +176,42 @@ class RulesEngine:
 
         # Save profile
 
-        save_tasks = []
-
-        # Segmentation
-
         segmentation_info = {"errors": [], "ids": []}
-        if self.profile.operation.needs_update() or self.profile.operation.needs_segmentation():
-            # Segmentation runs only if profile was updated or flow forced it
-            async for event_type, segment_id, error in self.profile.segment(event_types=flow_task_store.keys()):
-                # Segmentation triggered
-                if error:
-                    segmentation_info['errors'].append(error)
-                segmentation_info['ids'].append(segment_id)
+        try:
+            save_tasks = []
 
-        # Merging, schedule save only if there is an update in flow.
+            # Segmentation
+            if self.profile.operation.needs_update() or self.profile.operation.needs_segmentation():
+                # Segmentation runs only if profile was updated or flow forced it
+                async for event_type, segment_id, error in self.profile.segment(event_types=flow_task_store.keys()):
+                    # Segmentation triggered
+                    if error:
+                        segmentation_info['errors'].append(error)
+                    segmentation_info['ids'].append(segment_id)
 
-        if self.profile.operation.needs_merging() and self.profile.operation.needs_update():
+            # Merging, schedule save only if there is an update in flow.
 
-            disabled_profiles = await self.profile.merge(limit=2000)
-            if disabled_profiles is not None:
-                save_old_profiles_task = asyncio.create_task(disabled_profiles.bulk().save())
-                save_tasks.append(save_old_profiles_task)
+            if self.profile.operation.needs_merging() and self.profile.operation.needs_update():
 
-        # Must be the last operation
-        if self.profile.operation.needs_update():
-            save_tasks.append(asyncio.create_task(self.profile.storage().save()))
+                disabled_profiles = await self.profile.merge(limit=2000)
+                if disabled_profiles is not None:
+                    save_old_profiles_task = asyncio.create_task(disabled_profiles.bulk().save())
+                    save_tasks.append(save_old_profiles_task)
 
-        # run save tasks
-        await asyncio.gather(*save_tasks)
+            # Must be the last operation
+            if self.profile.operation.needs_update():
+                save_tasks.append(asyncio.create_task(self.profile.storage().save()))
 
-        return debug_info_by_event_type_and_rule_name, segmentation_info
+            # run save tasks
+            await asyncio.gather(*save_tasks)
+
+        except Exception as e:
+            # this error is a global segmentation error
+            # todo log it.
+            pass
+
+        finally:
+            return debug_info_by_event_type_and_rule_name, segmentation_info, console_log
 
     @staticmethod
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
@@ -202,48 +232,27 @@ class RulesEngine:
 
         return merge_key_values
 
-    async def execute(self, source_id) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list]]:
+    async def execute(self, source_id) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list], ConsoleLog]:
 
-        """Runs rules and flow and saves debug info """
+        """ Runs rules and flow and saves debug info and console log """
 
-        debug_info_by_event_type_and_rule_name, segmentation_info = await self.invoke(source_id)
+        debug_info_by_event_type_and_rule_name, segmentation_info, console_log = await self.invoke(source_id)
+
+        # Save console log
+
+        if console_log:
+            await console_log.bulk().save()
 
         # Collect debug info
 
         record = []
-        for debug_info_record in EventDebugRecord.encode(debug_info_by_event_type_and_rule_name):  # type: EventDebugRecord
+        for debug_info_record in EventDebugRecord.encode(
+                debug_info_by_event_type_and_rule_name):  # type: EventDebugRecord
             record.append(debug_info_record)
 
         # Save in debug index
         bulk = CollectionCrud("debug-info", record)
         await bulk.save()
 
-        return debug_info_by_event_type_and_rule_name, segmentation_info
+        return debug_info_by_event_type_and_rule_name, segmentation_info, console_log
 
-    @staticmethod
-    async def raise_event(event_type, properties, session, profile, source_id):
-
-        error_event = EventPayload(
-            type=event_type,
-            properties=properties,
-        )
-
-        error_event = error_event.to_event(
-            Metadata(time=Time()),
-            Entity(id=source_id),
-            session,
-            profile,
-            {}
-        )
-
-        events = Events()
-        events.append(error_event)
-
-        save_events_task = asyncio.create_task(events.bulk().save())
-
-        rules_engine = RulesEngine(session, profile, events)
-
-        rules_engine_result = asyncio.create_task(rules_engine.execute(source_id))
-
-        await save_events_task
-        return await rules_engine_result

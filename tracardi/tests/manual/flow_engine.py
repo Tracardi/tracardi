@@ -69,7 +69,7 @@ if __name__ == "__main__":
             profile,
             events)
 
-        flow_result, segmentation_result = await rules_engine.execute(source.id)
+        flow_result, segmentation_result, console_log = await rules_engine.execute(source.id)
         # print(stats.to_json())
         print(flow_result, segmentation_result)
 
