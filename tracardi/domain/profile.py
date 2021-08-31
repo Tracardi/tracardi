@@ -107,8 +107,8 @@ class Profile(Entity):
                 segment_id = segment.get_id()
 
                 try:
-
-                    if Condition.evaluate(segment.condition, flat_profile):
+                    condition = Condition()
+                    if await condition.evaluate(segment.condition, flat_profile):
                         segments = set(self.segments)
                         segments.add(segment_id)
                         self.segments = list(segments)

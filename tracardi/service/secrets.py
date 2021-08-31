@@ -23,7 +23,9 @@ def b64_decoder(data):
     except OSError:
         pass
     finally:
-        return json.loads(decoded)
+        if decoded:
+            return json.loads(decoded)
+        return {}
 
 
 def decrypt(data):

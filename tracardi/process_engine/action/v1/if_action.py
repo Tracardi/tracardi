@@ -20,7 +20,8 @@ class IfAction(ActionRunner):
 
         dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
 
-        if Condition.evaluate(self.condition, dot):
+        condition = Condition()
+        if await condition.evaluate(self.condition, dot):
             return Result(port="TRUE", value=payload), Result(port="FALSE", value=None)
         else:
             return Result(port="FALSE", value=payload)
