@@ -27,7 +27,7 @@ setup(
         'tracardi-plugin-sdk>=0.6.2',
         'tracardi_graph_runner>=0.6.2',
         'device_detector==0.10',
-        'tracardi-dot-notation',
+        'tracardi-dot-notation>=0.6.2',
         'pip>=21.2.4',
         'deepdiff>=5.5.0',
 

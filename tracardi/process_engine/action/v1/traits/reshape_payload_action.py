@@ -1,4 +1,6 @@
 from dotty_dict import dotty
+
+from tracardi_dot_notation.dict_traverser import DictTraverser
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
@@ -8,24 +10,24 @@ from tracardi_dot_notation.dot_accessor import DotAccessor
 class ReshapePayloadAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        self.mapping = kwargs
+        self.mapping_template = kwargs
 
     async def run(self, payload):
+
+        if not isinstance(payload, dict):
+            self.console.warning("Payload is not dict that is why you will not be able to read it. ")
 
         source = DotAccessor(
             self.profile,
             self.session,
-            payload if isinstance(payload, dict) else None,
+            payload,
             self.event,
             self.flow)
 
-        config = dotty(self.mapping)
+        traverser = DictTraverser(source)
+        result = traverser.reshape(reshape_template=self.mapping_template)
 
-        destination = dotty()
-        for key, value in config.items():
-            destination[key] = source[value]
-
-        return Result(port="payload", value=destination.to_dict())
+        return Result(port="payload", value=result)
 
 
 def register() -> Plugin:
