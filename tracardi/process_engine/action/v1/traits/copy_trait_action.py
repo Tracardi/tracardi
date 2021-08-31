@@ -1,11 +1,13 @@
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
-
+from deepdiff import DeepDiff
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi_dot_notation.dot_accessor import DotAccessor
+
+from tracardi.process_engine.tql.utils.dictonary import flatten
 
 
 class CopyTraitAction(ActionRunner):
@@ -31,16 +33,28 @@ class CopyTraitAction(ActionRunner):
             dot[destination] = value
 
         if not isinstance(dot.profile['traits']['private'], dict):
-            raise ValueError("Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
-                             "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
+            raise ValueError(
+                "Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
+                "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
 
         if not isinstance(dot.profile['traits']['public'], dict):
             raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
-                             "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
+                             "E.g. `name`: `{}`".format(dot.profile['traits']['public'],
+                                                        dot.profile['traits']['public']))
 
         profile = Profile(**dot.profile)
         event = Event(**dot.event)
         session = Session(**dot.session)
+
+        flat_profile = flatten(profile.dict())
+        flat_dot_profile = flatten(Profile(**dot.profile).dict())
+        diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
+
+        if diff_result and 'dictionary_item_removed' in diff_result:
+            errors = [item.replace("root[", "profile[") for item in diff_result['dictionary_item_removed']]
+            error_msg = "Some values were not added to profile. Profile schema seems not to have path: {}. " \
+                        "This node is probably misconfigured.".format(errors)
+            raise ValueError(error_msg)
 
         self.profile.replace(profile)
         self.session.replace(session)

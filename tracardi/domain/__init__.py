@@ -7,5 +7,6 @@ __all__ = [
     'source',
     'rule',
     'entity',
-    'value_object'
+    'value_object',
+    'console'
 ]

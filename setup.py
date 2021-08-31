@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi',
-    version='0.6.1',
+    version='0.6.2',
     description='Trackardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -28,7 +28,8 @@ setup(
         'tracardi_graph_runner>=0.6.1',
         'device_detector==0.10',
         'tracardi-dot-notation',
-        'pip',
+        'pip>=21.2.4',
+        'deepdiff>=5.5.0',
 
         'tracardi-key-counter',
         'tracardi-rabbitmq-publisher',

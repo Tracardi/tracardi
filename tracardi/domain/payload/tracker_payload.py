@@ -208,7 +208,7 @@ class TrackerPayload(BaseModel):
             debug_result = debug_result.dict()
             debug_result['execution'] = debug_info_by_event_type_and_rule_name
             debug_result['segmentation'] = segmentation_result
-            debug_result['console'] = console_log
+            debug_result['logs'] = console_log
             result['debugging'] = debug_result
 
         # Profile
