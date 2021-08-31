@@ -59,8 +59,9 @@ class ElasticStorage:
     async def refresh(self, params=None, headers=None):
         return await self.storage.refresh(self.index.get_write_index(), params, headers)
 
-    async def load_by(self, field, value):
+    async def load_by(self, field, value, limit=100):
         query = {
+            "size": limit,
             "query": {
                 "term": {
                     field: value

@@ -36,7 +36,7 @@ class Resource:
             "event":        Index(multi_index=True,  index="tracardi-event",               mapping="mappings/event-index.json", rel=None),
             "flow":         Index(multi_index=False, index="tracardi-flow",                mapping=None, rel=None),
             "rule":         Index(multi_index=False, index="tracardi-rule",                mapping=None, rel=None),
-            "segment":      Index(multi_index=False, index="tracardi-segment",             mapping=None, rel=None),
+            "segment":      Index(multi_index=False, index="tracardi-segment",             mapping="mappings/segment-index.json", rel=None),
             # "consent":      Index(multi_index=False, index="tracardi-consent",             mapping=None, rel=None),
             "console-log":  Index(multi_index=False, index="tracardi-console-log",         mapping="mappings/console-log-index.json", rel=None),
             "stat-log":     Index(multi_index=False, index="tracardi-stat-log",            mapping=None, rel=None),

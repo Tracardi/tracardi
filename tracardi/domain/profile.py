@@ -3,6 +3,9 @@ import uuid
 from datetime import datetime
 from typing import Optional, Any, List, Union
 
+import tracardi
+
+from tracardi_dot_notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import Metadata
 from .pii import PII
@@ -81,22 +84,31 @@ class Profile(Entity):
         """
 
         # todo cache segments for 30 sec
-        flat_payload = flatten(copy.deepcopy(self.dict()))
+        flat_profile = DotAccessor(
+            profile=self
+            # it has access only to profile. Other data is irrelevant
+        )
 
         for event_type in event_types:  # type: str
 
             # Segmentation is run for every event
 
             # todo segments are loaded one by one - maybe it is possible to load it at once
-            segments = await Segments.storage().load_by('eventType.keyword', event_type)
+            # todo segments are loaded event is they are disabled. It is checked later. Maybe we can filter it here.
+            segments = await Segments.storage().load_by('eventType', event_type)
+
             for segment in segments:
 
                 segment = Segment(**segment)
+
+                if segment.enabled is False:
+                    continue
+
                 segment_id = segment.get_id()
 
                 try:
 
-                    if Condition.evaluate(segment.condition, flat_payload):
+                    if Condition.evaluate(segment.condition, flat_profile):
                         segments = set(self.segments)
                         segments.add(segment_id)
                         self.segments = list(segments)

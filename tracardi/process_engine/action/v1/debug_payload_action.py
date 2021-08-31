@@ -1,5 +1,6 @@
 import asyncio
 
+from tracardi.service.storage.crud import EntityStorageCrud
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -13,21 +14,23 @@ from tracardi.domain.session import Session
 class DebugPayloadAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'event' not in kwargs or 'id' not in kwargs['event']:
-            raise ValueError("Please define event.id in config section.")
-        self.event_id = kwargs['event']['id']
+        if 'event' not in kwargs or 'type' not in kwargs['event']:
+            raise ValueError("Please define event.type in config section.")
+        self.event_type = kwargs['event']['type']
 
     async def run(self, **kwargs):
         if self.debug:
+            storage = EntityStorageCrud('event', Event)
+            result = await storage.load_by('type', self.event_type, limit=1)
 
-            event_entity = Entity(id=self.event_id)
-            event = await event_entity.storage('event').load(Event)  # type: Event
-
-            if event is None:
+            if result.total == 0:
                 raise ValueError(
-                    "There is no event with id `{}`. Check configuration for correct event id.".format(self.event_id))
+                    "There is no event with type `{}`. Check configuration for correct event type.".format(
+                        self.event_type))
 
-            self.event.replace(event)
+            event_data = list(result)[0]
+
+            self.event = Event(**event_data)
 
             profile_entity = Entity(id=self.event.profile.id)
             session_entity = Entity(id=self.event.session.id)
@@ -40,14 +43,14 @@ class DebugPayloadAction(ActionRunner):
             if session is None:
                 raise ValueError(
                     "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
-                        self.event_id, self.event.session.id))
+                        self.event.id, self.event.session.id))
 
             self.session.replace(session)
 
             if profile is None:
                 raise ValueError(
-                    "Event id `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
-                        self.event_id, self.event.profile.id))
+                    "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
+                        self.event.id, self.event.profile.id))
 
             self.profile.replace(profile)
 
@@ -67,9 +70,10 @@ def register() -> Plugin:
             outputs=["event"],
             init={
                 "event": {
-                    "id": "undefined",
+                    "type": None,
                 }
             },
+            manual="debug_payload_action",
             version='0.1',
             license="MIT",
             author="Risto Kowaczewski"

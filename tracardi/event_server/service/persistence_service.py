@@ -21,9 +21,9 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
-    async def load_by(self, field: str, value: str) -> StorageResult:
+    async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         try:
-            return StorageResult(await self.storage.load_by(field, value))
+            return StorageResult(await self.storage.load_by(field, value, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 

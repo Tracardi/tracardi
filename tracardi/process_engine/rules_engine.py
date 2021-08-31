@@ -210,6 +210,7 @@ class RulesEngine:
         except Exception as e:
             # this error is a global segmentation error
             # todo log it.
+            print(str(e))
             pass
 
         finally:

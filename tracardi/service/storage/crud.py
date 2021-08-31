@@ -34,9 +34,9 @@ class EntityStorageCrud(BaseStorageCrud):
 
         return None
 
-    async def load_by(self, field, value) -> StorageResult:
+    async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         service = self._get_storage_service()
-        return await service.load_by(field, value)
+        return await service.load_by(field, value, limit)
 
     async def delete_by(self, field, value) -> dict:
         service = self._get_storage_service()
