@@ -52,8 +52,8 @@ Feature freeze. Fixes and testing.
 
 #### Features:
 - [x] Workflow profiling
-- [ ] Every time segments raises error log that error to tracardi-segment-error index - so we can see that this segment is not right. 
-- [ ] Standard Error Reporting
+- [ ] Every time segments raises error log that error to tracardi-console-log index - so we can see that this segment is not right. 
+- [ ] Standard Error Reporting, showing console-log ang logging to stdout
 - [ ] Tracardi user profile domain object
 - [ ] Setting user and password from interface (user profile), use keycloak
 - [ ] Forgot password functionality
@@ -61,11 +61,11 @@ Feature freeze. Fixes and testing.
 - [ ] Reading data from external sources – use source configuration to fetch data
 - [ ] If Action – Should use plain/text editor not application/json
 
-- [ ] GraphQL Endpoint for profile fetching.
-- [ ] Profiler as part of debugger
+- [ ] GraphQL Endpoint for profile fetching. ???
+- [x] Profiler as part of debugger
 - [x] Refactor menu to take less space
 - [ ] Finish manual
-- [ ] Error log
+- [x] Error log - console log for developers
 - [ ] text/plain - editor in config
 - [x] Editable name for node in flow
 - [ ] Scheduler
