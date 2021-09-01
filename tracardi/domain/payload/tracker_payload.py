@@ -203,7 +203,7 @@ class TrackerPayload(BaseModel):
 
         # Debugging
         # todo save result to different index
-        if not tracardi.track_debug:
+        if not tracardi.track_debug and not self.is_disabled('debugger'):
             debug_result = TrackerPayloadResult(**collect_result.dict())
             debug_result = debug_result.dict()
             debug_result['execution'] = debug_info_by_event_type_and_rule_name
