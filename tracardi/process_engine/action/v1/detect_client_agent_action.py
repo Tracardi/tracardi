@@ -1,4 +1,9 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 from device_detector import DeviceDetector
+
+from tracardi_dot_notation.dot_accessor import DotAccessor
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -6,19 +11,29 @@ from tracardi_plugin_sdk.action_runner import ActionRunner
 
 class DetectClientAgentAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, **kwargs):
+        if 'userAgent' not in kwargs:
+            raise ValueError("Please define userAgent path with dot notation.")
 
-    async def run(self, void):
+        self.user_agent = kwargs['userAgent']
+
+    @staticmethod
+    def detect_device(ua):
+        detector = DeviceDetector(ua, skip_bot_detection=False)
+        return detector.parse()
+
+    async def run(self, payload):
 
         try:
             if not isinstance(self.session.context, dict):
                 raise KeyError("No session context defined.")
 
-            ua = self.session.context['browser']['browser']['userAgent']
+            dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+            ua = dot[self.user_agent]
 
-            detector = DeviceDetector(ua, skip_bot_detection=False)
-            device = detector.parse()
+            with ThreadPoolExecutor(max_workers=10) as pool:
+                loop = asyncio.get_event_loop()
+                device = await loop.run_in_executor(pool, self.detect_device, ua)  # type: DeviceDetector
 
             response = {
                 'status': {
@@ -52,6 +67,7 @@ class DetectClientAgentAction(ActionRunner):
 
                 }
             }
+
         except KeyError as e:
             response = {
                 'status': {
@@ -95,24 +111,26 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.detect_client_agent_action',
             className='DetectClientAgentAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=["client-info"],
-            init=None,
+            init={
+                "userAgent": "session@context.browser.browser.userAgent"
+            },
             manual="detect_client_agent_action",
-            version='0.1',
+            version='0.1.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Get client agent',
+            name='Parse client agent',
             desc='It will parse any user agent and detect the browser, operating system, device used (desktop, '
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
                  'of user agent strings, even from rare and obscure browsers and devices. It returns an object containing '
                  'all the information',
             type='flowNode',
-            width=100,
+            width=200,
             height=100,
             icon='browser',
-            group=["Processing"]
+            group=["Traits"]
         )
     )

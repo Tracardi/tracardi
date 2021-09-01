@@ -1,5 +1,3 @@
-from dotty_dict import dotty
-
 from tracardi_dot_notation.dict_traverser import DictTraverser
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.action_runner import ActionRunner
