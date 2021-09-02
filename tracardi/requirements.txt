@@ -27,3 +27,4 @@ tracardi_remote_call
 tracardi_zapier_webhook
 tracardi-mysql-connector
 tracardi-redshift-connector
+tracardi-postgresql-connector
