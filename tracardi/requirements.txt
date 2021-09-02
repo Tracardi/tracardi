@@ -9,8 +9,8 @@ lark==0.11.3
 dateparser==1.0.0
 dotty-dict==1.3.0
 pytz==2021.1
-tracardi-plugin-sdk>=0.6.2
-tracardi_graph_runner>=0.6.2
+tracardi-plugin-sdk>=0.6.4
+tracardi_graph_runner>=0.6.3
 tracardi-dot-notation>=0.6.2
 device_detector==0.10
 pip>=21.2.4
@@ -25,3 +25,5 @@ tracardi_day_night_split
 tracardi_discord_webhook
 tracardi_remote_call
 tracardi_zapier_webhook
+tracardi-mysql-connector
+tracardi-redshift-connector

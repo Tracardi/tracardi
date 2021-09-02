@@ -3,6 +3,7 @@ from setuptools import setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+
 setup(
     name='tracardi',
     version='0.6.4',
@@ -24,22 +25,28 @@ setup(
         'dateparser==1.0.0',
         'dotty-dict==1.3.0',
         'pytz==2021.1',
-        'tracardi-plugin-sdk>=0.6.2',
-        'tracardi_graph_runner>=0.6.2',
-        'device_detector==0.10',
+        'tracardi-plugin-sdk>=0.6.4',
+        'tracardi_graph_runner>=0.6.3',
         'tracardi-dot-notation>=0.6.2',
+        'device_detector==0.10',
         'pip>=21.2.4',
         'deepdiff>=5.5.0',
 
         'tracardi-key-counter',
+
         'tracardi-rabbitmq-publisher',
+
         'tracardi-weather',
-        'tracardi-mongodb-connector',
         'tracardi-maxmind-geolite2',
         'tracardi-day-night-split',
         'tracardi-discord-webhook',
         'tracardi-remote-call',
-        'tracardi-zapier-webhook'
+        'tracardi-zapier-webhook',
+
+        'tracardi-mongodb-connector',
+        'tracardi-postgresql-connector',
+        'tracardi-mysql-connector',
+        'tracardi-redshift-connector'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
