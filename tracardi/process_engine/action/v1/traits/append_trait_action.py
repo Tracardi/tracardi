@@ -38,12 +38,15 @@ class AppendTraitAction(ActionRunner):
                 dot[destination] = value
 
         if not isinstance(dot.profile['traits']['private'], dict):
-            raise ValueError("Error when appending profile@traits.private to value `{}`. Private must have key:value pair. "
-                             "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
+            raise ValueError("Error when appending profile@traits.private to value `{}`. "
+                             "Private must have key:value pair. "
+                             "E.g. `name`: `{}`".format(dot.profile['traits']['private'],
+                                                        dot.profile['traits']['private']))
 
         if not isinstance(dot.profile['traits']['public'], dict):
-            raise ValueError("Error when appending profile@traits.public to value `{}`. Public must have key:value pair. "
-                             "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
+            raise ValueError(
+                "Error when appending profile@traits.public to value `{}`. Public must have key:value pair. "
+                "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
 
         profile = Profile(**dot.profile)
         event = Event(**dot.event)
