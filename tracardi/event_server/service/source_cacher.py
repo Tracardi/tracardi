@@ -23,14 +23,14 @@ class SourceCacher:
         return source
 
     async def get(self, resource: Entity) -> Optional[Union[ResourceRecord]]:
-        if 'source' in self._cache:
-            resource = self._cache['source'].data
+        if 'resource' in self._cache:
+            resource = self._cache['resource'].data
             return resource
         else:
             # Expired
-            resource = await resource.storage("source").load(ResourceRecord)  # type: ResourceRecord
+            resource = await resource.storage("resource").load(ResourceRecord)  # type: ResourceRecord
             if resource is not None:
-                self._cache['source'] = CacheItem(data=resource, ttl=memory_cache.source_ttl)
+                self._cache['resource'] = CacheItem(data=resource, ttl=memory_cache.source_ttl)
                 return resource
             return None
 
