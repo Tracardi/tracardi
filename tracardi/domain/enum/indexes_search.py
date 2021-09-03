@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class IndexesSearch(str, Enum):
-    source = "source"
+    resource = "resource"
     session = "session"
     profile = "profile"
     event = "event"

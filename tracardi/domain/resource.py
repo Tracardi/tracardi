@@ -26,7 +26,7 @@ class Resource(Entity):
 
     # Persistence
     def storage(self) -> StorageCrud:
-        return StorageCrud("source", Resource, entity=self)
+        return StorageCrud("resource", Resource, entity=self)
 
 
 class ResourceRecord(Entity):
@@ -73,4 +73,4 @@ class ResourceRecord(Entity):
 
     # Persistence
     def storage(self) -> StorageCrud:
-        return StorageCrud("source", Resource, entity=self)
+        return StorageCrud("resource", Resource, entity=self)

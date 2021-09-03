@@ -5,4 +5,4 @@ class Resources(list):
 
     # Persistence
     def bulk(self) -> CollectionCrud:
-        return CollectionCrud("source", self)
+        return CollectionCrud("resource", self)

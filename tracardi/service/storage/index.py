@@ -30,18 +30,16 @@ class Resource:
             "project":      Index(multi_index=False, index="tracardi-flow-project",        mapping=None, rel=None),
             "action":       Index(multi_index=False, index="tracardi-flow-action-plugins", mapping=None, rel=None),
             "token":        Index(multi_index=False, index="tracardi-token",               mapping="mappings/token-index.json", rel=None),
-            "source":       Index(multi_index=False, index="tracardi-source",              mapping=None, rel=None),
+            "resource":     Index(multi_index=False, index="tracardi-resource",              mapping=None, rel=None),
             "session":      Index(multi_index=True,  index="tracardi-session",             mapping=None, rel='profile.id'),
             "profile":      Index(multi_index=False, index="tracardi-profile",             mapping="mappings/profile-index.json", rel='_id'),
             "event":        Index(multi_index=True,  index="tracardi-event",               mapping="mappings/event-index.json", rel=None),
             "flow":         Index(multi_index=False, index="tracardi-flow",                mapping=None, rel=None),
             "rule":         Index(multi_index=False, index="tracardi-rule",                mapping=None, rel=None),
             "segment":      Index(multi_index=False, index="tracardi-segment",             mapping="mappings/segment-index.json", rel=None),
-            # "consent":      Index(multi_index=False, index="tracardi-consent",             mapping=None, rel=None),
             "console-log":  Index(multi_index=False, index="tracardi-console-log",         mapping="mappings/console-log-index.json", rel=None),
             "stat-log":     Index(multi_index=False, index="tracardi-stat-log",            mapping=None, rel=None),
             "debug-info":   Index(multi_index=False, index="tracardi-debug-info",          mapping="mappings/debug-info-index.json", rel=None),
-            # "response":     Index(multi_index=False, index="tracardi-response",            mapping=None, rel=None),
         }
 
     def __getitem__(self, item):

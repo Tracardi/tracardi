@@ -9,7 +9,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 async def test_tracker_collect():
 
     source = Entity(id="scope")
-    await source.storage("source").save({})
+    await source.storage("resource").save({})
 
     session = Entity.new()
     profile = Entity.new()
