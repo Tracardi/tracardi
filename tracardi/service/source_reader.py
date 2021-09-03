@@ -1,5 +1,5 @@
 from tracardi.domain.entity import Entity
-from tracardi.domain.source import SourceRecord, Source
+from tracardi.domain.source import ResourceRecord, Source
 
 
 async def read_source(source_id: str) -> Source:
@@ -11,7 +11,7 @@ async def read_source(source_id: str) -> Source:
 
     source_config_record = await Entity(id=source_id). \
         storage('source'). \
-        load(SourceRecord)  # type: SourceRecord
+        load(ResourceRecord)  # type: ResourceRecord
 
     if source_config_record is None:
         raise ValueError('Source id {} does not exist.'.format(source_id))

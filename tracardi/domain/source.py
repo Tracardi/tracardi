@@ -29,7 +29,7 @@ class Source(Entity):
         return StorageCrud("source", Source, entity=self)
 
 
-class SourceRecord(Entity):
+class ResourceRecord(Entity):
     type: str
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
@@ -47,8 +47,8 @@ class SourceRecord(Entity):
         super().__init__(**data)
 
     @staticmethod
-    def encode(source: Source) -> 'SourceRecord':
-        return SourceRecord(
+    def encode(source: Source) -> 'ResourceRecord':
+        return ResourceRecord(
             id=source.id,
             name=source.name,
             description=source.description,
