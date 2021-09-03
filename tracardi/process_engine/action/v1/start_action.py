@@ -8,7 +8,7 @@ class StartAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         if self.debug and self.profile.id == '@debug-profile-id':
             raise ValueError("Start action can not run in debug mode without connection to Debug action.")
         return Result(port="payload", value={})
@@ -21,7 +21,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.start_action',
             className='StartAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=["payload"],
             init=None,
             version='0.1',

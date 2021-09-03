@@ -20,9 +20,9 @@ class MergeProfilesAction(ActionRunner):
                 raise ValueError(
                     f"Field mergeBy must define profile fields. Dot notation `{key}` does not start with profile@...")
 
-    async def run(self, void):
+    async def run(self, payload):
         self.profile.operation.merge = self.merge_key
-        return Result(value={}, port="void")
+        return Result(value={}, port="payload")
 
 
 def register() -> Plugin:
@@ -31,8 +31,8 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.operations.merge_profiles_action',
             className='MergeProfilesAction',
-            inputs=["void"],
-            outputs=["void"],
+            inputs=["payload"],
+            outputs=["payload"],
             init={"mergeBy": []},
             manual="merge_profiles_action"
         ),

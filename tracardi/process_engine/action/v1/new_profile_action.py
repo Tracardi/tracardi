@@ -8,7 +8,7 @@ class NewProfileAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         if self.profile.operation.new:
             return Result(port="TRUE", value=True)
 
@@ -21,7 +21,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.new_profile_action',
             className='NewProfileAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=['TRUE', 'FALSE'],
             init=None,
             manual="new_profile_action",

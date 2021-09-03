@@ -7,7 +7,7 @@ class EndAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         return None
 
 
@@ -17,7 +17,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.end_action',
             className='EndAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=[],
             version='0.1',
             license="MIT",

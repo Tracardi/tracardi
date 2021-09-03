@@ -8,9 +8,9 @@ class SegmentProfileAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         self.profile.operation.segment = True
-        return Result(value={}, port="void")
+        return Result(value={}, port="payload")
 
 
 def register() -> Plugin:
@@ -19,8 +19,8 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.operations.segment_profile_action',
             className='SegmentProfileAction',
-            inputs=["void"],
-            outputs=["void"],
+            inputs=["payload"],
+            outputs=["payload"],
             init=None,
             manual="segment_profiles_action"
         ),

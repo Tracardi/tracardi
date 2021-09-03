@@ -8,7 +8,7 @@ class NewVisitAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         if self.session.operation.new:
             return Result(port="TRUE", value=True)
 
@@ -21,7 +21,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.new_visit_action',
             className='NewVisitAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=['TRUE', 'FALSE'],
             init=None,
             manual="new_visit_action",

@@ -8,7 +8,7 @@ class ReadProfileAction(ActionRunner):
     def __init__(self, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         return Result(port="profile", value=self.profile.dict())
 
 
@@ -18,7 +18,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.read_profile_action',
             className='ReadProfileAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=['profile'],
             init=None,
             manual="read_profile_action",

@@ -6,7 +6,7 @@ from .named_entity import NamedEntity
 from ..exceptions.exception import TracardiException
 from typing import Optional, List
 from pydantic import BaseModel
-from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node
+from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
 from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec
 from tracardi.service.storage.crud import StorageCrud
 from ..service.secrets import decrypt, encrypt
@@ -20,7 +20,11 @@ class Flow(GraphFlow):
     # Persistence
 
     def storage(self) -> crud.StorageCrud:
-        return crud.StorageCrud("flow", Flow, entity=self)
+        flow_record = self.encode()
+        return crud.StorageCrud("flow", FlowRecord, entity=flow_record)
+
+    def encode(self) -> 'FlowRecord':
+        return FlowRecord.encode(self)
 
     @staticmethod
     async def decode(flow_id) -> 'Flow':
@@ -40,13 +44,32 @@ class Flow(GraphFlow):
         return Flow.construct(_fields_set=self.__fields_set__, **flow)
 
     @staticmethod
-    def new(id:str = None) -> 'Flow':
+    def new(id: str = None) -> 'Flow':
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name="Empty",
             enabled=False,
             flowGraph=FlowGraphData(nodes=[], edges=[])
         )
+
+    @staticmethod
+    def build(name: str, description: str = None, enabled=True, id=None) -> 'Flow':
+        return Flow(
+            id=str(uuid.uuid4()) if id is None else id,
+            name=name,
+            description=description,
+            enabled=enabled,
+            flowGraph=FlowGraphData(
+                nodes=[],
+                edges=[]
+            )
+        )
+
+    def __add__(self, edge_bundle: EdgeBundle):
+        self.flowGraph.nodes.append(edge_bundle.source)
+        self.flowGraph.nodes.append(edge_bundle.target)
+        self.flowGraph.edges.append(edge_bundle.edge)
+        return self
 
 
 class SpecRecord(BaseModel):

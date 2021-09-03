@@ -8,7 +8,7 @@ class ReadEventAction(ActionRunner):
     def __init__(self, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         return Result(port="event", value=self.event.dict())
 
 
@@ -19,7 +19,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.read_event_action',
             className='ReadEventAction',
-            inputs=['void'],
+            inputs=['payload'],
             outputs=["event"],
             init=None,
             version='0.1',

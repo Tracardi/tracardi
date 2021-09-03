@@ -8,7 +8,7 @@ class InjectAction(ActionRunner):
     def __init__(self, value):
         self.value = value
 
-    async def run(self, void):
+    async def run(self, payload):
         return Result(value=self.value, port="value")
 
 

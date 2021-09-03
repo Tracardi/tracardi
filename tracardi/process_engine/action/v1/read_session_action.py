@@ -8,7 +8,7 @@ class ReadSessionAction(ActionRunner):
     def __init__(self, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         return Result(port="session", value=self.session.dict())
 
 
@@ -18,7 +18,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.read_session_action',
             className='ReadSessionAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=['session'],
             init=None,
             manual="read_session_action",

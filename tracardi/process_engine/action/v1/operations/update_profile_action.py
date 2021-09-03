@@ -7,7 +7,7 @@ class UpdateProfileAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, void):
+    async def run(self, payload):
         self.profile.operation.update = True
         return None
 
@@ -18,7 +18,7 @@ def register() -> Plugin:
         spec=Spec(
             module='tracardi.process_engine.action.v1.operations.update_profile_action',
             className='UpdateProfileAction',
-            inputs=["void"],
+            inputs=["payload"],
             outputs=[],
             init=None,
             manual="update_profile_action"
