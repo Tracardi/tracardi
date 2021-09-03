@@ -5,10 +5,9 @@ from ...domain.event import Event
 from ...domain.flow import Flow
 from ...domain.profile import Profile
 from ...domain.session import Session
-from ...domain.source import Source
+from ...domain.resource import Resource
 from ...process_engine.tql.parser import Parser
 from ...process_engine.tql.transformer.expr_transformer import ExprTransformer
-from ...process_engine.tql.utils.dictonary import flatten
 
 payload = {
     "a": {
@@ -25,9 +24,9 @@ payload = {
 
 profile = Profile(id="1")
 session = Session(id="2")
-source = Source(id="3", type="event")
+resource = Resource(id="3", type="event")
 context = Context()
-event = Event(id="event-id", type="type", source=source, context=context, profile=profile, session=session)
+event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
 flow = Flow(id="flow-id", name="flow")
 dot = DotAccessor(profile, session, payload, event, flow)
 

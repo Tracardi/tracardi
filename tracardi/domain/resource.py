@@ -7,7 +7,7 @@ from .time import Time
 from ..service.secrets import encrypt, decrypt
 
 
-class Source(Entity):
+class Resource(Entity):
     type: str
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
@@ -26,7 +26,7 @@ class Source(Entity):
 
     # Persistence
     def storage(self) -> StorageCrud:
-        return StorageCrud("source", Source, entity=self)
+        return StorageCrud("source", Resource, entity=self)
 
 
 class ResourceRecord(Entity):
@@ -47,20 +47,20 @@ class ResourceRecord(Entity):
         super().__init__(**data)
 
     @staticmethod
-    def encode(source: Source) -> 'ResourceRecord':
+    def encode(resource: Resource) -> 'ResourceRecord':
         return ResourceRecord(
-            id=source.id,
-            name=source.name,
-            description=source.description,
-            type=source.type,
-            origin=source.origin,
-            enabled=source.enabled,
-            consent=source.consent,
-            config=encrypt(source.config)
+            id=resource.id,
+            name=resource.name,
+            description=resource.description,
+            type=resource.type,
+            origin=resource.origin,
+            enabled=resource.enabled,
+            consent=resource.consent,
+            config=encrypt(resource.config)
         )
 
-    def decode(self) -> Source:
-        return Source(
+    def decode(self) -> Resource:
+        return Resource(
             id=self.id,
             name=self.name,
             description=self.description,
@@ -73,4 +73,4 @@ class ResourceRecord(Entity):
 
     # Persistence
     def storage(self) -> StorageCrud:
-        return StorageCrud("source", Source, entity=self)
+        return StorageCrud("source", Resource, entity=self)

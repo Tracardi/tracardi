@@ -21,7 +21,6 @@ from ..service.merger import merge
 from .segment import Segment
 from .segments import Segments
 from ..process_engine.tql.condition import Condition
-from ..process_engine.tql.utils.dictonary import flatten
 
 
 class Profile(Entity):

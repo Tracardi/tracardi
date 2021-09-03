@@ -3,7 +3,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.domain.source import Source
+from tracardi.domain.resource import Resource
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
@@ -11,9 +11,9 @@ def test_value_read():
     profile = Profile(id="1")
     session = Session(id="2")
     payload = {"a": 3}
-    source = Source(id="3", type="event")
+    resource = Resource(id="3", type="event")
     context = Context()
-    event = Event(id="event-id", type="type", source=source, context=context, profile=profile, session=session)
+    event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
     flow = Flow(id="flow-id", name="flow")
     dot = DotAccessor(profile, session, payload, event, flow)
 
@@ -42,9 +42,9 @@ def test_value_exists():
     profile = Profile(id="1")
     session = Session(id="2")
     payload = {"a": 3}
-    source = Source(id="3", type="event")
+    resource = Resource(id="3", type="event")
     context = Context()
-    event = Event(id="event-id", type="type", source=source, context=context, profile=profile, session=session)
+    event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
     flow = Flow(id="flow-id", name="flow")
     dot = DotAccessor(profile, session, payload, event, flow)
 
@@ -56,9 +56,9 @@ def test_no_source():
     profile = Profile(id="1")
     session = Session(id="2")
     payload = {"a": 3}
-    source = Source(id="3", type="event")
+    resource = Resource(id="3", type="event")
     context = Context()
-    event = Event(id="event-id", type="type", source=source, context=context, profile=profile, session=session)
+    event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
     flow = Flow(id="flow-id", name="flow")
     dot = DotAccessor(profile, session, payload, event, flow)
 

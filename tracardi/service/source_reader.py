@@ -1,19 +1,19 @@
 from tracardi.domain.entity import Entity
-from tracardi.domain.source import ResourceRecord, Source
+from tracardi.domain.resource import ResourceRecord, Resource
 
 
-async def read_source(source_id: str) -> Source:
+async def read_source(resource_id: str) -> Resource:
     """
     Reads source by source id
     :param source_id: str
     :return source: Source
     """
 
-    source_config_record = await Entity(id=source_id). \
+    resource_config_record = await Entity(id=resource_id). \
         storage('source'). \
         load(ResourceRecord)  # type: ResourceRecord
 
-    if source_config_record is None:
-        raise ValueError('Source id {} does not exist.'.format(source_id))
+    if resource_config_record is None:
+        raise ValueError('Resource id {} does not exist.'.format(resource_id))
 
-    return source_config_record.decode()
+    return resource_config_record.decode()

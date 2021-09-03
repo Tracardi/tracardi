@@ -4,7 +4,7 @@ __all__ = [
     'profile',
     'consent',
     'segment',
-    'source',
+    'resource',
     'rule',
     'entity',
     'value_object',

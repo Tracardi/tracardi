@@ -4,7 +4,7 @@ from uuid import uuid4
 from tracardi.domain.consent import Consent
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.domain.source import Source
+from tracardi.domain.resource import Resource
 
 
 async def main(obj):
@@ -25,7 +25,7 @@ for o in [
     Session,
     # Flow,
     # Segment,
-    Source,
+    Resource,
     # UserConsent
 ]:
     loop.run_until_complete(main(o))

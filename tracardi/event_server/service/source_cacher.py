@@ -1,7 +1,7 @@
 from typing import Optional, Union
 from tracardi.config import memory_cache
 from tracardi.domain.entity import Entity
-from tracardi.domain.source import ResourceRecord
+from tracardi.domain.resource import ResourceRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 
 
