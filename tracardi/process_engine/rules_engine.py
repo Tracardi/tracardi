@@ -3,6 +3,7 @@ from time import time
 from typing import Dict, List, Tuple
 
 from pydantic import ValidationError
+
 from tracardi_graph_runner.domain.debug_info import DebugInfo
 from tracardi_graph_runner.domain.error_debug_info import ErrorDebugInfo
 from tracardi_graph_runner.domain.debug_info import FlowDebugInfo
@@ -11,7 +12,6 @@ from tracardi_graph_runner.domain.work_flow import WorkFlow
 from tracardi_plugin_sdk.domain.console import Log
 from ..domain.console import Console
 from ..domain.entity import Entity
-from ..domain.flow import Flow
 from ..domain.profile import Profile
 from ..domain.record.event_debug_record import EventDebugRecord
 from ..domain.session import Session
@@ -21,6 +21,8 @@ from ..domain.rule import Rule
 import asyncio
 
 from ..service.storage.factory import StorageFor, storage, StorageForBulk
+from ..service.storage.helpers.flow_loader import load_flow
+from ..service.storage.helpers.rules_loader import load_rules
 
 
 class RulesEngine:
@@ -74,7 +76,7 @@ class RulesEngine:
         for event in self.events:  # type: Event
 
             # Loads rules only for event.type
-            rules = await RulesEngine.load_rules(event.type)
+            rules = await load_rules(event.type)
 
             for rule in rules:
 
@@ -89,7 +91,7 @@ class RulesEngine:
                     continue
 
                 try:
-                    flow = await Flow.decode(rule.flow.id)
+                    flow = await load_flow(rule.flow.id)
                 except Exception as e:
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(

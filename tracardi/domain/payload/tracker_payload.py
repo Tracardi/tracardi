@@ -64,7 +64,6 @@ class TrackerPayload(BaseModel):
         # Save profile
         if save_profile and profile.operation.new:
             profile_result = await StorageFor(profile).index().save()
-            # profile_result = await profile.storage().save()
         else:
             profile_result = BulkInsertResult()
 
@@ -73,7 +72,6 @@ class TrackerPayload(BaseModel):
             # save only profile Entity
             session.profile = Entity(id=profile.id)
             session_result = await StorageFor(session).index().save()
-            # session_result = await session.storage().save()
         else:
             session_result = BulkInsertResult()
 

@@ -26,7 +26,6 @@ class Resource:
 
     def __init__(self):
         self.resources = {
-            # "credential":   Index(multi_index=False, index="tracardi-credential",          mapping=None, rel=None),
             "project":      Index(multi_index=False, index="tracardi-flow-project",        mapping=None, rel=None),
             "action":       Index(multi_index=False, index="tracardi-flow-action-plugins", mapping=None, rel=None),
             "token":        Index(multi_index=False, index="tracardi-token",               mapping="mappings/token-index.json", rel=None),

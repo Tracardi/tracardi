@@ -1,7 +1,7 @@
 import elasticsearch
 from typing import Union
 from tracardi.service.storage.elastic_storage import ElasticStorage
-from tracardi.event_server.service.persistence_service import PersistenceService
+from tracardi.service.storage.persistence_service import PersistenceService
 from tracardi.domain.entity import Entity
 from pydantic import BaseModel
 from tracardi.domain.agg_result import AggResult

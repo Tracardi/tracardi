@@ -142,7 +142,7 @@ class Profile(Entity):
             # Filter only profiles that are not current profile and where not merged
             profiles_to_merge = [p for p in existing_profiles if p.id != self.id and p.active is True]
 
-            print('profiles_to_merge',profiles_to_merge)
+            print('profiles_to_merge', profiles_to_merge)
 
             # Are there any profiles to merge?
             if len(profiles_to_merge) > 0:

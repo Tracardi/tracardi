@@ -1,17 +1,13 @@
 import uuid
 from tracardi_graph_runner.domain.flow import Flow as GraphFlow
-from .entity import Entity
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
-from ..exceptions.exception import TracardiException
 from typing import Optional, List
 from pydantic import BaseModel
 from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
 from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec
 from ..service.secrets import decrypt, encrypt
 import logging
-
-from ..service.storage.factory import StorageFor
 
 logger = logging.getLogger("Flow")
 logger.setLevel(logging.WARNING)
@@ -24,10 +20,6 @@ class Flow(GraphFlow):
 
     # Persistence
 
-    # def storage(self) -> crud.StorageCrud:
-    #     flow_record = self.encode()
-    #     return crud.StorageCrud("flow", FlowRecord, entity=flow_record)
-
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
@@ -37,16 +29,6 @@ class Flow(GraphFlow):
 
     def encode(self) -> 'FlowRecord':
         return FlowRecord.encode(self)
-
-    @staticmethod
-    async def decode(flow_id) -> 'Flow':
-        flow_record_entity = Entity(id=flow_id)
-        flow_record = await StorageFor(flow_record_entity).index("flow").load(FlowRecord)  # type: FlowRecord
-
-        if not flow_record:
-            raise TracardiException("Could not find flow `{}`".format(flow_id))
-
-        return flow_record.decode()
 
     def encode_draft(self, draft: 'Flow'):
         self.draft = encrypt(draft.dict())
