@@ -3,10 +3,9 @@ from datetime import datetime
 
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
-from tracardi.event_server.service.persistence_service import PersistenceService
 from tracardi.exceptions.exception import StorageException
 from tracardi.service.storage import index as index_2_elastic
-from tracardi.service.storage.elastic_storage import ElasticStorage
+from tracardi.service.storage.factory import storage
 from tracardi.service.storage.sql import to_sql_query, to_time_range_sql_query
 
 _logger = logging.getLogger("Index")
@@ -17,7 +16,7 @@ class Index:
     def __init__(self, index: str):
         self.index = index
         self.read_index = index_2_elastic.resources[index].get_read_index()
-        self.storage_service = PersistenceService(ElasticStorage(index_key=self.index))
+        self.storage_service = storage(self.index)
         self.time_fields_map = {
             'event': 'metadata.time.insert',
             'session': 'metadata.time.insert',

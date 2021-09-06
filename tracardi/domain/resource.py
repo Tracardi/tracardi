@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional, Any
 from .entity import Entity
-from tracardi.service.storage.crud import StorageCrud
 from .metadata import Metadata
 from .time import Time
 from .value_object.storage_info import StorageInfo
@@ -25,9 +24,9 @@ class Resource(Entity):
             ))
         super().__init__(**data)
 
-    # Persistence
-    def storage(self) -> StorageCrud:
-        return StorageCrud("resource", Resource, entity=self)
+    # # Persistence
+    # def storage(self) -> StorageCrud:
+    #     return StorageCrud("resource", Resource, entity=self)
 
     @staticmethod
     def storage_info() -> StorageInfo:
@@ -80,8 +79,8 @@ class ResourceRecord(Entity):
         )
 
     # Persistence
-    def storage(self) -> StorageCrud:
-        return StorageCrud("resource", Resource, entity=self)
+    # def storage(self) -> StorageCrud:
+    #     return StorageCrud("resource", Resource, entity=self)
 
     @staticmethod
     def storage_info() -> StorageInfo:

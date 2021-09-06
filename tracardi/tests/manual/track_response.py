@@ -32,7 +32,7 @@
 #         index = response_item.index
 #         slices = response_item.slices
 #         if index in resources and resources[index].rel is not None:
-#             storage = PersistenceService(ElasticStorage(index_key=index))
+#             storage = storage(index)
 #             result = await storage.load_by(resources[index].rel, profile.id)
 #             print(result)
 #

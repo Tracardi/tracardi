@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional, Any
-from tracardi.service.storage.crud import StorageCrud
 from ..entity import Entity
 from ..flow_action_plugin import FlowActionPlugin
 from tracardi.domain.flow import PluginRecord
@@ -23,9 +22,9 @@ class FlowActionPluginRecord(Entity):
         super().__init__(**data)
 
     # Persistence
-
-    def storage(self) -> StorageCrud:
-        return StorageCrud("action", FlowActionPluginRecord, entity=self)
+    #
+    # def storage(self) -> StorageCrud:
+    #     return StorageCrud("action", FlowActionPluginRecord, entity=self)
 
     @staticmethod
     def storage_info() -> StorageInfo:

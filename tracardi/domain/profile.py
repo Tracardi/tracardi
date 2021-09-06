@@ -14,14 +14,11 @@ from .time import Time
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..service.dot_notation_converter import DotNotationConverter
-from ..service.storage.collection_crud import CollectionCrud
-from ..service.storage.crud import StorageCrud
-
 from .profile_stats import ProfileStats
 from ..service.merger import merge
 from .segment import Segment
-from .segments import Segments
 from ..process_engine.tql.condition import Condition
+from ..service.storage.factory import StorageFor, storage
 
 
 class Profile(Entity):
@@ -95,7 +92,7 @@ class Profile(Entity):
 
             # todo segments are loaded one by one - maybe it is possible to load it at once
             # todo segments are loaded event is they are disabled. It is checked later. Maybe we can filter it here.
-            segments = await Segments.storage().load_by('eventType', event_type)
+            segments = await storage(index="segment").load_by('eventType', event_type)
 
             for segment in segments:
 
@@ -170,8 +167,8 @@ class Profile(Entity):
     def increase_views(self, value=1):
         self.stats.views += value
 
-    def storage(self) -> StorageCrud:
-        return StorageCrud("profile", Profile, entity=self, exclude={"operation": ...})
+    # def storage(self) -> StorageCrud:
+    #     return StorageCrud("profile", Profile, entity=self, exclude={"operation": ...})
 
     @staticmethod
     def storage_info() -> StorageInfo:
@@ -189,7 +186,7 @@ class Profile(Entity):
         """
 
         entity = Entity(id=id)
-        profile = await entity.storage('profile').load(Profile)  # type: Profile
+        profile = await StorageFor(entity).index('profile').load(Profile)  # type: Profile
         if profile is not None and profile.mergedWith is not None:
             profile = await Profile.load_current(profile.mergedWith)
         return profile
@@ -244,6 +241,3 @@ class Profiles(list):
             consents=consents,
             active=True
         )
-
-    def bulk(self) -> CollectionCrud:
-        return CollectionCrud("profile", self)

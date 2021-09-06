@@ -1,9 +1,7 @@
 import tracardi
 from typing import List
 from pydantic import BaseModel
-
-from tracardi.event_server.service.persistence_service import PersistenceService
-from tracardi.service.storage.elastic_storage import ElasticStorage
+from tracardi.service.storage.factory import storage
 
 
 class Operation(BaseModel):
@@ -23,5 +21,5 @@ class Operation(BaseModel):
 
     @staticmethod
     async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List['tracardi.domain.profile.Profile']:
-        profiles = await PersistenceService(ElasticStorage('profile')).load_by_values(merge_key_values, limit)
+        profiles = await storage('profile').load_by_values(merge_key_values, limit)
         return [tracardi.domain.profile.Profile(**profile) for profile in profiles]

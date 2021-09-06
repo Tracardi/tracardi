@@ -1,4 +1,6 @@
 import asyncio
+from time import sleep
+from tracardi.domain.entity import Entity
 
 from tracardi.domain.record.flow_action_plugin_record import FlowActionPluginRecord
 
@@ -25,7 +27,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.resource import Resource, ResourceRecord
 from tracardi.domain.session import Session
-from tracardi.service.storage.factory import storage
+from tracardi.service.storage.factory import StorageFor
 
 
 def test_storage():
@@ -34,8 +36,8 @@ def test_storage():
         Profile(id="1"),
         # Console(event_id="1", flow_id="1", origin="origin", type="type", class_name="classname", module="module", message="message")
         # Entity,
-        Event(id="1", type="test-event", source=Resource(id="1", type="test"), session=Session(id="1"),
-              context=Context()),
+        # Event(id="1", type="test-event", source=Resource(id="1", type="test"), session=Session(id="1"),
+        #       context=Context()),
         Flow(**{
             "id": "1",
             "name": "name",
@@ -47,27 +49,34 @@ def test_storage():
             "draft": "",
             "lock": False
         }),
-        FlowActionPlugin(id="1", plugin=register()),  #todo may not be allowed without encoding
+        FlowActionPlugin(id="1", plugin=register()),  # todo may not be allowed without encoding
         # Resource(id="2", type="test"),  # todo moze nie byc wymagane
         ResourceRecord(id="2", type="test"),
         Rule(id="1", name="rule", event=Type(type="type"), flow=NamedEntity(id="1", name="flow")),
-        Segment(id="1", name="segment", condition="a>1"),  #todo segment needs validation on condition
+        Segment(id="1", name="segment", condition="a>1"),  # todo segment needs validation on condition
         EventDebugRecord(id="1", content="abc"),
         FlowActionPluginRecord.encode(FlowActionPlugin(id="2", plugin=register())),
     ]
 
     loop = asyncio.get_event_loop()
-    for instance in objects:
-        db = storage(instance)
-        print(db.domain_class_ref)
 
-        async def main():
+    async def main():
+        for instance in objects:
+            db = StorageFor(instance).index()
+            print(db.domain_class_ref)
+
             result = await db.save()
             assert result.saved == 1
+            await asyncio.sleep(.4)
             result = await db.load()
             assert isinstance(result, db.domain_class_ref)
             # result = await db.delete()
-            # print(result)
 
-        loop.run_until_complete(main())
+        result = await StorageFor(Entity(id="1")).index("session").save({"properties": {"a": 1}})
+        assert result.saved == 1
+        await asyncio.sleep(.4)
+        result = await StorageFor(Entity(id="1")).index("session").load(Session)
+        assert result.properties == {"a": 1}
+
+    loop.run_until_complete(main())
     loop.close()

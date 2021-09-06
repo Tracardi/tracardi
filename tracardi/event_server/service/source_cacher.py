@@ -3,6 +3,7 @@ from tracardi.config import memory_cache
 from tracardi.domain.entity import Entity
 from tracardi.domain.resource import ResourceRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
+from tracardi.service.storage.factory import StorageFor
 
 
 class SourceCacher:
@@ -28,7 +29,7 @@ class SourceCacher:
             return resource
         else:
             # Expired
-            resource = await resource.storage("resource").load(ResourceRecord)  # type: ResourceRecord
+            resource = await StorageFor(resource).index("resource").load(ResourceRecord)  # type: ResourceRecord
             if resource is not None:
                 self._cache['resource'] = CacheItem(data=resource, ttl=memory_cache.source_ttl)
                 return resource

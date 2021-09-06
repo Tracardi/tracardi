@@ -1,5 +1,6 @@
 from tracardi.domain.entity import Entity
 from tracardi.domain.resource import ResourceRecord, Resource
+from tracardi.service.storage.factory import StorageFor
 
 
 async def read_source(resource_id: str) -> Resource:
@@ -9,8 +10,8 @@ async def read_source(resource_id: str) -> Resource:
     :return source: Source
     """
 
-    resource_config_record = await Entity(id=resource_id). \
-        storage('resource'). \
+    resource_config_record = await StorageFor(Entity(id=resource_id)). \
+        index('resource'). \
         load(ResourceRecord)  # type: ResourceRecord
 
     if resource_config_record is None:

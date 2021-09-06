@@ -1,6 +1,5 @@
 import asyncio
-
-from tracardi.service.storage.crud import EntityStorageCrud
+from tracardi.service.storage.factory import StorageFor
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -20,7 +19,7 @@ class DebugPayloadAction(ActionRunner):
 
     async def run(self, **kwargs):
         if self.debug:
-            storage = EntityStorageCrud('event', Event)
+            storage = StorageFor.crud('event', class_type=Event).load_by('type', self.event_type, limit=1)
             result = await storage.load_by('type', self.event_type, limit=1)
 
             if result.total == 0:
@@ -34,8 +33,8 @@ class DebugPayloadAction(ActionRunner):
 
             profile_entity = Entity(id=self.event.profile.id)
             session_entity = Entity(id=self.event.session.id)
-            profile_task = asyncio.create_task(profile_entity.storage('profile').load(Profile))
-            session_task = asyncio.create_task(session_entity.storage('session').load(Session))
+            profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
+            session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
 
             profile = await profile_task
             session = await session_task

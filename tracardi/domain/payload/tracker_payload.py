@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 from ..value_object.collect_result import CollectResult
 from ..entity import Entity
-from ..events import Events
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
 from ..session import Session
@@ -15,6 +14,7 @@ from ..value_object.save_result import SaveResult
 from ..value_object.tracker_payload_result import TrackerPayloadResult
 from ...config import tracardi
 from ...process_engine.rules_engine import RulesEngine
+from ...service.storage.factory import StorageFor, StorageForBulk
 
 
 class TrackerPayload(BaseModel):
@@ -35,8 +35,8 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
 
-    def get_events(self, session: Session, profile: Profile) -> Events:
-        _events = Events()
+    def get_events(self, session: Session, profile: Profile) -> list:
+        _events = []
         if self.events:
             for event in self.events:  # type: EventPayload
                 if event.is_persistent():
@@ -50,7 +50,7 @@ class TrackerPayload(BaseModel):
     def is_disabled(self, key):
         return key in self.options and self.options[key] is False
 
-    async def collect(self) -> Tuple[Profile, Session, Events, CollectResult]:
+    async def collect(self) -> Tuple[Profile, Session, list, CollectResult]:
 
         save_session = False if self.is_disabled('saveSession') else True
         save_events = False if self.is_disabled('saveEvents') else True
@@ -63,7 +63,8 @@ class TrackerPayload(BaseModel):
 
         # Save profile
         if save_profile and profile.operation.new:
-            profile_result = await profile.storage().save()
+            profile_result = await StorageFor(profile).index().save()
+            # profile_result = await profile.storage().save()
         else:
             profile_result = BulkInsertResult()
 
@@ -71,21 +72,22 @@ class TrackerPayload(BaseModel):
         if save_session and (session.operation.new or session.profile is None or session.profile.id != profile.id):
             # save only profile Entity
             session.profile = Entity(id=profile.id)
-            session_result = await session.storage().save()
+            session_result = await StorageFor(session).index().save()
+            # session_result = await session.storage().save()
         else:
             session_result = BulkInsertResult()
 
         # Save events
         if save_events:
             events = self.get_events(session, profile)
-            event_result = await events.bulk().save()
+            event_result = await StorageForBulk(events).index('event').save()
             event_result = SaveResult(**event_result.dict())
 
             # Add event types
             for event in events:
                 event_result.types.append(event.type)
         else:
-            events = Events()
+            events = []
             event_result = BulkInsertResult()
 
         result = {
@@ -107,7 +109,7 @@ class TrackerPayload(BaseModel):
 
         # Load session from storage
         if isinstance(self.session, Entity):
-            session = await self.session.storage("session").load(Session) # type: Session
+            session = await StorageFor(self.session).index("session").load(Session)  # type: Session
         else:
             raise ValueError(
                 "Session has unknown type. Available types Entity, Session. `{}` given".format(type(self.session)))

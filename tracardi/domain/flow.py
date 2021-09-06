@@ -1,6 +1,5 @@
 import uuid
 from tracardi_graph_runner.domain.flow import Flow as GraphFlow
-import tracardi.service.storage.crud as crud
 from .entity import Entity
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
@@ -9,9 +8,10 @@ from typing import Optional, List
 from pydantic import BaseModel
 from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
 from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec
-from tracardi.service.storage.crud import StorageCrud
 from ..service.secrets import decrypt, encrypt
 import logging
+
+from ..service.storage.factory import StorageFor
 
 logger = logging.getLogger("Flow")
 logger.setLevel(logging.WARNING)
@@ -24,9 +24,9 @@ class Flow(GraphFlow):
 
     # Persistence
 
-    def storage(self) -> crud.StorageCrud:
-        flow_record = self.encode()
-        return crud.StorageCrud("flow", FlowRecord, entity=flow_record)
+    # def storage(self) -> crud.StorageCrud:
+    #     flow_record = self.encode()
+    #     return crud.StorageCrud("flow", FlowRecord, entity=flow_record)
 
     @staticmethod
     def storage_info() -> StorageInfo:
@@ -41,7 +41,7 @@ class Flow(GraphFlow):
     @staticmethod
     async def decode(flow_id) -> 'Flow':
         flow_record_entity = Entity(id=flow_id)
-        flow_record = await flow_record_entity.storage("flow").load(FlowRecord)  # type: FlowRecord
+        flow_record = await StorageFor(flow_record_entity).index("flow").load(FlowRecord)  # type: FlowRecord
 
         if not flow_record:
             raise TracardiException("Could not find flow `{}`".format(flow_id))
@@ -215,8 +215,15 @@ class FlowRecord(NamedEntity):
 
     # Persistence
 
-    def storage(self) -> StorageCrud:
-        return StorageCrud("flow", FlowRecord, entity=self)
+    # def storage(self) -> StorageCrud:
+    #     return StorageCrud("flow", FlowRecord, entity=self)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'flow',
+            FlowRecord
+        )
 
     @staticmethod
     def encode(flow: Flow) -> 'FlowRecord':

@@ -9,7 +9,7 @@ from tracardi_graph_runner.domain.debug_info import FlowDebugInfo
 from tracardi_graph_runner.domain.flow_history import FlowHistory
 from tracardi_graph_runner.domain.work_flow import WorkFlow
 from tracardi_plugin_sdk.domain.console import Log
-from ..domain.console import Console, ConsoleLog
+from ..domain.console import Console
 from ..domain.entity import Entity
 from ..domain.flow import Flow
 from ..domain.profile import Profile
@@ -17,11 +17,10 @@ from ..domain.record.event_debug_record import EventDebugRecord
 from ..domain.session import Session
 from ..event_server.utils.memory_cache import MemoryCache, CacheItem
 from ..domain.event import Event
-from ..domain.events import Events
 from ..domain.rule import Rule
-from ..domain.rules import Rules
-from ..service.storage.collection_crud import CollectionCrud
 import asyncio
+
+from ..service.storage.factory import StorageFor, storage, StorageForBulk
 
 
 class RulesEngine:
@@ -29,7 +28,7 @@ class RulesEngine:
     def __init__(self,
                  session: Session,
                  profile: Profile,
-                 events: Events
+                 events: list
                  ):
         self.session = session
         self.profile = profile
@@ -61,13 +60,13 @@ class RulesEngine:
         memory_cache = MemoryCache()
 
         if 'rules' not in memory_cache:
-            flows_data = await Rules.storage().filter(query)
+            flows_data = await storage(index="rule").filter(query)
             memory_cache['rules'] = CacheItem(data=flows_data, ttl=1)
 
         rules = list(memory_cache['rules'].data)
         return rules
 
-    async def invoke(self, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list], ConsoleLog]:
+    async def invoke(self, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list], list]:
 
         flow_task_store = defaultdict(list)
         debug_info_by_event_type_and_rule_name = defaultdict(list)
@@ -132,7 +131,7 @@ class RulesEngine:
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
         # Run and report async
-        console_log = ConsoleLog()
+        console_log = []
         for event_type, tasks in flow_task_store.items():
             for flow_id, event_id, rule_name, task in tasks:
                 try:
@@ -197,12 +196,13 @@ class RulesEngine:
 
                 disabled_profiles = await self.profile.merge(limit=2000)
                 if disabled_profiles is not None:
-                    save_old_profiles_task = asyncio.create_task(disabled_profiles.bulk().save())
+                    save_old_profiles_task = asyncio.create_task(StorageForBulk(disabled_profiles).index('profile').save())
                     save_tasks.append(save_old_profiles_task)
 
             # Must be the last operation
             if self.profile.operation.needs_update():
-                save_tasks.append(asyncio.create_task(self.profile.storage().save()))
+                # save_tasks.append(asyncio.create_task(self.profile.storage().save()))
+                save_tasks.append(asyncio.create_task(StorageFor(self.profile).index().save()))
 
             # run save tasks
             await asyncio.gather(*save_tasks)
@@ -235,7 +235,7 @@ class RulesEngine:
 
         return merge_key_values
 
-    async def execute(self, source_id) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list], ConsoleLog]:
+    async def execute(self, source_id) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list], list]:
 
         """ Runs rules and flow and saves debug info and console log """
 
@@ -244,7 +244,7 @@ class RulesEngine:
         # Save console log
 
         if console_log:
-            await console_log.bulk().save()
+            await StorageForBulk(console_log).index('console-log').save()
 
         # Collect debug info
 
@@ -254,8 +254,7 @@ class RulesEngine:
             record.append(debug_info_record)
 
         # Save in debug index
-        bulk = CollectionCrud("debug-info", record)
-        await bulk.save()
+        await StorageForBulk(record).index("debug-info").save()
 
         return debug_info_by_event_type_and_rule_name, segmentation_info, console_log
 

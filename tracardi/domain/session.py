@@ -5,7 +5,6 @@ from uuid import uuid4
 from .entity import Entity
 from .metadata import Metadata
 from .time import Time
-from tracardi.service.storage.crud import StorageCrud
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 
@@ -32,8 +31,8 @@ class Session(Entity):
         self.properties = session.properties
         self.operation = session.operation
 
-    def storage(self, **kwargs) -> StorageCrud:
-        return StorageCrud("session", Session, entity=self)
+    # def storage(self, **kwargs) -> StorageCrud:
+    #     return StorageCrud("session", Session, entity=self)
 
     @staticmethod
     def storage_info() -> StorageInfo:

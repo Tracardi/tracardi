@@ -5,3 +5,4 @@ class StorageInfo:
         self.domain_class_ref = domain_class_ref
         self.exclude = exclude
         self.exclude_unset = exclude_unset
+

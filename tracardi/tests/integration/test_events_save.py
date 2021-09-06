@@ -4,6 +4,7 @@ from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.storage.factory import StorageFor, StorageForBulk
 
 
 @pytest.mark.asyncio
@@ -26,10 +27,10 @@ async def test_save_events():
         ]
     )
     events = tracker_payload.get_events(Session.new(), Profile.new())
-    result = await events.bulk().save()
+    result = await StorageForBulk(events).index('event').save()
     assert result.saved == 2  # profile id must be form session
 
     for id in result.ids:
         entity = Entity(id=id)
-        await entity.storage("event").delete()
+        await StorageFor(entity).index("event").delete()
 

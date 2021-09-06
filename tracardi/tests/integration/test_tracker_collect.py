@@ -3,13 +3,14 @@ import pytest
 from tracardi.domain.entity import Entity
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.storage.factory import StorageFor
 
 
 @pytest.mark.asyncio
 async def test_tracker_collect():
 
     source = Entity(id="scope")
-    await source.storage("resource").save({})
+    await StorageFor(source).index("resource").save({})
 
     session = Entity.new()
     profile = Entity.new()
@@ -43,7 +44,7 @@ async def test_tracker_collect():
 
     for id in result.events.ids:
         entity = Entity(id=id)
-        await entity.storage("event").delete()
+        await StorageFor(entity).index("event").delete()
 
     # for id in result.profile.ids:
     #     entity = Entity(id=id)
@@ -51,7 +52,7 @@ async def test_tracker_collect():
 
     for id in result.session.ids:
         entity = Entity(id=id)
-        await entity.storage("session").delete()
+        await StorageFor(entity).index("session").delete()
 
 
 
