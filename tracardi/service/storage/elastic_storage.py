@@ -13,6 +13,8 @@ class ElasticStorage:
 
     def __init__(self, index_key):
         self.storage = Elastic.instance()
+        if index_key not in index.resources:
+            raise ValueError("There is no index defined for `{}`.".format(index_key))
         self.index = index.resources[index_key]  # type: Index
 
     async def load(self, id) -> [dict, None]:

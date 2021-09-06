@@ -9,6 +9,7 @@ from .metadata import Metadata
 from .profile import Profile
 from .session import Session
 from .time import Time
+from .value_object.storage_info import StorageInfo
 
 
 class Event(Entity):
@@ -47,6 +48,13 @@ class Event(Entity):
 
     def storage(self, **kwargs) -> StorageCrud:
         return StorageCrud("event", Event, entity=self)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'event',
+            Event
+        )
 
     @staticmethod
     def new(data: dict) -> 'Event':

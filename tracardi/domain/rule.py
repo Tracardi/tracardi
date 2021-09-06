@@ -7,10 +7,10 @@ from .named_entity import NamedEntity
 from .time import Time
 from tracardi.service.storage.crud import StorageCrud
 from .type import Type
+from .value_object.storage_info import StorageInfo
 
 
-class Rule(Entity):
-    name: str
+class Rule(NamedEntity):
     event: Type
     flow: NamedEntity
 
@@ -29,3 +29,10 @@ class Rule(Entity):
 
     def storage(self) -> StorageCrud:
         return StorageCrud("rule", Rule, entity=self)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'rule',
+            Rule
+        )

@@ -12,6 +12,7 @@ from .pii import PII
 from .profile_traits import ProfileTraits
 from .time import Time
 from .value_object.operation import Operation
+from .value_object.storage_info import StorageInfo
 from ..service.dot_notation_converter import DotNotationConverter
 from ..service.storage.collection_crud import CollectionCrud
 from ..service.storage.crud import StorageCrud
@@ -171,6 +172,14 @@ class Profile(Entity):
 
     def storage(self) -> StorageCrud:
         return StorageCrud("profile", Profile, entity=self, exclude={"operation": ...})
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'profile',
+            Profile,
+            exclude={"operation": ...}
+        )
 
     @staticmethod
     async def load_current(id) -> 'Profile':

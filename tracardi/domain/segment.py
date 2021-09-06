@@ -1,6 +1,7 @@
 from typing import Optional
 
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.service.storage.crud import StorageCrud
 
 
@@ -17,3 +18,10 @@ class Segment(NamedEntity):
 
     def storage(self) -> StorageCrud:
         return StorageCrud("segment", Segment, entity=self)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'segment',
+            Segment
+        )

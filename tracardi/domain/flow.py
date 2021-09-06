@@ -3,6 +3,7 @@ from tracardi_graph_runner.domain.flow import Flow as GraphFlow
 import tracardi.service.storage.crud as crud
 from .entity import Entity
 from .named_entity import NamedEntity
+from .value_object.storage_info import StorageInfo
 from ..exceptions.exception import TracardiException
 from typing import Optional, List
 from pydantic import BaseModel
@@ -26,6 +27,13 @@ class Flow(GraphFlow):
     def storage(self) -> crud.StorageCrud:
         flow_record = self.encode()
         return crud.StorageCrud("flow", FlowRecord, entity=flow_record)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'flow',
+            FlowRecord
+        )
 
     def encode(self) -> 'FlowRecord':
         return FlowRecord.encode(self)

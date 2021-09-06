@@ -4,6 +4,7 @@ from .entity import Entity
 from tracardi.service.storage.crud import StorageCrud
 from .metadata import Metadata
 from .time import Time
+from .value_object.storage_info import StorageInfo
 from ..service.secrets import encrypt, decrypt
 
 
@@ -27,6 +28,13 @@ class Resource(Entity):
     # Persistence
     def storage(self) -> StorageCrud:
         return StorageCrud("resource", Resource, entity=self)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'resource',
+            Resource
+        )
 
 
 class ResourceRecord(Entity):
@@ -74,3 +82,10 @@ class ResourceRecord(Entity):
     # Persistence
     def storage(self) -> StorageCrud:
         return StorageCrud("resource", Resource, entity=self)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'resource',
+            ResourceRecord
+        )

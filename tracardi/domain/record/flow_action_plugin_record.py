@@ -7,6 +7,7 @@ from tracardi.domain.flow import PluginRecord
 from ..metadata import Metadata
 from ..settings import Settings
 from ..time import Time
+from ..value_object.storage_info import StorageInfo
 
 
 class FlowActionPluginRecord(Entity):
@@ -25,6 +26,13 @@ class FlowActionPluginRecord(Entity):
 
     def storage(self) -> StorageCrud:
         return StorageCrud("action", FlowActionPluginRecord, entity=self)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'action',
+            FlowActionPluginRecord
+        )
 
     @staticmethod
     def encode(action: FlowActionPlugin) -> 'FlowActionPluginRecord':
