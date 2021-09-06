@@ -10,6 +10,10 @@ from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Po
 from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec
 from tracardi.service.storage.crud import StorageCrud
 from ..service.secrets import decrypt, encrypt
+import logging
+
+logger = logging.getLogger("Flow")
+logger.setLevel(logging.WARNING)
 
 
 class Flow(GraphFlow):
@@ -66,9 +70,16 @@ class Flow(GraphFlow):
         )
 
     def __add__(self, edge_bundle: EdgeBundle):
-        self.flowGraph.nodes.append(edge_bundle.source)
-        self.flowGraph.nodes.append(edge_bundle.target)
-        self.flowGraph.edges.append(edge_bundle.edge)
+        if edge_bundle.source not in self.flowGraph.nodes:
+            self.flowGraph.nodes.append(edge_bundle.source)
+        if edge_bundle.target not in self.flowGraph.nodes:
+            self.flowGraph.nodes.append(edge_bundle.target)
+
+        if edge_bundle.edge not in self.flowGraph.edges:
+            self.flowGraph.edges.append(edge_bundle.edge)
+        else:
+            logger.warning("Edge {}->{} already exists".format(edge_bundle.edge.source, edge_bundle.edge.target))
+
         return self
 
 
