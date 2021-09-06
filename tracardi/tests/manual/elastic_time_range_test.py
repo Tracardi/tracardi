@@ -1,8 +1,9 @@
 import asyncio
 from pprint import pprint
 
-from tracardi.domain.index import Index
+from tracardi.service.storage.helpers.index import Index
 from tracardi.domain.time_range_query import DatetimeRangePayload
+from tracardi.service.storage.factory import storage
 
 
 async def main():
@@ -15,7 +16,7 @@ async def main():
         }
     }
     q = DatetimeRangePayload(**a)
-    es = Index("session")
+    es = Index(storage("session"))
     r = await es.histogram(q)
     pprint(r)
 

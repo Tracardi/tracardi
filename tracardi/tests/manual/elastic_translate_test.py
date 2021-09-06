@@ -6,7 +6,7 @@ from tracardi.service.storage.sql import to_sql_query
 
 async def main():
     es = Elastic.instance()
-    q = to_sql_query("test1-tracardi-event", query="type='view' and event_server.browser.browser.engine='xxx'")
+    q = to_sql_query("tracardi-event", query="type='view' and event_server.browser.browser.engine='xxx'")
     print(q)
     q = await es.translate(q)
     print(q)

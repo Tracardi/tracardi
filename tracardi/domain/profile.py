@@ -1,10 +1,6 @@
-import copy
 import uuid
 from datetime import datetime
-from typing import Optional, Any, List, Union
-
-import tracardi
-
+from typing import Optional, Any, List, Union, Callable
 from tracardi_dot_notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import Metadata
@@ -18,7 +14,6 @@ from .profile_stats import ProfileStats
 from ..service.merger import merge
 from .segment import Segment
 from ..process_engine.tql.condition import Condition
-from ..service.storage.factory import StorageFor, storage
 
 
 class Profile(Entity):
@@ -74,7 +69,7 @@ class Profile(Entity):
 
         return disabled_profiles
 
-    async def segment(self, event_types):
+    async def segment(self, event_types, load_segment_by_event_type):
 
         """
         This method mutates current profile. Loads segments and adds segments to current profile.
@@ -92,7 +87,7 @@ class Profile(Entity):
 
             # todo segments are loaded one by one - maybe it is possible to load it at once
             # todo segments are loaded event is they are disabled. It is checked later. Maybe we can filter it here.
-            segments = await storage(index="segment").load_by('eventType', event_type)
+            segments = await load_segment_by_event_type(event_type)
 
             for segment in segments:
 
@@ -119,7 +114,7 @@ class Profile(Entity):
 
                     yield event_type, segment_id, msg
 
-    async def merge(self, limit=2000) -> Union['Profiles', None]:
+    async def merge(self, load_profiles_to_merge_callable: Callable, limit: int = 2000) -> Union['Profiles', None]:
 
         """
         This method mutates current profile.
@@ -135,7 +130,7 @@ class Profile(Entity):
         if len(merge_key_values) > 0:
 
             # Load all profiles that match merging criteria
-            existing_profiles = await tracardi.domain.value_object.operation.Operation.load_profiles_to_merge(
+            existing_profiles = await load_profiles_to_merge_callable(
                 merge_key_values,
                 limit=limit)
 
@@ -178,18 +173,18 @@ class Profile(Entity):
             exclude={"operation": ...}
         )
 
-    @staticmethod
-    async def load_current(id) -> 'Profile':
-
-        """
-        Loads current profile. If profile was merged then it loads merged profile.
-        """
-
-        entity = Entity(id=id)
-        profile = await StorageFor(entity).index('profile').load(Profile)  # type: Profile
-        if profile is not None and profile.mergedWith is not None:
-            profile = await Profile.load_current(profile.mergedWith)
-        return profile
+    # @staticmethod
+    # async def load_current(id) -> 'Profile':
+    #
+    #     """
+    #     Loads current profile. If profile was merged then it loads merged profile.
+    #     """
+    #
+    #     entity = Entity(id=id)
+    #     profile = await StorageFor(entity).index('profile').load(Profile)  # type: Profile
+    #     if profile is not None and profile.mergedWith is not None:
+    #         profile = await Profile.load_current(profile.mergedWith)
+    #     return profile
 
     @staticmethod
     def new() -> 'Profile':

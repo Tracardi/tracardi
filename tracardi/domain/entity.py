@@ -8,9 +8,6 @@ from tracardi.domain.value_object.storage_info import StorageInfo
 class Entity(BaseModel):
     id: str
 
-    # def storage(self, index) -> 'crud.EntityStorageCrud':
-    #     return crud.EntityStorageCrud(index, entity=self)
-
     @staticmethod
     def new() -> 'Entity':
         return Entity(id=str(uuid4()))

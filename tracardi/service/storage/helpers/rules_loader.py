@@ -1,8 +1,20 @@
+import asyncio
+from asyncio import Task
+from typing import List, Tuple
+
+from tracardi.domain.event import Event
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.service.storage.factory import storage
 
 
-async def load_rules(event_type: str):
+def load_rules(events: List[Event]) -> List[Tuple[Task, Event]]:
+    return [(
+        asyncio.create_task(load_rule(event.type)),
+        event
+    ) for event in events]
+
+
+async def load_rule(event_type: str):
     query = {
         "query": {
             "bool": {

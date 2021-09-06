@@ -16,5 +16,5 @@ class DotNotationConverter:
                 raise KeyError("Invalid dot notation. Could not find value for `{}` in profile.".format(dot_notation))
         else:
             raise KeyError(
-                "Invalid dot notation. Only values from profile are allowed as merge_keys. `{}` does not start with profile@..".format(
-                    dot_notation))
+                "Invalid dot notation. Only values from profile are allowed as merge_keys. `{}` "
+                "does not start with profile@..".format(dot_notation))
