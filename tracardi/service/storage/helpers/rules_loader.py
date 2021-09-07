@@ -9,7 +9,7 @@ from tracardi.service.storage.factory import storage
 
 def load_rules(events: List[Event]) -> List[Tuple[Task, Event]]:
     return [(
-        load_rule(event.type),
+        asyncio.create_task(load_rule(event.type)),
         event
     ) for event in events]
 

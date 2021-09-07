@@ -28,3 +28,5 @@ tracardi_zapier_webhook
 tracardi-mysql-connector
 tracardi-redshift-connector
 tracardi-postgresql-connector
+tracardi-url-parser
+tracardi-local-timespan

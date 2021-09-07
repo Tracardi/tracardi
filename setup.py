@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi',
-    version='0.6.8',
+    version='0.6.9',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -46,7 +46,9 @@ setup(
         'tracardi-mongodb-connector',
         'tracardi-postgresql-connector',
         'tracardi-mysql-connector',
-        'tracardi-redshift-connector'
+        'tracardi-redshift-connector',
+        'tracardi-url-parser',
+        'tracardi-local-timespan'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
