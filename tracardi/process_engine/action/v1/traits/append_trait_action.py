@@ -11,12 +11,22 @@ from tracardi_dot_notation.dot_accessor import DotAccessor
 class AppendTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'append' not in kwargs:
-            raise ValueError("Please define `append` in config section.")
-        if not isinstance(kwargs['append'], dict):
-            raise ValueError("Please define `append` as dictionary not {}.".format(type(kwargs['append'])))
+        if 'append' not in kwargs and 'remove' not in kwargs:
+            raise ValueError("Please define `append` or `remove` in config section.")
 
-        self.mapping = kwargs['append']
+        if 'append' in kwargs:
+            if not isinstance(kwargs['append'], dict):
+                raise ValueError("Please define `append` as dictionary not {}.".format(type(kwargs['append'])))
+            self.mapping_append = kwargs['append']
+        else:
+            self.mapping_append = {}
+
+        if 'remove' in kwargs:
+            if not isinstance(kwargs['remove'], dict):
+                raise ValueError("Please define 'remove' as dictionary not {}.".format(type(kwargs['remove'])))
+            self.mapping_remove = kwargs['remove']
+        else:
+            self.mapping_remove = {}
 
     async def run(self, payload: dict):
 
@@ -27,7 +37,7 @@ class AppendTraitAction(ActionRunner):
             self.event,
             self.flow)
 
-        for destination, value in self.mapping.items():
+        for destination, value in self.mapping_append.items():
             if destination in dot:
                 if not isinstance(dot[destination], list):
                     dot[destination] = [dot[destination]]
@@ -36,6 +46,18 @@ class AppendTraitAction(ActionRunner):
                     dot[destination].append(value)
             else:
                 dot[destination] = value
+
+        for destination, value in self.mapping_remove.items():
+            if destination in dot:
+                if not isinstance(dot[destination], list):
+                    raise ValueError("Can not remove from non-list data.")
+
+                if isinstance(value, list):
+                    for v in value:
+                        if v in dot[destination]:
+                            dot[destination].remove(v)
+                elif value in dot[destination]:
+                    dot[destination].remove(value)
 
         if not isinstance(dot.profile['traits']['private'], dict):
             raise ValueError("Error when appending profile@traits.private to value `{}`. "
@@ -71,6 +93,9 @@ def register() -> Plugin:
                 "append": {
                     "target1": "source1",
                     "target2": "source2",
+                },
+                "remove": {
+                    "target": ["item1", "item2"]
                 }
             },
             version='0.1',

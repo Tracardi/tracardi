@@ -123,9 +123,11 @@ class ExprTransformer(TransformerNamespace):
             return date
         raise ValueError("Unknown type `{}`".format(value_type))
 
-    def op_compound_field(self, args):
+    @staticmethod
+    def op_compound_field(args):
         value_type, field = args
-        value = field.value
+
+        value = field._get_value()
         if value_type == 'datetime':
 
             if not isinstance(value, str):
