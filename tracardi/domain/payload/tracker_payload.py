@@ -33,7 +33,7 @@ class TrackerPayload(BaseModel):
         _events = []
         if self.events:
             for event in self.events:  # type: EventPayload
-                _event = event.to_event(self.metadata, self.source, session, profile, self.options)
+                _event = event.to_event(self.metadata, self.source, session, profile, event.options)
                 _events.append(_event)
         return _events
 

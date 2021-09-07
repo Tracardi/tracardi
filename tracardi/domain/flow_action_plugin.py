@@ -9,6 +9,12 @@ from .value_object.storage_info import StorageInfo
 
 
 class FlowActionPlugin(Entity):
+
+    """
+    This object can not be loaded without encoding.
+    Load it as FlowActionPluginRecord and then decode.
+    """
+
     metadata: Optional[Metadata]
     plugin: Plugin
     settings: Optional[Settings] = Settings()
@@ -22,8 +28,9 @@ class FlowActionPlugin(Entity):
 
     # Persistence
 
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("action", FlowActionPlugin, entity=self)
+    """
+    Do not use load method. This object must be decoded from FlowActionPluginRecord
+    """
 
     @staticmethod
     def storage_info() -> StorageInfo:
