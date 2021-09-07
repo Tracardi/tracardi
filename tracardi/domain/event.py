@@ -41,6 +41,13 @@ class Event(Entity):
         self.profile = event.profile
         self.context = event.context
 
+    def is_persistent(self) -> bool:
+        if 'save' in self.context.config and isinstance(self.context.config['save'], bool):
+            return self.context.config['save']
+        else:
+            return True
+
+
     # Persistence
 
     # def storage(self, **kwargs) -> StorageCrud:

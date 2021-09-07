@@ -158,9 +158,11 @@ class Profile(Entity):
 
     def increase_visits(self, value=1):
         self.stats.visits += value
+        self.operation.update = True
 
     def increase_views(self, value=1):
         self.stats.views += value
+        self.operation.update = True
 
     # def storage(self) -> StorageCrud:
     #     return StorageCrud("profile", Profile, entity=self, exclude={"operation": ...})

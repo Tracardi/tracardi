@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional, List, Tuple, Any
 from pydantic import BaseModel
+from tracardi.domain.event import Event
+
 from ..entity import Entity
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
@@ -27,7 +29,7 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
 
-    def get_events(self, session: Session, profile: Profile) -> list:
+    def get_events(self, session: Session, profile: Profile) -> List[Event]:
         _events = []
         if self.events:
             for event in self.events:  # type: EventPayload
