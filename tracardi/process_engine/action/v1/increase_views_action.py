@@ -15,7 +15,6 @@ class IncreaseViewsAction(ActionRunner):
             self.profile.stats = ProfileStats()
 
         self.profile.increase_views()
-        print(self.profile)
         return Result(port="payload", value=payload)
 
 

@@ -9,7 +9,7 @@ class InjectAction(ActionRunner):
         self.value = value
 
     async def run(self, payload):
-        return Result(value=self.value, port="value")
+        return Result(value=self.value, port="payload")
 
 
 def register() -> Plugin:
@@ -20,7 +20,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.inject_action',
             className='InjectAction',
             inputs=[],
-            outputs=["value"],
+            outputs=["payload"],
             init={"value": None},
             manual='inject_action',
             version='0.1',

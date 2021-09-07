@@ -9,7 +9,7 @@ class ReadProfileAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        return Result(port="profile", value=self.profile.dict())
+        return Result(port="payload", value=self.profile.dict())
 
 
 def register() -> Plugin:
@@ -19,7 +19,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.read_profile_action',
             className='ReadProfileAction',
             inputs=["payload"],
-            outputs=['profile'],
+            outputs=['payload'],
             init=None,
             manual="read_profile_action",
             version='0.1',

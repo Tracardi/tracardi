@@ -22,7 +22,7 @@ class IfAction(ActionRunner):
 
         condition = Condition()
         if await condition.evaluate(self.condition, dot):
-            return Result(port="TRUE", value=payload), Result(port="FALSE", value=None)
+            return Result(port="TRUE", value=payload)
         else:
             return Result(port="FALSE", value=payload)
 
