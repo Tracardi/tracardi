@@ -27,50 +27,6 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 ![Screenshot 1](https://raw.githubusercontent.com/atompie/tracardi-images/master/images/intro5.png)
 
-# Read-map
-
-### Version 0.5.1
-
-Feature freeze. Fixes and testing.
-
-- [ ] Review todos
-- [ ] Performance tests
-- [ ] Scaling test
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] Full profile, event, and sessions details page
-- [x] Project management: Feature list for contributors
-- [ ] UX: Simplify selecting event for debugging
-- [ ] Console log
-- [ ] Search
-
-### Version 0.6.0
-
-#### Use cases
-
-- [ ] Proof of concept for dynamic front-end loading
-
-#### Features:
-- [x] Workflow profiling
-- [ ] Every time segments raises error log that error to tracardi-console-log index - so we can see that this segment is not right. 
-- [ ] Standard Error Reporting, showing console-log ang logging to stdout
-- [ ] Tracardi user profile domain object
-- [ ] Setting user and password from interface (user profile), use keycloak
-- [ ] Forgot password functionality
-- [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
-- [ ] Reading data from external sources – use source configuration to fetch data
-- [ ] If Action – Should use plain/text editor not application/json
-
-- [ ] GraphQL Endpoint for profile fetching. ???
-- [x] Profiler as part of debugger
-- [x] Refactor menu to take less space
-- [ ] Finish manual
-- [x] Error log - console log for developers
-- [ ] text/plain - editor in config
-- [x] Editable name for node in flow
-- [ ] Scheduler
-
-
 # Installation
 
 The easiest way to run Tracardi is to run it as a docker container. 
@@ -102,7 +58,7 @@ Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variab
 Now pull and run Tracardi Graphical User Interface.
 
 ```
-docker run -p 8787:80 -e API_URL=http://127.0.0.1:8686 tracardi/tracardi-gui:0.6.0
+docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui:0.6.0
 ```
 
 ## Log-in
