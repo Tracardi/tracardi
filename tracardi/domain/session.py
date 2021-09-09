@@ -31,9 +31,6 @@ class Session(Entity):
         self.properties = session.properties
         self.operation = session.operation
 
-    # def storage(self, **kwargs) -> StorageCrud:
-    #     return StorageCrud("session", Session, entity=self)
-
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(

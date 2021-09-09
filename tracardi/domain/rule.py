@@ -24,9 +24,6 @@ class Rule(NamedEntity):
             ))
         super().__init__(**data)
 
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("rule", Rule, entity=self)
-
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(

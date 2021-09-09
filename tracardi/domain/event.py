@@ -48,18 +48,6 @@ class Event(Entity):
             return True
 
 
-    # Persistence
-
-    # def storage(self, **kwargs) -> StorageCrud:
-    #     return StorageCrud("event", Event, entity=self)
-
-    # @staticmethod
-    # def storage_info() -> StorageInfo:
-    #     return StorageInfo(
-    #         'event',
-    #         Event
-    #     )
-
     @staticmethod
     def new(data: dict) -> 'Event':
         data['id'] = str(uuid4())
