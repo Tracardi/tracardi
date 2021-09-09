@@ -48,6 +48,8 @@ class Resource:
             "stat-log": Index(multi_index=False, index="tracardi-stat-log", mapping=None, rel=None),
             "debug-info": Index(multi_index=False, index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json", rel=None),
+            "api-instance": Index(multi_index=False, index="tracardi-api-instance",
+                                  mapping="mappings/api-instance-index.json", rel=None),
         }
 
     def __getitem__(self, item):
