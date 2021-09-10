@@ -44,14 +44,13 @@ class DebugPayloadAction(ActionRunner):
                     "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
                         self.event.id, self.event.session.id))
 
-            self.session.replace(session)
-
             if profile is None:
                 raise ValueError(
                     "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
                         self.event.id, self.event.profile.id))
 
             self.profile.replace(profile)
+            self.session.replace(session)
 
             return Result(port="event", value=self.event.dict())
 
