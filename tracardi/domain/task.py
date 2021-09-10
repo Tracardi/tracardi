@@ -62,6 +62,7 @@ class Task(Entity):
             try:
                 return await track_event(tracker_payload, ip=local_ip), self
             except Exception as e:
+                print(str(e))
                 self.status = 'error'
                 return None, self
 
