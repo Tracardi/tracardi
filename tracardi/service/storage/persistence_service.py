@@ -52,17 +52,17 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
-    async def upsert(self, data) -> BulkInsertResult:
+    async def upsert(self, data, replace_id: bool = True) -> BulkInsertResult:
         try:
 
             if not isinstance(data, list):
-                if 'id' in data:
+                if replace_id is True and 'id' in data:
                     data["_id"] = data['id']
                 payload = [data]
             else:
                 # Add id
                 for d in data:
-                    if 'id' in d:
+                    if replace_id is True and 'id' in d:
                         d["_id"] = d['id']
                 payload = data
 

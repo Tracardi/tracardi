@@ -83,12 +83,12 @@ class CollectionCrud:
         self.index = index
         self.storage = storage(self.index)
 
-    async def save(self) -> BulkInsertResult:
+    async def save(self, replace_id: bool = True) -> BulkInsertResult:
         try:
             if not isinstance(self.payload, list):
-                raise TracardiException("CollectionCrud dave payload must be list.")
+                raise TracardiException("CollectionCrud data payload must be list.")
             data = [p.dict() for p in self.payload if isinstance(p, BaseModel)]
-            return await self.storage.upsert(data)
+            return await self.storage.upsert(data, replace_id)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))

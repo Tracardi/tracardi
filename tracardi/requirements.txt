@@ -30,3 +30,4 @@ tracardi-redshift-connector
 tracardi-postgresql-connector
 tracardi-url-parser
 tracardi-local-timespan
+# tracardi-event-scheduler

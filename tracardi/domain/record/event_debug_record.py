@@ -19,18 +19,18 @@ class EventDebugRecord(Entity):
                     b64 = b64_encoder(debug_info.dict())
                     yield EventDebugRecord(id=debug_info.event.id, content=b64)
 
-    def decode(self) -> DebugInfo:
+    def decode(self, from_dict=False) -> DebugInfo:
         # todo - to pole jest za małe (wyskakuje błąd gdy debug infor ma powyżej 32000 znaków)
-        debug_info = b64_decoder(self.content)
+        if from_dict is True:
+            debug_info = b64_decoder(self['content'])
+        else:
+            debug_info = b64_decoder(self.content)
 
         return DebugInfo(
             **debug_info
         )
 
     # Persistence
-    #
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("debug-info", EventDebugRecord, entity=self)
 
     @staticmethod
     def storage_info() -> StorageInfo:

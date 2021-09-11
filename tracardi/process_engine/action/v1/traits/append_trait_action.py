@@ -38,8 +38,10 @@ class AppendTraitAction(ActionRunner):
             self.flow)
 
         for destination, value in self.mapping_append.items():
+            value = dot[value]
             if destination in dot:
                 if not isinstance(dot[destination], list):
+                    # Make it a list with original value
                     dot[destination] = [dot[destination]]
 
                 if value not in dot[destination]:
@@ -48,6 +50,7 @@ class AppendTraitAction(ActionRunner):
                 dot[destination] = value
 
         for destination, value in self.mapping_remove.items():
+            value = dot[value]
             if destination in dot:
                 if not isinstance(dot[destination], list):
                     raise ValueError("Can not remove from non-list data.")

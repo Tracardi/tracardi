@@ -4,10 +4,9 @@ from tracardi.service.storage.factory import StorageForBulk
 
 
 async def save_debug_info(debug_info_by_event_type_and_rule_name) -> BulkInsertResult:
-    record = []
+    records = []
     for debug_info_record in EventDebugRecord.encode(
             debug_info_by_event_type_and_rule_name):  # type: EventDebugRecord
-        record.append(debug_info_record)
-
+        records.append(debug_info_record)
     # Save in debug index
-    return await StorageForBulk(record).index("debug-info").save()
+    return await StorageForBulk(records).index("debug-info").save(replace_id=False)
