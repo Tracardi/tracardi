@@ -42,6 +42,16 @@ class ElasticConfig:
             'ELASTIC_SQL_TRANSLATE_METHOD'] if 'ELASTIC_SQL_TRANSLATE_METHOD' in env else "POST"
 
 
+class RedisConfig:
+
+    def __init__(self, env):
+        self.redis_host = env['REDIS_HOST'] if 'REDIS_HOST' in env else False
+        self.redis_port = env['REDIS_PORT'] if 'REDIS_PORT' in env else 6379
+        self.redis_db = env['REDIS_DB'] if 'REDIS_DB' in env else 0
+        self.redis_password = env['REDIS_PASSWORD'] if 'REDIS_PASSWORD' in env else None
+
+
+redis_config = RedisConfig(os.environ)
 elastic = ElasticConfig(os.environ)
 memory_cache = MemoryCacheConfig(os.environ)
 tracardi = TracardiConfig(os.environ)
