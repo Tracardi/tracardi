@@ -40,6 +40,8 @@ class ElasticConfig:
             'ELASTIC_SQL_TRANSLATE_URL'] if 'ELASTIC_SQL_TRANSLATE_URL' in env else "/_sql/translate"
         self.sql_translate_method = env[
             'ELASTIC_SQL_TRANSLATE_METHOD'] if 'ELASTIC_SQL_TRANSLATE_METHOD' in env else "POST"
+        self.refresh_profiles_after_save = env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'] \
+            if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
 
 
 class RedisConfig:
