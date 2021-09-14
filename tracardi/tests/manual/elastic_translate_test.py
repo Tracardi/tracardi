@@ -1,11 +1,11 @@
 import asyncio
 
-from tracardi.service.storage.elastic import Elastic
+from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.sql import to_sql_query
 
 
 async def main():
-    es = Elastic.instance()
+    es = ElasticClient.instance()
     q = to_sql_query("tracardi-event", query="type='view' and event_server.browser.browser.engine='xxx'")
     print(q)
     q = await es.translate(q)

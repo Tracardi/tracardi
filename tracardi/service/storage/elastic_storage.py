@@ -5,14 +5,14 @@ import elasticsearch
 from tracardi.domain.storage_result import StorageResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage import index
-from tracardi.service.storage.elastic import Elastic
+from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import Index
 
 
 class ElasticStorage:
 
     def __init__(self, index_key):
-        self.storage = Elastic.instance()
+        self.storage = ElasticClient.instance()
         if index_key not in index.resources:
             raise ValueError("There is no index defined for `{}`.".format(index_key))
         self.index = index.resources[index_key]  # type: Index

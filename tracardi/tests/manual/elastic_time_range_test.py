@@ -3,7 +3,7 @@ from pprint import pprint
 
 from tracardi.service.storage.helpers.index import Index
 from tracardi.domain.time_range_query import DatetimeRangePayload
-from tracardi.service.storage.factory import storage
+from tracardi.service.storage.factory import storage_manager
 
 
 async def main():
@@ -16,7 +16,7 @@ async def main():
         }
     }
     q = DatetimeRangePayload(**a)
-    es = Index(storage("session"))
+    es = Index(storage_manager("session"))
     r = await es.histogram(q)
     pprint(r)
 

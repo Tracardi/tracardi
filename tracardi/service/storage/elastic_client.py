@@ -62,7 +62,7 @@ class AwsCompatibleSqlClient(SqlClient):
         )
 
 
-class Elastic:
+class ElasticClient:
 
     def __init__(self, **kwargs):
         self._cache = {}
@@ -207,8 +207,8 @@ class Elastic:
         global _singleton
 
         def get_elastic_client():
-            kwargs = Elastic._get_elastic_config()
-            return Elastic(**kwargs)
+            kwargs = ElasticClient._get_elastic_config()
+            return ElasticClient(**kwargs)
 
         if _singleton is None:
             _singleton = get_elastic_client()

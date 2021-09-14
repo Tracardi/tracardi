@@ -1,6 +1,7 @@
 import asyncio
+
+from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
-from tracardi.service.storage.helpers.event_loader import load_event_by_type
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -20,7 +21,7 @@ class DebugPayloadAction(ActionRunner):
 
     async def run(self, **kwargs):
         if self.debug:
-            result = await load_event_by_type(self.event_type)
+            result = await storage.driver.event.load_event_by_type(self.event_type)
 
             if result.total == 0:
                 raise ValueError(

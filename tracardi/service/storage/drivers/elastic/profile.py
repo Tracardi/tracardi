@@ -1,9 +1,8 @@
 from typing import List
-
-from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
+from tracardi.config import elastic, tracardi
 from tracardi.domain.profile import Profile
-from tracardi.service.storage.factory import StorageFor, storage
+from tracardi.service.storage.factory import StorageFor, storage_manager
 from tracardi.service.storage.profile_cacher import ProfileCache
 
 
@@ -27,5 +26,15 @@ async def load_merged_profile(id: str) -> Profile:
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:
-    profiles = await storage('profile').load_by_values(merge_key_values, limit)
+    profiles = await storage_manager('profile').load_by_values(merge_key_values, limit)
     return [Profile(**profile) for profile in profiles]
+
+
+async def save_profile(profile: Profile):
+    if tracardi.cache_profiles is not False:
+        cache = ProfileCache()
+        cache.save_profile(profile)
+    result = await StorageFor(profile).index().save()
+    if elastic.refresh_profiles_after_save:
+        await storage_manager('profile').flush()
+    return result

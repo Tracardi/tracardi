@@ -24,7 +24,7 @@ class BaseStorageCrud:
         return await service.delete(self.entity.id)
 
     def _get_storage_service(self):
-        return storage(self.index)
+        return storage_manager(self.index)
 
 
 class EntityStorageCrud(BaseStorageCrud):
@@ -81,7 +81,7 @@ class CollectionCrud:
     def __init__(self, index, payload):
         self.payload = payload
         self.index = index
-        self.storage = storage(self.index)
+        self.storage = storage_manager(self.index)
 
     async def save(self, replace_id: bool = True) -> BulkInsertResult:
         try:
@@ -156,5 +156,5 @@ class StorageForBulk:
         return CollectionCrud(index, self.collection)
 
 
-def storage(index) -> PersistenceService:
+def storage_manager(index) -> PersistenceService:
     return PersistenceService(ElasticStorage(index_key=index))
