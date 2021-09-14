@@ -10,4 +10,7 @@ class ExpiredException(TracardiException):
     pass
 
 
+class UnauthorizedException(TracardiException):
+    pass
+
 
