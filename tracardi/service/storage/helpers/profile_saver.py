@@ -10,6 +10,6 @@ async def save_profile(profile: Profile):
                                    redis_config.redis_db, redis_config.redis_password)
         redis_client.save_profile(profile)
     result = await StorageFor(profile).index().save()
-    if elastic.self.refresh_profiles_after_save:
+    if elastic.refresh_profiles_after_save:
         await storage('profile').flush()
     return result
