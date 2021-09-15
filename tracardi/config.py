@@ -5,7 +5,7 @@ class TracardiConfig:
     def __init__(self, env):
         self.track_debug = env['TRACK_DEBUG'] if 'TRACK_DEBUG' in env else False
         self.cache_profiles = env['CACHE_PROFILE'] if 'CACHE_PROFILE' in env else False
-        self.sync_profile_tracks = env['SYNC_PROFILE_TRACKS'] if 'SYNC_PROFILE_TRACKS' in env else True
+        self.sync_profile_tracks = env['SYNC_PROFILE_TRACKS'] if 'SYNC_PROFILE_TRACKS' in env else False
         self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
 
 

@@ -164,9 +164,6 @@ class Profile(Entity):
         self.stats.views += value
         self.operation.update = True
 
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("profile", Profile, entity=self, exclude={"operation": ...})
-
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
@@ -174,19 +171,6 @@ class Profile(Entity):
             Profile,
             exclude={"operation": ...}
         )
-
-    # @staticmethod
-    # async def load_current(id) -> 'Profile':
-    #
-    #     """
-    #     Loads current profile. If profile was merged then it loads merged profile.
-    #     """
-    #
-    #     entity = Entity(id=id)
-    #     profile = await StorageFor(entity).index('profile').load(Profile)  # type: Profile
-    #     if profile is not None and profile.mergedWith is not None:
-    #         profile = await Profile.load_current(profile.mergedWith)
-    #     return profile
 
     @staticmethod
     def new() -> 'Profile':
