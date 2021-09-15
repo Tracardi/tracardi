@@ -48,7 +48,7 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 Now pull and run Tracardi backend.
 
 ```
-docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi/tracardi-api:0.6.0
+docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi/tracardi-api
 ```
 
 Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variable to reference your laptop's IP. 
@@ -58,25 +58,12 @@ Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variab
 Now pull and run Tracardi Graphical User Interface.
 
 ```
-docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui:0.6.0
+docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui
 ```
 
 ## Log-in
 
 Visit http://127.0.0.1:8787 and login to Tracardi GUI with default username: admin and password: admin. 
-
-# Running Tracardi with docker compose
-
-```
-docker-compose up
-```
-
-This will build and install Tracardi and all required dependencies such as elastic search on your computer. 
-Hence that this type of setup is for demonstration purpose only.
-
-## Tracardi GUI
-
-Open browser and go to http://127.0.0.1:8787 Login with default user admin and password admin.
 
 # Scaling Tracardi for heavy load. 
  
