@@ -1,5 +1,6 @@
-docker build . -t tracardi/tracardi:0.5.0.rc-1
-docker push tracardi/tracardi:0.5.0.rc-1
+python setup.py sdist bdist_wheel
+python -m twine upload dist/*
 
-docker build . -t tracardi/tracardi
-docker push tracardi/tracardi
+rm -rf build
+rm -rf dist
+rm -rf tracardi.egg-info

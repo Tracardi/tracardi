@@ -1,0 +1,5 @@
+recursive-include tracardi/domain *
+recursive-include tracardi/event_server *
+recursive-include tracardi/exceptions *
+recursive-include tracardi/process_engine *
+recursive-include tracardi/service *

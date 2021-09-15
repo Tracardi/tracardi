@@ -27,80 +27,6 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 ![Screenshot 1](https://raw.githubusercontent.com/atompie/tracardi-images/master/images/intro5.png)
 
-# Read-map
-
-### Version 0.5.0
-
-#### Use cases
-- [x] Collecting events from web-page by JavaScript
-- [x] Binding events to elements on the page
-- [x] Gathering user properties
-- [x] Merging user profiles
-- [x] Simple segmentation
-
-#### Features
-- [x] Defining user data enhancement by workflow
-- [x] Workflow staging – working copy of workflow is not affecting currently running workflows. Workflow is executed only after it is deployed not during editing. 
-- [x] Simple workflow debugging
-- [x] Triggering workflow by rules
-- [x] Source configuration
-- [x] Credentials inside source
-- [x] Source should have type of query storage or event sourcing.
-- [x] Plugins configuration
-- [x] Schema for PII
-- [x] Filtering of action plugins
-- [x] User and password configurable by ENV
-- [x] Cleaner debug information
-- [ ] Documentation for all delivered actions
-- [x] Global state of profile, session, event visible in Debugger.
-- [x] Branding
-- [x] Custom nodes naming
-
-#### Removals
-
-- [x] Remove UQL Manual
-
-### Version 0.5.1
-
-Feature freeze. Fixes and testing.
-
-- [ ] Review todos
-- [ ] Performance tests
-- [ ] Scaling test
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] Full profile, event, and sessions details page
-- [ ] Project management: Feature list for contributors
-- [ ] UX: Simplify selecting event for debugging
-- [ ] Console log
-- [ ] Search
-
-### Version 0.6.0
-
-#### Use cases
-
-- [ ] Proof of concept for dynamic front-end loading
-
-#### Features:
-- [ ] Every time segments raises error log that error to tracardi-segment-error index - so we can see that this segment is not right. 
-- [ ] Standard Error Reporting
-- [ ] Tracardi user profile domain object
-- [ ] Setting user and password from interface (user profile), use keycloak
-- [ ] Forgot password functionality
-- [ ] Workflow parameters – Workflow has its own parameters that can be copied to action parameters. This allows for making workflow as a closed solution with own configuration. With this feature a ready to use workflows could be defined. 
-- [ ] Reading data from external sources – use source configuration to fetch data
-- [ ] If Action – Should use plain/text editor not application/json
-
-- [ ] GraphQL Endpoint for profile fetching.
-- [ ] Profiler as part of debugger
-- [x] Refactor menu to take less space
-- [ ] Finish manual
-- [ ] Error log
-- [ ] text/plain - editor in config
-- [x] Editable name for node in flow
-- [ ] Scheduler
-
-
 # Installation
 
 The easiest way to run Tracardi is to run it as a docker container. 
@@ -122,7 +48,7 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 Now pull and run Tracardi backend.
 
 ```
-docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi/tracardi:0.5.0.rc-1
+docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi/tracardi-api:0.6.0
 ```
 
 Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variable to reference your laptop's IP. 
@@ -132,7 +58,7 @@ Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variab
 Now pull and run Tracardi Graphical User Interface.
 
 ```
-docker run -p 8787:80 -e API_URL=http://127.0.0.1:8686 tracardi/tracardi-gui:0.5.0.rc-1
+docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui:0.6.0
 ```
 
 ## Log-in
