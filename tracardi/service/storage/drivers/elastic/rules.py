@@ -48,7 +48,7 @@ async def load_rule(event_type: str):
     return rules
 
 
-def load_flow_rules(flow_id: str) -> List[Rule]:
+async def load_flow_rules(flow_id: str) -> List[Rule]:
     rules_attached_to_flow = await storage_manager('rule').load_by('flow.id.keyword', flow_id)
     return [Rule(**rule) for rule in rules_attached_to_flow]
 
