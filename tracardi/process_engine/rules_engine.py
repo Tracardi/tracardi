@@ -97,10 +97,15 @@ class RulesEngine:
                         self.profile,
                         event
                     )
+
+                    # Creating task can cause problems. It must be thoroughly tested as
+                    # concurrently running flows on the same profile may override profile data.
+                    # Preliminary tests showed no issues but on heavy load we do not know if
+                    # the test is still valid and every thing is ok. Solution is to remove create_task.
                     flow_task = asyncio.create_task(workflow.invoke(flow, debug=False))
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
-        # Run and report async
+        # Run flows and report async
 
         for event_type, tasks in flow_task_store.items():
             for flow_id, event_id, rule_name, task in tasks:
@@ -148,48 +153,6 @@ class RulesEngine:
         ran_event_types = list(flow_task_store.keys())
 
         return debug_info_by_event_type_and_rule_name, ran_event_types, self.console_log
-        # # Save profile
-        #
-        # segmentation_info = {"errors": [], "ids": []}
-        # try:
-        #     save_tasks = []
-        #
-        #     # Segmentation
-        #     if self.profile.operation.needs_update() or self.profile.operation.needs_segmentation():
-        #         # Segmentation runs only if profile was updated or flow forced it
-        #         async for event_type, segment_id, error in self.profile.segment(
-        #                 flow_task_store.keys(),
-        #                 load_segment_by_event_type):
-        #             # Segmentation triggered
-        #             if error:
-        #                 segmentation_info['errors'].append(error)
-        #             segmentation_info['ids'].append(segment_id)
-        #
-        #     # Merging, schedule save only if there is an update in flow.
-        #
-        #     if self.profile.operation.needs_merging() and self.profile.operation.needs_update():
-        #
-        #         disabled_profiles = await self.profile.merge(limit=2000)
-        #         if disabled_profiles is not None:
-        #             save_old_profiles_task = asyncio.create_task(
-        #                 StorageForBulk(disabled_profiles).index('profile').save())
-        #             save_tasks.append(save_old_profiles_task)
-        #
-        #     # Must be the last operation
-        #     if self.profile.operation.needs_update():
-        #         save_tasks.append(asyncio.create_task(StorageFor(self.profile).index().save()))
-        #
-        #     # run save tasks
-        #     await asyncio.gather(*save_tasks)
-        #
-        # except Exception as e:
-        #     # this error is a global segmentation error
-        #     # todo log it.
-        #     print(str(e))
-        #     pass
-        #
-        # finally:
-        #     return debug_info_by_event_type_and_rule_name, segmentation_info, console_log
 
     @staticmethod
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
@@ -209,26 +172,3 @@ class RulesEngine:
         merge_key_values = [(f"{field}.keyword", value) for field, value in merge_key_values if value is not None]
 
         return merge_key_values
-
-    # async def execute(self, source_id) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], Dict[str, list], list]:
-    #
-    #     """ Runs rules and flow and saves debug info and console log """
-    #
-    #     debug_info_by_event_type_and_rule_name, segmentation_info, console_log = await self.invoke(source_id)
-    #
-    #     # # Save console log
-    #     #
-    #     # if console_log:
-    #     #     await StorageForBulk(console_log).index('console-log').save()
-    #     #
-    #     # # Collect debug info
-    #     #
-    #     # record = []
-    #     # for debug_info_record in EventDebugRecord.encode(
-    #     #         debug_info_by_event_type_and_rule_name):  # type: EventDebugRecord
-    #     #     record.append(debug_info_record)
-    #     #
-    #     # # Save in debug index
-    #     # await StorageForBulk(record).index("debug-info").save()
-    #     #
-    #     # return debug_info_by_event_type_and_rule_name, segmentation_info, console_log
