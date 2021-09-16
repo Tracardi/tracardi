@@ -38,3 +38,11 @@ async def save_profile(profile: Profile):
     if elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
     return result
+
+
+async def refresh():
+    return await storage_manager('profile').refresh()
+
+
+async def flush():
+    return await storage_manager('profile').flush()

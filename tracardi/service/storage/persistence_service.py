@@ -2,6 +2,8 @@ from typing import List
 
 import elasticsearch
 import logging
+
+from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception import StorageException
 import tracardi.service.storage.elastic_storage as storage
@@ -83,6 +85,18 @@ class PersistenceService:
         except elasticsearch.exceptions.NotFoundError:
             _logger.warning("No result found for query {}".format(query))
             return StorageResult()
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            raise StorageException(str(e))
+
+    async def aggregate(self, query: dict) -> StorageAggregateResult:
+        r = await self.storage.search(query)
+        print(r)
+        return r
+        try:
+            return StorageAggregateResult(await self.storage.search(query))
+        except elasticsearch.exceptions.NotFoundError:
+            _logger.warning("No result found for query {}".format(query))
+            return StorageAggregateResult()
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 

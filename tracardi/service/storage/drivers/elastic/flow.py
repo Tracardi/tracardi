@@ -1,7 +1,7 @@
 from tracardi.exceptions.exception import TracardiException
 from tracardi.domain.flow import FlowRecord
 from tracardi.domain.entity import Entity
-from tracardi.service.storage.factory import StorageFor
+from tracardi.service.storage.factory import StorageFor, storage_manager
 
 
 async def load_flow(flow_id):
@@ -13,5 +13,9 @@ async def load_flow(flow_id):
     return flow_record.decode()
 
 
+async def refresh():
+    return await storage_manager('flow').refresh()
 
 
+async def flush():
+    return await storage_manager('flow').flush()
