@@ -10,6 +10,7 @@ import tracardi.service.storage.drivers.elastic.resource
 import tracardi.service.storage.drivers.elastic.action
 import tracardi.service.storage.drivers.elastic.console_log
 import tracardi.service.storage.drivers.elastic.task
+import tracardi.service.storage.drivers.elastic.api_instance
 
 
 class ElasticDriver:
@@ -61,3 +62,7 @@ class ElasticDriver:
     @property
     def task(self):
         return tracardi.service.storage.drivers.elastic.task
+
+    @property
+    def api_instance(self):
+        return tracardi.service.storage.drivers.elastic.api_instance
