@@ -1,3 +1,4 @@
+import logging
 from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch._async.client.sql import SqlClient
@@ -10,7 +11,8 @@ from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 _singleton = None
-
+logger = logging.getLogger(__file__)
+logger.setLevel(logging.DEBUG)
 
 class AwsCompatibleSqlClient(SqlClient):
 
@@ -99,6 +101,7 @@ class ElasticClient:
             return None
 
     async def search(self, index, query):
+        logger.debug(f"SEARCH: {index}, {query}")
         return await self._client.search(index=index, body=query)
 
     async def scan(self, index, query):
