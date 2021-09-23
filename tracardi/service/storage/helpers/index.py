@@ -23,7 +23,7 @@ class Index:
             'profile': 'metadata.time.insert',
         }
 
-    async def search(self, query: str = None, limit: int = 20):
+    async def search(self, query: str = None, start: int = 0, limit: int = 20):
         query = to_sql_query(self.read_index, query=query, limit=limit)
         return (await self.storage_service.sql(query)).dict()
 
@@ -46,7 +46,7 @@ class Index:
         min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
 
         limit = query.limit
-        offset = query.offset
+        offset = query.start
         sql = query.where
         time_field = self.time_fields_map[self.index]
 

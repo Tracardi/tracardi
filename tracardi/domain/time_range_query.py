@@ -128,7 +128,7 @@ class DatetimeRangePayload(BaseModel):
     maxDate: Optional[DatePayload] = None
     where: Optional[str] = ""
     timeZone: Optional[str] = None
-    offset: Optional[int] = 0
+    start: Optional[int] = 0
     limit: Optional[int] = 20
     rand: Optional[float] = 0
 

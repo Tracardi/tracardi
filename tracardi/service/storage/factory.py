@@ -93,10 +93,10 @@ class CollectionCrud:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
-    async def load(self) -> StorageResult:
+    async def load(self, start: int = 0, limit: int = 100) -> StorageResult:
         try:
 
-            return await self.storage.load_all()
+            return await self.storage.load_all(start, limit)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))

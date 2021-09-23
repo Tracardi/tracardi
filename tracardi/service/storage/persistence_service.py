@@ -41,9 +41,10 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
-    async def load_all(self, limit: int = 100) -> StorageResult:
+    async def load_all(self, start: int = 0, limit: int = 100) -> StorageResult:
         try:
             query = {
+                "from": start,
                 "size": limit,
                 "query": {
                     "match_all": {}
