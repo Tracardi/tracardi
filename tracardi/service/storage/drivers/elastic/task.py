@@ -35,5 +35,5 @@ async def save_tasks(tasks):
     return await StorageForBulk(tasks).index('task').save()
 
 
-async def load_all(limit: int = 100):
-    return await storage_manager('task').load_all(limit)
+async def load_all(start: int = 0, limit: int = 100):
+    return await storage_manager('task').load_all(start, limit)

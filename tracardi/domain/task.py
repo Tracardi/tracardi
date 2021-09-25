@@ -1,9 +1,5 @@
-import asyncio
-from typing import Any, Optional, Coroutine
+from typing import Any, Optional
 from uuid import uuid4
-
-from app.api.track.service.tracker import track_event
-from app.utils.network import local_ip
 from tracardi.domain.payload.event_payload import EventPayload
 
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -54,16 +50,3 @@ class Task(Entity):
             'task',
             Task
         )
-
-    def run(self):
-        tracker_payload = self.event.to_tracker_payload()
-
-        async def _task():
-            try:
-                return await track_event(tracker_payload, ip=local_ip), self
-            except Exception as e:
-                print(str(e))
-                self.status = 'error'
-                return None, self
-
-        return asyncio.create_task(_task())

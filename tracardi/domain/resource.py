@@ -13,7 +13,7 @@ class Resource(Entity):
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     config: Optional[dict] = {}
-    origin: str = "event"
+    tags: str = "general"
     enabled: Optional[bool] = True
     consent: bool = False
 
@@ -43,7 +43,7 @@ class ResourceRecord(Entity):
     description: Optional[str] = "No description provided"
     config: Optional[str] = None
     enabled: Optional[bool] = True
-    origin: str = "event"
+    tags: str = "event"
     consent: bool = False
 
     def __init__(self, **data: Any):
@@ -60,7 +60,7 @@ class ResourceRecord(Entity):
             name=resource.name,
             description=resource.description,
             type=resource.type,
-            origin=resource.origin,
+            tags=resource.tags,
             enabled=resource.enabled,
             consent=resource.consent,
             config=encrypt(resource.config)
@@ -72,7 +72,7 @@ class ResourceRecord(Entity):
             name=self.name,
             description=self.description,
             type=self.type,
-            origin=self.origin,
+            tags=self.tags,
             enabled=self.enabled,
             consent=self.consent,
             config=decrypt(self.config)
