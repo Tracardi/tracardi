@@ -130,7 +130,12 @@ class PersistenceService:
             query = await self.storage.translate(sql)
             print(query)
             """ OpenSearch
-            {'root': {'name': 'ProjectOperator', 'description': {'fields': '[metadata]'}, 'children': [{'name': 'OpenSearchIndexScan', 'description': {'request': 'OpenSearchQueryRequest(indexName=tracardi-rule, sourceBuilder={"from":0,"size":20,"timeout":"1m","_source":{"includes":["metadata"],"excludes":[]}}, searchDone=false)'}, 'children': []}]}}
+            {'root': {'name': 'ProjectOperator', 'description': {'fields': '[metadata]'}, 'children': [{'name': 'OpenSearchIndexScan', 'description': {'request': 'OpenSearchQueryRequest(indexName=tracardi-rule, 
+            sourceBuilder={"from":0,"size":20,"timeout":"1m","_source":{"includes":["metadata"],"excludes":[]}}, searchDone=false)'}, 'children': []}]}}
+            """
+
+            """ Elastic
+            {'size': 20, '_source': False, 'fields': [{'field': 'metadata.time.insert', 'format': 'strict_date_optional_time_nanos'}], 'sort': [{'_doc': {'order': 'asc'}}]}
             """
             if '_source' in query and query['_source'] is False:
                 query['_source'] = True
