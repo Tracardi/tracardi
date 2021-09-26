@@ -202,6 +202,9 @@ class ElasticClient:
         if config.elastic.http_compress:
             kwargs['http_compress'] = config.elastic.http_compress
 
+        if config.elastic.verify_certs is not None:
+            kwargs['verify_certs'] = config.elastic.verify_certs
+
         return kwargs
 
     @staticmethod

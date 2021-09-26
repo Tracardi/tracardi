@@ -128,7 +128,11 @@ class PersistenceService:
     async def sql(self, sql):
         try:
             query = await self.storage.translate(sql)
-            if '_source' in query and query['_source'] == False:
+            print(query)
+            """ OpenSearch
+            {'root': {'name': 'ProjectOperator', 'description': {'fields': '[metadata]'}, 'children': [{'name': 'OpenSearchIndexScan', 'description': {'request': 'OpenSearchQueryRequest(indexName=tracardi-rule, sourceBuilder={"from":0,"size":20,"timeout":"1m","_source":{"includes":["metadata"],"excludes":[]}}, searchDone=false)'}, 'children': []}]}}
+            """
+            if '_source' in query and query['_source'] is False:
                 query['_source'] = True
             return StorageResult(await self.storage.search(query))
         except elasticsearch.exceptions.ElasticsearchException as e:
