@@ -14,3 +14,6 @@ class UnauthorizedException(TracardiException):
     pass
 
 
+class WorkflowException(Exception):
+    pass
+
