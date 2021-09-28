@@ -3,6 +3,8 @@ from typing import List
 import elasticsearch
 import logging
 
+from tracardi.config import elastic
+
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception import StorageException
@@ -90,9 +92,6 @@ class PersistenceService:
             raise StorageException(str(e))
 
     async def aggregate(self, query: dict) -> StorageAggregateResult:
-        r = await self.storage.search(query)
-        print(r)
-        return r
         try:
             return StorageAggregateResult(await self.storage.search(query))
         except elasticsearch.exceptions.NotFoundError:
@@ -128,17 +127,32 @@ class PersistenceService:
     async def sql(self, sql):
         try:
             query = await self.storage.translate(sql)
+
+            if elastic.elastic_opensearch:
+                query = query['root']['children'][0]['description']['request']
+                # query = query.sourceBuilder
+            else:
+                if '_source' in query and query['_source'] is False:
+                    query['_source'] = True
             print(query)
             """ OpenSearch
-            {'root': {'name': 'ProjectOperator', 'description': {'fields': '[metadata]'}, 'children': [{'name': 'OpenSearchIndexScan', 'description': {'request': 'OpenSearchQueryRequest(indexName=tracardi-rule, 
-            sourceBuilder={"from":0,"size":20,"timeout":"1m","_source":{"includes":["metadata"],"excludes":[]}}, searchDone=false)'}, 'children': []}]}}
+            {'root': 
+            {
+            'name': 'ProjectOperator', 
+            'description': {'fields': '[metadata]'}, 
+            'children': 
+            [
+            {'name': 'OpenSearchIndexScan', 
+            'description': {
+            'request': 'OpenSearchQueryRequest(indexName=tracardi-rule, 
+            sourceBuilder={"from":0,"size":20,"timeout":"1m","_source":{"includes":["metadata"],"excludes":[]}}, searchDone=false)'}, 
+            'children': []}]}}
             """
 
             """ Elastic
             {'size': 20, '_source': False, 'fields': [{'field': 'metadata.time.insert', 'format': 'strict_date_optional_time_nanos'}], 'sort': [{'_doc': {'order': 'asc'}}]}
             """
-            if '_source' in query and query['_source'] is False:
-                query['_source'] = True
+
             return StorageResult(await self.storage.search(query))
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))

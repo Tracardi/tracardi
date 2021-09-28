@@ -39,6 +39,7 @@ class ElasticConfig:
         self.maxsize = env['ELASTIC_MAX_CONN'] if 'ELASTIC_MAX_CONN' in env else None
         self.http_compress = env['ELASTIC_HTTP_COMPRESS'] if 'ELASTIC_HTTP_COMPRESS' in env else None
         self.verify_certs = (env['ELASTIC_VERIFY_CERTS'] == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
+        self.elastic_opensearch = (env['ELASTIC_OPENSEARCH'] == 'yes') if 'ELASTIC_OPENSEARCH' in env else None
 
         self.sql_translate_url = env[
             'ELASTIC_SQL_TRANSLATE_URL'] if 'ELASTIC_SQL_TRANSLATE_URL' in env else "/_sql/translate"

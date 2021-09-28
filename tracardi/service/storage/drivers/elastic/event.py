@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.service.storage.factory import StorageFor, storage_manager
 from typing import Union, List
@@ -9,6 +7,11 @@ from tracardi.domain.event import Event
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.storage.factory import StorageForBulk
+
+
+async def search(query):
+    storage = storage_manager("event")
+    return await storage.query({"query": query})
 
 
 async def save_events(events: List[Event], persist_events: bool = True) -> Union[SaveResult, BulkInsertResult]:
