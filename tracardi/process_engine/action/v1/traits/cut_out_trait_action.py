@@ -50,6 +50,6 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='property',
-            group=["Traits"]
+            group=["Data processing"]
         )
     )

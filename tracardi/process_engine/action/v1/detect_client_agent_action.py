@@ -101,7 +101,7 @@ class DetectClientAgentAction(ActionRunner):
                 }
             }
 
-        return Result(port="client-info", value=response)
+        return Result(port="payload", value=response)
 
 
 def register() -> Plugin:
@@ -112,7 +112,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.detect_client_agent_action',
             className='DetectClientAgentAction',
             inputs=["payload"],
-            outputs=["client-info"],
+            outputs=["payload"],
             init={
                 "userAgent": "session@context.browser.browser.userAgent"
             },
@@ -122,8 +122,8 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Parse client agent',
-            desc='It will parse any user agent and detect the browser, operating system, device used (desktop, '
+            name='Get client agent',
+            desc='It will parse any user agent string and detect the browser, operating system, device used (desktop, '
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
                  'of user agent strings, even from rare and obscure browsers and devices. It returns an object containing '
                  'all the information',
@@ -131,6 +131,6 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='browser',
-            group=["Traits"]
+            group=["Data processing"]
         )
     )

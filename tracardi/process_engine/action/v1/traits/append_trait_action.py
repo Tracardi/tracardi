@@ -112,6 +112,6 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='append',
-            group=["Traits"]
+            group=["Data processing"]
         )
     )

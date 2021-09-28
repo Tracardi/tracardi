@@ -60,6 +60,6 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='remove',
-            group=["Traits"]
+            group=["Data processing"]
         )
     )
