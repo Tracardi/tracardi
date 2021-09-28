@@ -11,9 +11,14 @@ import tracardi.service.storage.drivers.elastic.action
 import tracardi.service.storage.drivers.elastic.console_log
 import tracardi.service.storage.drivers.elastic.task
 import tracardi.service.storage.drivers.elastic.api_instance
+import tracardi.service.storage.drivers.elastic.raw
 
 
 class ElasticDriver:
+
+    @property
+    def raw(self):
+        return tracardi.service.storage.drivers.elastic.raw
 
     @property
     def profile(self):

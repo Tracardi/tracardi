@@ -134,7 +134,7 @@ class PersistenceService:
             else:
                 if '_source' in query and query['_source'] is False:
                     query['_source'] = True
-            print(query)
+
             """ OpenSearch
             {'root': 
             {

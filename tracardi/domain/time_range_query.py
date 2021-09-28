@@ -140,8 +140,8 @@ class DatetimeRangePayload(BaseModel):
         if self._is_now(self.maxDate):
             self.maxDate = DatePayload(absolute=DatetimePayload.now())
 
-        print("_is_min_date_absolute", self._is_min_date_absolute())
-        print("_is_max_date_absolute", self._is_max_date_absolute())
+        # print("_is_min_date_absolute", self._is_min_date_absolute())
+        # print("_is_max_date_absolute", self._is_max_date_absolute())
 
         # Set Anchor date
         if self._is_min_date_absolute() and not self._is_max_date_absolute():
