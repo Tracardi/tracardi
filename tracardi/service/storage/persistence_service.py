@@ -5,7 +5,6 @@ from typing import List
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
-from pprint import pprint
 from typing import Tuple, Optional
 from tracardi.domain.storage_result import StorageResult
 from tracardi.service.singleton import Singleton
@@ -114,45 +113,8 @@ class SqlSearchQueryEngine:
         min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
 
         time_field = self.time_fields_map[self.index]
-
-        # todo remove after 10-10-2021
-        # query_range = {
-        #     'range': {
-        #         time_field: {
-        #             'from': min_date_time,
-        #             'to': max_date_time,
-        #             'include_lower': True,
-        #             'include_upper': True,
-        #             'boost': 1.0,
-        #             'time_zone': time_zone if time_zone else "UTC"
-        #         }
-        #     }
-        # }
-        #
-        # es_query = {
-        #     "from": query.start,
-        #     "size": query.limit,
-        #     'sort': [{time_field: 'desc'}]
-        # }
-        #
-        # query_where = self.parser.parse(query.where)
-        #
-        # if query_where is not None:
-        #     es_query['query'] = {
-        #         "bool": {
-        #             "must": [
-        #                 query_where,
-        #                 query_range
-        #             ]
-        #         }
-        #     }
-        # else:
-        #     es_query['query'] = query_range
-
         es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
 
-        from pprint import pprint
-        pprint(es_query)
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:
@@ -208,21 +170,6 @@ class SqlSearchQueryEngine:
 
         es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
 
-        # todo remove after 10-10-2021
-        # sql = to_time_range_sql_query(self.read_index, time_field, min_date_time, max_date_time, sql)
-
-        # try:
-        #     translated_query = await self.storage_service.translate(sql)
-        # except StorageException as e:
-        #     _logger.error("Could not translate SQL {}. Reason: {}".format(sql, str(e)))
-        #     return QueryResult(total=0, result=[])
-
-        # if time_zone:
-        #     if 'range' in translated_query['query']:
-        #         translated_query['query']['range'][time_field]['time_zone'] = time_zone
-        #     elif 'bool' in translated_query['query'] and 'must' in translated_query['query']['bool']:
-        #         translated_query['query']['bool']['must'][0]['range'][time_field]['time_zone'] = time_zone
-
         es_query = {
             "size": 0,
             "query": es_query['query'],
@@ -243,8 +190,6 @@ class SqlSearchQueryEngine:
 
         if time_zone:
             es_query['aggs']['items_over_time']['date_histogram']['time_zone'] = time_zone
-
-        pprint(es_query)
 
         try:
             result = await self.persister.query(es_query)
@@ -352,12 +297,6 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
-    async def translate(self, sql):
-        try:
-            return await self.storage.translate(sql)
-        except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
-
     async def refresh(self, params=None, headers=None):
         try:
             return await self.storage.refresh(params, headers)
@@ -370,9 +309,9 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             raise StorageException(str(e))
 
-    async def query_by_sql(self, query: str):
+    async def query_by_sql(self, query: str, start: int = 0, limit: int = 0):
         engine = SqlSearchQueryEngine(self)
-        return engine.search(query)
+        return await engine.search(query, start, limit)
 
     async def query_by_sql_in_time_range(self, query: DatetimeRangePayload) -> QueryResult:
         engine = SqlSearchQueryEngine(self)
@@ -382,36 +321,3 @@ class PersistenceService:
         engine = SqlSearchQueryEngine(self)
         return await engine.histogram(query)
 
-    # todo remove after 10-10-2021
-    # async def sql(self, sql):
-    #     try:
-    #         query = await self.storage.translate(sql)
-    #
-    #         if elastic.elastic_opensearch:
-    #             query = query['root']['children'][0]['description']['request']
-    #             # query = query.sourceBuilder
-    #         else:
-    #             if '_source' in query and query['_source'] is False:
-    #                 query['_source'] = True
-    #
-    #         """ OpenSearch
-    #         {'root':
-    #         {
-    #         'name': 'ProjectOperator',
-    #         'description': {'fields': '[metadata]'},
-    #         'children':
-    #         [
-    #         {'name': 'OpenSearchIndexScan',
-    #         'description': {
-    #         'request': 'OpenSearchQueryRequest(indexName=tracardi-rule,
-    #         sourceBuilder={"from":0,"size":20,"timeout":"1m","_source":{"includes":["metadata"],"excludes":[]}}, searchDone=false)'},
-    #         'children': []}]}}
-    #         """
-    #
-    #         """ Elastic
-    #         {'size': 20, '_source': False, 'fields': [{'field': 'metadata.time.insert', 'format': 'strict_date_optional_time_nanos'}], 'sort': [{'_doc': {'order': 'asc'}}]}
-    #         """
-    #
-    #         return StorageResult(await self.storage.search(query))
-    #     except elasticsearch.exceptions.ElasticsearchException as e:
-    #         raise StorageException(str(e))

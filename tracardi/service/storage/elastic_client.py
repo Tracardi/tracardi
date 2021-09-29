@@ -14,6 +14,7 @@ _singleton = None
 logger = logging.getLogger(__file__)
 logger.setLevel(logging.DEBUG)
 
+
 class AwsCompatibleSqlClient(SqlClient):
 
     @query_params()
@@ -69,10 +70,8 @@ class ElasticClient:
     def __init__(self, **kwargs):
         self._cache = {}
         self._client = AsyncElasticsearch(**kwargs)
-        self._client.sql = AwsCompatibleSqlClient(self._client)
-
-    async def translate(self, sql):
-        return await self._client.sql.translate(body=sql)
+        # todo remove if not use of sql translate
+        # self._client.sql = AwsCompatibleSqlClient(self._client)
 
     async def close(self):
         await self._client.close()

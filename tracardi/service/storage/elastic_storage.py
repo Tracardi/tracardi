@@ -56,9 +56,6 @@ class ElasticStorage:
     async def search(self, query):
         return await self.storage.search(self.index.get_read_index(), query)
 
-    async def translate(self, sql):
-        return await self.storage.translate(sql)
-
     async def refresh(self, params=None, headers=None):
         return await self.storage.refresh(self.index.get_write_index(), params, headers)
 
