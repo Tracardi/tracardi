@@ -3,13 +3,24 @@ class ElasticFieldCondition:
         self.field = field
 
     def __eq__(self, other):
-        return {
-            "term": {
-                self.field: {
-                    "value": other
+        if isinstance(other, ElasticFieldCondition):
+            return {
+                "bool": {
+                    "filter": {
+                        "script": {
+                            "script": f"doc['{self.field}'].value ==  doc['{other.field}'].value"
+                        }
+                    }
                 }
             }
-        }
+        else:
+            return {
+                "term": {
+                    self.field: {
+                        "value": other
+                    }
+                }
+            }
 
     def __gt__(self, other):
         return {

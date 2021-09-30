@@ -5,6 +5,7 @@ from .transformer_namespace import TransformerNamespace
 from ..domain.operations import OrOperation
 from ..utils.value_compressions import Values
 
+
 # operation_mapper = {
 #     "between": "between",
 #     "=": "equals",
@@ -150,39 +151,40 @@ class FilterTransformer(TransformerNamespace):
 
     @staticmethod
     def op_compound_field(args):
-        value_type, field = args
-
-        value = field._get_value()
-        if value_type == 'datetime':
-
-            if not isinstance(value, str):
-                raise ValueError(
-                    "Value of `{}` must be string to compare it with datetime. Type of {} given".format(field.label,
-                                                                                                        type(value)))
-
-            date = dateparser.parse(value)
-            if not date:
-                raise ValueError("Could not parse date `{}`".format(value))
-            return date
-
-        raise ValueError("Unknown type `{}`".format(value_type))
+        value_type, field = args  # type: str, ElasticFieldCondition
+        raise ValueError("Functions on fields are not permitted. Unknown function `{}`".format(value_type))
 
     def op_field_sig(self, args):
-        return args[0]
+        return args[0]  # type: ElasticFieldCondition
 
     def op_value_sig(self, args):
         return args[0]
 
     def op_is_null(self, args):
-        return args[0].value is None
-
-    def op_exists(self, args):
+        field = args[0]  # type: ElasticFieldCondition
         return {
-            "exists": {
-                "field": args[0].label
+            "term": {
+                field.field: "NULL"
             }
         }
-        # return args[0].label in self._dot
+
+    def op_exists(self, args):
+        field = args[0]  # type: ElasticFieldCondition
+
+        return {
+            "exists": {
+                "field": field.field
+            }
+        }
 
     def op_not_exists(self, args):
-        return args[0].label not in self._dot
+        field = args[0]  # type: ElasticFieldCondition
+        return {
+            "bool": {
+                "must_not": {
+                    "exists": {
+                        "field": field.field
+                    }
+                }
+            }
+        }
