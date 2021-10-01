@@ -197,9 +197,6 @@ class FlowRecord(NamedEntity):
 
     # Persistence
 
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("flow", FlowRecord, entity=self)
-
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
