@@ -1,3 +1,5 @@
+from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+
 from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor
 from typing import List, Tuple
@@ -21,6 +23,11 @@ async def load_all() -> Tuple[List[Resource], int]:
 
 async def load_record(id: str) -> ResourceRecord:
     return await StorageFor(Entity(id=id)).index("resource").load(ResourceRecord)
+
+
+async def save_record(resource: Resource) -> BulkInsertResult:
+    resource_record = ResourceRecord.encode(resource)
+    return await StorageFor(resource_record).index().save()
 
 
 async def load(id: str) -> Resource:

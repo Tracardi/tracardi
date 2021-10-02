@@ -24,9 +24,7 @@ class Resource(Entity):
             ))
         super().__init__(**data)
 
-    # # Persistence
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("resource", Resource, entity=self)
+    # Persistence
 
     @staticmethod
     def storage_info() -> StorageInfo:
@@ -79,8 +77,6 @@ class ResourceRecord(Entity):
         )
 
     # Persistence
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("resource", Resource, entity=self)
 
     @staticmethod
     def storage_info() -> StorageInfo:

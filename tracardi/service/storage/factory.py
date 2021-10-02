@@ -48,7 +48,7 @@ class EntityStorageCrud(BaseStorageCrud):
         service = self._get_storage_service()
         return await service.delete_by(field, value)
 
-    async def save(self, row=None):
+    async def save(self, row=None) -> BulkInsertResult:
         if row is None:
             row = {}
         row['id'] = self.entity.id
