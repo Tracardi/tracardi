@@ -5,7 +5,7 @@ from .value_object.storage_info import StorageInfo
 from typing import Optional, List
 from pydantic import BaseModel
 from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
-from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec
+from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec, Form
 from ..service.secrets import decrypt, encrypt
 import logging
 
@@ -79,6 +79,7 @@ class SpecRecord(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[str] = ""
+    form: Optional[Form]
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
@@ -92,6 +93,7 @@ class SpecRecord(BaseModel):
             inputs=spec.inputs,
             outputs=spec.outputs,
             init=encrypt(spec.init),
+            form=spec.form,
             manual=spec.manual,
             author=spec.author,
             license=spec.license,
@@ -105,6 +107,7 @@ class SpecRecord(BaseModel):
             inputs=self.inputs,
             outputs=self.outputs,
             init=decrypt(self.init),
+            form=self.form,
             manual=self.manual,
             author=self.author,
             license=self.license,

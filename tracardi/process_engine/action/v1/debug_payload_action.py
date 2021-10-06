@@ -2,7 +2,7 @@ import asyncio
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -72,8 +72,22 @@ def register() -> Plugin:
                     "type": None,
                 }
             },
+            form=Form(title="Debug configuration", groups=[
+                FormGroup(
+                    name="Event type",
+                    description="Provide event type that exists in you database.",
+                    fields=[
+                        FormField(
+                            id="event.type",
+                            name="Event type",
+                            description="Provide event type that exists in you database.",
+                            component=FormComponent(type="text")
+                        )
+                    ]
+                ),
+            ]),
             manual="debug_payload_action",
-            version='0.1',
+            version='0.1.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),

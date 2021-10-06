@@ -30,7 +30,7 @@ setup(
         'pytz',
         'device_detector==0.10',
         'deepdiff>=5.5.0',
-        'tracardi-plugin-sdk>=0.6.11',
+        'tracardi-plugin-sdk>=0.6.16',
         'tracardi_graph_runner>=0.6.5',
         'tracardi-dot-notation>=0.6.2',
     ],
