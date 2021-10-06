@@ -21,7 +21,7 @@ def register() -> Plugin:
             className='InjectAction',
             inputs=[],
             outputs=["payload"],
-            init={"value": None},
+            init={"value": {}},
             manual='inject_action',
             version='0.1',
             license="MIT",

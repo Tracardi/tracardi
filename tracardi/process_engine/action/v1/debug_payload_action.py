@@ -74,14 +74,15 @@ def register() -> Plugin:
             },
             form=Form(title="Debug configuration", groups=[
                 FormGroup(
-                    name="Event type",
-                    description="Provide event type that exists in you database.",
+                    # name="Event type",
+                    # description="Provide event type that exists in you database.",
                     fields=[
                         FormField(
                             id="event.type",
                             name="Event type",
-                            description="Provide event type that exists in you database.",
-                            component=FormComponent(type="text")
+                            description="Provide event type that exists in you database. Tracardi will read "
+                                        "first event of provided type and will inject it into current workflow.",
+                            component=FormComponent(type="text", props={"label": "Event type"})
                         )
                     ]
                 ),
