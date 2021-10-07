@@ -1,5 +1,5 @@
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -35,9 +35,24 @@ def register() -> Plugin:
             className='IfAction',
             inputs=["payload"],
             outputs=["TRUE", "FALSE"],
-            init={"condition": None},
+            init={"condition": ""},
+            form=Form(title="If statement condition", groups=[
+                FormGroup(
+                    # name="Event type",
+                    # description="Provide event type that exists in you database.",
+                    fields=[
+                        FormField(
+                            id="condition",
+                            name="Condition statement",
+                            description="Provide condition for IF statement. If the condition is met then the payload "
+                                        "will be returned on TRUE port if not then FALSE port is triggered.",
+                            component=FormComponent(type="textarea", props={"label": "condition"})
+                        )
+                    ]
+                ),
+            ]),
             manual="if_action",
-            version='0.1',
+            version='0.2',
             license="MIT",
             author="Risto Kowaczewski"
         ),

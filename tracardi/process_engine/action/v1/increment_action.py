@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi.domain.profile import Profile
@@ -22,7 +22,8 @@ class IncrementAction(ActionRunner):
             raise ValueError("Increment must be a number. {} given.".format(type(self.increment)))
 
         if not self.field.startswith('profile@stats.counters'):
-            raise ValueError("Only fields inside `profile@stats.counters` can be incremented. Field `{}` given.".format(self.field))
+            raise ValueError(
+                "Only fields inside `profile@stats.counters` can be incremented. Field `{}` given.".format(self.field))
 
     async def run(self, payload):
 
@@ -63,7 +64,33 @@ def register() -> Plugin:
             className='IncrementAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"field": None, "increment": 1},
+            init={"field": "", "increment": 1},
+            form=Form(title="Debug configuration", groups=[
+                FormGroup(
+                    # name="Event type",
+                    # description="Provide event type that exists in you database.",
+                    fields=[
+                        FormField(
+                            id="field",
+                            name="Path to field",
+                            description="Provide provide path to field that should be incremented. "
+                                        "E.g. profile@stats.counters.boughtProducts",
+                            component=FormComponent(type="text", props={"label": "Field path"})
+                        ),
+                        FormField(
+                            id="increment",
+                            name="Incrementation",
+                            description="Provide by what number the path should be incremented. Default equals 1.",
+                            component=FormComponent(
+                                type="text",
+                                props={
+                                    "label": "Incrementation",
+                                    "inputProps": {"inputMode": "numeric", "pattern": '[0-9]*'}
+                                })
+                        )
+                    ]
+                ),
+            ]),
             manual="increment_action",
             version='0.1',
             license="MIT",
@@ -79,4 +106,3 @@ def register() -> Plugin:
             group=["Stats"]
         )
     )
-
