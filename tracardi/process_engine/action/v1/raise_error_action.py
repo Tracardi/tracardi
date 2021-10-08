@@ -1,4 +1,5 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    FormFieldValidation
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
 from tracardi.exceptions.exception import WorkflowException
@@ -31,9 +32,24 @@ def register() -> Plugin:
             license="MIT",
             author="Risto Kowaczewski",
             init={
-                "message": None
-            }
-
+                "message": "Flow stopped due to error."
+            },
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="message",
+                            name="Error message",
+                            description="Provide error message.",
+                            component=FormComponent(type="text", props={"label": "Message"}),
+                            validation=FormFieldValidation(
+                                regex=r"^(?!\s*$).+",
+                                message="This field must not be empty."
+                            )
+                        )
+                    ]
+                )
+            ]),
         ),
         metadata=MetaData(
             name='Throw error',

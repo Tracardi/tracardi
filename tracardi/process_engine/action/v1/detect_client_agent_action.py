@@ -4,7 +4,8 @@ from concurrent.futures import ThreadPoolExecutor
 from device_detector import DeviceDetector
 
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    FormFieldValidation
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -116,6 +117,23 @@ def register() -> Plugin:
             init={
                 "userAgent": "session@context.browser.browser.userAgent"
             },
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="userAgent",
+                            name="Path to user agent data",
+                            description="Provide path to field that has user agent data. "
+                                        "E.g. session@context.browser.browser.userAgent",
+                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
+                            validation=FormFieldValidation(
+                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
+                                message="This field must be in Tracardi dot path format."
+                            )
+                        )
+                    ]
+                )
+            ]),
             manual="detect_client_agent_action",
             version='0.1.1',
             license="MIT",

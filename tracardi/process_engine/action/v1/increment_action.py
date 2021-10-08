@@ -1,4 +1,5 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    FormFieldValidation
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi.domain.profile import Profile
@@ -65,30 +66,41 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             init={"field": "", "increment": 1},
-            form=Form(title="Debug configuration", groups=[
+            form=Form(groups=[
                 FormGroup(
-                    # name="Event type",
-                    # description="Provide event type that exists in you database.",
                     fields=[
                         FormField(
                             id="field",
                             name="Path to field",
-                            description="Provide provide path to field that should be incremented. "
+                            description="Provide path to field that should be incremented. "
                                         "E.g. profile@stats.counters.boughtProducts",
-                            component=FormComponent(type="text", props={"label": "Field path"})
-                        ),
+                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
+                            validation=FormFieldValidation(
+                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
+                                message="This field must be in Tracardi dot path format."
+                            )
+                        )
+                    ]
+                ),
+                FormGroup(
+                    fields=[
                         FormField(
                             id="increment",
                             name="Incrementation",
-                            description="Provide by what number the path should be incremented. Default equals 1.",
+                            description="Provide by what number the value at provided path should "
+                                        "be incremented. Default value equals 1.",
                             component=FormComponent(
                                 type="text",
                                 props={
-                                    "label": "Incrementation",
-                                    "inputProps": {"inputMode": "numeric", "pattern": '[0-9]*'}
-                                })
+                                    "label": "Incrementation"
+                                }),
+                            validation=FormFieldValidation(
+                                regex=r"^\d+$",
+                                message="This field must be numeric."
+                            )
                         )
                     ]
+
                 ),
             ]),
             manual="increment_action",

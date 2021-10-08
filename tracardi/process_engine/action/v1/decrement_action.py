@@ -1,4 +1,5 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    FormFieldValidation
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi.domain.profile import Profile
@@ -22,7 +23,8 @@ class DecrementAction(ActionRunner):
             raise ValueError("Decrement must be a number. {} given.".format(type(self.decrement)))
 
         if not self.field.startswith('profile@stats.counters'):
-            raise ValueError("Only fields inside `profile@stats.counters` can be decremented. Field `{}` given.".format(self.field))
+            raise ValueError(
+                "Only fields inside `profile@stats.counters` can be decremented. Field `{}` given.".format(self.field))
 
     async def run(self, payload):
 
@@ -63,7 +65,43 @@ def register() -> Plugin:
             className='DecrementAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"field": None, "decrement": 1},
+            init={"field": "", "decrement": 1},
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="field",
+                            name="Path to field",
+                            description="Provide path to field that should be decremented. "
+                                        "E.g. profile@stats.counters.boughtProducts",
+                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
+                            validation=FormFieldValidation(
+                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
+                                message="This field must be in Tracardi dot path format."
+                            )
+                        )
+                    ]
+                ),
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="decrement",
+                            name="Decrementation",
+                            description="Provide by what number the value at provided path should be "
+                                        "decremented. Default value equals 1.",
+                            component=FormComponent(
+                                type="text",
+                                props={
+                                    "label": "Decrementation"
+                                }),
+                            validation=FormFieldValidation(
+                                regex=r"^\d+$",
+                                message="This field must be numeric."
+                            )
+                        )
+                    ]
+                ),
+            ]),
             manual="decrement_action",
             version='0.1',
             license="MIT",
@@ -79,4 +117,3 @@ def register() -> Plugin:
             group=["Stats"]
         )
     )
-

@@ -36,10 +36,8 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["TRUE", "FALSE"],
             init={"condition": ""},
-            form=Form(title="If statement condition", groups=[
+            form=Form(groups=[
                 FormGroup(
-                    # name="Event type",
-                    # description="Provide event type that exists in you database.",
                     fields=[
                         FormField(
                             id="condition",

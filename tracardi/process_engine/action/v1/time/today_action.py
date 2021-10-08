@@ -2,7 +2,8 @@ from datetime import datetime
 
 import pytz
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    FormFieldValidation
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -52,7 +53,24 @@ def register() -> Plugin:
             version='0.1.1',
             license="MIT",
             author="Risto Kowaczewski",
-            init={"timezone": "session@context.time.tz"}
+            init={"timezone": "session@context.time.tz"},
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="timezone",
+                            name="Path to timezone",
+                            description="Provide path to field that has timezone. "
+                                        "E.g. session@context.time.tz",
+                            component=FormComponent(type="dotPath", props={"label": "Timezone"}),
+                            validation=FormFieldValidation(
+                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
+                                message="This field must be in Tracardi dot path format."
+                            )
+                        )
+                    ]
+                )
+            ]),
 
         ),
         metadata=MetaData(

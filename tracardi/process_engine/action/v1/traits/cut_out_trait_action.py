@@ -1,4 +1,5 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    FormFieldValidation
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -37,8 +38,25 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["trait"],
             init={
-                "trait": "undefined"
+                "trait": ""
             },
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="trait",
+                            name="Path to trait",
+                            description="Provide path to field that you would like to return as output. "
+                                        "E.g. event@session.context.browser.browser.userAgent",
+                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
+                            validation=FormFieldValidation(
+                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
+                                message="This field must be in Tracardi dot path format."
+                            )
+                        )
+                    ]
+                )
+            ]),
             version='0.1',
             license="MIT",
             author="Risto Kowaczewski"

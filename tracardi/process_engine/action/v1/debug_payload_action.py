@@ -74,8 +74,6 @@ def register() -> Plugin:
             },
             form=Form(title="Debug configuration", groups=[
                 FormGroup(
-                    # name="Event type",
-                    # description="Provide event type that exists in you database.",
                     fields=[
                         FormField(
                             id="event.type",

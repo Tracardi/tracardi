@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -22,6 +22,19 @@ def register() -> Plugin:
             inputs=[],
             outputs=["payload"],
             init={"value": {}},
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="value",
+                            name="Object to inject",
+                            description="Provide object as JSON to be injected into payload and returned "
+                                        "on output port.",
+                            component=FormComponent(type="json", props={"label": "object"})
+                        )
+                    ]
+                ),
+            ]),
             manual='inject_action',
             version='0.1',
             license="MIT",
