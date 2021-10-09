@@ -72,7 +72,7 @@ def register() -> Plugin:
                     "type": None,
                 }
             },
-            form=Form(title="Debug configuration", groups=[
+            form=Form(groups=[
                 FormGroup(
                     fields=[
                         FormField(
