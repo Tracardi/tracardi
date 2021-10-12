@@ -1,7 +1,8 @@
 from uuid import uuid4
 
 from time import time
-from app.utils.network import local_ip
+
+from tracardi.service.network import local_ip
 from tracardi.service.singleton import Singleton
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.domain.entity import Entity
