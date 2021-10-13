@@ -1,24 +1,49 @@
+import re
 from datetime import datetime
 
 import pytz
+from pydantic import BaseModel, validator
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
+
+
+class TodayConfiguration(BaseModel):
+    timezone: str
+
+    @validator('timezone')
+    def field_must_match(cls, value):
+        if len(value) < 1:
+            raise ValueError("Event type can not be empty.")
+
+        if value != value.strip():
+            raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
+
+        if not re.match(
+                r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
+                value.strip()
+        ):
+            raise ValueError("This field must be in form of dot notation. E.g. "
+                             "session@context.time.tz")
+        return value
+
+
+def validate(config: dict) -> TodayConfiguration:
+    return TodayConfiguration(**config)
 
 
 class TodayAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        self.timezone = kwargs['timezone'] if 'timezone' in kwargs else None
+        self.config = validate(kwargs)
         self.week_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
     async def run(self, payload):
         dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
 
-        if self.timezone is not None:
-            time_zone = dot[self.timezone]
+        if self.config.timezone is not None:
+            time_zone = dot[self.config.timezone]
             time_zone = pytz.timezone(time_zone)
             today = datetime.now(time_zone).today()
         else:
@@ -62,11 +87,7 @@ def register() -> Plugin:
                             name="Path to timezone",
                             description="Provide path to field that has timezone. "
                                         "E.g. session@context.time.tz",
-                            component=FormComponent(type="dotPath", props={"label": "Timezone"}),
-                            validation=FormFieldValidation(
-                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
-                                message="This field must be in Tracardi dot path format."
-                            )
+                            component=FormComponent(type="dotPath", props={"label": "Timezone"})
                         )
                     ]
                 )

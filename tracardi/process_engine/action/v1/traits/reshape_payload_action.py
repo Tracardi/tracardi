@@ -43,7 +43,7 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Reshape payload',
+            name='Make payload',
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
             type='flowNode',
             width=200,

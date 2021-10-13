@@ -1,4 +1,7 @@
 import asyncio
+import re
+
+from pydantic import BaseModel, validator
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
@@ -12,21 +15,41 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
 
+class DebugConfiguration(BaseModel):
+    type: str
+
+    @validator("type")
+    def not_empty(cls, value):
+        if len(value) < 1:
+            raise ValueError("Event type can not be empty.")
+
+        if value != value.strip():
+            raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
+
+        if not re.match(
+            r'^[\@a-zA-Z0-9\._\-]+$',
+            value.strip()
+        ):
+            raise ValueError("This field must not have other characters then: letters, digits, ., _, -, @")
+
+
+def validate(config: dict) -> DebugConfiguration:
+    return DebugConfiguration(**config)
+
+
 class DebugPayloadAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'event' not in kwargs or 'type' not in kwargs['event']:
-            raise ValueError("Please define event.type in config section.")
-        self.event_type = kwargs['event']['type']
+        self.config = validate(kwargs)
 
     async def run(self, **kwargs):
         if self.debug:
-            result = await storage.driver.event.load_event_by_type(self.event_type)
+            result = await storage.driver.event.load_event_by_type(self.config.type)
 
             if result.total == 0:
                 raise ValueError(
                     "There is no event with type `{}`. Check configuration for correct event type.".format(
-                        self.event_type))
+                        self.config.type))
 
             event_data = list(result)[0]
 
@@ -68,15 +91,13 @@ def register() -> Plugin:
             inputs=[],
             outputs=["event"],
             init={
-                "event": {
-                    "type": None,
-                }
+                "type": "page-view",
             },
             form=Form(groups=[
                 FormGroup(
                     fields=[
                         FormField(
-                            id="event.type",
+                            id="type",
                             name="Event type",
                             description="Provide event type that exists in you database. Tracardi will read "
                                         "first event of provided type and will inject it into current workflow.",

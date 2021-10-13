@@ -1,22 +1,45 @@
 import asyncio
+import re
 from concurrent.futures import ThreadPoolExecutor
 
 from device_detector import DeviceDetector
+from pydantic import BaseModel, validator
 
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
+
+
+class AgentConfiguration(BaseModel):
+    agent: str
+
+    @validator("agent")
+    def is_valid_dot_path(cls, value):
+        if len(value) < 1:
+            raise ValueError("Event type can not be empty.")
+
+        if value != value.strip():
+            raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
+
+        if not re.match(
+            r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
+            value.strip()
+        ):
+            raise ValueError("This field must be in form of dot notation. E.g. "
+                             "session@context.browser.browser.userAgent")
+        return value
+
+
+def validate(config: dict) -> AgentConfiguration:
+    return AgentConfiguration(**config)
 
 
 class DetectClientAgentAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'userAgent' not in kwargs:
-            raise ValueError("Please define userAgent path with dot notation.")
-
-        self.user_agent = kwargs['userAgent']
+        self.config = validate(kwargs)
+        self.config.agent = self.config.agent.strip()
 
     @staticmethod
     def detect_device(ua):
@@ -30,7 +53,7 @@ class DetectClientAgentAction(ActionRunner):
                 raise KeyError("No session context defined.")
 
             dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
-            ua = dot[self.user_agent]
+            ua = dot[self.config.agent]
 
             with ThreadPoolExecutor(max_workers=10) as pool:
                 loop = asyncio.get_event_loop()
@@ -115,21 +138,17 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={
-                "userAgent": "session@context.browser.browser.userAgent"
+                "agent": "session@context.browser.browser.userAgent"
             },
             form=Form(groups=[
                 FormGroup(
                     fields=[
                         FormField(
-                            id="userAgent",
+                            id="agent",
                             name="Path to user agent data",
-                            description="Provide path to field that has user agent data. "
+                            description="Type path to field that has user agent data. "
                                         "E.g. session@context.browser.browser.userAgent",
-                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
-                            validation=FormFieldValidation(
-                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
-                                message="This field must be in Tracardi dot path format."
-                            )
+                            component=FormComponent(type="dotPath", props={"label": "Field path"})
                         )
                     ]
                 )
@@ -143,8 +162,8 @@ def register() -> Plugin:
             name='Get client agent',
             desc='It will parse any user agent string and detect the browser, operating system, device used (desktop, '
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
-                 'of user agent strings, even from rare and obscure browsers and devices. It returns an object containing '
-                 'all the information',
+                 'of user agent strings, even from rare and obscure browsers and devices. It returns an '
+                 'object containing all the information',
             type='flowNode',
             width=200,
             height=100,

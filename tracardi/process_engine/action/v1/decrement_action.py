@@ -1,30 +1,32 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
+from typing import Union
+
+from pydantic import BaseModel, validator
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi.domain.profile import Profile
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
+class DecrementConfig(BaseModel):
+    field: str
+    decrement: Union[float, int]
+
+    @validator('field')
+    def field_must_match(cls, value, values, **kwargs):
+        if not value.startswith('profile@stats.counters'):
+            raise ValueError(f"Only fields inside `profile@stats.counters` can be decremented. Field `{value}` given.")
+        return value
+
+
+def validate(config: dict):
+    return DecrementConfig(**config)
+
+
 class DecrementAction(ActionRunner):
 
     def __init__(self, **kwargs):
-
-        if 'field' not in kwargs or kwargs['field'] is None:
-            raise ValueError("Field is not set. Define it in config section.")
-
-        if 'decrement' not in kwargs or kwargs['decrement'] is None:
-            raise ValueError("Decrement is not set. Define it in config section.")
-
-        self.field = kwargs['field']
-        self.decrement = kwargs['decrement']
-
-        if type(self.decrement) != int and type(self.decrement) != float:
-            raise ValueError("Decrement must be a number. {} given.".format(type(self.decrement)))
-
-        if not self.field.startswith('profile@stats.counters'):
-            raise ValueError(
-                "Only fields inside `profile@stats.counters` can be decremented. Field `{}` given.".format(self.field))
+        self.config = validate(kwargs)
 
     async def run(self, payload):
 
@@ -37,7 +39,7 @@ class DecrementAction(ActionRunner):
 
         try:
 
-            value = dot[self.field]
+            value = dot[self.config.field]
 
             if value is None:
                 value = 0
@@ -46,11 +48,11 @@ class DecrementAction(ActionRunner):
             value = 0
 
         if type(value) != int:
-            raise ValueError("Filed `{}` value is not numeric.".format(self.field))
+            raise ValueError("Filed `{}` value is not numeric.".format(self.config.field))
 
-        value -= self.decrement
+        value -= self.config.decrement
 
-        dot[self.field] = value
+        dot[self.config.field] = value
 
         self.profile.replace(Profile(**dot.profile))
 
@@ -74,11 +76,7 @@ def register() -> Plugin:
                             name="Path to field",
                             description="Provide path to field that should be decremented. "
                                         "E.g. profile@stats.counters.boughtProducts",
-                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
-                            validation=FormFieldValidation(
-                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
-                                message="This field must be in Tracardi dot path format."
-                            )
+                            component=FormComponent(type="dotPath", props={"label": "Field path"})
                         )
                     ]
                 ),
@@ -93,11 +91,7 @@ def register() -> Plugin:
                                 type="text",
                                 props={
                                     "label": "Decrementation"
-                                }),
-                            validation=FormFieldValidation(
-                                regex=r"^\d+$",
-                                message="This field must be numeric."
-                            )
+                                })
                         )
                     ]
                 ),

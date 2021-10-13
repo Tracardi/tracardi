@@ -44,11 +44,7 @@ def register() -> Plugin:
                             id="message",
                             name="Error message",
                             description="Provide error message.",
-                            component=FormComponent(type="text", props={"label": "Message"}),
-                            validation=FormFieldValidation(
-                                regex=r"^(?!\s*$).+",
-                                message="This field must not be empty."
-                            )
+                            component=FormComponent(type="text", props={"label": "Message"})
                         )
                     ]
                 )
