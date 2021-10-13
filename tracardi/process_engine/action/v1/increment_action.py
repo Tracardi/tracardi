@@ -1,3 +1,6 @@
+from typing import Union
+
+from pydantic import BaseModel, validator
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     FormFieldValidation
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -6,25 +9,25 @@ from tracardi.domain.profile import Profile
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
+class IncrementConfig(BaseModel):
+    field: str
+    increment: Union[int, float]
+
+    @validator('field')
+    def field_must_match(cls, value, values, **kwargs):
+        if not value.startswith('profile@stats.counters'):
+            raise ValueError(f"Only fields inside `profile@stats.counters` can be incremented. Field `{value}` given.")
+        return value
+
+
+def validate(config: dict):
+    return IncrementConfig(**config)
+
+
 class IncrementAction(ActionRunner):
 
     def __init__(self, **kwargs):
-
-        if 'field' not in kwargs or kwargs['field'] is None:
-            raise ValueError("Field is not set. Define it in config section.")
-
-        if 'increment' not in kwargs or kwargs['increment'] is None:
-            raise ValueError("Increment is not set. Define it in config section.")
-
-        self.field = kwargs['field']
-        self.increment = kwargs['increment']
-
-        if type(self.increment) != int and type(self.increment) != float:
-            raise ValueError("Increment must be a number. {} given.".format(type(self.increment)))
-
-        if not self.field.startswith('profile@stats.counters'):
-            raise ValueError(
-                "Only fields inside `profile@stats.counters` can be incremented. Field `{}` given.".format(self.field))
+        self.config = validate(kwargs)
 
     async def run(self, payload):
 
@@ -37,7 +40,7 @@ class IncrementAction(ActionRunner):
 
         try:
 
-            value = dot[self.field]
+            value = dot[self.config.field]
 
             if value is None:
                 value = 0
@@ -46,11 +49,11 @@ class IncrementAction(ActionRunner):
             value = 0
 
         if type(value) != int:
-            raise ValueError("Filed `{}` value is not numeric.".format(self.field))
+            raise ValueError("Filed `{}` value is not numeric.".format(self.config.field))
 
-        value += self.increment
+        value += self.config.increment
 
-        dot[self.field] = value
+        dot[self.config.field] = value
 
         self.profile.replace(Profile(**dot.profile))
 

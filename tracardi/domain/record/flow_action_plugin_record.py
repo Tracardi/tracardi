@@ -1,12 +1,13 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, Callable
 from ..entity import Entity
 from ..flow_action_plugin import FlowActionPlugin
-from tracardi.domain.flow import PluginRecord
 from ..metadata import Metadata
 from ..settings import Settings
 from ..time import Time
 from ..value_object.storage_info import StorageInfo
+from ...service.module_loader import import_package, load_callable
+from tracardi.domain.flow import PluginRecord
 
 
 class FlowActionPluginRecord(Entity):
@@ -20,11 +21,6 @@ class FlowActionPluginRecord(Entity):
                 insert=datetime.utcnow()
             ))
         super().__init__(**data)
-
-    # Persistence
-    #
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("action", FlowActionPluginRecord, entity=self)
 
     @staticmethod
     def storage_info() -> StorageInfo:
@@ -50,3 +46,7 @@ class FlowActionPluginRecord(Entity):
             "settings": self.settings
         }
         return FlowActionPlugin.construct(_fields_set=self.__fields_set__, **data)
+
+    def get_validator(self) -> Callable:
+        module = import_package(self.plugin.spec.module)
+        return load_callable(module, 'validate')

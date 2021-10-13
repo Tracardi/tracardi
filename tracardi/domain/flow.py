@@ -74,6 +74,7 @@ class Flow(GraphFlow):
 
 
 class SpecRecord(BaseModel):
+    id: str
     className: str
     module: str
     inputs: Optional[List[str]] = []
@@ -88,6 +89,7 @@ class SpecRecord(BaseModel):
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':
         return SpecRecord(
+            id=spec.id,
             className=spec.className,
             module=spec.module,
             inputs=spec.inputs,
@@ -102,6 +104,7 @@ class SpecRecord(BaseModel):
 
     def decode(self) -> Spec:
         return Spec(
+            id=self.id,
             className=self.className,
             module=self.module,
             inputs=self.inputs,

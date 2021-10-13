@@ -4,7 +4,6 @@ import tracardi.service.storage.drivers.elastic.event
 import tracardi.service.storage.drivers.elastic.flow
 import tracardi.service.storage.drivers.elastic.rule
 import tracardi.service.storage.drivers.elastic.segment
-import tracardi.service.storage.drivers.elastic.plugin
 import tracardi.service.storage.drivers.elastic.debug_info
 import tracardi.service.storage.drivers.elastic.resource
 import tracardi.service.storage.drivers.elastic.action
@@ -43,10 +42,6 @@ class ElasticDriver:
     @property
     def segment(self):
         return tracardi.service.storage.drivers.elastic.segment
-
-    @property
-    def plugin(self):
-        return tracardi.service.storage.drivers.elastic.plugin
 
     @property
     def debug_info(self):

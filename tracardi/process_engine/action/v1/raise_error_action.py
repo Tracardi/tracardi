@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     FormFieldValidation
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -5,19 +6,21 @@ from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi.exceptions.exception import WorkflowException
 
 
+class ErrorConfiguration(BaseModel):
+    message: str = "Workflow stopped"
+
+
+def validate(config: dict) -> ErrorConfiguration:
+    return ErrorConfiguration(**config)
+
+
 class RaiseErrorAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'message' not in kwargs or kwargs['message'] is None:
-            self.message = "Workflow stopped"
-        else:
-            if not isinstance(kwargs['message'], str):
-                raise ValueError("Message should be string")
-
-            self.message = kwargs['message']
+        self.config = validate(kwargs)
 
     async def run(self, payload):
-        raise WorkflowException(self.message)
+        raise WorkflowException(self.config.message)
 
 
 def register() -> Plugin:
