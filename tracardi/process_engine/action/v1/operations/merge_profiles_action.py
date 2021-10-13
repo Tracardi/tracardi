@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -34,6 +34,18 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={"mergeBy": []},
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="mergeBy",
+                            name="Merge primary fields",
+                            description="Provide a list od fields that can identify user.",
+                            component=FormComponent(type="listOfDotPaths", props={"label": "condition"})
+                        )
+                    ]
+                ),
+            ]),
             manual="merge_profiles_action"
         ),
         metadata=MetaData(
