@@ -2,7 +2,7 @@
 
 # Tracardi Open-source Customer Data Platform
 
-[Tracardi](http://www.twitter.com/tracardi) is a open-source Customer Data Platform.
+[Tracardi](http://www.twitter.com/tracardi) is an open-source Customer Data Platform.
 
 TRACARDI is an API-first solution, low-code / no-code platform aimed at any e-commerce business that 
 wants to start using user data for marketing purposes. If you own a brand new e-commerce platform or 
