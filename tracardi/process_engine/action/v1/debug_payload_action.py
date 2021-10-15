@@ -32,6 +32,8 @@ class DebugConfiguration(BaseModel):
         ):
             raise ValueError("This field must not have other characters then: letters, digits, ., _, -, @")
 
+        return value
+
 
 def validate(config: dict) -> DebugConfiguration:
     return DebugConfiguration(**config)

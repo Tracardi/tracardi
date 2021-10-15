@@ -155,9 +155,9 @@ class SqlSearchQueryEngine:
                 # todo timestamp no timezone
                 timestamp = datetime.fromisoformat(row["key_as_string"].replace('Z', '+00:00'))
                 yield {
-                    "time": "{}".format(timestamp.strftime(format)),
+                    "date": "{}".format(timestamp.strftime(format)),
                     'interval': "+{}{}".format(interval, unit),
-                    "events": row["doc_count"]
+                    "count": row["doc_count"]
                 }
 
         min_date_time, max_date_time = query.get_dates()  # type: datetime, datetime

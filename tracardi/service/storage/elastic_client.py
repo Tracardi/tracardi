@@ -7,12 +7,14 @@ from elasticsearch.exceptions import NotFoundError
 
 from ssl import create_default_context
 
+from tracardi.config import elastic
+
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 _singleton = None
-logger = logging.getLogger(__file__)
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(elastic.logging_level)
 
 
 class AwsCompatibleSqlClient(SqlClient):
@@ -77,6 +79,7 @@ class ElasticClient:
         await self._client.close()
 
     async def get(self, index, id):
+        logger.debug(f"GET DOCUMENT: {index}, {id}")
         return await self._client.get(index=index, doc_type='_doc', id=id)
 
     # todo error handling move to service
@@ -104,7 +107,7 @@ class ElasticClient:
         return await self._client.search(index=index, body=query)
 
     async def scan(self, index, query):
-
+        logger.debug(f"SCAN INDEX: {index}, {query}")
         _generator = helpers.async_scan(
             self._client,
             query=query,
@@ -115,6 +118,8 @@ class ElasticClient:
             yield doc
 
     async def insert(self, index, records) -> BulkInsertResult:
+
+        logger.debug(f"INSERT: {index}, {records}")
 
         if not isinstance(records, list):
             raise ValueError("Insert expects payload to be list.")
@@ -150,21 +155,26 @@ class ElasticClient:
         return await self._client.update(index, body=record, id=id)
 
     async def remove_index(self, index):
+        logger.debug(f"REMOVE INDEX: {index}")
         return await self._client.indices.delete(index=index)
 
     async def create_index(self, index, mappings):
+        logger.debug(f"CREATE INDEX: {index}")
         return await self._client.indices.create(index=index, ignore=400, body=mappings)
 
     async def exists_index(self, index):
+        logger.debug(f"EXISTS INDEX: {index}")
         return await self._client.indices.exists(index=index)
 
     async def list_indices(self):
         return await self._client.indices.get("*")
 
     async def refresh(self, index, params=None, headers=None):
+        logger.debug(f"REFRESH INDEX: {index}")
         return await self._client.indices.refresh(index=index, params=params, headers=headers)
 
     async def flush(self, index, params=None, headers=None):
+        logger.debug(f"FLUSH INDEX: {index}")
         return await self._client.indices.flush(index=index, params=params, headers=headers)
 
     @staticmethod

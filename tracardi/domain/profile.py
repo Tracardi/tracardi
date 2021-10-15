@@ -28,10 +28,10 @@ class Profile(Entity):
     active: bool = True
 
     def __init__(self, **data: Any):
-        data['metadata'] = Metadata(
-            time=Time(
-                insert=datetime.utcnow()
-            ))
+        # data['metadata'] = Metadata(
+        #     time=Time(
+        #         insert=datetime.utcnow()
+        #     ))
         super().__init__(**data)
 
     def replace(self, profile):

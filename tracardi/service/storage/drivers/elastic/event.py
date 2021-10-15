@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.service.storage.factory import StorageFor, storage_manager
 from typing import Union, List
@@ -12,6 +14,56 @@ from tracardi.service.storage.factory import StorageForBulk
 async def search(query):
     storage = storage_manager("event")
     return await storage.query({"query": query})
+
+
+async def heatmap_by_event_type(event_type=None):
+    query = {
+        "size": 0,
+        "aggs": {
+            "items_over_time": {
+                "date_histogram": {
+                    "min_doc_count": 1,
+                    "field": "metadata.time.insert",
+                    "fixed_interval": "1d",
+                    "extended_bounds": {
+                        "min": datetime.utcnow() - timedelta(days=1 * 365),
+                        "max": datetime.utcnow()
+                    }
+                }
+            }
+        }
+    }
+
+    if event_type is not None:
+        query["query"] = {"term": {"type": event_type}}
+
+    result = await storage_manager(index="event").query(query)
+    return result['aggregations']["items_over_time"]['buckets']
+
+
+async def heatmap_by_profile(profile_id=None):
+    query = {
+        "size": 0,
+        "aggs": {
+            "items_over_time": {
+                "date_histogram": {
+                    "min_doc_count": 1,
+                    "field": "metadata.time.insert",
+                    "fixed_interval": "1d",
+                    "extended_bounds": {
+                        "min": datetime.utcnow() - timedelta(days=1 * 365),
+                        "max": datetime.utcnow()
+                    }
+                }
+            }
+        }
+    }
+
+    if profile_id is not None:
+        query["query"] = {"term": {"profile.id": profile_id}}
+
+    result = await storage_manager(index="event").query(query)
+    return result['aggregations']["items_over_time"]['buckets']
 
 
 async def save_events(events: List[Event], persist_events: bool = True) -> Union[SaveResult, BulkInsertResult]:

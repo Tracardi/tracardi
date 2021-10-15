@@ -12,13 +12,13 @@ class IfConfiguration(BaseModel):
 
     @validator("condition")
     def is_valid_condition(cls, value):
-        condition = Condition()
+        _condition = Condition()
         try:
-            condition.parse(value)
+            _condition.parse(value)
         except Exception as e:
             raise ValueError(str(e))
 
-        return True
+        return value
 
 
 def validate(config: dict) -> IfConfiguration:

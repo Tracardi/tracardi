@@ -23,7 +23,7 @@ async def load_rule(event_type: str):
                 "must": [
                     {
                         "term": {
-                            "event.type.keyword": event_type
+                            "event.type": event_type
                         }
                     },
                     {

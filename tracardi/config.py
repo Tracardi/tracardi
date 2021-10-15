@@ -1,4 +1,19 @@
+import logging
 import os
+
+
+def _get_logging_level(level: str) -> int:
+    level = level.upper()
+    if level == 'DEBUG':
+        return logging.DEBUG
+    if level == 'INFO':
+        return logging.INFO
+    if level == 'WARNING' or level == "WARN":
+        return logging.WARNING
+    if level == 'ERROR':
+        return logging.ERROR
+
+    return logging.WARNING
 
 
 class TracardiConfig:
@@ -7,6 +22,7 @@ class TracardiConfig:
         self.cache_profiles = env['CACHE_PROFILE'] if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks = env['SYNC_PROFILE_TRACKS'] if 'SYNC_PROFILE_TRACKS' in env else False
         self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
+        self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
 
 
 class MemoryCacheConfig:
@@ -46,6 +62,8 @@ class ElasticConfig:
             'ELASTIC_SQL_TRANSLATE_METHOD'] if 'ELASTIC_SQL_TRANSLATE_METHOD' in env else "POST"
         self.refresh_profiles_after_save = env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'] \
             if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
+        self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env \
+            else logging.WARNING
 
 
 class RedisConfig:
