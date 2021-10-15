@@ -1,22 +1,33 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from typing import List
+
+from pydantic import BaseModel, validator
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi.domain.profile import Profile
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
+class DeleteTraitConfiguration(BaseModel):
+    delete: List[str]
+
+    @validator("delete")
+    def list_must_not_be_empty(cls, value):
+        if not len(value) > 0:
+            raise ValueError("List to delete must not be empty.")
+        return value
+
+
+def validate(config: dict):
+    return DeleteTraitConfiguration(**config)
+
+
 class DeleteTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'delete' not in kwargs:
-            raise ValueError("Please define delete in config section.")
-        if not isinstance(kwargs['delete'], list):
-            raise ValueError("Please define delete as list not {}.".format(type(kwargs['delete'])))
-
-        self.delete = kwargs['delete']
+        self.config = validate(kwargs)
 
     async def run(self, payload: dict):
-
         dot = DotAccessor(
             self.profile,
             self.session,
@@ -24,7 +35,7 @@ class DeleteTraitAction(ActionRunner):
             self.event,
             self.flow)
 
-        for value in self.delete:
+        for value in self.config.delete:
             del dot[value]
 
         profile = Profile(**dot.profile)
@@ -43,11 +54,20 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["payload"],
             init={
-                "delete": [
-                    "payload@undefied",
-                    "profile@undefined",
-                ]
+                "delete": []
             },
+            form=Form(groups=[
+                FormGroup(
+                    fields=[
+                        FormField(
+                            id="delete",
+                            name="Delete fields",
+                            description="Type a list of fields that must be deleted.",
+                            component=FormComponent(type="listOfDotPaths", props={"label": "Path to field"})
+                        )
+                    ]
+                ),
+            ]),
             version='0.1',
             license="MIT",
             author="Risto Kowaczewski"
