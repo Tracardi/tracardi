@@ -16,6 +16,33 @@ async def search(query):
     return await storage.query({"query": query})
 
 
+async def count_events_by_type(event_type: str, time_span: int) -> int:
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "range": {
+                            "metadata.time.insert": {
+                                "gte": "now-{}s".format(time_span),
+                                "lte": "now"}
+                        }
+                    },
+                    {
+                        "match": {
+                            "type": event_type
+                        }
+                    }
+                ]
+            }
+        }
+
+    }
+    print(query)
+    result = await storage_manager("event").query(query)
+    return result["hits"]["total"]
+
+
 async def heatmap_by_event_type(event_type=None):
     query = {
         "size": 0,
