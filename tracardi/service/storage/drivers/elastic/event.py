@@ -38,7 +38,6 @@ async def count_events_by_type(event_type: str, time_span: int) -> int:
         }
 
     }
-    print(query)
     result = await storage_manager("event").query(query)
     return result["hits"]["total"]
 
