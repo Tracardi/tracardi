@@ -32,7 +32,7 @@ setup(
         'deepdiff>=5.5.0',
         'tracardi-plugin-sdk>=0.6.21',
         'tracardi_graph_runner>=0.6.5',
-        'tracardi-dot-notation>=0.6.2',
+        'tracardi-dot-notation>=0.6.4',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
