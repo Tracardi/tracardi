@@ -24,6 +24,7 @@ def register() -> Plugin:
             init={"value": {}},
             form=Form(groups=[
                 FormGroup(
+                    name="Create payload object",
                     fields=[
                         FormField(
                             id="value",
