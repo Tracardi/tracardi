@@ -13,7 +13,7 @@ dotty-dict==1.3.0
 pytz
 tracardi-plugin-sdk>=0.6.21
 tracardi_graph_runner>=0.6.5
-tracardi-dot-notation>=0.6.4
+tracardi-dot-notation>=0.6.5
 device_detector==0.10
 pip>=21.2.4
 deepdiff>=5.5.0
