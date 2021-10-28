@@ -12,12 +12,6 @@ class EventPayload(BaseModel):
     user: Optional[Entity] = None
     options: Optional[dict] = {}
 
-    # def is_persistent(self):
-    #     if 'save' in self.options and isinstance(self.options['save'], bool):
-    #         return self.options['save']
-    #     else:
-    #         return True
-
     def to_event(self, metadata, source, session, profile, options):
         return Event.new({
             "metadata": metadata,

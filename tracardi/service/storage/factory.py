@@ -84,14 +84,10 @@ class CollectionCrud:
         self.storage = storage_manager(self.index)
 
     async def save(self, replace_id: bool = True) -> BulkInsertResult:
-        try:
-            if not isinstance(self.payload, list):
-                raise TracardiException("CollectionCrud data payload must be list.")
-            data = [p.dict() for p in self.payload if isinstance(p, BaseModel)]
-            return await self.storage.upsert(data, replace_id)
-
-        except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+        if not isinstance(self.payload, list):
+            raise TracardiException("CollectionCrud data payload must be list.")
+        data = [p.dict() for p in self.payload if isinstance(p, BaseModel)]
+        return await self.storage.upsert(data, replace_id)
 
     async def load(self, start: int = 0, limit: int = 100) -> StorageResult:
         try:
@@ -99,7 +95,8 @@ class CollectionCrud:
             return await self.storage.load_all(start, limit)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def uniq_field_value(self, field) -> AggResult:
         try:
@@ -115,7 +112,8 @@ class CollectionCrud:
             }
             return AggResult('uniq', await self.storage.query(query), return_counts=False)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
 
 class StorageFor:
