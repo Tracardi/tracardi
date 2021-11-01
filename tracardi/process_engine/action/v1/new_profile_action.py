@@ -10,9 +10,9 @@ class NewProfileAction(ActionRunner):
 
     async def run(self, payload):
         if self.profile.operation.new:
-            return Result(port="TRUE", value=True)
+            return Result(port="TRUE", value=payload)
 
-        return Result(port="FALSE", value=False)
+        return Result(port="FALSE", value=payload)
 
 
 def register() -> Plugin:
