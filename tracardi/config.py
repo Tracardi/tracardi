@@ -18,7 +18,7 @@ def _get_logging_level(level: str) -> int:
 
 class TracardiConfig:
     def __init__(self, env):
-        self.track_debug = env['TRACK_DEBUG'] if 'TRACK_DEBUG' in env else False
+        self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.cache_profiles = env['CACHE_PROFILE'] if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks = (env['SYNC_PROFILE_TRACKS'].lower() == 'yes') if 'SYNC_PROFILE_TRACKS' in env else False
         self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
@@ -27,7 +27,7 @@ class TracardiConfig:
 
 class MemoryCacheConfig:
     def __init__(self, env):
-        self.source_ttl = env['SOURCE_TTL'] if 'SOURCE_TTL' in env else 60
+        self.source_ttl = int(env['SOURCE_TTL']) if 'SOURCE_TTL' in env else 60
 
 
 class ElasticConfig:
@@ -60,7 +60,7 @@ class ElasticConfig:
             'ELASTIC_SQL_TRANSLATE_URL'] if 'ELASTIC_SQL_TRANSLATE_URL' in env else "/_sql/translate"
         self.sql_translate_method = env[
             'ELASTIC_SQL_TRANSLATE_METHOD'] if 'ELASTIC_SQL_TRANSLATE_METHOD' in env else "POST"
-        self.refresh_profiles_after_save = env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'] \
+        self.refresh_profiles_after_save = (env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'].lower() == 'yes') \
             if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
         self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env \
             else logging.WARNING
