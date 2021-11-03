@@ -214,25 +214,29 @@ class PersistenceService:
         try:
             return await self.storage.load(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         try:
             return StorageResult(await self.storage.load_by(field, value, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def load_by_values(self, field_value_pairs: List[tuple], limit=1000) -> StorageResult:
         try:
             return StorageResult(await self.storage.load_by_values(field_value_pairs, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def delete_by(self, field: str, value: str) -> dict:
         try:
             return await self.storage.delete_by(field, value)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def load_all(self, start: int = 0, limit: int = 100) -> StorageResult:
         try:
@@ -246,7 +250,8 @@ class PersistenceService:
             result = await self.storage.search(query)
             return StorageResult(result)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def upsert(self, data, replace_id: bool = True) -> BulkInsertResult:
         try:
@@ -265,13 +270,15 @@ class PersistenceService:
             return await self.storage.create(payload)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def delete(self, id: str) -> dict:
         try:
             return await self.storage.delete(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def filter(self, query: dict) -> StorageResult:
         try:
@@ -280,7 +287,8 @@ class PersistenceService:
             _logger.warning("No result found for query {}".format(query))
             return StorageResult()
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def aggregate(self, query: dict) -> StorageAggregateResult:
         try:
@@ -289,25 +297,29 @@ class PersistenceService:
             _logger.warning("No result found for query {}".format(query))
             return StorageAggregateResult()
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def query(self, query):
         try:
             return await self.storage.search(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def refresh(self, params=None, headers=None):
         try:
             return await self.storage.refresh(params, headers)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def flush(self, params=None, headers=None):
         try:
             return await self.storage.flush(params, headers)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            raise StorageException(str(e))
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
 
     async def query_by_sql(self, query: str, start: int = 0, limit: int = 0):
         engine = SqlSearchQueryEngine(self)

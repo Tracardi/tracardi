@@ -1,15 +1,38 @@
+import json
+from json import JSONDecodeError
+from typing import Dict, Union
+
+from pydantic import BaseModel, validator
+from tracardi_dot_notation.dict_traverser import DictTraverser
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
 
+class Configuration(BaseModel):
+    value: Union[str, Dict] = ""
+
+    @validator("value")
+    def validate_content(cls, value):
+        try:
+            # Try parsing JSON
+            return json.loads(value)
+        except JSONDecodeError as e:
+            raise ValueError(str(e))
+
+
+def validate(config: dict) -> Configuration:
+    return Configuration(**config)
+
+
 class InjectAction(ActionRunner):
 
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, **kwargs):
+        self.config = validate(kwargs)
 
     async def run(self, payload):
-        return Result(value=self.value, port="payload")
+        converter = DictTraverser(self._get_dot_accessor(payload))
+        return Result(value=converter.reshape(self.config.value), port="payload")
 
 
 def register() -> Plugin:
@@ -21,9 +44,10 @@ def register() -> Plugin:
             className='InjectAction',
             inputs=[],
             outputs=["payload"],
-            init={"value": {}},
+            init={"value": ""},
             form=Form(groups=[
                 FormGroup(
+                    name="Create payload object",
                     fields=[
                         FormField(
                             id="value",

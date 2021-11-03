@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi',
-    version='0.6.18',
+    version='0.6.20',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -30,9 +30,9 @@ setup(
         'pytz',
         'device_detector==0.10',
         'deepdiff>=5.5.0',
-        'tracardi-plugin-sdk>=0.6.21',
+        'tracardi-plugin-sdk>=0.6.24',
         'tracardi_graph_runner>=0.6.5',
-        'tracardi-dot-notation>=0.6.4',
+        'tracardi-dot-notation>=0.6.5',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

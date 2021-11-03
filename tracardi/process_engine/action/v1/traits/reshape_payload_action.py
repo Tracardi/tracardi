@@ -1,17 +1,37 @@
+import json
+from json import JSONDecodeError
+from typing import Dict, Union
+
+from pydantic import BaseModel, validator
 from tracardi_dot_notation.dict_traverser import DictTraverser
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
+class Configuration(BaseModel):
+    value: Union[str, Dict] = ""
+
+    @validator("value")
+    def validate_content(cls, value):
+        try:
+            # Try parsing JSON
+            return json.loads(value)
+        except JSONDecodeError as e:
+            raise ValueError(str(e))
+
+
+def validate(config: dict) -> Configuration:
+    return Configuration(**config)
+
+
 class ReshapePayloadAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        self.mapping_template = kwargs
+        self.config = validate(kwargs)
 
     async def run(self, payload):
-
         if not isinstance(payload, dict):
             self.console.warning("Payload is not dict that is why you will not be able to read it. ")
 
@@ -22,8 +42,8 @@ class ReshapePayloadAction(ActionRunner):
             self.event,
             self.flow)
 
-        traverser = DictTraverser(source)
-        result = traverser.reshape(reshape_template=self.mapping_template)
+        template = DictTraverser(source)
+        result = template.reshape(reshape_template=self.config.value)
 
         return Result(port="payload", value=result)
 
@@ -36,9 +56,23 @@ def register() -> Plugin:
             className='ReshapePayloadAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={},
+            init={"value": ""},
+            form=Form(groups=[
+                FormGroup(
+                    name="Create payload object",
+                    fields=[
+                        FormField(
+                            id="value",
+                            name="Object to inject",
+                            description="Provide object as JSON to be injected into payload and returned "
+                                        "on output port.",
+                            component=FormComponent(type="json", props={"label": "object"})
+                        )
+                    ]
+                ),
+            ]),
             manual="reshape_payload_action",
-            version='0.1',
+            version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski"
         ),
@@ -52,4 +86,3 @@ def register() -> Plugin:
             group=["Data processing"]
         )
     )
-

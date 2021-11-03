@@ -18,7 +18,7 @@ from ..process_engine.tql.condition import Condition
 
 class Profile(Entity):
     mergedWith: Optional[str] = None
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = Metadata(time=Time())
     operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()

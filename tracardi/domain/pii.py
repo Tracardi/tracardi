@@ -16,5 +16,8 @@ class PII(BaseModel):
     birthDate: Optional[Any] = None
     email: Optional[Any] = None
     telephone: Optional[Any] = None
+    twitter: Optional[Any] = None
+    facebook: Optional[Any] = None
+    whatsapp: Optional[Any] = None
     other: Optional[dict] = {}
 

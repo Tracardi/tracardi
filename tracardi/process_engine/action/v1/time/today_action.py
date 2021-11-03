@@ -3,7 +3,6 @@ from datetime import datetime
 
 import pytz
 from pydantic import BaseModel, validator
-from tracardi_dot_notation.dot_accessor import DotAccessor
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
@@ -40,30 +39,48 @@ class TodayAction(ActionRunner):
         self.week_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
     async def run(self, payload):
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
-
+        dot = self._get_dot_accessor(payload)
         if self.config.timezone is not None:
             time_zone = dot[self.config.timezone]
             time_zone = pytz.timezone(time_zone)
-            today = datetime.now(time_zone).today()
+            local_time = datetime.now(time_zone)
+            server_time = local_time.today()
         else:
-            today = datetime.today()
+            local_time = datetime.today()
+            server_time = datetime.today()
 
         return Result(port="payload", value={
-            'utcTime': today.utcnow(),
-            "dayOfWeek": self.week_days[today.weekday()],
-            "day": today.day,
-            "month": today.month,
-            "year": today.year,
-            "week": today.isoweekday(),
-            "hour": today.hour,
-            "minute": today.minute,
-            "second": today.second,
-            "ms": today.microsecond,
-            "time": today.time(),
-            "timestamp": today.timestamp(),
-            "fold": today.fold,
-            "iso": today.isoformat()
+            'utcTime': server_time.utcnow(),
+            "timestamp": server_time.timestamp(),
+            "server": {
+                "dayOfWeek": self.week_days[server_time.weekday()],
+                "day": server_time.day,
+                "month": server_time.month,
+                "year": server_time.year,
+                "week": server_time.isoweekday(),
+                "hour": server_time.hour,
+                "minute": server_time.minute,
+                "second": server_time.second,
+                "ms": server_time.microsecond,
+                "time": server_time.time(),
+                "fold": server_time.fold,
+                "iso": server_time.isoformat()
+            },
+            "local": {
+                "dayOfWeek": self.week_days[local_time.weekday()],
+                "day": local_time.day,
+                "month": local_time.month,
+                "year": local_time.year,
+                "week": local_time.isoweekday(),
+                "hour": local_time.hour,
+                "minute": local_time.minute,
+                "second": local_time.second,
+                "ms": local_time.microsecond,
+                "time": local_time.time(),
+                "fold": local_time.fold,
+                "iso": local_time.isoformat()
+            }
+
         })
 
 
@@ -79,6 +96,7 @@ def register() -> Plugin:
             license="MIT",
             author="Risto Kowaczewski",
             init={"timezone": "session@context.time.tz"},
+            manual="today_action",
             form=Form(groups=[
                 FormGroup(
                     fields=[

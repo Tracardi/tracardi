@@ -91,7 +91,7 @@ class TrackerPayload(BaseModel):
                 # Load profile based on profile id saved in session
                 profile = await load_merged_profile(id=session.profile.id)  # type: Profile
 
-                if session.profile.id != profile.id:
+                if isinstance(profile, Profile) and session.profile.id != profile.id:
                     # Profile in session id has been merged. Change profile in session.
 
                     session.profile.id = profile.id
