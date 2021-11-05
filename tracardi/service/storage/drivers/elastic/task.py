@@ -37,3 +37,6 @@ async def save_tasks(tasks):
 
 async def load_all(start: int = 0, limit: int = 100):
     return await storage_manager('task').load_all(start, limit)
+
+async def create(data: list):
+    return await storage_manager('task').upsert(data=data, replace_id=True)
