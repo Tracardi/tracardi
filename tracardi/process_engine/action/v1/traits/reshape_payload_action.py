@@ -1,13 +1,11 @@
 import json
 from json import JSONDecodeError
 from typing import Dict, Union
-
 from pydantic import BaseModel, validator
 from tracardi_dot_notation.dict_traverser import DictTraverser
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
-from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
 class Configuration(BaseModel):
@@ -35,14 +33,9 @@ class ReshapePayloadAction(ActionRunner):
         if not isinstance(payload, dict):
             self.console.warning("Payload is not dict that is why you will not be able to read it. ")
 
-        source = DotAccessor(
-            self.profile,
-            self.session,
-            payload,
-            self.event,
-            self.flow)
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
-        template = DictTraverser(source)
+        template = DictTraverser(dot)
         result = template.reshape(reshape_template=self.config.value)
 
         return Result(port="payload", value=result)

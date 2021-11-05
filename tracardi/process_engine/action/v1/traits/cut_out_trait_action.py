@@ -3,8 +3,6 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, Fo
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
-from tracardi_dot_notation.dot_accessor import DotAccessor
-
 
 class CutOutTraitAction(ActionRunner):
 
@@ -19,13 +17,7 @@ class CutOutTraitAction(ActionRunner):
 
     async def run(self, payload: dict):
 
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
-
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
         return Result(port="trait", value=dot[self.property])
 
 

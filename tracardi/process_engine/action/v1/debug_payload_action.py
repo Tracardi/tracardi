@@ -55,10 +55,10 @@ class DebugPayloadAction(ActionRunner):
 
             event_data = list(result)[0]
 
-            self.event = Event(**event_data)
+            event = Event(**event_data)
 
-            profile_entity = Entity(id=self.event.profile.id)
-            session_entity = Entity(id=self.event.session.id)
+            profile_entity = Entity(id=event.profile.id)
+            session_entity = Entity(id=event.session.id)
             profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
             session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
 
@@ -68,15 +68,16 @@ class DebugPayloadAction(ActionRunner):
             if session is None:
                 raise ValueError(
                     "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
-                        self.event.id, self.event.session.id))
+                        event.id, event.session.id))
 
             if profile is None:
                 raise ValueError(
                     "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
-                        self.event.id, self.event.profile.id))
+                        event.id, event.profile.id))
 
             self.profile.replace(profile)
             self.session.replace(session)
+            self.event.replace(event)
 
             return Result(port="event", value=self.event.dict())
 

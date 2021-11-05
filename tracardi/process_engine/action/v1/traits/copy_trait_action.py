@@ -8,7 +8,6 @@ from deepdiff import DeepDiff
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi_dot_notation.dot_accessor import DotAccessor
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 
@@ -27,13 +26,8 @@ class CopyTraitAction(ActionRunner):
         self.mapping = kwargs['copy']
 
     async def run(self, payload: dict):
-
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
+        print(self.event)
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         for destination, value in self.mapping.items():
             dot[destination] = value
