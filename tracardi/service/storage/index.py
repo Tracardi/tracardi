@@ -54,7 +54,9 @@ class Resource:
                                   mapping="mappings/api-instance-index.json", rel=None),
             "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None),
             "profile-purchase": Index(multi_index=False, index="tracardi-profile-purchase",
-                                      mapping="mappings/profile-purchase-index.json", rel=None)
+                                      mapping="mappings/profile-purchase-index.json", rel=None),
+            "event-tags": Index(multi_index=False, index="tracardi-event-tags", mapping="mappings/tag-index.json",
+                                rel=None)
         }
 
     def __getitem__(self, item):
