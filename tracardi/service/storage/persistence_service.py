@@ -290,9 +290,9 @@ class PersistenceService:
             message, details = e.args
             raise StorageException(str(e), message=message, details=details)
 
-    async def aggregate(self, query: dict) -> StorageAggregateResult:
+    async def aggregate(self, query: dict, aggregate_key='key') -> StorageAggregateResult:
         try:
-            return StorageAggregateResult(await self.storage.search(query))
+            return StorageAggregateResult(await self.storage.search(query), aggregate_key)
         except elasticsearch.exceptions.NotFoundError:
             _logger.warning("No result found for query {}".format(query))
             return StorageAggregateResult()
