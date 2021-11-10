@@ -6,6 +6,11 @@ from tracardi.service.storage.factory import StorageFor, storage_manager
 from tracardi.service.storage.profile_cacher import ProfileCache
 
 
+async def load_by_id(id: str) -> Profile:
+    profile = Profile(id=id)
+    return await StorageFor(profile).index().load()
+
+
 async def load_merged_profile(id: str) -> Profile:
     """
     Loads current profile. If profile was merged then it loads merged profile.
@@ -26,7 +31,7 @@ async def load_merged_profile(id: str) -> Profile:
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:
-    profiles = await storage_manager('profile').load_by_values(merge_key_values, limit)
+    profiles = await storage_manager('profile').load_by_values(merge_key_values, limit=limit)
     return [Profile(**profile) for profile in profiles]
 
 

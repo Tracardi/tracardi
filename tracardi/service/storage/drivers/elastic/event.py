@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import StorageFor, storage_manager
-from typing import Union, List
+from typing import Union, List, Optional
 
 from tracardi.domain.event import Event
 
@@ -109,6 +110,15 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
 
 async def load_event_by_type(event_type):
     return await StorageFor.crud('event', class_type=Event).load_by('type', event_type, limit=1)
+
+
+async def load_event_by_profile(profile_id: str, limit: int = 20) -> List[Event]:
+    return await StorageFor.crud('event', class_type=Event).load_by('profile.id', profile_id, limit=limit)
+
+
+async def load_event_by_values(key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
+                               limit: int = 20) -> List[Event]:
+    return await StorageFor.crud('event', class_type=Event).load_by_values(key_value_pairs, sort_by, limit=limit)
 
 
 async def aggregate_profile_events_by_type(profile_id: str) -> StorageAggregateResult:
