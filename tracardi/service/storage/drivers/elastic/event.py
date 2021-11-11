@@ -234,5 +234,5 @@ async def update_field(event_type: str, field: str, value: Any):
             }
         }
     }
-    result = await storage_manager(index="event").query_update(query=query)
+    result = await storage_manager(index="event").update_by_query(query=query)
     return result
