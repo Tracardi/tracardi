@@ -222,7 +222,7 @@ async def load_events_heatmap(profile_id: str):
     return list(convert_data(raw_result))
 
 
-async def update_fields(event_type: str, field: str, value: Any):
+async def update_field(event_type: str, field: str, value: Any):
     query = {
         "script": {
             "source": f"ctx._source.{field} = {value};",
