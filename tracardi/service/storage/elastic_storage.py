@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import elasticsearch
 
@@ -7,6 +7,30 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage import index
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import Index
+
+
+class ElasticFiledSort:
+    def __init__(self, field: str, order: str = None, format: str = None):
+        self.format = format
+        self.order = order
+        self.field = field
+
+    def to_query(self):
+        if self.field is not None and self.order is None and self.format is None:
+            return self.field
+        elif self.field is not None and self.order is not None:
+            output = {
+                self.field: {
+                    "order": self.order
+                }
+            }
+
+            if self.format is not None:
+                output[self.field]['format'] = self.format
+
+            return output
+        else:
+            raise ValueError("Invalid ElasticFiledSort.")
 
 
 class ElasticStorage:
@@ -80,7 +104,8 @@ class ElasticStorage:
         }
         return await self.storage.delete_by_query(self.index.get_read_index(), query)
 
-    async def load_by_values(self, fields_and_values: List[tuple], limit=1000):
+    async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
+                             limit=1000):
 
         terms = []
         for field, value in fields_and_values:
@@ -99,7 +124,16 @@ class ElasticStorage:
             }
         }
 
-        return await self.search(query)
+        if sort_by:
+            sort_by_query = []
+            for field in sort_by:
+                if isinstance(field, ElasticFiledSort):
+                    sort_by_query.append(field.to_query())
+            if sort_by_query:
+                query['sort'] = sort_by_query
+
+        result = await self.search(query)
+        return result
 
     async def flush(self, params, headers):
         return await self.storage.flush(self.index.get_write_index(), params, headers)

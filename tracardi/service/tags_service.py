@@ -8,10 +8,16 @@ from tracardi.domain.event_tag import EventTag
 def tags_service(event: Event):
     key = "tags-type-{}".format(event.type)
     if key not in memory_cache:
-        result = list(await storage.driver.tag.get_by_type(event.type)).pop()
+
+        records = list(await storage.driver.tag.get_by_type(event.type))
+        if len(records) > 1:
+            raise ValueError("There is more then 1 record in tags index for event type {}. ".format(event.type))
+
+        result = records.pop()  # There is only one record
         memory_cache[key] = CacheItem(
             data=EventTag(**result).tags,
             ttl=memory_cache.tags_ttl
         )
+
     event.tags = list(set(event.tags + memory_cache[key].data))
     return event
