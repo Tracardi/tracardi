@@ -1,6 +1,6 @@
 import elasticsearch
-from typing import Union
-from tracardi.service.storage.elastic_storage import ElasticStorage
+from typing import Union, List, Optional
+from tracardi.service.storage.elastic_storage import ElasticStorage, ElasticFiledSort
 from tracardi.service.storage.persistence_service import PersistenceService
 from tracardi.domain.entity import Entity
 from pydantic import BaseModel
@@ -43,6 +43,10 @@ class EntityStorageCrud(BaseStorageCrud):
     async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         service = self._get_storage_service()
         return await service.load_by(field, value, limit)
+
+    async def load_by_values(self, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None, limit: int = 100):
+        service = self._get_storage_service()
+        return await service.load_by_values(key_value_pairs, sort_by, limit=limit)
 
     async def delete_by(self, field, value) -> dict:
         service = self._get_storage_service()

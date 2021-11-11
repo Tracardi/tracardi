@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import StorageFor, storage_manager
-from typing import Union, List
+from typing import Union, List, Optional
 
 from tracardi.domain.event import Event
 
@@ -67,11 +68,12 @@ async def heatmap_by_event_type(event_type=None):
     return result['aggregations']["items_over_time"]['buckets']
 
 
-async def heatmap_by_profile(profile_id=None):
+async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> StorageAggregateResult:
+
     query = {
         "size": 0,
         "aggs": {
-            "items_over_time": {
+            bucket_name: {
                 "date_histogram": {
                     "min_doc_count": 1,
                     "field": "metadata.time.insert",
@@ -88,8 +90,7 @@ async def heatmap_by_profile(profile_id=None):
     if profile_id is not None:
         query["query"] = {"term": {"profile.id": profile_id}}
 
-    result = await storage_manager(index="event").query(query)
-    return result['aggregations']["items_over_time"]['buckets']
+    return await storage_manager(index="event").aggregate(query, aggregate_key='key_as_string')
 
 
 async def save_events(events: List[Event], persist_events: bool = True) -> Union[SaveResult, BulkInsertResult]:
@@ -111,7 +112,29 @@ async def load_event_by_type(event_type):
     return await StorageFor.crud('event', class_type=Event).load_by('type', event_type, limit=1)
 
 
-async def aggregate_profile_events_by_type(profile_id: str) -> StorageAggregateResult:
+async def load_event_by_profile(profile_id: str, limit: int = 20) -> List[Event]:
+    return await StorageFor.crud('event', class_type=Event).load_by('profile.id', profile_id, limit=limit)
+
+
+async def load_event_by_values(key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
+                               limit: int = 20) -> List[Event]:
+    return await StorageFor.crud('event', class_type=Event).load_by_values(key_value_pairs, sort_by, limit=limit)
+
+
+async def aggregate_profile_events_by_type(profile_id: str, bucket_name) -> StorageAggregateResult:
+    aggregate_query = {
+        bucket_name: {
+            "terms": {
+                "field": "type",
+                "size": 15,
+            }
+        }
+    }
+
+    return await aggregate_profile_events(profile_id, aggregate_query)
+
+
+async def aggregate_profile_events(profile_id: str, aggregate_query: dict) -> StorageAggregateResult:
     query = {
         "size": 0,
         "query": {
@@ -125,14 +148,7 @@ async def aggregate_profile_events_by_type(profile_id: str) -> StorageAggregateR
                 ]
             }
         },
-        "aggs": {
-            "by_type": {
-                "terms": {
-                    "field": "type",
-                    "size": 15,
-                }
-            }
-        }
+        "aggs": aggregate_query
     }
     return await storage_manager(index="event").aggregate(query)
 

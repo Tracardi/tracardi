@@ -1,9 +1,9 @@
 from collections import defaultdict
+from typing import Callable, Tuple, Any
 
 
 class StorageAggregateResult:
-    def __init__(self, result=None):
-        print(result)
+    def __init__(self, result=None, aggregate_key='key'):
         if result is None:
             self.total = 0
             self.aggregations = []
@@ -11,7 +11,7 @@ class StorageAggregateResult:
         else:
             aggrs = defaultdict(list)
             for bucket, data in result['aggregations'].items():
-                records = {record['key']: record['doc_count'] for record in data['buckets']}
+                records = {record[aggregate_key]: record['doc_count'] for record in data['buckets']}
                 if 'sum_other_doc_count' in data:
                     records['other'] = data['sum_other_doc_count']
                 aggrs[bucket].append(records)
@@ -25,3 +25,16 @@ class StorageAggregateResult:
 
     def __len__(self):
         return self.no_of_aggregates
+
+    def process(self, function: Callable, bucket_name=None):
+        for bucket, items in self.iterate(bucket_name):
+            yield bucket, function(items)
+
+    def iterate(self, bucket_name=None) -> Tuple[str, Any]:
+        if bucket_name is not None and bucket_name in self.aggregations:
+            for item in self.aggregations[bucket_name]:
+                yield bucket_name, item
+        else:
+            for bucket in self.aggregations:
+                for item in bucket:
+                    yield bucket, item
