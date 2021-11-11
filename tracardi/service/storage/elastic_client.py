@@ -177,6 +177,10 @@ class ElasticClient:
         logger.debug(f"FLUSH INDEX: {index}")
         return await self._client.indices.flush(index=index, params=params, headers=headers)
 
+    async def query_update(self, index, query):
+        logger.debug(f"UPDATED BY QUERY INDEX: {index}")
+        return await self._client.update_by_query(index=index, body=query, refresh=True)
+
     @staticmethod
     def _get_elastic_config():
 

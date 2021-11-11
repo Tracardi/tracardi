@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import StorageFor, storage_manager
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Any
 
 from tracardi.domain.event import Event
 
@@ -220,3 +220,19 @@ async def load_events_heatmap(profile_id: str):
                         yield record
 
     return list(convert_data(raw_result))
+
+
+async def update_fields(event_type: str, field: str, value: Any):
+    query = {
+        "script": {
+            "source": f"ctx._source.{field} = {value};",
+            "lang": "painless"
+        },
+        "query": {
+            "match": {
+                "type": event_type
+            }
+        }
+    }
+    result = await storage_manager(index="event").query_update(query=query)
+    return result

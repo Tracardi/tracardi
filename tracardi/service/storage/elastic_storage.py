@@ -137,3 +137,6 @@ class ElasticStorage:
 
     async def flush(self, params, headers):
         return await self.storage.flush(self.index.get_write_index(), params, headers)
+
+    async def query_update(self, query):
+        return await self.storage.query_update(index=self.index.get_write_index(), query=query)
