@@ -28,6 +28,7 @@ class TracardiConfig:
 class MemoryCacheConfig:
     def __init__(self, env):
         self.source_ttl = int(env['SOURCE_TTL']) if 'SOURCE_TTL' in env else 60
+        self.tags_ttl = int(env['TAGS_TTL']) if 'TAGS_TTL' in env else 60
 
 
 class ElasticConfig:

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, List
 from uuid import uuid4
 from .context import Context
 from .entity import Entity
@@ -18,6 +18,7 @@ class Event(Entity):
     session: Session
     profile: Profile = None
     context: Context
+    tags: List[str] = []
 
     def __init__(self, **data: Any):
         if 'metadata' in data and isinstance(data['metadata'], Metadata):
