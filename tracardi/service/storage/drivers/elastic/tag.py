@@ -9,18 +9,19 @@ async def get_by_type(event_type):
 
 async def add(event_type: str, tags: List[str]):
     search_result = await get_by_type(event_type=event_type)
+    storage = storage_manager("event-tags")
     if search_result.total == 1:
         record = list(search_result).pop()
         tag = EventTag(**record)
         tag.tags.extend(tags)
         tag.tags = list(set(tag.tags))
-        return await storage_manager("event-tags").upsert({
+        return await storage.upsert({
             "_id": event_type,
             "type": event_type,
             "tags": tag.tags
         })
     else:
-        return await storage_manager("event-tags").upsert({
+        return await storage.upsert({
             "_id": event_type,
             "type": event_type,
             "tags": tags
@@ -34,14 +35,15 @@ async def remove(event_type: str, tags: List[str]):
         tag = EventTag(**record)
         old_tags_number = len(tag.tags)
         tag.tags = list(set(tag.tags).difference(set(tags)))
+        storage = storage_manager("event-tags")
         if tag.tags:
-            result = await storage_manager("event-tags").upsert({
+            result = await storage.upsert({
                 "_id": event_type,
                 "type": event_type,
                 "tags": tag.tags
             })
         else:
-            result = await storage_manager("event-tags").delete(event_type)
+            result = await storage.delete(event_type)
         return len(tag.tags), old_tags_number - len(tag.tags), result
     else:
         raise ValueError("There is no document with 'type' field equal to '{}'.".format(event_type))

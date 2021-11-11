@@ -31,12 +31,7 @@ class IncrementAction(ActionRunner):
 
     async def run(self, payload):
 
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         try:
 
