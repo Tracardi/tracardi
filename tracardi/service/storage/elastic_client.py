@@ -1,70 +1,15 @@
 import logging
 from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
-from elasticsearch._async.client.sql import SqlClient
-from elasticsearch._async.client.utils import SKIP_IN_PATH, query_params
 from elasticsearch.exceptions import NotFoundError
-
 from ssl import create_default_context
-
 from tracardi.config import elastic
-
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 _singleton = None
 logger = logging.getLogger(__name__)
 logger.setLevel(elastic.logging_level)
-
-
-# class AwsCompatibleSqlClient(SqlClient):
-#
-#     @query_params()
-#     async def clear_cursor(self, body, params=None, headers=None):
-#         """
-#         Clears the SQL cursor
-#
-#         `<https://www.elastic.co/guide/en/elasticsearch/reference/7.12/sql-pagination.html>`_
-#
-#         :arg body: Specify the cursor value in the `cursor` element to
-#             clean the cursor.
-#         """
-#         if body in SKIP_IN_PATH:
-#             raise ValueError("Empty value passed for a required argument 'body'.")
-#
-#         return await self.transport.perform_request(
-#             "POST", "/_sql/close", params=params, headers=headers, body=body
-#         )
-#
-#     @query_params("format")
-#     async def query(self, body, params=None, headers=None):
-#         """
-#         Executes a SQL request
-#
-#         `<https://www.elastic.co/guide/en/elasticsearch/reference/7.12/sql-rest-overview.html>`_
-#
-#         :arg body: Use the `query` element to start a query. Use the
-#             `cursor` element to continue a query.
-#         :arg format: a short version of the Accept header, e.g. json,
-#             yaml
-#         """
-#         if body in SKIP_IN_PATH:
-#             raise ValueError("Empty value passed for a required argument 'body'.")
-#
-#         return await self.transport.perform_request(
-#             "POST", "/_sql", params=params, headers=headers, body=body
-#         )
-#
-#     @query_params()
-#     async def translate(self, body, params=None, headers=None):
-#
-#         if body in SKIP_IN_PATH:
-#             raise ValueError("Empty value passed for a required argument 'body'.")
-#
-#         return await self.transport.perform_request(
-#             config.elastic.sql_translate_method, config.elastic.sql_translate_url, params=params, headers=headers,
-#             body=body
-#         )
 
 
 class ElasticClient:
@@ -177,9 +122,9 @@ class ElasticClient:
         logger.debug(f"FLUSH INDEX: {index}")
         return await self._client.indices.flush(index=index, params=params, headers=headers)
 
-    async def query_update(self, index, query):
-        logger.debug(f"UPDATED BY QUERY INDEX: {index}")
-        return await self._client.update_by_query(index=index, body=query, refresh=True)
+    async def update_by_query(self, index, query):
+        logger.debug(f"UPDATED BY QUERY on INDEX: {index}")
+        return await self._client.update_by_query(index=index, body=query)
 
     @staticmethod
     def _get_elastic_config():
