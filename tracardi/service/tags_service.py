@@ -6,11 +6,12 @@ from tracardi.domain.event_tag import EventTag
 
 
 def tags_service(event: Event):
-    if "tags-type-{}".format(event.type) not in memory_cache:
+    key = "tags-type-{}".format(event.type)
+    if key not in memory_cache:
         result = list(await storage.driver.tag.get_by_type(event.type)).pop()
-        memory_cache["tags-type-{}".format(event.type)] = CacheItem(
+        memory_cache[key] = CacheItem(
             data=EventTag(**result).tags,
             ttl=memory_cache.tags_ttl
         )
-    event.tags = memory_cache["tags-type-{}".format(event.type)].data
+    event.tags = list(set(event.tags + memory_cache[key].data))
     return event
