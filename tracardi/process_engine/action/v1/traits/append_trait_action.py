@@ -100,10 +100,10 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Append Trait',
-            desc='Appends trait if it a value already exists or sets trait if it does not.',
+            name='Append/Remove Trait',
+            desc='Appends/Removes trait to/from existing profile trait.',
             type='flowNode',
-            width=100,
+            width=200,
             height=100,
             icon='append',
             group=["Data processing"]
