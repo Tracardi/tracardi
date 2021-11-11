@@ -333,3 +333,10 @@ class PersistenceService:
         engine = SqlSearchQueryEngine(self)
         return await engine.histogram(query)
 
+    async def query_update(self, query: dict):
+        try:
+            return await self.storage.query_update(query=query)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
+
