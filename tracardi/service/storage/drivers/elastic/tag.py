@@ -51,3 +51,7 @@ async def remove(event_type: str, tags: List[str]):
 
 async def load_tags(limit: int = 100):
     return await storage_manager("event-tags").load_all(start=0, limit=limit)
+
+
+async def delete(event_type: str):
+    return await storage_manager("event-tags").delete(event_type)
