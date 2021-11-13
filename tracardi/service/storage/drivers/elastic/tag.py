@@ -1,6 +1,34 @@
+import logging
+from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
+from tracardi.config import memory_cache as memory_cache_config, tracardi
 from tracardi.service.storage.factory import storage_manager
 from typing import List
 from tracardi.domain.event_tag import EventTag
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+memory_cache = MemoryCache()
+
+
+async def get_tags(event_type) -> list:
+    key = "tags-type-{}".format(event_type)
+    if key not in memory_cache:
+        logger.info("Refreshing memory cache for {}".format(key))
+        records = list(await get_by_type(event_type))
+        if len(records) > 1:
+            raise ValueError("There is more then 1 record in tags index for event type {}. ".format(event_type))
+        if records and len(records) > 0:
+            result = records.pop()  # There is only one record
+            cache_data = EventTag(**result).tags
+        else:
+            cache_data = []
+        logger.info("Refreshed value for {} is {}".format(key, cache_data))
+        memory_cache[key] = CacheItem(
+            data=cache_data,
+            ttl=memory_cache_config.tags_ttl
+        )
+
+    return memory_cache[key].data
 
 
 async def get_by_type(event_type):
