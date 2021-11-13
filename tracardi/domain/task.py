@@ -4,7 +4,6 @@ from tracardi.domain.payload.event_payload import EventPayload
 
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 
-from tracardi.domain.context import Context
 from tracardi.domain.metadata import Metadata
 from tracardi.domain.value_object.storage_info import StorageInfo
 
@@ -19,7 +18,7 @@ class TaskEvent(Entity):
     source: Entity
     session: Entity
     profile: Entity
-    context: Context
+    context: Optional[dict] = {}
     options: Optional[dict] = {}
 
     def to_tracker_payload(self) -> TrackerPayload:
