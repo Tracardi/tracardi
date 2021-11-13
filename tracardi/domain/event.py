@@ -7,6 +7,12 @@ from .metadata import Metadata
 from .profile import Profile
 from .session import Session
 from .time import Time
+from pydantic import BaseModel
+
+
+class Tags(BaseModel):
+    content: List[str] = []
+    count: int = 0
 
 
 class Event(Entity):
@@ -18,7 +24,7 @@ class Event(Entity):
     session: Session
     profile: Profile = None
     context: Context
-    tags: List[str] = []
+    tags: Tags = Tags(content=[], count=0)
 
     def __init__(self, **data: Any):
         if 'metadata' in data and isinstance(data['metadata'], Metadata):
