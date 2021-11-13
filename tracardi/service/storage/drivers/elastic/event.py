@@ -222,15 +222,23 @@ async def load_events_heatmap(profile_id: str):
     return list(convert_data(raw_result))
 
 
-async def update_field(event_type: str, field: str, value: Any):
+async def update_tags(event_type: str, tags: List[str]):
     query = {
         "script": {
-            "source": f"ctx._source.{field} = {value};",
+            "source": f"ctx._source.tags.content = {tags}; ctx._source.tags.count = {len(tags)}",
             "lang": "painless"
         },
         "query": {
-            "match": {
-                "type": event_type
+            "bool": {
+                "must": {"match": {"type": event_type}},
+                "must_not": {
+                    "bool": {
+                        "must": [
+                            *[{"term": {"tags.content": tag}} for tag in tags],
+                            {"term": {"tags.count": len(tags)}}
+                        ]
+                    }
+                }
             }
         }
     }
