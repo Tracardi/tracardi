@@ -100,7 +100,8 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
         for event in events:
             if event.is_persistent():
                 try:
-                    event.tags.values = (tag.lower() for tag in set(event.tags.values + tuple(await get_tags(event.type))))
+                    event.tags.values = (tag.lower() for tag in
+                                         set(event.tags.values + tuple(await get_tags(event.type))))
                 except ValueError as e:
                     logger.error(str(e))
                 finally:
@@ -256,8 +257,9 @@ async def update_tags(event_type: str, tags: List[str]):
     }
     return await storage_manager(index="event").update_by_query(query=query)
 
- 
-async def aggregate_timespan_events(time_from: str, time_to: str, aggregate_query: dict) -> StorageAggregateResult:
+
+async def aggregate_timespan_events(time_from: datetime, time_to: datetime,
+                                    aggregate_query: dict) -> StorageAggregateResult:
     query = {
         "size": 0,
         "query": {
@@ -275,4 +277,3 @@ async def aggregate_timespan_events(time_from: str, time_to: str, aggregate_quer
         "aggs": aggregate_query
     }
     return await storage_manager(index="event").aggregate(query)
-
