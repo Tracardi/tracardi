@@ -236,7 +236,7 @@ async def load_events_heatmap(profile_id: str):
 async def update_tags(event_type: str, tags: List[str]):
     query = {
         "script": {
-            "source": f"ctx._source.tags.content = {tags}; ctx._source.tags.count = {len(tags)}",
+            "source": f"ctx._source.tags.values = {tags}; ctx._source.tags.count = {len(tags)}",
             "lang": "painless"
         },
         "query": {
