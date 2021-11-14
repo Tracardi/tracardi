@@ -56,6 +56,7 @@ class Event(Entity):
         self.session = event.session
         self.profile = event.profile
         self.context = event.context
+        self.tags = event.tags
 
     def is_persistent(self) -> bool:
         if 'save' in self.context.config and isinstance(self.context.config['save'], bool):

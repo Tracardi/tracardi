@@ -234,6 +234,7 @@ async def load_events_heatmap(profile_id: str):
 
 
 async def update_tags(event_type: str, tags: List[str]):
+    tags = [tag.lower() for tag in tags]
     query = {
         "script": {
             "source": f"ctx._source.tags.values = {tags}; ctx._source.tags.count = {len(tags)}",
