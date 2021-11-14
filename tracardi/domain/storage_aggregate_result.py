@@ -11,7 +11,8 @@ class StorageAggregateResult:
         else:
             aggrs = defaultdict(list)
             for bucket, data in result['aggregations'].items():
-                records = {record[aggregate_key]: record['doc_count'] for record in data['buckets']}
+                records = {record[aggregate_key]: record['doc_count'] for record in data['buckets']} if \
+                    "buckets" in data else {"found": data["doc_count"]}
                 if 'sum_other_doc_count' in data:
                     records['other'] = data['sum_other_doc_count']
                 aggrs[bucket].append(records)
