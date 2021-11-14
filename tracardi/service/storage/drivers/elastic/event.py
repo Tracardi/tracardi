@@ -4,7 +4,7 @@ from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.service.storage.drivers.elastic.tag import get_tags
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import StorageFor, storage_manager
-from typing import Union, List, Optional, Any
+from typing import Union, List, Optional
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.storage.factory import StorageForBulk
@@ -100,7 +100,7 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
         for event in events:
             if event.is_persistent():
                 try:
-                    event.tags = [tag.lower() for tag in set(event.tags + await get_tags(event.type))]
+                    event.tags.values = (tag.lower() for tag in set(event.tags.values + tuple(await get_tags(event.type))))
                 except ValueError as e:
                     logger.error(str(e))
                 finally:
@@ -233,17 +233,24 @@ async def load_events_heatmap(profile_id: str):
     return list(convert_data(raw_result))
 
 
-async def update_field(event_type: str, field: str, value: Any):
+async def update_tags(event_type: str, tags: List[str]):
     query = {
         "script": {
-            "source": f"ctx._source.{field} = {value};",
+            "source": f"ctx._source.tags.content = {tags}; ctx._source.tags.count = {len(tags)}",
             "lang": "painless"
         },
         "query": {
-            "match": {
-                "type": event_type
+            "bool": {
+                "must": {"match": {"type": event_type}},
+                "must_not": {
+                    "bool": {
+                        "must": [
+                            *[{"term": {"tags.values": tag}} for tag in tags],
+                            {"term": {"tags.count": len(tags)}}
+                        ]
+                    }
+                }
             }
         }
     }
-    result = await storage_manager(index="event").update_by_query(query=query)
-    return result
+    return await storage_manager(index="event").update_by_query(query=query)

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any, List
+from typing import Optional, Any
 from uuid import uuid4
 from .context import Context
 from .entity import Entity
@@ -7,6 +7,21 @@ from .metadata import Metadata
 from .profile import Profile
 from .session import Session
 from .time import Time
+from pydantic import BaseModel, root_validator
+from typing import Tuple
+
+
+class Tags(BaseModel):
+    values: Tuple['str', ...] = ()
+    count: int = 0
+
+    class Config:
+        validate_assignment = True
+
+    @root_validator
+    def total_tags(cls, values):
+        values["count"] = len(values.get("values"))
+        return values
 
 
 class Event(Entity):
@@ -18,7 +33,7 @@ class Event(Entity):
     session: Session
     profile: Profile = None
     context: Context
-    tags: List[str] = []
+    tags: Tags = Tags()
 
     def __init__(self, **data: Any):
         if 'metadata' in data and isinstance(data['metadata'], Metadata):
