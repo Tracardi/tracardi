@@ -254,3 +254,24 @@ async def update_tags(event_type: str, tags: List[str]):
         }
     }
     return await storage_manager(index="event").update_by_query(query=query)
+
+ 
+async def aggregate_timespan_events(time_from: str, time_to: str, aggregate_query: dict) -> StorageAggregateResult:
+    query = {
+        "size": 0,
+        "query": {
+            "bool": {
+                "must": {
+                    "range": {
+                        "metadata.time.insert": {
+                            "gte": time_from,
+                            "lte": time_to
+                        }
+                    }
+                }
+            }
+        },
+        "aggs": aggregate_query
+    }
+    return await storage_manager(index="event").aggregate(query)
+
