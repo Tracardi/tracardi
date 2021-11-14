@@ -41,10 +41,14 @@ class DetectClientAgentAction(ActionRunner):
         self.config = validate(kwargs)
         self.config.agent = self.config.agent.strip()
 
-    @staticmethod
-    def detect_device(ua):
-        detector = DeviceDetector(ua, skip_bot_detection=False)
-        return detector.parse()
+    def detect_device(self, ua):
+        try:
+            print(ua)
+            detector = DeviceDetector(ua, skip_bot_detection=False)
+            return detector.parse()
+        except Exception as e:
+            self.console.error(str(e))
+            return {}
 
     async def run(self, payload):
 

@@ -1,20 +1,22 @@
+import logging
 from datetime import datetime, timedelta
-
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+from tracardi.service.storage.drivers.elastic.tag import get_tags
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import StorageFor, storage_manager
 from typing import Union, List, Optional, Any
-
-from tracardi.domain.event import Event
-
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.storage.factory import StorageForBulk
+from tracardi.domain.event import Event
+from tracardi.config import tracardi
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
 
 
 async def search(query):
-    storage = storage_manager("event")
-    return await storage.query({"query": query})
+    return await storage_manager("event").query({"query": query})
 
 
 async def count_events_by_type(event_type: str, time_span: int) -> int:
@@ -69,7 +71,6 @@ async def heatmap_by_event_type(event_type=None):
 
 
 async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> StorageAggregateResult:
-
     query = {
         "size": 0,
         "aggs": {
@@ -95,7 +96,17 @@ async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> 
 
 async def save_events(events: List[Event], persist_events: bool = True) -> Union[SaveResult, BulkInsertResult]:
     if persist_events:
-        events_to_save = [event for event in events if event.is_persistent()]
+        events_to_save = []
+        for event in events:
+            if event.is_persistent():
+                try:
+                    event.tags = [tag.lower() for tag in set(event.tags + await get_tags(event.type))]
+                except ValueError as e:
+                    logger.error(str(e))
+                finally:
+                    events_to_save.append(event)
+
+        # events_to_save = [event for event in events if event.is_persistent()]
         event_result = await StorageForBulk(events_to_save).index('event').save()
         event_result = SaveResult(**event_result.dict())
 
