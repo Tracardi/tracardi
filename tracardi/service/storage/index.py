@@ -59,6 +59,18 @@ class Resource:
                                 rel=None)
         }
 
+    def add_indices(self, indices: dict):
+        for name, index in indices.items():
+            if not isinstance(index, Index):
+                raise ValueError("Index must be Index object. {} given".format(type(index)))
+
+            if name in self.resources:
+                raise ValueError("Index `{}` already exist. Check the setup process and defined resources.".format(name))
+
+            self.resources[name] = index
+
+        self.resources.update(indices)
+
     def __getitem__(self, item):
         return self.resources[item]
 
