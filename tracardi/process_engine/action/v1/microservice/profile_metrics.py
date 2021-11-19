@@ -28,13 +28,13 @@ def validate(config: dict):
     return Configuration(**config)
 
 
-class ProfileStatisticsApi(ActionRunner):
+class ProfileMetricsApi(ActionRunner):
 
     @staticmethod
-    async def build(**kwargs) -> 'ProfileStatisticsApi':
+    async def build(**kwargs) -> 'ProfileMetricsApi':
         config = validate(kwargs)
         source = await storage.driver.resource.load(config.source.id)
-        plugin = ProfileStatisticsApi(config, ResourceConfiguration(**source.config))
+        plugin = ProfileMetricsApi(config, ResourceConfiguration(**source.config))
         return plugin
 
     def __init__(self, config: Configuration, source: ResourceConfiguration):
@@ -87,8 +87,8 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.microservice.profile_statistics',
-            className='ProfileStatisticsApi',
+            module='tracardi.process_engine.action.v1.microservice.profile_metrics',
+            className='ProfileMetricsApi',
             inputs=["payload"],
             outputs=['response', 'error'],
             version='0.6.0',
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     session = Session(id="1", operation=Operation(new=True))
 
     result = run_plugin(
-        ProfileStatisticsApi,
+        ProfileMetricsApi,
         init,
         payload,
         profile=Entity(id="profile-id"),
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     print(result)
 
     result = run_plugin(
-        ProfileStatisticsApi,
+        ProfileMetricsApi,
         init,
         payload,
         profile=Entity(id="profile-id"),
