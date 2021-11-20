@@ -18,7 +18,6 @@ class MicroserviceApi(metaclass=Singleton):
         print(url)
 
     async def authorize(self) -> Token:
-        print('wuth')
         async with aiohttp.ClientSession(timeout=self.timeout) as session:
             async with session.request(
                     method="POST",

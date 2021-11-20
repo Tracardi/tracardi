@@ -51,8 +51,7 @@ class ProfileMetricsApi(ActionRunner):
     async def run(self, payload):
 
         # todo run in background
-        print(self.node)
-        self.node.outputs = []
+
         response = await self._call_endpoint()
 
         result = {
@@ -124,7 +123,7 @@ def register() -> Plugin:
             ]),
         ),
         metadata=MetaData(
-            name='Profile statistics',
+            name='Profile metrics',
             desc='This plugin connects to profile statistics microservice',
             type='flowNode',
             width=250,
@@ -135,48 +134,3 @@ def register() -> Plugin:
             pro=True
         )
     )
-
-
-if __name__ == "__main__":
-    from tracardi.domain.context import Context
-    from tracardi.domain.entity import Entity
-    from tracardi.domain.event import Event, Tags
-    from tracardi.domain.value_object.operation import Operation
-    from tracardi.domain.session import Session
-    from tracardi_plugin_sdk.service.plugin_runner import run_plugin
-
-    init = {
-        "source": {
-            "id": "d74cad8c-0b17-4d1c-8d08-20c0df038284",
-            "timeout": 15
-        }
-    }
-
-    payload = {
-        "a": 1
-    }
-
-    tags = Tags(values=("tag1", "tag2"))
-    session = Session(id="1", operation=Operation(new=True))
-
-    result = run_plugin(
-        ProfileMetricsApi,
-        init,
-        payload,
-        profile=Entity(id="profile-id"),
-        session=session,
-        event=Event(id="2", type="page-view", tags=tags, source=Entity(id="3"), session=session, context=Context())
-    )
-
-    print(result)
-
-    result = run_plugin(
-        ProfileMetricsApi,
-        init,
-        payload,
-        profile=Entity(id="profile-id"),
-        session=session,
-        event=Event(id="2", type="page-view", tags=tags, source=Entity(id="3"), session=session, context=Context())
-    )
-
-    # print(result)
