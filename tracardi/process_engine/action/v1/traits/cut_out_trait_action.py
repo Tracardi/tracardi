@@ -34,11 +34,12 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Cut data to payload",
                     fields=[
                         FormField(
                             id="trait",
-                            name="Path to trait",
-                            description="Provide path to field that you would like to return as output. "
+                            name="Path to data",
+                            description="Provide path to field that you would like to return as output payload. "
                                         "E.g. event@session.context.browser.browser.userAgent",
                             component=FormComponent(type="dotPath", props={"label": "Field path"}),
                             validation=FormFieldValidation(

@@ -1,7 +1,9 @@
 import logging
 
+from pydantic import BaseModel
+
 from tracardi.config import tracardi
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from deepdiff import DeepDiff
@@ -15,24 +17,41 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 
 
+class TraitsConfiguration(BaseModel):
+    set: dict = {}
+
+
+class Configuration(BaseModel):
+    traits: TraitsConfiguration
+
+
+def validate(config: dict):
+    return Configuration(**config)
+
+
 class CopyTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'copy' not in kwargs:
-            raise ValueError("Please define copy in config section.")
-        if not isinstance(kwargs['copy'], dict):
-            raise ValueError("Please define copy as dictionary not {}.".format(type(kwargs['copy'])))
-
-        self.mapping = kwargs['copy']
+        self.config = validate(kwargs)
+        self.mapping = self.config.traits.set
 
     async def run(self, payload: dict):
-        print(self.event)
+
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         for destination, value in self.mapping.items():
             dot[destination] = value
 
         logger.debug("NEW PROFILE: {}".format(dot.profile))
+
+        if 'traits' not in dot.profile:
+            raise ValueError("Missing traits in profile.")
+
+        if 'private' not in dot.profile['traits']:
+            raise ValueError("Missing `traits.private` in profile.")
+
+        if 'public' not in dot.profile['traits']:
+            raise ValueError("Missing `traits.public` in profile.")
 
         if not isinstance(dot.profile['traits']['private'], dict):
             raise ValueError(
@@ -74,17 +93,37 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["payload"],
             init={
-                "copy": {
-                    "target1": "source1",
-                    "target2": "source2",
+                "traits": {
+                    "set": {
+                    }
                 }
             },
-            version='0.1',
+            form=Form(groups=[
+                FormGroup(
+                    name="Copy/Set profile traits",
+                    description="Define what data from event is to be copied to profile. You can also copy data the "
+                                "other way around.",
+                    fields=[
+                        FormField(
+                            id="traits",
+                            name="Define the copy/set actions",
+                            description="Provide source and target data along with action you would like to perform.",
+                            component=FormComponent(type="copyTraitsInput",
+                                                    props={"actions": {"set": "Set to"},
+                                                           "defaultAction": "set",
+                                                           "defaultSource": "event@properties",
+                                                           "defaultTarget": "profile@traits"
+                                                           })
+                        )
+                    ]
+                ),
+            ]),
+            version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Copy/Set Trait',
+            name='Set Trait',
             desc='Returns payload with copied/set traits.',
             type='flowNode',
             width=100,

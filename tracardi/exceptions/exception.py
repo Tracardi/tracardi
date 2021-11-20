@@ -30,3 +30,10 @@ class UnauthorizedException(TracardiException):
 
 class WorkflowException(Exception):
     pass
+
+
+class ConnectionException(TracardiException):
+
+    def __init__(self, *args, response=None):
+        TracardiException.__init__(self, *args)
+        self.response = response
