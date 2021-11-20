@@ -1,9 +1,13 @@
 import json
 from datetime import datetime
+
+import asyncio
 from aiohttp import ClientResponse
 from pydantic import BaseModel, AnyHttpUrl
+from tracardi.domain.flow import Flow
 
 from tracardi.service.storage.driver import storage
+from tracardi_graph_runner.domain.execution_graph import ExecutionGraph
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
@@ -52,17 +56,24 @@ class ProfileMetricsApi(ActionRunner):
 
         # todo run in background
 
-        response = await self._call_endpoint()
+        run_in_background = False
 
-        result = {
-            "status": response.status,
-            "json": await response.json()
-        }
+        if not run_in_background:
+            response = await self._call_endpoint()
 
-        if 200 <= response.status < 400:
-            return Result(port="response", value=result), Result(port="error", value=None)
+            result = {
+                "status": response.status,
+                "json": await response.json()
+            }
+
+            if 200 <= response.status < 400:
+                return Result(port="response", value=result), Result(port="error", value=None), Result(port="payload", value=payload)
+            else:
+                return Result(port="response", value=None), Result(port="error", value=result), Result(port="payload", value=payload)
+
         else:
-            return Result(port="response", value=None), Result(port="error", value=result)
+            asyncio.create_task(self._call_endpoint())
+            return Result(port="response", value=None), Result(port="payload", value=payload), Result(port="error", value=None)
 
     async def _call_endpoint(self) -> ClientResponse:
 
@@ -89,7 +100,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.microservice.profile_metrics',
             className='ProfileMetricsApi',
             inputs=["payload"],
-            outputs=['response', 'error'],
+            outputs=['response', 'error', 'payload'],
             version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski",
