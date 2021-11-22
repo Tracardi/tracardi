@@ -140,3 +140,6 @@ class ElasticStorage:
 
     async def update_by_query(self, query):
         return await self.storage.update_by_query(index=self.index.get_write_index(), query=query)
+
+    async def delete_by_query(self, query):
+        return await self.storage.delete_by_query(index=self.index.get_write_index(), body=query)

@@ -340,3 +340,9 @@ class PersistenceService:
             message, details = e.args
             raise StorageException(str(e), message=message, details=details)
 
+    async def delete_by_query(self, query: dict):
+        try:
+            return await self.storage.delete_by_query(query=query)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            message, details = e.args
+            raise StorageException(str(e), message=message, details=details)
