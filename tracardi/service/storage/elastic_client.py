@@ -107,6 +107,10 @@ class ElasticClient:
         logger.debug(f"CREATE INDEX: {index}")
         return await self._client.indices.create(index=index, ignore=400, body=mappings)
 
+    async def put_index_template(self, template_name, mappings):
+        logger.debug(f"PUT INDEX TEMPLATE: {template_name}")
+        return await self._client.indices.put_index_template(name=template_name, ignore=400, body=mappings)
+
     async def exists_index(self, index):
         logger.debug(f"EXISTS INDEX: {index}")
         return await self._client.indices.exists(index=index)
