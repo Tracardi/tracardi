@@ -2,9 +2,9 @@ from tracardi.service.storage.factory import storage_manager
 from uuid import UUID
 
 
-async def add_consent(doc_id: UUID, name: str, description: str, revokable: bool, default_value: str):
+async def add_consent(id: UUID, name: str, description: str, revokable: bool, default_value: str):
     return await storage_manager("consent-type").upsert(data={
-        "id": doc_id,
+        "id": id,
         "name": name,
         "description": description,
         "revokable": revokable,
