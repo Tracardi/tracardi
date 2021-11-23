@@ -15,6 +15,7 @@ import tracardi.service.storage.drivers.elastic.raw
 import tracardi.service.storage.drivers.elastic.tag
 import tracardi.service.storage.drivers.elastic.consent_type
 
+
 class ElasticDriver:
 
     @property

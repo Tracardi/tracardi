@@ -4,6 +4,7 @@ import os
 ON_PREMISES = 'on-premises'
 AWS_CLOUD = 'aws-cloud'
 
+
 def _get_logging_level(level: str) -> int:
     level = level.upper()
     if level == 'DEBUG':
