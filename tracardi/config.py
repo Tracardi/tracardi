@@ -1,6 +1,8 @@
 import logging
 import os
 
+ON_PREMISES = 'on-premises'
+AWS_CLOUD = 'aws-cloud'
 
 def _get_logging_level(level: str) -> int:
     level = level.upper()
@@ -35,12 +37,16 @@ class ElasticConfig:
 
     def __init__(self, env):
 
+        if 'ELASTIC_HOSTING' in env and not isinstance(env['ELASTIC_HOSTING'], str):
+            raise ValueError("Env ELASTIC_HOSTING must be sting")
+
         if 'ELASTIC_HOST' in env and not isinstance(env['ELASTIC_HOST'], str):
             raise ValueError("Env ELASTIC_HOST must be sting")
 
         if 'ELASTIC_HOST' in env and isinstance(env['ELASTIC_HOST'], str) and env['ELASTIC_HOST'].isnumeric():
             raise ValueError("Env ELASTIC_HOST must be sting")
 
+        self.hosting = env['ELASTIC_HOSTING'] if 'ELASTIC_HOSTING' in env else ON_PREMISES  # Possible values ON_PREMISES|AWS_CLOUD
         self.host = env['ELASTIC_HOST'] if 'ELASTIC_HOST' in env else '127.0.0.1'
         self.host = self.host.split(",")
         self.sniff_on_start = env['ELASTIC_SNIFF_ON_START'] if 'ELASTIC_SNIFF_ON_START' in env else None
@@ -57,14 +63,16 @@ class ElasticConfig:
         self.http_compress = env['ELASTIC_HTTP_COMPRESS'] if 'ELASTIC_HTTP_COMPRESS' in env else None
         self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
 
-        self.sql_translate_url = env[
-            'ELASTIC_SQL_TRANSLATE_URL'] if 'ELASTIC_SQL_TRANSLATE_URL' in env else "/_sql/translate"
-        self.sql_translate_method = env[
-            'ELASTIC_SQL_TRANSLATE_METHOD'] if 'ELASTIC_SQL_TRANSLATE_METHOD' in env else "POST"
         self.refresh_profiles_after_save = (env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'].lower() == 'yes') \
             if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
         self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env \
             else logging.WARNING
+
+        # AWS env variables
+
+        self.aws_access_key_id = env['AWS_ACCESS_KEY_ID'] if 'AWS_ACCESS_KEY_ID' in env else None
+        self.aws_secret_access_key = env['AWS_SECRET_ACCESS_KEY'] if 'AWS_SECRET_ACCESS_KEY' in env else None
+        self.aws_region = env['AWS_REGION'] if 'AWS_REGION' in env else None
 
 
 class RedisConfig:

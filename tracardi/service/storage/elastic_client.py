@@ -3,7 +3,7 @@ from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from ssl import create_default_context
-from tracardi.config import elastic
+from tracardi.config import elastic, ON_PREMISES, AWS_CLOUD
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
@@ -176,7 +176,10 @@ class ElasticClient:
 
         def get_elastic_client():
             kwargs = ElasticClient._get_elastic_config()
-            return ElasticClient(**kwargs)
+            if config.elastic.hosting == ON_PREMISES:
+                return ElasticClient(**kwargs)
+            elif config.elastic.hosting == AWS_CLOUD:
+                raise ConnectionError("Not implemented")
 
         if _singleton is None:
             _singleton = get_elastic_client()
