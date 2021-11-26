@@ -55,10 +55,11 @@ def register() -> Plugin:
             init={"condition": ""},
             form=Form(groups=[
                 FormGroup(
+                    name="Condition statement",
                     fields=[
                         FormField(
                             id="condition",
-                            name="Condition statement",
+                            name="If condition statement",
                             description="Provide condition for IF statement. If the condition is met then the payload "
                                         "will be returned on TRUE port if not then FALSE port is triggered.",
                             component=FormComponent(type="textarea", props={"label": "condition"})

@@ -109,6 +109,7 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Service source",
                     fields=[
                         FormField(
                             id="source",
@@ -120,6 +121,7 @@ def register() -> Plugin:
                     ]
                 ),
                 FormGroup(
+                    name="Service settings",
                     fields=[
                         FormField(
                             id="timeout",

@@ -10,8 +10,7 @@ from .value_object.storage_info import StorageInfo
 class Rule(NamedEntity):
     event: Type
     flow: NamedEntity
-
-    source: Optional[NamedEntity] = None
+    source: NamedEntity
     enabled: Optional[bool] = True
     description: Optional[str] = "No description provided"
     properties: Optional[dict] = None
