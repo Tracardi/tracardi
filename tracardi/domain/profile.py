@@ -14,6 +14,7 @@ from .profile_stats import ProfileStats
 from ..service.merger import merge
 from .segment import Segment
 from ..process_engine.tql.condition import Condition
+from tracardi.domain.consent_schema import ConsentSchema
 
 
 class Profile(Entity):
@@ -24,7 +25,7 @@ class Profile(Entity):
     traits: Optional[ProfileTraits] = ProfileTraits()
     pii: PII = PII()
     segments: Optional[list] = []
-    consents: Optional[dict] = {}
+    consents: Optional[List[ConsentSchema]] = []
     active: bool = True
 
     def __init__(self, **data: Any):
