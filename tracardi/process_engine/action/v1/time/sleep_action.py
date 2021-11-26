@@ -44,6 +44,7 @@ def register() -> Plugin:
             init={"wait": 1},
             form=Form(groups=[
                 FormGroup(
+                    name="Delay workflow",
                     fields=[
                         FormField(
                             id="wait",

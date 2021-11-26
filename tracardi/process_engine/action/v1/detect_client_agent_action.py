@@ -22,12 +22,12 @@ class AgentConfiguration(BaseModel):
         if value != value.strip():
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        if not re.match(
-            r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
-            value.strip()
-        ):
-            raise ValueError("This field must be in form of dot notation. E.g. "
-                             "session@context.browser.browser.userAgent")
+        # if not re.match(
+        #     r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
+        #     value.strip()
+        # ):
+        #     raise ValueError("This field must be in form of dot notation. E.g. "
+        #                      "session@context.browser.browser.userAgent")
         return value
 
 
@@ -43,7 +43,6 @@ class DetectClientAgentAction(ActionRunner):
 
     def detect_device(self, ua):
         try:
-            print(ua)
             detector = DeviceDetector(ua, skip_bot_detection=False)
             return detector.parse()
         except Exception as e:
@@ -146,6 +145,7 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Detect client type",
                     fields=[
                         FormField(
                             id="agent",

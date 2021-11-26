@@ -197,10 +197,19 @@ class SqlSearchQueryEngine:
             _logger.error("Could not query {}. Reason: {}".format(es_query, str(e)))
             return QueryResult(total=0, result=[])
 
-        qs = {
-            'total': result['hits']['total']['value'],
-            'result': list(__format(result['aggregations']['items_over_time']['buckets'], unit, interval, format))
-        }
+        try:
+            qs = {
+                'total': result['hits']['total']['value'],
+                'result': list(__format(result['aggregations']['items_over_time']['buckets'], unit, interval, format))
+            }
+
+            return QueryResult(**qs)
+        except KeyError:
+            # When no result
+            qs = {
+                'total': 0,
+                'result': []
+            }
 
         return QueryResult(**qs)
 
@@ -224,7 +233,8 @@ class PersistenceService:
             message, details = e.args
             raise StorageException(str(e), message=message, details=details)
 
-    async def load_by_values(self, field_value_pairs: List[tuple], sort_by: Optional[List[storage.ElasticFiledSort]] = None, limit=1000) -> StorageResult:
+    async def load_by_values(self, field_value_pairs: List[tuple],
+                             sort_by: Optional[List[storage.ElasticFiledSort]] = None, limit=1000) -> StorageResult:
         try:
             return StorageResult(await self.storage.load_by_values(field_value_pairs, sort_by, limit=limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
@@ -287,7 +297,10 @@ class PersistenceService:
             _logger.warning("No result found for query {}".format(query))
             return StorageResult()
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
+            if len(e.args) == 2:
+                message, details = e.args
+            else:
+                message = details = str(e)
             raise StorageException(str(e), message=message, details=details)
 
     async def aggregate(self, query: dict, aggregate_key='key') -> StorageAggregateResult:
