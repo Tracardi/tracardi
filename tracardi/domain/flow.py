@@ -40,6 +40,17 @@ class Flow(GraphFlow):
             lock=self.lock
         )
 
+    def get_empty_workflow_record(self) -> 'FlowRecord':
+
+        return FlowRecord(
+            id=self.id,
+            description=self.description,
+            name=self.name,
+            enabled=self.enabled,
+            projects=self.projects,
+            lock=self.lock
+        )
+
     @staticmethod
     def new(id: str = None) -> 'Flow':
         return Flow(
