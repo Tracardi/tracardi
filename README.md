@@ -83,7 +83,9 @@ tracardi.cdp@gmail.com or any social platform.
 
 # Support us
 
-If you would like to support us please follow us on [Facebook](https://bit.ly/3uPwP5a) or [Twitter](https://bit.ly/3uVJwLJ), tag us and leave your comments. Subscribe to our [Youtube channel](https://bit.ly/3pbdbPR) to see development process and new upcoming features.
+If you would like to support us please follow us on [Facebook](https://bit.ly/3uPwP5a) or [Twitter](https://bit.ly/3uVJwLJ), 
+tag us and leave your comments. Subscribe to our [Youtube channel](https://bit.ly/3pbdbPR) to see development process 
+and new upcoming features.
 
 Spread the news about TRACARDI so anyone interested get to know TRACARDI.
 
