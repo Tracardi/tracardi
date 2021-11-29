@@ -15,27 +15,22 @@ logger.setLevel(logging.WARNING)
 
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
-    draft: Optional[str] = ""
     lock: bool = False
 
-    # Persistence
+    def get_production_workflow_record(self) -> 'FlowRecord':
 
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'flow',
-            FlowRecord
+        production = encrypt(self.dict())
+
+        return FlowRecord(
+            id=self.id,
+            description=self.description,
+            name=self.name,
+            enabled=self.enabled,
+            projects=self.projects,
+            draft=production,
+            production=production,
+            lock=self.lock
         )
-
-    def encode(self) -> 'FlowRecord':
-        return FlowRecord.encode(self)
-
-    def encode_draft(self, draft: 'Flow'):
-        self.draft = encrypt(draft.dict())
-
-    def decode_draft(self) -> 'Flow':
-        flow = decrypt(self.draft)
-        return Flow.construct(_fields_set=self.__fields_set__, **flow)
 
     @staticmethod
     def new(id: str = None) -> 'Flow':
@@ -47,12 +42,17 @@ class Flow(GraphFlow):
         )
 
     @staticmethod
-    def build(name: str, description: str = None, enabled=True, id=None) -> 'Flow':
+    def build(name: str, description: str = None, enabled=True, id=None, lock=False, projects=None) -> 'Flow':
+        if projects is None:
+            projects = ["General"]
+
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name=name,
             description=description,
             enabled=enabled,
+            projects=projects,
+            lock=lock,
             flowGraph=FlowGraphData(
                 nodes=[],
                 edges=[]
@@ -143,62 +143,62 @@ class PluginRecord(BaseModel):
         return Plugin.construct(_fields_set=self.__fields_set__, **data)
 
 
-class NodeRecord(BaseModel):
-    id: str
-    type: str
-    position: Position
-    data: PluginRecord
+# class NodeRecord(BaseModel):
+#     id: str
+#     type: str
+#     position: Position
+#     data: PluginRecord
+#
+#     @staticmethod
+#     def encode(node: Node):
+#         return NodeRecord(
+#             id=node.id,
+#             type=node.type,
+#             position=node.position,
+#             data=PluginRecord.encode(node.data)
+#         )
+#
+#     def decode(self) -> Node:
+#         data = {
+#             "id": self.id,
+#             "type": self.type,
+#             "data": self.data.decode(),
+#             "position": self.position
+#         }
+#         return Node.construct(_fields_set=self.__fields_set__, **data)
 
-    @staticmethod
-    def encode(node: Node):
-        return NodeRecord(
-            id=node.id,
-            type=node.type,
-            position=node.position,
-            data=PluginRecord.encode(node.data)
-        )
 
-    def decode(self) -> Node:
-        data = {
-            "id": self.id,
-            "type": self.type,
-            "data": self.data.decode(),
-            "position": self.position
-        }
-        return Node.construct(_fields_set=self.__fields_set__, **data)
-
-
-class FlowGraphDataRecord(BaseModel):
-    nodes: List[NodeRecord]
-    edges: List[Edge]
-
-    @staticmethod
-    def encode(flowGraph: FlowGraphData) -> 'FlowGraphDataRecord':
-        if flowGraph:
-            return FlowGraphDataRecord(
-                edges=flowGraph.edges,
-                nodes=[NodeRecord.encode(node) for node in flowGraph.nodes]
-            )
-
-        return FlowGraphDataRecord(
-            edges=[],
-            nodes=[]
-        )
-
-    def decode(self) -> FlowGraphData:
-        data = {
-            "edges": self.edges,
-            "nodes": [node.decode() for node in self.nodes],
-        }
-        return FlowGraphData.construct(_fields_set=self.__fields_set__, **data)
+# class FlowGraphDataRecord(BaseModel):
+#     nodes: List[NodeRecord]
+#     edges: List[Edge]
+#
+#     @staticmethod
+#     def encode(flowGraph: FlowGraphData) -> 'FlowGraphDataRecord':
+#         if flowGraph:
+#             return FlowGraphDataRecord(
+#                 edges=flowGraph.edges,
+#                 nodes=[NodeRecord.encode(node) for node in flowGraph.nodes]
+#             )
+#
+#         return FlowGraphDataRecord(
+#             edges=[],
+#             nodes=[]
+#         )
+#
+#     def decode(self) -> FlowGraphData:
+#         data = {
+#             "edges": self.edges,
+#             "nodes": [node.decode() for node in self.nodes],
+#         }
+#         return FlowGraphData.construct(_fields_set=self.__fields_set__, **data)
 
 
 class FlowRecord(NamedEntity):
     description: Optional[str] = None
-    flowGraph: Optional[FlowGraphDataRecord] = None
     enabled: Optional[bool] = True
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
+    production: Optional[str] = ''
     lock: bool = False
 
     # Persistence
@@ -210,36 +210,14 @@ class FlowRecord(NamedEntity):
             FlowRecord
         )
 
-    @staticmethod
-    def encode(flow: Flow) -> 'FlowRecord':
-        return FlowRecord(
-            id=flow.id,
-            description=flow.description,
-            name=flow.name,
-            enabled=flow.enabled,
-            flowGraph=FlowGraphDataRecord.encode(flow.flowGraph),
-            projects=flow.projects,
-            draft=flow.draft,
-            lock=flow.lock
+    def get_production_workflow(self) -> 'Flow':
+        decrypted = decrypt(self.production)
+        return Flow(**decrypted)
 
-        )
+    def get_draft_workflow(self) -> 'Flow':
+        decrypted = decrypt(self.draft)
+        return Flow(**decrypted)
 
-    def decode(self) -> Flow:
-        data = {
-            "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "enabled": self.enabled,
-            "projects": self.projects,
-            "draft": self.draft,
-            "lock": self.lock,
-            "flowGraph": self.flowGraph.decode() if self.flowGraph else None,
-        }
-        return Flow.construct(_fields_set=self.__fields_set__, **data)
-
-    def decode_draft(self) -> 'Flow':
-        flow = decrypt(self.draft)
-        return Flow(**flow)
-
-    def encode_draft(self, draft: 'Flow'):
-        self.draft = encrypt(draft.dict())
+    def get_empty_workflow(self, id) -> 'Flow':
+        return Flow.build(id=id, name=self.name, description=self.description, enabled=self.enabled,
+                          projects=self.projects, lock=self.lock)
