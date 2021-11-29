@@ -4,7 +4,7 @@ from tracardi_dot_notation.dot_accessor import DotAccessor
 
 from tracardi.domain.context import Context
 from tracardi.domain.event import Event
-from tracardi.domain.flow import Flow
+from tracardi.domain.flow import Flow, FlowSchema
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.resource import Resource
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     resource = Resource(id="3", type="event")
     context = Context()
     event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
-    flow = Flow(id="flow-id", name="flow")
+    flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.6.0"))
     dot = DotAccessor(profile, session, payload, event, flow)
 
     query = ExprTransformer(dot=dot).transform(t)

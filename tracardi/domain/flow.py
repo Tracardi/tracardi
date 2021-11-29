@@ -6,6 +6,8 @@ from typing import Optional, List
 from pydantic import BaseModel
 from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
 from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec, Form
+
+from ..config import tracardi
 from ..service.secrets import decrypt, encrypt
 import logging
 
@@ -13,9 +15,15 @@ logger = logging.getLogger("Flow")
 logger.setLevel(logging.WARNING)
 
 
+class FlowSchema(BaseModel):
+    version: str
+    uri: str = 'http://www.tracardi.com/2021/WFSchema'
+
+
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
     lock: bool = False
+    wf_schema: FlowSchema
 
     def get_production_workflow_record(self) -> 'FlowRecord':
 
@@ -37,6 +45,7 @@ class Flow(GraphFlow):
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name="Empty",
+            wf_schema=FlowSchema(version=tracardi.version),
             enabled=False,
             flowGraph=FlowGraphData(nodes=[], edges=[])
         )
@@ -49,6 +58,7 @@ class Flow(GraphFlow):
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name=name,
+            wf_schema=FlowSchema(version=tracardi.version),
             description=description,
             enabled=enabled,
             projects=projects,

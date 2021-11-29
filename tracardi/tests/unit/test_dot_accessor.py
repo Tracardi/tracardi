@@ -1,6 +1,6 @@
 from tracardi.domain.context import Context
 from tracardi.domain.event import Event
-from tracardi.domain.flow import Flow
+from tracardi.domain.flow import Flow, FlowSchema
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.resource import Resource
@@ -14,7 +14,7 @@ def test_value_read():
     resource = Resource(id="3", type="event")
     context = Context()
     event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
-    flow = Flow(id="flow-id", name="flow")
+    flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.6.0"))
     dot = DotAccessor(profile, session, payload, event, flow)
 
     assert dot['profile@id'] == "1"
@@ -45,7 +45,7 @@ def test_value_exists():
     resource = Resource(id="3", type="event")
     context = Context()
     event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
-    flow = Flow(id="flow-id", name="flow")
+    flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.6.0"))
     dot = DotAccessor(profile, session, payload, event, flow)
 
     assert 'profile@id' in dot
@@ -59,7 +59,7 @@ def test_no_source():
     resource = Resource(id="3", type="event")
     context = Context()
     event = Event(id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
-    flow = Flow(id="flow-id", name="flow")
+    flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.6.0"))
     dot = DotAccessor(profile, session, payload, event, flow)
 
     assert 'test.id' == dot['test.id']
