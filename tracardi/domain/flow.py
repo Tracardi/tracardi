@@ -2,7 +2,7 @@ import uuid
 from tracardi_graph_runner.domain.flow import Flow as GraphFlow
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel, root_validator
 from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
 from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec, Form
@@ -18,7 +18,11 @@ logger.setLevel(logging.WARNING)
 class FlowSchema(BaseModel):
     version: str
     uri: str = 'http://www.tracardi.com/2021/WFSchema'
-    server_version: str = tracardi.version
+    server_version: str = None
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.server_version = tracardi.version
 
 
 class Flow(GraphFlow):
