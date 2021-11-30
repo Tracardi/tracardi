@@ -5,11 +5,11 @@ from datetime import datetime
 
 
 class Revoke(BaseModel):
-    revoke: datetime
+    revoke: datetime = None
 
-
+# todo after second thought this should be removed after the removal of endpoint /consent/profile/{profile_id}
 class ConsentSchema(BaseModel):
-    __root__: Dict[str, Revoke] = {"example-consent-id": {"revoke": datetime.utcnow()}}
+    __root__: Dict[str, Revoke] = {"consent-id": {"revoke": datetime.utcnow()}}
 
     @validator("__root__")
     def validate_root(cls, v):

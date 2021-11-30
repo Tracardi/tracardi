@@ -2,10 +2,12 @@ import uuid
 from tracardi_graph_runner.domain.flow import Flow as GraphFlow
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import Optional, List, Any
+from pydantic import BaseModel, root_validator
 from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
 from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec, Form
+
+from ..config import tracardi
 from ..service.secrets import decrypt, encrypt
 import logging
 
@@ -13,9 +15,20 @@ logger = logging.getLogger("Flow")
 logger.setLevel(logging.WARNING)
 
 
+class FlowSchema(BaseModel):
+    version: str
+    uri: str = 'http://www.tracardi.com/2021/WFSchema'
+    server_version: str = None
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.server_version = tracardi.version
+
+
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
     lock: bool = False
+    wf_schema: FlowSchema
 
     def get_production_workflow_record(self) -> 'FlowRecord':
 
@@ -32,11 +45,23 @@ class Flow(GraphFlow):
             lock=self.lock
         )
 
+    def get_empty_workflow_record(self) -> 'FlowRecord':
+
+        return FlowRecord(
+            id=self.id,
+            description=self.description,
+            name=self.name,
+            enabled=self.enabled,
+            projects=self.projects,
+            lock=self.lock
+        )
+
     @staticmethod
     def new(id: str = None) -> 'Flow':
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name="Empty",
+            wf_schema=FlowSchema(version=tracardi.version),
             enabled=False,
             flowGraph=FlowGraphData(nodes=[], edges=[])
         )
@@ -49,6 +74,7 @@ class Flow(GraphFlow):
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name=name,
+            wf_schema=FlowSchema(version=tracardi.version),
             description=description,
             enabled=enabled,
             projects=projects,

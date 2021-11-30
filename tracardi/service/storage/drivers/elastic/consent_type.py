@@ -1,3 +1,4 @@
+from tracardi.domain.storage_result import StorageResult
 from tracardi.service.storage.factory import storage_manager
 from uuid import UUID
 
@@ -16,5 +17,5 @@ async def delete_by_id(consent_id):
     return await storage_manager("consent-type").delete(consent_id)
 
 
-async def load(start: int = 0, limit: int = 10):
+async def load(start: int = 0, limit: int = 10) -> StorageResult:
     return await storage_manager("consent-type").load_all(start=start, limit=limit)
