@@ -1,5 +1,8 @@
 from datetime import datetime
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Union
+
+from pydantic import BaseModel
+
 from .entity import Entity
 from .metadata import Metadata
 from .time import Time
@@ -7,13 +10,19 @@ from .value_object.storage_info import StorageInfo
 from ..service.secrets import encrypt, decrypt
 
 
+class ResourceCredentials(BaseModel):
+    production: Optional[dict] = {}
+    test: Optional[dict] = {}
+
+
 class Resource(Entity):
     type: str
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
-    config: Optional[dict] = {}
-    tags: List[str] = ["general"]
+    credentials: ResourceCredentials
+    tags: Union[List[str], str] = ["general"]
+    icon: str = None
     enabled: Optional[bool] = True
     consent: bool = False
 
@@ -39,9 +48,10 @@ class ResourceRecord(Entity):
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
-    config: Optional[str] = None
+    credentials: Optional[str] = None
     enabled: Optional[bool] = True
-    tags: str = "event"
+    tags: Union[List[str], str] = ["general"]
+    icon: str = None
     consent: bool = False
 
     def __init__(self, **data: Any):
@@ -61,10 +71,14 @@ class ResourceRecord(Entity):
             tags=resource.tags,
             enabled=resource.enabled,
             consent=resource.consent,
-            config=encrypt(resource.config)
+            credentials=encrypt(resource.credentials)
         )
 
     def decode(self) -> Resource:
+        if self.credentials is not None:
+            decrypted = decrypt(self.credentials)
+        else:
+            decrypted = {"production": {}, "test": {}}
         return Resource(
             id=self.id,
             name=self.name,
@@ -73,7 +87,7 @@ class ResourceRecord(Entity):
             tags=self.tags,
             enabled=self.enabled,
             consent=self.consent,
-            config=decrypt(self.config)
+            credentials=ResourceCredentials(**decrypted)
         )
 
     # Persistence

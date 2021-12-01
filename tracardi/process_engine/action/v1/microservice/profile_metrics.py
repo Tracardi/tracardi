@@ -35,18 +35,25 @@ class ProfileMetricsApi(ActionRunner):
     async def build(**kwargs) -> 'ProfileMetricsApi':
         config = validate(kwargs)
         source = await storage.driver.resource.load(config.source.id)
-        plugin = ProfileMetricsApi(config, ResourceConfiguration(**source.config))
+        plugin = ProfileMetricsApi(config, ResourceConfiguration(**source.credentials))
         return plugin
 
     def __init__(self, config: Configuration, source: ResourceConfiguration):
         self.source = source
         self.config = config
+        if self.debug is True:
+            credentials = Credentials(
+                username=self.source.test.username,
+                password=self.source.test.password
+            )
+        else:
+            credentials = Credentials(
+                username=self.source.production.username,
+                password=self.source.production.password
+            )
         self.client = MicroserviceApi(
             self.source.url,
-            credentials=Credentials(
-                username=self.source.username,
-                password=self.source.password
-            )
+            credentials=credentials
         )
 
     async def run(self, payload):
