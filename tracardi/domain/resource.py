@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, List
 from .entity import Entity
 from .metadata import Metadata
 from .time import Time
@@ -13,7 +13,7 @@ class Resource(Entity):
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     config: Optional[dict] = {}
-    tags: str = "general"
+    tags: List[str] = ["general"]
     enabled: Optional[bool] = True
     consent: bool = False
 
