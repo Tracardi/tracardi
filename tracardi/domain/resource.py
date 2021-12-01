@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any, List, Union
+from typing import Optional, Any, List, Union, Type
 
 from pydantic import BaseModel
 
@@ -7,12 +7,18 @@ from .entity import Entity
 from .metadata import Metadata
 from .time import Time
 from .value_object.storage_info import StorageInfo
+from ..protocol.debuggable import Debuggable
 from ..service.secrets import encrypt, decrypt
 
 
 class ResourceCredentials(BaseModel):
     production: Optional[dict] = {}
     test: Optional[dict] = {}
+
+    def get_credentials(self, plugin: Debuggable, output: Type[BaseModel]):
+        if plugin.debug is True:
+            return output(**self.test)
+        return output(**self.production)
 
 
 class Resource(Entity):
