@@ -16,6 +16,10 @@ class ResourceCredentials(BaseModel):
     test: Optional[dict] = {}
 
     def get_credentials(self, plugin: Debuggable, output: Type[BaseModel]):
+        """
+        Returns configuration of resource depending on the state of the executed workflow: test or production.
+        """
+
         if plugin.debug is True:
             return output(**self.test)
         return output(**self.production)
