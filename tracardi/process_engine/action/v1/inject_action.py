@@ -60,13 +60,13 @@ def register() -> Plugin:
                 ),
             ]),
             manual='inject_action',
-            version='0.1',
+            version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Inject',
-            desc='Injector.',
+            desc='Inject .',
             keywords=['start node'],
             type='flowNode',
             width=100,

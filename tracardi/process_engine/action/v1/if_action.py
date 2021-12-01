@@ -80,7 +80,6 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='if',
-            editor='text',
             group=['Conditions']
         )
     )

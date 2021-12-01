@@ -1,10 +1,24 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, List, Union, Type
+
+from pydantic import BaseModel
+
 from .entity import Entity
 from .metadata import Metadata
 from .time import Time
 from .value_object.storage_info import StorageInfo
+from ..protocol.debuggable import Debuggable
 from ..service.secrets import encrypt, decrypt
+
+
+class ResourceCredentials(BaseModel):
+    production: Optional[dict] = {}
+    test: Optional[dict] = {}
+
+    def get_credentials(self, plugin: Debuggable, output: Type[BaseModel]):
+        if plugin.debug is True:
+            return output(**self.test)
+        return output(**self.production)
 
 
 class Resource(Entity):
@@ -12,8 +26,9 @@ class Resource(Entity):
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
-    config: Optional[dict] = {}
-    tags: str = "general"
+    credentials: ResourceCredentials
+    tags: Union[List[str], str] = ["general"]
+    icon: str = None
     enabled: Optional[bool] = True
     consent: bool = False
 
@@ -39,9 +54,10 @@ class ResourceRecord(Entity):
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
-    config: Optional[str] = None
+    credentials: Optional[str] = None
     enabled: Optional[bool] = True
-    tags: str = "event"
+    tags: Union[List[str], str] = ["general"]
+    icon: str = None
     consent: bool = False
 
     def __init__(self, **data: Any):
@@ -61,10 +77,14 @@ class ResourceRecord(Entity):
             tags=resource.tags,
             enabled=resource.enabled,
             consent=resource.consent,
-            config=encrypt(resource.config)
+            credentials=encrypt(resource.credentials)
         )
 
     def decode(self) -> Resource:
+        if self.credentials is not None:
+            decrypted = decrypt(self.credentials)
+        else:
+            decrypted = {"production": {}, "test": {}}
         return Resource(
             id=self.id,
             name=self.name,
@@ -73,7 +93,7 @@ class ResourceRecord(Entity):
             tags=self.tags,
             enabled=self.enabled,
             consent=self.consent,
-            config=decrypt(self.config)
+            credentials=ResourceCredentials(**decrypted)
         )
 
     # Persistence

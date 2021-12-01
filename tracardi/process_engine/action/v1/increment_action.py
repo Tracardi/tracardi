@@ -72,11 +72,7 @@ def register() -> Plugin:
                             name="Path to field",
                             description="Provide path to field that should be incremented. "
                                         "E.g. profile@stats.counters.boughtProducts",
-                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
-                            validation=FormFieldValidation(
-                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
-                                message="This field must be in Tracardi dot path format."
-                            )
+                            component=FormComponent(type="dotPath", props={"label": "Field path"})
                         )
                     ]
                 ),
@@ -91,11 +87,7 @@ def register() -> Plugin:
                                 type="text",
                                 props={
                                     "label": "Incrementation"
-                                }),
-                            validation=FormFieldValidation(
-                                regex=r"^\d+$",
-                                message="This field must be numeric."
-                            )
+                                })
                         )
                     ]
 

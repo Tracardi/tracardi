@@ -4,6 +4,8 @@ from datetime import datetime
 import asyncio
 from aiohttp import ClientResponse
 from pydantic import BaseModel, AnyHttpUrl
+
+from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
@@ -35,17 +37,17 @@ class ProfileMetricsApi(ActionRunner):
     async def build(**kwargs) -> 'ProfileMetricsApi':
         config = validate(kwargs)
         source = await storage.driver.resource.load(config.source.id)
-        plugin = ProfileMetricsApi(config, ResourceConfiguration(**source.config))
+        plugin = ProfileMetricsApi(config, source.credentials)
         return plugin
 
-    def __init__(self, config: Configuration, source: ResourceConfiguration):
-        self.source = source
+    def __init__(self, config: Configuration, credentials: ResourceCredentials):
+        source = credentials.get_credentials(self, output=ResourceConfiguration)  # type: ResourceConfiguration
         self.config = config
         self.client = MicroserviceApi(
-            self.source.url,
+            source.url,
             credentials=Credentials(
-                username=self.source.username,
-                password=self.source.password
+                username=source.username,
+                password=source.password
             )
         )
 
