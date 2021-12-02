@@ -16,6 +16,10 @@ class ResourceCredentials(BaseModel):
     test: Optional[dict] = {}
 
     def get_credentials(self, plugin: Debuggable, output: Type[BaseModel]):
+        """
+        Returns configuration of resource depending on the state of the executed workflow: test or production.
+        """
+
         if plugin.debug is True:
             return output(**self.test)
         return output(**self.production)
@@ -26,7 +30,7 @@ class Resource(Entity):
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
-    credentials: ResourceCredentials
+    credentials: ResourceCredentials = ResourceCredentials()
     tags: Union[List[str], str] = ["general"]
     icon: str = None
     enabled: Optional[bool] = True
