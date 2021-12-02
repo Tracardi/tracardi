@@ -30,7 +30,7 @@ class Resource(Entity):
     metadata: Optional[Metadata]
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
-    credentials: ResourceCredentials
+    credentials: ResourceCredentials = ResourceCredentials()
     tags: Union[List[str], str] = ["general"]
     icon: str = None
     enabled: Optional[bool] = True
