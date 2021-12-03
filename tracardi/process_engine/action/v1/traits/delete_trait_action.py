@@ -4,7 +4,10 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, Fo
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
+
+from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 
 
 class DeleteTraitConfiguration(BaseModel):
@@ -30,11 +33,18 @@ class DeleteTraitAction(ActionRunner):
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         for value in self.config.delete:
-            del dot[value]
+            try:
+                del dot[value]
+            except KeyError as e:
+                self.console.warning("Could not delete value {} due to error: {}".format(value, str(e)))
 
         profile = Profile(**dot.profile)
+        session = Session(**dot.session)
+        event = Event(**dot.event)
 
         self.profile.replace(profile)
+        self.event.replace(event)
+        self.session.replace(session)
 
         return Result(port="payload", value=payload)
 
@@ -72,7 +82,7 @@ def register() -> Plugin:
                  'deleted. Returns payload.',
             type='flowNode',
             width=100,
-            height=100,
+            height=200,
             icon='remove',
             group=["Data processing"],
             documentation=Documentation(

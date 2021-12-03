@@ -30,12 +30,12 @@ class TrackerPayload(BaseModel):
         super().__init__(**data)
 
     def get_events(self, session: Session, profile: Profile) -> List[Event]:
-        _events = []
+        event_list = []
         if self.events:
             for event in self.events:  # type: EventPayload
                 _event = event.to_event(self.metadata, self.source, session, profile, event.options)
-                _events.append(_event)
-        return _events
+                event_list.append(_event)
+        return event_list
 
     def return_profile(self):
         return self.options and "profile" in self.options and self.options['profile'] is True

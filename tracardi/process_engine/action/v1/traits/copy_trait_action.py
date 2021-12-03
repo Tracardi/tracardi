@@ -127,7 +127,7 @@ def register() -> Plugin:
             name='Set Trait',
             desc='Returns payload with copied/set traits.',
             type='flowNode',
-            width=100,
+            width=200,
             height=100,
             icon='copy',
             group=["Data processing"],
