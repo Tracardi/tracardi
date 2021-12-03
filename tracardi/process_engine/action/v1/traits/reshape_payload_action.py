@@ -3,7 +3,8 @@ from json import JSONDecodeError
 from typing import Dict, Union
 from pydantic import BaseModel, validator
 from tracardi_dot_notation.dict_traverser import DictTraverser
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -76,6 +77,15 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='copy-property',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns new payload,formed from given payload"
+                                            " according to configuration.")
+                }
+            )
         )
     )

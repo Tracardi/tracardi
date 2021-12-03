@@ -3,7 +3,8 @@ import logging
 from pydantic import BaseModel
 
 from tracardi.config import tracardi
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from deepdiff import DeepDiff
@@ -129,6 +130,14 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='copy',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns given payload modified according to configuration.")
+                }
+            )
         )
     )

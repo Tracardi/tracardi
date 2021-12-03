@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -37,6 +37,15 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='question',
-            group=["Conditions"]
+            group=["Conditions"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                },
+                outputs={
+                    "true": PortDoc(desc="This port returns payload if the defined condition is met."),
+                    "false": PortDoc(desc="This port returns payload if the defined condition is NOT met.")
+                }
+            )
         )
     )

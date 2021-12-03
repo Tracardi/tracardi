@@ -1,5 +1,6 @@
 from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_dot_notation.dot_template import DotTemplate
 from pydantic import BaseModel
@@ -60,6 +61,15 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='template',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns a string with placeholders replaced by values given in "
+                                            "payload.")
+                }
+            )
         )
     )
