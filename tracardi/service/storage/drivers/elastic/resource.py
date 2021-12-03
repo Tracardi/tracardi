@@ -38,5 +38,9 @@ async def load(id: str) -> Resource:
     return resource_config_record.decode()
 
 
+async def load_by_tag(tag):
+    return await StorageFor.crud('resource', class_type=Resource).load_by('tags', tag)
+
+
 async def delete(id: str):
     return await StorageFor(Entity(id=id)).index("resource").delete()

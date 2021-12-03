@@ -118,7 +118,7 @@ def register() -> Plugin:
                             name="Tracardi PRO - Stats service",
                             description="Select Tracardi PRO - Stats service resource.",
                             required=True,
-                            component=FormComponent(type="resource", props={"label": "resource"})
+                            component=FormComponent(type="resource", props={"label": "resource", "tag": "pro"})
                         )
                     ]
                 ),
