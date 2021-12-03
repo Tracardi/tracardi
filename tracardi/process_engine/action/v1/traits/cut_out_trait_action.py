@@ -1,5 +1,5 @@
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
+    FormFieldValidation, Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -61,6 +61,14 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='property',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "trait": PortDoc(desc="This port returns field selected from payload in configuration.")
+                }
+            )
         )
     )

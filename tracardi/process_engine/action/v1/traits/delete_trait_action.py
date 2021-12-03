@@ -1,6 +1,7 @@
 from typing import List
 from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi.domain.profile import Profile
@@ -67,12 +68,20 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Delete Trait',
-            desc='Deletes traits from profile or payload. Accepts dotted notation as definition of a filed to be '
+            desc='Deletes traits from profile or payload. Accepts dotted notation as definition of a field to be '
                  'deleted. Returns payload.',
             type='flowNode',
             width=100,
             height=100,
             icon='remove',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns given payload with selected fields deleted.")
+                }
+            )
         )
     )

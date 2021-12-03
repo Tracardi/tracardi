@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -10,7 +10,7 @@ class SegmentProfileAction(ActionRunner):
 
     async def run(self, payload):
         self.profile.operation.segment = True
-        return Result(value={}, port="payload")
+        return Result(value=payload, port="payload")
 
 
 def register() -> Plugin:
@@ -32,6 +32,14 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='segment',
-            group=["Operations"]
+            group=["Operations"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns exactly same payload as given one.")
+                }
+            )
         )
     )

@@ -2,7 +2,7 @@ from typing import Union
 
 from pydantic import BaseModel, validator
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
+    FormFieldValidation, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi.domain.profile import Profile
@@ -100,11 +100,19 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Increment counter',
-            desc='Increment profile stats.counters value. Returns payload',
+            desc='Increments given field in payload, returns payload.',
             type='flowNode',
             width=200,
             height=100,
             icon='plus',
-            group=["Stats"]
+            group=["Stats"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns object received by plugin in input.")
+                }
+            )
         )
     )

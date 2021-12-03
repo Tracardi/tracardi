@@ -4,7 +4,8 @@ from typing import Dict, Union
 
 from pydantic import BaseModel, validator
 from tracardi_dot_notation.dict_traverser import DictTraverser
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -72,6 +73,12 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='json',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                inputs={},
+                outputs={
+                    "payload": PortDoc(desc="This port returns object received by plugin in configuration.")
+                }
+            )
         )
     )

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, validator
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -80,6 +81,15 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='if',
-            group=['Conditions']
+            group=['Conditions'],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "TRUE": PortDoc(desc="This port returns payload if the defined condition is met."),
+                    "FALSE": PortDoc(desc="This port returns payload if the defined condition is NOT met.")
+                }
+            )
         )
     )

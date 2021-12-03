@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
 
@@ -31,6 +31,12 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='stop',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={}
+            )
         )
     )

@@ -5,7 +5,8 @@ from pydantic import BaseModel, validator
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -123,6 +124,12 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='debug',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                outputs={
+                    "event": PortDoc(desc="This port returns first event with type defined in configuration.")
+                },
+                inputs={}
+            )
         )
     )

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
+    FormFieldValidation, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
 from tracardi.exceptions.exception import WorkflowException
@@ -57,6 +57,12 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='stop',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                },
+                outputs={}
+            )
         )
     )

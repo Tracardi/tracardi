@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -34,11 +34,19 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Increase views',
-            desc='Increases view field in profile and returns profile.',
+            desc='Increases view field in profile and returns payload.',
             type='flowNode',
             width=200,
             height=100,
             icon='plus',
-            group=["Stats"]
+            group=["Stats"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns object received by plugin in input.")
+                }
+            )
         )
     )

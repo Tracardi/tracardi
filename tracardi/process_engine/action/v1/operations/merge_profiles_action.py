@@ -1,7 +1,8 @@
 from typing import List
 
 from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -35,7 +36,7 @@ class MergeProfilesAction(ActionRunner):
 
     async def run(self, payload):
         self.profile.operation.merge = self.merge_key
-        return Result(value={}, port="payload")
+        return Result(value=payload, port="payload")
 
 
 def register() -> Plugin:
@@ -70,6 +71,14 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='merge',
-            group=["Operations"]
+            group=["Operations"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns exactly same payload as given one.")
+                }
+            )
         )
     )
