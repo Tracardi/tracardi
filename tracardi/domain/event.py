@@ -28,12 +28,14 @@ class Event(Entity):
     metadata: Metadata
     type: str
     properties: Optional[dict] = {}
+    update: bool = False
 
     source: Entity
-    session: Session
-    profile: Profile = None
+    session: Entity
+    profile: Entity = None
     context: Context
     tags: Tags = Tags()
+    aux: dict = {}
 
     def __init__(self, **data: Any):
         if 'metadata' in data and isinstance(data['metadata'], Metadata):
@@ -52,11 +54,13 @@ class Event(Entity):
         self.id = event.id
         self.type = event.type
         self.properties = event.properties
-        self.source = event.source
-        self.session = event.session
-        self.profile = event.profile
+        # do not replace those - read only
+        # self.source = event.source
+        # self.session = event.session
+        # self.profile = event.profile
         self.context = event.context
         self.tags = event.tags
+        self.aux = event.aux
 
     def is_persistent(self) -> bool:
         if 'save' in self.context.config and isinstance(self.context.config['save'], bool):

@@ -1,4 +1,8 @@
+import datetime
+
 import dateparser
+import pytimeparse
+import pytz
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 from ..domain.field import Field
@@ -107,40 +111,96 @@ class ExprTransformer(TransformerNamespace):
     def OP_VALUE_TYPE(self, args):
         return args.value
 
+    def op_value_or_field(self, args):
+        if len(args) != 1:
+            raise ValueError("Expected 1 arg.")
+
+        value = args[0]
+        if isinstance(value, Field):
+            return value._get_value()
+
+        return value
+
     def op_compound_value(self, args):
-        value_type, value = args
-        if value_type == 'datetime':
 
-            if not isinstance(value, str):
-                raise ValueError(
-                    "Value of `{}` must be string to compare it with datetime. Type of {} given".format(value,
-                                                                                                        type(value)))
+        if len(args) < 2:
+            raise ValueError("Please provide params for function {}".format(args))
 
-            date = dateparser.parse(value)
+        function = args[0]
 
-            if not date:
-                raise ValueError("Could not parse date `{}`".format(value))
-            return date
-        raise ValueError("Unknown type `{}`".format(value_type))
+        values = args[1:]
 
-    @staticmethod
-    def op_compound_field(args):
-        value_type, field = args
+        if values[0] is None:
+            if function == 'now':
+                return datetime.datetime.now()
+            if function == 'utcnow':
+                return datetime.datetime.utcnow()
+        else:
+            if function == 'datetime' and len(values) == 1:
+                value = values[0]
+                if not isinstance(value, str):
+                    raise ValueError(
+                        "Value of `{}` must be string to compare it with datetime. Type of {} given".format(value,
+                                                                                                            type(value)))
 
-        value = field._get_value()
-        if value_type == 'datetime':
+                date = dateparser.parse(value)
 
-            if not isinstance(value, str):
-                raise ValueError(
-                    "Value of `{}` must be string to compare it with datetime. Type of {} given".format(field.label,
-                                                                                                        type(value)))
+                if not date:
+                    raise ValueError("Could not parse date `{}`".format(value))
+                return date
 
-            date = dateparser.parse(value)
-            if not date:
-                raise ValueError("Could not parse date `{}`".format(value))
-            return date
+            if function == 'now' and len(values) == 1:
+                timezone = values[0]
+                return datetime.datetime.now(pytz.timezone(timezone))
 
-        raise ValueError("Unknown type `{}`".format(value_type))
+            if function == 'now.offset' and len(values) == 1:
+                offset = values[0]
+                passed_seconds = pytimeparse.parse(offset)
+                if passed_seconds is None:
+                    raise ValueError("Could not parse `{}`".format(offset))
+                return datetime.datetime.now() + datetime.timedelta(seconds=passed_seconds)
+
+            if function == 'now.offset' and len(values) == 2:
+                timezone, offset = values
+                passed_seconds = pytimeparse.parse(offset)
+                if passed_seconds is None:
+                    raise ValueError("Could not parse `{}`".format(offset))
+                timezone = pytz.timezone(timezone)
+                return datetime.datetime.now(timezone) + datetime.timedelta(seconds=passed_seconds)
+
+        raise ValueError("Unknown type `{}`".format(function))
+
+    # @staticmethod
+    # def op_compound_field(args):
+    #     print("comp")
+    #     if len(args) == 1:
+    #         # this is function without parameters
+    #         value_type = args[0]
+    #         parameter_less_function = True
+    #     else:
+    #         value_type, field = args
+    #         value = field._get_value()
+    #         parameter_less_function = False
+    #
+    #     if parameter_less_function is False:
+    #         if value_type == 'datetime':
+    #
+    #             if not isinstance(value, str):
+    #                 raise ValueError(
+    #                     "Value of `{}` must be string to compare it with datetime. Type of {} given".format(field.label,
+    #                                                                                                         type(value)))
+    #
+    #             date = dateparser.parse(value)
+    #             if not date:
+    #                 raise ValueError("Could not parse date `{}`".format(value))
+    #             return date
+    #     else:
+    #         if value_type == 'now':
+    #             return datetime.datetime.now()
+    #         if value_type == 'utcnow':
+    #             return datetime.datetime.utcnow()
+    #
+    #     raise ValueError("Unknown type `{}`".format(value_type))
 
     def op_field_sig(self, args):
         return args[0]

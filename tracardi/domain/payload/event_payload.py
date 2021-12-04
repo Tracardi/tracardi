@@ -15,8 +15,8 @@ class EventPayload(BaseModel):
     def to_event(self, metadata, source, session, profile, options):
         return Event.new({
             "metadata": metadata,
-            "session": session,
-            "profile": profile.dict(exclude={"operation": ...}),
+            "session": Entity(id=session.id),
+            "profile": Entity(id=profile.id),
             "user": self.user,
             "type": self.type,
             "properties": self.properties,

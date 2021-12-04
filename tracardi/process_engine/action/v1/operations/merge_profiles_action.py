@@ -48,6 +48,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={"mergeBy": []},
+            version="0.6.0.1",
             form=Form(groups=[
                 FormGroup(
                     fields=[

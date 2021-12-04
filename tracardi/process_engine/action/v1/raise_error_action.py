@@ -55,7 +55,7 @@ def register() -> Plugin:
             desc='Throws an error and stops workflow.',
             type='flowNode',
             width=100,
-            height=100,
+            height=200,
             icon='stop',
             group=["Input/Output"],
             documentation=Documentation(

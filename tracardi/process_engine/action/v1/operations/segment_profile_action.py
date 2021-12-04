@@ -21,6 +21,7 @@ def register() -> Plugin:
             className='SegmentProfileAction',
             inputs=["payload"],
             outputs=["payload"],
+            version="0.6.0.1",
             init=None,
             manual="segment_profiles_action"
         ),

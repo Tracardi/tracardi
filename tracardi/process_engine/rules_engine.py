@@ -36,7 +36,7 @@ class RulesEngine:
         self.profile = profile
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], list, list]:
+    async def invoke(self, load_flow_callable, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], list, list, dict]:
 
         flow_task_store = defaultdict(list)
         debug_info_by_event_type_and_rule_name = defaultdict(list)
@@ -47,6 +47,8 @@ class RulesEngine:
             rules = await rules_loading_task
 
             for rule in rules:
+
+                # this is main roles loop
 
                 try:
                     rule = Rule(**rule)
@@ -59,7 +61,11 @@ class RulesEngine:
                     continue
 
                 try:
+
+                    # Loads flow for given rule
+
                     flow = await load_flow_callable(rule.flow.id)
+
                 except Exception as e:
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(
@@ -80,37 +86,43 @@ class RulesEngine:
 
                 if source_id:
                     if source_id == event.source.id:
+
+                        # Create workflow and pass data
+
                         # todo FlowHistory is empty
                         workflow = WorkFlow(
                             FlowHistory(history=[]),
                             self.session,
-                            self.profile,
-                            event
+                            self.profile
                         )
-                        flow_task = asyncio.create_task(workflow.invoke(flow, debug=False))
+
+                        # Flows are run concurrently
+
+                        flow_task = asyncio.create_task(workflow.invoke(flow, event, debug=False))
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
                 else:
                     # todo FlowHistory is empty
                     workflow = WorkFlow(
                         FlowHistory(history=[]),
                         self.session,
-                        self.profile,
-                        event
+                        self.profile
                     )
 
                     # Creating task can cause problems. It must be thoroughly tested as
                     # concurrently running flows on the same profile may override profile data.
                     # Preliminary tests showed no issues but on heavy load we do not know if
                     # the test is still valid and every thing is ok. Solution is to remove create_task.
-                    flow_task = asyncio.create_task(workflow.invoke(flow, debug=False))
+                    flow_task = asyncio.create_task(workflow.invoke(flow, event, debug=False))
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
         # Run flows and report async
 
+        post_invoke_events = {}
         for event_type, tasks in flow_task_store.items():
             for flow_id, event_id, rule_name, task in tasks:
                 try:
-                    debug_info, log_list = await task  # type: DebugInfo, List[Log]
+                    debug_info, log_list, post_invoke_event = await task  # type: DebugInfo, List[Log], Event
+                    post_invoke_events[post_invoke_event.id] = post_invoke_event
 
                     # Store logs in one console log
                     for log in log_list:  # type: Log
@@ -152,7 +164,7 @@ class RulesEngine:
 
         ran_event_types = list(flow_task_store.keys())
 
-        return debug_info_by_event_type_and_rule_name, ran_event_types, self.console_log
+        return debug_info_by_event_type_and_rule_name, ran_event_types, self.console_log, post_invoke_events
 
     @staticmethod
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
