@@ -10,3 +10,4 @@ class User(BaseModel):
     email: str
     roles: List[str]
     disabled: bool = False
+

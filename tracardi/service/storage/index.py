@@ -59,7 +59,8 @@ class Resource:
             "event-tags": Index(multi_index=False, index="tracardi-event-tags", mapping="mappings/tag-index.json",
                                 rel=None),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type", mapping="mappings/consent-type.json",
-                                rel=None)
+                                rel=None),
+            "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None)
         }
 
     def add_indices(self, indices: dict):
