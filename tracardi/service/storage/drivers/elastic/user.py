@@ -1,10 +1,47 @@
 from tracardi.service.storage.factory import storage_manager
 from uuid import UUID
+from tracardi.service.sha1_hasher import SHA1Encoder
+from typing import List
 
 
-async def add_user(user):
-    return await storage_manager("user").upsert(replace_id=True, data=user.encode(salt="6qO.IwmWg=#..R7/zICi").dict())
+async def add_user(id: UUID, username: str, password: str, full_name: str, email: str, roles: List[str], disabled: bool):
+    return await storage_manager("user").upsert({
+        "id": str(id),
+        "username": SHA1Encoder.encode(username),
+        "password": SHA1Encoder.encode(password),
+        "full_name": full_name,
+        "email": email,
+        "roles": roles,
+        "disabled": disabled
+    })
 
 
 async def del_user(id: UUID):
-    return await storage_manager("user").delete(id)
+    return await storage_manager("user").delete(str(id))
+
+
+async def get_by_login_data(username: str, password: str):
+    return await storage_manager("user").query({
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"username": username}},
+                    {"term": {"password": password}}
+                ]
+            }
+        }
+    })
+
+
+async def check_if_exists(username: str, id: UUID) -> bool:
+    return bool((await storage_manager("user").query({
+        "query": {
+            "bool": {
+                "should": [
+                    {"term": {"username": SHA1Encoder.encode(username)}},
+                    {"term": {"_id": str(id)}}
+                ],
+                "minimum_should_match": 1
+            }
+        }
+    }))["hits"]["total"]["value"])
