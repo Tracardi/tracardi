@@ -5,7 +5,7 @@ from astral.sun import sun
 import pytz
 
 
-def day_night_split(time_now, latitude: str, longitude: str) -> Tuple[datetime, datetime]:
+def day_night_split(time_now: datetime, latitude: str, longitude: str) -> Tuple[datetime, datetime]:
 
     loc_info = LocationInfo(latitude=float(latitude), longitude=float(longitude))
     sun_info = sun(loc_info.observer, date=time_now)
