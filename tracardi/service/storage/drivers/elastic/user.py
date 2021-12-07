@@ -26,8 +26,8 @@ async def get_by_login_data(username: str, password: str) -> Union[User, None]:
         "query": {
             "bool": {
                 "must": [
-                    {"term": {"username": username}},
-                    {"term": {"password": password}}
+                    {"term": {"username": SHA1Encoder.encode(username)}},
+                    {"term": {"password": SHA1Encoder.encode(password)}}
                 ]
             }
         }
