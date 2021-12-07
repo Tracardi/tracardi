@@ -42,7 +42,7 @@ async def count_events_by_type(event_type: str, time_span: int) -> int:
 
     }
     result = await storage_manager("event").query(query)
-    return result["hits"]["total"]
+    return result["hits"]["total"]['value']
 
 
 async def heatmap_by_event_type(event_type=None):

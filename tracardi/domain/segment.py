@@ -13,11 +13,6 @@ class Segment(NamedEntity):
     def get_id(self) -> str:
         return self.name.replace(" ", "-").lower()
 
-    # Persistence
-
-    # def storage(self) -> StorageCrud:
-    #     return StorageCrud("segment", Segment, entity=self)
-
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(

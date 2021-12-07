@@ -10,9 +10,9 @@ class NewVisitAction(ActionRunner):
 
     async def run(self, payload):
         if self.session.operation.new:
-            return Result(port="TRUE", value=payload)
+            return Result(port="true", value=payload)
 
-        return Result(port="FALSE", value=payload)
+        return Result(port="false", value=payload)
 
 
 def register() -> Plugin:
@@ -22,7 +22,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.new_visit_action',
             className='NewVisitAction',
             inputs=["payload"],
-            outputs=['TRUE', 'FALSE'],
+            outputs=['true', 'false'],
             init=None,
             manual="new_visit_action",
             version='0.1',
