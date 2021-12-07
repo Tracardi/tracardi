@@ -4,8 +4,6 @@ from uuid import uuid4
 from .context import Context
 from .entity import Entity
 from .metadata import Metadata
-from .profile import Profile
-from .session import Session
 from .time import Time
 from pydantic import BaseModel, root_validator
 from typing import Tuple
