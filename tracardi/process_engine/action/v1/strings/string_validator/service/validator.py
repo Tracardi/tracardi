@@ -1,7 +1,6 @@
 import re
 import barcodenumber
-
-from tracardi_string_validator.model.configuration import Configuration
+from ..model.configuration import Configuration
 
 
 class Validator:
