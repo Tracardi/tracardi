@@ -33,7 +33,7 @@ def register() -> Plugin:
             className='TemplateAction',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.6',
+            version='0.6.0.1',
             license="MIT",
             author="Dawid Kruk",
             manual="template_action",
