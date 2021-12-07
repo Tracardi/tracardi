@@ -4,7 +4,7 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, Fo
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 
-from tracardi_event_counter.model.configuration import Configuration
+from .model.configuration import Configuration
 
 
 def validate(config: dict) -> Configuration:

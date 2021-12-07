@@ -4,7 +4,7 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, Fo
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 
-from tracardi.process_engine.action.v1.segments.profile_segmentation.model.configuration import Configuration
+from .model.configuration import Configuration
 from tracardi.process_engine.tql.condition import Condition
 
 

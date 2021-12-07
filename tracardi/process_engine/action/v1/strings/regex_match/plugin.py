@@ -1,7 +1,7 @@
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
-from tracardi_regex_match.model.model import Configuration
+from .model.model import Configuration
 import re
 
 

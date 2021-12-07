@@ -3,7 +3,7 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, Fo
     Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
-from tracardi_local_timespan.model.configuration import TimeSpanConfiguration
+from .model.configuration import TimeSpanConfiguration
 
 
 def validate(config: dict) -> TimeSpanConfiguration:

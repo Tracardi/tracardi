@@ -3,8 +3,8 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, Fo
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 
-from tracardi_regex_validator.model.configuration import Configuration
-from tracardi_regex_validator.service.validator import Validator
+from .model.configuration import Configuration
+from .service.validator import Validator
 
 
 def validate(config: dict) -> Configuration:
