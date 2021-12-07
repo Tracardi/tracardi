@@ -87,7 +87,7 @@ def register() -> Plugin:
             name='Local time span',
             desc='Checks if an event is in given time span',
             type='flowNode',
-            width=200,
+            width=300,
             height=100,
             icon='profiler',
             group=["Time"],

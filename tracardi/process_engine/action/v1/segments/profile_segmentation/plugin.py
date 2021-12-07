@@ -130,7 +130,7 @@ def register() -> Plugin:
             name='Add/Remove segment',
             desc='This plugin will add/remove segment from the profile.',
             type='flowNode',
-            width=200,
+            width=300,
             height=100,
             icon='group-person',
             group=["Data processing"],
