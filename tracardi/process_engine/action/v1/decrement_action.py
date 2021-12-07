@@ -49,7 +49,7 @@ class DecrementAction(ActionRunner):
             value = 0
 
         if type(value) != int:
-            raise ValueError("Filed `{}` value is not numeric.".format(self.config.field))
+            raise ValueError("Value of field '{}' is not numeric.".format(self.config.field))
 
         value -= self.config.decrement
 

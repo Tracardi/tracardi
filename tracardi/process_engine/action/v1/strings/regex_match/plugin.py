@@ -1,5 +1,6 @@
 from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
 from .model.model import Configuration
 import re
@@ -51,7 +52,33 @@ def register() -> Plugin:
                 "pattern": "<pattern>",
                 "text": "<text or path to text>",
                 "group_prefix": "Group"
-            }
+            },
+            form=Form(
+                groups=[
+                    FormGroup(
+                        fields=[
+                            FormField(
+                                id="pattern",
+                                name="Regex pattern",
+                                description="Provide regular expression string to match with provided text.",
+                                component=FormComponent(type="text", props={"label": "Pattern"})
+                            ),
+                            FormField(
+                                id="text",
+                                name="Path to text",
+                                description="Provide path to field with text to match.",
+                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                            ),
+                            FormField(
+                                id="group_prefix",
+                                name="Group prefix",
+                                description="Provide group prefix for regex matching.",
+                                component=FormComponent(type="text", props={"label": "Group prefix"})
+                            )
+                        ]
+                    )
+                ]
+            )
         ),
         metadata=MetaData(
             name='Regex match',
