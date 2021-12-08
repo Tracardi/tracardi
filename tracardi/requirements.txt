@@ -19,3 +19,4 @@ pip>=21.2.4
 deepdiff>=5.5.0
 pytimeparse
 barcodenumber
+astral
