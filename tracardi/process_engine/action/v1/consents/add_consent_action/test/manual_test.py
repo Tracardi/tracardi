@@ -13,7 +13,7 @@ init = {
 payload = {
     "consents": {
         "marketing-consent": {"revoke": datetime.utcnow()},
-        "no-consent": {"revoke": datetime.utcnow()}
+        # "no-consent": {"revoke": datetime.utcnow()}
     }
 }
 profile = Profile(id="profile-id")

@@ -1,3 +1,4 @@
+from tracardi.domain.consent_type import ConsentType
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
@@ -12,14 +13,16 @@ class ConsentAdder(ActionRunner):
 
     async def run(self, payload):
         consents = Consents(__root__=payload["consents"] if "consents" in payload else {})
-        for consent in consents:
-            consent_type = await storage.driver.consent_type.get_by_id(consent[0])
-            if consent_type is not None:
-                if not consent_type["revokable"]:
-                    consent[1].set_to_none()
-                self.profile.consents[consent[0]] = consent[1]
+        for consent_id, consent in consents:
+            consent_type_data = await storage.driver.consent_type.get_by_id(consent_id)
+
+            if consent_type_data is not None:
+                consent_type = ConsentType(**consent_type_data)
+                if consent_type.revokable is False:
+                    consent.set_to_none()
+                self.profile.consents[consent_id] = consent
             else:
-                return Result(port="error", value=Exception(f"There is no consent type with id: {consent[0]}")), \
+                return Result(port="error", value=Exception(f"There is no consent type with id: {consent_id}")), \
                        Result(port="payload", value=payload)
         return Result(port="payload", value=payload)
 
@@ -32,10 +35,15 @@ def register() -> Plugin:
             className='ConsentAdder',
             inputs=["payload"],
             outputs=['payload', 'error'],
-            version='0.1.2',
+            version='0.6.0.1',
             license="MIT",
             author="Dawid Kruk",
-            init={}
+            init={
+                "consents": {
+                    "<consent-id-1>": {"revoke": "<revoke-date>"},
+                    "<consent-id-2>": {"revoke": "<revoke-date>"}
+                }
+            }
         ),
         metadata=MetaData(
             name='Add consent',
