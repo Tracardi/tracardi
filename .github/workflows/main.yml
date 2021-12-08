@@ -1,0 +1,12 @@
+on:
+  issues:
+    types: [opened]
+jobs:
+  createCard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign task to project
+        uses: peter-evans/create-or-update-project-card@v1
+        with:
+          project-name: TRACARDI
+          column-name: ToDo
