@@ -7,7 +7,7 @@ from .entity import Entity
 from .metadata import Metadata
 from .time import Time
 from .value_object.storage_info import StorageInfo
-from ..protocol.debuggable import Debuggable
+from tracardi.protocol.debuggable import Debuggable
 from ..service.secrets import encrypt, decrypt
 
 
