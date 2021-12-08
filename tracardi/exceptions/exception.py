@@ -37,3 +37,7 @@ class ConnectionException(TracardiException):
     def __init__(self, *args, response=None):
         TracardiException.__init__(self, *args)
         self.response = response
+
+
+class LoginException(TracardiException):
+    pass

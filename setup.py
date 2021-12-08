@@ -33,7 +33,9 @@ setup(
         'tracardi-plugin-sdk>=0.6.30',
         'tracardi_graph_runner>=0.6.9',
         'tracardi-dot-notation>=0.6.6',
-        'pytimeparse'
+        'pytimeparse',
+        'barcodenumber',
+        'astral'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

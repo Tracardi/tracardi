@@ -7,7 +7,6 @@ from .entity import Entity
 from .metadata import Metadata
 from .time import Time
 from .value_object.storage_info import StorageInfo
-from ..protocol.debuggable import Debuggable
 from ..service.secrets import encrypt, decrypt
 
 
@@ -15,7 +14,7 @@ class ResourceCredentials(BaseModel):
     production: Optional[dict] = {}
     test: Optional[dict] = {}
 
-    def get_credentials(self, plugin: Debuggable, output: Type[BaseModel]):
+    def get_credentials(self, plugin, output: Type[BaseModel]):
         """
         Returns configuration of resource depending on the state of the executed workflow: test or production.
         """

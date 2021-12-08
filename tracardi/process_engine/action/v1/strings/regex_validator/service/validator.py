@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 from typing.re import Match
-from tracardi_regex_validator.model.configuration import Configuration
+from ..model.configuration import Configuration
 
 
 class Validator:
