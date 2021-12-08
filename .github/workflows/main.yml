@@ -8,5 +8,7 @@ jobs:
       - name: Assign task to project
         uses: peter-evans/create-or-update-project-card@v1
         with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          project-location: Tracardi
           project-name: TRACARDI
           column-name: ToDo
