@@ -3,11 +3,12 @@ from datetime import datetime
 from typing import Dict, Union
 
 
+class Configuration(BaseModel):
+    consents: str
+
+
 class Revoke(BaseModel):
     revoke: Union[datetime, None] = None
-
-    def set_to_none(self):
-        self.revoke = None
 
 
 class Consents(BaseModel):
