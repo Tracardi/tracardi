@@ -8,7 +8,7 @@ from datetime import datetime
 from tracardi.process_engine.action.v1.consents.add_consent_action.plugin import ConsentAdder
 
 init = {
-    "consents":"payload@consents"
+    "consents": "payload@consents"
 }
 payload = {
     "consents": {
