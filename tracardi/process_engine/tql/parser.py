@@ -12,6 +12,7 @@ class Parser:
         ]
         self.base_parser = Lark(grammar,
                                 start=start,
+                                parser=parser,
                                 transformer=transformer,
                                 import_paths=import_paths)
 
