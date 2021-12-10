@@ -92,6 +92,7 @@ class ElasticStorage:
                 }
             }
         }
+        print(query)
         return await self.search(query)
 
     async def match_by(self, field, value, limit=100):

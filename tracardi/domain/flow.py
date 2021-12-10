@@ -16,7 +16,7 @@ logger.setLevel(logging.WARNING)
 
 
 class FlowSchema(BaseModel):
-    version: str
+    version: str = tracardi.version
     uri: str = 'http://www.tracardi.com/2021/WFSchema'
     server_version: str = None
 

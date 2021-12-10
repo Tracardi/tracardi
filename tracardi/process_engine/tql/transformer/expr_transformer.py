@@ -168,6 +168,20 @@ class ExprTransformer(TransformerNamespace):
                 timezone = pytz.timezone(timezone)
                 return datetime.datetime.now(timezone) + datetime.timedelta(seconds=passed_seconds)
 
+            if function == 'lowercase' and len(values) == 1:
+                value = values[0]
+                print(value)
+                if isinstance(value, str):
+                    return value.lower()
+                return value
+
+            if function == 'uppercase' and len(values) == 1:
+                value = values[0]
+                print(value)
+                if isinstance(value, str):
+                    return value.upper()
+                return value
+
         raise ValueError("Unknown type `{}`".format(function))
 
     # @staticmethod

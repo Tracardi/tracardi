@@ -8,12 +8,12 @@ from datetime import datetime
 from tracardi.process_engine.action.v1.consents.add_consent_action.plugin import ConsentAdder
 
 init = {
-
+    "consents": "payload@consents"
 }
 payload = {
     "consents": {
         "marketing-consent": {"revoke": datetime.utcnow()},
-        # "no-consent": {"revoke": datetime.utcnow()}
+        "no-consent": {"revoke": datetime.utcnow()}
     }
 }
 profile = Profile(id="profile-id")
