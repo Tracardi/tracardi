@@ -40,9 +40,9 @@ class IfAction(ActionRunner):
 
         condition = Condition()
         if await condition.evaluate(self.config.condition, dot):
-            return Result(port="TRUE", value=payload)
+            return Result(port="true", value=payload)
         else:
-            return Result(port="FALSE", value=payload)
+            return Result(port="false", value=payload)
 
 
 def register() -> Plugin:
@@ -52,7 +52,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.if_action',
             className='IfAction',
             inputs=["payload"],
-            outputs=["TRUE", "FALSE"],
+            outputs=["true", "false"],
             init={"condition": ""},
             form=Form(groups=[
                 FormGroup(
@@ -69,7 +69,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual="if_action",
-            version='0.2',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
@@ -84,11 +84,11 @@ def register() -> Plugin:
             group=['Conditions'],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                    "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "TRUE": PortDoc(desc="This port returns payload if the defined condition is met."),
-                    "FALSE": PortDoc(desc="This port returns payload if the defined condition is NOT met.")
+                    "true": PortDoc(desc="Returns payload if the defined condition is met."),
+                    "false": PortDoc(desc="Returns payload if the defined condition is NOT met.")
                 }
             )
         )
