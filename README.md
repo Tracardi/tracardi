@@ -25,7 +25,8 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 ## Screenshots
 
-![Screenshot 1](https://raw.githubusercontent.com/atompie/tracardi-images/master/images/intro5.png)
+![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
+
 
 # Installation
 
