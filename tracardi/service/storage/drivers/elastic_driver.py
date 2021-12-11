@@ -15,6 +15,7 @@ import tracardi.service.storage.drivers.elastic.raw
 import tracardi.service.storage.drivers.elastic.tag
 import tracardi.service.storage.drivers.elastic.consent_type
 import tracardi.service.storage.drivers.elastic.user
+import tracardi.service.storage.drivers.elastic.validation_schema
 
 
 class ElasticDriver:
@@ -86,3 +87,7 @@ class ElasticDriver:
     @property
     def user(self):
         return tracardi.service.storage.drivers.elastic.user
+
+    @property
+    def validation_schema(self):
+        return tracardi.service.storage.drivers.elastic.validation_schema
