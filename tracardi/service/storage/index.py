@@ -60,7 +60,9 @@ class Resource:
                                 rel=None),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type", mapping="mappings/consent-type.json",
                                 rel=None),
-            "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None)
+            "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None),
+            "validation-schema": Index(multi_index=False, index="tracardi-validation-schema",
+                                       mapping="mappings/validation-schema-index.json", rel=None)
         }
 
     def add_indices(self, indices: dict):
