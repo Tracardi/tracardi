@@ -10,8 +10,8 @@
     | product "/" atom  -> div
 
 ?atom: NUMBER           -> number
-    | "-" atom          -> neg
     | NAME              -> var
+    | "-" atom          -> neg
     | "(" sum ")"
     | FIELD             -> field
 
@@ -19,8 +19,8 @@
     | FIELD
 
 FIELD: /(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+/
+NAME: /[a-zA-Z0-9\._]+/
 
-%import common.CNAME -> NAME
 %import common.NUMBER
 %import common.WS_INLINE
 

@@ -10,10 +10,11 @@ class Parser:
         import_paths = [
             os.path.join(_local_dir, 'grammar')
         ]
+        self.transformer = transformer
         self.base_parser = Lark(grammar,
                                 start=start,
                                 parser=parser,
-                                transformer=transformer,
+                                transformer=self.transformer,
                                 import_paths=import_paths)
 
     @staticmethod
@@ -23,3 +24,4 @@ class Parser:
 
     def parse(self, query):
         return self.base_parser.parse(query)
+

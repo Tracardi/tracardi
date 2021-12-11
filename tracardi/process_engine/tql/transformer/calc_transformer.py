@@ -1,4 +1,3 @@
-from tracardi.process_engine.tql.transformer.function_transformer import FunctionTransformer
 from tracardi_dot_notation.dot_accessor import DotAccessor
 from tracardi.process_engine.tql.transformer.transformer_namespace import TransformerNamespace
 from lark import v_args, Token
@@ -18,17 +17,11 @@ class CalcTransformer(TransformerNamespace):
         self._dot = dot
         self.vars = {}
 
-    def function(self, *args):
-        print(args)
-        return args
-
     def assign_var(self, *args):
-        print(args)
         token, value = args
         if token.type == "NAME":
             self.vars[token.value] = value
         elif token.type == "FIELD":
-            self.vars[token.value] = value
             self._dot[token.value] = value
         return value
 
@@ -49,4 +42,4 @@ class CalcTransformer(TransformerNamespace):
         try:
             return self.vars[name]
         except KeyError:
-            raise Exception("Variable not found: %s" % name)
+            raise Exception(f"Variable `{name}` not found")
