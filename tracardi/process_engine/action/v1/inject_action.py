@@ -61,7 +61,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual='inject_action',
-            version='0.6.0',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
@@ -69,9 +69,6 @@ def register() -> Plugin:
             name='Inject',
             desc='Inject .',
             keywords=['start node'],
-            type='flowNode',
-            width=100,
-            height=100,
             icon='json',
             group=["Input/Output"],
             documentation=Documentation(

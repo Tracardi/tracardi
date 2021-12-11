@@ -31,7 +31,7 @@ def register() -> Plugin:
             className='RaiseErrorAction',
             inputs=["payload"],
             outputs=[],
-            version='0.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski",
             init={
@@ -53,9 +53,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Throw error',
             desc='Throws an error and stops workflow.',
-            type='flowNode',
-            width=100,
-            height=200,
             icon='stop',
             group=["Input/Output"],
             documentation=Documentation(

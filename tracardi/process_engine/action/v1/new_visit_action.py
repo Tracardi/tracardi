@@ -25,7 +25,7 @@ def register() -> Plugin:
             outputs=['true', 'false'],
             init=None,
             manual="new_visit_action",
-            version='0.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
@@ -33,9 +33,6 @@ def register() -> Plugin:
             name='Is it a new visit',
             desc='If new visit then it returns true on TRUE output, otherwise returns false on FALSE port.',
             keywords=['condition'],
-            type='flowNode',
-            width=200,
-            height=100,
             icon='question',
             group=["Conditions"],
             documentation=Documentation(
