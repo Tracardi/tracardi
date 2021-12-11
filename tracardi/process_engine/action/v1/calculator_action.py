@@ -59,6 +59,7 @@ def register() -> Plugin:
             className='CalculatorAction',
             inputs=["payload"],
             outputs=["payload"],
+            manual="calculator_action",
             init={
                 "calc_dsl": ""
             },
