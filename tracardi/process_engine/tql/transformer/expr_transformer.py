@@ -160,13 +160,33 @@ class ExprTransformer(TransformerNamespace):
                     raise ValueError("Could not parse `{}`".format(offset))
                 return datetime.datetime.now() + datetime.timedelta(seconds=passed_seconds)
 
-            if function == 'now.offset' and len(values) == 2:
+            if function == 'now.timezone.offset' and len(values) == 2:
                 timezone, offset = values
                 passed_seconds = pytimeparse.parse(offset)
                 if passed_seconds is None:
                     raise ValueError("Could not parse `{}`".format(offset))
                 timezone = pytz.timezone(timezone)
                 return datetime.datetime.now(timezone) + datetime.timedelta(seconds=passed_seconds)
+
+            if function == 'datetime.offset' and len(values) == 2:
+                date, offset = values
+                passed_seconds = pytimeparse.parse(offset)
+                if passed_seconds is None:
+                    raise ValueError("Could not parse `{}`".format(offset))
+
+                return date + datetime.timedelta(seconds=passed_seconds)
+
+            if function == 'datetime.timezone' and len(values) == 2:
+                date, timezone = values
+                timezone = pytz.timezone(timezone)
+                tz_date = date.replace(tzinfo=pytz.utc).astimezone(timezone)
+                return timezone.normalize(tz_date)
+
+            if function == 'now.timezone' and len(values) == 1:
+                timezone, = values
+                timezone = pytz.timezone(timezone)
+                tz_date = datetime.datetime.now().replace(tzinfo=pytz.utc).astimezone(timezone)
+                return timezone.normalize(tz_date)
 
             if function == 'lowercase' and len(values) == 1:
                 value = values[0]
