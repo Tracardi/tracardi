@@ -1,11 +1,7 @@
 from datetime import datetime
 from typing import Optional, Any, List, Union, Type
-
 from pydantic import BaseModel
-
 from .entity import Entity
-from .metadata import Metadata
-from .time import Time
 from .value_object.storage_info import StorageInfo
 from ..service.secrets import encrypt, decrypt
 
@@ -26,7 +22,7 @@ class ResourceCredentials(BaseModel):
 
 class Resource(Entity):
     type: str
-    metadata: Optional[Metadata]
+    timestamp: datetime
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     credentials: ResourceCredentials = ResourceCredentials()
@@ -36,10 +32,7 @@ class Resource(Entity):
     consent: bool = False
 
     def __init__(self, **data: Any):
-        data['metadata'] = Metadata(
-            time=Time(
-                insert=datetime.utcnow()
-            ))
+        data['timestamp'] = datetime.utcnow()
         super().__init__(**data)
 
     # Persistence
@@ -54,7 +47,7 @@ class Resource(Entity):
 
 class ResourceRecord(Entity):
     type: str
-    metadata: Optional[Metadata]
+    timestamp: datetime
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     credentials: Optional[str] = None
@@ -64,10 +57,7 @@ class ResourceRecord(Entity):
     consent: bool = False
 
     def __init__(self, **data: Any):
-        data['metadata'] = Metadata(
-            time=Time(
-                insert=datetime.utcnow()
-            ))
+        data['timestamp'] = datetime.utcnow()
         super().__init__(**data)
 
     @staticmethod

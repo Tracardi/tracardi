@@ -1,6 +1,7 @@
 from typing import Optional, Union
 from tracardi.config import memory_cache
 from tracardi.domain.entity import Entity
+from tracardi.domain.event_source import EventSource
 from tracardi.domain.resource import ResourceRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.service.storage.driver import storage
@@ -17,23 +18,22 @@ class SourceCacher:
 
         source = await self.get(entity)  # type: Optional[ResourceRecord]
         if source is None:
-            raise ValueError("Invalid source.")
+            raise ValueError("Invalid event source.")
 
         if not source.enabled:
-            raise ValueError("Source disabled.")
+            raise ValueError("Event source disabled.")
 
         return source
 
-    async def get(self, resource: Entity) -> Optional[Union[ResourceRecord]]:
-        if 'resource' in self._cache:
-            resource = self._cache['resource'].data
-            return resource
+    async def get(self, event_source: Entity) -> Optional[Union[EventSource]]:
+        if 'event-source' in self._cache:
+            return self._cache['event-source'].data
         else:
             # Expired
-            resource = await storage.driver.resource.load_record(resource.id)  # type: ResourceRecord
-            if resource is not None:
-                self._cache['resource'] = CacheItem(data=resource, ttl=memory_cache.source_ttl)
-                return resource
+            event_source = await storage.driver.event_source.load(event_source.id)  # type: EventSource
+            if event_source is not None:
+                self._cache['event-source'] = CacheItem(data=event_source, ttl=memory_cache.source_ttl)
+                return event_source
             return None
 
 
