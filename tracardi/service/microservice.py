@@ -1,27 +1,30 @@
 import aiohttp
 from aiohttp import ClientResponse
 from pydantic import BaseModel
-from tracardi.service.singleton import Singleton
 from tracardi.domain.credentials import Credentials
-
 from tracardi.domain.token import Token
 from tracardi.exceptions.exception import ConnectionException
 
 
-class MicroserviceApi(metaclass=Singleton):
+class MicroserviceApi:
 
     def __init__(self, url, credentials: Credentials, timeout=15):
+        if url[-1] == '/':
+            url = url[:-1]
         self.credentials = credentials
         self.url = url
         self.token = None
         self.timeout = aiohttp.ClientTimeout(total=timeout)
-        print(url)
 
     async def authorize(self) -> Token:
         async with aiohttp.ClientSession(timeout=self.timeout) as session:
+            if len(self.url) > 0 and self.url[-1] == '/':
+                token_endpoint = 'token'
+            else:
+                token_endpoint = '/token'
             async with session.request(
                     method="POST",
-                    url=f"{self.url}/token",
+                    url=f"{self.url}{token_endpoint}",
                     data=self.credentials.dict()
             ) as response:
                 if 200 <= response.status < 400:
@@ -37,7 +40,7 @@ class MicroserviceApi(metaclass=Singleton):
                 url = f"{self.url}{endpoint}"
             else:
                 url = f"{self.url}/{endpoint}"
-
+            print("url", url)
             async with session.request(
                     method=method,
                     url=url,

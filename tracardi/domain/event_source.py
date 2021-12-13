@@ -1,20 +1,7 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, Union, List, Any
-
 from tracardi.domain.value_object.storage_info import StorageInfo
-
 from tracardi.domain.entity import Entity
-
-
-class Endpoint(BaseModel):
-    url: str
-    method: str
-
-
-class RestEndpoint(BaseModel):
-    get: Endpoint
-    post: Endpoint
 
 
 class EventSource(Entity):
@@ -26,9 +13,6 @@ class EventSource(Entity):
     enabled: Optional[bool] = True
     tags: Union[List[str], str] = ["general"]
     icon: str = None
-    configurable: bool = False
-    # hash: str
-    endpoints: Optional[RestEndpoint] = None
 
     def __init__(self, **data: Any):
         data['timestamp'] = datetime.utcnow()
