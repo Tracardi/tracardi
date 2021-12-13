@@ -15,6 +15,7 @@ import tracardi.service.storage.drivers.elastic.raw
 import tracardi.service.storage.drivers.elastic.tag
 import tracardi.service.storage.drivers.elastic.consent_type
 import tracardi.service.storage.drivers.elastic.user
+import tracardi.service.storage.drivers.elastic.event_source
 
 
 class ElasticDriver:
@@ -58,6 +59,10 @@ class ElasticDriver:
     @property
     def resource(self):
         return tracardi.service.storage.drivers.elastic.resource
+
+    @property
+    def event_source(self):
+        return tracardi.service.storage.drivers.elastic.event_source
 
     @property
     def action(self):
