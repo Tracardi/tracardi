@@ -9,7 +9,7 @@ from tracardi.exceptions.exception import ConnectionException
 class MicroserviceApi:
 
     def __init__(self, url, credentials: Credentials, timeout=15):
-        if url[-1] == '/':
+        if len(url) > 0 and url[-1] == '/':
             url = url[:-1]
         self.credentials = credentials
         self.url = url
