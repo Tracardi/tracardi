@@ -1,5 +1,6 @@
 from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.event_payload_validator import PayloadValidatorRecord, EventPayloadValidator
+from tracardi.exceptions.exception import EventValidatorNotFound
 
 
 async def add_schema(schema: EventPayloadValidator):
@@ -17,4 +18,6 @@ async def load_schemas(start: int = 0, limit: int = 10):
 
 async def get_schema(event_type: str) -> EventPayloadValidator:
     result = await storage_manager("validation-schema").load(event_type)
-    return PayloadValidatorRecord(**result).decode() if result is not None else result
+    if result is None:
+        raise EventValidatorNotFound(f"There is no validator object for event type: {event_type}")
+    return PayloadValidatorRecord(**result).decode()

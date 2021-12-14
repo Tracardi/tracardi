@@ -1,4 +1,4 @@
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, validator
 from typing import List, Union, Dict
 import jsonschema
 from tracardi.service.secrets import encrypt, decrypt
@@ -9,14 +9,14 @@ class EventPayloadValidator(BaseModel):
     to_validate: Dict[str, Dict]
     event_type: str
 
-    @root_validator
-    def validate_root(cls, values):
-        for value in values["to_validate"].values():
+    @validator("to_validate")
+    def validate_root(cls, v):
+        for value in v.values():
             try:
                 jsonschema.Draft202012Validator.check_schema(value)
             except jsonschema.SchemaError as e:
                 raise ValueError(f"Given schema is invalid, detail: {str(e)}")
-        return values
+        return v
 
     def encode(self) -> 'PayloadValidatorRecord':
         return PayloadValidatorRecord(
@@ -27,7 +27,7 @@ class EventPayloadValidator(BaseModel):
 
 
 class PayloadValidatorRecord(BaseModel):
-    to_exclude: Union[List[str], str]
+    to_exclude: List[str]
     to_validate: str
     id: str
 

@@ -8,7 +8,5 @@ def validate(dot: DotAccessor, schema: EventPayloadValidator) -> None:
     for key, val_schema in schema.to_validate.items():
         try:
             jsonschema.validate(dot[key], val_schema)
-        except jsonschema.ValidationError as e:
-            raise EventValidationException(str(e))
-        except KeyError as e:
+        except (jsonschema.ValidationError, KeyError) as e:
             raise EventValidationException(str(e))
