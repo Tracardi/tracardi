@@ -103,8 +103,10 @@ class CollectionCrud:
             return await self.storage.load_all(start, limit)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args):
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def uniq_field_value(self, field) -> AggResult:
         try:
@@ -120,8 +122,10 @@ class CollectionCrud:
             }
             return AggResult('uniq', await self.storage.query(query), return_counts=False)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args):
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
 
 class StorageFor:
