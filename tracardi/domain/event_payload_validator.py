@@ -5,7 +5,6 @@ from tracardi.service.secrets import encrypt, decrypt
 
 
 class EventPayloadValidator(BaseModel):
-    to_exclude: List[str]
     to_validate: Dict[str, Dict]
     event_type: str
 
@@ -20,20 +19,17 @@ class EventPayloadValidator(BaseModel):
 
     def encode(self) -> 'PayloadValidatorRecord':
         return PayloadValidatorRecord(
-            to_exclude=self.to_exclude,
             to_validate=encrypt(self.to_validate),
             id=self.event_type.lower().replace(" ", "-")
         )
 
 
 class PayloadValidatorRecord(BaseModel):
-    to_exclude: List[str]
     to_validate: str
     id: str
 
     def decode(self) -> EventPayloadValidator:
         return EventPayloadValidator(
-            to_exclude=self.to_exclude,
             to_validate=decrypt(self.to_validate),
             event_type=self.id
         )
