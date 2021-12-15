@@ -18,11 +18,11 @@ class TemplateAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
-        self.dot = DotTemplate()
+        self.dot_template = DotTemplate()
 
     async def run(self, payload):
         accessor = self._get_dot_accessor(payload)
-        return Result(port="payload", value=self.dot.render(self.config.template, accessor))
+        return Result(port="payload", value=self.dot_template.render(self.config.template, accessor))
 
 
 def register() -> Plugin:
@@ -57,9 +57,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Template data',
             desc='Returns a string where placeholders are replaced with given values.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='template',
             group=["Data processing"],
             documentation=Documentation(

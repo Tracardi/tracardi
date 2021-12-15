@@ -223,37 +223,47 @@ class PersistenceService:
         try:
             return await self.storage.load(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         try:
             return StorageResult(await self.storage.load_by(field, value, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         try:
             return StorageResult(await self.storage.match_by(field, value, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def load_by_values(self, field_value_pairs: List[tuple],
                              sort_by: Optional[List[storage.ElasticFiledSort]] = None, limit=1000) -> StorageResult:
         try:
             return StorageResult(await self.storage.load_by_values(field_value_pairs, sort_by, limit=limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def delete_by(self, field: str, value: str) -> dict:
         try:
             return await self.storage.delete_by(field, value)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def load_all(self, start: int = 0, limit: int = 100) -> StorageResult:
         try:
@@ -267,8 +277,10 @@ class PersistenceService:
             result = await self.storage.search(query)
             return StorageResult(result)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def upsert(self, data, replace_id: bool = True) -> BulkInsertResult:
         try:
@@ -287,15 +299,19 @@ class PersistenceService:
             return await self.storage.create(payload)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def delete(self, id: str) -> dict:
         try:
             return await self.storage.delete(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def filter(self, query: dict) -> StorageResult:
         try:
@@ -306,9 +322,8 @@ class PersistenceService:
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
-            else:
-                message = details = str(e)
-            raise StorageException(str(e), message=message, details=details)
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def aggregate(self, query: dict, aggregate_key='key') -> StorageAggregateResult:
         try:
@@ -317,29 +332,37 @@ class PersistenceService:
             _logger.warning("No result found for query {}".format(query))
             return StorageAggregateResult()
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def query(self, query):
         try:
             return await self.storage.search(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def refresh(self, params=None, headers=None):
         try:
             return await self.storage.refresh(params, headers)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def flush(self, params=None, headers=None):
         try:
             return await self.storage.flush(params, headers)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def query_by_sql(self, query: str, start: int = 0, limit: int = 0):
         engine = SqlSearchQueryEngine(self)
@@ -357,12 +380,16 @@ class PersistenceService:
         try:
             return await self.storage.update_by_query(query=query)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def delete_by_query(self, query: dict):
         try:
             return await self.storage.delete_by_query(query=query)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))

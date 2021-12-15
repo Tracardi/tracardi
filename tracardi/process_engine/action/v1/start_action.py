@@ -24,17 +24,14 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init=None,
-            version='0.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Start',
             desc='Starts workflow and returns empty payload.',
-            type='flowNode',
             keywords=['start node'],
-            width=200,
-            height=100,
             icon='start',
             group=["Input/Output"],
             documentation=Documentation(
