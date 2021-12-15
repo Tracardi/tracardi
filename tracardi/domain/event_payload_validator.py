@@ -5,7 +5,7 @@ from tracardi.service.secrets import encrypt, decrypt
 
 
 class EventPayloadValidator(BaseModel):
-    to_exclude: Union[List[str], str]
+    to_exclude: List[str]
     to_validate: Dict[str, Dict]
     event_type: str
 
