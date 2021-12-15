@@ -25,7 +25,7 @@ def register() -> Plugin:
             outputs=['true', 'false'],
             init=None,
             manual="new_profile_action",
-            version='0.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
