@@ -9,7 +9,7 @@ class EventPayloadValidator(BaseModel):
     event_type: str
 
     @validator("to_validate")
-    def validate_root(cls, v):
+    def validate_schemas(cls, v):
         for value in v.values():
             try:
                 jsonschema.Draft202012Validator.check_schema(value)
