@@ -9,8 +9,11 @@ class TracardiProEndpoint(Entity):
     username: str
     password: str
 
-    def get_registered_services_endpoint(self):
+    def get_running_services_endpoint(self):
         return f"/services/{self.token}"
 
     def get_available_services_endpoint(self):
         return f"/services"
+
+    def get_running_service(self, id):
+        return f"/service/{id}"
