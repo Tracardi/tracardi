@@ -17,3 +17,7 @@ async def save_pro_service_endpoint(endpoint: TracardiProEndpoint):
 
 async def delete_pro_service_endpoint():
     return await StorageFor(Entity(id="0")).index("tracardi-pro").delete()
+
+
+async def refresh():
+    return await storage_manager('tracardi-pro').refresh()

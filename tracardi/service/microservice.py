@@ -40,7 +40,7 @@ class MicroserviceApi:
                 url = f"{self.url}{endpoint}"
             else:
                 url = f"{self.url}/{endpoint}"
-            print("url", url)
+
             async with session.request(
                     method=method,
                     url=url,
