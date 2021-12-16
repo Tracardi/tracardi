@@ -31,6 +31,8 @@ class Resource:
 
     def __init__(self):
         self.resources = {
+            "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json",
+                                 rel=None),
             "project": Index(multi_index=False, index="tracardi-flow-project", mapping=None, rel=None),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),

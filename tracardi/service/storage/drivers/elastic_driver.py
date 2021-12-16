@@ -17,9 +17,14 @@ import tracardi.service.storage.drivers.elastic.consent_type
 import tracardi.service.storage.drivers.elastic.user
 import tracardi.service.storage.drivers.elastic.validation_schema
 import tracardi.service.storage.drivers.elastic.event_source
+import tracardi.service.storage.drivers.elastic.pro
 
 
 class ElasticDriver:
+
+    @property
+    def pro(self):
+        return tracardi.service.storage.drivers.elastic.pro
 
     @property
     def purchase(self):
