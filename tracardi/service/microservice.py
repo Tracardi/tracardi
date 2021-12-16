@@ -40,7 +40,7 @@ class MicroserviceApi:
                 url = f"{self.url}{endpoint}"
             else:
                 url = f"{self.url}/{endpoint}"
-            print("url", url)
+
             async with session.request(
                     method=method,
                     url=url,
@@ -50,7 +50,7 @@ class MicroserviceApi:
 
                 return response
 
-    async def call(self, endpoint, method, data) -> ClientResponse:
+    async def call(self, endpoint, method, data=None) -> ClientResponse:
 
         if self.token is None:
             self.token = await self.authorize()

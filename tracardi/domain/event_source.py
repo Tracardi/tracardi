@@ -10,8 +10,10 @@ class EventSource(Entity):
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     url: Optional[str] = None
+    token: str = ""
     username: str = ""
     password: str = ""
+    service: str = None
     enabled: Optional[bool] = True
     tags: Union[List[str], str] = ["general"]
     icon: str = None

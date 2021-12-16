@@ -5,6 +5,7 @@ import asyncio
 from aiohttp import ClientResponse
 from pydantic import BaseModel, AnyHttpUrl
 
+from tracardi.domain.event_source import EventSource
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -16,38 +17,36 @@ from tracardi.service.microservice import MicroserviceApi
 from tracardi.domain.entity import Entity
 
 
-class ResourceConfiguration(BaseModel):
-    url: AnyHttpUrl = "http://localhost:12345"
-    username: str = "admin"
-    password: str = "admin"
+class ServiceConfiguration(BaseModel):
+    callback_url: AnyHttpUrl
 
 
 class Configuration(BaseModel):
-    source: Entity
+    service: Entity
     timeout: int = 15
 
 
-def validate(config: dict):
+def validate(config: dict) -> Configuration:
     return Configuration(**config)
 
 
-class ProfileMetricsApi(ActionRunner):
+class SchedulerPlugin(ActionRunner):
 
     @staticmethod
-    async def build(**kwargs) -> 'ProfileMetricsApi':
+    async def build(**kwargs) -> 'SchedulerPlugin':
         config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        plugin = ProfileMetricsApi(config, resource.credentials)
+        service = await storage.driver.raw.load(config.service.id, 'event-source', EventSource)
+        plugin = SchedulerPlugin(config, service)
         return plugin
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        source = credentials.get_credentials(self, output=ResourceConfiguration)  # type: ResourceConfiguration
+    def __init__(self, config: Configuration, service: EventSource):
         self.config = config
+        # url must be build from token (schedule/event/token)
         self.client = MicroserviceApi(
-            source.url,
+            service.url,
             credentials=Credentials(
-                username=source.username,
-                password=source.password
+                username=service.username,
+                password=service.password
             )
         )
 
@@ -96,53 +95,46 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.microservice.profile_metrics',
-            className='ProfileMetricsApi',
+            module='tracardi.process_engine.action.v1.pro.scheduler.plugin',
+            className='SchedulerPlugin',
             inputs=["payload"],
             outputs=['response', 'error', 'payload'],
             version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski",
             init={
-                "source": {
+                "service": {
                     "id": ""
                 },
-                "timeout": 5
+                "timeout": 15
             },
+            #
+            # Formularz pobierany z /schedule/config/form/
             form=Form(groups=[
                 FormGroup(
                     name="Service source",
                     fields=[
                         FormField(
-                            id="source",
-                            name="Tracardi PRO - Stats service",
-                            description="Select Tracardi PRO - Stats service resource.",
-                            required=True,
-                            component=FormComponent(type="resource", props={"label": "resource", "tag": "pro"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Service settings",
-                    fields=[
+                            id="service",
+                            name="Tracardi PRO - service",
+                            component=FormComponent(type="resource", props={"label": "resource", "tag": "scheduler"})
+                        ),
                         FormField(
                             id="timeout",
-                            name="Service time-out",
-                            component=FormComponent(type="text", props={"time-out": "15"})
+                            name="Callback timeout",
+                            component=FormComponent(type="text", props={"label": "Time-out"})
                         )
                     ]
-                ),
+                )
             ]),
         ),
         metadata=MetaData(
-            name='Profile metrics',
-            desc='This plugin connects to profile statistics microservice',
-            type='flowNode',
-            width=250,
-            height=100,
-            icon='pie-chart',
-            group=["Stats", "Professional"],
-            tags=["Pro", "Statistics"],
-            pro=True
+            name='Scheduler',
+            desc='This plugin schedules events',
+            icon='calendar',
+            group=["Time"],
+            tags=["Pro", "Scheduler"],
+            pro=True,
         )
     )
+
