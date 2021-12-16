@@ -50,7 +50,7 @@ class MicroserviceApi:
 
                 return response
 
-    async def call(self, endpoint, method, data) -> ClientResponse:
+    async def call(self, endpoint, method, data=None) -> ClientResponse:
 
         if self.token is None:
             self.token = await self.authorize()
