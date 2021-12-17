@@ -20,4 +20,4 @@ async def get_schema(event_type: str) -> EventPayloadValidator:
     result = await storage_manager("validation-schema").load(event_type)
     if result is None:
         raise EventValidatorNotFound(f"There is no validator object for event type: {event_type}")
-    return PayloadValidatorRecord(**result).decode()
+    return EventPayloadValidator.decode(PayloadValidatorRecord(**result))

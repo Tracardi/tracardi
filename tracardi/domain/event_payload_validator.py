@@ -23,14 +23,16 @@ class EventPayloadValidator(BaseModel):
             id=self.event_type.lower().replace(" ", "-")
         )
 
+    @staticmethod
+    def decode(record: 'PayloadValidatorRecord') -> 'EventPayloadValidator':
+        return EventPayloadValidator(
+            to_validate=decrypt(record.to_validate),
+            event_type=record.id
+        )
+
 
 class PayloadValidatorRecord(BaseModel):
     to_validate: str
     id: str
 
-    def decode(self) -> EventPayloadValidator:
-        return EventPayloadValidator(
-            to_validate=decrypt(self.to_validate),
-            event_type=self.id
-        )
 
