@@ -9,14 +9,9 @@ class EventSource(Entity):
     timestamp: datetime
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
-    url: Optional[str] = None
-    token: str = ""
-    username: str = ""
-    password: str = ""
-    service: str = None
     enabled: Optional[bool] = True
     tags: Union[List[str], str] = ["general"]
-    icon: str = None
+    groups: Union[List[str], str] = []
 
     def __init__(self, **data: Any):
         data['timestamp'] = datetime.utcnow()

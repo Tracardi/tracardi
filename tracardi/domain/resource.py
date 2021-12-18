@@ -27,6 +27,7 @@ class Resource(Entity):
     description: Optional[str] = "No description provided"
     credentials: ResourceCredentials = ResourceCredentials()
     tags: Union[List[str], str] = ["general"]
+    groups: Union[List[str], str] = []
     icon: str = None
     enabled: Optional[bool] = True
     consent: bool = False
@@ -53,6 +54,7 @@ class ResourceRecord(Entity):
     credentials: Optional[str] = None
     enabled: Optional[bool] = True
     tags: Union[List[str], str] = ["general"]
+    groups: Union[List[str], str] = []
     icon: str = None
     consent: bool = False
 
@@ -68,6 +70,7 @@ class ResourceRecord(Entity):
             description=resource.description,
             type=resource.type,
             tags=resource.tags,
+            groups=resource.groups,
             enabled=resource.enabled,
             consent=resource.consent,
             credentials=encrypt(resource.credentials)
@@ -84,6 +87,7 @@ class ResourceRecord(Entity):
             description=self.description,
             type=self.type,
             tags=self.tags,
+            groups=self.groups,
             enabled=self.enabled,
             consent=self.consent,
             credentials=ResourceCredentials(**decrypted)
