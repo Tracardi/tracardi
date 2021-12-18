@@ -45,7 +45,3 @@ class LoginException(TracardiException):
 
 class EventValidationException(TracardiException):
     pass
-
-
-class EventValidatorNotFound(TracardiException):
-    pass

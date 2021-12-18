@@ -1,38 +1,38 @@
-from pydantic import BaseModel, validator
-from typing import List, Union, Dict
 import jsonschema
+from pydantic import BaseModel, validator
+from typing import Dict
 from tracardi.service.secrets import encrypt, decrypt
 
 
 class EventPayloadValidator(BaseModel):
-    to_validate: Dict[str, Dict]
+    validation: Dict[str, Dict]
     event_type: str
 
-    @validator("to_validate")
-    def validate_schemas(cls, v):
+    @validator("validation")
+    def validate_schemas_format(cls, v):
         for value in v.values():
             try:
                 jsonschema.Draft202012Validator.check_schema(value)
             except jsonschema.SchemaError as e:
-                raise ValueError(f"Given schema is invalid, detail: {str(e)}")
+                raise ValueError(f"Validation schema is invalid, detail: {str(e)}")
         return v
 
-    def encode(self) -> 'PayloadValidatorRecord':
-        return PayloadValidatorRecord(
-            to_validate=encrypt(self.to_validate),
+    def encode(self) -> 'EventPayloadValidatorRecord':
+        return EventPayloadValidatorRecord(
+            validation=encrypt(self.validation),
             id=self.event_type.lower().replace(" ", "-")
         )
 
     @staticmethod
-    def decode(record: 'PayloadValidatorRecord') -> 'EventPayloadValidator':
+    def decode(record: 'EventPayloadValidatorRecord') -> 'EventPayloadValidator':
         return EventPayloadValidator(
-            to_validate=decrypt(record.to_validate),
+            validation=decrypt(record.validation),
             event_type=record.id
         )
 
 
-class PayloadValidatorRecord(BaseModel):
-    to_validate: str
+class EventPayloadValidatorRecord(BaseModel):
+    validation: str
     id: str
 
 
