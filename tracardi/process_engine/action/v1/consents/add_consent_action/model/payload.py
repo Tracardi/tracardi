@@ -14,6 +14,7 @@ class Revoke(BaseModel):
 class Consents(BaseModel):
     __root__: Dict[str, Revoke]
 
+    # TODO REMOVE IF NOT IN USE
     @property
     def id(self):
         return list(self.__root__.items()).pop()[0]
