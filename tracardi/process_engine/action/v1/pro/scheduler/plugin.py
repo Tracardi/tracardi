@@ -1,11 +1,10 @@
 import json
-from datetime import datetime
-
 import asyncio
+from datetime import datetime
 from aiohttp import ClientResponse
-from pydantic import BaseModel, AnyHttpUrl
+from pydantic import BaseModel
 
-from tracardi.domain.event_source import EventSource
+from tracardi.domain.pro_service_config import TracardiProServiceConfig
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -14,16 +13,15 @@ from tracardi_plugin_sdk.domain.result import Result
 from tracardi.domain.credentials import Credentials
 from tracardi.domain.stat_payload import StatPayload
 from tracardi.service.microservice import MicroserviceApi
-from tracardi.domain.entity import Entity
 
 
-class ServiceConfiguration(BaseModel):
-    callback_url: AnyHttpUrl
+class ServiceId(BaseModel):
+    source_id: str
+    service_id: str
 
 
 class Configuration(BaseModel):
-    service: Entity
-    timeout: int = 15
+    service: ServiceId
 
 
 def validate(config: dict) -> Configuration:
@@ -35,18 +33,22 @@ class SchedulerPlugin(ActionRunner):
     @staticmethod
     async def build(**kwargs) -> 'SchedulerPlugin':
         config = validate(kwargs)
-        service = await storage.driver.raw.load(config.service.id, 'event-source', EventSource)
-        plugin = SchedulerPlugin(config, service)
+        resource = await storage.driver.resource.load(config.service.source_id)
+        plugin = SchedulerPlugin(config, resource.credentials)
         return plugin
 
-    def __init__(self, config: Configuration, service: EventSource):
+    def __init__(self, config: Configuration, credentials: ResourceCredentials):
         self.config = config
+        self.credentials = credentials.get_credentials(
+            self,
+            output=TracardiProServiceConfig)  # type: TracardiProServiceConfig
+
         # url must be build from token (schedule/event/token)
         self.client = MicroserviceApi(
-            service.url,
+            self.credentials.auth.url,
             credentials=Credentials(
-                username=service.username,
-                password=service.password
+                username=self.credentials.auth.username,
+                password=self.credentials.auth.password
             )
         )
 
@@ -65,13 +67,16 @@ class SchedulerPlugin(ActionRunner):
             }
 
             if 200 <= response.status < 400:
-                return Result(port="response", value=result), Result(port="error", value=None), Result(port="payload", value=payload)
+                return Result(port="response", value=result), Result(port="error", value=None), Result(port="payload",
+                                                                                                       value=payload)
             else:
-                return Result(port="response", value=None), Result(port="error", value=result), Result(port="payload", value=payload)
+                return Result(port="response", value=None), Result(port="error", value=result), Result(port="payload",
+                                                                                                       value=payload)
 
         else:
             asyncio.create_task(self._call_endpoint())
-            return Result(port="response", value=None), Result(port="payload", value=payload), Result(port="error", value=None)
+            return Result(port="response", value=None), Result(port="payload", value=payload), Result(port="error",
+                                                                                                      value=None)
 
     async def _call_endpoint(self) -> ClientResponse:
 
@@ -102,31 +107,11 @@ def register() -> Plugin:
             version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski",
-            init={
-                "service": {
-                    "id": ""
-                },
-                "timeout": 15
-            },
-            #
-            # Formularz pobierany z /schedule/config/form/
-            form=Form(groups=[
-                FormGroup(
-                    name="Service source",
-                    fields=[
-                        FormField(
-                            id="service",
-                            name="Tracardi PRO - service",
-                            component=FormComponent(type="resource", props={"label": "resource", "tag": "scheduler"})
-                        ),
-                        FormField(
-                            id="timeout",
-                            name="Callback timeout",
-                            component=FormComponent(type="text", props={"label": "Time-out"})
-                        )
-                    ]
-                )
-            ]),
+            init= {
+                "event_type": None,
+                "properties": "{}",
+                "postpone": "+1m"
+            }
         ),
         metadata=MetaData(
             name='Scheduler',
@@ -137,4 +122,3 @@ def register() -> Plugin:
             pro=True,
         )
     )
-
