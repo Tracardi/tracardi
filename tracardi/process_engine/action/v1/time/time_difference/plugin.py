@@ -1,9 +1,10 @@
+from parser import ParserError
+
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from .model.config import Config
-from tracardi_dot_notation.dot_accessor import DotAccessor
 from datetime import datetime
 from dateutil import parser
 
@@ -15,18 +16,30 @@ def validate(config: dict):
 class TimeDiffCalculator(ActionRunner):
 
     def __init__(self, **kwargs):
-        self.config = Config(**kwargs)
+        self.config = validate(kwargs)
+
+    @staticmethod
+    def parse_date(date):
+        try:
+            if isinstance(date, str):
+                date = parser.parse(date)
+            return date
+        except ParserError as e:
+            raise ValueError("Could not parse data `{}`".format(date))
 
     async def run(self, payload):
-        dot = DotAccessor(profile=self.profile, session=self.session, payload=payload, event=self.event, flow=self.flow)
+        dot = self._get_dot_accessor(payload)
         ref_date = dot[self.config.reference_date]
+
+        ref_date = self.parse_date(ref_date)
+
         now_date = datetime.utcnow()
         if self.config.now_format == "date":
-            now_date = parser.parse(self.config.now)
+            now_date = self.parse_date(self.config.now)
         elif self.config.now_format == "path":
-            now_date = dot[self.config.now]
+            now_date =  self.parse_date(dot[self.config.now])
         diff_secs = int((now_date - ref_date).total_seconds())
-        return Result(port="payload", value=payload), Result(port="time_difference", value={
+        return Result(port="time_difference", value={
             "seconds": diff_secs,
             "minutes": diff_secs//60,
             "hours": diff_secs//(60*60),
@@ -42,14 +55,14 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.time.time_difference.plugin',
             className='TimeDiffCalculator',
             inputs=["payload"],
-            outputs=["payload", "time_difference"],
+            outputs=["time_difference"],
             version='0.6.0.1',
             license="MIT",
             author="Dawid Kruk",
             init={
-                "reference_date": "<path-to-reference-date>",
-                "now_format": "path | date | now",
-                "now": "profile@metadata.time.update | 2021-01-01 | now"
+                "reference_date": None,
+                "now_format": "now",
+                "now": "now"
             },
             form=Form(
                 groups=[
@@ -62,7 +75,7 @@ def register() -> Plugin:
                                 id="reference_date",
                                 name="Reference date",
                                 component=FormComponent(type="dotPath", props={
-                                    "label": "Prefix"
+                                    "label": "Source"
                                 }),
                                 required=True
                             ),
@@ -90,7 +103,7 @@ def register() -> Plugin:
                                 name="Second date",
                                 description="Please provide path, date or 'now' parameter, "
                                             "according to format chosen above.",
-                                component=FormComponent(type="text", props={"label": "Date in chosen format"}),
+                                component=FormComponent(type="dotPath", props={"label": "Source"}),
                                 required=True
                             )
                         ]
@@ -99,10 +112,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Calculate Time Diff',
+            name='Time difference',
             desc='Calculates time difference between given dates and returns it in multiple units.',
             type='flowNode',
-            icon='plugin',
+            icon='time',
             group=["Time"],
             documentation=Documentation(
                 inputs={
@@ -110,8 +123,7 @@ def register() -> Plugin:
                 },
                 outputs={
                     "time_difference": PortDoc(desc="This port returns calculated time difference in multiple time "
-                                                    "units."),
-                    "payload": PortDoc(desc="This port returns given payload without any changes.")
+                                                    "units.")
                 }
             )
         )

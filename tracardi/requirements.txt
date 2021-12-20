@@ -21,3 +21,4 @@ pytimeparse
 barcodenumber
 astral
 jsonschema
+python-dateutil

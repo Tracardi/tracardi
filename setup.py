@@ -36,7 +36,8 @@ setup(
         'pytimeparse',
         'barcodenumber',
         'astral',
-        'jsonschema'
+        'jsonschema',
+        'python-dateutil'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
