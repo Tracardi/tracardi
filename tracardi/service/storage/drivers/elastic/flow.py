@@ -4,9 +4,13 @@ from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor, storage_manager
 
 
-async def load_production_flow(flow_id):
+async def load_record(flow_id) -> FlowRecord:
     flow_record_entity = Entity(id=flow_id)
-    flow_record = await StorageFor(flow_record_entity).index("flow").load(FlowRecord)  # type: FlowRecord
+    return await StorageFor(flow_record_entity).index("flow").load(FlowRecord)  # type: FlowRecord
+
+
+async def load_production_flow(flow_id):
+    flow_record = await load_record(flow_id)
     if not flow_record:
         raise TracardiException("Could not find flow `{}`".format(flow_id))
 
@@ -14,8 +18,7 @@ async def load_production_flow(flow_id):
 
 
 async def load_draft_flow(flow_id):
-    flow_record_entity = Entity(id=flow_id)
-    flow_record = await StorageFor(flow_record_entity).index("flow").load(FlowRecord)  # type: FlowRecord
+    flow_record = await load_record(flow_id)
     if not flow_record:
         raise TracardiException("Could not find flow `{}`".format(flow_id))
 
