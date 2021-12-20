@@ -180,10 +180,6 @@ class FlowRecord(NamedEntity):
 
     # Persistence
 
-    def __init__(__pydantic_self__, **data: Any):
-        super().__init__(data)
-        __pydantic_self__.restore_production_from_back = None
-
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
@@ -205,3 +201,6 @@ class FlowRecord(NamedEntity):
 
     def restore_production_from_backup(self):
         self.production = self.backup
+
+    def restore_draft_from_production(self):
+        self.draft = self.production
