@@ -7,6 +7,7 @@ from tracardi_plugin_sdk.domain.result import Result
 from .model.config import Config
 from datetime import datetime
 from dateutil import parser
+from math import copysign
 
 
 def validate(config: dict):
@@ -29,22 +30,25 @@ class TimeDiffCalculator(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        ref_date = dot[self.config.reference_date]
-
-        ref_date = self.parse_date(ref_date)
-
+        ref_date = datetime.utcnow()
+        if self.config.reference_date_format == "date":
+            ref_date = self.parse_date(self.config.reference_date)
+        elif self.config.now_format == "path":
+            ref_date = self.parse_date(dot[self.config.reference_date])
         now_date = datetime.utcnow()
         if self.config.now_format == "date":
             now_date = self.parse_date(self.config.now)
         elif self.config.now_format == "path":
-            now_date =  self.parse_date(dot[self.config.now])
+            now_date = self.parse_date(dot[self.config.now])
         diff_secs = int((now_date - ref_date).total_seconds())
+        sign = copysign(1, diff_secs)
+        diff_secs = abs(diff_secs)
         return Result(port="time_difference", value={
-            "seconds": diff_secs,
-            "minutes": diff_secs//60,
-            "hours": diff_secs//(60*60),
-            "days": diff_secs//(60*60*24),
-            "weeks": diff_secs//(60*60*24*7)
+            "seconds": sign * diff_secs,
+            "minutes": sign * (diff_secs//60),
+            "hours": sign * (diff_secs//(60*60)),
+            "days": sign * (diff_secs//(60*60*24)),
+            "weeks": sign * (diff_secs//(60*60*24*7))
         })
 
 
@@ -56,11 +60,12 @@ def register() -> Plugin:
             className='TimeDiffCalculator',
             inputs=["payload"],
             outputs=["time_difference"],
-            version='0.6.0.1',
+            version='0.6.0.2',
             license="MIT",
             author="Dawid Kruk",
             init={
-                "reference_date": None,
+                "reference_date_format": "now",
+                "reference_date": "now",
                 "now_format": "now",
                 "now": "now"
             },
@@ -71,6 +76,25 @@ def register() -> Plugin:
                         description="Please provide path to date, which will be considered the reference date for "
                                     "calculations, and so called 'now' date, in one of available forms.",
                         fields=[
+                            FormField(
+                                id="reference_date_format",
+                                name="Format of reference date",
+                                description="This field defines type of date that is considered as the lower bound "
+                                            "of calculated time span. "
+                                            "Now requires 'now' value in reference date field. "
+                                            "Date requires date in reference date field "
+                                            "(Example: 2021-03-14). "
+                                            "Path requires path to wanted date (Example: event@metadata.time.insert).",
+                                component=FormComponent(type="select", props={
+                                    "items": {
+                                        "now": "Now",
+                                        "date": "Date",
+                                        "path": "Path"
+                                    },
+                                    "label": "Format"
+                                }),
+                                required=True
+                            ),
                             FormField(
                                 id="reference_date",
                                 name="Reference date",
