@@ -169,62 +169,13 @@ class PluginRecord(BaseModel):
         return Plugin.construct(_fields_set=self.__fields_set__, **data)
 
 
-# class NodeRecord(BaseModel):
-#     id: str
-#     type: str
-#     position: Position
-#     data: PluginRecord
-#
-#     @staticmethod
-#     def encode(node: Node):
-#         return NodeRecord(
-#             id=node.id,
-#             type=node.type,
-#             position=node.position,
-#             data=PluginRecord.encode(node.data)
-#         )
-#
-#     def decode(self) -> Node:
-#         data = {
-#             "id": self.id,
-#             "type": self.type,
-#             "data": self.data.decode(),
-#             "position": self.position
-#         }
-#         return Node.construct(_fields_set=self.__fields_set__, **data)
-
-
-# class FlowGraphDataRecord(BaseModel):
-#     nodes: List[NodeRecord]
-#     edges: List[Edge]
-#
-#     @staticmethod
-#     def encode(flowGraph: FlowGraphData) -> 'FlowGraphDataRecord':
-#         if flowGraph:
-#             return FlowGraphDataRecord(
-#                 edges=flowGraph.edges,
-#                 nodes=[NodeRecord.encode(node) for node in flowGraph.nodes]
-#             )
-#
-#         return FlowGraphDataRecord(
-#             edges=[],
-#             nodes=[]
-#         )
-#
-#     def decode(self) -> FlowGraphData:
-#         data = {
-#             "edges": self.edges,
-#             "nodes": [node.decode() for node in self.nodes],
-#         }
-#         return FlowGraphData.construct(_fields_set=self.__fields_set__, **data)
-
-
 class FlowRecord(NamedEntity):
     description: Optional[str] = None
     enabled: Optional[bool] = True
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
     production: Optional[str] = ''
+    backup: Optional[str] = ''
     lock: bool = False
 
     # Persistence
@@ -247,3 +198,9 @@ class FlowRecord(NamedEntity):
     def get_empty_workflow(self, id) -> 'Flow':
         return Flow.build(id=id, name=self.name, description=self.description, enabled=self.enabled,
                           projects=self.projects, lock=self.lock)
+
+    def restore_production_from_backup(self):
+        self.production = self.backup
+
+    def restore_draft_from_production(self):
+        self.draft = self.production

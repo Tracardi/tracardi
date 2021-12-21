@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi',
-    version='0.6.23',
+    version='0.6.24',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -35,7 +35,9 @@ setup(
         'tracardi-dot-notation>=0.6.6',
         'pytimeparse',
         'barcodenumber',
-        'astral'
+        'astral',
+        'jsonschema',
+        'python-dateutil'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

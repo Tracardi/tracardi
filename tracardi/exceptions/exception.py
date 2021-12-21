@@ -41,3 +41,7 @@ class ConnectionException(TracardiException):
 
 class LoginException(TracardiException):
     pass
+
+
+class EventValidationException(TracardiException):
+    pass
