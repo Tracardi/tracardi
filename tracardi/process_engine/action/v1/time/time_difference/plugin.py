@@ -7,7 +7,6 @@ from tracardi_plugin_sdk.domain.result import Result
 from .model.config import Config
 from datetime import datetime
 from dateutil import parser
-from math import copysign
 
 
 def validate(config: dict):
@@ -23,32 +22,31 @@ class TimeDiffCalculator(ActionRunner):
     def parse_date(date):
         try:
             if isinstance(date, str):
-                date = parser.parse(date)
+                if date == 'now':
+                    date = datetime.utcnow()
+                else:
+                    date = parser.parse(date)
+            elif not isinstance(date, datetime):
+                raise ValueError("Date can be either string or datetime object")
             return date
-        except ParserError as e:
+        except ParserError:
             raise ValueError("Could not parse data `{}`".format(date))
 
     async def run(self, payload):
+
         dot = self._get_dot_accessor(payload)
-        ref_date = datetime.utcnow()
-        if self.config.reference_date_format == "date":
-            ref_date = self.parse_date(self.config.reference_date)
-        elif self.config.now_format == "path":
-            ref_date = self.parse_date(dot[self.config.reference_date])
-        now_date = datetime.utcnow()
-        if self.config.now_format == "date":
-            now_date = self.parse_date(self.config.now)
-        elif self.config.now_format == "path":
-            now_date = self.parse_date(dot[self.config.now])
-        diff_secs = int((now_date - ref_date).total_seconds())
-        sign = copysign(1, diff_secs)
-        diff_secs = abs(diff_secs)
+
+        ref_date = self.parse_date(dot[self.config.reference_date])
+        now_date = self.parse_date(dot[self.config.now])
+
+        diff_secs = (now_date - ref_date).total_seconds()
+        print(diff_secs, diff_secs / 60)
         return Result(port="time_difference", value={
-            "seconds": sign * diff_secs,
-            "minutes": sign * (diff_secs//60),
-            "hours": sign * (diff_secs//(60*60)),
-            "days": sign * (diff_secs//(60*60*24)),
-            "weeks": sign * (diff_secs//(60*60*24*7))
+            "seconds": diff_secs,
+            "minutes": diff_secs / 60,
+            "hours": diff_secs / (60 * 60),
+            "days": diff_secs / (60 * 60 * 24),
+            "weeks": diff_secs / (60 * 60 * 24 * 7)
         })
 
 
@@ -60,13 +58,11 @@ def register() -> Plugin:
             className='TimeDiffCalculator',
             inputs=["payload"],
             outputs=["time_difference"],
-            version='0.6.0.2',
+            version='0.6.0.1',
             license="MIT",
             author="Dawid Kruk",
             init={
-                "reference_date_format": "now",
-                "reference_date": "now",
-                "now_format": "now",
+                "reference_date": None,
                 "now": "now"
             },
             form=Form(
@@ -77,48 +73,10 @@ def register() -> Plugin:
                                     "calculations, and so called 'now' date, in one of available forms.",
                         fields=[
                             FormField(
-                                id="reference_date_format",
-                                name="Format of reference date",
-                                description="This field defines type of date that is considered as the lower bound "
-                                            "of calculated time span. "
-                                            "Now requires 'now' value in reference date field. "
-                                            "Date requires date in reference date field "
-                                            "(Example: 2021-03-14). "
-                                            "Path requires path to wanted date (Example: event@metadata.time.insert).",
-                                component=FormComponent(type="select", props={
-                                    "items": {
-                                        "now": "Now",
-                                        "date": "Date",
-                                        "path": "Path"
-                                    },
-                                    "label": "Format"
-                                }),
-                                required=True
-                            ),
-                            FormField(
                                 id="reference_date",
                                 name="Reference date",
                                 component=FormComponent(type="dotPath", props={
                                     "label": "Source"
-                                }),
-                                required=True
-                            ),
-                            FormField(
-                                id="now_format",
-                                name="Format of second date",
-                                description="This field defines type of date that is considered as the upper bound "
-                                            "of calculated time span. "
-                                            "Now requires 'now' value in second date field. "
-                                            "Date requires date in second date field "
-                                            "(Example: 2021-03-14). "
-                                            "Path requires path to wanted date (Example: event@metadata.time.insert).",
-                                component=FormComponent(type="select", props={
-                                    "items": {
-                                        "now": "Now",
-                                        "date": "Date",
-                                        "path": "Path"
-                                    },
-                                    "label": "Format"
                                 }),
                                 required=True
                             ),
@@ -137,16 +95,16 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Time difference',
-            desc='Calculates time difference between given dates and returns it in multiple units.',
+            desc='Returns time difference between two dates.',
             type='flowNode',
             icon='time',
             group=["Time"],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                    "payload": PortDoc(desc="This port payload object.")
                 },
                 outputs={
-                    "time_difference": PortDoc(desc="This port returns calculated time difference in multiple time "
+                    "time_difference": PortDoc(desc="This port returns time difference in several time "
                                                     "units.")
                 }
             )
