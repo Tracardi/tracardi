@@ -40,7 +40,7 @@ class TimeDiffCalculator(ActionRunner):
         now_date = self.parse_date(dot[self.config.now])
 
         diff_secs = (now_date - ref_date).total_seconds()
-        print(diff_secs, diff_secs / 60)
+
         return Result(port="time_difference", value={
             "seconds": diff_secs,
             "minutes": diff_secs / 60,

@@ -21,7 +21,6 @@ class Configuration(BaseModel):
 
     @validator("true_segment")
     def is_valid_true_segment(cls, value, values):
-        print(values)
         if 'true_action' in values and values['true_action'] != 'none':
             if value == "":
                 raise ValueError("Segment can not be empty for action {}".format(values['true_action']))
@@ -29,7 +28,6 @@ class Configuration(BaseModel):
 
     @validator("false_segment")
     def is_valid_false_segment(cls, value, values):
-        print(values)
         if 'false_action' in values and values['false_action'] != 'none':
             if value == "":
                 raise ValueError("Segment can not be empty for action {}".format(values['false_action']))
