@@ -3,10 +3,16 @@ from typing import Optional, Any
 from uuid import uuid4
 from .context import Context
 from .entity import Entity
-from .metadata import Metadata
+from .event_metadata import EventMetadata
 from .time import Time
 from pydantic import BaseModel, root_validator
 from typing import Tuple
+
+RECEIVED = 'received'
+VALIDATED = 'validated'
+OK = 'ok'
+WARNING = 'warning'
+ERROR = 'error'
 
 
 class Tags(BaseModel):
@@ -23,7 +29,7 @@ class Tags(BaseModel):
 
 
 class Event(Entity):
-    metadata: Metadata
+    metadata: EventMetadata
     type: str
     properties: Optional[dict] = {}
     update: bool = False
@@ -36,12 +42,12 @@ class Event(Entity):
     aux: dict = {}
 
     def __init__(self, **data: Any):
-        if 'metadata' in data and isinstance(data['metadata'], Metadata):
+        if 'metadata' in data and isinstance(data['metadata'], EventMetadata):
             data['metadata'].time = Time(
                 insert=datetime.utcnow()
             )
         else:
-            data['metadata'] = Metadata(
+            data['metadata'] = EventMetadata(
                 time=Time(
                     insert=datetime.utcnow()
                 )
@@ -65,7 +71,6 @@ class Event(Entity):
             return self.context.config['save']
         else:
             return True
-
 
     @staticmethod
     def new(data: dict) -> 'Event':

@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import Optional, List, Tuple, Any
 from pydantic import BaseModel
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, RECEIVED
 
 from ..entity import Entity
+from ..event_metadata import EventMetadata
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
 from ..session import Session
-from ..metadata import Metadata
 from ..time import Time
 
 
@@ -15,7 +15,7 @@ class TrackerPayload(BaseModel):
     source: Entity
     session: Entity
 
-    metadata: Optional[Metadata]
+    metadata: Optional[EventMetadata]
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
@@ -23,7 +23,7 @@ class TrackerPayload(BaseModel):
     options: Optional[dict] = {}
 
     def __init__(self, **data: Any):
-        data['metadata'] = Metadata(
+        data['metadata'] = EventMetadata(
             time=Time(
                 insert=datetime.utcnow()
             ))
@@ -34,6 +34,7 @@ class TrackerPayload(BaseModel):
         if self.events:
             for event in self.events:  # type: EventPayload
                 _event = event.to_event(self.metadata, self.source, session, profile, event.options)
+                _event.metadata.status = RECEIVED
                 event_list.append(_event)
         return event_list
 

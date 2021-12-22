@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from ..context import Context
 from ..entity import Entity
 from ..event import Event
+from ..event_metadata import EventMetadata
 
 
 class EventPayload(BaseModel):
@@ -12,7 +13,7 @@ class EventPayload(BaseModel):
     user: Optional[Entity] = None
     options: Optional[dict] = {}
 
-    def to_event(self, metadata, source, session, profile, options):
+    def to_event(self, metadata: EventMetadata, source: Entity, session: Entity, profile: Entity, options: dict) -> Event:
         return Event.new({
             "metadata": metadata,
             "session": Entity(id=session.id),
