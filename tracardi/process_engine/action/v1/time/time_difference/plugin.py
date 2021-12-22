@@ -22,29 +22,31 @@ class TimeDiffCalculator(ActionRunner):
     def parse_date(date):
         try:
             if isinstance(date, str):
-                date = parser.parse(date)
+                if date == 'now':
+                    date = datetime.utcnow()
+                else:
+                    date = parser.parse(date)
+            elif not isinstance(date, datetime):
+                raise ValueError("Date can be either string or datetime object")
             return date
-        except ParserError as e:
+        except ParserError:
             raise ValueError("Could not parse data `{}`".format(date))
 
     async def run(self, payload):
+
         dot = self._get_dot_accessor(payload)
-        ref_date = dot[self.config.reference_date]
 
-        ref_date = self.parse_date(ref_date)
+        ref_date = self.parse_date(dot[self.config.reference_date])
+        now_date = self.parse_date(dot[self.config.now])
 
-        now_date = datetime.utcnow()
-        if self.config.now_format == "date":
-            now_date = self.parse_date(self.config.now)
-        elif self.config.now_format == "path":
-            now_date =  self.parse_date(dot[self.config.now])
-        diff_secs = int((now_date - ref_date).total_seconds())
+        diff_secs = (now_date - ref_date).total_seconds()
+        print(diff_secs, diff_secs / 60)
         return Result(port="time_difference", value={
             "seconds": diff_secs,
-            "minutes": diff_secs//60,
-            "hours": diff_secs//(60*60),
-            "days": diff_secs//(60*60*24),
-            "weeks": diff_secs//(60*60*24*7)
+            "minutes": diff_secs / 60,
+            "hours": diff_secs / (60 * 60),
+            "days": diff_secs / (60 * 60 * 24),
+            "weeks": diff_secs / (60 * 60 * 24 * 7)
         })
 
 
@@ -61,7 +63,6 @@ def register() -> Plugin:
             author="Dawid Kruk",
             init={
                 "reference_date": None,
-                "now_format": "now",
                 "now": "now"
             },
             form=Form(
@@ -80,25 +81,6 @@ def register() -> Plugin:
                                 required=True
                             ),
                             FormField(
-                                id="now_format",
-                                name="Format of second date",
-                                description="This field defines type of date that is considered as the upper bound "
-                                            "of calculated time span. "
-                                            "Now requires 'now' value in second date field. "
-                                            "Date requires date in second date field "
-                                            "(Example: 2021-03-14). "
-                                            "Path requires path to wanted date (Example: event@metadata.time.insert).",
-                                component=FormComponent(type="select", props={
-                                    "items": {
-                                        "now": "Now",
-                                        "date": "Date",
-                                        "path": "Path"
-                                    },
-                                    "label": "Format"
-                                }),
-                                required=True
-                            ),
-                            FormField(
                                 id="now",
                                 name="Second date",
                                 description="Please provide path, date or 'now' parameter, "
@@ -113,16 +95,16 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Time difference',
-            desc='Calculates time difference between given dates and returns it in multiple units.',
+            desc='Returns time difference between two dates.',
             type='flowNode',
             icon='time',
             group=["Time"],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                    "payload": PortDoc(desc="This port payload object.")
                 },
                 outputs={
-                    "time_difference": PortDoc(desc="This port returns calculated time difference in multiple time "
+                    "time_difference": PortDoc(desc="This port returns time difference in several time "
                                                     "units.")
                 }
             )
