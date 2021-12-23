@@ -13,11 +13,12 @@ class EventPayload(BaseModel):
     user: Optional[Entity] = None
     options: Optional[dict] = {}
 
-    def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Entity, profile: Entity, options: dict) -> Event:
+    def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Entity, profile: Optional[Entity],
+                 options: dict) -> Event:
         return Event.new({
             "metadata": EventMetadata(**metadata.dict()),
             "session": Entity(id=session.id),
-            "profile": Entity(id=profile.id),
+            "profile": profile,  # profile can be None when profile_less event.
             "user": self.user,
             "type": self.type,
             "properties": self.properties,

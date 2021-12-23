@@ -1,8 +1,9 @@
 import asyncio
+import traceback
 from asyncio import Task
 from collections import defaultdict
 from time import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from pydantic import ValidationError
 from tracardi.domain.event import Event
 
@@ -17,13 +18,14 @@ from ..domain.entity import Entity
 from ..domain.profile import Profile
 from ..domain.session import Session
 from ..domain.rule import Rule
+from ..exceptions.exception_service import get_traceback
 
 
 class RulesEngine:
 
     def __init__(self,
                  session: Session,
-                 profile: Profile,
+                 profile: Optional[Profile],
                  events_rules: List[Tuple[Task, Event]],
                  console_log=None
                  ):
@@ -33,13 +35,14 @@ class RulesEngine:
 
         self.console_log = console_log
         self.session = session
-        self.profile = profile
+        self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], list, list, dict]:
+    async def invoke(self, load_flow_callable, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], list, list, dict, Dict[str, list]]:
 
         flow_task_store = defaultdict(list)
         debug_info_by_event_type_and_rule_name = defaultdict(list)
+        invoked_rules = defaultdict(list)
 
         for rules_loading_task, event in self.events_rules:
 
@@ -49,6 +52,8 @@ class RulesEngine:
             for rule in rules:
 
                 # this is main roles loop
+                if 'name' in rule:
+                    invoked_rules[event.type].append(rule['name'])
 
                 try:
                     rule = Rule(**rule)
@@ -139,7 +144,6 @@ class RulesEngine:
 
                 except Exception as e:
                     # todo log error
-
                     console = Console(
                         origin="workflow",
                         event_id=event_id,
@@ -147,7 +151,8 @@ class RulesEngine:
                         module='tracardi.process_engine.rules_engine',
                         class_name="RulesEngine",
                         type="error",
-                        message=str(e)
+                        message=repr(e),
+                        traceback=get_traceback(e)
                     )
                     self.console_log.append(console)
 
@@ -164,7 +169,7 @@ class RulesEngine:
 
         ran_event_types = list(flow_task_store.keys())
 
-        return debug_info_by_event_type_and_rule_name, ran_event_types, self.console_log, post_invoke_events
+        return debug_info_by_event_type_and_rule_name, ran_event_types, self.console_log, post_invoke_events, invoked_rules
 
     @staticmethod
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:

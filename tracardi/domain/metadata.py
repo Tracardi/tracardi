@@ -4,3 +4,4 @@ from tracardi.domain.time import Time
 
 class Metadata(BaseModel):
     time: Time
+
