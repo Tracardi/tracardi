@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from tracardi.domain.event import Event, RECEIVED
 
 from ..entity import Entity
-from ..event_metadata import EventMetadata
+from ..event_metadata import EventPayloadMetadata
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
 from ..session import Session
@@ -15,7 +15,7 @@ class TrackerPayload(BaseModel):
     source: Entity
     session: Entity
 
-    metadata: Optional[EventMetadata]
+    metadata: Optional[EventPayloadMetadata]
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
@@ -23,7 +23,7 @@ class TrackerPayload(BaseModel):
     options: Optional[dict] = {}
 
     def __init__(self, **data: Any):
-        data['metadata'] = EventMetadata(
+        data['metadata'] = EventPayloadMetadata(
             time=Time(
                 insert=datetime.utcnow()
             ))
