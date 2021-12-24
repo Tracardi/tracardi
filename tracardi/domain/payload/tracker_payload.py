@@ -29,11 +29,11 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
 
-    def get_events(self, session: Session, profile: Optional[Profile]) -> List[Event]:
+    def get_events(self, session: Session, profile: Optional[Profile], profile_less) -> List[Event]:
         event_list = []
         if self.events:
             for event in self.events:  # type: EventPayload
-                _event = event.to_event(self.metadata, self.source, session, profile, event.options)
+                _event = event.to_event(self.metadata, self.source, session, profile, event.options, profile_less)
                 _event.metadata.status = RECEIVED
                 event_list.append(_event)
         return event_list
@@ -55,13 +55,14 @@ class TrackerPayload(BaseModel):
         is_new_session = False
         profile = None
 
-        if session is None:  # loaded session is empty
+        if profile_less is False:
 
-            session = Session(id=self.session.id)
-            is_new_session = True
+            if session is None:  # loaded session is empty
 
-            # Bind profile
-            if profile_less is False:
+                session = Session(id=self.session.id)
+                is_new_session = True
+
+                # Bind profile
                 if self.profile is None:
 
                     # Create empty default profile generate profile_id
@@ -84,11 +85,10 @@ class TrackerPayload(BaseModel):
                         # Create new profile
                         is_new_profile = True
 
-        else:
+            else:
 
-            # There is session. Copy profile id form session to profile
+                # There is session. Copy profile id form session to profile
 
-            if profile_less is False:
                 if session.profile is not None:
                     # Loaded session has profile
 
@@ -120,7 +120,7 @@ class TrackerPayload(BaseModel):
         session.properties = self.properties
         session.operation.new = is_new_session
 
-        if profile_less is False:
+        if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
 
         return profile, session

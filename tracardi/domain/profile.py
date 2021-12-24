@@ -35,16 +35,17 @@ class Profile(Entity):
         super().__init__(**data)
 
     def replace(self, profile):
-        self.id = profile.id
-        self.mergedWith = profile.mergedWith
-        self.metadata = profile.metadata
-        self.operation = profile.operation
-        self.stats = profile.stats
-        self.traits = profile.traits
-        self.pii = profile.pii
-        self.segments = profile.segments
-        self.consents = profile.consents
-        self.active = profile.active
+        if isinstance(profile, Profile):
+            self.id = profile.id
+            self.mergedWith = profile.mergedWith
+            self.metadata = profile.metadata
+            self.operation = profile.operation
+            self.stats = profile.stats
+            self.traits = profile.traits
+            self.pii = profile.pii
+            self.segments = profile.segments
+            self.consents = profile.consents
+            self.active = profile.active
 
     def get_merge_key_values(self) -> List[tuple]:
         converter = DotNotationConverter(self)

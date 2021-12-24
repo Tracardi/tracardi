@@ -12,11 +12,14 @@ class IncreaseVisitsAction(ActionRunner):
 
     async def run(self, payload):
 
-        if self.profile.stats is None:
-            self.profile.stats = ProfileStats()
+        if self.event.metadata.profile_less is True:
+            self.console.warning("Can not increase profile visits in profile less events.")
+        else:
+            if self.profile.stats is None:
+                self.profile.stats = ProfileStats()
 
-        if self.session is not None and self.session.operation.new:
-            self.profile.increase_visits()
+            if self.session is not None and self.session.operation.new:
+                self.profile.increase_visits()
 
         return Result(port="payload", value=payload)
 
@@ -38,9 +41,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Increase visits',
             desc='Increases visit field in profile and returns payload.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='plus',
             group=["Stats"],
             documentation=Documentation(

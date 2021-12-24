@@ -14,6 +14,7 @@ class EventMetadata(BaseModel):
     ip: str = None
     status: str = None
     processed_by: EventProcessors = EventProcessors()
+    profile_less: bool = False
 
 
 class EventPayloadMetadata(BaseModel):

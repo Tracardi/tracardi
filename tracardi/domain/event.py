@@ -1,16 +1,14 @@
-from datetime import datetime
-from typing import Optional, Any
+from typing import Optional
 from uuid import uuid4
 from .context import Context
 from .entity import Entity
 from .event_metadata import EventMetadata
-from .time import Time
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
 RECEIVED = 'received'
 VALIDATED = 'validated'
-OK = 'ok'
+PROCESSED = 'processed'
 WARNING = 'warning'
 ERROR = 'error'
 
@@ -36,35 +34,24 @@ class Event(Entity):
 
     source: Entity
     session: Entity
-    profile: Entity = None
+    profile: Optional[Entity] = None
     context: Context
     tags: Tags = Tags()
     aux: dict = {}
 
-    def __init__(self, **data: Any):
-        if 'metadata' in data and isinstance(data['metadata'], EventMetadata):
-            data['metadata'].time = Time(
-                insert=datetime.utcnow()
-            )
-        else:
-            data['metadata'] = EventMetadata(
-                time=Time(
-                    insert=datetime.utcnow()
-                )
-            )
-        super().__init__(**data)
-
     def replace(self, event):
-        self.id = event.id
-        self.type = event.type
-        self.properties = event.properties
-        # do not replace those - read only
-        # self.source = event.source
-        # self.session = event.session
-        # self.profile = event.profile
-        self.context = event.context
-        self.tags = event.tags
-        self.aux = event.aux
+        if isinstance(event, Event):
+            self.id = event.id
+            self.metadata = event.metadata
+            self.type = event.type
+            self.properties = event.properties
+            # do not replace those - read only
+            # self.source = event.source
+            # self.session = event.session
+            # self.profile = event.profile
+            self.context = event.context
+            self.tags = event.tags
+            self.aux = event.aux
 
     def is_persistent(self) -> bool:
         if 'save' in self.context.config and isinstance(self.context.config['save'], bool):

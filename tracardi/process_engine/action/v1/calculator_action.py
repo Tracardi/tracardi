@@ -31,18 +31,21 @@ class CalculatorAction(ActionRunner):
     async def run(self, payload: dict):
         calc_lines = [line.strip() for line in self.config.calc_dsl.split("\n")]
 
-        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
+        dot = self._get_dot_accessor(payload)
 
         equation = MathEquation(dot)
         results = equation.evaluate(calc_lines)
 
-        profile = Profile(**dot.profile)
-        session = Session(**dot.session)
-        event = Event(**dot.event)
+        if self.event.metadata.profile_less is False:
+            profile = Profile(**dot.profile)
+            self.profile.replace(profile)
 
-        self.profile.replace(profile)
-        self.event.replace(event)
+        session = Session(**dot.session)
         self.session.replace(session)
+
+        event = Event(**dot.event)
+        self.event.replace(event)
+
 
         return Result(port="payload", value={
             "result": results[-1],
@@ -86,10 +89,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Calculator',
             desc='Calculates new values. Adds, subtracts, divides, and multiplies values.',
-            type='flowNode',
             keywords=['math'],
-            width=300,
-            height=100,
             icon='calculator',
             group=["Data processing"],
             documentation=Documentation(

@@ -1,4 +1,6 @@
 from typing import Optional
+from uuid import uuid4
+
 from pydantic import BaseModel
 
 from ..context import Context
@@ -14,15 +16,18 @@ class EventPayload(BaseModel):
     options: Optional[dict] = {}
 
     def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Entity, profile: Optional[Entity],
-                 options: dict) -> Event:
-        return Event.new({
-            "metadata": EventMetadata(**metadata.dict()),
-            "session": Entity(id=session.id),
-            "profile": profile,  # profile can be None when profile_less event.
-            "user": self.user,
-            "type": self.type,
-            "properties": self.properties,
-            "source": source,  # Entity
-            'context': Context(config=options, params={})
-        })
+                 options: dict, profile_less: bool) -> Event:
 
+        meta = EventMetadata(**metadata.dict())
+        meta.profile_less = profile_less
+
+        return Event(id=str(uuid4()),
+                     metadata=meta,
+                     session=Entity(id=session.id),
+                     profile=profile,  # profile can be None when profile_less event.
+                     user=self.user,
+                     type=self.type,
+                     properties=self.properties,
+                     source=source,  # Entity
+                     context=Context(config=options, params={})
+                     )

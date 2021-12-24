@@ -27,9 +27,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Update event',
             desc='Updates event in storage.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='event',
             group=["Operations"],
             documentation=Documentation(

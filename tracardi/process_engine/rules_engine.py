@@ -138,7 +138,8 @@ class RulesEngine:
                             module=log.module,
                             class_name=log.class_name,
                             type=log.type,
-                            message=log.message
+                            message=log.message,
+                            traceback=log.traceback
                         )
                         self.console_log.append(console)
 

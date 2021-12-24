@@ -5,6 +5,7 @@ from pydantic import BaseModel, validator
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
+from tracardi_graph_runner.domain.execution_graph import ExecutionGraph
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
@@ -47,14 +48,19 @@ class DebugPayloadAction(ActionRunner):
 
     @staticmethod
     async def _load_full_event(event_data):
+
+        profile = None
         event = Event(**event_data)
 
-        profile_entity = Entity(id=event.profile.id)
         session_entity = Entity(id=event.session.id)
-        profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
         session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
 
-        profile = await profile_task
+        if event.metadata.profile_less is False and isinstance(event.profile, Entity):
+            profile_entity = Entity(id=event.profile.id)
+            profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
+
+            profile = await profile_task
+
         session = await session_task
 
         if session is None:
@@ -62,7 +68,7 @@ class DebugPayloadAction(ActionRunner):
                 "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
                     event.id, event.session.id))
 
-        if profile is None:
+        if event.metadata.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(
                 "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
                     event.id, event.profile.id))
@@ -71,6 +77,7 @@ class DebugPayloadAction(ActionRunner):
 
     async def run(self, **kwargs):
         if self.debug:
+
             result = await storage.driver.event.load_event_by_type(self.config.type, limit=10)
 
             if result.total == 0:
@@ -84,9 +91,19 @@ class DebugPayloadAction(ActionRunner):
 
                     event, profile, session = await self._load_full_event(event_data)
 
-                    self.profile.replace(profile)
                     self.session.replace(session)
                     self.event.replace(event)
+                    if event.metadata.profile_less is False:
+                        if self.profile is not None and profile is not None:
+                            self.profile.replace(profile)
+                    else:
+                        self.event.profile = None
+                        self.profile = None
+
+                        # Remove profiles in all nodes because the event is profile less
+                        graph = self.execution_graph  # type: ExecutionGraph
+                        if isinstance(graph, ExecutionGraph):
+                            graph.remove_profiles()
 
                     return Result(port="event", value=self.event.dict())
 
@@ -136,9 +153,6 @@ def register() -> Plugin:
             desc='Loads debug payload into flow. This action is executed only in debug mode. ' +
                  'Use it to inject payload defined it config to analyse you workflow.',
             keywords=['start node'],
-            type='flowNode',
-            width=100,
-            height=100,
             icon='debug',
             group=["Input/Output"],
             documentation=Documentation(

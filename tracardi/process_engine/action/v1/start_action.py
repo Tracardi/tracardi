@@ -9,8 +9,10 @@ class StartAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        if self.debug and self.profile.id == '@debug-profile-id':
+
+        if self.event.metadata.profile_less is False and self.debug and self.profile.id == '@debug-profile-id':
             raise ValueError("Start action can not run in debug mode without connection to Debug action.")
+
         return Result(port="payload", value={})
 
 

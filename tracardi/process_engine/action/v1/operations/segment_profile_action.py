@@ -1,3 +1,5 @@
+from tracardi.domain.profile import Profile
+
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
@@ -9,7 +11,14 @@ class SegmentProfileAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        self.profile.operation.segment = True
+        if isinstance(self.profile, Profile):
+            self.profile.operation.segment = True
+        else:
+            if self.event.metadata.profile_less is True:
+                self.console.warning("Can not segment profile when processing profile less events.")
+            else:
+                self.console.error("Can not segment profile. Profile is empty.")
+
         return Result(value=payload, port="payload")
 
 
@@ -29,9 +38,6 @@ def register() -> Plugin:
             name='Force segmentation',
             desc='Segment profile when flow ends.This action forces segmentation on profile after flow ends. See '
                  'documentation for more information.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='segment',
             group=["Operations"],
             documentation=Documentation(
