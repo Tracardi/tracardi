@@ -7,7 +7,7 @@ class Index:
         self.multi_index = multi_index
         self.rel = rel
         self.index = index
-        self.prefix = "{}-".format(os.environ['INSTANCE_PREFIX']) if 'INSTANCE_PREFIX' in os.environ and not os.environ['INSTANCE_PREFIX'] else ''
+        self.prefix = "{}-".format(os.environ['INSTANCE_PREFIX']) if 'INSTANCE_PREFIX' in os.environ and os.environ['INSTANCE_PREFIX'] else ''
         self.mapping = mapping
 
     def _index(self):
