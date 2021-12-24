@@ -1,6 +1,7 @@
 from pydantic import BaseModel, validator
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -39,9 +40,9 @@ class IfAction(ActionRunner):
 
         condition = Condition()
         if await condition.evaluate(self.config.condition, dot):
-            return Result(port="TRUE", value=payload)
+            return Result(port="true", value=payload)
         else:
-            return Result(port="FALSE", value=payload)
+            return Result(port="false", value=payload)
 
 
 def register() -> Plugin:
@@ -51,14 +52,15 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.if_action',
             className='IfAction',
             inputs=["payload"],
-            outputs=["TRUE", "FALSE"],
+            outputs=["true", "false"],
             init={"condition": ""},
             form=Form(groups=[
                 FormGroup(
+                    name="Condition statement",
                     fields=[
                         FormField(
                             id="condition",
-                            name="Condition statement",
+                            name="If condition statement",
                             description="Provide condition for IF statement. If the condition is met then the payload "
                                         "will be returned on TRUE port if not then FALSE port is triggered.",
                             component=FormComponent(type="textarea", props={"label": "condition"})
@@ -67,7 +69,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual="if_action",
-            version='0.2',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
@@ -79,7 +81,15 @@ def register() -> Plugin:
             width=200,
             height=100,
             icon='if',
-            editor='text',
-            group=['Conditions']
+            group=['Conditions'],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={
+                    "true": PortDoc(desc="Returns payload if the defined condition is met."),
+                    "false": PortDoc(desc="Returns payload if the defined condition is NOT met.")
+                }
+            )
         )
     )

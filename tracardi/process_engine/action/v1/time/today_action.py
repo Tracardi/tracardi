@@ -3,7 +3,8 @@ from datetime import datetime
 
 import pytz
 from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -19,12 +20,12 @@ class TodayConfiguration(BaseModel):
         if value != value.strip():
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        if not re.match(
-                r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
-                value.strip()
-        ):
-            raise ValueError("This field must be in form of dot notation. E.g. "
-                             "session@context.time.tz")
+        # if not re.match(
+        #         r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
+        #         value.strip()
+        # ):
+        #     raise ValueError("This field must be in form of dot notation. E.g. "
+        #                      "session@context.time.tz")
         return value
 
 
@@ -119,6 +120,14 @@ def register() -> Plugin:
             width=100,
             height=100,
             icon='today',
-            group=["Time"]
+            group=["Time"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns payload containing current date, time, etc.")
+                }
+            )
         )
     )

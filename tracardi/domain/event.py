@@ -1,14 +1,16 @@
-from datetime import datetime
-from typing import Optional, Any
+from typing import Optional
 from uuid import uuid4
 from .context import Context
 from .entity import Entity
-from .metadata import Metadata
-from .profile import Profile
-from .session import Session
-from .time import Time
+from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
+
+RECEIVED = 'received'
+VALIDATED = 'validated'
+PROCESSED = 'processed'
+WARNING = 'warning'
+ERROR = 'error'
 
 
 class Tags(BaseModel):
@@ -25,45 +27,37 @@ class Tags(BaseModel):
 
 
 class Event(Entity):
-    metadata: Metadata
+    metadata: EventMetadata
     type: str
     properties: Optional[dict] = {}
+    update: bool = False
 
     source: Entity
-    session: Session
-    profile: Profile = None
+    session: Entity
+    profile: Optional[Entity] = None
     context: Context
     tags: Tags = Tags()
-
-    def __init__(self, **data: Any):
-        if 'metadata' in data and isinstance(data['metadata'], Metadata):
-            data['metadata'].time = Time(
-                insert=datetime.utcnow()
-            )
-        else:
-            data['metadata'] = Metadata(
-                time=Time(
-                    insert=datetime.utcnow()
-                )
-            )
-        super().__init__(**data)
+    aux: dict = {}
 
     def replace(self, event):
-        self.id = event.id
-        self.type = event.type
-        self.properties = event.properties
-        self.source = event.source
-        self.session = event.session
-        self.profile = event.profile
-        self.context = event.context
-        self.tags = event.tags
+        if isinstance(event, Event):
+            self.id = event.id
+            self.metadata = event.metadata
+            self.type = event.type
+            self.properties = event.properties
+            # do not replace those - read only
+            # self.source = event.source
+            # self.session = event.session
+            # self.profile = event.profile
+            self.context = event.context
+            self.tags = event.tags
+            self.aux = event.aux
 
     def is_persistent(self) -> bool:
         if 'save' in self.context.config and isinstance(self.context.config['save'], bool):
             return self.context.config['save']
         else:
             return True
-
 
     @staticmethod
     def new(data: dict) -> 'Event':

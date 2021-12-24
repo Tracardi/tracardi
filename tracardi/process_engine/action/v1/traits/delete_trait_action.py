@@ -1,9 +1,13 @@
 from typing import List
 from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
+
+from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 
 
 class DeleteTraitConfiguration(BaseModel):
@@ -23,17 +27,27 @@ def validate(config: dict):
 class DeleteTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
+        print(self.event, kwargs)
         self.config = validate(kwargs)
 
     async def run(self, payload: dict):
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         for value in self.config.delete:
-            del dot[value]
+            try:
+                del dot[value]
+            except KeyError as e:
+                self.console.warning("Could not delete value {} due to error: {}".format(value, str(e)))
 
-        profile = Profile(**dot.profile)
+        if self.event.metadata.profile_less is False:
+            profile = Profile(**dot.profile)
+            self.profile.replace(profile)
 
-        self.profile.replace(profile)
+        session = Session(**dot.session)
+        self.session.replace(session)
+
+        event = Event(**dot.event)
+        self.event.replace(event)
 
         return Result(port="payload", value=payload)
 
@@ -67,12 +81,17 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Delete Trait',
-            desc='Deletes traits from profile or payload. Accepts dotted notation as definition of a filed to be '
+            desc='Deletes traits from profile or payload. Accepts dotted notation as definition of a field to be '
                  'deleted. Returns payload.',
-            type='flowNode',
-            width=100,
-            height=100,
             icon='remove',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns given payload with selected fields deleted.")
+                }
+            )
         )
     )

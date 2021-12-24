@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -11,10 +11,15 @@ class IncreaseViewsAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        if self.profile.stats is None:
-            self.profile.stats = ProfileStats()
 
-        self.profile.increase_views()
+        if self.event.metadata.profile_less is True:
+            self.console.warning("Can not increase profile views in profile less events.")
+        else:
+            if self.profile.stats is None:
+                self.profile.stats = ProfileStats()
+
+            self.profile.increase_views()
+
         return Result(port="payload", value=payload)
 
 
@@ -34,11 +39,16 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Increase views',
-            desc='Increases view field in profile and returns profile.',
-            type='flowNode',
-            width=200,
-            height=100,
+            desc='Increases view field in profile and returns payload.',
             icon='plus',
-            group=["Stats"]
+            group=["Stats"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns object received by plugin in input.")
+                }
+            )
         )
     )

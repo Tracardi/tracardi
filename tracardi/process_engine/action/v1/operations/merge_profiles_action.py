@@ -1,7 +1,10 @@
 from typing import List
 
 from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.domain.profile import Profile
+
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -34,8 +37,15 @@ class MergeProfilesAction(ActionRunner):
         self.merge_key = [key.lower() for key in config.mergeBy]
 
     async def run(self, payload):
-        self.profile.operation.merge = self.merge_key
-        return Result(value={}, port="payload")
+        if isinstance(self.profile, Profile):
+            self.profile.operation.merge = self.merge_key
+        else:
+            if self.event.metadata.profile_less is True:
+                self.console.warning("Can not merge profile when processing profile less events.")
+            else:
+                self.console.error("Can not merge profile. Profile is empty.")
+
+        return Result(value=payload, port="payload")
 
 
 def register() -> Plugin:
@@ -47,6 +57,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={"mergeBy": []},
+            version="0.6.0.1",
             form=Form(groups=[
                 FormGroup(
                     fields=[
@@ -66,10 +77,15 @@ def register() -> Plugin:
             name='Merge profiles',
             desc='Merges profile in storage when flow ends. This operation is expensive so use it with caution, '
                  'only when there is a new PII information added.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='merge',
-            group=["Operations"]
+            group=["Operations"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns exactly same payload as given one.")
+                }
+            )
         )
     )

@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi',
-    version='0.6.21',
+    version='0.6.24',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -20,7 +20,7 @@ setup(
         'aiohttp[speedups]',
         'redis',
         'aioredis',
-        'elasticsearch==7.13.4',
+        'elasticsearch[async]==7.10.1',
         'prodict>=0.8.18',
         'tzlocal',
         'python-multipart>=0.0.5',
@@ -30,10 +30,14 @@ setup(
         'pytz',
         'device_detector==0.10',
         'deepdiff>=5.5.0',
-        'tracardi-plugin-sdk>=0.6.25',
-        'tracardi_graph_runner>=0.6.5',
-        'tracardi-dot-notation>=0.6.5',
-        'pytimeparse'
+        'tracardi-plugin-sdk>=0.6.30',
+        'tracardi_graph_runner>=0.6.9',
+        'tracardi-dot-notation>=0.6.6',
+        'pytimeparse',
+        'barcodenumber',
+        'astral',
+        'jsonschema',
+        'python-dateutil'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

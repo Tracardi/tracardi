@@ -13,9 +13,18 @@ import tracardi.service.storage.drivers.elastic.task
 import tracardi.service.storage.drivers.elastic.api_instance
 import tracardi.service.storage.drivers.elastic.raw
 import tracardi.service.storage.drivers.elastic.tag
+import tracardi.service.storage.drivers.elastic.consent_type
+import tracardi.service.storage.drivers.elastic.user
+import tracardi.service.storage.drivers.elastic.validation_schema
+import tracardi.service.storage.drivers.elastic.event_source
+import tracardi.service.storage.drivers.elastic.pro
 
 
 class ElasticDriver:
+
+    @property
+    def pro(self):
+        return tracardi.service.storage.drivers.elastic.pro
 
     @property
     def purchase(self):
@@ -58,6 +67,10 @@ class ElasticDriver:
         return tracardi.service.storage.drivers.elastic.resource
 
     @property
+    def event_source(self):
+        return tracardi.service.storage.drivers.elastic.event_source
+
+    @property
     def action(self):
         return tracardi.service.storage.drivers.elastic.action
 
@@ -76,3 +89,15 @@ class ElasticDriver:
     @property
     def tag(self):
         return tracardi.service.storage.drivers.elastic.tag
+
+    @property
+    def consent_type(self):
+        return tracardi.service.storage.drivers.elastic.consent_type
+
+    @property
+    def user(self):
+        return tracardi.service.storage.drivers.elastic.user
+
+    @property
+    def validation_schema(self):
+        return tracardi.service.storage.drivers.elastic.validation_schema

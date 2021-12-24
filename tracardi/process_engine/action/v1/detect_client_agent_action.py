@@ -6,7 +6,8 @@ from device_detector import DeviceDetector
 from pydantic import BaseModel, validator
 
 from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -22,12 +23,6 @@ class AgentConfiguration(BaseModel):
         if value != value.strip():
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        if not re.match(
-            r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
-            value.strip()
-        ):
-            raise ValueError("This field must be in form of dot notation. E.g. "
-                             "session@context.browser.browser.userAgent")
         return value
 
 
@@ -43,7 +38,6 @@ class DetectClientAgentAction(ActionRunner):
 
     def detect_device(self, ua):
         try:
-            print(ua)
             detector = DeviceDetector(ua, skip_bot_detection=False)
             return detector.parse()
         except Exception as e:
@@ -56,7 +50,7 @@ class DetectClientAgentAction(ActionRunner):
             if not isinstance(self.session.context, dict):
                 raise KeyError("No session context defined.")
 
-            dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+            dot = self._get_dot_accessor(payload)
             ua = dot[self.config.agent]
 
             with ThreadPoolExecutor(max_workers=10) as pool:
@@ -146,6 +140,7 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Detect client type",
                     fields=[
                         FormField(
                             id="agent",
@@ -168,10 +163,16 @@ def register() -> Plugin:
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
                  'of user agent strings, even from rare and obscure browsers and devices. It returns an '
                  'object containing all the information',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='browser',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns information about user's client, so browser, "
+                                            "device info, etc.")
+                }
+            )
         )
     )

@@ -3,7 +3,8 @@ import logging
 from pydantic import BaseModel
 
 from tracardi.config import tracardi
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from deepdiff import DeepDiff
@@ -44,42 +45,51 @@ class CopyTraitAction(ActionRunner):
 
         logger.debug("NEW PROFILE: {}".format(dot.profile))
 
-        if 'traits' not in dot.profile:
-            raise ValueError("Missing traits in profile.")
 
-        if 'private' not in dot.profile['traits']:
-            raise ValueError("Missing `traits.private` in profile.")
 
-        if 'public' not in dot.profile['traits']:
-            raise ValueError("Missing `traits.public` in profile.")
+        if self.event.metadata.profile_less is False:
+            if 'traits' not in dot.profile:
+                raise ValueError("Missing traits in profile.")
 
-        if not isinstance(dot.profile['traits']['private'], dict):
-            raise ValueError(
-                "Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
-                "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
+            if 'private' not in dot.profile['traits']:
+                raise ValueError("Missing `traits.private` in profile.")
 
-        if not isinstance(dot.profile['traits']['public'], dict):
-            raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
-                             "E.g. `name`: `{}`".format(dot.profile['traits']['public'],
-                                                        dot.profile['traits']['public']))
+            if 'public' not in dot.profile['traits']:
+                raise ValueError("Missing `traits.public` in profile.")
 
-        profile = Profile(**dot.profile)
+            if not isinstance(dot.profile['traits']['private'], dict):
+                raise ValueError(
+                    "Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
+                    "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
+
+            if not isinstance(dot.profile['traits']['public'], dict):
+                raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
+                                 "E.g. `name`: `{}`".format(dot.profile['traits']['public'],
+                                                            dot.profile['traits']['public']))
+
+            profile = Profile(**dot.profile)
+
+            flat_profile = flatten(profile.dict())
+            flat_dot_profile = flatten(Profile(**dot.profile).dict())
+            diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
+
+            if diff_result and 'dictionary_item_removed' in diff_result:
+                errors = [item.replace("root[", "profile[") for item in diff_result['dictionary_item_removed']]
+                error_msg = "Some values were not added to profile. Profile schema seems not to have path: {}. " \
+                            "This node is probably misconfigured.".format(errors)
+                raise ValueError(error_msg)
+
+            self.profile.replace(profile)
+        else:
+            if dot.profile:
+                self.console.warning("Profile changes were discarded in node `Set Trait`. This event is profile "
+                                     "less so there is no profile.")
+
         event = Event(**dot.event)
-        session = Session(**dot.session)
-
-        flat_profile = flatten(profile.dict())
-        flat_dot_profile = flatten(Profile(**dot.profile).dict())
-        diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
-
-        if diff_result and 'dictionary_item_removed' in diff_result:
-            errors = [item.replace("root[", "profile[") for item in diff_result['dictionary_item_removed']]
-            error_msg = "Some values were not added to profile. Profile schema seems not to have path: {}. " \
-                        "This node is probably misconfigured.".format(errors)
-            raise ValueError(error_msg)
-
-        self.profile.replace(profile)
-        self.session.replace(session)
         self.event.replace(event)
+
+        session = Session(**dot.session)
+        self.session.replace(session)
 
         return Result(port="payload", value=payload)
 
@@ -125,10 +135,15 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Set Trait',
             desc='Returns payload with copied/set traits.',
-            type='flowNode',
-            width=100,
-            height=100,
             icon='copy',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns given payload modified according to configuration.")
+                }
+            )
         )
     )

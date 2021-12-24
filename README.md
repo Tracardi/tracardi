@@ -25,7 +25,8 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
 ## Screenshots
 
-![Screenshot 1](https://raw.githubusercontent.com/atompie/tracardi-images/master/images/intro5.png)
+![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
+
 
 # Installation
 
@@ -48,7 +49,7 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 Now pull and run Tracardi backend.
 
 ```
-docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 tracardi/tracardi-api
+docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 -e USER_NAME=admin -e PASSWORD=admin tracardi/tracardi-api
 ```
 
 Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variable to reference your laptop's IP. 

@@ -1,4 +1,6 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi.domain.profile import Profile
+
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 
@@ -9,8 +11,15 @@ class SegmentProfileAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        self.profile.operation.segment = True
-        return Result(value={}, port="payload")
+        if isinstance(self.profile, Profile):
+            self.profile.operation.segment = True
+        else:
+            if self.event.metadata.profile_less is True:
+                self.console.warning("Can not segment profile when processing profile less events.")
+            else:
+                self.console.error("Can not segment profile. Profile is empty.")
+
+        return Result(value=payload, port="payload")
 
 
 def register() -> Plugin:
@@ -21,6 +30,7 @@ def register() -> Plugin:
             className='SegmentProfileAction',
             inputs=["payload"],
             outputs=["payload"],
+            version="0.6.0.1",
             init=None,
             manual="segment_profiles_action"
         ),
@@ -28,10 +38,15 @@ def register() -> Plugin:
             name='Force segmentation',
             desc='Segment profile when flow ends.This action forces segmentation on profile after flow ends. See '
                  'documentation for more information.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='segment',
-            group=["Operations"]
+            group=["Operations"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns exactly same payload as given one.")
+                }
+            )
         )
     )

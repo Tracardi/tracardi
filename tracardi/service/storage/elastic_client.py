@@ -3,7 +3,7 @@ from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from ssl import create_default_context
-from tracardi.config import elastic
+from tracardi.config import elastic, ON_PREMISES, AWS_CLOUD
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
@@ -107,6 +107,10 @@ class ElasticClient:
         logger.debug(f"CREATE INDEX: {index}")
         return await self._client.indices.create(index=index, ignore=400, body=mappings)
 
+    async def put_index_template(self, template_name, mappings):
+        logger.debug(f"PUT INDEX TEMPLATE: {template_name}")
+        return await self._client.indices.put_index_template(name=template_name, ignore=400, body=mappings)
+
     async def exists_index(self, index):
         logger.debug(f"EXISTS INDEX: {index}")
         return await self._client.indices.exists(index=index)
@@ -172,7 +176,10 @@ class ElasticClient:
 
         def get_elastic_client():
             kwargs = ElasticClient._get_elastic_config()
-            return ElasticClient(**kwargs)
+            if config.elastic.hosting == ON_PREMISES:
+                return ElasticClient(**kwargs)
+            elif config.elastic.hosting == AWS_CLOUD:
+                raise ConnectionError("Not implemented")
 
         if _singleton is None:
             _singleton = get_elastic_client()

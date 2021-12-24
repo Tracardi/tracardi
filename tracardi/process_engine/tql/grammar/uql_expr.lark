@@ -26,10 +26,13 @@ expr: and_expr
         | op_field_eq_field
 
 op_field_sig: OP_FIELD
-        | op_compound_field
+        | op_compound_value
 
 op_value_sig: op_value
     | op_compound_value
+
+op_value_or_field: op_value
+    | OP_FIELD
 
 op_field_eq_field: op_field_sig OP op_field_sig
 op_between: op_field_sig BETWEEN_TERMINAL op_range
@@ -47,9 +50,8 @@ OP_NULL: "NULL"i
 OP_BOOL: /(TRUE|FALSE)/i
 OP_FIELD: /(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+/
 OP_STRING: ESCAPED_STRING
-OP_VALUE_TYPE: /[a-zA-Z0-9]+/
-op_compound_value: OP_VALUE_TYPE "(" op_value ")"
-op_compound_field: OP_VALUE_TYPE "(" OP_FIELD ")"
+OP_VALUE_TYPE: /[a-zA-Z0-9\._]+/
+op_compound_value: OP_VALUE_TYPE "(" [op_value_or_field ("," op_value_or_field)*] ")"
 OP_INTEGER: /\d+/
 OP_FLOAT: NUMBER
 OP_TIME: /\d+(m|s|h|d)/

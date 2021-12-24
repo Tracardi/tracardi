@@ -42,7 +42,7 @@ async def count_events_by_type(event_type: str, time_span: int) -> int:
 
     }
     result = await storage_manager("event").query(query)
-    return result["hits"]["total"]
+    return result["hits"]["total"]['value']
 
 
 async def heatmap_by_event_type(event_type=None):
@@ -107,8 +107,7 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
                 finally:
                     events_to_save.append(event)
 
-        # events_to_save = [event for event in events if event.is_persistent()]
-        event_result = await StorageForBulk(events_to_save).index('event').save()
+        event_result = await StorageForBulk(events_to_save).index('event').save(exclude={"update": ...})
         event_result = SaveResult(**event_result.dict())
 
         # Add event types
@@ -120,8 +119,8 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
     return event_result
 
 
-async def load_event_by_type(event_type):
-    return await StorageFor.crud('event', class_type=Event).load_by('type', event_type, limit=1)
+async def load_event_by_type(event_type, limit=1):
+    return await StorageFor.crud('event', class_type=Event).load_by('type', event_type, limit=limit)
 
 
 async def load_event_by_profile(profile_id: str, limit: int = 20) -> List[Event]:
@@ -208,7 +207,6 @@ async def load_events_heatmap(profile_id: str):
     def convert_data(raw_result):
         if 'aggregations' in raw_result:
             for aggregation, data_bucket in raw_result['aggregations'].items():
-                print(data_bucket)
                 if 'buckets' in data_bucket:
                     for row in data_bucket['buckets']:
                         date = row['key_as_string']

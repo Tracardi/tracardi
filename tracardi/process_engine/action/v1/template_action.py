@@ -1,5 +1,6 @@
 from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_dot_notation.dot_template import DotTemplate
 from pydantic import BaseModel
@@ -17,11 +18,11 @@ class TemplateAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
-        self.dot = DotTemplate()
+        self.dot_template = DotTemplate()
 
     async def run(self, payload):
         accessor = self._get_dot_accessor(payload)
-        return Result(port="payload", value=self.dot.render(self.config.template, accessor))
+        return Result(port="payload", value=self.dot_template.render(self.config.template, accessor))
 
 
 def register() -> Plugin:
@@ -32,7 +33,7 @@ def register() -> Plugin:
             className='TemplateAction',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.6',
+            version='0.6.0.1',
             license="MIT",
             author="Dawid Kruk",
             manual="template_action",
@@ -56,10 +57,16 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Template data',
             desc='Returns a string where placeholders are replaced with given values.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='template',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns a string with placeholders replaced by values given in "
+                                            "payload.")
+                }
+            )
         )
     )

@@ -1,4 +1,4 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -9,8 +9,10 @@ class StartAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        if self.debug and self.profile.id == '@debug-profile-id':
+
+        if self.event.metadata.profile_less is False and self.debug and self.profile.id == '@debug-profile-id':
             raise ValueError("Start action can not run in debug mode without connection to Debug action.")
+
         return Result(port="payload", value={})
 
 
@@ -24,18 +26,23 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init=None,
-            version='0.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Start',
             desc='Starts workflow and returns empty payload.',
-            type='flowNode',
             keywords=['start node'],
-            width=200,
-            height=100,
             icon='start',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns empty payload object.")
+                }
+            )
         )
     )

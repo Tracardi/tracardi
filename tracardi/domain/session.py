@@ -24,12 +24,13 @@ class Session(Entity):
         super().__init__(**data)
 
     def replace(self, session):
-        self.id = session.id
-        self.metadata = session.metadata
-        self.operation = session.operation
-        self.profile = session.profile
-        self.context = session.context
-        self.properties = session.properties
+        if isinstance(session, Session):
+            self.id = session.id
+            self.metadata = session.metadata
+            self.operation = session.operation
+            self.profile = session.profile
+            self.context = session.context
+            self.properties = session.properties
 
     @staticmethod
     def storage_info() -> StorageInfo:

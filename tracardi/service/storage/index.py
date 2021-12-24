@@ -31,14 +31,20 @@ class Resource:
 
     def __init__(self):
         self.resources = {
+            "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json",
+                                 rel=None),
             "project": Index(multi_index=False, index="tracardi-flow-project", mapping=None, rel=None),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),
             "token": Index(multi_index=False, index="tracardi-token", mapping="mappings/token-index.json", rel=None),
-            "resource": Index(multi_index=False, index="tracardi-resource", mapping=None, rel=None),
+            "resource": Index(multi_index=False, index="tracardi-resource", mapping="mappings/resource-index.json",
+                              rel=None),
+            "event-source": Index(multi_index=False, index="tracardi-event-source",
+                                  mapping="mappings/event-source-index.json",
+                                  rel=None),
             "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json",
                              rel='profile.id'),
-            "profile": Index(multi_index=False, index="tracardi-profile", mapping="mappings/profile-index.json",
+            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json",
                              rel='_id'),
             "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json", rel=None),
             "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json", rel=None),
@@ -56,7 +62,12 @@ class Resource:
             "profile-purchase": Index(multi_index=False, index="tracardi-profile-purchase",
                                       mapping="mappings/profile-purchase-index.json", rel=None),
             "event-tags": Index(multi_index=False, index="tracardi-event-tags", mapping="mappings/tag-index.json",
-                                rel=None)
+                                rel=None),
+            "consent-type": Index(multi_index=False, index="tracardi-consent-type", mapping="mappings/consent-type.json",
+                                rel=None),
+            "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None),
+            "validation-schema": Index(multi_index=False, index="tracardi-validation-schema",
+                                       mapping="mappings/validation-schema-index.json", rel=None)
         }
 
     def add_indices(self, indices: dict):

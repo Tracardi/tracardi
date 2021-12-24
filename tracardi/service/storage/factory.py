@@ -44,6 +44,10 @@ class EntityStorageCrud(BaseStorageCrud):
         service = self._get_storage_service()
         return await service.load_by(field, value, limit)
 
+    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+        service = self._get_storage_service()
+        return await service.match_by(field, value, limit)
+
     async def load_by_values(self, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None, limit: int = 100):
         service = self._get_storage_service()
         return await service.load_by_values(key_value_pairs, sort_by, limit=limit)
@@ -87,10 +91,10 @@ class CollectionCrud:
         self.index = index
         self.storage = storage_manager(self.index)
 
-    async def save(self, replace_id: bool = True) -> BulkInsertResult:
+    async def save(self, replace_id: bool = True, exclude=None) -> BulkInsertResult:
         if not isinstance(self.payload, list):
             raise TracardiException("CollectionCrud data payload must be list.")
-        data = [p.dict() for p in self.payload if isinstance(p, BaseModel)]
+        data = [p.dict(exclude=exclude) for p in self.payload if isinstance(p, BaseModel)]
         return await self.storage.upsert(data, replace_id)
 
     async def load(self, start: int = 0, limit: int = 100) -> StorageResult:
@@ -99,8 +103,10 @@ class CollectionCrud:
             return await self.storage.load_all(start, limit)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args):
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
     async def uniq_field_value(self, field) -> AggResult:
         try:
@@ -116,8 +122,10 @@ class CollectionCrud:
             }
             return AggResult('uniq', await self.storage.query(query), return_counts=False)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args):
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
 
 class StorageFor:

@@ -94,6 +94,17 @@ class ElasticStorage:
         }
         return await self.search(query)
 
+    async def match_by(self, field, value, limit=100):
+        query = {
+            "size": limit,
+            "query": {
+                "match": {
+                    field: value
+                }
+            }
+        }
+        return await self.search(query)
+
     async def delete_by(self, field, value):
         query = {
             "query": {
@@ -140,3 +151,6 @@ class ElasticStorage:
 
     async def update_by_query(self, query):
         return await self.storage.update_by_query(index=self.index.get_write_index(), query=query)
+
+    async def delete_by_query(self, query):
+        return await self.storage.delete_by_query(index=self.index.get_write_index(), body=query)

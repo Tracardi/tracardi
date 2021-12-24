@@ -5,7 +5,9 @@ from pydantic import BaseModel, validator
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi_graph_runner.domain.execution_graph import ExecutionGraph
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -27,8 +29,8 @@ class DebugConfiguration(BaseModel):
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
         if not re.match(
-            r'^[\@a-zA-Z0-9\._\-]+$',
-            value.strip()
+                r'^[\@a-zA-Z0-9\._\-]+$',
+                value.strip()
         ):
             raise ValueError("This field must not have other characters then: letters, digits, ., _, -, @")
 
@@ -44,44 +46,76 @@ class DebugPayloadAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
+    @staticmethod
+    async def _load_full_event(event_data):
+
+        profile = None
+        event = Event(**event_data)
+
+        session_entity = Entity(id=event.session.id)
+        session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
+
+        if event.metadata.profile_less is False and isinstance(event.profile, Entity):
+            profile_entity = Entity(id=event.profile.id)
+            profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
+
+            profile = await profile_task
+
+        session = await session_task
+
+        if session is None:
+            raise ValueError(
+                "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
+                    event.id, event.session.id))
+
+        if event.metadata.profile_less is False and isinstance(event.profile, Entity) and profile is None:
+            raise ValueError(
+                "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
+                    event.id, event.profile.id))
+
+        return event, profile, session
+
     async def run(self, **kwargs):
         if self.debug:
-            result = await storage.driver.event.load_event_by_type(self.config.type)
+
+            result = await storage.driver.event.load_event_by_type(self.config.type, limit=10)
 
             if result.total == 0:
                 raise ValueError(
                     "There is no event with type `{}`. Check configuration for correct event type.".format(
                         self.config.type))
 
-            event_data = list(result)[0]
+            for event_data in list(result):
 
-            event = Event(**event_data)
+                try:
 
-            profile_entity = Entity(id=event.profile.id)
-            session_entity = Entity(id=event.session.id)
-            profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
-            session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
+                    event, profile, session = await self._load_full_event(event_data)
 
-            profile = await profile_task
-            session = await session_task
+                    self.session.replace(session)
+                    self.event.replace(event)
+                    if event.metadata.profile_less is False:
+                        if self.profile is not None and profile is not None:
+                            self.profile.replace(profile)
+                    else:
+                        self.event.profile = None
+                        self.profile = None
 
-            if session is None:
-                raise ValueError(
-                    "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
-                        event.id, event.session.id))
+                        # Remove profiles in all nodes because the event is profile less
+                        graph = self.execution_graph  # type: ExecutionGraph
+                        if isinstance(graph, ExecutionGraph):
+                            graph.remove_profiles()
 
-            if profile is None:
-                raise ValueError(
-                    "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
-                        event.id, event.profile.id))
+                    return Result(port="event", value=self.event.dict())
 
-            self.profile.replace(profile)
-            self.session.replace(session)
-            self.event.replace(event)
+                except ValueError as e:
+                    self.console.warning(str(e))
 
+            raise ValueError("There is no event with type `{}` that is consistent. See log error for details.".format(
+                        self.config.type))
+
+        else:
+            # No debug mode
             return Result(port="event", value=self.event.dict())
-
-        return Result(port="event", value=self.event.dict())
 
 
 def register() -> Plugin:
@@ -119,10 +153,13 @@ def register() -> Plugin:
             desc='Loads debug payload into flow. This action is executed only in debug mode. ' +
                  'Use it to inject payload defined it config to analyse you workflow.',
             keywords=['start node'],
-            type='flowNode',
-            width=100,
-            height=100,
             icon='debug',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                outputs={
+                    "event": PortDoc(desc="This port returns first event with type defined in configuration.")
+                },
+                inputs={}
+            )
         )
     )

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
+    FormFieldValidation, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
 from tracardi.exceptions.exception import WorkflowException
@@ -31,7 +31,7 @@ def register() -> Plugin:
             className='RaiseErrorAction',
             inputs=["payload"],
             outputs=[],
-            version='0.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski",
             init={
@@ -53,10 +53,13 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Throw error',
             desc='Throws an error and stops workflow.',
-            type='flowNode',
-            width=100,
-            height=100,
             icon='stop',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                },
+                outputs={}
+            )
         )
     )
