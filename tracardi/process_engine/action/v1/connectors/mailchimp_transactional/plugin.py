@@ -3,8 +3,10 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Document
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi.service.mailchimp_sender import MailChimpTransactionalSender
 from tracardi_plugin_sdk.domain.result import Result
-from .model.config import Config
+from .model.config import Config, Token
 from tracardi_dot_notation.dot_template import DotTemplate
+from tracardi.service.storage.driver import storage
+from tracardi.domain.resource import ResourceCredentials
 
 
 def validate(config: dict):
@@ -13,25 +15,34 @@ def validate(config: dict):
 
 class TransactionalMailSender(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    def __init__(self, config: Config, credentials: ResourceCredentials):
+        self.config = config
+        self._client = MailChimpTransactionalSender(credentials.get_credentials(self, output=Token).token)
         self._dot_template = DotTemplate()
+
+    @staticmethod
+    async def build(**kwargs) -> 'TransactionalMailSender':
+        config = validate(kwargs)
+        resource = await storage.driver.resource.load(config.source.id)
+        return TransactionalMailSender(
+            config,
+            resource.credentials
+        )
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         message = self._dot_template.render(self.config.message.content.content, dot)
         recipient_emails = dot[self.config.message.recipient]
         recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
-        mailchimp = MailChimpTransactionalSender(self.config.api_key)
         for email in recipient_emails:
-            mailchimp.create_message(
+            self._client.create_message(
                 from_email=self.config.sender_email,
                 subject=self.config.message.subject,
                 message=message,
                 to_email=email,
                 html_content=True if self.config.message.content.type == "text/html" else False
             )
-        result = mailchimp.send_messages()
+        result = self._client.send_messages()
         return Result(port="payload", value=payload), Result(port="response", value=result)
 
 
@@ -43,11 +54,14 @@ def register() -> Plugin:
             className='TransactionalMailSender',
             inputs=["payload"],
             outputs=["payload", "response"],
-            version='0.6.0.1',
+            version='0.6.0.2',
             license="MIT",
             author="Dawid Kruk",
             init={
-                "api_key": None,
+                "source": {
+                    "name": None,
+                    "id": None
+                },
                 "sender_email": None,
                 "message": {
                     "recipient": None,
@@ -61,11 +75,10 @@ def register() -> Plugin:
                         name="Your data",
                         fields=[
                             FormField(
-                                id="api_key",
-                                name="Mailchimp API key",
-                                description="Here please provide your Mailchimp API key. "
-                                            "If you do not know it, just check it on mandrillapp.com.",
-                                component=FormComponent(type="text", props={"label": "API key"})
+                                id="source",
+                                name="Mailchimp resource",
+                                description="Here please provide your Mandrill resource ID. ",
+                                component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
                             ),
                             FormField(
                                 id="sender_email",
@@ -106,8 +119,8 @@ def register() -> Plugin:
                         ]
                     )
                 ]
-            )
-
+            ),
+            manual="mailchimp_transactional_action"
         ),
         metadata=MetaData(
             name='Send transactional e-mail',

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, validator
-from tracardi.service.mailchimp_sender import MailChimpTransactionalSender
 
 
 class Content(BaseModel):
@@ -25,12 +24,16 @@ class Message(BaseModel):
         return value
 
 
+class SourceInfo(BaseModel):
+    name: str
+    id: str
+
+
 class Config(BaseModel):
-    api_key: str = None
+    source: SourceInfo
     sender_email: str = None
     message: Message
 
-    @validator("api_key")
-    def validate_api_key(cls, value):
-        MailChimpTransactionalSender.validate_api_key(value)
-        return value
+
+class Token(BaseModel):
+    token: str
