@@ -44,7 +44,7 @@ class TransactionalMailSender(ActionRunner):
             try:
                 validate_email(email)
             except EmailNotValidError:
-                self.console.warnig("Recipient e-mail {} is not valid email. This e-mail was skipped.".format(email))
+                self.console.warning("Recipient e-mail {} is not valid email. This e-mail was skipped.".format(email))
                 continue
 
             self._client.create_message(
@@ -150,7 +150,7 @@ def register() -> Plugin:
             desc='Sends transactional e-mail via MailChimp API.',
             type='flowNode',
             icon='mailchimp',
-            group=["Connectors"],
+            group=["Connectors", "E-mail"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

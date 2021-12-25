@@ -24,3 +24,5 @@ jsonschema
 python-dateutil
 mailchimp-transactional
 email-validator
+lxml
+beautifulsoup4

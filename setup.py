@@ -39,7 +39,9 @@ setup(
         'jsonschema',
         'python-dateutil',
         'mailchimp-transactional',
-        'email-validator'
+        'email-validator',
+        'lxml',
+        'beautifulsoup4'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
