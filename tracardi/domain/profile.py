@@ -49,7 +49,7 @@ class Profile(Entity):
 
     def get_merge_key_values(self) -> List[tuple]:
         converter = DotNotationConverter(self)
-        return [converter.get_profile_fiel_value_pair(key) for key in self.operation.merge]
+        return [converter.get_profile_file_value_pair(key) for key in self.operation.merge]
 
     def _get_merging_keys_and_values(self):
         merge_key_values = self.get_merge_key_values()

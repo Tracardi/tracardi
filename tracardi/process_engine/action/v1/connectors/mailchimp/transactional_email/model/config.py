@@ -1,9 +1,10 @@
 from pydantic import BaseModel, validator
+from tracardi.domain.named_entity import NamedEntity
 
 
 class Content(BaseModel):
-    content: str = None
-    type: str = None
+    content: str
+    type: str
 
     @validator("type")
     def validate_type(cls, value):
@@ -13,9 +14,15 @@ class Content(BaseModel):
 
 
 class Message(BaseModel):
-    recipient: str = None
+    recipient: str
     subject: str = ""
     content: Content
+
+    @validator("recipient")
+    def recipient_subject(cls, value):
+        if len(value) == 0:
+            raise ValueError("Recipient e-mail can not be empty.")
+        return value
 
     @validator("subject")
     def validate_subject(cls, value):
@@ -24,16 +31,16 @@ class Message(BaseModel):
         return value
 
 
-class SourceInfo(BaseModel):
-    name: str
-    id: str
-
-
 class Config(BaseModel):
-    source: SourceInfo
-    sender_email: str = None
+    source: NamedEntity
+    sender_email: str
     message: Message
 
+    @validator("sender_email")
+    def sender_email_subject(cls, value):
+        if len(value) == 0:
+            raise ValueError("Sender e-mail can not be empty.")
+        return value
 
 class Token(BaseModel):
     token: str
