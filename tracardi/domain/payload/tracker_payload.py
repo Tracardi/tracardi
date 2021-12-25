@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import Optional, List, Tuple, Any
 from pydantic import BaseModel
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, RECEIVED
 
 from ..entity import Entity
+from ..event_metadata import EventPayloadMetadata
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
 from ..session import Session
-from ..metadata import Metadata
 from ..time import Time
 
 
@@ -15,7 +15,7 @@ class TrackerPayload(BaseModel):
     source: Entity
     session: Entity
 
-    metadata: Optional[Metadata]
+    metadata: Optional[EventPayloadMetadata]
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
@@ -23,17 +23,18 @@ class TrackerPayload(BaseModel):
     options: Optional[dict] = {}
 
     def __init__(self, **data: Any):
-        data['metadata'] = Metadata(
+        data['metadata'] = EventPayloadMetadata(
             time=Time(
                 insert=datetime.utcnow()
             ))
         super().__init__(**data)
 
-    def get_events(self, session: Session, profile: Profile) -> List[Event]:
+    def get_events(self, session: Session, profile: Optional[Profile], profile_less) -> List[Event]:
         event_list = []
         if self.events:
             for event in self.events:  # type: EventPayload
-                _event = event.to_event(self.metadata, self.source, session, profile, event.options)
+                _event = event.to_event(self.metadata, self.source, session, profile, event.options, profile_less)
+                _event.metadata.status = RECEIVED
                 event_list.append(_event)
         return event_list
 
@@ -43,7 +44,8 @@ class TrackerPayload(BaseModel):
     def is_disabled(self, key):
         return key in self.options and self.options[key] is False
 
-    async def get_profile_and_session(self, session: Session, load_merged_profile) -> Tuple[Profile, Session]:
+    async def get_profile_and_session(self, session: Session, load_merged_profile, profile_less) -> Tuple[
+        Optional[Profile], Session]:
 
         """
         Returns session. Creates profile if it does not exist.If it exists connects session with profile.
@@ -51,73 +53,74 @@ class TrackerPayload(BaseModel):
 
         is_new_profile = False
         is_new_session = False
+        profile = None
 
-        if session is None:  # loaded session is empty
+        if profile_less is False:
 
-            session = Session(id=self.session.id)
-            is_new_session = True
+            if session is None:  # loaded session is empty
 
-            # Bind profile
+                session = Session(id=self.session.id)
+                is_new_session = True
 
-            if self.profile is None:
+                # Bind profile
+                if self.profile is None:
 
-                # Create empty default profile generate profile_id
-                profile = Profile.new()
+                    # Create empty default profile generate profile_id
+                    profile = Profile.new()
 
-                # Create new profile
-                is_new_profile = True
+                    # Create new profile
+                    is_new_profile = True
+
+                else:
+
+                    # Id exists load profile from storage
+                    profile = await load_merged_profile(id=self.profile.id)  # type: Profile
+
+                    if profile is None:
+                        # Profile id delivered but profile does not exist in storage.
+                        # Id was forged
+
+                        profile = Profile.new()
+
+                        # Create new profile
+                        is_new_profile = True
 
             else:
 
-                # Id exists load profile from storage
-                profile = await load_merged_profile(id=self.profile.id)  # type: Profile
+                # There is session. Copy profile id form session to profile
+
+                if session.profile is not None:
+                    # Loaded session has profile
+
+                    # Load profile based on profile id saved in session
+                    profile = await load_merged_profile(id=session.profile.id)  # type: Profile
+
+                    if isinstance(profile, Profile) and session.profile.id != profile.id:
+                        # Profile in session id has been merged. Change profile in session.
+
+                        session.profile.id = profile.id
+                        session.metadata.time = Time(insert=datetime.utcnow())
+
+                        is_new_session = True
+
+                else:
+                    # Corrupted session, or profile less session
+
+                    profile = None
 
                 if profile is None:
-                    # Profile id delivered but profile does not exist in storage.
-                    # Id was forged
+                    # Id exists but profile not exist in storage.
 
                     profile = Profile.new()
 
                     # Create new profile
                     is_new_profile = True
 
-        else:
-
-            # There is session. Copy profile id form session to profile
-
-            if session.profile is not None:
-                # Loaded session has profile
-
-                # Load profile based on profile id saved in session
-                profile = await load_merged_profile(id=session.profile.id)  # type: Profile
-
-                if isinstance(profile, Profile) and session.profile.id != profile.id:
-                    # Profile in session id has been merged. Change profile in session.
-
-                    session.profile.id = profile.id
-                    session.metadata.time = Time(insert=datetime.utcnow())
-
-                    is_new_session = True
-
-                # profile = await profile.storage().load()  # type: Profile
-
-            else:
-                # Corrupted session
-
-                profile = None
-
-            if profile is None:
-                # Id exists but profile not exist in storage.
-
-                profile = Profile.new()
-
-                # Create new profile
-                is_new_profile = True
-
         session.context = self.context
         session.properties = self.properties
         session.operation.new = is_new_session
 
-        profile.operation.new = is_new_profile
+        if profile_less is False and profile is not None:
+            profile.operation.new = is_new_profile
 
         return profile, session

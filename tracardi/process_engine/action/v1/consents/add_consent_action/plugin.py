@@ -18,28 +18,33 @@ class ConsentAdder(ActionRunner):
 
     async def run(self, payload):
 
-        dot = self._get_dot_accessor(payload)
+        if self.event.metadata.profile_less is False:
 
-        consents_data = dot[self.config.consents]
+            dot = self._get_dot_accessor(payload)
 
-        if not isinstance(consents_data, dict):
-            raise ValueError(
-                "Consents must be defined as dict, with keys as consent-id and value as Consent object with revoke.")
+            consents_data = dot[self.config.consents]
 
-        consents = Consents(__root__=consents_data)
-        for consent_id, consent in consents:
-            consent_type_data = await storage.driver.consent_type.get_by_id(consent_id)
+            if not isinstance(consents_data, dict):
+                raise ValueError(
+                    "Consents must be defined as dict, with keys as consent-id and value as Consent object with revoke.")
 
-            if consent_type_data is not None:
-                consent_type = ConsentType(**consent_type_data)
-                if consent_type.revokable is False:
-                    consent.revoke = None
-                self.profile.consents[consent_id] = consent
-            else:
-                self.console.warning(f"The consent id `{consent_id}` was not appended to profile as there is no consent "
-                                     f"type `{consent_id}` defined in the system.")
+            consents = Consents(__root__=consents_data)
+            for consent_id, consent in consents:
+                consent_type_data = await storage.driver.consent_type.get_by_id(consent_id)
 
-        return Result(port="payload", value=self.profile.consents)
+                if consent_type_data is not None:
+                    consent_type = ConsentType(**consent_type_data)
+                    if consent_type.revokable is False:
+                        consent.revoke = None
+                    self.profile.consents[consent_id] = consent
+                else:
+                    self.console.warning(f"The consent id `{consent_id}` was not appended to profile as there is no consent "
+                                         f"type `{consent_id}` defined in the system.")
+
+            return Result(port="payload", value=self.profile.consents)
+        else:
+            self.console.error("Can not add profile consents on profile less event.")
+            return Result(port="payload", value=None)
 
 
 def register() -> Plugin:
@@ -77,9 +82,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Add consent',
             desc='This plugin adds consents to profile.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='icon',
             group=["Consents"],
             documentation=Documentation(

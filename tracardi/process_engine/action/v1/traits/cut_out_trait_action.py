@@ -1,19 +1,30 @@
+from pydantic import BaseModel, validator
+
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     FormFieldValidation, Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
 
+class CutOutTraitConfig(BaseModel):
+    trait: str
+
+    @validator("trait")
+    def trait_should_not_be_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Trait should not be empty")
+
+        return value
+
+
+def validate(config: dict):
+    return CutOutTraitConfig(**config)
+
+
 class CutOutTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'trait' not in kwargs:
-            raise ValueError("Please define trait in config section.")
-
-        if kwargs['trait'] == 'undefined':
-            raise ValueError("Please define trait in config section. It has default value of undefined.")
-
-        self.property = kwargs['trait']
+        self.property = validate(kwargs)
 
     async def run(self, payload: dict):
 
@@ -57,9 +68,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Cut out trait',
             desc='Returns defined property from payload.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='property',
             group=["Data processing"],
             documentation=Documentation(

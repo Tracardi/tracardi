@@ -207,7 +207,6 @@ async def load_events_heatmap(profile_id: str):
     def convert_data(raw_result):
         if 'aggregations' in raw_result:
             for aggregation, data_bucket in raw_result['aggregations'].items():
-                print(data_bucket)
                 if 'buckets' in data_bucket:
                     for row in data_bucket['buckets']:
                         date = row['key_as_string']

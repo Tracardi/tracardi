@@ -56,24 +56,30 @@ class AppendTraitAction(ActionRunner):
                 elif value in dot[destination]:
                     dot[destination].remove(value)
 
-        if not isinstance(dot.profile['traits']['private'], dict):
-            raise ValueError("Error when appending profile@traits.private to value `{}`. "
-                             "Private must have key:value pair. "
-                             "E.g. `name`: `{}`".format(dot.profile['traits']['private'],
-                                                        dot.profile['traits']['private']))
+        if self.event.metadata.profile_less is False:
+            if not isinstance(dot.profile['traits']['private'], dict):
+                raise ValueError("Error when appending profile@traits.private to value `{}`. "
+                                 "Private must have key:value pair. "
+                                 "E.g. `name`: `{}`".format(dot.profile['traits']['private'],
+                                                            dot.profile['traits']['private']))
 
-        if not isinstance(dot.profile['traits']['public'], dict):
-            raise ValueError(
-                "Error when appending profile@traits.public to value `{}`. Public must have key:value pair. "
-                "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
+            if not isinstance(dot.profile['traits']['public'], dict):
+                raise ValueError(
+                    "Error when appending profile@traits.public to value `{}`. Public must have key:value pair. "
+                    "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
 
-        profile = Profile(**dot.profile)
+            profile = Profile(**dot.profile)
+            self.profile.replace(profile)
+        else:
+            if dot.profile:
+                self.console.warning("Profile changes were discarded in node `Append/Remove Trait`. "
+                                     "This event is profile less so there is no profile.")
+
         event = Event(**dot.event)
-        session = Session(**dot.session)
-
-        self.profile.replace(profile)
-        self.session.replace(session)
         self.event.replace(event)
+
+        session = Session(**dot.session)
+        self.session.replace(session)
 
         return Result(port="payload", value=payload)
 
@@ -102,9 +108,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Append/Remove Trait',
             desc='Appends/Removes trait to/from existing profile trait.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='append',
             group=["Data processing"],
             documentation=Documentation(

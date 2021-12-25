@@ -11,10 +11,15 @@ class IncreaseViewsAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        if self.profile.stats is None:
-            self.profile.stats = ProfileStats()
 
-        self.profile.increase_views()
+        if self.event.metadata.profile_less is True:
+            self.console.warning("Can not increase profile views in profile less events.")
+        else:
+            if self.profile.stats is None:
+                self.profile.stats = ProfileStats()
+
+            self.profile.increase_views()
+
         return Result(port="payload", value=payload)
 
 
@@ -35,9 +40,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Increase views',
             desc='Increases view field in profile and returns payload.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='plus',
             group=["Stats"],
             documentation=Documentation(

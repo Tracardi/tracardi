@@ -1,3 +1,5 @@
+from tracardi.domain.profile import Profile
+
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
 
@@ -8,8 +10,13 @@ class UpdateProfileAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        self.profile.operation.update = True
-        return None
+        if isinstance(self.profile, Profile):
+            self.profile.operation.update = True
+        else:
+            if self.event.metadata.profile_less is True:
+                self.console.warning("Can not update profile when processing profile less events.")
+            else:
+                self.console.error("Can not update profile. Profile is empty.")
 
 
 def register() -> Plugin:
@@ -27,9 +34,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Update profile',
             desc='Updates profile in storage.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='store',
             group=["Operations"],
             documentation=Documentation(

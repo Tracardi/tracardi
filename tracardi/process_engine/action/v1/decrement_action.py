@@ -6,7 +6,6 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, Fo
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi.domain.profile import Profile
-from tracardi_dot_notation.dot_accessor import DotAccessor
 
 
 class DecrementConfig(BaseModel):
@@ -31,12 +30,7 @@ class DecrementAction(ActionRunner):
 
     async def run(self, payload):
 
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
+        dot = self._get_dot_accessor(payload)
 
         try:
 
@@ -55,7 +49,8 @@ class DecrementAction(ActionRunner):
 
         dot[self.config.field] = value
 
-        self.profile.replace(Profile(**dot.profile))
+        if self.event.metadata.profile_less is False:
+            self.profile.replace(Profile(**dot.profile))
 
         return Result(port="payload", value=payload)
 
@@ -105,9 +100,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Decrement counter',
             desc='Decrement profile stats.counters value. Returns payload',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='minus',
             group=["Stats"],
             documentation=Documentation(

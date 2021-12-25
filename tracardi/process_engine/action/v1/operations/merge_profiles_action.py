@@ -1,6 +1,8 @@
 from typing import List
 
 from pydantic import BaseModel, validator
+from tracardi.domain.profile import Profile
+
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -35,7 +37,14 @@ class MergeProfilesAction(ActionRunner):
         self.merge_key = [key.lower() for key in config.mergeBy]
 
     async def run(self, payload):
-        self.profile.operation.merge = self.merge_key
+        if isinstance(self.profile, Profile):
+            self.profile.operation.merge = self.merge_key
+        else:
+            if self.event.metadata.profile_less is True:
+                self.console.warning("Can not merge profile when processing profile less events.")
+            else:
+                self.console.error("Can not merge profile. Profile is empty.")
+
         return Result(value=payload, port="payload")
 
 
@@ -68,9 +77,6 @@ def register() -> Plugin:
             name='Merge profiles',
             desc='Merges profile in storage when flow ends. This operation is expensive so use it with caution, '
                  'only when there is a new PII information added.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='merge',
             group=["Operations"],
             documentation=Documentation(

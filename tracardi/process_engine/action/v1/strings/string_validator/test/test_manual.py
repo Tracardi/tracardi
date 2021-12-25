@@ -1,6 +1,9 @@
+from tracardi.domain.time import Time
+
 from tracardi.domain.context import Context
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
+from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.profile_traits import ProfileTraits
@@ -27,7 +30,8 @@ def test_string_validator_plugin_fails():
             "validator": "time"}
     payload = {}
     profile = Profile(id="profile-id", traits=ProfileTraits(public={"test": "new test"}))
-    event = Event(id="event-id",
+    event = Event(metadata=EventMetadata(time=Time()),
+                  id="event-id",
                   type="event-type",
                   profile=profile,
                   session=Session(id="session-id"),

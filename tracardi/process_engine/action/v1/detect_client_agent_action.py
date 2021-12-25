@@ -23,12 +23,6 @@ class AgentConfiguration(BaseModel):
         if value != value.strip():
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        # if not re.match(
-        #     r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
-        #     value.strip()
-        # ):
-        #     raise ValueError("This field must be in form of dot notation. E.g. "
-        #                      "session@context.browser.browser.userAgent")
         return value
 
 
@@ -56,7 +50,7 @@ class DetectClientAgentAction(ActionRunner):
             if not isinstance(self.session.context, dict):
                 raise KeyError("No session context defined.")
 
-            dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+            dot = self._get_dot_accessor(payload)
             ua = dot[self.config.agent]
 
             with ThreadPoolExecutor(max_workers=10) as pool:
@@ -169,9 +163,6 @@ def register() -> Plugin:
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
                  'of user agent strings, even from rare and obscure browsers and devices. It returns an '
                  'object containing all the information',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='browser',
             group=["Data processing"],
             documentation=Documentation(

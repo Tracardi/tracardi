@@ -73,9 +73,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Make payload',
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='copy-property',
             group=["Data processing"],
             documentation=Documentation(
