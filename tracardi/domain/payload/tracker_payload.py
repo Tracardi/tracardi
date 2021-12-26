@@ -55,12 +55,12 @@ class TrackerPayload(BaseModel):
         is_new_session = False
         profile = None
 
-        if profile_less is False:
+        if session is None:  # loaded session is empty
 
-            if session is None:  # loaded session is empty
+            session = Session(id=self.session.id)
+            is_new_session = True
 
-                session = Session(id=self.session.id)
-                is_new_session = True
+            if profile_less is False:
 
                 # Bind profile
                 if self.profile is None:
@@ -85,7 +85,9 @@ class TrackerPayload(BaseModel):
                         # Create new profile
                         is_new_profile = True
 
-            else:
+        else:
+
+            if profile_less is False:
 
                 # There is session. Copy profile id form session to profile
 
