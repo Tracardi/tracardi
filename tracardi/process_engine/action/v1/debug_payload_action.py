@@ -19,6 +19,7 @@ from tracardi.domain.session import Session
 
 class DebugConfiguration(BaseModel):
     type: str
+    profile_less: bool = False
 
     @validator("type")
     def not_empty(cls, value):
@@ -46,16 +47,16 @@ class DebugPayloadAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    @staticmethod
-    async def _load_full_event(event_data):
+    async def _load_full_event(self, event_data):
 
         profile = None
         event = Event(**event_data)
+        event.metadata.profile_less = self.config.profile_less
 
         session_entity = Entity(id=event.session.id)
         session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
 
-        if event.metadata.profile_less is False and isinstance(event.profile, Entity):
+        if self.config.profile_less is False and isinstance(event.profile, Entity):
             profile_entity = Entity(id=event.profile.id)
             profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
 
@@ -68,7 +69,7 @@ class DebugPayloadAction(ActionRunner):
                 "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
                     event.id, event.session.id))
 
-        if event.metadata.profile_less is False and isinstance(event.profile, Entity) and profile is None:
+        if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(
                 "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
                     event.id, event.profile.id))
@@ -93,7 +94,7 @@ class DebugPayloadAction(ActionRunner):
 
                     self.session.replace(session)
                     self.event.replace(event)
-                    if event.metadata.profile_less is False:
+                    if self.config.profile_less is False:
                         if self.profile is not None and profile is not None:
                             self.profile.replace(profile)
                     else:
@@ -129,6 +130,7 @@ def register() -> Plugin:
             outputs=["event"],
             init={
                 "type": "page-view",
+                "profile_less": False
             },
             form=Form(groups=[
                 FormGroup(
@@ -139,12 +141,18 @@ def register() -> Plugin:
                             description="Provide event type that exists in you database. Tracardi will read "
                                         "first event of provided type and will inject it into current workflow.",
                             component=FormComponent(type="text", props={"label": "Event type"})
+                        ),
+                        FormField(
+                            id="profile_less",
+                            name="Profileless event",
+                            description="Profileless events are events that does not attach profile data.",
+                            component=FormComponent(type="bool", props={"label": "Profileless event"})
                         )
                     ]
                 ),
             ]),
             manual="debug_payload_action",
-            version='0.1.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),

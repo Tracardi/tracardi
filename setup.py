@@ -37,7 +37,11 @@ setup(
         'barcodenumber',
         'astral',
         'jsonschema',
-        'python-dateutil'
+        'python-dateutil',
+        'mailchimp-transactional',
+        'email-validator',
+        'lxml',
+        'beautifulsoup4'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
