@@ -29,7 +29,7 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
 
-    def get_events(self, session: Session, profile: Optional[Profile], profile_less) -> List[Event]:
+    def get_events(self, session: Optional[Session], profile: Optional[Profile], profile_less) -> List[Event]:
         event_list = []
         if self.events:
             for event in self.events:  # type: EventPayload

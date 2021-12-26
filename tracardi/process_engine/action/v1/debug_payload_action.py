@@ -1,5 +1,6 @@
 import asyncio
 import re
+from typing import Tuple, Optional
 
 from pydantic import BaseModel, validator
 
@@ -20,6 +21,7 @@ from tracardi.domain.session import Session
 class DebugConfiguration(BaseModel):
     type: str
     profile_less: bool = False
+    session_less: bool = False
 
     @validator("type")
     def not_empty(cls, value):
@@ -47,27 +49,20 @@ class DebugPayloadAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def _load_full_event(self, event_data):
+    async def _load_full_event(self, event_data) -> Tuple[Event, Optional[Profile], Optional[Session]]:
 
+        session = None
         profile = None
         event = Event(**event_data)
         event.metadata.profile_less = self.config.profile_less
 
-        session_entity = Entity(id=event.session.id)
-        session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
+        if event.session is not None:
+            session_entity = Entity(id=event.session.id)
+            session = await StorageFor(session_entity).index('session').load(Session)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
             profile_entity = Entity(id=event.profile.id)
-            profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
-
-            profile = await profile_task
-
-        session = await session_task
-
-        if session is None:
-            raise ValueError(
-                "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
-                    event.id, event.session.id))
+            profile = await StorageFor(profile_entity).index('profile').load(Profile)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(
@@ -92,12 +87,24 @@ class DebugPayloadAction(ActionRunner):
 
                     event, profile, session = await self._load_full_event(event_data)
 
-                    self.session.replace(session)
                     self.event.replace(event)
-                    if self.config.profile_less is False:
-                        if self.profile is not None and profile is not None:
-                            self.profile.replace(profile)
-                    else:
+                    self.event.session = session
+
+                    # Session can be None is user requested not to save it.
+                    if self.config.session_less is True or session is None:
+                        self.event.session = None
+                        self.session = None
+
+                        # Remove session in all nodes because the event is session less
+                        graph = self.execution_graph  # type: ExecutionGraph
+                        if isinstance(graph, ExecutionGraph):
+                            graph.remove_sessions()
+
+                    elif self.session is not None:
+                        self.session.replace(session)
+
+                    # Event can be profile less if collected via webhook
+                    if self.config.profile_less is True:
                         self.event.profile = None
                         self.profile = None
 
@@ -105,6 +112,9 @@ class DebugPayloadAction(ActionRunner):
                         graph = self.execution_graph  # type: ExecutionGraph
                         if isinstance(graph, ExecutionGraph):
                             graph.remove_profiles()
+                    else:
+                        if self.profile is not None and profile is not None:
+                            self.profile.replace(profile)
 
                     return Result(port="event", value=self.event.dict())
 
@@ -130,7 +140,8 @@ def register() -> Plugin:
             outputs=["event"],
             init={
                 "type": "page-view",
-                "profile_less": False
+                "profile_less": False,
+                "session_less": False
             },
             form=Form(groups=[
                 FormGroup(
@@ -147,6 +158,12 @@ def register() -> Plugin:
                             name="Profileless event",
                             description="Profileless events are events that does not attach profile data.",
                             component=FormComponent(type="bool", props={"label": "Profileless event"})
+                        ),
+                        FormField(
+                            id="session_less",
+                            name="Sessionless event",
+                            description="Sessionless events may occur when user did not want session to be saved.",
+                            component=FormComponent(type="bool", props={"label": "Sessionless event"})
                         )
                     ]
                 ),
