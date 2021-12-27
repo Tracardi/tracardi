@@ -2,7 +2,7 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Document
     FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from .model.config import Config, Token
-from tracardi.service.mailchimp_audience_editor import MailChimpAudienceEditor
+from tracardi.process_engine.action.v1.connectors.mailchimp.service.mailchimp_audience_editor import MailChimpAudienceEditor
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
@@ -32,7 +32,7 @@ class MailChimpAudienceRemover(ActionRunner):
             await self._delete_or_archive(list_id=self.config.list_id, email_address=email) for email in emails
         ]
         for result in results:
-            if result != {}:
+            if result is not None:
                 return Result(port="error", value={"result": results})
         return Result(port="response", value={"result": results})
 
@@ -45,7 +45,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_mailchimp_audience.plugin',
+            module=__name__,
             className='MailChimpAudienceRemover',
             inputs=["payload"],
             outputs=["response", "error"],
@@ -71,11 +71,11 @@ def register() -> Plugin:
                                 id="source",
                                 name="MailChimp resource",
                                 description="Please select your MailChimp resource.",
-                                component=FormComponent(type="resource", props={"label": "Resource"})
+                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "token"})
                             ),
                             FormField(
                                 id="list_id",
-                                name="ID of your list (audience)",
+                                name="ID of your e-mail list (audience)",
                                 description="Please type in your MailChimp audience ID.",
                                 component=FormComponent(type="text", props={"label": "Audience ID"})
                             ),
@@ -91,7 +91,7 @@ def register() -> Plugin:
                                 description="Please determine if plugin should permanently delete contact, or archive "
                                             "it. Please notice that if you permanently delete your contact, then you"
                                             " cannot add it again. ON switch position indicates deleting mode.",
-                                component=FormComponent(type="bool")
+                                component=FormComponent(type="bool", props={"label": "Permanently delete contact"})
                             )
                         ]
                     )
@@ -101,8 +101,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Remove from MailChimp audience',
             desc='Removes contact to MailChimp audience or archives it.',
-            type='flowNode',
-            icon='plugin',
+            icon='mailchimp',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={
