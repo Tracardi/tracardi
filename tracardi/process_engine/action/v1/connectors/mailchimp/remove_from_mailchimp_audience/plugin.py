@@ -85,6 +85,11 @@ def register() -> Plugin:
                                 description="Please provide path to contact's email address.",
                                 component=FormComponent(type="dotPath", props={"label": "Prefix"})
                             ),
+                        ]
+                    ),
+                    FormGroup(
+                        name="For Advanced Users Only",
+                        fields=[
                             FormField(
                                 id="delete",
                                 name="Permanently delete contact",
@@ -95,6 +100,7 @@ def register() -> Plugin:
                             )
                         ]
                     )
+
                 ]
             )
         ),
