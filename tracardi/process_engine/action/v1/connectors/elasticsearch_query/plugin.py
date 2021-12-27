@@ -42,7 +42,6 @@ class ElasticSearchFetcher(ActionRunner):
             await self._client.close()
 
         except ElasticsearchException as e:
-            print(e)
             return Result(port="error", value={})
 
         return Result(port="result", value=res)
