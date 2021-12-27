@@ -61,10 +61,16 @@ class SqlSearchQueryEngine:
                     "match_all": {}
                 }
             }
+        else:
+            query = {
+                "query": query
+            }
 
         query['from'] = start
         query['size'] = limit
+
         result = await self.persister.query(query)
+
         return StorageResult(result).dict()
 
     def _query(self, query: DatetimeRangePayload, min_date_time, max_date_time, time_field: str,
@@ -364,7 +370,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def query_by_sql(self, query: str, start: int = 0, limit: int = 0):
+    async def query_by_sql(self, query: str, start: int = 0, limit: int = 0) -> StorageResult:
         engine = SqlSearchQueryEngine(self)
         return await engine.search(query, start, limit)
 

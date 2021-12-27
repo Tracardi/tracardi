@@ -1,5 +1,9 @@
 import asyncio
+import json
 import re
+from datetime import datetime
+from json import JSONDecodeError
+from typing import Tuple, Optional
 
 from pydantic import BaseModel, validator
 
@@ -18,22 +22,23 @@ from tracardi.domain.session import Session
 
 
 class DebugConfiguration(BaseModel):
-    type: str
+    type: str = ""
     profile_less: bool = False
+    session_less: bool = False
+    properties: str = ""
 
     @validator("type")
     def not_empty(cls, value):
-        if len(value) < 1:
-            raise ValueError("Event type can not be empty.")
+        if len(value) != 0:
 
-        if value != value.strip():
-            raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
+            if value != value.strip():
+                raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        if not re.match(
-                r'^[\@a-zA-Z0-9\._\-]+$',
-                value.strip()
-        ):
-            raise ValueError("This field must not have other characters then: letters, digits, ., _, -, @")
+            if not re.match(
+                    r'^[\@a-zA-Z0-9\._\-]+$',
+                    value.strip()
+            ):
+                raise ValueError("This field must not have other characters then: letters, digits, ., _, -, @")
 
         return value
 
@@ -47,27 +52,26 @@ class DebugPayloadAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def _load_full_event(self, event_data):
+    async def _create_full_event(self, event_data) -> Tuple[Event, Optional[Profile], Optional[Session]]:
 
+        session = None
         profile = None
         event = Event(**event_data)
         event.metadata.profile_less = self.config.profile_less
 
-        session_entity = Entity(id=event.session.id)
-        session_task = asyncio.create_task(StorageFor(session_entity).index('session').load(Session))
+        if self.config.properties != "":
+            try:
+                event.properties = json.loads(self.config.properties)
+            except JSONDecodeError as e:
+                self.console.warning(str(e))
+
+        if event.session is not None:
+            session_entity = Entity(id=event.session.id)
+            session = await StorageFor(session_entity).index('session').load(Session)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
             profile_entity = Entity(id=event.profile.id)
-            profile_task = asyncio.create_task(StorageFor(profile_entity).index('profile').load(Profile))
-
-            profile = await profile_task
-
-        session = await session_task
-
-        if session is None:
-            raise ValueError(
-                "Event id `{}` has reference to empty session id `{}`. Debug stopped. This event is corrupted.".format(
-                    event.id, event.session.id))
+            profile = await StorageFor(profile_entity).index('profile').load(Profile)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(
@@ -79,32 +83,75 @@ class DebugPayloadAction(ActionRunner):
     async def run(self, **kwargs):
         if self.debug:
 
-            result = await storage.driver.event.load_event_by_type(self.config.type, limit=10)
+            if self.config.type is None or self.config.type == "":
 
-            if result.total == 0:
-                raise ValueError(
-                    "There is no event with type `{}`. Check configuration for correct event type.".format(
-                        self.config.type))
+                events = [
+                    {
+                        "id": "@debug-event-id",
+                        "metadata": {
+                            "time": {
+                                "insert": datetime.utcnow()
+                            },
+                            "ip": "127.0.0.1",
+                            "profile_less": False
+                        },
+                        "source": {
+                            "id": "debug-source"
+                        },
+                        "type": "debug-event-type",
+                        "properties": {},
+                        "context": {
+                            "config": {},
+                            "params": {}
+                        }
+                    }
+                ]
 
-            for event_data in list(result):
+            else:
+                result = await storage.driver.event.load_event_by_type(self.config.type, limit=10)
+
+                if result.total == 0:
+                    raise ValueError(
+                        "There is no event with type `{}`. Check configuration for correct event type.".format(
+                            self.config.type))
+
+                events = list(result)
+
+            for event_data in events:
 
                 try:
 
-                    event, profile, session = await self._load_full_event(event_data)
+                    event, profile, session = await self._create_full_event(event_data)
 
-                    self.session.replace(session)
                     self.event.replace(event)
-                    if self.config.profile_less is False:
-                        if self.profile is not None and profile is not None:
-                            self.profile.replace(profile)
-                    else:
+                    self.event.session = session
+                    self.event.source = event.source
+
+                    # Session can be None is user requested not to save it.
+                    if self.config.session_less is True or session is None:
+                        self.event.session = None
+                        self.session = None
+
+                        # Remove session in all nodes because the event is session less
+                        graph = self.execution_graph  # type: ExecutionGraph
+                        if isinstance(graph, ExecutionGraph):
+                            graph.set_sessions(None)
+
+                    elif self.session is not None:
+                        self.session.replace(session)
+
+                    # Event can be profile less if collected via webhook
+                    if self.config.profile_less is True:
                         self.event.profile = None
                         self.profile = None
 
                         # Remove profiles in all nodes because the event is profile less
                         graph = self.execution_graph  # type: ExecutionGraph
                         if isinstance(graph, ExecutionGraph):
-                            graph.remove_profiles()
+                            graph.set_profiles(None)
+                    else:
+                        if self.profile is not None and profile is not None:
+                            self.profile.replace(profile)
 
                     return Result(port="event", value=self.event.dict())
 
@@ -130,10 +177,13 @@ def register() -> Plugin:
             outputs=["event"],
             init={
                 "type": "page-view",
-                "profile_less": False
+                "profile_less": False,
+                "session_less": False,
+                "properties": ""
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Load existing event type",
                     fields=[
                         FormField(
                             id="type",
@@ -141,12 +191,30 @@ def register() -> Plugin:
                             description="Provide event type that exists in you database. Tracardi will read "
                                         "first event of provided type and will inject it into current workflow.",
                             component=FormComponent(type="text", props={"label": "Event type"})
-                        ),
+                        )
+                    ]
+                ),
+                FormGroup(
+                    name="Modify event",
+                    fields=[
                         FormField(
                             id="profile_less",
                             name="Profileless event",
                             description="Profileless events are events that does not attach profile data.",
                             component=FormComponent(type="bool", props={"label": "Profileless event"})
+                        ),
+                        FormField(
+                            id="session_less",
+                            name="Sessionless event",
+                            description="Sessionless events may occur when user did not want session to be saved.",
+                            component=FormComponent(type="bool", props={"label": "Sessionless event"})
+                        ),
+                        FormField(
+                            id="properties",
+                            name="Payload properties",
+                            description="Set payload properties. If this field is not empty it will override the "
+                                        "loaded event properties.",
+                            component=FormComponent(type="json", props={"label": "Payload properties"})
                         )
                     ]
                 ),

@@ -12,10 +12,9 @@ from ..event_metadata import EventPayloadMetadata, EventMetadata
 class EventPayload(BaseModel):
     type: str
     properties: Optional[dict] = {}
-    user: Optional[Entity] = None
     options: Optional[dict] = {}
 
-    def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Entity, profile: Optional[Entity],
+    def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Optional[Entity], profile: Optional[Entity],
                  options: dict, profile_less: bool) -> Event:
 
         meta = EventMetadata(**metadata.dict())
@@ -23,9 +22,8 @@ class EventPayload(BaseModel):
 
         return Event(id=str(uuid4()),
                      metadata=meta,
-                     session=Entity(id=session.id),
+                     session=Entity(id=session.id) if session is not None else None,
                      profile=profile,  # profile can be None when profile_less event.
-                     user=self.user,
                      type=self.type,
                      properties=self.properties,
                      source=source,  # Entity

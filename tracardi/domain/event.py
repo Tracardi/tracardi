@@ -33,7 +33,7 @@ class Event(Entity):
     update: bool = False
 
     source: Entity
-    session: Entity
+    session: Optional[Entity] = None
     profile: Optional[Entity] = None
     context: Context
     tags: Tags = Tags()
