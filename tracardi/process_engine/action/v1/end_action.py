@@ -34,7 +34,7 @@ def register() -> Plugin:
             group=["Input/Output"],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                    "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={}
             )

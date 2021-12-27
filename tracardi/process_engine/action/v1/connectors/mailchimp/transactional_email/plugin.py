@@ -61,14 +61,14 @@ class TransactionalMailSender(ActionRunner):
             for response in data:
                 if 'status' not in response:
                     self.console.warning("MailChimp API did not return status.")
-                    return Result(port="error", value=result)
+                    return Result(port="error", value={"result": result})
                 elif response['status'] != 'sent':
                     self.console.warning(
                         "MailChimp API returned status: `{}` and error: `{}`".format(response['status'],
                                                                                      response['reject_reason']))
-                    return Result(port="error", value=result)
+                    return Result(port="error", value={"result": result})
 
-        return Result(port="response", value=result)
+        return Result(port="response", value={"result": result})
 
 
 def register() -> Plugin:
