@@ -13,15 +13,7 @@ class StartAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        print(self.event, self.event.metadata.profile_less is False, self.debug, self.event.id == '@debug-event-id')
-
-        flow = self.flow # type: Flow
-        node  = self.node  #type: Node
-        print(node.get_number_of_input_edges())
-        print(node.has_input_node(flow.flowGraph.nodes, class_name='DebugPayloadAction'))
-
-
-        if self.event.metadata.profile_less is False and self.debug and self.event.id != '@debug-event-id':
+        if not self.node.has_input_node(self.flow.flowGraph.nodes, class_name='DebugPayloadAction'):
             raise ValueError("Start action can not run in debug mode without connection to Debug action.")
 
         return Result(port="payload", value={})
