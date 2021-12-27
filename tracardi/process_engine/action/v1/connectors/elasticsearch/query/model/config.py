@@ -2,14 +2,11 @@ from pydantic import BaseModel, validator
 from typing import Dict, Union
 import json
 
-
-class Source(BaseModel):
-    id: str
-    name: str
+from tracardi.domain.named_entity import NamedEntity
 
 
 class Config(BaseModel):
-    source: Source
+    source: NamedEntity
     index: str
     query: Union[Dict, str]
 

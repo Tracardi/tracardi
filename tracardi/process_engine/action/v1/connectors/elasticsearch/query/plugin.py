@@ -22,13 +22,13 @@ class ElasticSearchFetcher(ActionRunner):
 
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
-        self._credentials = credentials.get_credentials(self, Credentials)
+        credentials = credentials.get_credentials(self, Credentials)
 
         self._client = AsyncElasticsearch(
-            [self._credentials.url],
-            http_auth=(self._credentials.username, self._credentials.password),
-            scheme=self._credentials.scheme,
-            port=self._credentials.port
+            [credentials.url],
+            http_auth=(credentials.username, credentials.password),
+            scheme=credentials.scheme,
+            port=credentials.port
         )
 
     async def run(self, payload):
@@ -42,6 +42,7 @@ class ElasticSearchFetcher(ActionRunner):
             await self._client.close()
 
         except ElasticsearchException as e:
+            self.console.error(str(e))
             return Result(port="error", value={})
 
         return Result(port="result", value=res)
@@ -68,9 +69,9 @@ def register() -> Plugin:
             },
             manual="elasticsearch_query_action",
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Plugin configuration",
                         fields=[
                             FormField(
                                 id="source",
@@ -96,18 +97,17 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Fetch from Elasticsearch',
+            name='Query Elasticsearch',
             desc='Gets data from given Elasticsearch resource',
-            type='flowNode',
-            icon='plugin',
+            icon='elasticsearch',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                    "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
                     "result": PortDoc(desc="This port returns result of querying ElasticSearch instance."),
-                    "error": PortDoc(desc="This port return error if one occurs, or if received result contains more "
+                    "error": PortDoc(desc="This port returns error if one occurs, or if received result contains more "
                                           "than 20 records.")
                 }
             )
