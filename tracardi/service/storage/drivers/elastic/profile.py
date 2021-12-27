@@ -2,7 +2,7 @@ from typing import List
 from tracardi.domain.entity import Entity
 from tracardi.config import elastic, tracardi
 from tracardi.domain.profile import Profile
-from tracardi.service.storage.factory import StorageFor, storage_manager
+from tracardi.service.storage.factory import StorageFor, storage_manager, StorageForBulk
 from tracardi.service.storage.profile_cacher import ProfileCache
 
 
@@ -43,6 +43,10 @@ async def save_profile(profile: Profile):
     if elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
     return result
+
+
+async def save_profiles(profiles: List[Profile]):
+    return await StorageForBulk(profiles).index('profile').save()
 
 
 async def refresh():
