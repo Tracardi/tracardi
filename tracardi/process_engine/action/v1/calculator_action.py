@@ -46,7 +46,6 @@ class CalculatorAction(ActionRunner):
         event = Event(**dot.event)
         self.event.replace(event)
 
-
         return Result(port="payload", value={
             "result": results[-1],
             "variables": equation.get_variables()
