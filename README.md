@@ -62,9 +62,26 @@ Now pull and run Tracardi Graphical User Interface.
 docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui
 ```
 
+## Start Tracardi Documentation
+
+Now pull and run Tracardi Documentation.
+
+```
+docker run -p 8585:8585 tracardi/tracardi-docs
+```
+
 ## Log-in
 
 Visit http://127.0.0.1:8787 and login to Tracardi GUI with default username: admin and password: admin. 
+
+## System Documentation
+
+Visit http://127.0.0.1:8585
+
+## API Documentation
+
+Visit http://127.0.0.1:8686/docs
+
 
 # Scaling Tracardi for heavy load. 
  

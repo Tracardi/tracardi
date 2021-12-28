@@ -27,13 +27,6 @@ class Profile(Entity):
     consents: Optional[dict] = {}
     active: bool = True
 
-    def __init__(self, **data: Any):
-        # data['metadata'] = Metadata(
-        #     time=Time(
-        #         insert=datetime.utcnow()
-        #     ))
-        super().__init__(**data)
-
     def replace(self, profile):
         if isinstance(profile, Profile):
             self.id = profile.id

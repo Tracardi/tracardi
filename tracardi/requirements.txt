@@ -26,3 +26,4 @@ mailchimp-transactional
 email-validator
 lxml
 beautifulsoup4
+mailchimp-marketing
