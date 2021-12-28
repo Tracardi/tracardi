@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional, List, Tuple, Any
 from pydantic import BaseModel
+from tracardi.config import tracardi
+
 from tracardi.domain.event import Event, RECEIVED
 
 from ..entity import Entity
@@ -42,7 +44,14 @@ class TrackerPayload(BaseModel):
         return self.options and "profile" in self.options and self.options['profile'] is True
 
     def is_disabled(self, key):
-        return key in self.options and self.options[key] is False
+        if key not in self.options or not isinstance(self.options[key], bool):
+            # default value
+            return True
+
+        return not self.options[key]
+
+    def is_debugging_disabled(self) -> bool:
+        return not tracardi.track_debug and not self.is_disabled('debugger')
 
     async def get_profile_and_session(self, session: Session, load_merged_profile, profile_less) -> Tuple[
         Optional[Profile], Session]:
