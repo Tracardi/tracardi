@@ -3,7 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from bs4 import BeautifulSoup
 
-from tracardi_smtp_connector.model.smtp_configuration import SmtpConfiguration, Message
+from ..model.smtp_configuration import SmtpConfiguration, Message
 
 
 class PostMan:

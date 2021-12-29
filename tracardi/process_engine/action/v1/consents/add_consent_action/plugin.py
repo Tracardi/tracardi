@@ -61,6 +61,7 @@ def register() -> Plugin:
             init={
                 "consents": None
             },
+            manual="add_consents_action",
             form=Form(groups=[
                 FormGroup(
                     fields=[
