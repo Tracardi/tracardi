@@ -1,3 +1,4 @@
+import inspect
 import subprocess
 import importlib
 import importlib.util
@@ -26,3 +27,7 @@ def is_installed(package_name):
         return True
     else:
         return False
+
+
+def is_coroutine(object):
+    return inspect.iscoroutinefunction(object)
