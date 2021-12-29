@@ -13,8 +13,9 @@ class StartAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        if not self.node.has_input_node(self.flow.flowGraph.nodes, class_name='DebugPayloadAction'):
-            raise ValueError("Start action can not run in debug mode without connection to Debug action.")
+        if self.debug:
+            if not self.node.has_input_node(self.flow.flowGraph.nodes, class_name='DebugPayloadAction'):
+                raise ValueError("Start action can not run in debug mode without connection to Debug action.")
 
         return Result(port="payload", value={})
 
