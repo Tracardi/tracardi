@@ -54,6 +54,13 @@ docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 -e USER_NAME=
 
 Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variable to reference your laptop's IP. 
 
+> "Waiting for application startup" issue
+> 
+> Notice that when type `http://localhost:9200` as ELASTIC_HOST you try to connect to Elastic on localhost. This means that you're
+> connecting to the docker itself as localhost means local in docker. Obviously elastic is not there, so Tracardi will
+> never connect. Pass external ip for elastic. This may be your laptop IP if you are running Tracardi locally, e.g. 192.168.1.143:9200. Please refer to Tracardi documentaion for more Trouble Shooting inforamtion.
+
+
 ## Start Tracardi GUI
 
 Now pull and run Tracardi Graphical User Interface.
