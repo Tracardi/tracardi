@@ -108,14 +108,15 @@ class CollectionCrud:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def uniq_field_value(self, field) -> AggResult:
+    async def uniq_field_value(self, field, search=None, limit=500) -> AggResult:
         try:
             query = {
                 "size": "0",
                 "aggs": {
                     "uniq": {
                         "terms": {
-                            "field": field
+                            "field": field,
+                            "size": limit
                         }
                     }
                 }
