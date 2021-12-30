@@ -15,8 +15,8 @@ async def flush():
     return await storage_manager('resource').flush()
 
 
-async def load_all() -> Tuple[List[Resource], int]:
-    result = await StorageForBulk().index('resource').load()
+async def load_all(start=0, limit=100) -> Tuple[List[Resource], int]:
+    result = await StorageForBulk().index('resource').load(start, limit)
     data = [ResourceRecord.construct(Resource.__fields_set__, **r).decode() for r in result]
     return data, result.total
 
