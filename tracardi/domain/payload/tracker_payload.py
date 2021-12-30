@@ -43,15 +43,15 @@ class TrackerPayload(BaseModel):
     def return_profile(self):
         return self.options and "profile" in self.options and self.options['profile'] is True
 
-    def is_disabled(self, key):
+    def is_on(self, key, default):
         if key not in self.options or not isinstance(self.options[key], bool):
             # default value
-            return True
+            return default
 
-        return not self.options[key]
+        return self.options[key]
 
-    def is_debugging_disabled(self) -> bool:
-        return not tracardi.track_debug and not self.is_disabled('debugger')
+    def is_debugging_on(self) -> bool:
+        return tracardi.track_debug and self.is_on('debugger', default=False)
 
     async def get_profile_and_session(self, session: Session, load_merged_profile, profile_less) -> Tuple[
         Optional[Profile], Session]:

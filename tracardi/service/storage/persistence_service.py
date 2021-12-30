@@ -120,7 +120,6 @@ class SqlSearchQueryEngine:
 
         time_field = self.time_fields_map[self.index]
         es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
-
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:
