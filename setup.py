@@ -41,8 +41,7 @@ setup(
         'mailchimp-transactional',
         'email-validator',
         'lxml',
-        'beautifulsoup4'
-        'python-dateutil',
+        'beautifulsoup4',
         'names==0.3.0'
     ],
     classifiers=[
