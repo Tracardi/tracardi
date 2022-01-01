@@ -21,7 +21,7 @@ async def load(id: str) -> EventSource:
 
 
 async def load_all(limit=100) -> Tuple[List[EventSource], int]:
-    result = await StorageForBulk().index('event-source').load(limit)
+    result = await StorageForBulk().index('event-source').load(limit=limit)
     data = [EventSource(**r) for r in result]
     return data, result.total
 

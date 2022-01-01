@@ -37,7 +37,8 @@ setup(
         'barcodenumber',
         'astral',
         'jsonschema',
-        'python-dateutil'
+        'python-dateutil',
+        'names==0.3.0'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

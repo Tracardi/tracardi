@@ -22,3 +22,4 @@ barcodenumber
 astral
 jsonschema
 python-dateutil
+names==0.3.0

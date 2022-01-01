@@ -44,6 +44,10 @@ class EntityStorageCrud(BaseStorageCrud):
         service = self._get_storage_service()
         return await service.load_by(field, value, limit)
 
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+        service = self._get_storage_service()
+        return await service.load_by_query_string(query_string, limit)
+
     async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         service = self._get_storage_service()
         return await service.match_by(field, value, limit)

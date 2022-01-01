@@ -237,6 +237,15 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+        try:
+            return StorageResult(await self.storage.load_by_query_string(query_string, limit))
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
     async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         try:
             return StorageResult(await self.storage.match_by(field, value, limit))

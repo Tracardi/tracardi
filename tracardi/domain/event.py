@@ -66,7 +66,6 @@ class Event(Entity):
         else:
             return True
 
-
     @staticmethod
     def new(data: dict) -> 'Event':
         data['id'] = str(uuid4())
