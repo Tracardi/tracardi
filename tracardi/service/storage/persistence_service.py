@@ -1,7 +1,7 @@
 import logging
 import elasticsearch
 import tracardi.service.storage.elastic_storage as storage
-from typing import List
+from typing import List, Union
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
@@ -233,9 +233,18 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+    async def load_by(self, field: str, value: Union[str, int, float, bool], limit: int = 100) -> StorageResult:
         try:
             return StorageResult(await self.storage.load_by(field, value, limit))
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+        try:
+            return StorageResult(await self.storage.load_by_query_string(query_string, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

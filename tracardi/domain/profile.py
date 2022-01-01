@@ -1,4 +1,5 @@
 import uuid
+from collections import defaultdict
 from datetime import datetime
 from typing import Optional, Any, List, Union, Callable
 from tracardi_dot_notation.dot_accessor import DotAccessor
@@ -24,6 +25,7 @@ class Profile(Entity):
     traits: Optional[ProfileTraits] = ProfileTraits()
     pii: PII = PII()
     segments: Optional[list] = []
+    interests: Optional[dict] = {}
     consents: Optional[dict] = {}
     active: bool = True
 
@@ -39,6 +41,7 @@ class Profile(Entity):
             self.segments = profile.segments
             self.consents = profile.consents
             self.active = profile.active
+            self.interests = profile.interests
 
     def get_merge_key_values(self) -> List[tuple]:
         converter = DotNotationConverter(self)
@@ -187,8 +190,9 @@ class Profiles(list):
 
         consents = {}
         segments = []
+        interests = defaultdict(int)
         stats = ProfileStats()
-        for profile in profiles:
+        for profile in profiles:  # Type: Profile
 
             stats.visits += profile.stats.visits
             stats.views += profile.stats.views
@@ -197,6 +201,9 @@ class Profiles(list):
                 segments += profile.segments
 
             consents.update(profile.consents)
+
+            for interest, count in profile.interests.items():
+                interests[interest] += profile.interests[interest]
 
             # make uniq
             segments = list(set(segments))
@@ -212,5 +219,6 @@ class Profiles(list):
             pii=piis,
             segments=segments,
             consents=consents,
+            interests=dict(interests),
             active=True
         )

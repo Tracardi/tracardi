@@ -42,6 +42,8 @@ setup(
         'email-validator',
         'lxml',
         'beautifulsoup4'
+        'python-dateutil',
+        'names==0.3.0'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

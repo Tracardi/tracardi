@@ -19,7 +19,7 @@ def test_profile_merge():
         },
         pii=PII(
             name="john",
-            surname="doe"
+            last_name="doe"
         ),
         segments=['segment-1'],
         consents={"all": "granted"}
@@ -36,7 +36,7 @@ def test_profile_merge():
         },
         pii=PII(
             name="jonathan",
-            surname="doe"
+            last_name="doe"
         )
     )
 
@@ -63,7 +63,7 @@ def test_profile_merge():
     assert p.traits.private == {'b': 2, 'a': [1, 2, 3], 'c': 1}
     assert p.traits.public == {'b': [2, 3], 'a': 1}
     assert set(p.pii.name).intersection({'john', 'jonathan'}) == {'john', 'jonathan'}
-    assert p.pii.surname == 'doe'
+    assert p.pii.last_name == 'doe'
     assert p.mergedWith is None
     assert p.stats.views == 3
     assert p.stats.visits == 6
