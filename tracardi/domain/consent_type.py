@@ -6,6 +6,7 @@ class ConsentType(BaseModel):
     description: str
     revokable: bool
     default_value: str
+    enabled: bool = True
 
     @validator("default_value")
     def default_value_validator(cls, v):

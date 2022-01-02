@@ -44,6 +44,10 @@ class EntityStorageCrud(BaseStorageCrud):
         service = self._get_storage_service()
         return await service.load_by(field, value, limit)
 
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+        service = self._get_storage_service()
+        return await service.load_by_query_string(query_string, limit)
+
     async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         service = self._get_storage_service()
         return await service.match_by(field, value, limit)
@@ -108,14 +112,15 @@ class CollectionCrud:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def uniq_field_value(self, field) -> AggResult:
+    async def uniq_field_value(self, field, search=None, limit=500) -> AggResult:
         try:
             query = {
                 "size": "0",
                 "aggs": {
                     "uniq": {
                         "terms": {
-                            "field": field
+                            "field": field,
+                            "size": limit
                         }
                     }
                 }

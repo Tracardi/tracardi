@@ -38,7 +38,7 @@ class RulesEngine:
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], list, list, dict, Dict[str, list]]:
+    async def invoke(self, load_flow_callable, ux: list, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], list, list, dict, Dict[str, list]]:
 
         flow_task_store = defaultdict(list)
         debug_info_by_event_type_and_rule_name = defaultdict(list)
@@ -103,7 +103,7 @@ class RulesEngine:
 
                         # Flows are run concurrently
 
-                        flow_task = asyncio.create_task(workflow.invoke(flow, event, debug=False))
+                        flow_task = asyncio.create_task(workflow.invoke(flow, event, ux, debug=False))
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
                 else:
                     # todo FlowHistory is empty
@@ -117,7 +117,7 @@ class RulesEngine:
                     # concurrently running flows on the same profile may override profile data.
                     # Preliminary tests showed no issues but on heavy load we do not know if
                     # the test is still valid and every thing is ok. Solution is to remove create_task.
-                    flow_task = asyncio.create_task(workflow.invoke(flow, event, debug=False))
+                    flow_task = asyncio.create_task(workflow.invoke(flow, event, ux, debug=False))
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
         # Run flows and report async
@@ -170,7 +170,11 @@ class RulesEngine:
 
         ran_event_types = list(flow_task_store.keys())
 
-        return debug_info_by_event_type_and_rule_name, ran_event_types, self.console_log, post_invoke_events, invoked_rules
+        return debug_info_by_event_type_and_rule_name, \
+               ran_event_types, \
+               self.console_log, \
+               post_invoke_events, \
+               invoked_rules
 
     @staticmethod
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:

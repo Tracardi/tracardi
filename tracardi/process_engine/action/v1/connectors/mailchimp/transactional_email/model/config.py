@@ -42,5 +42,6 @@ class Config(BaseModel):
             raise ValueError("Sender e-mail can not be empty.")
         return value
 
+
 class Token(BaseModel):
     token: str

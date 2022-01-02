@@ -10,7 +10,7 @@ from .service.sendman import PostMan
 from .model.smtp_configuration import Configuration, SmtpConfiguration
 
 
-def validate(config: dict) -> Configuration:
+async def validate(config: dict) -> Configuration:
     return Configuration(**config)
 
 
@@ -18,7 +18,7 @@ class SmtpDispatcherAction(ActionRunner):
 
     @staticmethod
     async def build(**kwargs) -> 'SmtpDispatcherAction':
-        config = validate(kwargs)
+        config = await validate(kwargs)
         source = await storage.driver.resource.load(config.source.id)  # type: Resource
         return SmtpDispatcherAction(config, source.credentials)
 

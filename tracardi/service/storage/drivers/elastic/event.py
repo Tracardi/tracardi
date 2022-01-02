@@ -1,10 +1,11 @@
 import logging
 from datetime import datetime, timedelta
+
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.service.storage.drivers.elastic.tag import get_tags
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import StorageFor, storage_manager
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Dict
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.storage.factory import StorageForBulk
@@ -13,6 +14,10 @@ from tracardi.config import tracardi
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
+
+
+def _get_name(source_names_idx, id):
+    return source_names_idx[id] if id in source_names_idx else id
 
 
 async def search(query):
@@ -164,21 +169,68 @@ async def aggregate_profile_events(profile_id: str, aggregate_query: dict) -> St
     return await storage_manager(index="event").aggregate(query)
 
 
-async def load_events_heatmap(profile_id: str):
-    # todo add range - one year
+async def _aggregate_event(bucket_name, by) -> StorageAggregateResult:
+    aggregate_query = {
+        bucket_name: {
+            "terms": {
+                "field": by,
+                "size": 15,
+            }
+        }
+    }
+
     query = {
         "size": 0,
         "query": {
-            "bool": {
-                "must": [
-                    {
-                        "term": {
-                            "profile.id": profile_id
-                        }
-                    }
-                ]
-            }
+            "match_all": {}
         },
+        "aggs": aggregate_query
+    }
+    return await storage_manager(index="event").aggregate(query)
+
+
+async def aggregate_event_type() -> List[Dict[str, str]]:
+    bucket_name = "by_type"
+    result = await _aggregate_event(bucket_name, "type")
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_tag() -> List[Dict[str, str]]:
+    bucket_name = "by_tag"
+    result = await _aggregate_event(bucket_name, "tags.values")
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_events_by_source():
+    result = await _aggregate_event(bucket_name='by_source', by="source.id")
+    query_string = [f"id:{id}" for id in result.aggregations['by_source'][0]]
+    query_string = " OR ".join(query_string)
+    sources = await storage_manager('event-source').load_by_query_string(query_string)
+    source_names_idx = {source['id']: source['name'] for source in sources}
+    return [{"name": _get_name(source_names_idx, id), "value": count} for id, count in
+            result.aggregations['by_source'][0].items()]
+
+
+async def load_events_heatmap(profile_id: str = None):
+    if profile_id is not None:
+        filter_query = {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "profile.id": profile_id
+                            }
+                        }
+                    ]
+                }
+            },
+    else:
+        filter_query = {"match_all": {}}
+
+    # todo add range - one year
+    query = {
+        "size": 0,
+        "query": filter_query,
         "aggs": {
             "by_time": {
                 "date_histogram": {

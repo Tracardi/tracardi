@@ -20,8 +20,8 @@ async def load(id: str) -> EventSource:
     return await StorageFor(Entity(id=id)).index("event-source").load(EventSource)
 
 
-async def load_all() -> Tuple[List[EventSource], int]:
-    result = await StorageForBulk().index('event-source').load()
+async def load_all(limit=100) -> Tuple[List[EventSource], int]:
+    result = await StorageForBulk().index('event-source').load(limit=limit)
     data = [EventSource(**r) for r in result]
     return data, result.total
 
