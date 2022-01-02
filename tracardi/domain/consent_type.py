@@ -1,4 +1,6 @@
 from pydantic import BaseModel, validator
+from typing import List
+from pytimeparse import parse
 
 
 class ConsentType(BaseModel):
@@ -7,9 +9,18 @@ class ConsentType(BaseModel):
     revokable: bool
     default_value: str
     enabled: bool = True
+    tags: List[str] = []
+    required: bool = True
+    auto_revoke: str
 
     @validator("default_value")
     def default_value_validator(cls, v):
         if v not in ("grant", "deny"):
             raise ValueError("'default_value' must be either 'grant' or 'deny'")
+        return v
+
+    @validator('auto_revoke')
+    def auto_revoke_validator(cls, v):
+        if parse(v) is None or parse(v) < 0:
+            raise ValueError("Auto-revoke time is in invalid form.")
         return v
