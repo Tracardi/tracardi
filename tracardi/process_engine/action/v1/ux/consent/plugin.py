@@ -27,7 +27,7 @@ class ConsentUx(ActionRunner):
 
     async def run(self, payload):
 
-        self.ux.append({"tag": "div", "props": { "class": "TracardiConsentDrawer"}})
+        self.ux.append({"tag": "div", "props": { "class": "tracardi-uix-consent"}})
         self.ux.append({"tag": "script", "props": {"src": "src/widgets/drawer/index.js"}})
 
         return Result(port="payload", value=payload)
@@ -42,7 +42,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={
-                "message": ""
+                "enable": True
             },
             version='0.6.0.1',
             license="MIT",
