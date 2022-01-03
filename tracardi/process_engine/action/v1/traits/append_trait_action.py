@@ -1,3 +1,7 @@
+from typing import Dict, List, Optional
+
+from pydantic import BaseModel, validator
+
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -7,31 +11,32 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
 
+class Configuration(BaseModel):
+    append: Optional[Dict[str, str]] = {}
+    remove: Optional[Dict[str, List[str]]] = {}
+
+    @validator("remove")
+    def validate_remove(cls, value, values):
+        if 'append' not in values and 'remove' not in values:
+            raise ValueError("Please define `append` or `remove` in config section.")
+
+        return value
+
+
+def validate(config: dict):
+    return Configuration(**config)
+
+
 class AppendTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'append' not in kwargs and 'remove' not in kwargs:
-            raise ValueError("Please define `append` or `remove` in config section.")
-
-        if 'append' in kwargs:
-            if not isinstance(kwargs['append'], dict):
-                raise ValueError("Please define `append` as dictionary not {}.".format(type(kwargs['append'])))
-            self.mapping_append = kwargs['append']
-        else:
-            self.mapping_append = {}
-
-        if 'remove' in kwargs:
-            if not isinstance(kwargs['remove'], dict):
-                raise ValueError("Please define 'remove' as dictionary not {}.".format(type(kwargs['remove'])))
-            self.mapping_remove = kwargs['remove']
-        else:
-            self.mapping_remove = {}
+        self.config = validate(kwargs)
 
     async def run(self, payload: dict):
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
-        for destination, value in self.mapping_append.items():
+        for destination, value in self.config.append.items():
             value = dot[value]
             if destination in dot:
                 if not isinstance(dot[destination], list):
@@ -43,7 +48,7 @@ class AppendTraitAction(ActionRunner):
             else:
                 dot[destination] = value
 
-        for destination, value in self.mapping_remove.items():
+        for destination, value in self.config.remove.items():
             value = dot[value]
             if destination in dot:
                 if not isinstance(dot[destination], list):

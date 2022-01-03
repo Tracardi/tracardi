@@ -26,9 +26,18 @@ class ConsentUx(ActionRunner):
         pass
 
     async def run(self, payload):
-
-        self.ux.append({"tag": "div", "props": { "class": "tracardi-uix-consent"}})
-        self.ux.append({"tag": "script", "props": {"src": "src/widgets/drawer/index.js"}})
+        tracardi_endpoint = "http://localhost:8686"
+        uix_endpoint = "http://localhost:8686"
+        self.ux.append({"tag": "div", "props": {
+            "class": "tracardi-uix-consent",
+            "data-endpoint": tracardi_endpoint,  # Tracardi endpoint
+            "data-event-type": "user-consent-pref",
+            "data-agree-all-event-type": "user-consent-agree-all",
+            "data-profile": self.profile.id,
+            "data-session": self.session.id,
+            "data-source": self.event.source.id
+        }})
+        self.ux.append({"tag": "script", "props": {"src": f"{uix_endpoint}/uix/consent/index.js"}})
 
         return Result(port="payload", value=payload)
 
@@ -44,7 +53,7 @@ def register() -> Plugin:
             init={
                 "enable": True
             },
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
             # form=Form(groups=[

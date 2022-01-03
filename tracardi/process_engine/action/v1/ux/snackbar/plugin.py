@@ -26,8 +26,9 @@ class SnackBarUx(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
-        self.ux.append({"tag": "div", "props": { "class": "TracardiMessagePopUp", "data-message": self.config.message}})
-        self.ux.append({"tag": "script", "props": {"src": "src/widgets/snackbar/index.js"}})
+        uix_endpoint = "http://localhost:8686"
+        self.ux.append({"tag": "div", "props": { "class": "tracardi-uix-snackbar", "data-message": self.config.message}})
+        self.ux.append({"tag": "script", "props": {"src": f"{uix_endpoint}/uix/snackbar/index.js"}})
 
         print("ux", self.ux)
         return Result(port="payload", value=payload)
@@ -44,7 +45,7 @@ def register() -> Plugin:
             init={
                 "message": ""
             },
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
             form=Form(groups=[

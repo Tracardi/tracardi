@@ -10,13 +10,16 @@ class UpdateProfileAction(ActionRunner):
         pass
 
     async def run(self, payload):
-        if isinstance(self.profile, Profile):
-            self.profile.operation.update = True
-        else:
-            if self.event.metadata.profile_less is True:
-                self.console.warning("Can not update profile when processing profile less events.")
+        if self.debug is not True:
+            if isinstance(self.profile, Profile):
+                self.profile.operation.update = True
             else:
-                self.console.error("Can not update profile. Profile is empty.")
+                if self.event.metadata.profile_less is True:
+                    self.console.warning("Can not update profile when processing profile less events.")
+                else:
+                    self.console.error("Can not update profile. Profile is empty.")
+        else:
+            self.console.warning("Profile update skipped. It will not be updated when debugging.")
 
 
 def register() -> Plugin:
