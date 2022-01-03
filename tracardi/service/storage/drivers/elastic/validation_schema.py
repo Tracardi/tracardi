@@ -13,6 +13,10 @@ async def del_schema(event_type: str):
     return await storage_manager("validation-schema").delete(event_type)
 
 
+async def get_schema(event_type: str):
+    return await storage_manager("validation-schema").load(event_type)
+
+
 async def load_schemas(start: int = 0, limit: int = 10):
     return await storage_manager("validation-schema").load_all(start, limit)
 
@@ -22,3 +26,11 @@ async def load_schema(event_type: str) -> Optional[EventPayloadValidator]:
     if result is not None:
         return EventPayloadValidator.decode(EventPayloadValidatorRecord(**result))
     return None
+
+
+async def refresh():
+    return await storage_manager('validation-schema').refresh()
+
+
+async def flush():
+    return await storage_manager('validation-schema').flush()

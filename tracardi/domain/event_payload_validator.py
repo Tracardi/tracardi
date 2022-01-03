@@ -1,16 +1,17 @@
 import jsonschema
 from pydantic import BaseModel, validator
-from typing import Dict
+from typing import Dict, List
 from tracardi.service.secrets import encrypt, decrypt
 from typing import Optional
 
 
 class EventPayloadValidator(BaseModel):
-    validation: Dict[str, Dict]
+    validation: dict
     event_type: str
     name: str
     description: Optional[str] = "No description provided"
     enabled: bool
+    tags: List[str] = []
 
     @validator("validation")
     def validate_schemas_format(cls, v):
@@ -18,7 +19,9 @@ class EventPayloadValidator(BaseModel):
             try:
                 jsonschema.Draft202012Validator.check_schema(value)
             except jsonschema.SchemaError as e:
-                raise ValueError(f"Validation schema is invalid, detail: {str(e)}")
+                raise ValueError(f"Validation JSON-schema is invalid. Please refer to documentation "
+                                 f"for the JSON-schema format. "
+                                 f"Error message: {str(e)}")
         return v
 
     def encode(self) -> 'EventPayloadValidatorRecord':
@@ -27,7 +30,8 @@ class EventPayloadValidator(BaseModel):
             id=self.event_type.lower().replace(" ", "-"),
             name=self.name,
             description=self.description,
-            enabled=self.enabled
+            enabled=self.enabled,
+            tags=self.tags
         )
 
     @staticmethod
@@ -37,7 +41,8 @@ class EventPayloadValidator(BaseModel):
             event_type=record.id,
             name=record.name,
             description=record.description,
-            enabled=record.enabled
+            enabled=record.enabled,
+            tags=record.tags
         )
 
 
@@ -47,5 +52,5 @@ class EventPayloadValidatorRecord(BaseModel):
     name: str
     description: str
     enabled: bool
-
+    tags: List[str]
 
