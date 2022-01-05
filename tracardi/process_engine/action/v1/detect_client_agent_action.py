@@ -149,7 +149,7 @@ def register() -> Plugin:
                 )
             ]),
             manual="detect_client_agent_action",
-            version='0.1.1',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
