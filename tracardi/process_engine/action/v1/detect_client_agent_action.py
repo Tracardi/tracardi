@@ -154,7 +154,7 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Get client agent',
+            name='Detect device',
             desc='It will parse any user agent string and detect the browser, operating system, device used (desktop, '
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
                  'of user agent strings, even from rare and obscure browsers and devices. It returns an '
