@@ -27,6 +27,3 @@ class Config(BaseModel):
             raise ValueError("This field cannot be empty.")
         return value
 
-
-class Token(BaseModel):
-    token: str

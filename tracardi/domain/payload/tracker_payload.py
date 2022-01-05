@@ -9,7 +9,7 @@ from ..entity import Entity
 from ..event_metadata import EventPayloadMetadata
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
-from ..session import Session
+from ..session import Session, SessionMetadata
 from ..time import Time
 
 
@@ -63,10 +63,10 @@ class TrackerPayload(BaseModel):
         is_new_profile = False
         is_new_session = False
         profile = None
-
+        print("s", session)
         if session is None:  # loaded session is empty
 
-            session = Session(id=self.session.id)
+            session = Session(id=self.session.id, metadata=SessionMetadata())
             is_new_session = True
 
             if profile_less is False:
@@ -110,7 +110,7 @@ class TrackerPayload(BaseModel):
                         # Profile in session id has been merged. Change profile in session.
 
                         session.profile.id = profile.id
-                        session.metadata.time = Time(insert=datetime.utcnow())
+                        session.metadata.time.timestamp = datetime.timestamp(datetime.utcnow())
 
                         is_new_session = True
 

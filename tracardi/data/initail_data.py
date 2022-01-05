@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from tracardi.domain.event import Event
 from tracardi.domain.entity import Entity
-from tracardi.domain.session import Session
+from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.pii import PII
 from tracardi.domain.time import Time
 from tracardi.domain.metadata import Metadata
@@ -55,9 +55,8 @@ def generate_profile():
 def generate_sessions_for_profiles(profiles):
     for profile in profiles:
         for _ in range(randint(1, 5)):
-            yield Session(
+            yield Session(metadata=SessionMetadata(),
                 id=str(uuid4()),
-                metadata=Metadata(time=Time(insert=profile.metadata.time.insert, ip="127.0.0.1")),
                 profile=Entity(id=profile.id),
                 context={},
                 properties={}
