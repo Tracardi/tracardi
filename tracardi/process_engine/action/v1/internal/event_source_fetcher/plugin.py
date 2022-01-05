@@ -27,7 +27,7 @@ def register() -> Plugin:
             version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski",
-            init={}
+            init=None
         ),
         metadata=MetaData(
             name='Read event source',

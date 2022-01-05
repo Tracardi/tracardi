@@ -1,7 +1,5 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from tracardi.domain.named_entity import NamedEntity
-
-from tracardi.domain.entity import Entity
 
 
 class Configuration(BaseModel):

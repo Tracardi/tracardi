@@ -10,25 +10,35 @@ from tracardi_plugin_sdk.domain.result import Result
 
 
 class Configuration(BaseModel):
-    value: Union[str, Dict] = ""
+    value: str = ""
 
     @validator("value")
     def validate_content(cls, value):
         try:
-            # Try parsing JSON
-            return json.loads(value)
+            if isinstance(value, dict):
+                value = json.dumps(value)
+            return value
+
         except JSONDecodeError as e:
             raise ValueError(str(e))
 
 
 def validate(config: dict) -> Configuration:
-    return Configuration(**config)
+    config = Configuration(**config)
+
+    # Try parsing JSON just for validation purposes
+    try:
+        json.loads(config.value)
+    except JSONDecodeError as e:
+        raise ValueError(str(e))
+
+    return config
 
 
 class ReshapePayloadAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+        self.config = Configuration(**kwargs)
 
     async def run(self, payload):
         if not isinstance(payload, dict):
@@ -37,7 +47,8 @@ class ReshapePayloadAction(ActionRunner):
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         template = DictTraverser(dot)
-        result = template.reshape(reshape_template=self.config.value)
+        output = json.loads(self.config.value)
+        result = template.reshape(reshape_template=output)
 
         return Result(port="payload", value=result)
 
@@ -50,7 +61,7 @@ def register() -> Plugin:
             className='ReshapePayloadAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"value": ""},
+            init={"value": "{}"},
             form=Form(groups=[
                 FormGroup(
                     name="Create payload object",

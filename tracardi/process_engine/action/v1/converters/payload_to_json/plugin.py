@@ -40,6 +40,7 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Convert data to JSON string",
                     fields=[
                         FormField(
                             id="to_json",
@@ -55,9 +56,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='To JSON',
             desc='This plugin converts objects to JSON',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='json',
             group=["Data processing"]
         )
