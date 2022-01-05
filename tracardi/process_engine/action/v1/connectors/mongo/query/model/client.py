@@ -1,5 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from configuration import MongoConfiguration
+from .configuration import MongoConfiguration
 
 
 class MongoClient:
