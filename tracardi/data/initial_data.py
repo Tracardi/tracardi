@@ -3,6 +3,10 @@ from datetime import timedelta, datetime
 from random import randint
 from uuid import uuid4
 
+from tracardi.domain.context import Context
+
+from tracardi.domain.event_metadata import EventMetadata
+
 from tracardi.domain.event import Event
 from tracardi.domain.entity import Entity
 from tracardi.domain.session import Session, SessionMetadata
@@ -22,11 +26,11 @@ def generate_events_for_profile(profiles, sessions, sources):
             yield Event(
                 id=str(uuid4()),
                 type=random.choice(['page-view', 'identify', 'purchase-order', 'log-in']),
-                metadata=Metadata(time=Time(insert=generate_random_date(), ip="127.0.0.1")),
+                metadata=EventMetadata(time=Time(insert=generate_random_date(), ip="127.0.0.1")),
                 profile=Entity(id=profile.id),
                 session=random.choice(sessions),
                 source=random.choice(sources),
-                context={},
+                context=Context(),
                 properties={
                     "name": profile.pii.name,
                     "last_name": profile.pii.last_name,
