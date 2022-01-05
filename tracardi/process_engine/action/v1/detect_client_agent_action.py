@@ -1,11 +1,7 @@
 import asyncio
-import re
 from concurrent.futures import ThreadPoolExecutor
-
 from device_detector import DeviceDetector
 from pydantic import BaseModel, validator
-
-from tracardi_dot_notation.dot_accessor import DotAccessor
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
@@ -66,7 +62,7 @@ class DetectClientAgentAction(ActionRunner):
                     "model": {
                         "name": device.device_model(),
                         "brand": {
-                            "name": device.device_brand_name(),
+                            "name": device.device_brand(),
                         },
                         "type": device.device_type()
                     },
