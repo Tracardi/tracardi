@@ -1,6 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-
-from tracardi_mongodb_connector.model.configuration import MongoConfiguration
+from configuration import MongoConfiguration
 
 
 class MongoClient:

@@ -1,6 +1,4 @@
-import json
-from json import JSONDecodeError
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from tracardi.domain.named_entity import NamedEntity
 
 
