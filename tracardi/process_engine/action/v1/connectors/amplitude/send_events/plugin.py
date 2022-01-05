@@ -22,7 +22,6 @@ class AmplitudeSendEvent(ActionRunner):
 
     @staticmethod
     async def build(**kwargs) -> 'AmplitudeSendEvent':
-        print(kwargs)
         config = validate(kwargs)
         resource = await storage.driver.resource.load(config.source.id)
         return AmplitudeSendEvent(config, resource.credentials)
@@ -63,7 +62,7 @@ class AmplitudeSendEvent(ActionRunner):
                     "app_version": tracardi.version,
                     "insert_id": self.event.id if self.debug is False else None,
                     "user_id": self.profile.id,
-                    "session_id": int(datetime.timestamp(self.profile.metadata.time.lastVisit)) if self.profile.metadata.time.lastVisit is not None else -1,
+                    "session_id": int(datetime.timestamp(self.session.metadata.time.insert)) if self.profile.metadata.time.insert is not None else -1,
                     "event_type": self.event.type if event_type is None else event_type,
                     "event_properties": self.event.properties if not isinstance(properties, dict) else properties,
                     "user_properties": self.profile.pii.dict() if not isinstance(pii, dict) else pii,

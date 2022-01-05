@@ -1,9 +1,11 @@
 from pydantic import BaseModel, validator
+from tracardi.domain.named_entity import NamedEntity
+
 from tracardi.domain.entity import Entity
 
 
 class Configuration(BaseModel):
-    source: Entity
+    source: NamedEntity
     url: str = "https://api2.amplitude.com/2/httpapi"
     timeout: int = 15
     event_type: str = None

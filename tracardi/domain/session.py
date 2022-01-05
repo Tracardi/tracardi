@@ -1,12 +1,9 @@
 from datetime import datetime
 from typing import Optional, Any
-from uuid import uuid4
 
 from pydantic import BaseModel
 
 from .entity import Entity
-from .metadata import Metadata
-from .time import Time
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 
@@ -34,9 +31,6 @@ class Session(Entity):
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
 
     def replace(self, session):
         if isinstance(session, Session):
