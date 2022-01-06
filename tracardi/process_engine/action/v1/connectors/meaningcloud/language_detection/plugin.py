@@ -77,7 +77,7 @@ def register() -> Plugin:
                             id="source",
                             name="Token resource",
                             description="Select resource that have API token.",
-                            component=FormComponent(type="resource", props={"label": "resource"})
+                            component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
                         ),
                         FormField(
                             id="timeout",
