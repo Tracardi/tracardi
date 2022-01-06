@@ -9,7 +9,7 @@ from pydantic import BaseModel, validator
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
-from tracardi_graph_runner.domain.execution_graph import ExecutionGraph
+from tracardi.service.wf.domain.execution_graph import ExecutionGraph
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result

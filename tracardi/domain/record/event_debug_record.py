@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from tracardi.domain.value_object.storage_info import StorageInfo
-from tracardi_graph_runner.domain.debug_info import DebugInfo
+from tracardi.service.wf.domain.debug_info import DebugInfo
 from tracardi.domain.entity import Entity
 from tracardi.service.secrets import b64_encoder, b64_decoder
 

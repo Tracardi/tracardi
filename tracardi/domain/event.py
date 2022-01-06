@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 from .context import Context
@@ -6,7 +7,7 @@ from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
-RECEIVED = 'received'
+COLLECTED = 'collected'
 VALIDATED = 'validated'
 PROCESSED = 'processed'
 WARNING = 'warning'
@@ -26,6 +27,11 @@ class Tags(BaseModel):
         return values
 
 
+class EventSession(Entity):
+    start: datetime = datetime.utcnow()
+    duration: float = 0
+
+
 class Event(Entity):
     metadata: EventMetadata
     type: str
@@ -33,7 +39,7 @@ class Event(Entity):
     update: bool = False
 
     source: Entity
-    session: Optional[Entity] = None
+    session: Optional[EventSession] = None
     profile: Optional[Entity] = None
     context: Context
     tags: Tags = Tags()

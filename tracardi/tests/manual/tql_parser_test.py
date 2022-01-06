@@ -1,7 +1,6 @@
 from pprint import pprint
 
-from tracardi.domain.event_metadata import EventMetadata
-from tracardi.domain.time import Time
+from tracardi.domain.event_metadata import EventMetadata, EventTime
 from tracardi_dot_notation.dot_accessor import DotAccessor
 
 from tracardi.domain.context import Context
@@ -47,7 +46,7 @@ if __name__ == "__main__":
     payload = data
     resource = Resource(id="3", type="event")
     context = Context()
-    event = Event(metadata=EventMetadata(time=Time()),
+    event = Event(metadata=EventMetadata(time=EventTime()),
                   id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
     flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.6.0"))
     dot = DotAccessor(profile, session, payload, event, flow)

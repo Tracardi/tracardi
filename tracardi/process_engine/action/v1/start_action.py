@@ -1,7 +1,7 @@
 from tracardi.domain.flow import Flow
-from tracardi_graph_runner.domain.edge import Edge
-from tracardi_graph_runner.domain.node import Node
-from tracardi_graph_runner.service.node_indexer import index_nodes
+from tracardi.service.wf.domain.edge import Edge
+from tracardi.service.wf.domain.node import Node
+from tracardi.service.wf.service.node_indexer import index_nodes
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_plugin_sdk.action_runner import ActionRunner

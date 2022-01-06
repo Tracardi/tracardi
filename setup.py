@@ -31,7 +31,7 @@ setup(
         'device_detector==5.0.1',
         'deepdiff>=5.5.0',
         'tracardi-plugin-sdk>=0.6.30',
-        'tracardi_graph_runner>=0.6.9',
+        # 'tracardi_graph_runner>=0.6.9',
         'tracardi-dot-notation>=0.6.6',
         'pytimeparse',
         'barcodenumber',
@@ -43,7 +43,14 @@ setup(
         'lxml',
         'beautifulsoup4',
         'names==0.3.0',
-        'motor~=2.5.0'
+        'motor~=2.5.0',
+        'aiodns',
+        'urllib3',
+        'geoip2~=4.2.0',
+        'aiomysql',
+        'kombu',
+        'asyncpg',
+        'aiobotocore~=1.4.2'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

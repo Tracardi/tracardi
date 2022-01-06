@@ -3,7 +3,7 @@ from typing import Optional, List, Tuple, Any
 from pydantic import BaseModel
 from tracardi.config import tracardi
 
-from tracardi.domain.event import Event, RECEIVED
+from tracardi.domain.event import Event, COLLECTED
 
 from ..entity import Entity
 from ..event_metadata import EventPayloadMetadata
@@ -36,7 +36,12 @@ class TrackerPayload(BaseModel):
         if self.events:
             for event in self.events:  # type: EventPayload
                 _event = event.to_event(self.metadata, self.source, session, profile, event.options, profile_less)
-                _event.metadata.status = RECEIVED
+                _event.metadata.status = COLLECTED
+
+                # Append session data
+                _event.session.start = session.metadata.time.insert
+                _event.session.duration = session.metadata.time.duration
+
                 event_list.append(_event)
         return event_list
 
