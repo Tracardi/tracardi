@@ -101,7 +101,7 @@ def register() -> Plugin:
                             FormField(
                                 id="card_name",
                                 name="Name of your card",
-                                description="Please provide path to the name of the card that you want to delete.",
+                                description="Please provide path to the name of the card that you want to move.",
                                 component=FormComponent(type="dotPath", props={"label": "Prefix"})
                             )
                         ]
