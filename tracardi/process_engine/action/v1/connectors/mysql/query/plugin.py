@@ -197,8 +197,8 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "result": PortDoc(desc="This port query result."),
-                    "error": PortDoc(desc="This port gets triggered if an error occurs.")
+                    "result": PortDoc(desc="Returns query result."),
+                    "error": PortDoc(desc="Gets triggered if an error occurs.")
                 }
             )
         )
