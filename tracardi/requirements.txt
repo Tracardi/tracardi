@@ -29,3 +29,5 @@ beautifulsoup4
 mailchimp-marketing
 names==0.3.0
 motor~=2.5.0
+aiodns
+urllib3

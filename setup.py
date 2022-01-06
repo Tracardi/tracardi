@@ -43,7 +43,9 @@ setup(
         'lxml',
         'beautifulsoup4',
         'names==0.3.0',
-        'motor~=2.5.0'
+        'motor~=2.5.0',
+        'aiodns',
+        'urllib3'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
