@@ -33,3 +33,4 @@ aiodns
 urllib3
 geoip2~=4.2.0
 aiomysql
+kombu

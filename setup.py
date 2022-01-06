@@ -47,7 +47,8 @@ setup(
         'aiodns',
         'urllib3',
         'geoip2~=4.2.0',
-        'aiomysql'
+        'aiomysql',
+        'kombu'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
