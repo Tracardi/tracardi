@@ -200,7 +200,11 @@ class FlowRecord(NamedEntity):
                           projects=self.projects, lock=self.lock)
 
     def restore_production_from_backup(self):
+        if not self.backup:
+            raise ValueError("Back up is empty.")
         self.production = self.backup
 
     def restore_draft_from_production(self):
+        if not self.production:
+            raise ValueError("Production up is empty.")
         self.draft = self.production
