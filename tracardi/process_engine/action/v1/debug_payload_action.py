@@ -27,6 +27,12 @@ class DebugConfiguration(BaseModel):
     session_less: bool = False
     properties: str = ""
 
+    @validator("properties")
+    def convert_to_json_id_dict(cls, value):
+        if isinstance(value, dict):
+            value = json.dumps(value)
+        return value
+
     @validator("type")
     def not_empty(cls, value):
         if len(value) != 0:
@@ -99,7 +105,7 @@ class DebugPayloadAction(ActionRunner):
                             "id": "debug-source"
                         },
                         "type": "debug-event-type",
-                        "properties": {},
+                        "properties": "{}",
                         "context": {
                             "config": {},
                             "params": {}

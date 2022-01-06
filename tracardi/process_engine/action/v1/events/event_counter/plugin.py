@@ -70,9 +70,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Event counter',
             desc='This plugin reads how many events of defined type were triggered within defined time.',
-            type='flowNode',
-            width=300,
-            height=100,
             icon='event',
             group=["Stats"],
             documentation=Documentation(

@@ -1,11 +1,7 @@
 import asyncio
-import re
 from concurrent.futures import ThreadPoolExecutor
-
 from device_detector import DeviceDetector
 from pydantic import BaseModel, validator
-
-from tracardi_dot_notation.dot_accessor import DotAccessor
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi_plugin_sdk.domain.result import Result
@@ -66,7 +62,7 @@ class DetectClientAgentAction(ActionRunner):
                     "model": {
                         "name": device.device_model(),
                         "brand": {
-                            "name": device.device_brand_name(),
+                            "name": device.device_brand(),
                         },
                         "type": device.device_type()
                     },
@@ -153,12 +149,12 @@ def register() -> Plugin:
                 )
             ]),
             manual="detect_client_agent_action",
-            version='0.1.1',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Get client agent',
+            name='Detect device',
             desc='It will parse any user agent string and detect the browser, operating system, device used (desktop, '
                  'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
                  'of user agent strings, even from rare and obscure browsers and devices. It returns an '

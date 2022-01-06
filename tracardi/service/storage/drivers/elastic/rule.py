@@ -2,6 +2,8 @@ import asyncio
 from asyncio import Task
 from typing import List, Tuple
 
+from tracardi.domain.storage_result import StorageResult
+
 from tracardi.domain.rule import Rule
 
 from tracardi.domain.event import Event
@@ -51,6 +53,10 @@ async def load_rule(event_type: str):
 async def load_flow_rules(flow_id: str) -> List[Rule]:
     rules_attached_to_flow = await storage_manager('rule').load_by('flow.id', flow_id)
     return [Rule(**rule) for rule in rules_attached_to_flow]
+
+
+async def load_all(start: int = 0, limit: int = 100) -> StorageResult:
+    return await storage_manager('rule').load_all(start, limit=limit)
 
 
 async def refresh():

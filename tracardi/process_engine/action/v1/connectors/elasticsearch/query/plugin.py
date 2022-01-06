@@ -1,3 +1,5 @@
+import json
+
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi_plugin_sdk.action_runner import ActionRunner
@@ -9,14 +11,22 @@ from tracardi_plugin_sdk.domain.result import Result
 
 
 def validate(config: dict):
-    return Config(**config)
+    config = Config(**config)
+
+    # Try parsing JSON just for validation purposes
+    try:
+        json.loads(config.query)
+    except json.JSONDecodeError as e:
+        raise ValueError(str(e))
+
+    return config
 
 
 class ElasticSearchFetcher(ActionRunner):
 
     @staticmethod
     async def build(**kwargs) -> 'ElasticSearchFetcher':
-        config = validate(kwargs)
+        config = Config(**kwargs)
         credentials = await storage.driver.resource.load(config.source.id)
         return ElasticSearchFetcher(config, credentials.credentials)
 
@@ -36,7 +46,7 @@ class ElasticSearchFetcher(ActionRunner):
         try:
             res = await self._client.search(
                 index=self.config.index,
-                body=self.config.query,
+                body=json.loads(self.config.query),
                 size=20
             )
             await self._client.close()
@@ -65,7 +75,7 @@ def register() -> Plugin:
                     "id": None
                 },
                 "index": None,
-                "query": None
+                "query": "{\"query\":{}}"
             },
             manual="elasticsearch_query_action",
             form=Form(

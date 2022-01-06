@@ -8,7 +8,7 @@ from tracardi.domain.context import Context
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow, FlowSchema
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
+from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.resource import Resource
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # pprint(t)
 
     profile = Profile(id="1")
-    session = Session(id="2")
+    session = Session(id="2", metadata=SessionMetadata())
     payload = data
     resource = Resource(id="3", type="event")
     context = Context()

@@ -14,7 +14,7 @@ pytz
 tracardi-plugin-sdk>=0.6.30
 tracardi_graph_runner>=0.6.9
 tracardi-dot-notation>=0.6.6
-device_detector==0.10
+device_detector==5.0.1
 pip>=21.2.4
 deepdiff>=5.5.0
 pytimeparse
@@ -28,3 +28,4 @@ lxml
 beautifulsoup4
 mailchimp-marketing
 names==0.3.0
+motor~=2.5.0

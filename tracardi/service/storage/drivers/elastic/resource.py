@@ -30,16 +30,16 @@ async def save_record(resource: Resource) -> BulkInsertResult:
     return await StorageFor(resource_record).index().save()
 
 
+async def load_by_tag(tag):
+    return await StorageFor.crud('resource', class_type=Resource).load_by('tags', tag)
+
+
 async def load(id: str) -> Resource:
     resource_config_record = await load_record(id)  # type: ResourceRecord
     if resource_config_record is None:
         raise ValueError('Resource id {} does not exist.'.format(id))
 
     return resource_config_record.decode()
-
-
-async def load_by_tag(tag):
-    return await StorageFor.crud('resource', class_type=Resource).load_by('tags', tag)
 
 
 async def delete(id: str):

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, validator
-from typing import Dict, Union
 import json
 
 from tracardi.domain.named_entity import NamedEntity
@@ -8,7 +7,7 @@ from tracardi.domain.named_entity import NamedEntity
 class Config(BaseModel):
     source: NamedEntity
     index: str
-    query: Union[Dict, str]
+    query: str
 
     @validator("index")
     def validate_index(cls, value):
@@ -19,7 +18,10 @@ class Config(BaseModel):
     @validator("query")
     def validate_content(cls, value):
         try:
-            return json.loads(value) if isinstance(value, str) else value
+            if isinstance(value, dict):
+                value = json.dumps(value)
+            return value
+
         except json.JSONDecodeError as e:
             raise ValueError(str(e))
 
