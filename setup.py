@@ -46,7 +46,8 @@ setup(
         'motor~=2.5.0',
         'aiodns',
         'urllib3',
-        'geoip2~=4.2.0'
+        'geoip2~=4.2.0',
+        'aiomysql'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
