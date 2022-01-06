@@ -104,7 +104,7 @@ def register() -> Plugin:
                                         "connect to MeaningCloud server.",
                             component=FormComponent(
                                 type="resource",
-                                props={"label": "resource"})
+                                props={"label": "resource", "tag": "token"})
                         )
                     ]
                 ),
