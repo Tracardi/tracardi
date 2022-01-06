@@ -45,7 +45,8 @@ setup(
         'names==0.3.0',
         'motor~=2.5.0',
         'aiodns',
-        'urllib3'
+        'urllib3',
+        'geoip2~=4.2.0'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

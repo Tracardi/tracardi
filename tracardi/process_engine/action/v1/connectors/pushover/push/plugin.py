@@ -41,6 +41,7 @@ class PushoverAction(ActionRunner):
             result = await session.post(url='https://api.pushover.net/1/messages.json',
                                         data=urllib.parse.urlencode(data),
                                         headers={"Content-type": "application/x-www-form-urlencoded"})
+
             return Result(port="payload", value={
                 "status": result.status,
                 "body": await result.json()

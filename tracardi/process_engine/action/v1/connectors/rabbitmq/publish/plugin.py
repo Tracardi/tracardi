@@ -35,6 +35,7 @@ class RabbitPublisherAction(ActionRunner):
                 queue_publisher = QueuePublisher(conn, config=self.config)
                 queue_publisher.publish(payload)
         except Exception as e:
+            self.console.error(str(e))
             return Result(port="error", value={"error": str(e), "payload": payload})
 
         return Result(port="payload", value=payload)
