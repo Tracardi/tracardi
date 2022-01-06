@@ -69,9 +69,9 @@ def register() -> Plugin:
             },
             # manual="",
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Plugin configuration",
                         fields=[
                             FormField(
                                 id="source",
@@ -88,15 +88,14 @@ def register() -> Plugin:
                             FormField(
                                 id="list_name1",
                                 name="Name of current Trello list",
-                                description="Please provide the name of your Trello list that card is currently on. You"
-                                            " don't have to look for it's ID. Tracardi will do this for you.",
+                                description="Please provide the name of your Trello list that card is currently on.",
                                 component=FormComponent(type="text", props={"label": "List name"})
                             ),
                             FormField(
                                 id="list_name2",
                                 name="Name of target Trello list",
                                 description="Please provide the name of your Trello list that you want to move your "
-                                            "card to. As before, you do not have to provide list's ID.",
+                                            "card to.",
                                 component=FormComponent(type="text", props={"label": "List name"})
                             ),
                             FormField(

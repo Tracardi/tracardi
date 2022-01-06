@@ -68,9 +68,9 @@ def register() -> Plugin:
             },
             # manual="",
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Plugin configuration",
                         fields=[
                             FormField(
                                 id="source",
@@ -87,8 +87,7 @@ def register() -> Plugin:
                             FormField(
                                 id="list_name",
                                 name="Name of Trello list",
-                                description="Please provide the name of your Trello list. You don't have to look for"
-                                            "it's ID. Tracardi will do this for you.",
+                                description="Please provide the name of your Trello list.",
                                 component=FormComponent(type="text", props={"label": "List name"})
                             ),
                             FormField(
