@@ -37,6 +37,11 @@ class TrackerPayload(BaseModel):
             for event in self.events:  # type: EventPayload
                 _event = event.to_event(self.metadata, self.source, session, profile, event.options, profile_less)
                 _event.metadata.status = COLLECTED
+
+                # Append session data
+                _event.session.start = session.metadata.time.insert
+                _event.session.duration = session.metadata.time.duration
+
                 event_list.append(_event)
         return event_list
 

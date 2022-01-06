@@ -11,14 +11,18 @@ from .value_object.storage_info import StorageInfo
 class SessionTime(BaseModel):
     insert: Optional[datetime]
     timestamp: Optional[int] = 0
+    duration: float = 0
 
     def __init__(self, **data: Any):
         if 'insert' not in data:
             data['insert'] = datetime.utcnow()
 
-        data['timestamp'] = datetime.timestamp(datetime.utcnow())
+        now_timestamp = datetime.timestamp(datetime.utcnow())
+        data['timestamp'] = now_timestamp
 
         super().__init__(**data)
+
+        self.duration = now_timestamp - datetime.timestamp(self.insert)
 
 
 class SessionMetadata(BaseModel):
