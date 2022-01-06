@@ -54,7 +54,7 @@ class SentimentAnalysisAction(ActionRunner):
                         "confidence": float(data['confidence'])
                     }
 
-                    return Result(port="payload", value=result)
+                    return Result(port="result", value=result)
             except Exception as e:
                 self.console.error(repr(e))
                 return Result(port="error", value=str(e))
@@ -67,7 +67,7 @@ def register() -> Plugin:
             module=__name__,
             className='SentimentAnalysisAction',
             inputs=["payload"],
-            outputs=['payload', 'error'],
+            outputs=['result', 'error'],
             version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
