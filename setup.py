@@ -49,7 +49,8 @@ setup(
         'geoip2~=4.2.0',
         'aiomysql',
         'kombu',
-        'asyncpg'
+        'asyncpg',
+        'aiobotocore~=1.4.2'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
