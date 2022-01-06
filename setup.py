@@ -48,7 +48,8 @@ setup(
         'urllib3',
         'geoip2~=4.2.0',
         'aiomysql',
-        'kombu'
+        'kombu',
+        'asyncpg'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
