@@ -114,7 +114,7 @@ def register() -> Plugin:
             name='Move Trello card',
             desc='Moves card from given list on given board to another list on that board in Trello.',
             type='flowNode',
-            icon='plugin',
+            icon='trello',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

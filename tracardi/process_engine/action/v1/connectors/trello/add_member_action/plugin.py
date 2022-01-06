@@ -113,7 +113,7 @@ def register() -> Plugin:
             name='Add Trello member',
             desc='Adds a member to given card on given list in Trello.',
             type='flowNode',
-            icon='plugin',
+            icon='trello',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

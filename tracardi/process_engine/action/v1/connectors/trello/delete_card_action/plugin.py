@@ -105,7 +105,7 @@ def register() -> Plugin:
             name='Remove Trello card',
             desc='Removes card from given list on given board in Trello.',
             type='flowNode',
-            icon='plugin',
+            icon='trello',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={
