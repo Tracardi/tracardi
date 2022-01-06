@@ -1,0 +1,2 @@
+class Nodes(dict):
+    pass

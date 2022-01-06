@@ -7,11 +7,11 @@ from typing import Dict, List, Tuple, Optional
 from pydantic import ValidationError
 from tracardi.domain.event import Event
 
-from tracardi_graph_runner.domain.debug_info import DebugInfo
-from tracardi_graph_runner.domain.error_debug_info import ErrorDebugInfo
-from tracardi_graph_runner.domain.debug_info import FlowDebugInfo
-from tracardi_graph_runner.domain.flow_history import FlowHistory
-from tracardi_graph_runner.domain.work_flow import WorkFlow
+from tracardi.service.wf.domain.debug_info import DebugInfo
+from tracardi.service.wf.domain.error_debug_info import ErrorDebugInfo
+from tracardi.service.wf.domain.debug_info import FlowDebugInfo
+from tracardi.service.wf.domain.flow_history import FlowHistory
+from tracardi.service.wf.domain.work_flow import WorkFlow
 from tracardi_plugin_sdk.domain.console import Log
 from ..domain.console import Console
 from ..domain.entity import Entity

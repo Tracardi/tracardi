@@ -6,7 +6,7 @@ from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
-RECEIVED = 'received'
+COLLECTED = 'collected'
 VALIDATED = 'validated'
 PROCESSED = 'processed'
 WARNING = 'warning'
