@@ -149,7 +149,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Add Trello card',
             desc='Adds card to given list on given board in Trello.',
-            type='flowNode',
             icon='trello',
             group=["Connectors"],
             documentation=Documentation(
