@@ -23,6 +23,10 @@ class BaseStorageCrud:
         service = self._get_storage_service()
         return await service.delete(self.entity.id)
 
+    async def refresh(self) -> dict:
+        service = self._get_storage_service()
+        return await service.refresh()
+
     def _get_storage_service(self):
         return storage_manager(self.index)
 
