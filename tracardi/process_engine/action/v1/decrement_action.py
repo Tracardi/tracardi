@@ -48,7 +48,6 @@ class DecrementAction(ActionRunner):
         value -= self.config.decrement
 
         dot[self.config.field] = value
-
         if self.event.metadata.profile_less is False:
             self.profile.replace(Profile(**dot.profile))
 

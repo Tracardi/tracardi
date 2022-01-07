@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any, Union
 
 from pydantic import BaseModel, validator
 
@@ -12,8 +12,8 @@ from tracardi.domain.session import Session
 
 
 class Configuration(BaseModel):
-    append: Optional[Dict[str, str]] = {}
-    remove: Optional[Dict[str, List[str]]] = {}
+    append: Optional[Dict[str, Any]] = {}
+    remove: Optional[Dict[str, Union[Any, List[Any]]]] = {}
 
     @validator("remove")
     def validate_remove(cls, value, values):

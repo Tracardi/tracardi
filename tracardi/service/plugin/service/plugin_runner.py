@@ -19,8 +19,8 @@ class PluginTestResult:
                f"\nconsole=`{self.console}`"
 
 
-def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=None, event=None, flow=None) -> PluginTestResult:
-
+def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=None, event=None, flow=None,
+               node=None) -> PluginTestResult:
     async def main(plugin, init, payload):
         try:
 
@@ -38,6 +38,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
             plugin.event = event
             plugin.console = console
             plugin.flow = flow
+            plugin.node = node
 
             output = await plugin.run(payload)
 
