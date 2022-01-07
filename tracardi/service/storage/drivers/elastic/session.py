@@ -1,10 +1,14 @@
-from typing import Optional
+from typing import Optional, List
 
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
-from tracardi.service.storage.factory import StorageFor, storage_manager
+from tracardi.service.storage.factory import StorageFor, storage_manager, StorageForBulk
+
+
+async def save_sessions(profiles: List[Session]):
+    return await StorageForBulk(profiles).index('session').save()
 
 
 async def save_session(session: Session, profile: Optional[Profile], profile_less, persist_session: bool = True):
