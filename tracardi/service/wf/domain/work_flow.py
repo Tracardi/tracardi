@@ -6,7 +6,7 @@ from .flow_history import FlowHistory
 from ..utils.dag_error import DagGraphError
 from ..utils.dag_processor import DagProcessor
 from ..utils.flow_graph_converter import FlowGraphConverter
-from tracardi_plugin_sdk.domain.console import Log
+from tracardi.service.plugin.domain.console import Log
 
 
 class WorkFlow:

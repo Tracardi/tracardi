@@ -1,6 +1,6 @@
 from typing import List
 
-from tracardi_plugin_sdk.domain.result import Result, MissingResult
+from tracardi.service.plugin.domain.result import Result, MissingResult
 from ..utils.dag_error import DagError
 
 

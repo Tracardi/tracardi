@@ -3,11 +3,11 @@ import asyncio
 from aiohttp import ClientConnectorError
 from tracardi.domain.resource import Resource, ResourceCredentials
 from tracardi.service.storage.driver import storage
-from tracardi_dot_notation.dict_traverser import DictTraverser
-from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.domain.result import Result
 
 from .model.configuration import Configuration
 from .model.full_contact_source_configuration import FullContactSourceConfiguration

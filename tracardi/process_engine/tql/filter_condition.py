@@ -2,7 +2,7 @@ import asyncio
 
 from tracardi.process_engine.tql.transformer.filter_transformer import FilterTransformer
 from tracardi.service.singleton import Singleton
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.process_engine.tql.parser import Parser
 
 

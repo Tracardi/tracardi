@@ -1,8 +1,8 @@
 from tracardi.domain.consent_type import ConsentType
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.result import Result
 from .model.payload import Consents, Configuration
 from tracardi.service.storage.driver import storage
 

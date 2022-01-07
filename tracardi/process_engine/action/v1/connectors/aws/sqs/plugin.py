@@ -2,12 +2,12 @@ import json
 
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from .model.model import AwsSqsConfiguration, AwsIamAuth, MessageAttributes
 from aiobotocore.session import get_session
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    Documentation, PortDoc
 
 
 def validate(config: dict):

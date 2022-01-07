@@ -3,12 +3,12 @@ from tracardi.domain.resources.token import Token
 
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
-from tracardi_dot_notation.dot_template import DotTemplate
+from tracardi.service.notation.dot_template import DotTemplate
 
 
 def validate(config: dict) -> Configuration:

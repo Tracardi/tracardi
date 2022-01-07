@@ -6,7 +6,7 @@ from uuid import uuid4
 from typing import List
 
 from pydantic import BaseModel
-from tracardi_plugin_sdk.domain.register import Plugin
+from tracardi.service.plugin.domain.register import Plugin
 
 
 class Position(BaseModel):

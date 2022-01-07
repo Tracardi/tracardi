@@ -3,7 +3,7 @@ import datetime
 import dateparser
 import pytimeparse
 import pytz
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_accessor import DotAccessor
 
 from ..domain.field import Field
 from .function_transformer import FunctionTransformer

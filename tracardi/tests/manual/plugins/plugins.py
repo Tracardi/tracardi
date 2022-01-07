@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.action_runner import ActionRunner
 
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.result import Result
 
 
 class Say(BaseModel):

@@ -1,10 +1,10 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import Resource, ResourceCredentials
-from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_dot_notation.dot_template import DotTemplate
+from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_template import DotTemplate
 
 from .service.sendman import PostMan
 from .model.smtp_configuration import Configuration, SmtpConfiguration

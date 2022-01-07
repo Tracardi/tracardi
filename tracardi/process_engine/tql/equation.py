@@ -2,7 +2,7 @@ from typing import List
 from dotty_dict import dotty
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.calc_transformer import CalcTransformer
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_accessor import DotAccessor
 
 grammar = Parser.read('grammar/math_expr.lark')
 

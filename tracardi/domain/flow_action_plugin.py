@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, Any
-from tracardi_plugin_sdk.domain.register import Plugin
+from tracardi.service.plugin.domain.register import Plugin
 from .entity import Entity
 from .metadata import Metadata
 from .settings import Settings

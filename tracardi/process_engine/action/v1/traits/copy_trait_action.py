@@ -3,10 +3,10 @@ import logging
 from pydantic import BaseModel
 
 from tracardi.config import tracardi
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
 from deepdiff import DeepDiff
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile

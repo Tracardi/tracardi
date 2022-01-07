@@ -1,7 +1,7 @@
 from pprint import pprint
 
 from tracardi.domain.event_metadata import EventMetadata, EventTime
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_accessor import DotAccessor
 
 from tracardi.domain.context import Context
 from tracardi.domain.event import Event

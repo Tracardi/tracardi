@@ -2,10 +2,10 @@ from pydantic import BaseModel, validator
 from tracardi.domain.event import Event
 from tracardi.domain.session import Session
 from tracardi.domain.profile import Profile
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
 from tracardi.process_engine.tql.equation import MathEquation
 
 

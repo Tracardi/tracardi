@@ -2,7 +2,7 @@ import uuid
 from collections import defaultdict
 from datetime import datetime
 from typing import Optional, Any, List, Union, Callable
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import Metadata
 from .pii import PII
