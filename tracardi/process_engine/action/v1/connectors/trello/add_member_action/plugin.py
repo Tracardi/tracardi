@@ -66,7 +66,7 @@ def register() -> Plugin:
                 "list_name": None,
                 "member_id": None
             },
-            # manual="",
+            manual="add_trello_member_action",
             form=Form(
                 groups=[
                     FormGroup(

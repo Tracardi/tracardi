@@ -67,7 +67,7 @@ def register() -> Plugin:
                 "list_name2": None,
                 "card_name": None
             },
-            # manual="",
+            manual="move_trello_card_action",
             form=Form(
                 groups=[
                     FormGroup(
