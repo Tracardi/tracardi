@@ -84,7 +84,7 @@ def register() -> Plugin:
                 }
 
             },
-            # manual="",
+            manual="add_trello_card_action",
             form=Form(
                 groups=[
                     FormGroup(

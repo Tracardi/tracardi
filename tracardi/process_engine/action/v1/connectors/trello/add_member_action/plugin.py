@@ -66,7 +66,7 @@ def register() -> Plugin:
                 "list_name": None,
                 "member_id": None
             },
-            # manual="",
+            manual="add_trello_member_action",
             form=Form(
                 groups=[
                     FormGroup(
@@ -93,7 +93,8 @@ def register() -> Plugin:
                             FormField(
                                 id="card_name",
                                 name="Name of your card",
-                                description="Please provide path to the name of the card that you want to delete.",
+                                description="Please provide path to the name of the card that you want to add member "
+                                            "to.",
                                 component=FormComponent(type="dotPath", props={"label": "Prefix"})
                             ),
                             FormField(
