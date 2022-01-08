@@ -2,11 +2,11 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.action_runner import ActionRunner
-from .model.config import Config, TrelloCredentials, Card
+from .model.config import Config, Card
+from ..credentials import TrelloCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.trello.trello_client import TrelloClient
 from tracardi.service.notation.dict_traverser import DictTraverser
-from fastapi import HTTPException
 from tracardi.service.notation.dot_template import DotTemplate
 
 
@@ -51,8 +51,9 @@ class TrelloCardAdder(ActionRunner):
 
         try:
             result = await self._client.add_card(self.config.list_id, **self.config.card.dict())
-        except (HTTPException, ValueError):
-            return Result(port="error", value={})
+        except (ConnectionError, ValueError) as e:
+            self.console.log(str(e))
+            return Result(port="error", value=payload)
 
         return Result(port="response", value=result)
 

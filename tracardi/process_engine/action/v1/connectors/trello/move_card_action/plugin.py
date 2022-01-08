@@ -2,10 +2,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.action_runner import ActionRunner
-from .model.config import Config, TrelloCredentials
+from .model.config import Config
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.trello.trello_client import TrelloClient
-from fastapi import HTTPException
+from ..credentials import TrelloCredentials
 
 
 async def validate(config: dict) -> Config:
@@ -40,7 +40,8 @@ class TrelloCardMover(ActionRunner):
 
         try:
             result = await self._client.move_card(self.config.list_id1, self.config.list_id2, self.config.card_name)
-        except (HTTPException, ValueError):
+        except (ConnectionError, ValueError) as e:
+            self.console.log(str(e))
             return Result(port="error", value={})
 
         return Result(port="response", value=result)

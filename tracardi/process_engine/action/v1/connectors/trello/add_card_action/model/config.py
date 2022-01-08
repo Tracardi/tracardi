@@ -18,8 +18,3 @@ class Config(BaseModel):
     list_name: str
     list_id: str = None
     card: Card
-
-
-class TrelloCredentials(BaseModel):
-    api_key: str
-    token: str

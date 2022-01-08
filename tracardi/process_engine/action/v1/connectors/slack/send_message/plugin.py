@@ -1,13 +1,13 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+from tracardi.domain.resources.token import Token
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from .model.config import Config, Token
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
+from .model.config import Config
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.slack.slack_client import SlackClient
-from tracardi_dot_notation.dot_template import DotTemplate
-from fastapi import HTTPException
+from tracardi.service.notation.dot_template import DotTemplate
 
 
 def validate(config: dict) -> Config:
@@ -35,7 +35,8 @@ class SlackPoster(ActionRunner):
 
         try:
             response = await self._client.send_to_channel_as_bot(self.config.channel, self.config.message)
-        except HTTPException:
+        except ConnectionError as e:
+            self.console.log(str(e))
             return Result(port="error", value={})
 
         return Result(port="response", value=response)
@@ -49,7 +50,7 @@ def register() -> Plugin:
             className='SlackPoster',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             manual="send_to_slack_channel_action",
@@ -62,9 +63,9 @@ def register() -> Plugin:
                 "message": None
             },
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Slack configuration",
                         fields=[
                             FormField(
                                 id="source",
@@ -75,9 +76,9 @@ def register() -> Plugin:
                             FormField(
                                 id="channel",
                                 name="Slack channel",
-                                description="Please provide the name of the channel that you want the plugin to post "
+                                description="Please provide the name of the channel you want the plugin to post "
                                             "to.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Channel"})
                             ),
                             FormField(
                                 id="message",
@@ -91,9 +92,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Post to Slack channel',
+            name='Post to Slack Channel',
             desc='Posts defined message to a Slack channel.',
-            icon='plugin',
+            icon='slack',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

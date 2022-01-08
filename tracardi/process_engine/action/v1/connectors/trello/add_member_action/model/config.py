@@ -10,7 +10,3 @@ class Config(BaseModel):
     card_name: str
     member_id: str
 
-
-class TrelloCredentials(BaseModel):
-    api_key: str
-    token: str

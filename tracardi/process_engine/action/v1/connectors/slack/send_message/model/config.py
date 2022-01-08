@@ -18,7 +18,3 @@ class Config(BaseModel):
         if len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
-
-
-class Token(BaseModel):
-    token: str

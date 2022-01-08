@@ -1,7 +1,7 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
@@ -53,7 +53,7 @@ def register() -> Plugin:
             className='TokenGetter',
             inputs=["payload"],
             outputs=["payload", "error"],
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             init={
@@ -65,9 +65,9 @@ def register() -> Plugin:
             },
             manual="oauth2_token_action",
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Oauth2 Connection Configuration",
                         fields=[
                             FormField(
                                 id="source",

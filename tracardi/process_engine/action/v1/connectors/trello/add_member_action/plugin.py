@@ -2,10 +2,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.action_runner import ActionRunner
-from .model.config import Config, TrelloCredentials
+from .model.config import Config
+from ..credentials import TrelloCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.trello.trello_client import TrelloClient
-from fastapi import HTTPException
 
 
 async def validate(config: dict) -> Config:
@@ -40,8 +40,9 @@ class TrelloMemberAdder(ActionRunner):
 
         try:
             result = await self._client.add_member(self.config.list_id, self.config.card_name, self.config.member_id)
-        except (HTTPException, ValueError):
-            return Result(port="error", value={})
+        except (ConnectionError, ValueError) as e:
+            self.console.log(str(e))
+            return Result(port="error", value=payload)
 
         return Result(port="response", value=result)
 
@@ -54,7 +55,7 @@ def register() -> Plugin:
             className='TrelloMemberAdder',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             init={

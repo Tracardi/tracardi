@@ -1,5 +1,4 @@
 import aiohttp
-from fastapi import HTTPException
 import json
 
 
@@ -22,7 +21,7 @@ class SlackClient:
             ) as response:
 
                 if response.status != 200 or not (await response.json())["ok"]:
-                    raise HTTPException(status_code=response.status, detail=response.content)
+                    raise ConnectionError("Expected response status 200 got {}".format(response.status))
 
                 return await response.json()
 
