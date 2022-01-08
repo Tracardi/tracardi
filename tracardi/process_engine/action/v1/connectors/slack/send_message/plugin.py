@@ -36,7 +36,7 @@ class SlackPoster(ActionRunner):
         try:
             response = await self._client.send_to_channel_as_bot(self.config.channel, self.config.message)
         except ConnectionError as e:
-            self.console.log(str(e))
+            self.console.error(str(e))
             return Result(port="error", value={})
 
         return Result(port="response", value=response)

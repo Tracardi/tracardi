@@ -20,8 +20,13 @@ class SlackClient:
                 })
             ) as response:
 
-                if response.status != 200 or not (await response.json())["ok"]:
+                if response.status != 200:
                     raise ConnectionError("Expected response status 200 got {}".format(response.status))
+
+                result = await response.json()
+
+                if not result["ok"]:
+                    raise ConnectionError("Expected OK response {}".format(result))
 
                 return await response.json()
 
