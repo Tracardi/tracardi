@@ -45,8 +45,6 @@ class CopyTraitAction(ActionRunner):
 
         logger.debug("NEW PROFILE: {}".format(dot.profile))
 
-
-
         if self.event.metadata.profile_less is False:
             if 'traits' not in dot.profile:
                 raise ValueError("Missing traits in profile.")

@@ -29,6 +29,10 @@ async def load(id: str) -> Session:
     return await StorageFor(Entity(id=id)).index("session").load(Session)
 
 
+async def delete(id: str):
+    return await storage_manager('session').delete(id)
+
+
 async def refresh():
     return await storage_manager('session').refresh()
 
