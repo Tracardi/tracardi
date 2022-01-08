@@ -3,9 +3,9 @@ from json import JSONDecodeError
 from typing import Optional, Union
 from enum import Enum
 
-from tracardi_dot_notation.dict_traverser import DictTraverser
-from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_dot_notation.dot_template import DotTemplate
+from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_template import DotTemplate
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from pydantic import AnyHttpUrl, BaseModel, validator

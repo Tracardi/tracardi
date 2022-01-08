@@ -2,7 +2,7 @@ from typing import List, Optional, Any, Iterator, Dict
 from pydantic import BaseModel
 
 import tracardi.service.wf
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.action_runner import ActionRunner
 
 from .port_to_port_edges import PortToPortEdges
 from ..service.node_indexer import index_nodes

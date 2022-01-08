@@ -1,13 +1,13 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
 from .model.config import Config, TrelloCredentials, Card
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.trello.trello_client import TrelloClient
-from tracardi_dot_notation.dict_traverser import DictTraverser
+from tracardi.service.notation.dict_traverser import DictTraverser
 from fastapi import HTTPException
-from tracardi_dot_notation.dot_template import DotTemplate
+from tracardi.service.notation.dot_template import DotTemplate
 
 
 async def validate(config: dict) -> Config:

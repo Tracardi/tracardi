@@ -10,10 +10,10 @@ from pydantic import BaseModel, validator
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
 from tracardi.service.wf.domain.execution_graph import ExecutionGraph
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
 
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event

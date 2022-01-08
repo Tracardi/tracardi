@@ -1,8 +1,7 @@
 from typing import List, Optional
 
 from pydantic import BaseModel
-from tracardi_plugin_sdk.domain.console import Console
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.result import Result
 
 from .entity import Entity
 from .input_params import InputParams

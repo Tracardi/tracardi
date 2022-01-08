@@ -1,4 +1,4 @@
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.notation.dot_accessor import DotAccessor
 import jsonschema
 from tracardi.domain.event_payload_validator import EventPayloadValidator
 from tracardi.exceptions.exception import EventValidationException

@@ -1,7 +1,7 @@
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, FormGroup, Form, FormField, FormComponent, \
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormGroup, Form, FormField, FormComponent, \
     Documentation, PortDoc
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.result import Result
 from .model.configuration import PluginConfiguration, WeatherResult
 from .service.weather_client import AsyncWeatherClient
 

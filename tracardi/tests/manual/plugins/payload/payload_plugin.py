@@ -1,6 +1,6 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
 
 
 class PayloadPlugin(ActionRunner):

@@ -55,3 +55,7 @@ async def refresh():
 
 async def flush():
     return await storage_manager('profile').flush()
+
+
+async def delete(id: str):
+    return await storage_manager('profile').delete(id)

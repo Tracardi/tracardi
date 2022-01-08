@@ -12,7 +12,7 @@ from tracardi.service.wf.domain.error_debug_info import ErrorDebugInfo
 from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
-from tracardi_plugin_sdk.domain.console import Log
+from tracardi.service.plugin.domain.console import Log
 from ..domain.console import Console
 from ..domain.entity import Entity
 from ..domain.profile import Profile

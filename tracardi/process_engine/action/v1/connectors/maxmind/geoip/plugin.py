@@ -1,9 +1,9 @@
 from tracardi.service.storage.driver import storage
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, FormGroup, FormField, FormComponent, Form, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormGroup, FormField, FormComponent, Form, \
     Documentation, PortDoc
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.domain.resource import ResourceCredentials, Resource
 from .model.maxmind_geolite2_client import GeoIpConfiguration, \
     PluginConfiguration, MaxMindGeoLite2, GeoLiteCredentials

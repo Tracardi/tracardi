@@ -1,5 +1,5 @@
 from tracardi.service.storage.factory import storage_manager
-from tracardi_plugin_sdk.domain.register import Plugin
+from tracardi.service.plugin.domain.register import Plugin
 
 from tracardi.domain.record.flow_action_plugin_record import FlowActionPluginRecord
 

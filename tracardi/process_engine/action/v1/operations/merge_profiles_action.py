@@ -3,10 +3,10 @@ from typing import List
 from pydantic import BaseModel, validator
 from tracardi.domain.profile import Profile
 
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 
 
 class MergeProfileConfiguration(BaseModel):

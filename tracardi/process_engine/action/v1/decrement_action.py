@@ -1,10 +1,10 @@
 from typing import Union
 
 from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
 
 
@@ -48,7 +48,6 @@ class DecrementAction(ActionRunner):
         value -= self.config.decrement
 
         dot[self.config.field] = value
-
         if self.event.metadata.profile_less is False:
             self.profile.replace(Profile(**dot.profile))
 

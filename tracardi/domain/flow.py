@@ -3,9 +3,9 @@ from tracardi.service.wf.domain.flow import Flow as GraphFlow
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
 from typing import Optional, List, Any
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel
 from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
-from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec, Form
+from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, Form
 
 from ..config import tracardi
 from ..service.secrets import decrypt, encrypt

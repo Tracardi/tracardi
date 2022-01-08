@@ -4,9 +4,9 @@ import inspect
 from time import time
 from typing import List, Union, Tuple
 from pydantic import BaseModel
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.console import Console, Log
-from tracardi_plugin_sdk.domain.result import Result, VoidResult, MissingResult
+from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.domain.console import Console, Log
+from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
 
 from .debug_call_info import DebugCallInfo, DebugOutput, DebugInput, Profiler
