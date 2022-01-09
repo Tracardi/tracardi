@@ -47,7 +47,9 @@ setup(
         'aiomysql',
         'kombu',
         'asyncpg',
-        'aiobotocore~=1.4.2'
+        'aiobotocore~=1.4.2',
+        'google-api-python-client == 2.33.0',
+        'google_auth_oauthlib == 0.4.6'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

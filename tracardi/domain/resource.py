@@ -10,14 +10,14 @@ class ResourceCredentials(BaseModel):
     production: Optional[dict] = {}
     test: Optional[dict] = {}
 
-    def get_credentials(self, plugin, output: Type[BaseModel]):
+    def get_credentials(self, plugin, output: Type[BaseModel] = None):
         """
         Returns configuration of resource depending on the state of the executed workflow: test or production.
         """
 
         if plugin.debug is True:
-            return output(**self.test)
-        return output(**self.production)
+            return output(**self.test) if output is not None else self.test
+        return output(**self.production) if output is not None else self.production
 
 
 class Resource(Entity):
