@@ -52,7 +52,7 @@ class TrelloCardAdder(ActionRunner):
         try:
             result = await self._client.add_card(self.config.list_id, **self.config.card.dict())
         except (ConnectionError, ValueError) as e:
-            self.console.log(str(e))
+            self.console.error(str(e))
             return Result(port="error", value=payload)
 
         return Result(port="response", value=result)
