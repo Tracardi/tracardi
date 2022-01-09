@@ -151,7 +151,7 @@ def register() -> Plugin:
             name='Add Trello card',
             desc='Adds card to given list on given board in Trello.',
             icon='trello',
-            group=["Connectors"],
+            group=["Trello"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

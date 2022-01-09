@@ -105,7 +105,7 @@ def register() -> Plugin:
             name='Remove Trello card',
             desc='Removes card from given list on given board in Trello.',
             icon='trello',
-            group=["Connectors"],
+            group=["Trello"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

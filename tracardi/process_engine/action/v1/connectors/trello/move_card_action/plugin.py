@@ -114,7 +114,7 @@ def register() -> Plugin:
             name='Move Trello card',
             desc='Moves card from given list on given board to another list on that board in Trello.',
             icon='trello',
-            group=["Connectors"],
+            group=["Trello"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
