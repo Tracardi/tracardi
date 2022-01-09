@@ -67,7 +67,7 @@ def register() -> Plugin:
                 "list_name": None,
                 "member_id": None
             },
-            manual="add_trello_member_action",
+            manual="trello/add_trello_member_action",
             form=Form(
                 groups=[
                     FormGroup(
@@ -96,14 +96,14 @@ def register() -> Plugin:
                                 name="Name of your card",
                                 description="Please provide path to the name of the card that you want to add member "
                                             "to.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Card name", "defaultMode": "2"})
                             ),
                             FormField(
                                 id="member_id",
                                 name="ID of the member",
                                 description="Please provide the path to the field containing ID of the member that you "
                                             "want to add.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "ID of the member", "defaultMode": "2"})
                             )
                         ]
                     )

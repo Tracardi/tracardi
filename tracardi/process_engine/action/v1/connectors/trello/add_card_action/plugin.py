@@ -66,7 +66,7 @@ def register() -> Plugin:
             className='TrelloCardAdder',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             init={
@@ -85,7 +85,7 @@ def register() -> Plugin:
                 }
 
             },
-            manual="add_trello_card_action",
+            manual="trello/add_trello_card_action",
             form=Form(
                 groups=[
                     FormGroup(
@@ -113,7 +113,7 @@ def register() -> Plugin:
                                 id="card.name",
                                 name="Name of your card",
                                 description="Please provide path to the name of the card that you want to add.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Card name", "defaultMode": "2"})
                             ),
                             FormField(
                                 id="card.desc",
@@ -126,21 +126,21 @@ def register() -> Plugin:
                                 id="card.urlSource",
                                 name="Card link",
                                 description="You can add an URL to your card as an attachment.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Card link", "defaultMode": "2"})
                             ),
                             FormField(
                                 id="card.coordinates",
                                 name="Card coordinates",
                                 description="You can add location coordinates to your card. This should be a path"
                                             " to an object, containing 'longitude' and 'latitude' fields.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Card coordinates", "defaultMode": "2"})
                             ),
                             FormField(
                                 id="card.due",
                                 name="Card due date",
                                 description="You can add due date to your card. Various formats should work, but "
                                             "UTC format seems to be the best option.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"defaultMode": "2", "label": "Card due date"})
                             )
                         ]
                     )

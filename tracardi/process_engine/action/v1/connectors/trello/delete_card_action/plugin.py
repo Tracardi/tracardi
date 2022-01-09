@@ -54,7 +54,7 @@ def register() -> Plugin:
             className='TrelloCardRemover',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             init={
@@ -66,7 +66,7 @@ def register() -> Plugin:
                 "list_name": None,
                 "card_name": None
             },
-            manual="delete_trello_card_action",
+            manual="trello/delete_trello_card_action",
             form=Form(
                 groups=[
                     FormGroup(
@@ -94,7 +94,7 @@ def register() -> Plugin:
                                 id="card_name",
                                 name="Name of your card",
                                 description="Please provide path to the name of the card that you want to delete.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Card name", "defaultMode": "2"})
                             )
                         ]
                     )

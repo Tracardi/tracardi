@@ -41,7 +41,7 @@ class TrelloCardMover(ActionRunner):
         try:
             result = await self._client.move_card(self.config.list_id1, self.config.list_id2, self.config.card_name)
         except (ConnectionError, ValueError) as e:
-            self.console.log(str(e))
+            self.console.error(str(e))
             return Result(port="error", value={})
 
         return Result(port="response", value=result)
@@ -55,7 +55,7 @@ def register() -> Plugin:
             className='TrelloCardMover',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             init={
@@ -68,7 +68,7 @@ def register() -> Plugin:
                 "list_name2": None,
                 "card_name": None
             },
-            manual="move_trello_card_action",
+            manual="trello/move_trello_card_action",
             form=Form(
                 groups=[
                     FormGroup(
@@ -103,7 +103,7 @@ def register() -> Plugin:
                                 id="card_name",
                                 name="Name of your card",
                                 description="Please provide path to the name of the card that you want to move.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Card name", "defaultMode": "2"})
                             )
                         ]
                     )
