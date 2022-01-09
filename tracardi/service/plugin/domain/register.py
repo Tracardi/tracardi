@@ -40,8 +40,11 @@ class Spec(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[dict] = None
+    skip: bool = False
+    block_flow: bool = False
+    run_in_background: bool = False
     on_error_continue: bool = False
-    on_error_repeat: int = 1
+    on_connection_error_repeat: int = 1
     append_input_payload: bool = False
     join_input_payload: bool = False
     form: Optional[Form]

@@ -23,8 +23,11 @@ class Node(BaseModel):
     className: str
     module: str
     init: Optional[dict] = {}
+    skip: bool = False
+    block_flow: bool = False
     on_error_continue: bool = False
-    on_error_repeat: int = 1
+    run_in_background: bool = False
+    on_connection_error_repeat: int = 1
     append_input_payload: bool = False
     join_input_payload: bool = False
     object: Optional[ActionRunner] = None

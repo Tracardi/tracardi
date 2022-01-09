@@ -33,10 +33,10 @@ class ExecutionGraph(BaseModel):
         return tasks
 
     @staticmethod
-    async def _void_return(node):
+    async def _void_return(node: Node):
 
         all_outputs = [VoidResult(port=_start_port, value=None)
-                       for _start_port in node.graph.out_edges.get_start_ports()]
+                       for _start_port in node.outputs]
 
         outputs_len = len(all_outputs)
 
@@ -48,12 +48,21 @@ class ExecutionGraph(BaseModel):
             return tuple(all_outputs)
 
     @staticmethod
+    async def _skip_node(node: Node, params):
+        # Returns payload on every output port
+        return tuple([Result(port=_start_port, value=params)
+                      for _start_port in node.outputs])
+
+    @staticmethod
     def _null_params(node):
         pass
 
     def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, edge_id):
         try:
-            coroutine = node.object.run(**params)
+            if node.skip is True:
+                coroutine = self._skip_node(node, params)
+            else:
+                coroutine = node.object.run(**params)
             return self._add_to_event_loop(tasks,
                                            coroutine,
                                            port=_port,
@@ -318,6 +327,10 @@ class ExecutionGraph(BaseModel):
 
                 # Skip debug nodes when not debugging
                 if not self.debug and node.debug:
+                    continue
+
+                # Skip tasks that are marked to be skipped
+                if node.block_flow is True:
                     continue
 
                 async for result, input_port, input_params, input_edge_id, task_start_time, active in \

@@ -26,8 +26,11 @@ class FlowGraphConverter:
                 className=node.data.spec.className,
                 module=node.data.spec.module,
                 init=node.data.spec.init,
+                skip=node.data.spec.skip,
+                block_flow=node.data.spec.block_flow,
+                run_in_background=node.data.spec.run_in_background,
                 on_error_continue=node.data.spec.on_error_continue,
-                on_error_repeat=node.data.spec.on_error_repeat,
+                on_connection_error_repeat=node.data.spec.on_connection_error_repeat,
                 append_input_payload=node.data.spec.append_input_payload,
                 join_input_payload=node.data.spec.join_input_payload
             )
