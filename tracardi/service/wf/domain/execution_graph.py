@@ -50,8 +50,17 @@ class ExecutionGraph(BaseModel):
     @staticmethod
     async def _skip_node(node: Node, params):
         # Returns payload on every output port
-        return tuple([Result(port=_start_port, value=params)
-                      for _start_port in node.outputs])
+        all_outputs = ([Result(port=_start_port, value=params)
+                        for _start_port in node.outputs])
+
+        outputs_len = len(all_outputs)
+
+        if outputs_len == 0:
+            return None
+        elif len(all_outputs) == 1:
+            return all_outputs[0]
+        else:
+            return tuple(all_outputs)
 
     @staticmethod
     def _null_params(node):
@@ -194,6 +203,7 @@ class ExecutionGraph(BaseModel):
             try:
                 result = await task
                 if node.append_input_payload:
+                    print(result, input_params)
                     result = Result.append_input(result, input_params)
             except BaseException as e:
 

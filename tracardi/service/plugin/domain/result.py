@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Tuple, Union
 from pydantic import BaseModel
 
 
@@ -10,12 +10,19 @@ class Result(BaseModel):
         allow_mutation = False
 
     @staticmethod
-    def append_input(result: 'Result', payload) -> Optional['Result']:
-        if result is None:
+    def append_input(result: Union['Result', Tuple['Result', ...]], payload) -> Optional[Union['Result', Tuple['Result', ...]]]:
+        if result is None:  # Is empty
             return None
-        elif result.value is None:
+        elif isinstance(result, tuple):  # Has multiple outputs
+            results = []
+            for r in result:
+                if isinstance(r, Result) and isinstance(r.value, dict):
+                    payload.update(r.value)
+                    results.append(Result(value=payload, port=r.port))
+            return tuple(results)
+        elif isinstance(result, Result) and result.value is None:  # Has empty value
             return Result(value=payload, port=result.port)
-        elif isinstance(result.value, dict):
+        elif isinstance(result, Result) and isinstance(result.value, dict):
             payload.update(result.value)
             return Result(value=payload, port=result.port)
         else:

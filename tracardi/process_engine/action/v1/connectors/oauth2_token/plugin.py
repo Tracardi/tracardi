@@ -30,17 +30,23 @@ class TokenGetter(ActionRunner):
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url=self._credentials.url,
-                data={
-                    "username": self._credentials.username,
-                    "password": self._credentials.password
-                }
+                    url=self._credentials.url,
+                    # todo what if there is no credentials
+                    data={
+                        "username": self._credentials.username,
+                        "password": self._credentials.password
+                    }
             ) as response:
+                result = await response.json()
+
+                if response.status == 404:
+                    return Result(port="error", value={
+                        "detail": "URL {}, method POST, returned status 404: Not Found".format(self._credentials.url)})
 
                 if response.status != 200:
-                    return Result(port="error", value={})
+                    return Result(port="error", value=result)
 
-                dot[self.config.destination] = await response.json()
+                dot[self.config.destination] = result
 
                 return Result(port="payload", value=payload)
 
