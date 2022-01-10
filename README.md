@@ -4,7 +4,7 @@
 
 [Tracardi](http://www.tracardi.com) is an open-source system that supports customer engagement and enhances the consumer experience.
 Tracardi is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery.
-Tracardi collects data from customer journeys and assigns to a profile that is maintained throughout the period of interaction with the customer.
+Tracardi collects data from customer journeys and assigns it to a profile that is maintained throughout the period of interaction with the customer.
 
 
 TRACARDI is an API-first solution, low-code / no-code platform aimed at any business that 
