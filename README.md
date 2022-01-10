@@ -1,6 +1,6 @@
-![header.jpg](https://raw.githubusercontent.com/atompie/tracardi-images/master/images/github-splash.png)
+![github_banner](https://user-images.githubusercontent.com/16271564/148844248-c970b9dc-026a-406c-a920-872429bc9061.png)
 
-# Tracardi Open-source Customer Data Platform
+# Open-source Customer Engagement and Data Platform
 
 [Tracardi](http://www.twitter.com/tracardi) is an open-source Customer Data Platform.
 
