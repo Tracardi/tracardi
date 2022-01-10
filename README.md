@@ -2,10 +2,13 @@
 
 # Open-source Customer Engagement and Data Platform
 
-[Tracardi](http://www.twitter.com/tracardi) is an open-source Customer Data Platform.
+[Tracardi](http://www.tracardi.com) is an open-source system that supports customer engagement and enhances the consumer experience.
+Tracardi is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery.
+Tracardi collects data from customer journeys and assigns to a profile that is maintained throughout the period of interaction with the customer.
 
-TRACARDI is an API-first solution, low-code / no-code platform aimed at any e-commerce business that 
-wants to start using user data for marketing purposes. If you own a brand new e-commerce platform or 
+
+TRACARDI is an API-first solution, low-code / no-code platform aimed at any business that 
+wants to start using user data for automated customer engagement. If you own a brand new e-commerce platform or 
 a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
 
  * **Customer Data Integration** - You can ingest, aggregate and store customer data
