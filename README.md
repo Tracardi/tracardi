@@ -1,4 +1,4 @@
-![github_banner](https://user-images.githubusercontent.com/16271564/148844248-c970b9dc-026a-406c-a920-872429bc9061.png)
+![github_banner](https://user-images.githubusercontent.com/16271564/148844741-77519819-088f-44c4-95a8-ed6986c71dbe.png)
 
 # Open-source Customer Engagement and Data Platform
 
