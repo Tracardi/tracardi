@@ -11,3 +11,7 @@ async def refresh():
 
 async def flush():
     return await storage_manager('segment').flush()
+
+
+async def save(data: dict):
+    return await storage_manager('segment').upsert(data)
