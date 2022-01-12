@@ -7,6 +7,6 @@ from tracardi.exceptions.exception import EventValidationException
 def validate(dot: DotAccessor, validator: EventPayloadValidator) -> None:
     for key, val_schema in validator.validation.items():
         try:
-            jsonschema.validate(dot[key], val_schema)
+            jsonschema.validate(dot[key] if isinstance(dot[key], dict) else dot[key].to_dict(), val_schema)
         except (jsonschema.ValidationError, KeyError) as e:
             raise EventValidationException("{}: {}".format(key, str(e)))
