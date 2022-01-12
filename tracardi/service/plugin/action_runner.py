@@ -1,4 +1,6 @@
+from tracardi.domain.profile import Profile
 from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.service.plugin.domain.console import Console
 
 
 class ActionRunner:
@@ -6,10 +8,10 @@ class ActionRunner:
     debug = True
     event = None
     session = None
-    profile = None
+    profile = None  # type: Profile
     flow = None
     flow_history = None
-    console = None
+    console = None  # type: Console
     node = None
     metrics = None
     execution_graph = None
