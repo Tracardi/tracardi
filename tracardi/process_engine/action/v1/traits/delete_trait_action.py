@@ -43,8 +43,9 @@ class DeleteTraitAction(ActionRunner):
             profile = Profile(**dot.profile)
             self.profile.replace(profile)
 
-        session = Session(**dot.session)
-        self.session.replace(session)
+        if 'id' in dot.session:
+            session = Session(**dot.session)
+            self.session.replace(session)
 
         event = Event(**dot.event)
         self.event.replace(event)

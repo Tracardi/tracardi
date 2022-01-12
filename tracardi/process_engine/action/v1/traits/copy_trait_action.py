@@ -86,8 +86,9 @@ class CopyTraitAction(ActionRunner):
         event = Event(**dot.event)
         self.event.replace(event)
 
-        session = Session(**dot.session)
-        self.session.replace(session)
+        if 'id' in dot.session:
+            session = Session(**dot.session)
+            self.session.replace(session)
 
         return Result(port="payload", value=payload)
 

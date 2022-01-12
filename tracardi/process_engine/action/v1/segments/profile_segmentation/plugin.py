@@ -29,19 +29,23 @@ class ProfileSegmentAction(ActionRunner):
             self.profile.replace(profile)
 
     async def run(self, payload):
-        dot = self._get_dot_accessor(payload)
-        condition = Condition()
-        profile = Profile(**dot.profile)
-        try:
-            if await condition.evaluate(self.config.condition, dot):
-                self._update(profile, self.config.true_segment, self.config.true_action)
-                return Result(port="true", value=payload)
-            else:
-                self._update(profile, self.config.false_segment, self.config.false_action)
-                return Result(port="false", value=payload)
-        except Exception as e:
-            self.console.error(str(e))
-            return Result(port="error", value=payload)
+        if self.event.metadata.profile_less is False:
+            dot = self._get_dot_accessor(payload)
+            condition = Condition()
+            profile = Profile(**dot.profile)
+            try:
+                if await condition.evaluate(self.config.condition, dot):
+                    self._update(profile, self.config.true_segment, self.config.true_action)
+                    return Result(port="true", value=payload)
+                else:
+                    self._update(profile, self.config.false_segment, self.config.false_action)
+                    return Result(port="false", value=payload)
+            except Exception as e:
+                self.console.error(str(e))
+                return Result(port="error", value=payload)
+
+        self.console.warning("Can not segment profile-less event. There is no profile.")
+        return Result(port="false", value=payload)
 
 
 def register() -> Plugin:

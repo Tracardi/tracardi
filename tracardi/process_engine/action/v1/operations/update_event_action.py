@@ -9,6 +9,8 @@ class UpdateEventAction(ActionRunner):
 
     async def run(self, payload):
         self.event.update = True
+        if self.debug is True:
+            self.console.warning("Events may not be updated in debug mode.")
         return None
 
 
