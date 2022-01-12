@@ -28,7 +28,7 @@ class ConsoleRecord(BaseModel):
 class Console(BaseModel):
     metadata: Metadata = Metadata()
     event_id: str = None
-    flow_id: str = None
+    flow_id: Optional[str] = None
     profile_id: Optional[str] = None
     origin: str
     class_name: str

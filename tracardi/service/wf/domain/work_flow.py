@@ -1,5 +1,6 @@
 from typing import Tuple, List
 
+from tracardi.domain.event import Event
 from .debug_info import DebugInfo
 from .flow import Flow
 from .flow_history import FlowHistory
@@ -16,7 +17,7 @@ class WorkFlow:
         self.profile = profile
         self.session = session
 
-    async def invoke(self, flow: Flow, event, ux: list, debug=False) -> Tuple[DebugInfo, List[Log], 'Event']:
+    async def invoke(self, flow: Flow, event: Event, ux: list, debug=False) -> Tuple[DebugInfo, List[Log], 'Event']:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.
@@ -47,8 +48,8 @@ class WorkFlow:
 
             debug_info, log_list = await exec_dag.run(
                 payload={},
-                flow_id=flow.id,
-                event_id=event.id
+                flow=flow,
+                event=event
             )
 
             await exec_dag.close()

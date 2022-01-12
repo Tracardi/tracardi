@@ -4,13 +4,16 @@ import inspect
 from time import time
 from typing import List, Union, Tuple
 from pydantic import BaseModel
+
+from tracardi.domain.event import Event
+from tracardi.domain.flow import Flow
 from tracardi.service.plugin.action_runner import ActionRunner
 from tracardi.service.plugin.domain.console import Console, Log
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
 
-from .debug_call_info import DebugCallInfo, DebugOutput, DebugInput, Profiler
-from .debug_info import DebugInfo, DebugNodeInfo, FlowDebugInfo, DebugEdgeInfo
+from .debug_call_info import Profiler
+from .debug_info import DebugInfo, DebugNodeInfo, FlowDebugInfo
 from .entity import Entity
 from .init_result import InitResult
 from .input_params import InputParams
@@ -303,14 +306,14 @@ class ExecutionGraph(BaseModel):
             return InputParams(port=input_port, value=input_params)
         return None
 
-    async def run(self, payload, flow_id, event_id) -> Tuple[DebugInfo, List[Log]]:
+    async def run(self, payload, flow: Flow, event: Event) -> Tuple[DebugInfo, List[Log]]:
 
         actions_results = ActionsResults()
         flow_start_time = time()
         debug_info = DebugInfo(
             timestamp=flow_start_time,
-            flow=FlowDebugInfo(id=flow_id),
-            event=Entity(id=event_id)
+            flow=FlowDebugInfo(id=flow.id, name=flow.name),
+            event=Entity(id=event.id)
         )
 
         log_list = []
@@ -396,36 +399,55 @@ class ExecutionGraph(BaseModel):
                             edge=input_edge_id
                         )
 
+                    # todo remove after 14.02.2022
                     # Save debug call info
-                    debug_start_time = task_start_time - flow_start_time
-                    debug_end_time = time() - flow_start_time
-                    debug_run_time = debug_end_time - debug_start_time
+                    # debug_start_time = task_start_time - flow_start_time
+                    # debug_end_time = time() - flow_start_time
+                    # debug_run_time = debug_end_time - debug_start_time
 
-                    call_debug_info = DebugCallInfo(
+                    if event.metadata.debug is True:
+                        node_debug_info.append_call_info(
+                            flow_start_time,
+                            task_start_time,
+                            node,
+                            input_edge=Entity(id=input_edge_id) if input_edge_id is not None else None,
+                            input_params=self._get_input_params(input_port, input_params),
+                            output_edge=None,
+                            output_params=[result] if isinstance(result, Result) else result,
+                            active=active
+                        )
 
-                        run=active,
-
-                        profiler=Profiler(
-                            startTime=debug_start_time,
-                            endTime=debug_end_time,
-                            runTime=debug_run_time
-                        ),
-
-                        input=DebugInput(
-                            edge=Entity(id=input_edge_id) if input_edge_id is not None else None,
-                            params=self._get_input_params(input_port, input_params)
-                        ),
-                        output=DebugOutput(
-                            edge=None,  # todo
-                            results=[result] if isinstance(result, Result) else result
-                        ),
-
-                        init=node.init,
-                        profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
-                                                              and isinstance(node.object.profile, BaseModel) else {}
-                    )
-
-                    node_debug_info.calls.append(call_debug_info)
+                    # todo remove after 14.02.2022
+                    # call_debug_info = DebugCallInfo(
+                    #
+                    #     run=active,
+                    #
+                    #     profiler=Profiler(
+                    #         startTime=debug_start_time,
+                    #         endTime=debug_end_time,
+                    #         runTime=debug_run_time
+                    #     ),
+                    #
+                    #     input=DebugInput(
+                    #         edge=Entity(id=input_edge_id) if input_edge_id is not None else None,
+                    #         params=self._get_input_params(input_port, input_params)
+                    #     ),
+                    #     output=DebugOutput(
+                    #         edge=None,  # todo
+                    #         results=[result] if isinstance(result, Result) else result
+                    #     ),
+                    #
+                    #     init=node.init,
+                    #     profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
+                    #                                           and isinstance(node.object.profile, BaseModel) else {},
+                    #
+                    #     event=node.object.event.dict() if isinstance(node.object, ActionRunner)
+                    #                                       and isinstance(node.object.event, BaseModel) else {},
+                    #     session=node.object.session.dict() if isinstance(node.object, ActionRunner)
+                    #                                           and isinstance(node.object.session, BaseModel) else {}
+                    # )
+                    #
+                    # node_debug_info.calls.append(call_debug_info)
                     log_list.append(
                         Log(
                             module=node.object.console.module,
@@ -451,74 +473,111 @@ class ExecutionGraph(BaseModel):
 
                 log_list.append(error_log)
 
-                debug_start_time = task_start_time - flow_start_time
-                debug_end_time = time() - flow_start_time
-                debug_run_time = debug_end_time - debug_start_time
+                # todo remove after 14.02.2022
+                # debug_start_time = task_start_time - flow_start_time
+                # debug_end_time = time() - flow_start_time
+                # debug_run_time = debug_end_time - debug_start_time
 
-                if e.input is not None and e.port is not None:
+                if event.metadata.debug is True:
+                    if e.input is not None and e.port is not None:
 
-                    call_debug_info = DebugCallInfo(
+                        node_debug_info.append_call_info(
+                            flow_start_time,
+                            task_start_time,
+                            node,
+                            input_edge=Entity(id=e.edge) if e.edge is not None else None,
+                            input_params=InputParams(port=e.port, value=e.input),
+                            output_edge=None,
+                            output_params=None,
+                            active=True
+                        )
 
-                        run=True,
+                        # todo remove after 14.02.2022
+                        # call_debug_info = DebugCallInfo(
+                        #
+                        #     run=True,
+                        #
+                        #     profiler=Profiler(
+                        #         startTime=debug_start_time,
+                        #         endTime=debug_end_time,
+                        #         runTime=debug_run_time
+                        #     ),
+                        #     init=node.init,
+                        #     input=DebugInput(
+                        #         params=InputParams(port=e.port, value=e.input),
+                        #         edge=Entity(id=e.edge) if e.edge is not None else None
+                        #     ),
+                        #     output=DebugOutput(
+                        #         edge=None,
+                        #         results=None
+                        #     ),
+                        #     profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
+                        #                                           and isinstance(node.object.profile, BaseModel) else {},
+                        #     event=node.object.event.dict() if isinstance(node.object, ActionRunner)
+                        #                                       and isinstance(node.object.event, BaseModel) else {},
+                        #     session=node.object.session.dict() if isinstance(node.object, ActionRunner)
+                        #                                           and isinstance(node.object.session, BaseModel) else {},
+                        #     error=str(e)
+                        # )
 
-                        profiler=Profiler(
-                            startTime=debug_start_time,
-                            endTime=debug_end_time,
-                            runTime=debug_run_time
-                        ),
-                        init=node.init,
-                        input=DebugInput(
-                            params=InputParams(port=e.port, value=e.input),
-                            edge=Entity(id=e.edge) if e.edge is not None else None
-                        ),
-                        output=DebugOutput(
-                            edge=None,
-                            results=None
-                        ),
-                        profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
-                                                              and isinstance(node.object.profile, BaseModel) else {},
-                        error=str(e)
-                    )
+                    else:
 
-                else:
+                        node_debug_info.append_call_info(
+                            flow_start_time,
+                            task_start_time,
+                            node,
+                            input_edge=Entity(id=e.edge) if e.edge is not None else None,
+                            input_params=None,
+                            output_edge=None,
+                            output_params=None,
+                            active=True
+                        )
 
-                    call_debug_info = DebugCallInfo(
+                        # todo remove after 14.02.2022
+                        # call_debug_info = DebugCallInfo(
+                        #
+                        #     run=True,
+                        #
+                        #     profiler=Profiler(
+                        #         startTime=debug_start_time,
+                        #         endTime=debug_end_time,
+                        #         runTime=debug_run_time
+                        #     ),
+                        #     input=DebugInput(
+                        #         edge=Entity(id=e.edge) if e.edge is not None else None,
+                        #         params=None
+                        #     ),
+                        #     output=DebugOutput(
+                        #         edge=None,
+                        #         results=None
+                        #     ),
+                        #     init=node.init,
+                        #     error=str(e),
+                        #     profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
+                        #                                           and isinstance(node.object.profile, BaseModel) else {},
+                        #     event=node.object.event.dict() if isinstance(node.object, ActionRunner)
+                        #                                       and isinstance(node.object.event, BaseModel) else {},
+                        #     session=node.object.session.dict() if isinstance(node.object, ActionRunner)
+                        #                                           and isinstance(node.object.session, BaseModel) else {},
+                        # )
 
-                        run=True,
-
-                        profiler=Profiler(
-                            startTime=debug_start_time,
-                            endTime=debug_end_time,
-                            runTime=debug_run_time
-                        ),
-                        input=DebugInput(
-                            edge=Entity(id=e.edge) if e.edge is not None else None,
-                            params=None
-                        ),
-                        output=DebugOutput(
-                            edge=None,
-                            results=None
-                        ),
-                        init=node.init,
-                        error=str(e),
-                        profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
-                                                              and isinstance(node.object.profile, BaseModel) else {},
-                    )
-
-                node_debug_info.calls.append(call_debug_info)
+                    # todo remove after 14.02.2022
+                    # node_debug_info.calls.append(call_debug_info)
 
                 # Stop workflow when there is an error
                 break
 
             finally:
-                node_debug_info.profiler.endTime = time() - flow_start_time
-                node_debug_info.profiler.runTime = time() - flow_start_time - task_start_time
+                if event.metadata.debug is True:
+                    node_debug_info.profiler.endTime = time() - flow_start_time
+                    node_debug_info.profiler.runTime = time() - flow_start_time - task_start_time
 
-                # If node had call that means it was running
-                if node_debug_info.calls:
-                    execution_number += 1
-                    node_debug_info.executionNumber = execution_number
-                    debug_info.nodes[node_debug_info.id] = node_debug_info
+                    # If node had call that means it was running
+
+                    if node_debug_info.calls:
+                        execution_number += 1
+                        node_debug_info.executionNumber = execution_number
+                        debug_info.nodes[node_debug_info.id] = node_debug_info
 
                 # Collect console logs set inside plugins
                 if isinstance(node.object, ActionRunner):

@@ -29,6 +29,8 @@ class DebugCallInfo(BaseModel):
     output: DebugOutput
     init: Optional[dict] = None
     profile: Optional[dict] = {}
+    event: Optional[dict] = {}
+    session: Optional[dict] = {}
     error: Optional[str] = None
     run: bool = False
 

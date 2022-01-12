@@ -34,9 +34,11 @@ class TrackerPayload(BaseModel):
     def get_events(self, session: Optional[Session], profile: Optional[Profile], profile_less) -> List[Event]:
         event_list = []
         if self.events:
+            debugging = self.is_debugging_on()
             for event in self.events:  # type: EventPayload
                 _event = event.to_event(self.metadata, self.source, session, profile, event.options, profile_less)
                 _event.metadata.status = COLLECTED
+                _event.metadata.debug = debugging
 
                 # Append session data
                 _event.session.start = session.metadata.time.insert

@@ -26,7 +26,7 @@ class EventMetadata(BaseModel):
     status: str = None
     processed_by: EventProcessors = EventProcessors()
     profile_less: bool = False
-    debugged: bool = False
+    debug: bool = False
 
 
 class EventPayloadMetadata(BaseModel):

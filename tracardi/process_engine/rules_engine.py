@@ -58,8 +58,17 @@ class RulesEngine:
                 try:
                     rule = Rule(**rule)
                 except ValidationError as e:
-                    print(str(e))
-                    # todo log error and disable rule
+                    console = Console(
+                        origin="rule",
+                        event_id=event.id,
+                        flow_id=None,
+                        module=__name__,
+                        class_name='RulesEngine',
+                        type="error",
+                        message="Rule validation error: ".format(str(e)),
+                        traceback=get_traceback(e)
+                    )
+                    self.console_log.append(console)
                     continue
 
                 if not rule.enabled:
@@ -77,6 +86,7 @@ class RulesEngine:
                         timestamp=time(),
                         flow=FlowDebugInfo(
                             id=rule.flow.id,
+                            name=rule.flow.name,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=103)]
                         ),
                         event=Entity(id=event.id)
@@ -160,7 +170,8 @@ class RulesEngine:
                     debug_info = DebugInfo(
                         timestamp=time(),
                         flow=FlowDebugInfo(
-                            id=flow_id,
+                            id=rule.flow.name,
+                            name=rule.flow.name,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=86)]
                         ),
                         event=Entity(id=event_id)
