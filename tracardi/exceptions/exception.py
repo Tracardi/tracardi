@@ -14,7 +14,12 @@ class FieldTypeConflictException(TracardiException):
 
     def __init__(self, *args, rows=None):
         TracardiException.__init__(self, *args)
-        self.details = [row['index']['error']['reason'] for row in rows]
+        if isinstance(rows, list):
+            self.details = [row['index']['error']['reason'] for row in rows]
+        elif isinstance(rows, str):
+            self.details = rows
+        else:
+            self.details = "Unknown"
 
     def explain(self):
         return ",".join(self.details)
