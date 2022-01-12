@@ -57,8 +57,8 @@ class ExprTransformer(TransformerNamespace):
     def OP(self, args):
         return args.value
 
-    def OP_INTEGER(self, args):
-        return int(args.value)
+    def OP_NUMBER(self, args):
+        return float(args.value)
 
     def OP_STRING(self, args):
         return args.value.strip('"')
@@ -79,6 +79,10 @@ class ExprTransformer(TransformerNamespace):
             return value1 < value2
         elif operation == '<=':
             return value1 <= value2
+        elif operation == '=<':
+            return value1 <= value2
+        elif operation == '=>':
+            return value1 >= value2
 
     def op_condition(self, args):
         value1, operation, value2 = args

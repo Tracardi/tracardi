@@ -5,7 +5,7 @@ expr: and_expr
         | or_expr
 ?op_value:  OP_NULL
         | OP_BOOL
-        | OP_INTEGER
+        | OP_NUMBER
         | OP_FLOAT
         | OP_STRING
         | op_array
@@ -52,7 +52,7 @@ OP_FIELD: /(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]
 OP_STRING: ESCAPED_STRING
 OP_VALUE_TYPE: /[a-zA-Z0-9\._]+/
 op_compound_value: OP_VALUE_TYPE "(" [op_value_or_field ("," op_value_or_field)*] ")"
-OP_INTEGER: /\d+/
+OP_NUMBER: /[+-]?([0-9]*[.])?[0-9]+/
 OP_FLOAT: NUMBER
 OP_TIME: /\d+(m|s|h|d)/
 
