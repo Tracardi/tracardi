@@ -67,12 +67,13 @@ def register() -> Plugin:
             name='Show snack bar',
             desc='Shows snack bar pop-up on the front end.',
             icon='react',
-            group=["UI Widgets"],
+            group=["UIX Widgets"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={"payload": PortDoc(desc="This port returns input payload object.")}
-            )
+            ),
+            frontend=True
         )
     )

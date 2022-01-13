@@ -46,7 +46,7 @@ class DebugConfiguration(BaseModel):
             ):
                 raise ValueError("This field must not have other characters then: letters, digits, ., _, -, @")
 
-        return value
+        return value.strip()
 
 
 def validate(config: dict) -> DebugConfiguration:

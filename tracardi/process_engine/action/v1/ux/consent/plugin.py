@@ -144,12 +144,14 @@ def register() -> Plugin:
             name='Show consent bar',
             desc='Shows consent pop-up on the front end.',
             icon='react',
-            group=["UI Widgets"],
+            group=["UIX Widgets"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={"payload": PortDoc(desc="This port returns input payload object.")}
-            )
+            ),
+            frontend=True,
+            emits_event=['user-consent-pref', 'agree-all-event-type']
         )
     )

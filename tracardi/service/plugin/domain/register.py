@@ -84,6 +84,8 @@ class MetaData(BaseModel):
     group: Optional[List[str]] = ["General"]
     tags: List[str] = []
     pro: bool = False
+    frontend: bool = False
+    emits_event: List[str] = []
 
 
 class Plugin(BaseModel):
