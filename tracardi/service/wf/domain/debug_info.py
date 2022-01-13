@@ -101,6 +101,9 @@ class DebugInfo(BaseModel):
             else:
                 self.edges[input_edge_id].active.append(active)
 
+    def has_nodes(self):
+        return len(self.nodes) > 0
+
     def has_errors(self) -> bool:
         if self.flow.has_errors():
             return True

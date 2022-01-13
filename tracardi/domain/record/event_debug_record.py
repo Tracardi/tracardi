@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from tracardi.domain.value_object.storage_info import StorageInfo
+from tracardi.process_engine.debugger import Debugger
 from tracardi.service.wf.domain.debug_info import DebugInfo
 from tracardi.domain.entity import Entity
 from tracardi.service.secrets import b64_encoder, b64_decoder
@@ -10,7 +11,7 @@ class EventDebugRecord(Entity):
     content: str = None
 
     @staticmethod
-    def encode(stat: Dict[str, List[Dict[str, DebugInfo]]]) -> List['EventDebugRecord']:
+    def encode(stat: Debugger) -> List['EventDebugRecord']:
 
         for event_type, debugging in stat.items():
             for debug_infos in debugging:

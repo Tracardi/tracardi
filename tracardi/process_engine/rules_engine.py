@@ -13,6 +13,7 @@ from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
 from tracardi.service.plugin.domain.console import Log
+from .debugger import Debugger
 from ..domain.console import Console
 from ..domain.entity import Entity
 from ..domain.profile import Profile
@@ -38,10 +39,10 @@ class RulesEngine:
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, ux: list, source_id=None) -> Tuple[Dict[str, List[Dict[str, DebugInfo]]], list, list, dict, Dict[str, list]]:
+    async def invoke(self, load_flow_callable, ux: list, source_id=None) -> Tuple[Debugger, list, list, dict, Dict[str, list]]:
 
         flow_task_store = defaultdict(list)
-        debug_info_by_event_type_and_rule_name = defaultdict(list)
+        debugger = Debugger()
         invoked_rules = defaultdict(list)
 
         for rules_loading_task, event in self.events_rules:
@@ -91,7 +92,7 @@ class RulesEngine:
                         ),
                         event=Entity(id=event.id)
                     )
-                    debug_info_by_event_type_and_rule_name[event.type].append({rule.name: debug_info})
+                    debugger[event.type].append({rule.name: debug_info})
                     continue
 
                 if not flow.enabled:
@@ -177,11 +178,11 @@ class RulesEngine:
                         event=Entity(id=event_id)
                     )
 
-                debug_info_by_event_type_and_rule_name[event_type].append({rule_name: debug_info})
+                debugger[event_type].append({rule_name: debug_info})
 
         ran_event_types = list(flow_task_store.keys())
 
-        return debug_info_by_event_type_and_rule_name, \
+        return debugger, \
                ran_event_types, \
                self.console_log, \
                post_invoke_events, \
