@@ -42,6 +42,9 @@ class InjectAction(ActionRunner):
         self.config = Configuration(**kwargs)
 
     async def run(self, payload):
+        if self.debug is True:
+            self.event.metadata.debug = True
+
         converter = DictTraverser(self._get_dot_accessor(payload))
 
         try:
@@ -76,7 +79,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual='inject_action',
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),

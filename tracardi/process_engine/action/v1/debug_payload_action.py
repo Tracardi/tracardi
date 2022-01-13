@@ -88,9 +88,7 @@ class DebugPayloadAction(ActionRunner):
 
     async def run(self, **kwargs):
         if self.debug:
-
             if self.config.type is None or self.config.type == "":
-
                 events = [
                     {
                         "id": "@debug-event-id",
@@ -107,7 +105,9 @@ class DebugPayloadAction(ActionRunner):
                         "type": "debug-event-type",
                         "properties": "{}",
                         "context": {
-                            "config": {},
+                            "config": {
+                                "debugger": True
+                            },
                             "params": {}
                         }
                     }
@@ -130,6 +130,7 @@ class DebugPayloadAction(ActionRunner):
                     event, profile, session = await self._create_full_event(event_data)
 
                     self.event.replace(event)
+                    self.event.metadata.debug = True
                     self.event.session = session
                     self.event.source = event.source
 
