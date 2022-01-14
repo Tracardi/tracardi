@@ -53,8 +53,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Throw error',
             desc='Throws an error and stops workflow.',
-            icon='stop',
-            group=["Input/Output"],
+            icon='error',
+            group=["Error reporting"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON like object.")
