@@ -21,7 +21,7 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class RandomReturner(ActionRunner):
+class RandomItemAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = Config(**kwargs)
@@ -40,10 +40,10 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='RandomReturner',
+            className='RandomItemAction',
             inputs=["payload"],
             outputs=["random_element"],
-            version='0.6.0.1',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             manual="random_element_action",
@@ -51,9 +51,9 @@ def register() -> Plugin:
                 "list_of_items": []
             },
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Random item configuration",
                         fields=[
                             FormField(
                                 id="list_of_items",
@@ -71,17 +71,16 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Return random item',
+            name='Random item',
             desc='Returns a random value from list given in configuration.',
-            type='flowNode',
-            icon='plugin',
-            group=["Input/Output"],
+            icon='shuffle',
+            group=["Data processing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "random_element": PortDoc(desc="This port returns a random item from given list.")
+                    "random_element": PortDoc(desc="This port returns a random item from defined list.")
                 }
             )
         )

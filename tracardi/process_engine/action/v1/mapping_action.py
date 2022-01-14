@@ -7,13 +7,13 @@ from tracardi.service.plugin.domain.result import Result
 
 
 class Config(BaseModel):
-    condition_value: str
-    switch: Dict[str, Any]
+    value: str
+    mapping: Dict[str, Any]
 
-    @validator('switch')
-    def validate_switch(cls, value):
+    @validator('mapping')
+    def validate_mapping(cls, value):
         if not value:
-            raise ValueError("Switch cannot be empty.")
+            raise ValueError("Mapping cannot be empty.")
         return value
 
 
@@ -21,18 +21,18 @@ def validate(config: dict):
     return Config(**config)
 
 
-class SwitchAction(ActionRunner):
+class MappingAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = Config(**kwargs)
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.condition_value = dot[self.config.condition_value]
+        self.config.value = dot[self.config.value]
 
-        self.config.switch = {dot[key]: dot[value] for key, value in self.config.switch.items()}
+        self.config.mapping = {dot[key]: dot[value] for key, value in self.config.mapping.items()}
 
-        value = self.config.switch.get(self.config.condition_value, None)
+        value = self.config.mapping.get(self.config.value, None)
 
         return Result(port="result", value={"value": value})
 
@@ -42,33 +42,33 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='SwitchAction',
+            className='MappingAction',
             inputs=["payload"],
             outputs=["result"],
             version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
-            manual="switch_action",
+            manual="mapping_action",
             init={
-                "condition_value": None,
-                "switch": {}
+                "value": None,
+                "mapping": {}
             },
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Mapping configuration",
                         fields=[
                             FormField(
-                                id="condition_value",
-                                name="Condition value",
-                                description="Please provide a path to the condition value.",
+                                id="value",
+                                name="Value",
+                                description="Please provide a path to the value to match.",
                                 component=FormComponent(type="dotPath", props={"label": "Prefix"})
                             ),
                             FormField(
-                                id="switch",
-                                name="Switch",
-                                description="Please provide key-value pairs. Value will be returned if condition value "
-                                            "is the same as key.",
+                                id="mapping",
+                                name="Set of data to match",
+                                description="Please provide key-value pairs. Value will be returned if the value"
+                                            "is the same as the key from this set.",
                                 component=FormComponent(type="keyValueList", props={"label": "List"})
                             )
                         ]
@@ -78,17 +78,16 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Switch',
-            desc='Returns one of given values in terms of given condition value.',
-            type='flowNode',
-            icon='plugin',
-            group=["Conditions"],
+            name='Value mapping',
+            desc='It returns matching value form the set of data.',
+            icon='map-properties',
+            group=["Data processing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "result": PortDoc(desc="This ports returns result value, according to configuration.")
+                    "result": PortDoc(desc="This ports returns matched value.")
                 }
             )
         )
