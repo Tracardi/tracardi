@@ -8,6 +8,7 @@ from tracardi.service.plugin.domain.result import Result
 
 class Config(BaseModel):
     value: str
+    case_sensitive: bool
     mapping: Dict[str, Any]
 
     @validator('mapping')
@@ -30,7 +31,11 @@ class MappingAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         self.config.value = dot[self.config.value]
 
-        self.config.mapping = {dot[key]: dot[value] for key, value in self.config.mapping.items()}
+        self.config.mapping = {
+            dot[key].lower() if not self.config.case_sensitive and isinstance(dot[key], str) else dot[key]:
+            dot[value].lower() if not self.config.case_sensitive and isinstance(dot[value], str) else dot[value]
+            for key, value in self.config.mapping.items()
+        }
 
         value = self.config.mapping.get(self.config.value, None)
 
@@ -51,6 +56,7 @@ def register() -> Plugin:
             manual="mapping_action",
             init={
                 "value": None,
+                "case_sensitive": False,
                 "mapping": {}
             },
             form=Form(
@@ -63,6 +69,13 @@ def register() -> Plugin:
                                 name="Value",
                                 description="Please provide a path to the value to match.",
                                 component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                            ),
+                            FormField(
+                                id="case_sensitive",
+                                name="Case sensitivity",
+                                description="Please specify if plugin should differentiate lowercase and uppercase "
+                                            "letters different or not.",
+                                component=FormComponent(type="bool", props={"label": "Enable case sensitivity"})
                             ),
                             FormField(
                                 id="mapping",
