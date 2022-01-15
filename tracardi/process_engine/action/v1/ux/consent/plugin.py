@@ -145,6 +145,7 @@ def register() -> Plugin:
             desc='Shows consent pop-up on the front end.',
             icon='react',
             group=["UIX Widgets"],
+            type="flowNodeWithEvents",
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -152,6 +153,10 @@ def register() -> Plugin:
                 outputs={"payload": PortDoc(desc="This port returns input payload object.")}
             ),
             frontend=True,
-            emits_event=['user-consent-pref', 'agree-all-event-type']
+            emits_event={
+                "Consent preferences": 'user-consent-pref',
+                "Agree all": 'agree-all-event-type',
+                "Close": 'agree-all-event-type'
+            }
         )
     )
