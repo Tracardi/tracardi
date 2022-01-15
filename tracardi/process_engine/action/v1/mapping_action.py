@@ -12,9 +12,12 @@ class Config(BaseModel):
     mapping: Dict[str, Any]
 
     @validator('mapping')
-    def validate_mapping(cls, value):
+    def validate_mapping(cls, value, values):
         if not value:
             raise ValueError("Mapping cannot be empty.")
+        if not values["case_sensitive"] and len({key.lower() for key in value}) != len(value):
+            raise ValueError("Inserting two keys that differ only in letter case without case sensitivity enabled, " 
+                             "may cause plugin malfunction.")
         return value
 
 
