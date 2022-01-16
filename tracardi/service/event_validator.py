@@ -4,6 +4,7 @@ from tracardi.domain.event_payload_validator import EventPayloadValidator
 from tracardi.exceptions.exception import EventValidationException
 from dotty_dict import Dotty
 
+
 def validate(dot: DotAccessor, validator: EventPayloadValidator) -> None:
     for key, val_schema in validator.validation.items():
         try:
