@@ -76,8 +76,7 @@ def register() -> Plugin:
                             FormField(
                                 id="case_sensitive",
                                 name="Case sensitivity",
-                                description="Please specify if plugin should differentiate lowercase and uppercase "
-                                            "letters different or not.",
+                                description="Should the value be lowercased before mapping?",
                                 component=FormComponent(type="bool", props={"label": "Enable case sensitivity"})
                             ),
                             FormField(
