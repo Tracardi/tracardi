@@ -34,6 +34,7 @@ class InfluxSender(ActionRunner):
             return Result(port="error", value=payload)
         return Result(port="success", value=payload)
 
+
 def register() -> Plugin:
     return Plugin(
         start=False,
