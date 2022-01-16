@@ -206,12 +206,11 @@ class ExecutionGraph(BaseModel):
             try:
                 result = await task
                 if node.append_input_payload:
-                    print(result, input_params)
                     result = Result.append_input(result, input_params)
             except BaseException as e:
 
                 if isinstance(node.object, ActionRunner):
-                    await node.object.on_error()
+                    await node.object.on_error(e)
 
                 msg = f"{repr(e)}. Check run method of `{node.className}`\n\n" \
                       f"Details: {format_exc()}"
@@ -305,6 +304,12 @@ class ExecutionGraph(BaseModel):
         if input_port:
             return InputParams(port=input_port, value=input_params)
         return None
+
+    def is_in_debug_mode(self, event):
+        """
+        Is either event marked as debug or debug method was called
+        """
+        return event.metadata.debug is True or self.debug is True
 
     async def run(self, payload, flow: Flow, event: Event) -> Tuple[DebugInfo, List[Log]]:
 
@@ -405,7 +410,7 @@ class ExecutionGraph(BaseModel):
                     # debug_end_time = time() - flow_start_time
                     # debug_run_time = debug_end_time - debug_start_time
 
-                    if event.metadata.debug is True:
+                    if self.is_in_debug_mode(event):
                         node_debug_info.append_call_info(
                             flow_start_time,
                             task_start_time,
@@ -478,7 +483,7 @@ class ExecutionGraph(BaseModel):
                 # debug_end_time = time() - flow_start_time
                 # debug_run_time = debug_end_time - debug_start_time
 
-                if event.metadata.debug is True:
+                if self.is_in_debug_mode(event):
                     if e.input is not None and e.port is not None:
 
                         node_debug_info.append_call_info(
@@ -489,7 +494,8 @@ class ExecutionGraph(BaseModel):
                             input_params=InputParams(port=e.port, value=e.input),
                             output_edge=None,
                             output_params=None,
-                            active=True
+                            active=True,
+                            error=str(e)
                         )
 
                         # todo remove after 14.02.2022
@@ -530,7 +536,8 @@ class ExecutionGraph(BaseModel):
                             input_params=None,
                             output_edge=None,
                             output_params=None,
-                            active=True
+                            active=True,
+                            error=str(e)
                         )
 
                         # todo remove after 14.02.2022
@@ -568,7 +575,7 @@ class ExecutionGraph(BaseModel):
                 break
 
             finally:
-                if event.metadata.debug is True:
+                if self.is_in_debug_mode(event):
                     node_debug_info.profiler.endTime = time() - flow_start_time
                     node_debug_info.profiler.runTime = time() - flow_start_time - task_start_time
 
@@ -583,7 +590,7 @@ class ExecutionGraph(BaseModel):
                 if isinstance(node.object, ActionRunner):
                     for log in node.object.console.get_logs():  # type: Log
                         log_list.append(log)
-
+        print(debug_info)
         return debug_info, log_list
 
     def serialize(self):

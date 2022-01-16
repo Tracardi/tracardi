@@ -52,7 +52,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
 
         except Exception as e:
             if isinstance(plugin, ActionRunner):
-                await plugin.on_error()
+                await plugin.on_error(e)
             raise e
         finally:
             if isinstance(plugin, ActionRunner):

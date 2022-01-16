@@ -81,7 +81,7 @@ class DebugPayloadAction(ActionRunner):
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(
-                "Event type `{}` has reference to empty profile id `{}`. Debug stopped. This event is corrupted.".format(
+                "Event type '{}' has reference to empty profile id '{}'. Debug stopped. This event is corrupted.".format(
                     event.id, event.profile.id))
 
         return event, profile, session
@@ -118,7 +118,7 @@ class DebugPayloadAction(ActionRunner):
 
                 if result.total == 0:
                     raise ValueError(
-                        "There is no event with type `{}`. Check configuration for correct event type.".format(
+                        "There is no event with type '{}'. Check configuration for correct event type.".format(
                             self.config.type))
 
                 events = list(result)
@@ -165,12 +165,15 @@ class DebugPayloadAction(ActionRunner):
                 except ValueError as e:
                     self.console.warning(str(e))
 
-            raise ValueError("There is no event with type `{}` that is consistent. See log error for details.".format(
+            raise ValueError("There is no event with type '{}' that is consistent. See log error for details.".format(
                         self.config.type))
 
         else:
             # No debug mode
             return Result(port="event", value=self.event.dict())
+
+    async def on_error(self, e):
+        print('x')
 
 
 def register() -> Plugin:
