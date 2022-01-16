@@ -38,7 +38,7 @@ def register() -> Plugin:
             className='RegexReplacer',
             inputs=["payload"],
             outputs=["replaced", "not_found"],
-            version='0.6.2',
+            version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
             init={
@@ -55,22 +55,21 @@ def register() -> Plugin:
                             FormField(
                                 id="string",
                                 name="String",
-                                description="Please provide path to the text that you want to change by replacing "
-                                            "fragments of it.",
+                                description="Please provide a path to the text (or the text itself) that you want to "
+                                            "change.",
                                 component=FormComponent(type="dotPath", props={"label": "Prefix"})
                             ),
                             FormField(
                                 id="replace_with",
                                 name="Replace with",
-                                description="Please provide a path to the text that you want to replace matched "
-                                            "fragments with.",
+                                description="Please provide the text that replaces the matched substring.",
                                 component=FormComponent(type="dotPath", props={"label": "Prefix"})
                             ),
                             FormField(
                                 id="find_regex",
                                 name="Regex",
-                                description="Please provide a regular expression matching fragments of text that you "
-                                            "want to replace.",
+                                description="Please provide a regular expression to match text (substring) to be "
+                                            "replaced.",
                                 component=FormComponent(type="text", props={"label": "Regex"})
                             )
                         ]
@@ -80,7 +79,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Regex string replace',
-            desc='Replaces pieces of string that match provided regex with given value.',
+            desc='Replaces a substring that matches regex pattern with the given replacement string.',
             type='flowNode',
             icon='regex',
             group=["Regex"],
