@@ -48,9 +48,9 @@ def register() -> Plugin:
             },
             manual="regex_replace_action",
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Regex replace configuration",
                         fields=[
                             FormField(
                                 id="string",
@@ -78,9 +78,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Regex string replace',
+            name='Regex replace',
             desc='Replaces a substring that matches regex pattern with the given replacement string.',
-            type='flowNode',
             icon='regex',
             group=["Regex"],
             documentation=Documentation(

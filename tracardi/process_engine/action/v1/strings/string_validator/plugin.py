@@ -88,9 +88,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Data validator',
             desc='Validates data such as: email, url, ipv4, date, time,int,float, phone number, ean code',
-            type='flowNode',
-            width=300,
-            height=100,
             icon='ok',
             group=["Validators"],
             documentation=Documentation(

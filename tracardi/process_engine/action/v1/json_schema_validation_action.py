@@ -51,9 +51,9 @@ class SchemaValidator(ActionRunner):
 
         try:
             validate_with_schema(dot, payload_validator)
-            return Result(port="OK", value=payload)
+            return Result(port="ok", value=payload)
         except EventValidationException:
-            return Result(port="ERROR", value=payload)
+            return Result(port="error", value=payload)
 
 
 def register() -> Plugin:
@@ -63,7 +63,7 @@ def register() -> Plugin:
             module=__name__,
             className='SchemaValidator',
             inputs=["payload"],
-            outputs=["OK", "ERROR"],
+            outputs=["ok", "error"],
             version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
@@ -72,9 +72,9 @@ def register() -> Plugin:
                 "validation_schema": {}
             },
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="JSON Schema Validation Configuration",
                         fields=[
                             FormField(
                                 id="validation_schema",
@@ -89,18 +89,17 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Validate with JSON schema',
+            name='JSON schema validator',
             desc='Validates objects using provided JSON validation schema.',
-            type='flowNode',
-            icon='plugin',
-            group=["Data processing"],
+            icon='ok',
+            group=["Validators"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "OK": PortDoc(desc="This port returns payload if it passes defined validation."),
-                    "ERROR": PortDoc(desc="This port returns payload if it does not pass defined validation.")
+                    "ok": PortDoc(desc="This port returns payload if it passes defined validation."),
+                    "error": PortDoc(desc="This port returns payload if it does not pass defined validation.")
                 }
             )
         )
