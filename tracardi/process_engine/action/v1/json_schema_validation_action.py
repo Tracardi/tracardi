@@ -79,7 +79,8 @@ def register() -> Plugin:
                             FormField(
                                 id="validation_schema",
                                 name="JSON validation schema",
-                                description="Please provide a JSON validation schema that you want to use.",
+                                description="Please provide a JSON validation schema that you want to validate data "
+                                            "with.",
                                 component=FormComponent(type="json", props={"label": "Schema"})
                             )
                         ]
