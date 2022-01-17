@@ -173,7 +173,7 @@ class DebugPayloadAction(ActionRunner):
             return Result(port="event", value=self.event.dict())
 
     async def on_error(self, e):
-        print('x')
+        pass
 
 
 def register() -> Plugin:

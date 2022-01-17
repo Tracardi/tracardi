@@ -590,7 +590,7 @@ class ExecutionGraph(BaseModel):
                 if isinstance(node.object, ActionRunner):
                     for log in node.object.console.get_logs():  # type: Log
                         log_list.append(log)
-        print(debug_info)
+
         return debug_info, log_list
 
     def serialize(self):

@@ -27,7 +27,6 @@ def validate(config: dict):
 class DeleteTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        print(self.event, kwargs)
         self.config = validate(kwargs)
 
     async def run(self, payload: dict):

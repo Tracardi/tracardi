@@ -30,7 +30,6 @@ class SnackBarUx(ActionRunner):
         self.ux.append({"tag": "div", "props": {"class": "tracardi-uix-snackbar", "data-message": self.config.message}})
         self.ux.append({"tag": "script", "props": {"src": f"{uix_endpoint}/uix/snackbar/index.js"}})
 
-        print("ux", self.ux)
         return Result(port="payload", value=payload)
 
 
