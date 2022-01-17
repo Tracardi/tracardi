@@ -72,7 +72,7 @@ def register() -> Plugin:
                                 id="value",
                                 name="Value",
                                 description="Please provide a path to the value to match.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Value"})
                             ),
                             FormField(
                                 id="case_sensitive",
