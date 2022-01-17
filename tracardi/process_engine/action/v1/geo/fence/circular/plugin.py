@@ -16,8 +16,11 @@ class CircularGeoFenceAction(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
-        center_coordinates_tuple = (self.config.center_coordinate.lat, self.config.center_coordinate.lng)
-        test_coordinates_tuple = (self.config.test_coordinate.lat, self.config.test_coordinate.lng)
+
+        dot = self._get_dot_accessor(payload)
+
+        center_coordinates_tuple = (float(self.config.center_coordinate.lat), float(self.config.center_coordinate.lng))
+        test_coordinates_tuple = (float(dot[self.config.test_coordinate.lat]), float(dot[self.config.test_coordinate.lng]))
 
         distance_from_center = distance.distance(center_coordinates_tuple, test_coordinates_tuple).km
 
