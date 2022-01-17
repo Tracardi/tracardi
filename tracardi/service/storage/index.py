@@ -67,7 +67,10 @@ class Resource:
                                 rel=None),
             "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None),
             "validation-schema": Index(multi_index=False, index="tracardi-validation-schema",
-                                       mapping="mappings/validation-schema-index.json", rel=None)
+                                       mapping="mappings/validation-schema-index.json", rel=None),
+            "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
+                                     mapping="mappings/value-threshold-index.json",
+                                     rel=None)
         }
 
     def add_indices(self, indices: dict):
