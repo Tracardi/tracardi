@@ -32,7 +32,8 @@ class MappingAction(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.value = dot[self.config.value]
+        self.config.value = dot[self.config.value].lower() \
+            if not self.config.case_sensitive and isinstance(dot[self.config.value], str) else dot[self.config.value]
 
         self.config.mapping = {
             dot[key].lower() if not self.config.case_sensitive and isinstance(dot[key], str) else dot[key]:
