@@ -11,7 +11,6 @@ class ValueThreshold(NamedEntity):
     timestamp: datetime
     ttl: int
     last_value: Any
-    default_value: Any
 
     def encode(self) -> ValueThresholdRecord:
         return ValueThresholdRecord(
@@ -21,7 +20,6 @@ class ValueThreshold(NamedEntity):
             timestamp=self.timestamp,
             ttl=self.ttl,
             last_value=b64_encoder(self.last_value),
-            default_value=b64_encoder(self.default_value),
         )
 
     @staticmethod
@@ -33,5 +31,4 @@ class ValueThreshold(NamedEntity):
             timestamp=record.timestamp,
             ttl=record.ttl,
             last_value=b64_decoder(record.last_value),
-            default_value=b64_decoder(record.default_value),
         )

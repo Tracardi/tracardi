@@ -10,7 +10,6 @@ class ValueThresholdRecord(NamedEntity):
     timestamp: datetime
     ttl: int
     last_value: str
-    default_value: str
 
     @staticmethod
     def storage_info() -> StorageInfo:

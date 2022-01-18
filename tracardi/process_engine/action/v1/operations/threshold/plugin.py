@@ -24,7 +24,6 @@ class ValueThresholdAction(ActionRunner):
         vtm = ValueThresholdManager(node_id=self.node.id,
                                     profile_id=profile_id,
                                     name=self.config.name,
-                                    default_value=self.config.default_value,
                                     ttl=self.config.ttl)
 
         dot = self._get_dot_accessor(payload)
@@ -49,7 +48,6 @@ def register() -> Plugin:
                 "name": None,
                 "value": None,
                 "ttl": 30 * 60,
-                "default_value": None,
                 "assign_to_profile": True
             },
             form=Form(groups=[

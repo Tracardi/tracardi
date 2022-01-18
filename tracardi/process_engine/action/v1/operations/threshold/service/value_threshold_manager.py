@@ -6,9 +6,8 @@ from tracardi.service.storage.driver import storage
 
 class ValueThresholdManager:
 
-    def __init__(self, name, default_value, ttl, node_id, profile_id=None):
+    def __init__(self, name, ttl, node_id, profile_id=None):
         self.ttl = ttl
-        self.default_value = default_value
         self.name = name
         self.profile_id = profile_id
         self.node_id = node_id
@@ -40,7 +39,6 @@ class ValueThresholdManager:
             timestamp=datetime.utcnow(),
             ttl=self.ttl,
             last_value=current_value,
-            default_value=self.default_value
         )
         record = value.encode()
         result = await storage.driver.value_threshold.save(record)
