@@ -6,17 +6,26 @@ from tracardi.service.storage.driver import storage
 
 class ValueThresholdManager:
 
-    def __init__(self, name, ttl, node_id, profile_id=None):
-        self.ttl = ttl
+    def __init__(self, name, ttl, debug, node_id, profile_id=None):
+        self.debug = debug
+        self.ttl = int(ttl)
         self.name = name
         self.profile_id = profile_id
-        self.node_id = node_id
+        self.node_id = "{}-{}".format(node_id, "1" if self.debug is True else "0")
 
     async def pass_threshold(self, current_value):
         value_threshold = await self.load_last_value()
         if value_threshold is not None:
-            if value_threshold.last_value == current_value:
-                return False
+            if self.ttl > 0:
+                # With timestamp
+                ttl_timestamp = datetime.timestamp(value_threshold.timestamp) + self.ttl
+                now = datetime.timestamp(datetime.utcnow())
+                if value_threshold.last_value == current_value and now < ttl_timestamp:
+                    return False
+            else:
+                if value_threshold.last_value == current_value:
+                    return False
+
         await self.save_current_value(current_value)
         return True
 

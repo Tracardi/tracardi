@@ -2,7 +2,7 @@ import asyncio
 from typing import Type
 from uuid import uuid4
 
-from ..action_runner import ActionRunner
+from ..runner import ActionRunner
 from ..domain.console import Console
 
 

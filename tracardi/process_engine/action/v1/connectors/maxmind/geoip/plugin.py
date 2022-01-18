@@ -1,7 +1,7 @@
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormGroup, FormField, FormComponent, Form, \
     Documentation, PortDoc
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.domain.resource import ResourceCredentials, Resource

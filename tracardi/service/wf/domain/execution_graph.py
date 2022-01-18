@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.console import Console, Log
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
@@ -22,6 +22,8 @@ from ..utils.dag_error import DagError, DagExecError
 from .edge import Edge
 from .node import Node
 from .tasks_results import ActionsResults
+from ...notation.dot_accessor import DotAccessor
+from ...value_threshold_manager import ValueThresholdManager
 
 
 class ExecutionGraph(BaseModel):
@@ -69,12 +71,36 @@ class ExecutionGraph(BaseModel):
     def _null_params(node):
         pass
 
-    def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, edge_id):
+    async def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, edge_id):
         try:
+
             if node.skip is True:
                 coroutine = self._skip_node(node, params)
             else:
-                coroutine = node.object.run(**params)
+                if node.run_once.enabled is True:
+                    vtm = ValueThresholdManager(
+                        name=node.name,
+                        node_id=node.id,
+                        profile_id=node.object.profile.id,
+                        ttl=node.run_once.ttl,
+                        debug=self.debug
+                    )
+                    if node.run_once.type == 'value':
+                        dot_payload = list(params.values())
+                        dot = DotAccessor(profile=node.object.profile,
+                                          session=node.object.session,
+                                          payload=dot_payload[0] if len(dot_payload) == 1 else {},  # this is fine, input params has only one value
+                                          event=node.object.event,
+                                          flow=node.object.flow)
+
+                        if not await vtm.pass_threshold(dot[node.run_once.value]):
+                            coroutine = self._void_return(node)
+                        else:
+                            coroutine = node.object.run(**params)
+                    else:
+                        coroutine = node.object.run(**params)
+                else:
+                    coroutine = node.object.run(**params)
             return self._add_to_event_loop(tasks,
                                            coroutine,
                                            port=_port,
@@ -133,7 +159,7 @@ class ExecutionGraph(BaseModel):
             _payload = {}
 
             params = {"payload": payload}
-            tasks = self._run_in_event_loop(tasks, node, params, _port, _payload, None)
+            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, None)
 
         elif node.graph.in_edges:
 
@@ -176,7 +202,7 @@ class ExecutionGraph(BaseModel):
                             # Run spec with every downstream message (param)
                             # Runs as many times as downstream edges
 
-                            tasks = self._run_in_event_loop(
+                            tasks = await self._run_in_event_loop(
                                 tasks,
                                 node,
                                 params,

@@ -5,7 +5,7 @@ from .debug_call_info import DebugCallInfo, Profiler, DebugInput, DebugOutput
 from .entity import Entity
 from .error_debug_info import ErrorDebugInfo
 from .input_params import InputParams
-from ...plugin.action_runner import ActionRunner
+from ...plugin.runner import ActionRunner
 
 
 class FlowDebugInfo(Entity):

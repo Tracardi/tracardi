@@ -4,7 +4,7 @@ import pytz
 from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 
 

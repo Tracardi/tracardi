@@ -1,7 +1,7 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from pydantic import BaseModel, validator
 from typing import Dict, Union
 from tracardi.service.event_validator import validate as validate_with_schema
