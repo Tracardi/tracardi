@@ -3,7 +3,7 @@ import asyncio
 from aiohttp import ClientConnectorError
 from tracardi.domain.resources.token import Token
 from tracardi.service.notation.dot_template import DotTemplate
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result

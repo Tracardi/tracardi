@@ -1,7 +1,7 @@
 from tracardi.domain.profile import Profile
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 
 
 class UpdateProfileAction(ActionRunner):

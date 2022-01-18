@@ -18,9 +18,14 @@ import tracardi.service.storage.drivers.elastic.user
 import tracardi.service.storage.drivers.elastic.validation_schema
 import tracardi.service.storage.drivers.elastic.event_source
 import tracardi.service.storage.drivers.elastic.pro
+import tracardi.service.storage.drivers.elastic.value_threshold
 
 
 class ElasticDriver:
+
+    @property
+    def value_threshold(self):
+        return tracardi.service.storage.drivers.elastic.value_threshold
 
     @property
     def pro(self):

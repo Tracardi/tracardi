@@ -28,6 +28,7 @@ class FlowGraphConverter:
                 init=node.data.spec.init,
                 skip=node.data.spec.skip,
                 block_flow=node.data.spec.block_flow,
+                run_once=node.data.spec.run_once,
                 run_in_background=node.data.spec.run_in_background,
                 on_error_continue=node.data.spec.on_error_continue,
                 on_connection_error_repeat=node.data.spec.on_connection_error_repeat,

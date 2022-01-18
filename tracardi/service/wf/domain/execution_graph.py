@@ -7,7 +7,8 @@ from pydantic import BaseModel
 
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.process_engine.tql.condition import Condition
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.console import Console, Log
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
@@ -22,6 +23,8 @@ from ..utils.dag_error import DagError, DagExecError
 from .edge import Edge
 from .node import Node
 from .tasks_results import ActionsResults
+from ...notation.dot_accessor import DotAccessor
+from ...value_threshold_manager import ValueThresholdManager
 
 
 class ExecutionGraph(BaseModel):
@@ -69,12 +72,50 @@ class ExecutionGraph(BaseModel):
     def _null_params(node):
         pass
 
-    def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, edge_id):
+    async def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, edge_id):
         try:
+
             if node.skip is True:
                 coroutine = self._skip_node(node, params)
             else:
-                coroutine = node.object.run(**params)
+                if node.run_once.enabled is True:
+
+                    if node.object.profile is None:
+                        node.object.console.log("Conditional stop is global and assigned to node {}".format(node.id))
+
+                    profile_id = node.object.profile.id if node.object.profile is not None else None
+
+                    vtm = ValueThresholdManager(
+                        name=node.name,
+                        node_id=node.id,
+                        profile_id=profile_id,
+                        ttl=node.run_once.ttl,
+                        debug=self.debug
+                    )
+
+                    dot_payload = list(params.values())
+                    dot = DotAccessor(profile=node.object.profile,
+                                      session=node.object.session,
+                                      payload=dot_payload[0] if len(dot_payload) == 1 else {},
+                                      # this is fine, input params has only one value
+                                      event=node.object.event,
+                                      flow=node.object.flow)
+
+                    if node.run_once.type == 'value':
+                        value = dot[node.run_once.value]
+                    elif node.run_once.type == 'condition':
+                        condition = Condition()
+                        value = await condition.evaluate(node.run_once.value, dot)
+                    else:
+                        raise ValueError("Unknown type {} for conditional workflow stop.".format(node.run_once.type))
+
+                    if not await vtm.pass_threshold(value):
+                        coroutine = self._void_return(node)
+                    else:
+                        coroutine = node.object.run(**params)
+
+                else:
+                    coroutine = node.object.run(**params)
             return self._add_to_event_loop(tasks,
                                            coroutine,
                                            port=_port,
@@ -133,7 +174,7 @@ class ExecutionGraph(BaseModel):
             _payload = {}
 
             params = {"payload": payload}
-            tasks = self._run_in_event_loop(tasks, node, params, _port, _payload, None)
+            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, None)
 
         elif node.graph.in_edges:
 
@@ -176,7 +217,7 @@ class ExecutionGraph(BaseModel):
                             # Run spec with every downstream message (param)
                             # Runs as many times as downstream edges
 
-                            tasks = self._run_in_event_loop(
+                            tasks = await self._run_in_event_loop(
                                 tasks,
                                 node,
                                 params,
@@ -206,12 +247,11 @@ class ExecutionGraph(BaseModel):
             try:
                 result = await task
                 if node.append_input_payload:
-                    print(result, input_params)
                     result = Result.append_input(result, input_params)
             except BaseException as e:
 
                 if isinstance(node.object, ActionRunner):
-                    await node.object.on_error()
+                    await node.object.on_error(e)
 
                 msg = f"{repr(e)}. Check run method of `{node.className}`\n\n" \
                       f"Details: {format_exc()}"
@@ -305,6 +345,12 @@ class ExecutionGraph(BaseModel):
         if input_port:
             return InputParams(port=input_port, value=input_params)
         return None
+
+    def is_in_debug_mode(self, event):
+        """
+        Is either event marked as debug or debug method was called
+        """
+        return event.metadata.debug is True or self.debug is True
 
     async def run(self, payload, flow: Flow, event: Event) -> Tuple[DebugInfo, List[Log]]:
 
@@ -405,7 +451,7 @@ class ExecutionGraph(BaseModel):
                     # debug_end_time = time() - flow_start_time
                     # debug_run_time = debug_end_time - debug_start_time
 
-                    if event.metadata.debug is True:
+                    if self.is_in_debug_mode(event):
                         node_debug_info.append_call_info(
                             flow_start_time,
                             task_start_time,
@@ -478,7 +524,7 @@ class ExecutionGraph(BaseModel):
                 # debug_end_time = time() - flow_start_time
                 # debug_run_time = debug_end_time - debug_start_time
 
-                if event.metadata.debug is True:
+                if self.is_in_debug_mode(event):
                     if e.input is not None and e.port is not None:
 
                         node_debug_info.append_call_info(
@@ -489,7 +535,8 @@ class ExecutionGraph(BaseModel):
                             input_params=InputParams(port=e.port, value=e.input),
                             output_edge=None,
                             output_params=None,
-                            active=True
+                            active=True,
+                            error=str(e)
                         )
 
                         # todo remove after 14.02.2022
@@ -530,7 +577,8 @@ class ExecutionGraph(BaseModel):
                             input_params=None,
                             output_edge=None,
                             output_params=None,
-                            active=True
+                            active=True,
+                            error=str(e)
                         )
 
                         # todo remove after 14.02.2022
@@ -568,7 +616,7 @@ class ExecutionGraph(BaseModel):
                 break
 
             finally:
-                if event.metadata.debug is True:
+                if self.is_in_debug_mode(event):
                     node_debug_info.profiler.endTime = time() - flow_start_time
                     node_debug_info.profiler.runTime = time() - flow_start_time - task_start_time
 

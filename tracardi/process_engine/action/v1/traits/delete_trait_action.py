@@ -3,7 +3,7 @@ from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -27,7 +27,6 @@ def validate(config: dict):
 class DeleteTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        print(self.event, kwargs)
         self.config = validate(kwargs)
 
     async def run(self, payload: dict):

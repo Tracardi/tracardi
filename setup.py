@@ -50,7 +50,8 @@ setup(
         'aiobotocore~=1.4.2',
         'google-api-python-client == 2.33.0',
         'google_auth_oauthlib == 0.4.6',
-        'python_weather'
+        'python_weather',
+        'geopy'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

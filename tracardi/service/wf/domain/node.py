@@ -1,11 +1,12 @@
-from typing import List, Optional, Any, Iterator, Dict
+from typing import List, Optional, Iterator, Dict
 from pydantic import BaseModel
 
 import tracardi.service.wf
-from tracardi.service.plugin.action_runner import ActionRunner
 
 from .port_to_port_edges import PortToPortEdges
 from ..service.node_indexer import index_nodes
+from tracardi.service.plugin.domain.register import RunOnce
+from tracardi.service.plugin.runner import ActionRunner
 
 
 class Graph(BaseModel):
@@ -24,6 +25,7 @@ class Node(BaseModel):
     module: str
     init: Optional[dict] = {}
     skip: bool = False
+    run_once: Optional[RunOnce] = RunOnce()
     block_flow: bool = False
     on_error_continue: bool = False
     run_in_background: bool = False

@@ -1,10 +1,10 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 
 
 class EndAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         pass
 
     async def run(self, payload):
@@ -27,9 +27,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='End',
             desc='Ends workflow.',
-            type='flowNode',
-            width=100,
-            height=100,
             icon='stop',
             group=["Input/Output"],
             documentation=Documentation(

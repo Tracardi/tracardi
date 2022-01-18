@@ -117,7 +117,7 @@ class SqlSearchQueryEngine:
         es_query = {
             "from": query.start,
             "size": query.limit,
-            'sort': [{time_field: 'desc'}]
+            'sort': [{time_field: 'desc'}],
         }
 
         query_where = self.parser.parse(query.where)
@@ -149,7 +149,7 @@ class SqlSearchQueryEngine:
             es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
         else:
             es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
-        print(es_query)
+        # print(es_query)
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:

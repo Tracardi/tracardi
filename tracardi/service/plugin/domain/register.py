@@ -33,6 +33,13 @@ class Form(BaseModel):
     groups: List[FormGroup]
 
 
+class RunOnce(BaseModel):
+    value: Optional[str] = ""
+    ttl: int = 0
+    type: str = "value"
+    enabled: bool = False
+
+
 class Spec(BaseModel):
     id: Optional[str]
     className: str
@@ -51,7 +58,8 @@ class Spec(BaseModel):
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.0.1'
+    version: Optional[str] = '0.6.1'
+    run_once: Optional[RunOnce] = RunOnce()
 
     def __init__(self, **data: Any):
         super().__init__(**data)

@@ -3,7 +3,7 @@ import aiohttp
 from aiohttp import ClientConnectorError
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.notation.dot_template import DotTemplate
 
 from .model.configuration import DiscordWebHookConfiguration

@@ -3,7 +3,7 @@ from uuid import uuid4
 import inspect
 
 from tracardi.service.wf.domain.flow_graph_data import Node, Position
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 
 
 def action(plugin, init=None) -> Node:

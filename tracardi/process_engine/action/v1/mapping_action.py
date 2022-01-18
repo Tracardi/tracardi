@@ -1,6 +1,6 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from pydantic import BaseModel, validator
 from typing import Dict, Any
 from tracardi.service.plugin.domain.result import Result
@@ -8,12 +8,16 @@ from tracardi.service.plugin.domain.result import Result
 
 class Config(BaseModel):
     value: str
+    case_sensitive: bool
     mapping: Dict[str, Any]
 
     @validator('mapping')
-    def validate_mapping(cls, value):
+    def validate_mapping(cls, value, values):
         if not value:
             raise ValueError("Mapping cannot be empty.")
+        if not values["case_sensitive"] and len({key.lower() for key in value}) != len(value):
+            raise ValueError("Inserting two keys that differ only in letter case without case sensitivity enabled, " 
+                             "may cause plugin malfunction.")
         return value
 
 
@@ -28,9 +32,14 @@ class MappingAction(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.value = dot[self.config.value]
+        self.config.value = dot[self.config.value].lower() \
+            if not self.config.case_sensitive and isinstance(dot[self.config.value], str) else dot[self.config.value]
 
-        self.config.mapping = {dot[key]: dot[value] for key, value in self.config.mapping.items()}
+        self.config.mapping = {
+            dot[key].lower() if not self.config.case_sensitive and isinstance(dot[key], str) else dot[key]:
+            dot[value].lower() if not self.config.case_sensitive and isinstance(dot[value], str) else dot[value]
+            for key, value in self.config.mapping.items()
+        }
 
         value = self.config.mapping.get(self.config.value, None)
 
@@ -51,6 +60,7 @@ def register() -> Plugin:
             manual="mapping_action",
             init={
                 "value": None,
+                "case_sensitive": False,
                 "mapping": {}
             },
             form=Form(
@@ -62,7 +72,13 @@ def register() -> Plugin:
                                 id="value",
                                 name="Value",
                                 description="Please provide a path to the value to match.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Value"})
+                            ),
+                            FormField(
+                                id="case_sensitive",
+                                name="Case sensitivity",
+                                description="Should the value be lowercased before mapping?",
+                                component=FormComponent(type="bool", props={"label": "Enable case sensitivity"})
                             ),
                             FormField(
                                 id="mapping",

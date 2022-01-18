@@ -2,7 +2,7 @@ from pydantic import BaseModel, validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 
 
@@ -30,7 +30,6 @@ class SnackBarUx(ActionRunner):
         self.ux.append({"tag": "div", "props": {"class": "tracardi-uix-snackbar", "data-message": self.config.message}})
         self.ux.append({"tag": "script", "props": {"src": f"{uix_endpoint}/uix/snackbar/index.js"}})
 
-        print("ux", self.ux)
         return Result(port="payload", value=payload)
 
 

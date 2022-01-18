@@ -5,7 +5,7 @@ from .debug_call_info import DebugCallInfo, Profiler, DebugInput, DebugOutput
 from .entity import Entity
 from .error_debug_info import ErrorDebugInfo
 from .input_params import InputParams
-from ...plugin.action_runner import ActionRunner
+from ...plugin.runner import ActionRunner
 
 
 class FlowDebugInfo(Entity):
@@ -42,7 +42,8 @@ class DebugNodeInfo(BaseModel):
                          input_params: Optional[InputParams],
                          output_edge: Optional[Entity],
                          output_params: Optional[InputParams],
-                         active):
+                         active,
+                         error=None):
 
         debug_start_time = task_start_time - flow_start_time
         debug_end_time = time() - flow_start_time
@@ -74,7 +75,8 @@ class DebugNodeInfo(BaseModel):
             event=node.object.event.dict() if isinstance(node.object, ActionRunner) and isinstance(node.object.event,
                                                                                                    BaseModel) else {},
             session=node.object.session.dict() if isinstance(node.object, ActionRunner) and isinstance(
-                node.object.session, BaseModel) else {}
+                node.object.session, BaseModel) else {},
+            error=error
         )
 
         self.calls.append(call_debug_info)

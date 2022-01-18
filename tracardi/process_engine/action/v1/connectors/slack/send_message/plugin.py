@@ -2,7 +2,7 @@ from tracardi.domain.resources.token import Token
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.plugin.action_runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage

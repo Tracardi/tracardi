@@ -24,7 +24,7 @@ class ActionRunner:
     async def close(self):
         pass
 
-    async def on_error(self):
+    async def on_error(self, e):
         pass
 
     def _get_dot_accessor(self, payload) -> DotAccessor:
