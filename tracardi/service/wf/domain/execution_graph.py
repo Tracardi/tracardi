@@ -80,10 +80,15 @@ class ExecutionGraph(BaseModel):
             else:
                 if node.run_once.enabled is True:
 
+                    if node.object.profile is None:
+                        node.object.console.log("Conditional stop is global and assigned to node {}".format(node.id))
+
+                    profile_id = node.object.profile.id if node.object.profile is not None else None
+
                     vtm = ValueThresholdManager(
                         name=node.name,
                         node_id=node.id,
-                        profile_id=node.object.profile.id,
+                        profile_id=profile_id,
                         ttl=node.run_once.ttl,
                         debug=self.debug
                     )
