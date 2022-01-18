@@ -37,6 +37,8 @@ async def load(node_id: str, profile_id: Optional[str] = None) -> Optional[Value
         result = result[0]
     else:
         result = await storage_manager('value-threshold').load(node_id)
+        if result is None:
+            return None
 
     return ValueThresholdRecord(**result)
 
