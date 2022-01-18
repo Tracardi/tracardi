@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
+from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.console import Console, Log
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
@@ -78,6 +79,7 @@ class ExecutionGraph(BaseModel):
                 coroutine = self._skip_node(node, params)
             else:
                 if node.run_once.enabled is True:
+
                     vtm = ValueThresholdManager(
                         name=node.name,
                         node_id=node.id,
@@ -85,20 +87,28 @@ class ExecutionGraph(BaseModel):
                         ttl=node.run_once.ttl,
                         debug=self.debug
                     )
-                    if node.run_once.type == 'value':
-                        dot_payload = list(params.values())
-                        dot = DotAccessor(profile=node.object.profile,
-                                          session=node.object.session,
-                                          payload=dot_payload[0] if len(dot_payload) == 1 else {},  # this is fine, input params has only one value
-                                          event=node.object.event,
-                                          flow=node.object.flow)
 
-                        if not await vtm.pass_threshold(dot[node.run_once.value]):
-                            coroutine = self._void_return(node)
-                        else:
-                            coroutine = node.object.run(**params)
+                    dot_payload = list(params.values())
+                    dot = DotAccessor(profile=node.object.profile,
+                                      session=node.object.session,
+                                      payload=dot_payload[0] if len(dot_payload) == 1 else {},
+                                      # this is fine, input params has only one value
+                                      event=node.object.event,
+                                      flow=node.object.flow)
+
+                    if node.run_once.type == 'value':
+                        value = dot[node.run_once.value]
+                    elif node.run_once.type == 'condition':
+                        condition = Condition()
+                        value = await condition.evaluate(node.run_once.value, dot)
+                    else:
+                        raise ValueError("Unknown type {} for conditional workflow stop.".format(node.run_once.type))
+
+                    if not await vtm.pass_threshold(value):
+                        coroutine = self._void_return(node)
                     else:
                         coroutine = node.object.run(**params)
+
                 else:
                     coroutine = node.object.run(**params)
             return self._add_to_event_loop(tasks,
