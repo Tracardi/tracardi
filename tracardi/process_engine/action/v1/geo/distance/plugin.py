@@ -84,7 +84,7 @@ def register() -> Plugin:
             name='Geo distance',
             desc='Finds out if the test geo location coordinates are within the radius threshold from '
                  'center point coordinates.',
-            icon='geo-fence',
+            icon='path',
             group=["Location"],
             documentation=Documentation(
                 inputs={

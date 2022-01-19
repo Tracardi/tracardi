@@ -12,6 +12,10 @@ class ValueThresholdManager:
         self.name = name
         self.profile_id = profile_id
         self.node_id = "{}-{}".format(node_id, "1" if self.debug is True else "0")
+        if profile_id is not None:
+            self.id = "{}-{}-{}".format("1" if self.debug is True else "0", node_id, profile_id)
+        else:
+            self.id = "{}-{}".format("1" if self.debug is True else "0", node_id)
 
     async def pass_threshold(self, current_value):
         value_threshold = await self.load_last_value()
@@ -30,19 +34,19 @@ class ValueThresholdManager:
         return True
 
     async def load_last_value(self) -> Optional[ValueThreshold]:
-        record = await storage.driver.value_threshold.load(self.node_id, self.profile_id)
+        record = await storage.driver.value_threshold.load(self.id)
         if record is not None:
             return ValueThreshold.decode(record)
         return None
 
     async def delete(self):
-        result = await storage.driver.value_threshold.delete(self.node_id, self.profile_id)
+        result = await storage.driver.value_threshold.delete(self.id)
         await storage.driver.value_threshold.refresh()
         return result
 
     async def save_current_value(self, current_value):
         value = ValueThreshold(
-            id=self.node_id,
+            id=self.id,
             profile_id=self.profile_id,
             name=self.name,
             timestamp=datetime.utcnow(),
