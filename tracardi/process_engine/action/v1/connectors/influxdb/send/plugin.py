@@ -112,7 +112,7 @@ def register() -> Plugin:
                                 name="Measurement value",
                                 description="Please type the path to the field that will be consider as measurement for"
                                             "InfluxDB record.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Measurement"})
                             ),
                             FormField(
                                 id="time",
@@ -120,7 +120,7 @@ def register() -> Plugin:
                                 description="Please type the path to the field containing date, or string, or timestamp"
                                             "that will be interpreted as timestamp for your record. This parameter is "
                                             "optional.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Time"})
                             ),
                             FormField(
                                 id="tags",
@@ -142,7 +142,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Send to InfluxDB',
             desc='Sends data to InfluxDB.',
-            type='flowNode',
             icon='plugin',
             group=["Connectors"],
             documentation=Documentation(

@@ -40,6 +40,8 @@ class InfluxFetcher(ActionRunner):
             fr"range(start: {self.config.start}, stop: {self.config.stop})",
             *self.config.filters
         ])
+        if self.config.aggregation not in (None, ""):
+            query += f"\n |> {self.config.aggregation}"
 
         query_api = self.client.query_api()
 
@@ -73,6 +75,7 @@ def register() -> Plugin:
                 "organization": None,
                 "bucket": None,
                 "filters": {},
+                "aggregation": None,
                 "start": None,
                 "stop": None
             },
@@ -109,18 +112,25 @@ def register() -> Plugin:
                                 component=FormComponent(type="keyValueList", props={"label": "Filters"})
                             ),
                             FormField(
+                                id="aggregation",
+                                name="Aggregation function",
+                                description='If you want, you can insert a Flux aggregation function, for example '
+                                            'count(column: "_value"), or distinct().',
+                                component=FormComponent(type="text", props={"label": "Aggregation"})
+                            ),
+                            FormField(
                                 id="start",
                                 name="Lower time bound",
                                 description="Here type the path to lower time bound for your search. "
                                             "It can be either relative (so for example -30m), or fixed as a date.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Lower"})
                             ),
                             FormField(
                                 id="stop",
                                 name="Upper time bound",
                                 description="Here type the path to the upper bound of your search span. As before, it "
                                             "can be either relative or fixed.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "Upper"})
                             )
                         ]
                     )
@@ -130,7 +140,6 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Fetch from InfluxDB',
             desc='Gets data from provided InfluxDB resource.',
-            type='flowNode',
             icon='plugin',
             group=["Connectors"],
             documentation=Documentation(
