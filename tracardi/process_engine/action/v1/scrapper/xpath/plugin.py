@@ -49,7 +49,7 @@ def register() -> Plugin:
                         FormField(
                             id="xpath",
                             name="XPATH to data",
-                            description="Type XPATH that poinst to data you would like to scrap.",
+                            description="Type XPATH that points to data you would like to scrap.",
                             component=FormComponent(type="text", props={"label": "XPATH"})
                         ),
                         FormField(
