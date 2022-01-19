@@ -24,10 +24,7 @@ class CircularGeoFenceAction(ActionRunner):
 
         distance_from_center = distance.distance(center_coordinates_tuple, test_coordinates_tuple).km
 
-        if distance_from_center <= self.config.radius:
-            return Result(port="inside", value={"distance": distance_from_center})
-        else:
-            return Result(port="outside", value={"distance": distance_from_center})
+        return Result(port="payload", value={"inside": distance_from_center <= self.config.radius})
 
 
 def register() -> Plugin:
@@ -37,8 +34,8 @@ def register() -> Plugin:
             module=__name__,
             className='CircularGeoFenceAction',
             inputs=["payload"],
-            outputs=["inside", "outside"],
-            version='0.6.2',
+            outputs=["payload"],
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
             init={
@@ -105,10 +102,7 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "inside": PortDoc(desc="Returns distance from test point to center point if test point is "
-                                           "inside the radius."),
-                    "outside": PortDoc(
-                        desc="Returns distance from test point to center point if test point is outside the radius.")
+                    "payload": PortDoc(desc="Returns true if inside the radius, otherwise false.")
                 }
             )
         )
