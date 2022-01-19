@@ -21,7 +21,7 @@ class Result(BaseModel):
                     results.append(Result(value=payload, port=r.port))
             return tuple(results)
         elif isinstance(result, Result) and result.value is None:  # Has empty value
-            return Result(value=payload, port=result.port)
+            return Result(value=None, port=result.port)
         elif isinstance(result, Result) and isinstance(result.value, dict):
             payload.update(result.value)
             return Result(value=payload, port=result.port)

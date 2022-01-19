@@ -108,7 +108,6 @@ class ExecutionGraph(BaseModel):
                         value = await condition.evaluate(node.run_once.value, dot)
                     else:
                         raise ValueError("Unknown type {} for conditional workflow stop.".format(node.run_once.type))
-
                     if not await vtm.pass_threshold(value):
                         coroutine = self._void_return(node)
                     else:
