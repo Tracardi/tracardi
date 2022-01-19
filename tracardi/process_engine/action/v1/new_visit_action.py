@@ -38,7 +38,7 @@ def register() -> Plugin:
             desc='If new visit then it returns true on TRUE output, otherwise returns false on FALSE port.',
             keywords=['condition'],
             icon='question',
-            group=["Conditions"],
+            group=["Flow control"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON like object.")

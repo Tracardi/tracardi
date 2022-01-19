@@ -77,11 +77,8 @@ def register() -> Plugin:
             name='If',
             desc='This a conditional action that conditionally runs a branch of workflow.',
             keywords=['condition'],
-            type='flowNode',
-            width=200,
-            height=100,
             icon='if',
-            group=['Conditions'],
+            group=['Flow control'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
