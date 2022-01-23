@@ -8,6 +8,7 @@ from tracardi.service.plugin.domain.result import Result
 
 class Configuration(BaseModel):
     endpoint: AnyHttpUrl
+    uix_source: AnyHttpUrl
     event_type: str = "user-consent-pref"
     agree_all_event_type: str = "agree-all-event-type"
     position: str = "bottom"
@@ -16,6 +17,12 @@ class Configuration(BaseModel):
 
     @validator("agree_all_event_type")
     def all_event_type_should_no_be_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("This field should not be empty")
+        return value
+
+    @validator("uix_source")
+    def uix_source_should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("This field should not be empty")
         return value
@@ -55,11 +62,9 @@ class ConsentUx(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
-        tracardi_endpoint = "http://localhost:8686"
-        uix_endpoint = "http://localhost:8686"
         self.ux.append({"tag": "div", "props": {
             "class": "tracardi-uix-consent",
-            "data-endpoint": tracardi_endpoint,  # Tracardi endpoint
+            "data-endpoint": self.config.endpoint,  # Tracardi endpoint
             "data-event-type": "user-consent-pref",
             "data-agree-all-event-type": "user-consent-agree-all",
             "data-position": "top",
@@ -68,7 +73,7 @@ class ConsentUx(ActionRunner):
             "data-session": self.session.id,
             "data-source": self.event.source.id
         }})
-        self.ux.append({"tag": "script", "props": {"src": f"{uix_endpoint}/uix/consent/index.js"}})
+        self.ux.append({"tag": "script", "props": {"src": f"{self.config.uix_source}/uix/consent/index.js"}})
 
         return Result(port="payload", value=payload)
 
@@ -100,6 +105,13 @@ def register() -> Plugin:
                             id="endpoint",
                             name="Tracardi API endpoint URL",
                             description="Provide URL where the events from this widget will be send.",
+                            component=FormComponent(type="text", props={"label": "URL"})
+                        ),
+                        FormField(
+                            id="uix_source",
+                            name="Consent micro frontend location",
+                            description="Provide URL where the micro frontend source is located. Usually it is the "
+                                        "location of Tracardi API. Type different location if you use CDN.",
                             component=FormComponent(type="text", props={"label": "URL"})
                         ),
                         FormField(
