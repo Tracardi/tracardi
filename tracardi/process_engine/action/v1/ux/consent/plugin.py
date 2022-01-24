@@ -68,7 +68,7 @@ class ConsentUx(ActionRunner):
             "data-event-type": self.config.event_type,
             "data-agree-all-event-type": self.config.agree_all_event_type,
             "data-position": self.config.position,
-            "data-expand-height": 400,
+            "data-expand-height": self.config.expand_height,
             "data-profile": self.profile.id,
             "data-session": self.session.id,
             "data-source": self.event.source.id
