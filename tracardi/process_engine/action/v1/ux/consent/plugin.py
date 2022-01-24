@@ -65,9 +65,9 @@ class ConsentUx(ActionRunner):
         self.ux.append({"tag": "div", "props": {
             "class": "tracardi-uix-consent",
             "data-endpoint": self.config.endpoint,  # Tracardi endpoint
-            "data-event-type": "user-consent-pref",
-            "data-agree-all-event-type": "user-consent-agree-all",
-            "data-position": "top",
+            "data-event-type": self.config.event_type,
+            "data-agree-all-event-type": self.config.agree_all_event_type,
+            "data-position": self.config.position,
             "data-expand-height": 400,
             "data-profile": self.profile.id,
             "data-session": self.session.id,
