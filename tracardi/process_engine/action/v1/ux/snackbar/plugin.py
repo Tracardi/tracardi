@@ -8,12 +8,21 @@ from tracardi.service.plugin.domain.result import Result
 
 class Configuration(BaseModel):
     message: str
+    hide_after: str
+    position_x: str
+    position_y: str
     uix_mf_source: AnyHttpUrl = "http://localhost:8686"
 
     @validator("message")
     def should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Message should not be empty")
+        return value
+
+    @validator("hide_after")
+    def hide_after_should_be_numeric(cls, value: str):
+        if not value.isnumeric():
+            raise ValueError("This value should be numeric")
         return value
 
 
@@ -27,7 +36,16 @@ class SnackBarUx(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
-        self.ux.append({"tag": "div", "props": {"class": "tracardi-uix-snackbar", "data-message": self.config.message}})
+        self.ux.append({
+            "tag": "div",
+            "props": {
+                "class": "tracardi-uix-snackbar",
+                "data-message": self.config.message,
+                "data-vertical": self.config.position_y,
+                "data-horizontal": self.config.position_x,
+                "data-auto-hide": self.config.hide_after
+            }
+        })
         self.ux.append({"tag": "script", "props": {"src": f"{self.config.uix_mf_source}/uix/snackbar/index.js"}})
 
         return Result(port="payload", value=payload)
@@ -42,14 +60,18 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={
-                "message": ""
+                "message": "",
+                "hide_after": 6000,
+                "position_x": "center",
+                "position_y": "bottom",
+                "uix_mf_source": "http://localhost:8686"
             },
             version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
             form=Form(groups=[
                 FormGroup(
-                    name="Message",
+                    name="Widget Message Configuration",
                     fields=[
                         FormField(
                             id="message",
@@ -57,6 +79,35 @@ def register() -> Plugin:
                             description="Provide message that will be show on the web page.",
                             component=FormComponent(type="textarea", props={"label": "message"})
                         ),
+                        FormField(
+                            id="hide_after",
+                            name="Hide message after",
+                            description="Type number of milliseconds the message must be visible. Default: 6000. 6sec.",
+                            component=FormComponent(type="text", props={"label": "hide after"})
+                        ),
+                        FormField(
+                            id="position_y",
+                            name="Vertical position",
+                            description="Select where would you like to place the message.",
+                            component=FormComponent(type="select", props={"label": "Vertical position", "items": {
+                                "bottom": "Bottom",
+                                "top": "Top"
+                            }})
+                        ),
+                        FormField(
+                            id="position_x",
+                            name="Horizontal position",
+                            description="Select where would you like to place the message.",
+                            component=FormComponent(type="select", props={"label": "Horizontal position", "items": {
+                                "left": "Left",
+                                "center": "Center",
+                                "Right": "Right"
+                            }})
+                        ),
+                    ]),
+                FormGroup(
+                    name="Widget Source Location",
+                    fields=[
                         FormField(
                             id="uix_mf_source",
                             name="Micro frontend source location",
