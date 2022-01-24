@@ -21,6 +21,7 @@ class ConsentType(BaseModel):
 
     @validator('auto_revoke')
     def auto_revoke_validator(cls, value):
-        if value is not None and (parse(value) is None or parse(value) < 0):
-            raise ValueError("Auto-revoke time is in invalid form.")
+        if (value is not None or value != "") and (parse(value) is None or parse(value) < 0):
+            raise ValueError("Auto-revoke time is in invalid form. If you do not want to auto "
+                             "revoke consent leave it empty.")
         return value

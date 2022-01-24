@@ -13,7 +13,7 @@ class Configuration(BaseModel):
     agree_all_event_type: str = "agree-all-event-type"
     position: str = "bottom"
     expand_height: int = 400
-    enable: bool = True
+    enabled: bool = True
 
     @validator("agree_all_event_type")
     def all_event_type_should_no_be_empty(cls, value):
@@ -62,18 +62,19 @@ class ConsentUx(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
-        self.ux.append({"tag": "div", "props": {
-            "class": "tracardi-uix-consent",
-            "data-endpoint": self.config.endpoint,  # Tracardi endpoint
-            "data-event-type": self.config.event_type,
-            "data-agree-all-event-type": self.config.agree_all_event_type,
-            "data-position": self.config.position,
-            "data-expand-height": self.config.expand_height,
-            "data-profile": self.profile.id,
-            "data-session": self.session.id,
-            "data-source": self.event.source.id
-        }})
-        self.ux.append({"tag": "script", "props": {"src": f"{self.config.uix_source}/uix/consent/index.js"}})
+        if self.config.enabled is True:
+            self.ux.append({"tag": "div", "props": {
+                "class": "tracardi-uix-consent",
+                "data-endpoint": self.config.endpoint,  # Tracardi endpoint
+                "data-event-type": self.config.event_type,
+                "data-agree-all-event-type": self.config.agree_all_event_type,
+                "data-position": self.config.position,
+                "data-expand-height": self.config.expand_height,
+                "data-profile": self.profile.id,
+                "data-session": self.session.id,
+                "data-source": self.event.source.id
+            }})
+            self.ux.append({"tag": "script", "props": {"src": f"{self.config.uix_source}/uix/consent/index.js"}})
 
         return Result(port="payload", value=payload)
 
