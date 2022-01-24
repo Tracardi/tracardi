@@ -2,6 +2,7 @@ import asyncio
 from asyncio import Task
 from typing import List, Tuple
 
+from tracardi.domain.entity import Entity
 from tracardi.domain.storage_result import StorageResult
 
 from tracardi.domain.rule import Rule
@@ -11,14 +12,14 @@ from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.service.storage.factory import storage_manager
 
 
-def load_rules(events: List[Event]) -> List[Tuple[Task, Event]]:
+def load_rules(source: Entity, events: List[Event]) -> List[Tuple[Task, Event]]:
     return [(
-        asyncio.create_task(load_rule(event.type)),
+        asyncio.create_task(load_rule(event.type, source.id)),
         event
     ) for event in events]
 
 
-async def load_rule(event_type: str):
+async def load_rule(event_type: str, source_id: str):
     query = {
         "query": {
             "bool": {
@@ -26,6 +27,11 @@ async def load_rule(event_type: str):
                     {
                         "term": {
                             "event.type": event_type
+                        }
+                    },
+                    {
+                        "term": {
+                            "source.id": source_id
                         }
                     },
                     {
@@ -37,7 +43,7 @@ async def load_rule(event_type: str):
             }
         }
     }
-
+    print(query)
     # todo set MemoryCache ttl from env
     memory_cache = MemoryCache()
 
