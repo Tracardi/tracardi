@@ -22,7 +22,9 @@ class StartAction(ActionRunner):
             if not self.node.has_input_node(self.flow.flowGraph.nodes, class_name='DebugPayloadAction'):
                 raise ValueError("Start action can not run in debug mode without connection to Debug action.")
 
-        if self.event.type not in self.config.get_allowed_event_types():
+        allowed_event_types = self.config.get_allowed_event_types()
+
+        if len(allowed_event_types) > 0 and self.event.type not in self.config.get_allowed_event_types():
             return None
 
         return Result(port="payload", value={})
