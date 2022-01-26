@@ -1,5 +1,5 @@
 from datetime import datetime
-import os
+from tracardi.config import elastic
 
 
 class Index:
@@ -7,7 +7,7 @@ class Index:
         self.multi_index = multi_index
         self.rel = rel
         self.index = index
-        self.prefix = "{}-".format(os.environ['INSTANCE_PREFIX']) if 'INSTANCE_PREFIX' in os.environ and os.environ['INSTANCE_PREFIX'] else ''
+        self.prefix = "{}-".format(elastic.instance_prefix)
         self.mapping = mapping
 
     def _index(self):
@@ -32,7 +32,7 @@ class Resource:
     def __init__(self):
         self.resources = {
             "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json",
-                                 rel=None),
+                                  rel=None),
             "project": Index(multi_index=False, index="tracardi-flow-project", mapping=None, rel=None),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),
@@ -63,14 +63,18 @@ class Resource:
                                       mapping="mappings/profile-purchase-index.json", rel=None),
             "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json",
                                 rel=None),
-            "consent-type": Index(multi_index=False, index="tracardi-consent-type", mapping="mappings/consent-type.json",
-                                rel=None),
+            "consent-type": Index(multi_index=False, index="tracardi-consent-type",
+                                  mapping="mappings/consent-type.json",
+                                  rel=None),
             "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None),
             "validation-schema": Index(multi_index=False, index="tracardi-validation-schema",
                                        mapping="mappings/validation-schema-index.json", rel=None),
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
                                      mapping="mappings/value-threshold-index.json",
-                                     rel=None)
+                                     rel=None),
+            "log": Index(multi_index=True, index='tracardi-log',
+                         mapping="mappings/log-index.json",
+                         rel=None)
         }
 
     def add_indices(self, indices: dict):
@@ -79,7 +83,8 @@ class Resource:
                 raise ValueError("Index must be Index object. {} given".format(type(index)))
 
             if name in self.resources:
-                raise ValueError("Index `{}` already exist. Check the setup process and defined resources.".format(name))
+                raise ValueError(
+                    "Index `{}` already exist. Check the setup process and defined resources.".format(name))
 
             self.resources[name] = index
 
