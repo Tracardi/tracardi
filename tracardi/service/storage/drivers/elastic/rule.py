@@ -11,10 +11,12 @@ from tracardi.domain.rule import Rule
 
 from tracardi.domain.event import Event
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
+# from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.factory import storage_manager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
+# logger.addHandler(log_handler)
 
 
 def load_rules(source: Entity, events: List[Event]) -> List[Tuple[Task, Event]]:

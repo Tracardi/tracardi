@@ -12,9 +12,11 @@ from ..payload.event_payload import EventPayload
 from ..profile import Profile
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
+from ...exceptions.log_handler import log_handler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 class TrackerPayload(BaseModel):

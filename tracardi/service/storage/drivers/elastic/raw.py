@@ -1,3 +1,5 @@
+from typing import List
+
 from tracardi.domain.entity import Entity
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -13,8 +15,8 @@ def entity(entity: Entity) -> StorageCrud:
     return StorageFor(entity).index()
 
 
-def collection(info: StorageInfo) -> CollectionCrud:
-    return StorageForBulk().index(info.index)
+def collection(index, dataset: List) -> CollectionCrud:
+    return StorageForBulk(dataset).index(index)
 
 
 def load(id: str, index, output):

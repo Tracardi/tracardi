@@ -11,6 +11,7 @@ import tracardi.service.storage.drivers.elastic.action
 import tracardi.service.storage.drivers.elastic.console_log
 import tracardi.service.storage.drivers.elastic.task
 import tracardi.service.storage.drivers.elastic.api_instance
+import tracardi.service.storage.drivers.elastic.log
 import tracardi.service.storage.drivers.elastic.raw
 import tracardi.service.storage.drivers.elastic.tag
 import tracardi.service.storage.drivers.elastic.consent_type
@@ -90,6 +91,10 @@ class ElasticDriver:
     @property
     def api_instance(self):
         return tracardi.service.storage.drivers.elastic.api_instance
+
+    @property
+    def log(self):
+        return tracardi.service.storage.drivers.elastic.log
 
     @property
     def tag(self):
