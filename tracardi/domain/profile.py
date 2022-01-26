@@ -172,7 +172,10 @@ class Profile(Entity):
         """
         @return Profile
         """
-        return Profile(id=str(uuid.uuid4()))
+        return Profile(
+            id=str(uuid.uuid4()),
+            metadata=Metadata(time=Time(insert=datetime.utcnow()))
+        )
 
 
 class Profiles(list):

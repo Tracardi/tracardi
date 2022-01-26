@@ -106,3 +106,4 @@ class ElasticDriver:
     @property
     def validation_schema(self):
         return tracardi.service.storage.drivers.elastic.validation_schema
+

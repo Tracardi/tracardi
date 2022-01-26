@@ -22,7 +22,7 @@ def _get_logging_level(level: str) -> int:
 class TracardiConfig:
     def __init__(self, env):
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
-        self.cache_profiles = env['CACHE_PROFILE'] if 'CACHE_PROFILE' in env else False
+        self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks = (env['SYNC_PROFILE_TRACKS'].lower() == 'yes') if 'SYNC_PROFILE_TRACKS' in env else False
         self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
         self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'

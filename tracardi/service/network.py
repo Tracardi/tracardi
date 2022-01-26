@@ -2,8 +2,10 @@ import logging
 import socket
 from typing import Optional
 
+from tracardi.config import tracardi
+
 logger = logging.getLogger('utils.network')
-logger.setLevel(logging.INFO)
+logger.setLevel(tracardi.logging_level)
 
 
 def get_local_ip() -> Optional[str]:

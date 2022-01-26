@@ -1,7 +1,9 @@
 import asyncio
+import logging
 from asyncio import Task
 from typing import List, Tuple
 
+from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_result import StorageResult
 
@@ -10,6 +12,9 @@ from tracardi.domain.rule import Rule
 from tracardi.domain.event import Event
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.service.storage.factory import storage_manager
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
 
 
 def load_rules(source: Entity, events: List[Event]) -> List[Tuple[Task, Event]]:
@@ -43,7 +48,9 @@ async def load_rule(event_type: str, source_id: str):
             }
         }
     }
-    print(query)
+
+    logger.info("Loading routing rules with {}".format(query))
+
     # todo set MemoryCache ttl from env
     memory_cache = MemoryCache()
 
