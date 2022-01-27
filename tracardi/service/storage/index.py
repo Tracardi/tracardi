@@ -35,6 +35,14 @@ class Resource:
 
     def __init__(self):
         self.resources = {
+            "log": Index(multi_index=True, index='tracardi-log',
+                         mapping="mappings/log-index.json",
+                         rel=None),
+            "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json",
+                             rel='profile.id'),
+            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json",
+                             rel='_id'),
+            "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json", rel=None),
             "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json",
                                   rel=None),
             "project": Index(multi_index=False, index="tracardi-flow-project", mapping=None, rel=None),
@@ -46,11 +54,6 @@ class Resource:
             "event-source": Index(multi_index=False, index="tracardi-source",
                                   mapping="mappings/event-source-index.json",
                                   rel=None),
-            "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json",
-                             rel='profile.id'),
-            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json",
-                             rel='_id'),
-            "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json", rel=None),
             "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json", rel=None),
             "rule": Index(multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json", rel=None),
             "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json",
@@ -76,9 +79,7 @@ class Resource:
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
                                      mapping="mappings/value-threshold-index.json",
                                      rel=None),
-            "log": Index(multi_index=True, index='tracardi-log',
-                         mapping="mappings/log-index.json",
-                         rel=None)
+
         }
 
     def add_indices(self, indices: dict):
