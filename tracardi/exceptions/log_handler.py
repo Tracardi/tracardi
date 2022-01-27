@@ -1,9 +1,6 @@
 from datetime import datetime
 from logging import Handler, LogRecord
 
-from tracardi.exceptions.exception import StorageException
-from tracardi.service.storage.driver import storage
-
 
 class ElasticLogHandler(Handler):
 
@@ -26,13 +23,11 @@ class ElasticLogHandler(Handler):
 
         self.collection.append(record)
 
-    async def save(self):
-        try:
-            if isinstance(self.collection, list) and len(self.collection) > 0:
-                await storage.driver.raw.collection('log', self.collection).save()
-                self.collection = []
-        except StorageException as e:
-            print(str(e))
+    def has_logs(self):
+        return isinstance(self.collection, list) and len(self.collection) > 0
+
+    def reset(self):
+        self.collection = []
 
 
 log_handler = ElasticLogHandler()

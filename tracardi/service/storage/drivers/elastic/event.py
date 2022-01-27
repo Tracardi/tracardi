@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-# from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.drivers.elastic.tag import get_tags
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import StorageFor, storage_manager
@@ -15,7 +15,7 @@ from tracardi.config import tracardi
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
-# logger.addHandler(log_handler)
+logger.addHandler(log_handler)
 
 
 def _get_name(source_names_idx, id):
