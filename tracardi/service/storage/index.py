@@ -7,7 +7,11 @@ class Index:
         self.multi_index = multi_index
         self.rel = rel
         self.index = index
-        self.prefix = "{}-".format(elastic.instance_prefix)
+        if elastic.instance_prefix:
+            self.prefix = "{}-".format(elastic.instance_prefix)
+        else:
+            self.prefix = ''
+
         self.mapping = mapping
 
     def _index(self):
