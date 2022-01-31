@@ -76,9 +76,22 @@ Now pull and run Tracardi Graphical User Interface.
 docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui
 ```
 
+## Need help ?
+
+
+<p align="center">
+    Join our community
+<br/>
+<a href="https://join.slack.com/t/tracardi/shared_invite/zt-10y7w0o9y-PmCBnK9qywchmd1~KIER2Q">
+    <img src="https://user-images.githubusercontent.com/16271564/151843970-5e869807-4ccf-46ab-98f5-6a65aea790f8.png" width="120px"/> 
+</a>
+</p>
+
+
 ## Start Tracardi Documentation
 
 Now pull and run Tracardi Documentation.
+
 
 ```
 docker run -p 8585:8585 tracardi/tracardi-docs
