@@ -129,3 +129,5 @@ You can support us on [BOUNTY-SOURCE](https://www.bountysource.com/teams/tracard
 
 Tracardi is available under MIT with Common Clause license.
 
+[![Forkers repo roster for @tracardi/tracardi](https://reporoster.com/forks/tracardi/tracardi)](https://github.com/tracardi/tracardi/network/members)
+
