@@ -1,5 +1,7 @@
 ![github_banner](https://user-images.githubusercontent.com/16271564/148845983-7c9e85c1-465f-44ed-b1e9-7112908d2e83.png)
 
+[![Stargazers repo roster for @tracardi/tracardi](https://reporoster.com/stars/tracardi/tracardi)](https://github.com/tracardi/tracardi/stargazers)
+
 # Open-source Customer Engagement and Data Platform
 
 [Tracardi](http://www.tracardi.com) is an open-source system that supports customer engagement and enhances the consumer experience.
