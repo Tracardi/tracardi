@@ -8,6 +8,11 @@
 Tracardi is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery.
 Tracardi collects data from customer journeys and assigns it to a profile that is maintained throughout the period of interaction with the customer.
 
+## Screenshots
+
+![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
+
+# Intorduction
 
 TRACARDI is an API-first solution, low-code / no-code platform aimed at any business that 
 wants to start using user data for automated customer engagement. If you own a brand new e-commerce platform or 
@@ -27,10 +32,6 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
    
  * **Automation** - TRACARDI is a great framework for creating
    marketing automation apps. You can send your data to other systems easily
-
-## Screenshots
-
-![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
 
 
 # Installation
