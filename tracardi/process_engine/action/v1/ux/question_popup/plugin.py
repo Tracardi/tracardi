@@ -27,7 +27,7 @@ class Config(BaseModel):
         return value
 
     @validator("uix_source")
-    def validate_api_url(cls, value):
+    def validate_uix_source(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
@@ -39,19 +39,19 @@ class Config(BaseModel):
         return value
 
     @validator("left_button_text")
-    def validate_api_url(cls, value):
+    def validate_left_button_text(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
     @validator("right_button_text")
-    def validate_api_url(cls, value):
+    def validate_right_button_text(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
     @validator("event_type")
-    def validate_api_url(cls, value):
+    def validate_event_type(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
@@ -111,10 +111,10 @@ def register() -> Plugin:
             version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
-            manual="question_popup_action", # TODO MANUAL
+            manual="question_popup_action",
             init={
-                "api_url": None,
-                "uix_source": None,
+                "api_url": "http://localhost:8686",
+                "uix_source": "http://localhost:8686",
                 "popup_title": None,
                 "content": None,
                 "left_button_text": None,
@@ -123,7 +123,7 @@ def register() -> Plugin:
                 "vertical_pos": "bottom",
                 "event_type": None,
                 "save_event": True,
-                "popup_lifetime": None,
+                "popup_lifetime": "6",
                 "dark_theme": False,
             },
             form=Form(
@@ -132,8 +132,88 @@ def register() -> Plugin:
                         name="Plugin configuration",
                         fields=[
                             FormField(
+                                id="uix_source",
+                                name="UIX source",
+                                description="Provide URL where the micro frontend source is located. Usually it is the "
+                                            "location of Tracardi API. Type different location if you use CDN.",
+                                component=FormComponent(type="text", props={"label": "URL"})
+                            ),
+                            FormField(
                                 id="api_url",
-
+                                name="API URL",
+                                description="Provide a URL of Tracardi instance to send event with answer.",
+                                component=FormComponent(type="text", props={"label": "API URL"})
+                            ),
+                            FormField(
+                                id="popup_title",
+                                name="Popup title",
+                                description="This text will become a title for your popup.",
+                                component=FormComponent(type="text", props={"label": "Title"})
+                            ),
+                            FormField(
+                                id="content",
+                                name="Popup content",
+                                description="That's the message to be displayed in the popup. You can use a template "
+                                            "here.",
+                                component=FormComponent(type="textarea", props={"label": "Message"})
+                            ),
+                            FormField(
+                                id="left_button_text",
+                                name="Left button text",
+                                description="That's the text to be displayed on the left button. It will be sent back "
+                                            "in event properties if left button gets clicked.",
+                                component=FormComponent(type="text", props={"label": "Left button"})
+                            ),
+                            FormField(
+                                id="right_button_text",
+                                name="Right button text",
+                                description="That's the text to be displayed on the right button. It will be sent back "
+                                            "in event properties if right button gets clicked.",
+                                component=FormComponent(type="text", props={"label": "Right button"})
+                            ),
+                            FormField(
+                                id="horizontal_pos",
+                                name="Horizontal position",
+                                description="That's the horizontal position of your popup.",
+                                component=FormComponent(type="select", props={"label": "Horizontal position", "items": {
+                                    "left": "Left",
+                                    "center": "Center",
+                                    "right": "Right"
+                                }})
+                            ),
+                            FormField(
+                                id="vertical_pos",
+                                name="Vertical position",
+                                description="That's the vertical position of your popup.",
+                                component=FormComponent(type="select", props={"label": "Vertical position", "items": {
+                                    "top": "Top",
+                                    "bottom": "Bottom"
+                                }})
+                            ),
+                            FormField(
+                                id="event_type",
+                                name="Event type",
+                                description="Please provide a type of event to be sent back after clicking one of "
+                                            "buttons.",
+                                component=FormComponent(type="text", props={"label": "Event type"})
+                            ),
+                            FormField(
+                                id="save_event",
+                                name="Save event",
+                                description="Please determine whether sent event should be saved or not.",
+                                component=FormComponent(type="bool", props={"label": "Save event"})
+                            ),
+                            FormField(
+                                id="popup_lifetime",
+                                name="Popup lifetime",
+                                description="Please provide a number of seconds for the popup to be displayed.",
+                                component=FormComponent(type="text", props={"label": "Lifetime"})
+                            ),
+                            FormField(
+                                id="dark_theme",
+                                name="Dark theme",
+                                description="You can switch to dark mode for your popup. Default theme is bright.",
+                                component=FormComponent(type="bool", props={"label": "Dark mode"})
                             )
                         ]
                     )
@@ -143,7 +223,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Show question popup',
             desc='Shows question popup to user, according to configuration.',
-            icon='plugin',
+            icon='react',
             group=["UIX Widgets"],
             documentation=Documentation(
                 inputs={
