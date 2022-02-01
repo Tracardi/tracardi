@@ -115,7 +115,7 @@ def register() -> Plugin:
                             component=FormComponent(type="select", props={"label": "Horizontal position", "items": {
                                 "left": "Left",
                                 "center": "Center",
-                                "Right": "Right"
+                                "right": "Right"
                             }})
                         ),
                     ]),
