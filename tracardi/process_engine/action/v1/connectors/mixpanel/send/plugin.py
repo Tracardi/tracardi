@@ -103,8 +103,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Send event to MixPanel',
             desc='Sends processed event to MixPanel project.',
-            icon='plugin',
-            group=["Connectors"],
+            icon='bar-chart',
+            group=["Stats"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

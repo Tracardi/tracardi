@@ -127,8 +127,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Fetch funnel from MixPanel',
             desc='Gets funnel given by ID for current profile.',
-            icon='plugin',
-            group=["Connectors"],
+            icon='bar-chart',
+            group=["Stats"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
