@@ -27,7 +27,7 @@ class TracardiConfig:
         self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
         self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
-        self.version = '0.6.1'
+        self.version = '0.6.2'
 
 
 class MemoryCacheConfig:
