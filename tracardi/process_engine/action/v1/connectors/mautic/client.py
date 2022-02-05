@@ -37,14 +37,17 @@ class MauticClient:
                 self.token = (await response.json())["access_token"]
 
     async def add_contact(self, email: str, overwrite_with_blank: bool, **kwargs) -> dict:
+        data = {
+            "email": email,
+            **kwargs
+        }
+        if overwrite_with_blank is True:
+            data["overwriteWithBlank"] = True
+
         async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
             async with session.post(
                 url=f"{self.api_url}/api/contacts/new",
-                data={
-                    "email": email,
-                    "overwriteWithBlank": overwrite_with_blank,
-                    **kwargs
-                }
+                data=data
             ) as response:
 
                 if response.status == 401:
