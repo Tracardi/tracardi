@@ -8,7 +8,7 @@ class KeyCounter:
             raise ValueError("Storage path for key counting must be dict.")
         self.counts = counts
 
-    def _increase(self, key, increase_value: Union[float,int] = 1):
+    def _increase(self, key, increase_value: Union[float, int] = 1):
         if key not in self.counts:
             self.counts[key] = 0
         self.counts[key] += increase_value
@@ -23,11 +23,17 @@ class KeyCounter:
                     for _k, _v in k.items():
                         if isinstance(_v, int) or isinstance(_v, float):
                             self._increase(_k, _v)
+                        else:
+                            raise ValueError(
+                                "Value {} is not numeric value. Expected integer or float got {}".format(_v, type(_v)))
                 else:
                     self._increase(k)
         elif isinstance(key, dict):
             for k, v in key.items():
                 if isinstance(v, int) or isinstance(v, float):
                     self._increase(k, v)
+                else:
+                    raise ValueError(
+                        "Value {} is not numeric value. Expected integer or float got {}".format(v, type(v)))
         else:
             self._increase(key)

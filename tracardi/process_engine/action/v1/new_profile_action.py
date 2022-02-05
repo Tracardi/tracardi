@@ -47,6 +47,6 @@ def register() -> Plugin:
                 }
             ),
             icon='question',
-            group=["Conditions"]
+            group=["Flow control"]
         )
     )

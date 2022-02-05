@@ -12,7 +12,7 @@ from ..service.secrets import decrypt, encrypt
 import logging
 
 logger = logging.getLogger("Flow")
-logger.setLevel(logging.WARNING)
+logger.setLevel(tracardi.logging_level)
 
 
 class FlowSchema(BaseModel):

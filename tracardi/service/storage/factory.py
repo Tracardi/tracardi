@@ -102,7 +102,14 @@ class CollectionCrud:
     async def save(self, replace_id: bool = True, exclude=None) -> BulkInsertResult:
         if not isinstance(self.payload, list):
             raise TracardiException("CollectionCrud data payload must be list.")
-        data = [p.dict(exclude=exclude) for p in self.payload if isinstance(p, BaseModel)]
+
+        data = []
+        for p in self.payload:
+            if isinstance(p, BaseModel):
+                data.append(p.dict(exclude=exclude))
+            elif isinstance(p, dict):
+                data.append(p)
+
         return await self.storage.upsert(data, replace_id)
 
     async def load(self, start: int = 0, limit: int = 100) -> StorageResult:

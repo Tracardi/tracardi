@@ -16,7 +16,7 @@ async def load_merged_profile(id: str) -> Profile:
     Loads current profile. If profile was merged then it loads merged profile.
     """
 
-    if tracardi.cache_profiles is not False:
+    if tracardi.cache_profiles is True:
         profile_cache = ProfileCache()
         if profile_cache.exists(id):
             return profile_cache.get_profile(id)
@@ -36,9 +36,11 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
 
 
 async def save_profile(profile: Profile):
+
     if tracardi.cache_profiles is not False:
         cache = ProfileCache()
         cache.save_profile(profile)
+
     result = await StorageFor(profile).index().save()
     if elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()

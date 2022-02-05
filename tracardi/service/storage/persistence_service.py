@@ -1,12 +1,15 @@
 import logging
 import elasticsearch
 import tracardi.service.storage.elastic_storage as storage
-from typing import List, Union
+from typing import List, Union, Dict
+
+from tracardi.config import tracardi
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
 from typing import Tuple, Optional
 from tracardi.domain.storage_result import StorageResult
+# from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.singleton import Singleton
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
@@ -15,6 +18,8 @@ from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.filter_transformer import FilterTransformer
 
 _logger = logging.getLogger("PersistenceService")
+_logger.setLevel(tracardi.logging_level)
+# _logger.addHandler(log_handler)
 
 
 class SqlSearchQueryParser(metaclass=Singleton):
@@ -312,7 +317,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def load_all(self, start: int = 0, limit: int = 100) -> StorageResult:
+    async def load_all(self, start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None) -> StorageResult:
         try:
             query = {
                 "from": start,
@@ -321,6 +326,9 @@ class PersistenceService:
                     "match_all": {}
                 }
             }
+
+            if sort is not None:
+                query['sort'] = sort
             result = await self.storage.search(query)
             return StorageResult(result)
         except elasticsearch.exceptions.ElasticsearchException as e:

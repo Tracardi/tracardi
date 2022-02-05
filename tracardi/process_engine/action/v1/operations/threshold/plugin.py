@@ -90,7 +90,7 @@ def register() -> Plugin:
             name='Value change',
             desc='This plugin will stop the workflow if the defined value did not change,',
             icon='threshold',
-            group=["Input/Output"],
+            group=["Flow control"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

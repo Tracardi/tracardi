@@ -22,6 +22,11 @@ class StartAction(ActionRunner):
             if not self.node.has_input_node(self.flow.flowGraph.nodes, class_name='DebugPayloadAction'):
                 raise ValueError("Start action can not run in debug mode without connection to Debug action.")
 
+        allowed_event_types = self.config.get_allowed_event_types()
+
+        if len(allowed_event_types) > 0 and self.event.type not in self.config.get_allowed_event_types():
+            return None
+
         return Result(port="payload", value={})
 
 
@@ -35,7 +40,8 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={
-                "debug": False
+                "debug": False,
+                "events": []
             },
             form=Form(groups=[
                 FormGroup(
@@ -44,9 +50,15 @@ def register() -> Plugin:
                             id="debug",
                             name="Collect debugging information",
                             description="Set if you want to collect debugging information. Debugging collects a lot of "
-                                        "data if you no longer need to test your worflow disable it to save data and "
+                                        "data if you no longer need to test your workflow disable it to save data and "
                                         "compute power.",
                             component=FormComponent(type="bool", props={"label": "Collect debugging information"})
+                        ),
+                        FormField(
+                            id="events",
+                            name="Trigger start on these event types",
+                            description="If left empty triggers regardless the event type.",
+                            component=FormComponent(type="eventTypes", props={"label": "Event types"})
                         ),
                     ]
                 ),
@@ -59,6 +71,7 @@ def register() -> Plugin:
             name='Start',
             desc='Starts workflow and returns empty payload.',
             keywords=['start node'],
+            type="startNode",
             icon='start',
             group=["Input/Output"],
             documentation=Documentation(

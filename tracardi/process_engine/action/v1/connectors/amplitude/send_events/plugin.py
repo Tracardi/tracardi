@@ -382,6 +382,6 @@ def register() -> Plugin:
             name='Amplitude register event',
             desc='Sends request to Amplitude API endpoint to register event.',
             icon='bar-chart',
-            group=["Connectors", "Stats"]
+            group=["Stats"]
         )
     )

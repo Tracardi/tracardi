@@ -93,7 +93,7 @@ class MetaData(BaseModel):
     tags: List[str] = []
     pro: bool = False
     frontend: bool = False
-    emits_event: Dict[str, str] = {}
+    emits_event: Optional[Dict[str, str]] = {}
 
 
 class Plugin(BaseModel):

@@ -3,13 +3,15 @@ from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from ssl import create_default_context
-from tracardi.config import elastic, ON_PREMISES, AWS_CLOUD
+from tracardi.config import ON_PREMISES, AWS_CLOUD, tracardi
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+from tracardi.exceptions.log_handler import log_handler
 
 _singleton = None
 logger = logging.getLogger(__name__)
-logger.setLevel(elastic.logging_level)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 class ElasticClient:
@@ -17,8 +19,6 @@ class ElasticClient:
     def __init__(self, **kwargs):
         self._cache = {}
         self._client = AsyncElasticsearch(**kwargs)
-        # todo remove if not use of sql translate
-        # self._client.sql = AwsCompatibleSqlClient(self._client)
 
     async def close(self):
         await self._client.close()

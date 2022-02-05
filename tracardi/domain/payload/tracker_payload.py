@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Optional, List, Tuple, Any
 from pydantic import BaseModel
@@ -11,6 +12,11 @@ from ..payload.event_payload import EventPayload
 from ..profile import Profile
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
+from ...exceptions.log_handler import log_handler
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 class TrackerPayload(BaseModel):
@@ -82,6 +88,8 @@ class TrackerPayload(BaseModel):
                 )
             )
 
+            logger.info("New session is to be created with id {}".format(session.id))
+
             is_new_session = True
 
             if profile_less is False:
@@ -94,6 +102,8 @@ class TrackerPayload(BaseModel):
 
                     # Create new profile
                     is_new_profile = True
+
+                    logger.info("New profile created at UTC {} with id {}".format(profile.metadata.time.insert, profile.id))
 
                 else:
 
@@ -109,7 +119,19 @@ class TrackerPayload(BaseModel):
                         # Create new profile
                         is_new_profile = True
 
+                        logger.info(
+                            "No merged profile. New profile created at UTC {} with id {}".format(
+                                profile.metadata.time.insert,
+                                profile.id))
+
+                    else:
+                        logger.info(
+                            "Merged profile loaded with date {} UTC and id {}".format(profile.metadata.time.insert,
+                                                                                  profile.id))
+
         else:
+
+            logger.info("Session exists with id {}".format(session.id))
 
             if profile_less is False:
 

@@ -8,14 +8,21 @@ from tracardi.service.plugin.domain.result import Result
 
 class Configuration(BaseModel):
     endpoint: AnyHttpUrl
+    uix_source: AnyHttpUrl
     event_type: str = "user-consent-pref"
     agree_all_event_type: str = "agree-all-event-type"
     position: str = "bottom"
     expand_height: int = 400
-    enable: bool = True
+    enabled: bool = True
 
     @validator("agree_all_event_type")
     def all_event_type_should_no_be_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("This field should not be empty")
+        return value
+
+    @validator("uix_source")
+    def uix_source_should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("This field should not be empty")
         return value
@@ -55,20 +62,19 @@ class ConsentUx(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
-        tracardi_endpoint = "http://localhost:8686"
-        uix_endpoint = "http://localhost:8686"
-        self.ux.append({"tag": "div", "props": {
-            "class": "tracardi-uix-consent",
-            "data-endpoint": tracardi_endpoint,  # Tracardi endpoint
-            "data-event-type": "user-consent-pref",
-            "data-agree-all-event-type": "user-consent-agree-all",
-            "data-position": "top",
-            "data-expand-height": 400,
-            "data-profile": self.profile.id,
-            "data-session": self.session.id,
-            "data-source": self.event.source.id
-        }})
-        self.ux.append({"tag": "script", "props": {"src": f"{uix_endpoint}/uix/consent/index.js"}})
+        if self.config.enabled is True:
+            self.ux.append({"tag": "div", "props": {
+                "class": "tracardi-uix-consent",
+                "data-endpoint": self.config.endpoint,  # Tracardi endpoint
+                "data-event-type": self.config.event_type,
+                "data-agree-all-event-type": self.config.agree_all_event_type,
+                "data-position": self.config.position,
+                "data-expand-height": self.config.expand_height,
+                "data-profile": self.profile.id,
+                "data-session": self.session.id,
+                "data-source": self.event.source.id
+            }})
+            self.ux.append({"tag": "script", "props": {"src": f"{self.config.uix_source}/uix/consent/index.js"}})
 
         return Result(port="payload", value=payload)
 
@@ -83,6 +89,7 @@ def register() -> Plugin:
             outputs=["payload"],
             init={
                 "endpoint": "http://locahost:8686",
+                "uix_source": "http://locahost:8686",
                 "event_type": "user-consent-pref",
                 "agree_all_event_type": "agree-all-event-type",
                 "position": "bottom",
@@ -94,26 +101,8 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             form=Form(groups=[
                 FormGroup(
-                    name="Consent Widget Configuration",
+                    name="Widget Configuration",
                     fields=[
-                        FormField(
-                            id="endpoint",
-                            name="Tracardi API endpoint URL",
-                            description="Provide URL where the events from this widget will be send.",
-                            component=FormComponent(type="text", props={"label": "URL"})
-                        ),
-                        FormField(
-                            id="event_type",
-                            name="Event type",
-                            description="Event type that will be send when user selects consent preferences.",
-                            component=FormComponent(type="text", props={"label": "Event type"})
-                        ),
-                        FormField(
-                            id="agree_all_event_type",
-                            name="Event type for Agree To All",
-                            description="Event type that will be send when user selects Agree to All consents.",
-                            component=FormComponent(type="text", props={"label": "Event type"})
-                        ),
                         FormField(
                             id="position",
                             name="Widget position",
@@ -135,8 +124,38 @@ def register() -> Plugin:
                             description="Only enabled widgets are show on the page",
                             component=FormComponent(type="bool", props={"label": "Enable"})
                         ),
-                    ]
+                    ],
+
                 ),
+                FormGroup(
+                    name="Widget Source Location",
+                    fields=[
+                        FormField(
+                            id="uix_source",
+                            name="Consent micro frontend location",
+                            description="Provide URL where the micro frontend source is located. Usually it is the "
+                                        "location of Tracardi API. Type different location if you use CDN.",
+                            component=FormComponent(type="text", props={"label": "URL"})
+                        ),
+                        FormField(
+                            id="endpoint",
+                            name="Tracardi API endpoint URL",
+                            description="Provide URL where the events from this widget will be send.",
+                            component=FormComponent(type="text", props={"label": "URL"})
+                        ),
+                        FormField(
+                            id="event_type",
+                            name="Event type for consent preferences",
+                            description="Event type that will be send when user selects Consent Preferences.",
+                            component=FormComponent(type="text", props={"label": "Event type"})
+                        ),
+                        FormField(
+                            id="agree_all_event_type",
+                            name="Event type for Agree To All",
+                            description="Event type that will be send when user selects Agree to All consents.",
+                            component=FormComponent(type="text", props={"label": "Event type"})
+                        )
+                    ])
             ]),
 
         ),

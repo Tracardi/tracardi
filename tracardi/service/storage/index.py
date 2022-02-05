@@ -1,5 +1,5 @@
 from datetime import datetime
-import os
+from tracardi.config import elastic
 
 
 class Index:
@@ -7,7 +7,11 @@ class Index:
         self.multi_index = multi_index
         self.rel = rel
         self.index = index
-        self.prefix = "{}-".format(os.environ['INSTANCE_PREFIX']) if 'INSTANCE_PREFIX' in os.environ and os.environ['INSTANCE_PREFIX'] else ''
+        if elastic.instance_prefix:
+            self.prefix = "{}-".format(elastic.instance_prefix)
+        else:
+            self.prefix = ''
+
         self.mapping = mapping
 
     def _index(self):
@@ -31,22 +35,25 @@ class Resource:
 
     def __init__(self):
         self.resources = {
+            "log": Index(multi_index=True, index='tracardi-log',
+                         mapping="mappings/log-index.json",
+                         rel=None),
+            "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json",
+                             rel='profile.id'),
+            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json",
+                             rel='_id'),
+            "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json", rel=None),
             "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json",
-                                 rel=None),
+                                  rel=None),
             "project": Index(multi_index=False, index="tracardi-flow-project", mapping=None, rel=None),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),
             "token": Index(multi_index=False, index="tracardi-token", mapping="mappings/token-index.json", rel=None),
             "resource": Index(multi_index=False, index="tracardi-resource", mapping="mappings/resource-index.json",
                               rel=None),
-            "event-source": Index(multi_index=False, index="tracardi-event-source",
+            "event-source": Index(multi_index=False, index="tracardi-source",
                                   mapping="mappings/event-source-index.json",
                                   rel=None),
-            "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json",
-                             rel='profile.id'),
-            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json",
-                             rel='_id'),
-            "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json", rel=None),
             "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json", rel=None),
             "rule": Index(multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json", rel=None),
             "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json",
@@ -59,18 +66,20 @@ class Resource:
             "api-instance": Index(multi_index=False, index="tracardi-api-instance",
                                   mapping="mappings/api-instance-index.json", rel=None),
             "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None),
-            "profile-purchase": Index(multi_index=False, index="tracardi-profile-purchase",
+            "profile-purchase": Index(multi_index=False, index="tracardi-profiles-purchase",
                                       mapping="mappings/profile-purchase-index.json", rel=None),
-            "event-tags": Index(multi_index=False, index="tracardi-event-tags", mapping="mappings/tag-index.json",
+            "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json",
                                 rel=None),
-            "consent-type": Index(multi_index=False, index="tracardi-consent-type", mapping="mappings/consent-type.json",
-                                rel=None),
+            "consent-type": Index(multi_index=False, index="tracardi-consent-type",
+                                  mapping="mappings/consent-type.json",
+                                  rel=None),
             "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None),
             "validation-schema": Index(multi_index=False, index="tracardi-validation-schema",
                                        mapping="mappings/validation-schema-index.json", rel=None),
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
                                      mapping="mappings/value-threshold-index.json",
-                                     rel=None)
+                                     rel=None),
+
         }
 
     def add_indices(self, indices: dict):
@@ -79,7 +88,8 @@ class Resource:
                 raise ValueError("Index must be Index object. {} given".format(type(index)))
 
             if name in self.resources:
-                raise ValueError("Index `{}` already exist. Check the setup process and defined resources.".format(name))
+                raise ValueError(
+                    "Index `{}` already exist. Check the setup process and defined resources.".format(name))
 
             self.resources[name] = index
 
