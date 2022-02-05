@@ -40,8 +40,11 @@ class InfluxFetcher(ActionRunner):
             fr"range(start: {self.config.start}, stop: {self.config.stop})",
             *self.config.filters
         ])
+
         if self.config.aggregation not in (None, ""):
             query += f"\n |> {self.config.aggregation}"
+
+        self.console.log(f"Filtering data with the following query: {query}")
 
         query_api = self.client.query_api()
 
@@ -52,6 +55,7 @@ class InfluxFetcher(ActionRunner):
             return Result(port="success", value=result)
 
         except Exception as e:
+            self.console.error(str(e))
             return Result(port="error", value={"error": str(e)})
 
 
@@ -63,7 +67,7 @@ def register() -> Plugin:
             className='InfluxFetcher',
             inputs=["payload"],
             outputs=["success", "error"],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
             manual="fetch_from_influxdb_action",
@@ -76,25 +80,25 @@ def register() -> Plugin:
                 "bucket": None,
                 "filters": {},
                 "aggregation": None,
-                "start": None,
-                "stop": None
+                "start": "-15m",
+                "stop": "0m"
             },
             form=Form(
-                name="Plugin configuration",
+
                 groups=[
                     FormGroup(
+                        name="InfluxDb configuration",
                         fields=[
                             FormField(
                                 id="source",
                                 name="InfluxDB resource",
-                                description="Please select your InfluxDB resource with URL and token.",
+                                description="Please select InfluxDB resource.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "influx"})
                             ),
                             FormField(
                                 id="organization",
                                 name="Organization",
-                                description="Please type the name of your InfluxDB organization that you want to fetch "
-                                            "data from.",
+                                description="Please type the name of your InfluxDB organization.",
                                 component=FormComponent(type="text", props={"label": "Organization"})
                             ),
                             FormField(
@@ -107,7 +111,7 @@ def register() -> Plugin:
                                 id="filters",
                                 name="Filters",
                                 description="Please insert key-value pairs, where key is the key in InfluxDB record ("
-                                            "for example _measurement) and value is the value that we want it to "
+                                            "for example _measurement) and value is the value that you want it to "
                                             "contain. Feel free to use dot paths.",
                                 component=FormComponent(type="keyValueList", props={"label": "Filters"})
                             ),
@@ -121,14 +125,14 @@ def register() -> Plugin:
                             FormField(
                                 id="start",
                                 name="Lower time bound",
-                                description="Here type the path to lower time bound for your search. "
+                                description="Type the path to lower time bound for your search. "
                                             "It can be either relative (so for example -30m), or fixed as a date.",
-                                component=FormComponent(type="dotPath", props={"label": "Lower"})
+                                component=FormComponent(type="dotPath", props={"label": "Lower", "defaultMode": 2})
                             ),
                             FormField(
                                 id="stop",
                                 name="Upper time bound",
-                                description="Here type the path to the upper bound of your search span. As before, it "
+                                description="Type the path to the upper bound of your search span. As before, it "
                                             "can be either relative or fixed.",
                                 component=FormComponent(type="dotPath", props={"label": "Upper"})
                             )
@@ -140,7 +144,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Fetch from InfluxDB',
             desc='Gets data from provided InfluxDB resource.',
-            icon='plugin',
+            icon='influxdb',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

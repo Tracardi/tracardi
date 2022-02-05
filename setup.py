@@ -52,6 +52,7 @@ setup(
         'google_auth_oauthlib == 0.4.6',
         'python_weather',
         'geopy',
+        'influxdb-client',
         'grpcio',
         'grpcio-tools'
     ],

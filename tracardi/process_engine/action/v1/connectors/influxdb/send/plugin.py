@@ -1,3 +1,5 @@
+from datetime import datetime, time
+
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -8,6 +10,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.notation.dict_traverser import DictTraverser
+from dateutil.parser import parse, ParserError
 
 
 def validate(config: dict) -> Config:
@@ -30,22 +33,40 @@ class InfluxSender(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
+
         self.config.fields = traverser.reshape(self.config.fields)
         self.config.tags = {str(key_tag): str(key_value) for key_tag, key_value in
                             traverser.reshape(self.config.tags).items()}
 
-        self.config.time = dot[self.config.time] if isinstance(dot[self.config.time], (str, int, float)) else \
-            str(dot[self.config.time])
-        self.config.measurement = dot[self.config.measurement] if \
-            isinstance(dot[self.config.measurement], (str, int, float)) else str(dot[self.config.time])
+        try:
+            if self.config.time is None or self.config.time == "":
+                time_data = None
+            elif isinstance(self.config.time, str):
+                time_data = dot[self.config.time]
+                if isinstance(time_data, datetime):
+                    time_data = time_data.isoformat()
+                else:
+                    time_data = parse(time_data).isoformat()  # will throw error if invalid string
+            else:
+                raise ValueError(f"Incorrect time type. Expected date as string, got {self.config.time}.")
+        except KeyError:
+            self.console.warning(f"Defined time value {self.config.time} does not exist. Time value set to now.")
+            time_data = None
+        except ParserError:
+            self.console.error(f"Defined time value {self.config.time} is not a date. Time value set to now.")
+            time_data = None
 
         record = {
             "measurement": self.config.measurement,
             "fields": self.config.fields,
             "tags": self.config.tags
         }
-        if self.config.time not in ("None", None):
-            record["time"] = self.config.time
+
+        if time_data is not None:
+            record["time"] = time_data
+
+        self.console.log("Record {} for bucket {} in organisation {}".format(record, self.config.bucket,
+                                                                             self.config.organization))
 
         writer = self.client.write_api(write_options=SYNCHRONOUS)
         try:
@@ -56,6 +77,7 @@ class InfluxSender(ActionRunner):
             )
             return Result(port="success", value=payload)
         except Exception as e:
+            self.console.error(str(e))
             return Result(port="error", value=payload)
 
 
@@ -67,7 +89,7 @@ def register() -> Plugin:
             className='InfluxSender',
             inputs=["payload"],
             outputs=["success", "error"],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
             manual="send_to_influx_db_action",
@@ -84,56 +106,61 @@ def register() -> Plugin:
                 "organization": None
             },
             form=Form(
-                name="Plugin configuration",
                 groups=[
                     FormGroup(
+                        name="Influxdb configuration",
                         fields=[
                             FormField(
                                 id="source",
                                 name="InfluxDB resource",
-                                description="Please select your InfluxDB resource with token and URL.",
+                                description="Please select InfluxDB resource.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "influx"})
+                            ),
+                            FormField(
+                                id="organization",
+                                name="Organization",
+                                description="Organization is a workspace for your data. Please type the name of the "
+                                            "organization that you want to use for writing. When using cloud InfluxDB "
+                                            "it is usually your login e-mail.",
+                                component=FormComponent(type="text", props={"label": "Organization"})
                             ),
                             FormField(
                                 id="bucket",
                                 name="Bucket",
-                                description="Please type in the name of bucket that you want to write in.",
+                                description="A bucket is a named location where time series data is stored. Please type "
+                                            "in the name of bucket that you want the data to be stored.",
                                 component=FormComponent(type="text", props={"label": "Bucket"})
                             ),
                             FormField(
+                                id="measurement",
+                                name="Measurement name",
+                                description="Please type then name of the measurement, e.g. Purchase orders.",
+                                component=FormComponent(type="text", props={"label": "Measurement name"})
+                            ),
+                            FormField(
                                 id="fields",
-                                name="Fields",
-                                description="Please map the keys to the values to send as record fields to"
-                                            "InfluxDB.",
+                                name="Fields and values",
+                                description="Fields are keys and values. It is the name and value of the measure. "
+                                            "You can send more then one value. Value can be retrieved via path to value in"
+                                            "tracardi, eg. profile@stats.visists",
                                 component=FormComponent(type="keyValueList", props={"label": "Fields"})
                             ),
                             FormField(
-                                id="measurement",
-                                name="Measurement value",
-                                description="Please type the path to the field that will be consider as measurement for"
-                                            "InfluxDB record.",
-                                component=FormComponent(type="dotPath", props={"label": "Measurement"})
-                            ),
-                            FormField(
                                 id="time",
-                                name="Time value",
-                                description="Please type the path to the field containing date, or string, or timestamp"
-                                            "that will be interpreted as timestamp for your record. This parameter is "
-                                            "optional.",
+                                name="Time",
+                                description="Please type date or the path to the field containing date. "
+                                            "It will be become as timestamp for your record. This parameter is "
+                                            "optional. Invalid data of date format will be ignored and date time will "
+                                            "be set to the moment of the execution.",
                                 component=FormComponent(type="dotPath", props={"label": "Time"})
                             ),
                             FormField(
                                 id="tags",
                                 name="Record tags",
-                                description="Please map tags for the record to values.",
+                                description="Tags are additional data used for grouping values. They consist of key and "
+                                            "value. Key is a name of the tag while value is a grouping value.",
                                 component=FormComponent(type="keyValueList", props={"label": "Tags"})
                             ),
-                            FormField(
-                                id="organization",
-                                name="Organization",
-                                description="Please type the name of the organization that you want to use for writing.",
-                                component=FormComponent(type="text", props={"label": "Organization"})
-                            )
                         ]
                     )
                 ]
@@ -141,16 +168,19 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Send to InfluxDB',
-            desc='Sends data to InfluxDB.',
-            icon='plugin',
+            desc='Sends data to InfluxDB. Data in influxDb is more complex then regular data. It has on top '
+                 'Organisation, this is the equivalent of database instance. Bucket is the equivalent of database '
+                 'in SQL. Measure is a table, fields and values are records (e.i: columns and values in one record). '
+                 'Tags are additional metadata. Time is a timestamp of a particular set of fields (record).',
+            icon='influxdb',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "success": PortDoc(desc="This port returns given payload if everything went OK."),
-                    "error": PortDoc(desc="This port returns given payload if an error occurred.")
+                    "success": PortDoc(desc="This port returns input payload if everything went OK."),
+                    "error": PortDoc(desc="This port returns input payload if an error occurred.")
                 }
             )
         )
