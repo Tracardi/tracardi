@@ -40,6 +40,9 @@ class ElasticClient:
         except NotFoundError:
             return None
 
+    async def get_mapping(self, index):
+        return await self._client.indices.get_mapping(index=index)
+
     # todo error handling move to service
     async def exists(self, index, id):
         try:
