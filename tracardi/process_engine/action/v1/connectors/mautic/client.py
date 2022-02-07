@@ -90,6 +90,29 @@ class MauticClient:
                 except KeyError:
                     raise MauticClientException(f"Unable to find contact with given email address: {email}")
 
+    async def add_points(self, id: int, amount: int):
+        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
+            async with session.post(url=f"{self.api_url}/api/contacts/{id}/points/plus/{amount}") as response:
+
+                if response.status == 401:
+                    raise MauticClientAuthException()
+
+                if response.status != 200:
+                    raise MauticClientException(await response.text())
+
+                return await response.json()
+
+    async def subtract_points(self, id: int, amount: int):
+        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
+            async with session.post(url=f"{self.api_url}/api/contacts/{id}/points/minus/{amount}") as response:
+
+                if response.status == 401:
+                    raise MauticClientAuthException()
+
+                if response.status != 200:
+                    raise MauticClientException(await response.text())
+
+                return await response.json()
 
     @property
     def credentials(self):
