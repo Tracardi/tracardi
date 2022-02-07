@@ -20,12 +20,12 @@ class MauticClient:
     async def update_token(self) -> None:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url=f"{self.api_url}/oauth/v2/token",
-                data={
-                    "client_id": self.public_key,
-                    "client_secret": self.private_key,
-                    "grant_type": "client_credentials"
-                }
+                    url=f"{self.api_url}/oauth/v2/token",
+                    data={
+                        "client_id": self.public_key,
+                        "client_secret": self.private_key,
+                        "grant_type": "client_credentials"
+                    }
             ) as response:
 
                 if response.status == 401:
@@ -46,8 +46,8 @@ class MauticClient:
 
         async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
             async with session.post(
-                url=f"{self.api_url}/api/contacts/new",
-                data=data
+                    url=f"{self.api_url}/api/contacts/new",
+                    data=data
             ) as response:
 
                 if response.status == 401:
@@ -105,6 +105,29 @@ class MauticClient:
     async def subtract_points(self, id: int, amount: int):
         async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
             async with session.post(url=f"{self.api_url}/api/contacts/{id}/points/minus/{amount}") as response:
+
+                if response.status == 401:
+                    raise MauticClientAuthException()
+
+                if response.status != 200:
+                    raise MauticClientException(await response.text())
+
+                return await response.json()
+
+    async def change_segment(self, id: int, remove_from: int, add_to: int):
+        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
+            async with session.post(url=f"{self.api_url}/api/segments/{remove_from}/contact/{id}/remove") \
+                    as response:
+
+                if response.status == 401: # TODO ASK FOR AUTHORIZATION ISSUE, ALIAS, ID
+                    raise MauticClientAuthException()
+
+                if response.status != 200:
+                    raise MauticClientException(await response.text())
+
+        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
+            async with session.post(url=f"{self.api_url}/api/segments/{add_to}/contact/{id}/add") \
+                    as response:
 
                 if response.status == 401:
                     raise MauticClientAuthException()

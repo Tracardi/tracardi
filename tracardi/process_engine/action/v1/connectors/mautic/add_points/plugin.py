@@ -34,7 +34,7 @@ class MauticPointsAdder(ActionRunner):
 
         try:
             await self.client.add_points(int(self.config.contact_id), int(self.config.points))
-            return Result(port="response", value=payload)
+            return Result(port="success", value=payload)
 
         except MauticClientAuthException:
             try:
@@ -48,7 +48,7 @@ class MauticPointsAdder(ActionRunner):
                     self.resource.credentials.production = self.client.credentials
                 await storage.driver.resource.save_record(self.resource)
 
-                return Result(port="response", value=payload)
+                return Result(port="success", value=payload)
 
             except MauticClientAuthException as e:
                 return Result(port="error", value={"error": str(e), "msg": ""})
