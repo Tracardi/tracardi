@@ -8,6 +8,7 @@ from tracardi.service.plugin.runner import ActionRunner
 
 class Configuration(BaseModel):
     traits_type: str
+    sub_traits: str = ""
 
     @validator("traits_type")
     def must_be_private_or_public(cls, value):
@@ -48,7 +49,8 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["traits", "error"],
             init={
-                "traits_type": "public"
+                "traits_type": "public",
+                "sub_traits": ""
             },
             form=Form(groups=[
                 FormGroup(
@@ -57,11 +59,21 @@ def register() -> Plugin:
                         FormField(
                             id="traits_type",
                             name="Define traits type",
-                            description="Please select which traits you would like to be updated with event properties.",
+                            description="Please select which traits you would like to be updated with data form "
+                                        "event properties.",
                             component=FormComponent(type="select", props={"label": "traits type", "items": {
                                 "private": "Private",
                                 "public": "Public"
                             }})
+                        ),
+                        FormField(
+                            id="sub_traits",
+                            name="Sub traits path",
+                            description="Leave it empty if you want to merge data to the root of your profile traits."
+                                        "Type sub-path only if you want to create or merge a part of the profile "
+                                        "traits. This path will be appended to the main traits path. "
+                                        "e.g: profile@traits.public.[sub.path]",
+                            component=FormComponent(type="text", props={"label": "Sub path"})
                         )
                     ]
                 ),
