@@ -51,7 +51,7 @@ class Profile(Entity):
         merge_key_values = self.get_merge_key_values()
 
         # Add keyword
-        merge_key_values = [(f"{field}.keyword", value) for field, value in merge_key_values if value is not None]
+        merge_key_values = [(field, value) for field, value in merge_key_values if value is not None]
 
         return merge_key_values
 
@@ -141,6 +141,9 @@ class Profile(Entity):
 
                 # Replace current profile with merged profile
                 self.replace(merged_profile)
+
+                # Update profile after merge
+                self.operation.update = True
 
                 # Deactivate all other profiles except merged one
 
