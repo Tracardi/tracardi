@@ -14,13 +14,13 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class MauticSegmentChanger(ActionRunner):
+class MauticSegmentRemover(ActionRunner):
 
     @staticmethod
-    async def build(**kwargs) -> 'MauticSegmentChanger':
+    async def build(**kwargs) -> 'MauticSegmentRemover':
         config = Config(**kwargs)
         resource = await storage.driver.resource.load(config.source.id)
-        return MauticSegmentChanger(config, resource)
+        return MauticSegmentRemover(config, resource)
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
@@ -33,16 +33,14 @@ class MauticSegmentChanger(ActionRunner):
         self.config.contact_id = dot[self.config.contact_id]
 
         try:
-            await self.client.change_segment(int(self.config.contact_id), int(self.config.remove_from),
-                                                      int(self.config.add_to))
+            await self.client.remove_from_segment(int(self.config.contact_id), int(self.config.remove_from))
             return Result(port="success", value=payload)
 
         except MauticClientAuthException:
             try:
                 await self.client.update_token()
 
-                await self.client.change_segment(int(self.config.contact_id), int(self.config.remove_from),
-                                                          int(self.config.add_to))
+                await self.client.remove_from_segment(int(self.config.contact_id), int(self.config.remove_from))
 
                 if self.debug:
                     self.resource.credentials.test = self.client.credentials
@@ -70,21 +68,20 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='MauticSegmentChanger',
+            className='MauticSegmentRemover',
             inputs=["payload"],
             outputs=["success", "error"],
             version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
-            manual="change_segment_in_mautic_action",
+            manual="remove_from_segment_in_mautic_action",
             init={
                 "source": {
                     "id": None,
                     "name": None
                 },
                 "contact_id": None,
-                "remove_from": None,
-                "add_to": None
+                "remove_from": None
             },
             form=Form(
                 groups=[
@@ -101,23 +98,16 @@ def register() -> Plugin:
                             FormField(
                                 id="contact_id",
                                 name="Contact ID",
-                                description="Please type in the path to ID of the contact that you want to change"
-                                            " segment of.",
+                                description="Please type in the path to ID of the contact that you want to remove from"
+                                            " the segment.",
                                 component=FormComponent(type="dotPath", props={"label": "ID"})
                             ),
                             FormField(
                                 id="remove_from",
                                 name="Remove from segment",
-                                description="Please type in the ID of the segment that you want to remove given "
-                                            "contact from.",
+                                description="Please type in the ID of the segment that you want to remove given contact"
+                                            " from.",
                                 component=FormComponent(type="text", props={"label": "Remove from"})
-                            ),
-                            FormField(
-                                id="add_to",
-                                name="Add to segment",
-                                description="Please type in the ID of the segment that you want to add given contact"
-                                            " to.",
-                                component=FormComponent(type="text", props={"label": "Add to"})
                             )
                         ]
                     )
@@ -125,8 +115,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Change segment in Mautic',
-            desc='Changes segmentation of given Mautic contact, based on provided contact ID.',
+            name='Remove from segment in Mautic',
+            desc='Removes given Mautic contact from given segment, based on provided contact ID.',
             icon='plugin',
             group=["Connectors"],
             documentation=Documentation(
