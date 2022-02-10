@@ -4,9 +4,9 @@ from tracardi.service.sha1_hasher import SHA1Encoder
 from tracardi.exceptions.exception import LoginException
 
 
-async def find_user(username: str, password: str) -> User:
-    result = (await storage.driver.user.get_by_login_data(
-        username=username,
+async def find_user(email: str, password: str) -> User:
+    result = (await storage.driver.user.get_by_credentials(
+        email=email,
         password=password
     ))
     if result is None:

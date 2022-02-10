@@ -13,11 +13,10 @@ async def flush():
     return await storage_manager("user").flush()
 
 
-async def add_user(id: UUID, username: str, password: str, full_name: str, email: str, roles: List[str],
+async def add_user(id: UUID, password: str, full_name: str, email: str, roles: List[str],
                    disabled: bool):
     return await storage_manager("user").upsert({
         "id": str(id),
-        "username": SHA1Encoder.encode(username),
         "password": SHA1Encoder.encode(password),
         "full_name": full_name,
         "email": email,
@@ -39,11 +38,10 @@ async def search_by_name(start: int, limit: int, name: str):
     return await storage_manager("user").query(query=query)
 
 
-async def edit_user(id: UUID, username: str, password: str, full_name: str, email: str, roles: List[str],
+async def edit_user(id: UUID, password: str, full_name: str, email: str, roles: List[str],
                     disabled: bool, password_change: bool):
     return await storage_manager("user").upsert({
         "id": str(id),
-        "username": username,
         "password": SHA1Encoder.encode(password) if password_change else password,
         "full_name": full_name,
         "email": email,
@@ -64,12 +62,12 @@ async def load(start: int, limit: int):
     return await storage_manager("user").load_all(start, limit)
 
 
-async def get_by_login_data(username: str, password: str) -> Union[User, None]:
+async def get_by_credentials(email: str, password: str) -> Union[User, None]:
     result = (await storage_manager("user").query({
         "query": {
             "bool": {
                 "must": [
-                    {"term": {"username": SHA1Encoder.encode(username)}},
+                    {"term": {"email": email}},
                     {"term": {"password": SHA1Encoder.encode(password)}},
                     {"term": {"disabled": False}}
                 ]
@@ -81,12 +79,12 @@ async def get_by_login_data(username: str, password: str) -> Union[User, None]:
     return None
 
 
-async def check_if_exists(username: str, id: UUID) -> bool:
+async def check_if_exists(email: str, id: UUID) -> bool:
     return bool((await storage_manager("user").query({
         "query": {
             "bool": {
                 "should": [
-                    {"term": {"username": SHA1Encoder.encode(username)}},
+                    {"term": {"email": email}},
                     {"term": {"_id": str(id)}}
                 ],
                 "minimum_should_match": 1
