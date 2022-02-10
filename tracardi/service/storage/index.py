@@ -21,7 +21,7 @@ class Index:
         if self.multi_index is False:
             return self._index()
 
-        return self._index() + "*"
+        return self._index() + "-*"
 
     def get_write_index(self):
         if self.multi_index is False:

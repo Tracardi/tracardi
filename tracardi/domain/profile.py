@@ -51,7 +51,7 @@ class Profile(Entity):
         merge_key_values = self.get_merge_key_values()
 
         # Add keyword
-        merge_key_values = [(f"{field}.keyword", value) for field, value in merge_key_values if value is not None]
+        merge_key_values = [(field, value) for field, value in merge_key_values if value is not None]
 
         return merge_key_values
 
@@ -66,7 +66,7 @@ class Profile(Entity):
 
         return disabled_profiles
 
-    async def segment(self, event_types, load_segment_by_event_type):
+    async def segment(self, event_types, load_segments):
 
         """
         This method mutates current profile. Loads segments and adds segments to current profile.
@@ -83,8 +83,8 @@ class Profile(Entity):
             # Segmentation is run for every event
 
             # todo segments are loaded one by one - maybe it is possible to load it at once
-            # todo segments are loaded event is they are disabled. It is checked later. Maybe we can filter it here.
-            segments = await load_segment_by_event_type(event_type)
+            # todo segments are loaded event if they are disabled. It is checked later. Maybe we can filter it here.
+            segments = await load_segments(event_type, limit=500)
 
             for segment in segments:
 
@@ -141,6 +141,9 @@ class Profile(Entity):
 
                 # Replace current profile with merged profile
                 self.replace(merged_profile)
+
+                # Update profile after merge
+                self.operation.update = True
 
                 # Deactivate all other profiles except merged one
 

@@ -65,10 +65,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Wait',
-            desc='Waits workflow for given time.',
-            type='flowNode',
-            width=100,
-            height=100,
+            desc='Stops workflow for given time.',
             icon='sleep',
             group=["Time"],
             documentation=Documentation(

@@ -4,6 +4,7 @@ import tracardi.service.storage.elastic_storage as storage
 from typing import List, Union, Dict
 
 from tracardi.config import tracardi
+from tracardi.domain.storage.index_mapping import IndexMapping
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
@@ -265,6 +266,15 @@ class PersistenceService:
     async def load(self, id: str):
         try:
             return await self.storage.load(id)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
+    async def get_mapping(self) -> IndexMapping:
+        try:
+            return IndexMapping(await self.storage.get_mapping(self.storage.index.get_read_index()))
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
