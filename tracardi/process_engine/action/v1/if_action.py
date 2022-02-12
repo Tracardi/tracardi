@@ -36,7 +36,7 @@ class IfAction(ActionRunner):
         if self.config.condition is None:
             raise ValueError("Condition is not set. Define it in config section.")
 
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+        dot = self._get_dot_accessor(payload)
 
         condition = Condition()
         if await condition.evaluate(self.config.condition, dot):
