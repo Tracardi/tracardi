@@ -101,7 +101,13 @@ class DotAccessor:
                 "Please start dotted path with one of the accessors: [profile@, session@, payload@, event@] ")
 
     def __getitem__(self, dot_notation):
+        cast = False
+
         if isinstance(dot_notation, str):
+
+            if dot_notation.startswith("`") and dot_notation.endswith("`"):
+                dot_notation = dot_notation.strip("`")
+                cast = True
 
             all_data = self.get_all(dot_notation)
 
@@ -111,9 +117,9 @@ class DotAccessor:
             for prefix in self.storage.keys():
                 value = self._get_value(dot_notation, prefix)
                 if value is not None:
-                    return value
+                    return self.cast(value) if cast else value
 
-        return dot_notation
+        return self.cast(dot_notation) if cast else dot_notation
 
     def __contains__(self, item):
         try:
@@ -134,3 +140,24 @@ class DotAccessor:
     def set(key, value, payload, prefix):
         key = key[len(prefix + '@'):]
         payload[key] = value
+
+    @classmethod
+    def cast(cls, value):
+        if isinstance(value, str):
+            if value.lower() == "true":
+                return True
+            elif value.lower() == "false":
+                return False
+            elif value.lower() in ["null", "none"]:
+                return None
+            elif value.replace(".", "").isnumeric() and value.count(".") == 1:
+                try:
+                    return float(value)
+                except ValueError:
+                    return value
+            elif value.isnumeric():
+                try:
+                    return int(value)
+                except ValueError:
+                    return value
+        return value
