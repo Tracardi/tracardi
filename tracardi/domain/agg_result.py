@@ -1,12 +1,17 @@
 class AggResult:
     def __init__(self, agg_key, result=None, return_counts=True):
         self.return_counts = return_counts
+        self._hits = []
         if result is None:
             self.total = 0
-            self._hits = []
         else:
+            print(result)
             self.total = result['hits']['total']['value']
-            self._hits = result['aggregations'][agg_key]['buckets']
+            if self.total > 0:
+                try:
+                    self._hits = result['aggregations'][agg_key]['buckets']
+                except KeyError:
+                    self._hits = []
 
     def __repr__(self):
         return "hits {}, total: {}".format(self._hits, self.total)
