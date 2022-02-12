@@ -5,7 +5,6 @@ class AggResult:
         if result is None:
             self.total = 0
         else:
-            print(result)
             self.total = result['hits']['total']['value']
             if self.total > 0:
                 try:
