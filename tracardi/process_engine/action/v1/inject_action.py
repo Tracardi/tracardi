@@ -1,6 +1,5 @@
 import json
 from json import JSONDecodeError
-from typing import Dict, Union
 
 from pydantic import BaseModel, validator
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -11,7 +10,8 @@ from tracardi.service.plugin.domain.result import Result
 
 
 class Configuration(BaseModel):
-    value: str = ""
+    value: str = "{}"
+    destination: str = "payload"
 
     @validator("value")
     def validate_content(cls, value):
@@ -49,9 +49,29 @@ class InjectAction(ActionRunner):
 
         try:
             output = json.loads(self.config.value)
-            return Result(value=converter.reshape(output), port="payload")
         except JSONDecodeError as e:
             raise ValueError(str(e))
+
+        inject = converter.reshape(output)
+        if self.config.destination == 'event-properties':
+            self.event.properties = inject
+        elif self.config.destination == 'profile-pii':
+            self.profile.pii = inject
+        elif self.config.destination == 'profile-traits-public':
+            self.profile.traits.public = inject
+        elif self.config.destination == 'profile-traits-private':
+            self.profile.traits.private = inject
+        elif self.config.destination == 'profile-interests':
+            self.profile.interests = inject
+        elif self.config.destination == 'profile-counters':
+            self.profile.stats.counters = inject
+        elif self.config.destination == 'profile-consents':
+            self.profile.consents = inject
+        elif self.config.destination == 'session-context':
+            self.session.context = inject
+        elif self.config.destination == 'payload':
+            return Result(value=inject, port="payload")
+        return Result(value={}, port="payload")
 
 
 def register() -> Plugin:
@@ -63,7 +83,7 @@ def register() -> Plugin:
             className='InjectAction',
             inputs=[],
             outputs=["payload"],
-            init={"value": "{}"},
+            init={"value": "{}", "destination": "payload"},
             form=Form(groups=[
                 FormGroup(
                     name="Create payload object",
@@ -71,9 +91,25 @@ def register() -> Plugin:
                         FormField(
                             id="value",
                             name="Object to inject",
-                            description="Provide object as JSON to be injected into payload and returned "
+                            description="Type object as JSON to be injected into payload and returned "
                                         "on output port.",
                             component=FormComponent(type="json", props={"label": "object"})
+                        ),
+                        FormField(
+                            id="destination",
+                            name="Inject data into",
+                            description="Select where the data should be injected.",
+                            component=FormComponent(type="select", props={"label": "Destination", "items":{
+                                'event-properties': "Event Properties",
+                                'payload': "Payload",
+                                'profile-pii': "Profile PII",
+                                'profile-traits-public': "Public Profile Traits",
+                                'profile-traits-private': "Private Profile Traits",
+                                'profile-interests': "Profile Interests",
+                                'profile-counters': "Profile Counters",
+                                'profile-consents': "Profile Consents",
+                                'session-context': "Session Context"
+                            }})
                         )
                     ]
                 ),
