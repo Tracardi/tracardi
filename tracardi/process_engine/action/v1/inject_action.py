@@ -115,7 +115,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual='inject_action',
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski"
         ),

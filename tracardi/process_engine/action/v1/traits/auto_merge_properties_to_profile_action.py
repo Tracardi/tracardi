@@ -1,3 +1,4 @@
+from dotty_dict import dotty
 from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.result import Result
 
@@ -7,7 +8,7 @@ from tracardi.service.plugin.runner import ActionRunner
 
 
 class Configuration(BaseModel):
-    traits_type: str
+    traits_type: str = "public"
     sub_traits: str = ""
 
     @validator("traits_type")
@@ -26,15 +27,43 @@ class AutoMergePropertiesToProfileAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
+    def _update(self, source, value) -> dict:
+        path = self.config.sub_traits.strip()
+        if path:
+            dotty_source = dotty(source)
+            try:
+                # get value to update
+                dict_to_update = dotty_source[path]
+
+                if isinstance(dict_to_update, dict):
+                    # update
+                    dict_to_update.update(value)
+                else:
+                    self.console.warning(f"Path {path} has value {dict_to_update}. It was replaced with value {value}")
+                    dict_to_update = value
+
+                # assign
+                dotty_source[path] = dict_to_update
+            except KeyError:
+                dotty_source[path] = value
+
+            return dotty_source.to_dict()
+
+        else:
+            source.update(value)
+            return source
+
     async def run(self, payload):
         if self.profile is not None:
+
             if self.debug is not True:
                 self.profile.operation.update = True
+
             if self.config.traits_type == 'private':
-                self.profile.traits.private.update(self.event.properties)
+                self.profile.traits.private = self._update(self.profile.traits.private, self.event.properties)
                 return Result(port="traits", value=self.profile.traits.private)
             else:
-                self.profile.traits.public.update(self.event.properties)
+                self.profile.traits.public = self._update(self.profile.traits.public, self.event.properties)
                 return Result(port="traits", value=self.profile.traits.public)
 
         return Result(port="error", value={})
