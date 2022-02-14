@@ -94,9 +94,11 @@ def register() -> Plugin:
                             ),
                             FormField(
                                 id="email",
-                                name="Contact's email address",
+                                name="Contact's e-mail address",
                                 description="Please provide path to contact's email address.",
-                                component=FormComponent(type="dotPath", props={"label": "Prefix"})
+                                component=FormComponent(type="dotPath", props={"label": "E-mail",
+                                                                               "defaultSourceValue": "profile",
+                                                                               "defaultPathValue": "pii.email"})
                             ),
                             FormField(
                                 id="merge_fields",
