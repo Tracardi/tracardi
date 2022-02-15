@@ -32,7 +32,7 @@ def register() -> Plugin:
             className='EventCounter',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.6.0.1',
+            version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
             manual="event_counter_action",
@@ -50,8 +50,8 @@ def register() -> Plugin:
                             FormField(
                                 id="event_type",
                                 name="Event type",
-                                description="Type event you would like to count.",
-                                component=FormComponent(type="text", props={
+                                description="Select event type you would like to count.",
+                                component=FormComponent(type="eventType", props={
                                     "label": "Event type"
                                 })
                             ),
