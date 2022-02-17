@@ -5,7 +5,7 @@ from pydantic import validator
 from tracardi.domain.value_object.storage_info import StorageInfo
 
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.secrets import b64_decoder, b64_encoder
+from tracardi.service.secrets import b64_decoder, b64_encoder, encrypt, decrypt
 
 
 class Destination(NamedEntity):
@@ -14,6 +14,7 @@ class Destination(NamedEntity):
     enabled: bool = False
     tags: List[str] = []
     mapping: dict = {}
+    config: dict = {}
 
     @validator("name")
     def name_not_empty(cls, value):
@@ -34,6 +35,7 @@ class DestinationRecord(NamedEntity):
     enabled: bool = False
     tags: List[str] = []
     mapping: Optional[str] = None
+    config: Optional[str] = None
 
     def decode(self):
         return Destination(
@@ -43,7 +45,8 @@ class DestinationRecord(NamedEntity):
             package=self.package,
             enabled=self.enabled,
             tags=self.tags,
-            mapping=b64_decoder(self.mapping)
+            mapping=b64_decoder(self.mapping) if self.mapping else {},
+            config=decrypt(self.config) if self.config else {}
         )
 
     @staticmethod
@@ -55,7 +58,8 @@ class DestinationRecord(NamedEntity):
             package=destination.package,
             enabled=destination.enabled,
             tags=destination.tags,
-            mapping=b64_encoder(destination.mapping)
+            mapping=b64_encoder(destination.mapping),
+            config=encrypt(destination.config)
         )
 
     @staticmethod
