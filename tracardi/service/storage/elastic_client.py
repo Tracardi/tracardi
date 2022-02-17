@@ -161,8 +161,8 @@ class ElasticClient:
         if config.elastic.cloud_id:
             kwargs['cloud_id'] = config.elastic.cloud_id
 
-        if config.elastic.api_key:
-            kwargs['api_key'] = config.elastic.api_key
+        if config.elastic.api_key and config.elastic.api_key_id:
+            kwargs['api_key'] = (config.elastic.api_key_id, config.elastic.api_key)
 
         if config.elastic.http_compress:
             kwargs['http_compress'] = config.elastic.http_compress
