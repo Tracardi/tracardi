@@ -20,6 +20,7 @@ import tracardi.service.storage.drivers.elastic.validation_schema
 import tracardi.service.storage.drivers.elastic.event_source
 import tracardi.service.storage.drivers.elastic.pro
 import tracardi.service.storage.drivers.elastic.value_threshold
+import tracardi.service.storage.drivers.elastic.destination
 
 
 class ElasticDriver:
@@ -111,4 +112,8 @@ class ElasticDriver:
     @property
     def validation_schema(self):
         return tracardi.service.storage.drivers.elastic.validation_schema
+
+    @property
+    def destination(self):
+        return tracardi.service.storage.drivers.elastic.destination
 

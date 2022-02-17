@@ -79,6 +79,9 @@ class Resource:
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
                                      mapping="mappings/value-threshold-index.json",
                                      rel=None),
+            "destination": Index(multi_index=False, index='tracardi-destination',
+                                 mapping="mappings/destination-index.json",
+                                 rel=None),
 
         }
 
