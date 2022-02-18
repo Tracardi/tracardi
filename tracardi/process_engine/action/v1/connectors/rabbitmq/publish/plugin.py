@@ -77,7 +77,7 @@ def register() -> Plugin:
                                         "connect to RabbitMQ server.",
                             component=FormComponent(
                                 type="resource",
-                                props={"label": "resource", "tag": "rabbitmq"})
+                                props={"label": "resource", "tag": "rabbitmq", "pro": True})
                         )
                     ]
                 ),
@@ -167,6 +167,7 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="Returns input payload on success."),
                     "error": PortDoc(desc="Returns input payload and error on failure."),
                 }
-            )
+            ),
+            pro=True
         )
     )

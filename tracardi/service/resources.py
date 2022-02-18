@@ -25,9 +25,10 @@ def get_resource_types():
                 "virtual_host": None,
                 "port": 5672
             },
-            "tags": ['rabbitmq', 'queue'],
+            "tags": ['rabbitmq', 'pro'],
             "name": "RabbitMQ",
             "icon": "rabbitmq",
+            "pro": True,
             "package": "tracardi.process_engine.destination.rabbitmq_connector.RabbitMqConnector"
         },
         "aws": {
@@ -183,15 +184,15 @@ def get_resource_types():
             "tags": ["mixpanel"],
             "name": "MixPanel"
         },
-        "scheduler": {
-            "config": {
-                "host": "<tracardi-pro-host>",
-                "callback_host": "<callback-host>",
-                "token": "<token>"
-            },
-            "tags": ["pro", "scheduler"],
-            "name": "Scheduler"
-        },
+        # "scheduler": {
+        #     "config": {
+        #         "host": "<tracardi-pro-host>",
+        #         "callback_host": "<callback-host>",
+        #         "token": "<token>"
+        #     },
+        #     "tags": ["pro", "scheduler"],
+        #     "name": "Scheduler"
+        # },
         "mautic": {
             "config": {
                 "public_key": "<client-public-key>",
@@ -209,3 +210,10 @@ def get_destinations():
     for _, resource_type in resource_types.items():
         if 'package' in resource_type:
             yield resource_type['package'], resource_type
+
+
+def get_type_of_resources():
+    resource_types = get_resource_types()
+    for key, resource_type in resource_types.items():
+        if 'pro' not in resource_type:
+            yield key, resource_type
