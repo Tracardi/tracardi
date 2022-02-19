@@ -19,13 +19,13 @@ class Destination(NamedEntity):
     @validator("name")
     def name_not_empty(cls, value):
         if len(value) == 0:
-            raise ValueError("Name can not be empty")
+            raise ValueError("Name cannot be empty")
         return value
 
     @validator("package")
     def package_not_empty(cls, value):
         if len(value) == 0:
-            raise ValueError("Destination can not be empty")
+            raise ValueError("Destination cannot be empty")
         return value
 
 
