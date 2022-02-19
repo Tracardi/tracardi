@@ -1,3 +1,5 @@
+import asyncio
+
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.domain.destination import DestinationRecord
@@ -35,4 +37,4 @@ class DestinationManager:
             destination_instance = destination_class(destination.config)
             if isinstance(destination_instance, Connector):
                 result = template.reshape(reshape_template=destination.mapping)
-                await destination_instance.run(result, self.delta)
+                asyncio.create_task(destination_instance.run(result, self.delta))
