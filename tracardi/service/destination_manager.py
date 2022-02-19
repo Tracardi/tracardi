@@ -32,8 +32,7 @@ class DestinationManager:
             module, class_name = self._get_class_and_module(destination.package)
             module = import_package(module)
             destination_class = load_callable(module, class_name)
-            dest_class = destination_class(destination.config)
-            if isinstance(dest_class, Connector):
+            destination_instance = destination_class(destination.config)
+            if isinstance(destination_instance, Connector):
                 result = template.reshape(reshape_template=destination.mapping)
-                await dest_class.run(result, self.delta)
-
+                await destination_instance.run(result, self.delta)
