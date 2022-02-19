@@ -35,5 +35,5 @@ class DestinationManager:
             dest_class = destination_class(destination.config)
             if isinstance(dest_class, Connector):
                 result = template.reshape(reshape_template=destination.mapping)
-                dest_class.run(result, self.delta)
+                await dest_class.run(result, self.delta)
 
