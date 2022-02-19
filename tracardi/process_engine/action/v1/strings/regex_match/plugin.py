@@ -7,10 +7,10 @@ import re
 
 
 def search(pattern, text):
-    result = re.search(f"{pattern}", text)
+    result = re.findall(pattern, text)
     if result is None:
         return None
-    return result.groups()
+    return result
 
 
 def validate(config: dict):
@@ -32,7 +32,7 @@ class RegexMatchAction(ActionRunner):
             for i, match in enumerate(result):
                 dictionary[f"{self.config.group_prefix}-{i}"] = match
         else:
-            self.console.warn("Regex couldn't find anything matching the pattern from supplied string.")
+            self.console.warning("Regex couldn't find anything matching the pattern from supplied string.")
         return Result(port="payload", value=dictionary)
 
 
