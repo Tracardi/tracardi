@@ -103,7 +103,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Send data to Airtable',
             desc='Adds a record to a given table in Airtable, according to provided schema.',
-            icon='plugin',
+            icon='airtable',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

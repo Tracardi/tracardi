@@ -105,7 +105,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Fetch data from Airtable',
             desc='Fetches data from given Airtable table, according to given query.',
-            icon='plugin',
+            icon='airtable',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={
