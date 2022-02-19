@@ -12,7 +12,7 @@ Tracardi collects data from customer journeys and assigns it to a profile that i
 
 ![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
 
-# Intorduction
+# Introduction
 
 TRACARDI is an API-first solution, low-code / no-code platform aimed at any business that 
 wants to start using user data for automated customer engagement. If you own a brand new e-commerce platform or 
