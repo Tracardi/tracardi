@@ -201,6 +201,13 @@ def get_resource_types():
             },
             "tags": ["mautic"],
             "name": "Mautic"
+        },
+        "airtable": {
+            "config": {
+                "api_key": "<your-api-key>"
+            },
+            "tags": ["airtable"],
+            "name": "Airtable"
         }
     }
 
