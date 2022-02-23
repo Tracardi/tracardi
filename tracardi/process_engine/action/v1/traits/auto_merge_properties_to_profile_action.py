@@ -116,7 +116,7 @@ def register() -> Plugin:
             name='Auto merge event properties',
             desc='Automatically merges all event properties to profile traits.',
             icon='merge',
-            group=["Traits"],
+            group=["Data processing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

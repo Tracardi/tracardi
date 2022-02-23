@@ -1,5 +1,5 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
-    FormField, FormComponent
+    FormField, FormComponent, NodeEvents
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
@@ -22,6 +22,7 @@ class ValueThresholdAction(ActionRunner):
 
         profile_id = self.profile.id if self.profile is not None else None
         vtm = ValueThresholdManager(node_id=self.node.id,
+                                    debug=self.debug,
                                     profile_id=profile_id,
                                     name=self.config.name,
                                     ttl=self.config.ttl)
@@ -50,6 +51,9 @@ def register() -> Plugin:
                 "ttl": 30 * 60,
                 "assign_to_profile": True
             },
+            node=NodeEvents(
+                on_remove="path-to-endpoint"
+            ),
             form=Form(groups=[
                 FormGroup(
                     name="Value change threshold",

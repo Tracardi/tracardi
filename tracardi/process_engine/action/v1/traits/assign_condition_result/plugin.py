@@ -53,8 +53,9 @@ def register() -> Plugin:
                                 id="conditions",
                                 name="Conditions",
                                 description="Please provide key-value pairs, where key is a path to some field in "
-                                            "profile, and value is a condition whose result will be assigned to given "
-                                            "field. (e.g. profile@consents.marketing-consent: "
+                                            "profile, and value is a condition that after being resolved the result "
+                                            "will be assigned to profile field. "
+                                            "(e.g. profile@consents.marketing-consent: "
                                             "profile@consents.marketing EXISTS) Every key must start with 'profile@'.",
                                 component=FormComponent(type="keyValueList", props={"label": "Value"})
                             )
@@ -64,10 +65,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Assign condition results',
-            desc='Ends workflow.',
-            icon='plugin',
-            group=["Conditions"],
+            name='Resolve conditions into profile fields',
+            desc='This plugin resolves a set of conditions and assigns it to the profile fields.',
+            icon='if',
+            group=["Data processing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
