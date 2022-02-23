@@ -115,9 +115,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Add to segment in Mautic',
-            desc='Adds given Mautic contact to given segment, based on provided contact ID.',
-            icon='plugin',
+            name='Mautic: Add to segment',
+            desc='Adds Mautic contact to segment, based on provided contact ID.',
+            icon='mautic',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

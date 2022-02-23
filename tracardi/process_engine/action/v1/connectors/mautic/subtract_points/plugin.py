@@ -114,9 +114,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Subtract points in Mautic',
+            name='Mautic: Subtract points',
             desc='Subtracts points from a given contact in Mautic, based on provided contact ID.',
-            icon='plugin',
+            icon='mautic',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

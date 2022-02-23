@@ -107,9 +107,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Fetch Mautic contact by email',
+            name='Mautic: Get contact by email',
             desc='Fetches a profile from Mautic, based on provided email address.',
-            icon='plugin',
+            icon='mautic',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={

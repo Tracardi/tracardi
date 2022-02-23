@@ -115,9 +115,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Remove from segment in Mautic',
+            name='Mautic: Remove from segment',
             desc='Removes given Mautic contact from given segment, based on provided contact ID.',
-            icon='plugin',
+            icon='mautic',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={
