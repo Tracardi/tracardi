@@ -3,7 +3,8 @@ import json
 
 import aiohttp
 from aiohttp import ClientConnectorError
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormField, FormGroup, Form, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormField, FormGroup, Form, FormComponent, \
+    NodeEvents
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -73,6 +74,10 @@ def register() -> Plugin:
                 "body": "{}",
                 "timeout": 30
             },
+            node=NodeEvents(
+                on_remove="test",
+                on_create="create"
+            ),
             form=Form(groups=[
                 FormGroup(
                     name="Zapier webhook settings",
