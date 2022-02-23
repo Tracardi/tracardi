@@ -430,7 +430,7 @@ def register() -> Plugin:
             name='Register event',
             brand='Amplitude',
             desc='Sends request to Amplitude API endpoint to register event.',
-            icon='bar-chart',
+            icon='amplitude',
             group=["Stats"]
         )
     )

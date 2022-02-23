@@ -128,7 +128,7 @@ def register() -> Plugin:
             name='Fetch funnel',
             brand='MixPanel',
             desc='Gets funnel given by ID for current profile.',
-            icon='bar-chart',
+            icon='mixpanel',
             group=["Stats"],
             documentation=Documentation(
                 inputs={

@@ -104,7 +104,7 @@ def register() -> Plugin:
             name='Register event',
             brand='MixPanel',
             desc='Sends processed event to MixPanel project.',
-            icon='bar-chart',
+            icon='mixpanel',
             group=["Stats"],
             documentation=Documentation(
                 inputs={
