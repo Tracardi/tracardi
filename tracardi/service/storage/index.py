@@ -11,7 +11,6 @@ class Index:
             self.prefix = "{}-".format(elastic.instance_prefix)
         else:
             self.prefix = ''
-
         self.mapping = mapping
 
     def _index(self):
