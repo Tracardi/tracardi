@@ -204,19 +204,28 @@ def register() -> Plugin:
                             id="event_type",
                             name="Event type",
                             description="Leave empty if the current event type is to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to event type"})
+                            component=FormComponent(type="dotPath", props={"label": "Reference to event type",
+                                                                           "defaultSourceValue": "event",
+                                                                           "defaultPathValue": "type"
+                                                                           })
                         ),
                         FormField(
                             id="event_properties",
                             name="Event properties",
                             description="Leave empty if the current event properties is to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to event properties"})
+                            component=FormComponent(type="dotPath", props={"label": "Reference to event properties",
+                                                                           "defaultSourceValue": "event",
+                                                                           "defaultPathValue": "properties"
+                                                                           })
                         ),
                         FormField(
                             id="user_properties",
                             name="User Personal Identifiable Information (PII)",
                             description="Leave empty if the current profile PII is to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to profile PII"})
+                            component=FormComponent(type="dotPath", props={"label": "Reference to profile PII",
+                                                                           "defaultSourceValue": "profile",
+                                                                           "defaultPathValue": "pii"
+                                                                           })
                         ),
                         FormField(
                             id="groups",
@@ -235,49 +244,66 @@ def register() -> Plugin:
                             id="ip",
                             name="IP address",
                             description="Leave empty if the events ip to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "IP address"})
+                            component=FormComponent(type="dotPath", props={"label": "IP address",
+                                                                           "defaultSourceValue": "event",
+                                                                           "defaultPathValue": "metadata.ip"
+                                                                           })
                         ),
                         FormField(
                             id="location_lat",
                             name="Latitude",
                             description="Leave empty if you want Amplitude to read location from IP.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to latitude"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to latitude",
+                                                                           "defaultSourceValue": "payload"
+                                                                           })
                         ),
                         FormField(
                             id="location_lng",
                             name="Longitude",
                             description="Leave empty if you want Amplitude to read location from IP.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to longitude"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to longitude",
+                                                                           "defaultSourceValue": "payload"
+                                                                           })
                         ),
                         FormField(
                             id="language",
                             name="Language",
                             description="The language set by the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to Language"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to Language",
+                                                                           "defaultSourceValue": "payload"
+                                                                           })
                         ),
                         FormField(
                             id="dma",
                             name="Designated Market Area (DMA)",
                             description="The current Designated Market Area of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to DMA"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to DMA",
+                                                                           "defaultSourceValue": "payload"
+                                                                           })
                         ),
                         FormField(
                             id="city",
                             name="City",
                             description="The current city of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to city"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to city",
+                                                                           "defaultSourceValue": "payload"
+                                                                           })
                         ),
                         FormField(
                             id="region",
                             name="Region",
                             description="The current region of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to region"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to region",
+                                                                           "defaultSourceValue": "payload"
+                                                                           })
                         ),
                         FormField(
                             id="country",
                             name="Country",
                             description="The current country of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to country"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to country",
+                                                                           "defaultSourceValue": "payload"
+                                                                           })
                         ),
                     ]),
                 FormGroup(
@@ -291,7 +317,9 @@ def register() -> Plugin:
                             name="Product ID",
                             description="An identifier for the item purchased. You must send a price and quantity "
                                         "or revenue with this field.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to productId"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to productId",
+                                                                           "defaultSourceValue": "event"
+                                                                           })
                         ),
                         FormField(
                             id="revenue",
@@ -299,7 +327,9 @@ def register() -> Plugin:
                             description="revenue = price * quantity. If you send all 3 fields of price, quantity, and "
                                         "revenue, then (price * quantity) will be used as the revenue value. You can "
                                         "use negative values to indicate refunds.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to revenue"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to revenue",
+                                                                           "defaultSourceValue": "event"
+                                                                           })
                         ),
                         FormField(
                             id="revenueType",
@@ -307,20 +337,24 @@ def register() -> Plugin:
                             description="The type of revenue for the item purchased. You must send a price and "
                                         "quantity or revenue with this field.",
                             component=FormComponent(type="dotPath", props={"label": "Path to revenue type",
-                                                                           "defaultMode": 2})
+                                                                           "defaultSourceValue": "event"})
                         ),
                         FormField(
                             id="quantity",
                             name="Quantity",
                             description="The quantity of the item purchased. Defaults to 1 if not specified.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to quantity"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to quantity",
+                                                                           "defaultSourceValue": "event"
+                                                                           })
                         ),
                         FormField(
                             id="price",
                             name="Price",
                             description="The price of the item purchased. Required for revenue data if the revenue "
                                         "field is not sent. You can use negative values to indicate refunds.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to price"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to price",
+                                                                           "defaultSourceValue": "event"
+                                                                           })
                         ),
                     ]),
                 FormGroup(
@@ -332,43 +366,57 @@ def register() -> Plugin:
                             id="platform",
                             name="Platform",
                             description="Platform of the device.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to platform"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to platform",
+                                                                           "defaultSourceValue": "session"
+                                                                           })
                         ),
                         FormField(
                             id="os_name",
                             name="Operation System Name (OS)",
                             description="The name of the mobile operating system or browser that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to OS"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to OS",
+                                                                           "defaultSourceValue": "session"
+                                                                           })
                         ),
                         FormField(
                             id="os_version",
                             name="Operation System Version",
                             description="The version of the mobile operating system or browser the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to OS version"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to OS version",
+                                                                           "defaultSourceValue": "session"
+                                                                           })
                         ),
                         FormField(
                             id="device_brand",
                             name="Device Brand",
                             description="The device brand that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to device brand"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to device brand",
+                                                                           "defaultSourceValue": "session"
+                                                                           })
                         ),
                         FormField(
                             id="device_manufacturer",
                             name="Device Manufacturer",
                             description="The device manufacturer that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to device manufacturer"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to device manufacturer",
+                                                                           "defaultSourceValue": "session"
+                                                                           })
                         ),
                         FormField(
                             id="device_model",
                             name="Device Model",
                             description="The device model that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to device model"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to device model",
+                                                                           "defaultSourceValue": "session"
+                                                                           })
                         ),
                         FormField(
                             id="carrier",
                             name="Carrier",
                             description="The carrier that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to carrier"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to carrier",
+                                                                           "defaultSourceValue": "session"
+                                                                           })
                         ),
                     ])
             ]),
@@ -382,6 +430,6 @@ def register() -> Plugin:
             name='Amplitude register event',
             desc='Sends request to Amplitude API endpoint to register event.',
             icon='bar-chart',
-            group=["Connectors", "Stats"]
+            group=["Stats"]
         )
     )

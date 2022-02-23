@@ -54,18 +54,19 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
-                    name="Local time settings",
+                    name="Time-span settings",
+                    description="Please define the time span. This action will check if current time is in defined time span.",
                     fields=[
                         FormField(
                             id="timezone",
                             name="Timezone",
-                            description="Type type zone or path to time zone",
+                            description="Type time zone or path to time zone, eg. Europe/Paris, or session@context.time.tz",
                             component=FormComponent(type="dotPath", props={})
                         ),
                         FormField(
                             id="start",
                             name="Start time",
-                            description="Start time must be before end time.",
+                            description="This is the beginning of time span. Start time must be before end time.",
                             component=FormComponent(type="text", props={
                                 "label": "Start time"
                             })
@@ -73,7 +74,7 @@ def register() -> Plugin:
                         FormField(
                             id="end",
                             name="End time",
-                            description="End time must be after start time.",
+                            description="This is the end of time span. End time must be after start time.",
                             component=FormComponent(type="text", props={
                                 "label": "End time"
                             })
@@ -84,11 +85,8 @@ def register() -> Plugin:
             ),
         ),
         metadata=MetaData(
-            name='Local time span',
-            desc='Checks if an event is in given time span',
-            type='flowNode',
-            width=300,
-            height=100,
+            name='Is time between dates',
+            desc='Checks if the current time is within defined time span.',
             icon='profiler',
             group=["Time"],
             documentation=Documentation(

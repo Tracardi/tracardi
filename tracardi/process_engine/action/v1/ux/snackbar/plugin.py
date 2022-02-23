@@ -4,6 +4,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.notation.dot_template import DotTemplate
 
 
 class Configuration(BaseModel):
@@ -37,6 +38,11 @@ class SnackBarUx(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
+        dot = self._get_dot_accessor(payload)
+        template = DotTemplate()
+
+        self.config.message = template.render(self.config.message, dot)
+
         self.ux.append({
             "tag": "div",
             "props": {
@@ -115,7 +121,7 @@ def register() -> Plugin:
                             component=FormComponent(type="select", props={"label": "Horizontal position", "items": {
                                 "left": "Left",
                                 "center": "Center",
-                                "Right": "Right"
+                                "right": "Right"
                             }})
                         ),
                     ]),

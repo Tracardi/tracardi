@@ -5,7 +5,7 @@ import tracardi.service.wf
 
 from .port_to_port_edges import PortToPortEdges
 from ..service.node_indexer import index_nodes
-from tracardi.service.plugin.domain.register import RunOnce
+from tracardi.service.plugin.domain.register import RunOnce, NodeEvents
 from tracardi.service.plugin.runner import ActionRunner
 
 
@@ -26,6 +26,7 @@ class Node(BaseModel):
     init: Optional[dict] = {}
     skip: bool = False
     run_once: Optional[RunOnce] = RunOnce()
+    node: Optional[NodeEvents] = None
     block_flow: bool = False
     on_error_continue: bool = False
     run_in_background: bool = False

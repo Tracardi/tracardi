@@ -27,6 +27,7 @@ class FlowGraphConverter:
                 module=node.data.spec.module,
                 init=node.data.spec.init,
                 skip=node.data.spec.skip,
+                node=node.data.spec.node,
                 block_flow=node.data.spec.block_flow,
                 run_once=node.data.spec.run_once,
                 run_in_background=node.data.spec.run_in_background,

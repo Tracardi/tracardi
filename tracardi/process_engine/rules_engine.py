@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import traceback
 from asyncio import Task
 from collections import defaultdict
@@ -14,13 +15,18 @@ from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
 from tracardi.service.plugin.domain.console import Log
 from .debugger import Debugger
+from ..config import tracardi
 from ..domain.console import Console
 from ..domain.entity import Entity
 from ..domain.profile import Profile
 from ..domain.session import Session
 from ..domain.rule import Rule
 from ..exceptions.exception_service import get_traceback
+from ..exceptions.log_handler import log_handler
 
+logger = logging.getLogger("Segmentation")
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 class RulesEngine:
 
@@ -116,6 +122,10 @@ class RulesEngine:
 
                         flow_task = asyncio.create_task(workflow.invoke(flow, event, ux, debug=False))
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
+
+                    else:
+                        logger.warning(f"Workflow {rule.flow.id} skipped. Event source id is not equal "
+                                       f"to rule source id.")
                 else:
                     # todo FlowHistory is empty
                     workflow = WorkFlow(

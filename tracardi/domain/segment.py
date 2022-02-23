@@ -1,11 +1,11 @@
-from typing import Optional, Any
+from typing import Optional, Any, List
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.value_object.storage_info import StorageInfo
 
 
 class Segment(NamedEntity):
     description: Optional[str] = ""
-    eventType: Optional[str] = None
+    eventType: Optional[List[str]] = []
     condition: str
     enabled: bool = True
     machine_name: str = None

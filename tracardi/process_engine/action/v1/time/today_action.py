@@ -103,7 +103,7 @@ def register() -> Plugin:
                         FormField(
                             id="timezone",
                             name="Path to timezone",
-                            description="Provide path to field that has timezone. "
+                            description="Type path to field that has timezone. "
                                         "E.g. session@context.time.tz",
                             component=FormComponent(type="dotPath", props={"label": "Timezone"})
                         )
@@ -114,10 +114,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Today',
-            desc='Gets today object, that consists day of week, date and current time.',
-            type='flowNode',
-            width=100,
-            height=100,
+            desc='Returns information about current time, month, day, etc. It will consists of day of the week, date and current time.',
             icon='today',
             group=["Time"],
             documentation=Documentation(

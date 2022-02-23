@@ -68,13 +68,13 @@ def register() -> Plugin:
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Time data",
-                        description="Please provide path to date, which will be considered the reference date for "
-                                    "calculations, and so called 'now' date, in one of available forms.",
+                        name="Time delta",
+                        description="Calculates the time difference between two dates.",
                         fields=[
                             FormField(
                                 id="reference_date",
                                 name="Reference date",
+                                description="Please type path to the start date.",
                                 component=FormComponent(type="dotPath", props={
                                     "label": "Source"
                                 }),
@@ -83,8 +83,7 @@ def register() -> Plugin:
                             FormField(
                                 id="now",
                                 name="Second date",
-                                description="Please provide path, date or 'now' parameter, "
-                                            "according to format chosen above.",
+                                description="Please type path, date or 'now'. This is the end date.",
                                 component=FormComponent(type="dotPath", props={"label": "Source"}),
                                 required=True
                             )

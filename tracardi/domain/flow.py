@@ -5,10 +5,10 @@ from .value_object.storage_info import StorageInfo
 from typing import Optional, List, Any
 from pydantic import BaseModel
 from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
-from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, Form
+from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents
 
 from ..config import tracardi
-from ..service.secrets import decrypt, encrypt
+from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 import logging
 
 logger = logging.getLogger("Flow")
@@ -106,11 +106,12 @@ class SpecRecord(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[str] = ""
-    form: Optional[Form]
+    node: Optional[NodeEvents] = None
+    form: Optional[str] = ""
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.0.1'
+    version: Optional[str] = '0.6.2'
 
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':
@@ -121,7 +122,8 @@ class SpecRecord(BaseModel):
             inputs=spec.inputs,
             outputs=spec.outputs,
             init=encrypt(spec.init),
-            form=spec.form,
+            node=spec.node,
+            form=b64_encoder(spec.form),
             manual=spec.manual,
             author=spec.author,
             license=spec.license,
@@ -136,7 +138,8 @@ class SpecRecord(BaseModel):
             inputs=self.inputs,
             outputs=self.outputs,
             init=decrypt(self.init),
-            form=self.form,
+            node=self.node,
+            form=b64_decoder(self.form),
             manual=self.manual,
             author=self.author,
             license=self.license,
@@ -144,11 +147,62 @@ class SpecRecord(BaseModel):
         )
 
 
+class MetaDataRecord(BaseModel):
+    name: str
+    desc: Optional[str] = ""
+    keywords: Optional[List[str]] = []
+    type: str = 'flowNode'
+    width: int = 300
+    height: int = 100
+    icon: str = 'plugin'
+    documentation: Optional[str] = ""
+    group: Optional[List[str]] = ["General"]
+    tags: List[str] = []
+    pro: bool = False
+    frontend: bool = False
+    emits_event: Optional[str] = ""
+
+    @staticmethod
+    def encode(metadata: MetaData) -> 'MetaDataRecord':
+        return MetaDataRecord(
+            name=metadata.name,
+            desc=metadata.desc,
+            keywords=metadata.keywords,
+            type=metadata.type,
+            width=metadata.width,
+            height=metadata.height,
+            icon=metadata.icon,
+            documentation=b64_encoder(metadata.documentation),
+            group=metadata.group,
+            tags=metadata.tags,
+            pro=metadata.pro,
+            frontend=metadata.frontend,
+            emits_event=b64_encoder(metadata.emits_event)
+        )
+
+    def decode(self) -> MetaData:
+        return MetaData(
+            name=self.name,
+            desc=self.desc,
+            keywords=self.keywords,
+            type=self.type,
+            width=self.width,
+            height=self.height,
+            icon=self.icon,
+            documentation=b64_decoder(self.documentation),
+            group=self.group,
+            tags=self.tags,
+            pro=self.pro,
+            frontend=self.frontend,
+            emits_event=b64_decoder(self.emits_event)
+        )
+
+
 class PluginRecord(BaseModel):
     start: bool = False
     debug: bool = False
     spec: SpecRecord
-    metadata: MetaData
+    metadata: MetaDataRecord
 
     @staticmethod
     def encode(plugin: Plugin) -> 'PluginRecord':
@@ -156,7 +210,7 @@ class PluginRecord(BaseModel):
             start=plugin.start,
             debug=plugin.debug,
             spec=SpecRecord.encode(plugin.spec),
-            metadata=plugin.metadata
+            metadata=MetaDataRecord.encode(plugin.metadata)
         )
 
     def decode(self) -> Plugin:
@@ -164,7 +218,7 @@ class PluginRecord(BaseModel):
             "start": self.start,
             "debug": self.debug,
             "spec": self.spec.decode(),
-            "metadata": self.metadata
+            "metadata": self.metadata.decode()
         }
         return Plugin.construct(_fields_set=self.__fields_set__, **data)
 

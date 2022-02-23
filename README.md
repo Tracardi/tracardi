@@ -1,11 +1,18 @@
 ![github_banner](https://user-images.githubusercontent.com/16271564/148845983-7c9e85c1-465f-44ed-b1e9-7112908d2e83.png)
 
+[![Stargazers repo roster for @tracardi/tracardi](https://reporoster.com/stars/tracardi/tracardi)](https://github.com/tracardi/tracardi/stargazers)
+
 # Open-source Customer Engagement and Data Platform
 
 [Tracardi](http://www.tracardi.com) is an open-source system that supports customer engagement and enhances the consumer experience.
 Tracardi is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery.
 Tracardi collects data from customer journeys and assigns it to a profile that is maintained throughout the period of interaction with the customer.
 
+## Screenshots
+
+![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
+
+# Introduction
 
 TRACARDI is an API-first solution, low-code / no-code platform aimed at any business that 
 wants to start using user data for automated customer engagement. If you own a brand new e-commerce platform or 
@@ -25,10 +32,6 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
    
  * **Automation** - TRACARDI is a great framework for creating
    marketing automation apps. You can send your data to other systems easily
-
-## Screenshots
-
-![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
 
 
 # Installation
@@ -74,9 +77,22 @@ Now pull and run Tracardi Graphical User Interface.
 docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui
 ```
 
+## Need help ?
+
+
+<p align="center">
+    Join our community
+<br/>
+<a href="https://join.slack.com/t/tracardi/shared_invite/zt-10y7w0o9y-PmCBnK9qywchmd1~KIER2Q">
+    <img src="https://user-images.githubusercontent.com/16271564/151843970-5e869807-4ccf-46ab-98f5-6a65aea790f8.png" width="120px"/> 
+</a>
+</p>
+
+
 ## Start Tracardi Documentation
 
 Now pull and run Tracardi Documentation.
+
 
 ```
 docker run -p 8585:8585 tracardi/tracardi-docs
@@ -126,4 +142,6 @@ You can support us on [BOUNTY-SOURCE](https://www.bountysource.com/teams/tracard
 # License
 
 Tracardi is available under MIT with Common Clause license.
+
+[![Forkers repo roster for @tracardi/tracardi](https://reporoster.com/forks/tracardi/tracardi)](https://github.com/tracardi/tracardi/network/members)
 

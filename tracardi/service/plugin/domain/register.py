@@ -40,6 +40,11 @@ class RunOnce(BaseModel):
     enabled: bool = False
 
 
+class NodeEvents(BaseModel):
+    on_remove: Optional[str]
+    on_create: Optional[str]
+
+
 class Spec(BaseModel):
     id: Optional[str]
     className: str
@@ -60,6 +65,7 @@ class Spec(BaseModel):
     license: Optional[str] = "MIT"
     version: Optional[str] = '0.6.1'
     run_once: Optional[RunOnce] = RunOnce()
+    node: Optional[NodeEvents] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)

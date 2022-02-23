@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi',
-    version='0.6.26',
+    version='0.6.27',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -51,7 +51,10 @@ setup(
         'google-api-python-client == 2.33.0',
         'google_auth_oauthlib == 0.4.6',
         'python_weather',
-        'geopy'
+        'geopy',
+        'influxdb-client',
+        'grpcio',
+        'grpcio-tools'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

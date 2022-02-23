@@ -88,8 +88,8 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             init={
-                "endpoint": "http://locahost:8686",
-                "uix_source": "http://locahost:8686",
+                "endpoint": "http://localhost:8686",
+                "uix_source": "http://localhost:8686",
                 "event_type": "user-consent-pref",
                 "agree_all_event_type": "agree-all-event-type",
                 "position": "bottom",

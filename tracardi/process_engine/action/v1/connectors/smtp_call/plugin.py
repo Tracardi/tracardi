@@ -75,22 +75,23 @@ def register() -> Plugin:
                 FormGroup(
                     fields=[
                         FormField(
-                            id="message.send_to",
+                            id="message.send_from",
                             name="E-mail to send from",
                             description="Type path to E-mail or e-mail itself.",
-                            component=FormComponent(type="dotPath", props={"defaultMode": 2})
+                            component=FormComponent(type="dotPath", props={"label": "E-mail"})
                         ),
                         FormField(
-                            id="message.send_from",
+                            id="message.send_to",
                             name="Recipient e-mail",
                             description="Type path to E-mail or e-mail itself.",
-                            component=FormComponent(type="dotPath", props={"defaultSourceValue": "profile"})
+                            component=FormComponent(type="dotPath", props={"label": "E-mail",
+                                                                           "defaultSourceValue": "profile"})
                         ),
                         FormField(
                             id="message.reply_to",
                             name="Reply to e-mail",
                             description="Type path to E-mail or e-mail itself.",
-                            component=FormComponent(type="dotPath", props={"defaultMode": 2})
+                            component=FormComponent(type="dotPath", props={"label": "E-mail"})
                         ),
                         FormField(
                             id="message.title",

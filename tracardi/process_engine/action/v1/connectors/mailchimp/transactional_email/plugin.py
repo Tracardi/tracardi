@@ -123,7 +123,10 @@ def register() -> Plugin:
                                 name="Message recipient's email",
                                 description="Please provide path to e-mail address of a recipient, or "
                                             "the e-mail address itself.",
-                                component=FormComponent(type="dotPath", props={"label": "E-mail"})
+                                component=FormComponent(type="dotPath", props={"label": "E-mail",
+                                                                               "defaultSourceValue": "profile",
+                                                                               "defaultPathValue": "pii.email"
+                                                                               })
                             ),
                             FormField(
                                 id="message.subject",
