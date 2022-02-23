@@ -58,7 +58,7 @@ def register() -> Plugin:
             className='LanguageDetectAction',
             inputs=["payload"],
             outputs=['response', 'error'],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Patryk Migaj, Risto Kowaczewski",
             manual="lang_detection_action",
@@ -102,9 +102,10 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Language detection',
+            brand='Meaning cloud',
             desc='This plugin detect language from given string with meaningcloud API',
             icon='language',
-            group=["Language"],
+            group=["Machine learning"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

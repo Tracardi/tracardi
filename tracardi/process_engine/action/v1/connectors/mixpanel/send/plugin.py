@@ -101,7 +101,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Send event to MixPanel',
+            name='Register event',
+            brand='MixPanel',
             desc='Sends processed event to MixPanel project.',
             icon='bar-chart',
             group=["Stats"],

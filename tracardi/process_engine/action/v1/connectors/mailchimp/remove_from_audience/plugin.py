@@ -108,10 +108,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Remove from MailChimp audience',
+            name='Remove from audience',
+            brand="MailChimp",
             desc='Removes contact to MailChimp audience or archives it.',
             icon='mailchimp',
-            group=["Connectors"],
+            group=["Mailing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

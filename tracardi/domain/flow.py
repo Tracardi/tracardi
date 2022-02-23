@@ -149,6 +149,7 @@ class SpecRecord(BaseModel):
 
 class MetaDataRecord(BaseModel):
     name: str
+    brand: Optional[str] = ""
     desc: Optional[str] = ""
     keywords: Optional[List[str]] = []
     type: str = 'flowNode'
@@ -166,6 +167,7 @@ class MetaDataRecord(BaseModel):
     def encode(metadata: MetaData) -> 'MetaDataRecord':
         return MetaDataRecord(
             name=metadata.name,
+            brand=metadata.brand,
             desc=metadata.desc,
             keywords=metadata.keywords,
             type=metadata.type,
@@ -183,6 +185,7 @@ class MetaDataRecord(BaseModel):
     def decode(self) -> MetaData:
         return MetaData(
             name=self.name,
+            brand=self.brand,
             desc=self.desc,
             keywords=self.keywords,
             type=self.type,

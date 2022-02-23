@@ -112,20 +112,21 @@ def register() -> Plugin:
                             id="pii.email",
                             name="E-mail",
                             description="Type path to E-mail",
-                            component=FormComponent(type="dotPath", props={"label": "Path to e-mail"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to e-mail", "forceMode": 1})
                         ),
                         FormField(
                             id="pii.phone",
                             name="Phone",
                             description="Type path to phone",
-                            component=FormComponent(type="dotPath", props={"label": "Path to phone"})
+                            component=FormComponent(type="dotPath", props={"label": "Path to phone", "forceMode": 1})
                         )
                     ]
                 ),
             ]),
         ),
         metadata=MetaData(
-            name='Full contact person enrich',
+            name='Enrich profile',
+            brand='Full contact',
             desc='This plugin retrieves data about the provided e-mail from FullContact service.',
             icon='fullcontact',
             group=["Connectors"]

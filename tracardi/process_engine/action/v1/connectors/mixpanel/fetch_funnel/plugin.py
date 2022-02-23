@@ -125,7 +125,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Fetch funnel from MixPanel',
+            name='Fetch funnel',
+            brand='MixPanel',
             desc='Gets funnel given by ID for current profile.',
             icon='bar-chart',
             group=["Stats"],

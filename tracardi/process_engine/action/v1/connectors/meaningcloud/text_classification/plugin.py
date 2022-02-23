@@ -79,7 +79,7 @@ def register() -> Plugin:
             className='TextClassificationAction',
             inputs=["payload"],
             outputs=['payload', 'error'],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski",
             manual="text_classification_action",
@@ -157,8 +157,9 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Text classification',
+            brand='Meaning cloud',
             desc='It connects to the service that classifies a given sentence.',
-            icon='paragraph',
+            icon='ai',
             group=["Machine learning"],
             documentation=Documentation(
                 inputs={

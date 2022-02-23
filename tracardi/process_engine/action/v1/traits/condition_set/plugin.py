@@ -61,10 +61,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Check conditions',
-            desc='That plugin creates an object with results for given conditions.',
-            icon='plugin',
-            group=["Conditions"],
+            name='Resolve conditions',
+            desc='That plugin creates an object with results from resolved condition set.',
+            icon='if',
+            group=["Data processing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

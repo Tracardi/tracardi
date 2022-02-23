@@ -114,10 +114,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Mautic: Subtract points',
+            name='Subtract points',
+            brand='Mautic',
             desc='Subtracts points from a given contact in Mautic, based on provided contact ID.',
             icon='mautic',
-            group=["Connectors"],
+            group=["Marketing automation"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

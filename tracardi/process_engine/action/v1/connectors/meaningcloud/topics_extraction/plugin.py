@@ -1,3 +1,4 @@
+from tracardi.exceptions.exception import TracardiException
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -6,7 +7,6 @@ from .model.config import Config, Token
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.meaningcloud.client import MeaningCloudClient
-from fastapi import HTTPException
 
 
 def validate(config: dict) -> Config:
@@ -34,7 +34,7 @@ class TopicsExtractionPlugin(ActionRunner):
             result = await self.client.topics_extraction(self.config.text, self.config.lang)
             return Result(port="response", value=result)
 
-        except HTTPException as e:
+        except TracardiException as e:
             return Result(port="error", value={"error": str(e)})
 
 
@@ -46,7 +46,7 @@ def register() -> Plugin:
             className='TopicsExtractionPlugin',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
             manual="topics_extraction_action",
@@ -91,9 +91,10 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Extract topics',
+            brand='Meaning cloud',
             desc='Extracts topics from text using MeaningCloud\'s topics extraction API.',
-            icon='plugin',
-            group=["Machine learning", "Connectors"],
+            icon='ai',
+            group=["Machine learning"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

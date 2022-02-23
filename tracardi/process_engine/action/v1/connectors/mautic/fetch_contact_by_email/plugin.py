@@ -107,10 +107,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Mautic: Get contact by email',
+            name='Get contact by email',
+            brand='Mautic',
             desc='Fetches a profile from Mautic, based on provided email address.',
             icon='mautic',
-            group=["Connectors"],
+            group=["Marketing automation"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

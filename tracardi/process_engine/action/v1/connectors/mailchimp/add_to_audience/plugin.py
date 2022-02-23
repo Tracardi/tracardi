@@ -129,10 +129,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Add to MailChimp audience',
+            name='Add to audience',
+            brand="MailChimp",
             desc='Adds contact to MailChimp audience',
             icon='mailchimp',
-            group=["Connectors"],
+            group=["Mailing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

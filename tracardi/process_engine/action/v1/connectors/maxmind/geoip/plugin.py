@@ -99,6 +99,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='GeoIp service',
+            brand='MaxMind',
             desc='This plugin converts IP to location information.',
             icon='location',
             group=["Location"],

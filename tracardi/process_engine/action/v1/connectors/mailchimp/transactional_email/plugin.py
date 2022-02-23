@@ -150,10 +150,11 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Send e-mail',
+            brand='MailChimp',
             desc='Sends transactional e-mail via MailChimp API.',
             type='flowNode',
             icon='mailchimp',
-            group=["Connectors", "E-mail"],
+            group=["Mailing"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

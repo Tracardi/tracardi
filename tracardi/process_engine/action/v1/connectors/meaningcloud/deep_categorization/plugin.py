@@ -1,3 +1,4 @@
+from tracardi.exceptions.exception import TracardiException
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -6,7 +7,6 @@ from .model.config import Config, Token
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.meaningcloud.client import MeaningCloudClient
-from fastapi import HTTPException
 
 
 def validate(config: dict) -> Config:
@@ -30,10 +30,11 @@ class DeepCategorizationPlugin(ActionRunner):
         self.config.text = dot[self.config.text]
 
         try:
+
             result = await self.client.deep_categorization(self.config.text, self.config.model)
             return Result(port="response", value=result)
 
-        except HTTPException as e:
+        except TracardiException as e:
             return Result(port="error", value={"error": str(e)})
 
 
@@ -45,7 +46,7 @@ def register() -> Plugin:
             className='DeepCategorizationPlugin',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
             manual="deep_categorization_action",
@@ -79,7 +80,21 @@ def register() -> Plugin:
                                 name="Model",
                                 description="Please type in the model to analyze your text with (for example "
                                             "IAB_2.0-tier4_en stands for IAB 2.0 Tier 4 model for english language).",
-                                component=FormComponent(type="text", props={"label": "Model"})
+                                component=FormComponent(type="select", props={"label": "Model", "items": {
+                                    "IAB_2.0": "IAB 2.0",
+                                    "IAB_2.0-tier3": "IAB 2.0 Tier3",
+                                    "IAB_2.0-tier4_en": "IAB 2.0 Tier 4",
+                                    "Emotion": 'Emotion',
+                                    "IntentionAnalysis": "Intention analysis",
+                                    "VoC-Generic": "VoC Generic",
+                                    "VoC-Banking": "VoC Banking",
+                                    "VoC-Insurance": "VoC Insurance",
+                                    "VoC-Retail": "VoC Retail",
+                                    "VoC-Telco": "VoC Telco",
+                                    "VoE-Performance": "VoE Performance",
+                                    "VoE-Organization": "VoE Organization",
+                                    "VoE-ExitInterview": "VoE ExitInterview"
+                                }})
                             )
                         ]
                     )
@@ -88,9 +103,10 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Categorize text',
+            brand='Meaning cloud',
             desc='Categorizes text using MeaningCloud\'s deep categorization API.',
-            icon='plugin',
-            group=["Machine learning", "Connectors"],
+            icon='ai',
+            group=["Machine learning"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

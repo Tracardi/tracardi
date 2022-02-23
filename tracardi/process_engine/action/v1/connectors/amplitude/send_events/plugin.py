@@ -427,7 +427,8 @@ def register() -> Plugin:
             manual="amplitude_send_event"
         ),
         metadata=MetaData(
-            name='Amplitude register event',
+            name='Register event',
+            brand='Amplitude',
             desc='Sends request to Amplitude API endpoint to register event.',
             icon='bar-chart',
             group=["Stats"]

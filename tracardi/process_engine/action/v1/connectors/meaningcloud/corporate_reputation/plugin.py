@@ -52,7 +52,7 @@ def register() -> Plugin:
             className='CorporateReputationPlugin',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
             manual="corporate_reputation_action",
@@ -123,9 +123,10 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Corporate reputation',
+            brand='Meaning cloud',
             desc='Corporates reputation using given text with MeaningCloud\'s corporate reputation 2.0 API.',
-            icon='plugin',
-            group=["Machine learning", "Connectors"],
+            icon='ai',
+            group=["Machine learning"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

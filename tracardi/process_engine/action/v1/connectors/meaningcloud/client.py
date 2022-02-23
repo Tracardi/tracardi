@@ -1,14 +1,17 @@
 import aiohttp
-from fastapi import HTTPException
+from aiohttp import ClientTimeout
+
+from tracardi.exceptions.exception import TracardiException
 
 
 class MeaningCloudClient:
 
     def __init__(self, token: str):
         self._token = token
+        self._timeout = 20000
 
     async def deep_categorization(self, txt: str, model: str):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(timeout=ClientTimeout(total=30)) as session:
             async with session.post(
                 url="https://api.meaningcloud.com/deepcategorization-1.0",
                 data={
@@ -19,7 +22,7 @@ class MeaningCloudClient:
             ) as response:
 
                 if response.status != 200 or (await response.json()).get("status", {"code": "1"})["code"] != "0":
-                    raise HTTPException(status_code=response.status, detail=response.content)
+                    raise TracardiException(response.content)
 
                 return await response.json()
 
@@ -36,7 +39,7 @@ class MeaningCloudClient:
             ) as response:
 
                 if response.status != 200 or (await response.json()).get("status", {"code": "1"})["code"] != "0":
-                    raise HTTPException(status_code=response.status, detail=response.content)
+                    raise TracardiException(response.content)
 
                 return await response.json()
 
@@ -61,7 +64,7 @@ class MeaningCloudClient:
             ) as response:
 
                 if response.status != 200 or (await response.json()).get("status", {"code": "1"})["code"] != 0:
-                    raise HTTPException(status_code=response.status, detail=response.content)
+                    raise TracardiException(response.content)
 
                 return await response.json()
 
@@ -78,6 +81,6 @@ class MeaningCloudClient:
             ) as response:
 
                 if response.status != 200 or (await response.json()).get("status", {"code": "1"})["code"] != '0':
-                    raise HTTPException(status_code=response.status, detail=response.content)
+                    raise TracardiException(response.content)
 
                 return await response.json()

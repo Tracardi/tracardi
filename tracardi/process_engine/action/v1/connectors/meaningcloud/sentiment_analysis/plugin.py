@@ -125,6 +125,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Sentiment analysis',
+            brand='Meaning cloud',
             desc='It connects to the service that predicts sentiment from a given sentence.',
             icon='paragraph',
             group=["Machine learning"],
