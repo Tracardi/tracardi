@@ -152,7 +152,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Add contact to Mautic',
             desc='Adds a new contact to Mautic based on provided data.',
-            icon='plugin',
+            icon='mautic',
             group=["Connectors"],
             documentation=Documentation(
                 inputs={
