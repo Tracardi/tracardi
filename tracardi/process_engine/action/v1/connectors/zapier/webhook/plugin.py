@@ -74,10 +74,6 @@ def register() -> Plugin:
                 "body": "{}",
                 "timeout": 30
             },
-            node=NodeEvents(
-                on_remove="test",
-                on_create="create"
-            ),
             form=Form(groups=[
                 FormGroup(
                     name="Zapier webhook settings",
