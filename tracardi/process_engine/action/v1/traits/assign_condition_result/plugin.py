@@ -57,7 +57,11 @@ def register() -> Plugin:
                                             "will be assigned to profile field. "
                                             "(e.g. profile@consents.marketing-consent: "
                                             "profile@consents.marketing EXISTS) Every key must start with 'profile@'.",
-                                component=FormComponent(type="keyValueList", props={"label": "Value"})
+                                component=FormComponent(type="keyValueList", props={
+                                    "label": "Value",
+                                    "defaultKeySource": "profile",
+                                    "lockKeySource": True
+                                })
                             )
                         ]
                     )
