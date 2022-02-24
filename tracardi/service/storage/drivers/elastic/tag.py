@@ -35,6 +35,18 @@ async def get_by_type(event_type):
     return await storage_manager("event-tags").load_by(field="type", value=event_type)
 
 
+async def replace(event_type: str, tags: List[str]):
+    return await storage_manager("event-tags").upsert({
+        "_id": event_type,
+        "type": event_type,
+        "tags": tags
+    })
+
+
+async def refresh():
+    return await storage_manager("event-tags").refresh()
+
+
 async def add(event_type: str, tags: List[str]):
     search_result = await get_by_type(event_type=event_type)
     storage = storage_manager("event-tags")
@@ -77,8 +89,20 @@ async def remove(event_type: str, tags: List[str]):
         raise ValueError("There is no document with 'type' field equal to '{}'.".format(event_type))
 
 
-async def load_tags(limit: int = 100):
-    return await storage_manager("event-tags").load_all(start=0, limit=limit)
+async def load_tags(limit: int = 100, query_string: str = ""):
+    if not query_string:
+        return (await storage_manager("event-tags").load_all(start=0, limit=limit)).dict()["result"]
+    else:
+        query = {
+            "from": 0,
+            "size": limit,
+            "query": {
+                "wildcard": {
+                    "type": f"{query_string}*"
+                }
+            }
+        }
+        return [record["_source"] for record in (await storage_manager("event-tags").query(query))["hits"]["hits"]]
 
 
 async def delete(event_type: str):
