@@ -1,8 +1,16 @@
+import re
+
 from dotty_dict import dotty
 from pydantic import BaseModel
 
+dot_notation_regex = re.compile(r"(?:payload|profile|event|session|flow|memory)@[\[\]0-9a-zA-a_\-\.]+(?<![\.\[])")
+
 
 class DotAccessor:
+
+    @staticmethod
+    def validate(dot_notation: str):
+        return dot_notation_regex.match(dot_notation) is not None
 
     def _convert(self, data, label):
         if data is None:

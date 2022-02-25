@@ -9,6 +9,7 @@ from typing import Tuple
 
 COLLECTED = 'collected'
 VALIDATED = 'validated'
+INVALID = 'invalid'
 PROCESSED = 'processed'
 WARNING = 'warning'
 ERROR = 'error'

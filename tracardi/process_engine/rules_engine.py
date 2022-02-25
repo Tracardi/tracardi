@@ -6,7 +6,7 @@ from collections import defaultdict
 from time import time
 from typing import Dict, List, Tuple, Optional
 from pydantic import ValidationError
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, INVALID
 
 from tracardi.service.wf.domain.debug_info import DebugInfo
 from tracardi.service.wf.domain.error_debug_info import ErrorDebugInfo
@@ -27,6 +27,7 @@ from ..exceptions.log_handler import log_handler
 logger = logging.getLogger("Segmentation")
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+
 
 class RulesEngine:
 
@@ -53,8 +54,15 @@ class RulesEngine:
 
         for rules_loading_task, event in self.events_rules:
 
+            # skip invalid events
+            if event.metadata.status == INVALID:
+                continue
+
             # Loads rules only for event.type
             rules = await rules_loading_task
+
+            if len(rules) == 0:
+                logger.info(f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")
 
             for rule in rules:
 
@@ -79,7 +87,10 @@ class RulesEngine:
                     continue
 
                 if not rule.enabled:
+                    logger.info(f"Rule {rule.name} skipped. Rule is disabled.")
                     continue
+
+                logger.info(f"Running rule {rule.name}")
 
                 try:
 

@@ -7,7 +7,12 @@ from dotty_dict import Dotty
 
 def validate(dot: DotAccessor, validator: EventPayloadValidator) -> None:
     for key, val_schema in validator.validation.items():
+        if not DotAccessor.validate(key):
+            raise EventValidationException(
+                f"Please correct the reference to data in your validation schema. Expected dot notation got {key}")
+
         try:
-            jsonschema.validate(dot[key].to_dict() if isinstance(dot[key], Dotty) else dot[key], val_schema)
+            value = dot[key].to_dict() if isinstance(dot[key], Dotty) else dot[key]
+            jsonschema.validate(value, val_schema)
         except (jsonschema.ValidationError, KeyError) as e:
             raise EventValidationException("{}: {}".format(key, str(e)))

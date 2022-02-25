@@ -33,7 +33,7 @@ async def load_rule(event_type: str, source_id: str):
                 "must": [
                     {
                         "term": {
-                            "event.type": event_type
+                            "event.type": event_type.strip()
                         }
                     },
                     {
@@ -51,12 +51,11 @@ async def load_rule(event_type: str, source_id: str):
         }
     }
 
-    logger.info("Loading routing rules with {}".format(query))
-
     # todo set MemoryCache ttl from env
     memory_cache = MemoryCache()
 
     if 'rules' not in memory_cache:
+        logger.info("Loading routing rules with {}".format(query))
         flows_data = await storage_manager(index="rule").filter(query)
         memory_cache['rules'] = CacheItem(data=flows_data, ttl=1)
 
