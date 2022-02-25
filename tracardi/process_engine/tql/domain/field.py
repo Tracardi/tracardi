@@ -1,3 +1,6 @@
+from tracardi.process_engine.tql.domain.missing_value import MissingValue
+
+
 class Field:
     def __init__(self, label, value_ref):
         self.label = label
@@ -6,7 +9,10 @@ class Field:
 
     def _get_value(self):
         if self.value is None:
-            self.value = self.dot[self.label]
+            try:
+                self.value = self.dot[self.label]
+            except KeyError as e:
+                return MissingValue(str(e))
         return self.value
 
     def __eq__(self, other):

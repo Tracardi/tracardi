@@ -175,7 +175,6 @@ def register() -> Plugin:
             emits_event={
                 "Consent preferences": 'user-consent-pref',
                 "Agree all": 'agree-all-event-type',
-                "Close": 'agree-all-event-type'
             }
         )
     )
