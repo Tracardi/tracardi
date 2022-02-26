@@ -14,18 +14,19 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class MauticSegmentAdder(ActionRunner):
+class MauticPointsEditor(ActionRunner):
 
     @staticmethod
-    async def build(**kwargs) -> 'MauticSegmentAdder':
+    async def build(**kwargs) -> 'MauticPointsEditor':
         config = Config(**kwargs)
         resource = await storage.driver.resource.load(config.source.id)
-        return MauticSegmentAdder(config, resource)
+        return MauticPointsEditor(config, resource)
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
         self.resource = resource
         self.client = MauticClient(**self.resource.credentials.get_credentials(self, None))
+        self.actions = {"add": self.client.add_points, "subtract": self.client.subtract_points}
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
@@ -33,14 +34,14 @@ class MauticSegmentAdder(ActionRunner):
         self.config.contact_id = dot[self.config.contact_id]
 
         try:
-            await self.client.add_to_segment(int(self.config.contact_id), int(self.config.add_to))
+            await self.actions[self.config.action](int(self.config.contact_id), int(self.config.points))
             return Result(port="success", value=payload)
 
         except MauticClientAuthException:
             try:
                 await self.client.update_token()
 
-                await self.client.add_to_segment(int(self.config.contact_id), int(self.config.add_to))
+                await self.actions[self.config.action](int(self.config.contact_id), int(self.config.points))
 
                 if self.debug:
                     self.resource.credentials.test = self.client.credentials
@@ -68,20 +69,21 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='MauticSegmentAdder',
+            className='MauticPointsEditor',
             inputs=["payload"],
             outputs=["success", "error"],
             version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
-            manual="add_to_segment_in_mautic_action",
+            manual="edit_points_in_mautic_action",
             init={
                 "source": {
                     "id": None,
                     "name": None
                 },
+                "action": None,
                 "contact_id": None,
-                "add_to": None
+                "points": None
             },
             form=Form(
                 groups=[
@@ -96,18 +98,27 @@ def register() -> Plugin:
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "mautic"})
                             ),
                             FormField(
+                                id="action",
+                                name="Action",
+                                description="Please define whether you want to add or subtract given amount of points "
+                                            "from given contact.",
+                                component=FormComponent(type="select", props={"label": "Action", "items": {
+                                    "add": "Add",
+                                    "subtract": "Subtract"
+                                }})
+                            ),
+                            FormField(
                                 id="contact_id",
                                 name="Contact ID",
-                                description="Please type in the path to ID of the contact that you want to add to"
-                                            " the segment.",
+                                description="Please type in the path to ID of the contact that you want to add "
+                                            "or subtract points from.",
                                 component=FormComponent(type="dotPath", props={"label": "ID"})
                             ),
                             FormField(
-                                id="add_to",
-                                name="Add to segment",
-                                description="Please type in the ID of the segment that you want to add given contact"
-                                            " to.",
-                                component=FormComponent(type="text", props={"label": "Add to"})
+                                id="points",
+                                name="Number of points",
+                                description="Please type in the number of points that you want to add or subtract.",
+                                component=FormComponent(type="text", props={"label": "Points"})
                             )
                         ]
                     )
@@ -115,9 +126,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Add to segment',
+            name='Edit points',
             brand='Mautic',
-            desc='Adds Mautic contact to segment, based on provided contact ID.',
+            desc='Adds or subtracts points from a given contact in Mautic, based on provided contact ID.',
             icon='mautic',
             group=["Marketing automation"],
             documentation=Documentation(
