@@ -4,8 +4,15 @@ from tracardi.domain.named_entity import NamedEntity
 
 class Config(BaseModel):
     source: NamedEntity
+    action: str
     contact_id: str
     points: str
+
+    @validator("action")
+    def validate_action(cls, value):
+        if value is None or value not in ("add", "subtract"):
+            raise ValueError("Action parameter must be either 'add' or 'subtract'.")
+        return value
 
     @validator("contact_id")
     def validate_contact_id(cls, value):
