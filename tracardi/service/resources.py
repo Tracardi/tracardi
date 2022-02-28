@@ -25,11 +25,23 @@ def get_resource_types():
                 "virtual_host": None,
                 "port": 5672
             },
-            "tags": ['rabbitmq', 'pro'],
+            "tags": ['rabbitmq', 'pro', 'destination'],
             "name": "RabbitMQ",
             "icon": "rabbitmq",
-            "pro": True,
-            "package": "tracardi.process_engine.destination.rabbitmq_connector.RabbitMqConnector"
+            "destination": {
+                "package": "tracardi.process_engine.destination.rabbitmq_connector.RabbitMqConnector",
+                "init": {
+                    "queue": {
+                        "name": None,
+                        "routing_key": "routing",
+                        "queue_type": "direct",
+                        "compression": None,
+                        "auto_declare": True,
+                        "serializer": "json"
+                    }
+                },
+                "form": {}
+            }
         },
         "aws": {
             "config": {

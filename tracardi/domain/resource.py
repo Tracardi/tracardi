@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import Optional, Any, List, Union, Type
 from pydantic import BaseModel
+
+from .destination import DestinationConfig
 from .entity import Entity
 from .value_object.storage_info import StorageInfo
-from ..service.secrets import encrypt, decrypt
+from ..service.secrets import encrypt, decrypt, b64_decoder, b64_encoder
 
 
 class ResourceCredentials(BaseModel):
@@ -29,6 +31,7 @@ class Resource(Entity):
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
     icon: str = None
+    destination: Optional[DestinationConfig] = None
     enabled: Optional[bool] = True
     consent: bool = False
 
@@ -45,6 +48,9 @@ class Resource(Entity):
             Resource
         )
 
+    def is_destination(self):
+        return self.destination is not None
+
 
 class ResourceRecord(Entity):
     type: str
@@ -56,6 +62,7 @@ class ResourceRecord(Entity):
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
     icon: str = None
+    destination: Optional[str] = None
     consent: bool = False
 
     def __init__(self, **data: Any):
@@ -70,8 +77,10 @@ class ResourceRecord(Entity):
             description=resource.description,
             type=resource.type,
             tags=resource.tags,
+            destination=b64_encoder(resource.destination.dict()) if resource.destination else None,
             groups=resource.groups,
             enabled=resource.enabled,
+            icon=resource.icon,
             consent=resource.consent,
             credentials=encrypt(resource.credentials)
         )
@@ -87,7 +96,9 @@ class ResourceRecord(Entity):
             description=self.description,
             type=self.type,
             tags=self.tags,
+            destination=b64_decoder(self.destination),
             groups=self.groups,
+            icon=self.icon,
             enabled=self.enabled,
             consent=self.consent,
             credentials=ResourceCredentials(**decrypted)
@@ -101,3 +112,6 @@ class ResourceRecord(Entity):
             'resource',
             ResourceRecord
         )
+
+    def is_destination(self):
+        return self.destination is not None
