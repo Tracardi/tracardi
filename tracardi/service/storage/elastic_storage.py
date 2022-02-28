@@ -94,6 +94,17 @@ class ElasticStorage:
         }
         return await self.search(query)
 
+    async def count_by_query_string(self, query_string: str, time_range: str):
+        query = {
+            "size": 0,
+            "query": {
+                "query_string": {
+                    "query": f"metadata.time.insert:[now{time_range} TO now] AND ({query_string})"
+                }
+            },
+        }
+        return (await self.search(query))["hits"]["total"]["value"]
+
     async def load_by(self, field, value, limit=100):
         query = {
             "size": limit,
