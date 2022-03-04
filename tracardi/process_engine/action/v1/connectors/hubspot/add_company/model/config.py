@@ -6,3 +6,4 @@ from typing import Dict, Any
 class Config(BaseModel):
     source: NamedEntity
     properties: Dict[str, Any]
+    is_token_got: bool

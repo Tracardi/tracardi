@@ -12,11 +12,34 @@ class HubSpotClientAuthException(Exception):
 
 class HubSpotClient:
 
-    def __init__(self, refresh_token: str, client_secret: str, client_id: str, token: str):
+    def __init__(self, client_secret: str, client_id: str, access_token: str, refresh_token: str, redirect_url: str,
+                 code: str):
         self.client_id = client_id
         self.client_secret = client_secret
+        self.access_token = access_token
         self.refresh_token = refresh_token
-        self.token = token
+        self.redirect_url = redirect_url
+        self.code = code
+
+    async def get_token(self) -> None:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                    url="https://api.hubapi.com/oauth/v1/token",
+                    headers={
+                        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+                        "Data": f"grant_type=authorization_code&client_id={self.client_id}&client_secret="
+                                f"{self.client_secret}&redirect_uri={self.redirect_url}&code={self.code}"
+                    },
+            ) as response:
+
+                if response.status == 401:
+                    raise HubSpotClientException("Provided credentials are invalid. Check them in resources.")
+
+                if response.status != 200 or "error" in await response.text() or "errors" in await response.json():
+                    raise HubSpotClientException(await response.text())
+
+                self.access_token = (await response.json())["access_token"]
+                self.refresh_token = (await response.json())["refresh_token"]
 
     async def update_token(self) -> None:
         async with aiohttp.ClientSession() as session:
@@ -35,13 +58,14 @@ class HubSpotClient:
                 if response.status != 200 or "error" in await response.text() or "errors" in await response.json():
                     raise HubSpotClientException(await response.text())
 
-                self.token = (await response.json())["access_token"]
+                self.access_token = (await response.json())["access_token"]
+                self.refresh_token = (await response.json())["refresh_token"]
 
     async def add_company(self, properties) -> dict:
         data = {"properties": properties}
 
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
-                                                  "Authorization": f"Bearer {self.token}"}) as session:
+                                                  "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.post(
                     url="https://api.hubapi.com/companies/v2/companies",
                     data=data
@@ -60,7 +84,7 @@ class HubSpotClient:
         data = {"properties": properties}
 
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
-                                                  "Authorization": f"Bearer {self.token}"}) as session:
+                                                  "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.post(
                     url='https://api.hubapi.com/contacts/v1/contact/',
                     data=data
@@ -92,7 +116,7 @@ class HubSpotClient:
             })
 
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
-                                                  "Authorization": f"Bearer {self.token}"}) as session:
+                                                  "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.post(
                     url="https://api.hubapi.com/marketing-emails/v1/emails",
                     data=data
@@ -109,7 +133,7 @@ class HubSpotClient:
 
     async def get_company(self, company_id: int):
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
-                                                  "Authorization": f"Bearer {self.token}"}) as session:
+                                                  "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.get(url=f"https://api.hubapi.com/contacts/v1/contact/vid/{company_id}") as response:
 
                 if response.status == 401:
@@ -123,7 +147,7 @@ class HubSpotClient:
 
     async def get_contact(self, contact_id: int):
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
-                                                  "Authorization": f"Bearer {self.token}"}) as session:
+                                                  "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.get(url=f"https://api.hubapi.com/contacts/v1/contact/vid/{contact_id}") as response:
                 if response.status == 401:
                     raise HubSpotClientAuthException()
@@ -139,7 +163,7 @@ class HubSpotClient:
         data = {"properties": properties}
 
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
-                                                  "Authorization": f"Bearer {self.token}"}) as session:
+                                                  "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.post(
                     url=f"https://api.hubapi.com/contacts/v1/contact/vid/{company_id}",
                     data=data
@@ -157,7 +181,7 @@ class HubSpotClient:
     async def update_contact(self, contact_id, properties) -> dict:
         data = {"properties": properties}
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
-                                                  "Authorization": f"Bearer {self.token}"}) as session:
+                                                  "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.post(
                     url=f'https://api.hubapi.com/contacts/v1/contact/vid/{contact_id}',
                     data=data
@@ -172,12 +196,13 @@ class HubSpotClient:
 
                 return await response.json()
 
-
     @property
     def credentials(self):
         return {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "refresh_token": self.refresh_token,
-            "token": self.token
+            "access_token": self.access_token,
+            "redirect_url": self.redirect_url,
+            "code": self.code,
         }

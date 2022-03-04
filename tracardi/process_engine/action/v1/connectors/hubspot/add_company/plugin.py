@@ -58,6 +58,9 @@ class HubSpotCompanyAdder(ActionRunner):
 
         except HubSpotClientAuthException:
             try:
+                if self.config.is_token_got is False:
+                    await self.client.get_token()
+
                 await self.client.update_token()
 
                 result = await self.client.add_company(
@@ -100,9 +103,13 @@ def register() -> Plugin:
             init={
                 "source": {
                     "client_id": None,
-                    "client_secret": None
+                    "client_secret": None,
+                    "refresh_token": None,
+                    "redirect_uri": None,
+                    "code": None,
                 },
-                "properties": []
+                "is_token_got": True,
+                "properties": [],
             },
             form=Form(
                 groups=[
@@ -113,8 +120,16 @@ def register() -> Plugin:
                                 id="source",
                                 name="HubSpot resource",
                                 description="Please select your HubSpot resource, containing your client id and "
-                                            "client secret",
+                                            "client secret.\n"
+                                            "If you haven't got access token yet, you also should select your "
+                                            "redirect url and your code.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "hubspot"})
+                            ),
+                            FormField(
+                                id="is_token_got",
+                                name="Is token got",
+                                description="Please select true if you've got token or false if you haven't.",
+                                component=FormComponent(type="keyValueList", props={"label": "Fields"}),
                             ),
                             FormField(
                                 id="properties",
@@ -123,7 +138,7 @@ def register() -> Plugin:
                                             "the field as key, and a path as a value for this field. This is fully "
                                             "optional.",
                                 component=FormComponent(type="keyValueList", props={"label": "Fields"})
-                            )
+                            ),
                         ]
                     )
                 ]
