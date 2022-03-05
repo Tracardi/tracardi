@@ -234,9 +234,9 @@ def get_resource_types():
 
 def get_destinations():
     resource_types = get_resource_types()
-    for _, resource_type in resource_types.items():
-        if 'package' in resource_type:
-            yield resource_type['package'], resource_type
+    for resource_type in resource_types.values():
+        if 'destination' in resource_type:
+            yield resource_type["destination"]['package'], resource_type
 
 
 def get_type_of_resources():
