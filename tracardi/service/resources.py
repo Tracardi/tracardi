@@ -211,8 +211,16 @@ def get_resource_types():
                 "private_key": "<client-private-key>",
                 "api_url": "<url-of-mautic-instance>"
             },
+            "icon": "mautic",
             "tags": ["mautic"],
-            "name": "Mautic"
+            "name": "Mautic",
+            "destination": {
+                "package": "tracardi.process_engine.destination.mautic_connector.MauticConnector",
+                "init": {
+                    "overwrite_with_blank": False
+                },
+                "form": {}
+            }
         },
         "airtable": {
             "config": {
