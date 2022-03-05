@@ -18,7 +18,7 @@ class MauticConnector(Connector):
             await client.add_contact(
                 data["email"],
                 self.destination.destination.init["overwrite_with_blank"],
-                **data
+                **{key: value for key, value in data.items() if key not in ("overwrite_with_blank", "email")}
             )
 
         except MauticClientAuthException:
@@ -26,7 +26,7 @@ class MauticConnector(Connector):
             await client.add_contact(
                 data["email"],
                 self.destination.destination.init["overwrite_with_blank"],
-                **data
+                **{key: value for key, value in data.items() if key not in ("overwrite_with_blank", "email")}
             )
 
             if self.debug:
