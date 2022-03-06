@@ -92,8 +92,6 @@ def register() -> Plugin:
             name='Key counter',
             desc='Counts keys and saves it in profile.',
             type='flowNode',
-            width=200,
-            height=100,
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON like object.")

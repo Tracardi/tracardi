@@ -211,8 +211,14 @@ def get_resource_types():
                 "private_key": "<client-private-key>",
                 "api_url": "<url-of-mautic-instance>"
             },
+            "icon": "mautic",
             "tags": ["mautic"],
-            "name": "Mautic"
+            "name": "Mautic",
+            "destination": {
+                "package": "tracardi.process_engine.destination.rabbitmq_connector.MauticConnector",
+                "init": {},
+                "form": {}
+            }
         },
         "airtable": {
             "config": {
@@ -227,8 +233,8 @@ def get_resource_types():
 def get_destinations():
     resource_types = get_resource_types()
     for _, resource_type in resource_types.items():
-        if 'package' in resource_type:
-            yield resource_type['package'], resource_type
+        if 'destination' in resource_type:
+            yield resource_type['destination'], resource_type
 
 
 def get_type_of_resources():
