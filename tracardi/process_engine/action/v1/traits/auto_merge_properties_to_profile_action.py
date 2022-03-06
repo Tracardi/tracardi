@@ -56,8 +56,7 @@ class AutoMergePropertiesToProfileAction(ActionRunner):
     async def run(self, payload):
         if self.profile is not None:
 
-            if self.debug is not True:
-                self.profile.operation.update = True
+            self.update_profile()
 
             if self.config.traits_type == 'private':
                 self.profile.traits.private = self._update(self.profile.traits.private, self.event.properties)

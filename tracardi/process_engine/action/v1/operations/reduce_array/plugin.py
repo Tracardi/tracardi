@@ -58,7 +58,7 @@ def register() -> Plugin:
                                 id="array",
                                 name="Path to array",
                                 description="Please provide a path to an array that you want to reduce.",
-                                component=FormComponent(type="dotPath", props={"label": "Array"})
+                                component=FormComponent(type="dotPath", props={"label": "Array", "defaultSourceValue": "event"})
                             )
                         ]
                     )
@@ -68,7 +68,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Reduce array',
             desc='Reduces given array.',
-            icon='plugin',
+            icon='array',
             group=["Operations"],
             documentation=Documentation(
                 inputs={
