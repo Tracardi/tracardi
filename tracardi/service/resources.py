@@ -215,8 +215,10 @@ def get_resource_types():
             "tags": ["mautic"],
             "name": "Mautic",
             "destination": {
-                "package": "tracardi.process_engine.destination.rabbitmq_connector.MauticConnector",
-                "init": {},
+                "package": "tracardi.process_engine.destination.mautic_connector.MauticConnector",
+                "init": {
+                    "overwrite_with_blank": False
+                },
                 "form": {}
             }
         },
@@ -232,10 +234,9 @@ def get_resource_types():
 
 def get_destinations():
     resource_types = get_resource_types()
-    for _, resource_type in resource_types.items():
+    for resource_type in resource_types.values():
         if 'destination' in resource_type:
-            yield resource_type['destination'], resource_type
-
+            yield resource_type["destination"]['package'], resource_type
 
 def get_type_of_resources():
     resource_types = get_resource_types()

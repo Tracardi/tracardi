@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any, List, Union, Type
+from typing import Optional, Any, List, Union, Type, Dict
 from pydantic import BaseModel
 
 from .destination import DestinationConfig
@@ -62,7 +62,7 @@ class ResourceRecord(Entity):
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
     icon: str = None
-    destination: Optional[str] = None
+    destination: Optional[Dict[str, str]] = None
     consent: bool = False
 
     def __init__(self, **data: Any):
@@ -77,7 +77,11 @@ class ResourceRecord(Entity):
             description=resource.description,
             type=resource.type,
             tags=resource.tags,
-            destination=b64_encoder(resource.destination.dict()) if resource.destination else None,
+            destination={
+                "package": resource.destination.package,
+                "init": b64_encoder(resource.destination.init),
+                "form": b64_encoder(resource.destination.form)
+            } if resource.destination is not None else None,
             groups=resource.groups,
             enabled=resource.enabled,
             icon=resource.icon,
@@ -96,7 +100,11 @@ class ResourceRecord(Entity):
             description=self.description,
             type=self.type,
             tags=self.tags,
-            destination=b64_decoder(self.destination),
+            destination={
+                "package": self.destination["package"],
+                "init": b64_decoder(self.destination["init"]),
+                "form": b64_decoder(self.destination["form"])
+            } if self.destination is not None else None,
             groups=self.groups,
             icon=self.icon,
             enabled=self.enabled,
