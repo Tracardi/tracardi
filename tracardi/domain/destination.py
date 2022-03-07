@@ -17,6 +17,15 @@ class DestinationConfig(BaseModel):
             raise ValueError("Destination package cannot be empty")
         return value
 
+    def encode(self):
+        return b64_encoder(self)
+
+    @staticmethod
+    def decode(encoded_string) -> "DestinationConfig":
+        return DestinationConfig(
+            **b64_decoder(encoded_string)
+        )
+
 
 class Destination(NamedEntity):
     description: Optional[str] = ""
@@ -53,7 +62,7 @@ class DestinationRecord(NamedEntity):
             resource=self.resource,
             name=self.name,
             description=self.description,
-            destination=b64_decoder(self.destination),
+            destination=DestinationConfig.decode(self.destination) if self.destination is not None else None,
             enabled=self.enabled,
             tags=self.tags,
             mapping=b64_decoder(self.mapping) if self.mapping else {},
@@ -66,7 +75,7 @@ class DestinationRecord(NamedEntity):
             resource=destination.resource,
             name=destination.name,
             description=destination.description,
-            destination=b64_encoder(destination.destination),
+            destination=destination.destination.encode() if destination.destination else None,
             enabled=destination.enabled,
             tags=destination.tags,
             mapping=b64_encoder(destination.mapping),

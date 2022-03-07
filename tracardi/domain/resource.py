@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Optional, Any, List, Union, Type, Dict
+from typing import Optional, Any, List, Union, Type
 from pydantic import BaseModel
 
 from .destination import DestinationConfig
 from .entity import Entity
 from .value_object.storage_info import StorageInfo
-from ..service.secrets import encrypt, decrypt, b64_decoder, b64_encoder
+from ..service.secrets import encrypt, decrypt
 
 
 class ResourceCredentials(BaseModel):
@@ -62,7 +62,7 @@ class ResourceRecord(Entity):
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
     icon: str = None
-    destination: Optional[Dict[str, str]] = None
+    destination: Optional[str] = None
     consent: bool = False
 
     def __init__(self, **data: Any):
@@ -77,11 +77,7 @@ class ResourceRecord(Entity):
             description=resource.description,
             type=resource.type,
             tags=resource.tags,
-            destination={
-                "package": resource.destination.package,
-                "init": b64_encoder(resource.destination.init),
-                "form": b64_encoder(resource.destination.form)
-            } if resource.destination is not None else None,
+            destination=resource.destination.encode() if resource.destination else None,
             groups=resource.groups,
             enabled=resource.enabled,
             icon=resource.icon,
@@ -100,11 +96,7 @@ class ResourceRecord(Entity):
             description=self.description,
             type=self.type,
             tags=self.tags,
-            destination={
-                "package": self.destination["package"],
-                "init": b64_decoder(self.destination["init"]),
-                "form": b64_decoder(self.destination["form"])
-            } if self.destination is not None else None,
+            destination=DestinationConfig.decode(self.destination) if self.destination is not None else None,
             groups=self.groups,
             icon=self.icon,
             enabled=self.enabled,
