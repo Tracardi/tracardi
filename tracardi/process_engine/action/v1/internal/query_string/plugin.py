@@ -24,9 +24,12 @@ class CountRecordsAction(ActionRunner):
         self.config.query = template.render(self.config.query, dot)
 
         try:
+
+            time_span = parse_time(self.config.time_range)
+
             result = await storage_manager(self.config.index).storage.count_by_query_string(
                 self.config.query,
-                f"{parse_time(self.config.time_range)}s" if parse_time(self.config.time_range) < 0 else ""
+                f"{time_span}s" if time_span < 0 else ""
             )
 
         except ElasticsearchException as e:
@@ -50,7 +53,7 @@ def register() -> Plugin:
             init={
                 "index": None,
                 "time_range": None,
-                "query": None
+                "query": ""
             },
             form=Form(
                 groups=[
@@ -78,7 +81,7 @@ def register() -> Plugin:
                                 id="query",
                                 name="Query string",
                                 description="Please provide a query string that will match records to be counted. "
-                                            "(e.g. consents.marketing_consent:true). You can use dot template as well.",
+                                            "(e.g. type:\"page-view\"). You can use dot template as well.",
                                 component=FormComponent(type="textarea", props={"label": "Query"})
                             ),
                         ]
@@ -87,8 +90,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Count records by query string',
-            desc='Counts records from local Tracardi database, based on given index and query string.',
+            name='Count records',
+            desc='Counts event, profile, or session records.Records can be filtered by query sting.',
             icon='plugin',
             group=["Stats"],
             documentation=Documentation(

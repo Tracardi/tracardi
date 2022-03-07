@@ -5,7 +5,7 @@ from pytimeparse import parse as parse_time
 class Config(BaseModel):
     index: str
     time_range: str
-    query: str
+    query: str = ""
 
     @validator("time_range")
     def validate_time_range(cls, value):
@@ -15,6 +15,6 @@ class Config(BaseModel):
 
     @validator("query")
     def validate_query(cls, value):
-        if value is None or len(value) == 0:
+        if value is None:
             raise ValueError("This field cannot be empty")
         return value
