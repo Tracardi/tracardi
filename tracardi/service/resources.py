@@ -238,7 +238,6 @@ def get_destinations():
         if 'destination' in resource_type:
             yield resource_type["destination"]['package'], resource_type
 
-
 def get_type_of_resources():
     resource_types = get_resource_types()
     for key, resource_type in resource_types.items():
