@@ -1,5 +1,12 @@
 import asyncio
-from datetime import datetime
+import logging
+
+from tracardi.config import tracardi
+from tracardi.exceptions.log_handler import log_handler
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 # todo this works only in one threaded env.
@@ -45,12 +52,15 @@ class PostponedCall:
         self.wait = 60
 
     def _postpone_call(self, loop):
-        if cache.get_postpone(self.profile_id, False):
-            loop.call_later(self.wait, self._postpone_call, loop)
-            cache.set_postpone(self.profile_id, False)
-        else:
-            asyncio.ensure_future(self.callable_coroutine(*self.args))
-            cache.reset(self.profile_id)
+        try:
+            if cache.get_postpone(self.profile_id, False):
+                loop.call_later(self.wait, self._postpone_call, loop)
+                cache.set_postpone(self.profile_id, False)
+            else:
+                asyncio.ensure_future(self.callable_coroutine(*self.args))
+                cache.reset(self.profile_id)
+        except Exception as e:
+            logger.error(str(e))
 
     def run(self, loop):
         if cache.get_schedule(self.profile_id, False) is False:

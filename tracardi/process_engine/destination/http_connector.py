@@ -1,13 +1,23 @@
+import asyncio
 import json
+import logging
 
 import aiohttp
 from typing import Optional
+
+from aiohttp import ClientConnectorError
 from pydantic import BaseModel, AnyHttpUrl
+
+from tracardi.config import tracardi
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.utils.dictonary import flatten
-
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
-
 from tracardi.process_engine.destination.connector import Connector
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 class HttpCredentials(BaseModel):
@@ -53,31 +63,37 @@ class HttpConnector(Connector):
                                                                                name))
 
     async def run(self, data, delta):
+        try:
+            credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
+            credentials = HttpCredentials(**credentials)
 
-        credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
-        credentials = HttpCredentials(**credentials)
+            init = self.destination.destination.init
 
-        init = self.destination.destination.init
+            config = HttpConfiguration(**init)
 
-        config = HttpConfiguration(**init)
+            self._validate_key_value(config.headers, "Header")
+            self._validate_key_value(config.cookies, "Cookie")
 
-        self._validate_key_value(config.headers, "Header")
-        self._validate_key_value(config.cookies, "Cookie")
+            timeout = aiohttp.ClientTimeout(total=config.timeout)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.request(
+                        method=config.method,
+                        url=str(credentials.url),
+                        headers=config.headers,
+                        cookies=config.cookies,
+                        ssl=config.ssl_check,
+                        **config.get_params(data)
+                ) as response:
+                    result = {
+                        "status": response.status,
+                        "content": await response.json(),
+                        "cookies": response.cookies
+                    }
 
-        timeout = aiohttp.ClientTimeout(total=config.timeout)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.request(
-                    method=config.method,
-                    url=str(credentials.url),
-                    headers=config.headers,
-                    cookies=config.cookies,
-                    ssl=config.ssl_check,
-                    **config.get_params(data)
-            ) as response:
-                result = {
-                    "status": response.status,
-                    "content": await response.json(),
-                    "cookies": response.cookies
-                }
+                    # todo log
 
-                # todo log
+        except ClientConnectorError as e:
+            logger.error(str(e))
+
+        except asyncio.exceptions.TimeoutError as e:
+            logger.error(str(e))
