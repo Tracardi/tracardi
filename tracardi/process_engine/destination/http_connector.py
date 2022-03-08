@@ -80,4 +80,4 @@ class HttpConnector(Connector):
                     "cookies": response.cookies
                 }
 
-                print(result)
+                # todo log

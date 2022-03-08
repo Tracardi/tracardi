@@ -39,6 +39,9 @@ class DestinationManager:
             # Load resource
             resource = await storage.driver.resource.load(destination.resource.id)
 
+            if resource.enabled is False:
+                raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
+
             # Pass resource to destination class
 
             destination_instance = destination_class(debug, resource, destination)
