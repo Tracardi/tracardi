@@ -1,6 +1,6 @@
 import json
 from json import JSONDecodeError
-from typing import Optional, Union
+from typing import Optional
 from enum import Enum
 
 from tracardi.service.notation.dict_traverser import DictTraverser

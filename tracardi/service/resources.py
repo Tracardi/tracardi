@@ -15,8 +15,22 @@ def get_resource_types():
                 "username": "<username>",
                 "password": "<password>"
             },
-            "tags": ['api'],
-            "name": "API endpoint"
+            "tags": ['api', "destination"],
+            "name": "API endpoint",
+            "icon": "cloud",
+            "destination": {
+                "package": "tracardi.process_engine.destination.http_connector.HttpConnector",
+                "init": {
+                    "method": "post",
+                    "timeout": 30,
+                    "headers": {
+                        "content-type": "application/json"
+                    },
+                    "cookies": {},
+                    "ssl_check": True
+                },
+                "form": {}
+            }
         },
         "rabbitMQ": {
             "config": {
@@ -212,7 +226,7 @@ def get_resource_types():
                 "api_url": "<url-of-mautic-instance>"
             },
             "icon": "mautic",
-            "tags": ["mautic"],
+            "tags": ["mautic", "destination"],
             "name": "Mautic",
             "destination": {
                 "package": "tracardi.process_engine.destination.mautic_connector.MauticConnector",
