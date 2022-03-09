@@ -81,7 +81,8 @@ class Resource:
             "destination": Index(multi_index=False, index='tracardi-destination',
                                  mapping="mappings/destination-index.json",
                                  rel=None),
-
+            "user-logs": Index(multi_index=True, index="tracardi-user-log", mapping="mappings/user-log-index.json",
+                               rel=None)
         }
 
     def add_indices(self, indices: dict):
