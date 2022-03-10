@@ -121,7 +121,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Inject',
-            desc='Inject .',
+            desc='Injects data into selected object (e.g. payload, event properties, session context, etc).',
             keywords=['start node'],
             icon='json',
             group=["Input/Output"],

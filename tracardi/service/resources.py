@@ -106,7 +106,8 @@ def get_resource_types():
                 "verify_certs": True
             },
             "tags": ['elastic'],
-            "name": "Elasticsearch"
+            "name": "Elasticsearch",
+            "icon": "elasticsearch"
         },
         "pushover": {
             "config": {
@@ -114,7 +115,8 @@ def get_resource_types():
                 "user": "<user>"
             },
             "tags": ['pushover', 'message'],
-            "name": "Pushover"
+            "name": "Pushover",
+            "icon": "pushover"
         },
         "mysql": {
             "config": {
@@ -125,7 +127,8 @@ def get_resource_types():
                 "database": "<database>"
             },
             "tags": ['mysql', 'database'],
-            "name": "MySQL"
+            "name": "MySQL",
+            "icon": "mysql"
 
         },
         "mqtt": {
@@ -150,7 +153,8 @@ def get_resource_types():
                 "password": "<password>"
             },
             "tags": ['redis'],
-            "name": "Redis"
+            "name": "Redis",
+            "icon": "redis"
 
         },
         "mongodb": {
@@ -159,7 +163,8 @@ def get_resource_types():
                 "timeout": 5000
             },
             "tags": ['mongo', 'database', 'nosql'],
-            "name": "MongoDB"
+            "name": "MongoDB",
+            "icon": "mongo"
         },
         "trello": {
             "config": {
@@ -198,7 +203,8 @@ def get_resource_types():
                 "token": "<API-token>"
             },
             "tags": ["influx"],
-            "name": "InfluxDB"
+            "name": "InfluxDB",
+            "icon": "influxdb"
         },
         "mixpanel": {
             "config": {
@@ -208,7 +214,8 @@ def get_resource_types():
                 "password": "<service-account-password>"
             },
             "tags": ["mixpanel"],
-            "name": "MixPanel"
+            "name": "MixPanel",
+            "icon": "mixpanel"
         },
         # "scheduler": {
         #     "config": {
@@ -234,14 +241,15 @@ def get_resource_types():
                     "overwrite_with_blank": False
                 },
                 "form": {}
-            }
+            },
         },
         "airtable": {
             "config": {
                 "api_key": "<your-api-key>"
             },
             "tags": ["airtable"],
-            "name": "Airtable"
+            "name": "Airtable",
+            "icon": "airtable"
         }
     }
 
