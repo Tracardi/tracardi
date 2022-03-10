@@ -3,7 +3,7 @@ import re
 from dotty_dict import dotty
 from pydantic import BaseModel
 
-dot_notation_regex = re.compile(r"(?:payload|profile|event|session|flow|memory)@[\[\]0-9a-zA-a_\-\.]+(?<![\.\[])")
+dot_notation_regex = re.compile(r"(?:payload|profile|event|session|flow|memory)@([\[\]0-9a-zA-a_\-\.]+(?<![\.\[])|\.\.\.)")
 
 
 class DotAccessor:

@@ -2,8 +2,6 @@ from pprint import pprint
 
 from tracardi.domain.event_metadata import EventMetadata, EventTime
 from tracardi.service.notation.dot_accessor import DotAccessor
-
-from tracardi.domain.context import Context
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow, FlowSchema
 from tracardi.domain.profile import Profile
@@ -45,7 +43,7 @@ if __name__ == "__main__":
     session = Session(id="2", metadata=SessionMetadata())
     payload = data
     resource = Resource(id="3", type="event")
-    context = Context()
+    context = {}
     event = Event(metadata=EventMetadata(time=EventTime()),
                   id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
     flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.6.0"))

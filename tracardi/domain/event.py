@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
-from .context import Context
 from .entity import Entity
 from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
@@ -42,7 +41,8 @@ class Event(Entity):
     source: Entity
     session: Optional[EventSession] = None
     profile: Optional[Entity] = None
-    context: Context
+    context: Optional[dict] = {}
+    config: Optional[dict] = {}
     tags: Tags = Tags()
     aux: dict = {}
 
@@ -57,12 +57,13 @@ class Event(Entity):
             # self.session = event.session
             # self.profile = event.profile
             self.context = event.context
+            self.config = event.config
             self.tags = event.tags
             self.aux = event.aux
 
     def is_persistent(self) -> bool:
-        if 'save' in self.context.config and isinstance(self.context.config['save'], bool):
-            return self.context.config['save']
+        if 'save' in self.config and isinstance(self.config['save'], bool):
+            return self.config['save']
         else:
             return True
 
