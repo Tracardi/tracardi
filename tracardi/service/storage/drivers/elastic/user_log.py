@@ -30,3 +30,15 @@ async def load_within_period(upper: int, lower: int, start: int = 0, limit: int 
             {"timestamp": "desc"}
         ]
     })
+
+
+async def load_by_user(email: str, start: int = 0, limit: int = 100):
+    return await storage_manager("user-logs").query({
+        "query": {
+            "wildcard": {
+                    "email": f"{email}*"
+            }
+        },
+        "from": start,
+        "size": limit
+    })
