@@ -40,15 +40,29 @@ class DictTraverser:
     def reshape(self, reshape_template: Union[Dict, List]):
         out_dot = dotty()
         for key, value, path in self.traverse(reshape_template):
+
             if key is not None:
                 path = path[:-len(key)-1]
+
+            optional = False
+            if len(key) > 0 and key[-1] == '?':
+                key = key[:-1]
+                optional = True
+
+            if len(path) > 0 and path[-1] == '?':
+                path = path[:-1]
+                optional = True
 
             value = self._get_value(value)
 
             if value is None and self.include_none is False:
                 continue
 
-            out_dot[f"{path}.{key}"] = value
+            if not value:
+                if not optional:
+                    out_dot[f"{path}.{key}"] = value
+            else:
+                out_dot[f"{path}.{key}"] = value
 
         result = out_dot.to_dict()
         return result['root'] if 'root' in result else {}
