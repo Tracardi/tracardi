@@ -15,10 +15,14 @@ class DictTraverser:
         else:
             self.throw_error = True
 
-    def _get_value(self, path):
+    def _get_value(self, path, optional):
         if self.throw_error is True:
-            return self.dot[path]
-
+            try:
+                return self.dot[path]
+            except KeyError as e:
+                if optional is True:
+                    return None
+                raise e
         try:
             value = self.dot[path]
         except KeyError:
@@ -53,7 +57,7 @@ class DictTraverser:
                 path = path[:-1]
                 optional = True
 
-            value = self._get_value(value)
+            value = self._get_value(value, optional)
 
             if value is None and self.include_none is False:
                 continue
