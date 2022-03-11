@@ -29,7 +29,7 @@ class DestinationManager:
 
     async def send_data(self, profile_id, debug):
 
-        template = DictTraverser(self.dot)
+        template = DictTraverser(self.dot, default=None)
 
         async for destination in self._load_destinations():  # type: Destination
             module, class_name = self._get_class_and_module(destination.destination.package)
