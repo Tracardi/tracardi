@@ -2,26 +2,11 @@ from tracardi.service.storage.factory import storage_manager
 from datetime import datetime
 
 
-async def add_log(successful: bool, email: str):
-    return await storage_manager("user-logs").upsert({
-        "timestamp": datetime.utcnow(),
-        "email": email,
-        "successful": successful
-    })
-
-
-async def load_logs(start: int = 0, limit: int = 100):
-    return await storage_manager("user-logs").load_all(start, limit)
-
-
-async def load_within_period(upper: int, lower: int, start: int = 0, limit: int = 100):
-    return await storage_manager("user-logs").query({
+async def load_logs(start: int = 0, limit: int = 100, email: str = None, lower: int = None, upper: int = None):
+    query = {
         "query": {
-            "range": {
-                "timestamp": {
-                    "gte": datetime.fromtimestamp(lower),
-                    "lte": datetime.fromtimestamp(upper)
-                }
+            "wildcard": {
+                "email": f"{email if email is not None else ''}*"
             }
         },
         "from": start,
@@ -29,16 +14,13 @@ async def load_within_period(upper: int, lower: int, start: int = 0, limit: int 
         "sort": [
             {"timestamp": "desc"}
         ]
-    })
+    }
 
-
-async def load_by_user(email: str, start: int = 0, limit: int = 100):
-    return await storage_manager("user-logs").query({
-        "query": {
-            "wildcard": {
-                    "email": f"{email}*"
+    if lower is not None and upper is not None:
+        query["query"]["range"] = {
+            "timestamp": {
+                "gte": datetime.fromtimestamp(lower),
+                "lte": datetime.fromtimestamp(upper)
             }
-        },
-        "from": start,
-        "size": limit
-    })
+        }
+    return await storage_manager("user-logs").query(query)
