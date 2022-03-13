@@ -21,6 +21,13 @@ async def load_all(start=0, limit=100) -> Tuple[List[Resource], int]:
     return data, result.total
 
 
+async def load_destinations(start=0, limit=100) -> Tuple[List[Resource], int]:
+    result = await StorageForBulk().index('resource').load(start, limit)
+    data = [ResourceRecord.construct(Resource.__fields_set__, **r).decode() for r in result if
+            'destination' in r and r['destination'] is not None]
+    return data, result.total
+
+
 async def load_record(id: str) -> ResourceRecord:
     return await StorageFor(Entity(id=id)).index("resource").load(ResourceRecord)
 

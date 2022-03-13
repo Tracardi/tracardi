@@ -30,4 +30,14 @@ class ActionRunner:
     def _get_dot_accessor(self, payload) -> DotAccessor:
         return DotAccessor(self.profile, self.session, payload, self.event, self.flow)
 
-
+    def update_profile(self):
+        if self.debug is not True:
+            if isinstance(self.profile, Profile):
+                self.profile.operation.update = True
+            else:
+                if self.event.metadata.profile_less is True:
+                    self.console.warning("Can not update profile when processing profile less events.")
+                else:
+                    self.console.error("Can not update profile. Profile is empty.")
+        else:
+            self.console.warning("Profile update skipped. It will not be updated when debugging.")

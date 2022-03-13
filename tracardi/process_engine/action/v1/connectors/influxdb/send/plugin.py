@@ -168,10 +168,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Send to InfluxDB',
-            desc='Sends data to InfluxDB. Data in influxDb is more complex then regular data. It has on top '
-                 'Organisation, this is the equivalent of database instance. Bucket is the equivalent of database '
-                 'in SQL. Measure is a table, fields and values are records (e.i: columns and values in one record). '
-                 'Tags are additional metadata. Time is a timestamp of a particular set of fields (record).',
+            desc='Sends data to InfluxDB.',
             icon='influxdb',
             group=["Connectors"],
             documentation=Documentation(

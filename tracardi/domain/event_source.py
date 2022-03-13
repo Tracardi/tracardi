@@ -10,6 +10,7 @@ class EventSource(Entity):
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     enabled: Optional[bool] = True
+    transitional: Optional[bool] = False
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
 

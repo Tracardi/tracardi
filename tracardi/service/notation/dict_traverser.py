@@ -15,10 +15,14 @@ class DictTraverser:
         else:
             self.throw_error = True
 
-    def _get_value(self, path):
+    def _get_value(self, path, optional):
         if self.throw_error is True:
-            return self.dot[path]
-
+            try:
+                return self.dot[path]
+            except KeyError as e:
+                if optional is True:
+                    return None
+                raise e
         try:
             value = self.dot[path]
         except KeyError:
@@ -40,15 +44,29 @@ class DictTraverser:
     def reshape(self, reshape_template: Union[Dict, List]):
         out_dot = dotty()
         for key, value, path in self.traverse(reshape_template):
+
             if key is not None:
                 path = path[:-len(key)-1]
 
-            value = self._get_value(value)
+            optional = False
+            if len(key) > 0 and key[-1] == '?':
+                key = key[:-1]
+                optional = True
+
+            if len(path) > 0 and path[-1] == '?':
+                path = path[:-1]
+                optional = True
+
+            value = self._get_value(value, optional)
 
             if value is None and self.include_none is False:
                 continue
 
-            out_dot[f"{path}.{key}"] = value
+            if not value:
+                if not optional:
+                    out_dot[f"{path}.{key}"] = value
+            else:
+                out_dot[f"{path}.{key}"] = value
 
         result = out_dot.to_dict()
         return result['root'] if 'root' in result else {}

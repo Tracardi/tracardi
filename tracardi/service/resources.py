@@ -15,8 +15,22 @@ def get_resource_types():
                 "username": "<username>",
                 "password": "<password>"
             },
-            "tags": ['api'],
-            "name": "API endpoint"
+            "tags": ['api', "destination"],
+            "name": "API endpoint",
+            "icon": "cloud",
+            "destination": {
+                "package": "tracardi.process_engine.destination.http_connector.HttpConnector",
+                "init": {
+                    "method": "post",
+                    "timeout": 30,
+                    "headers": {
+                        "content-type": "application/json"
+                    },
+                    "cookies": {},
+                    "ssl_check": True
+                },
+                "form": {}
+            }
         },
         "rabbitMQ": {
             "config": {
@@ -25,11 +39,23 @@ def get_resource_types():
                 "virtual_host": None,
                 "port": 5672
             },
-            "tags": ['rabbitmq', 'pro'],
+            "tags": ['rabbitmq', 'pro', 'destination'],
             "name": "RabbitMQ",
             "icon": "rabbitmq",
-            "pro": True,
-            "package": "tracardi.process_engine.destination.rabbitmq_connector.RabbitMqConnector"
+            "destination": {
+                "package": "tracardi.process_engine.destination.rabbitmq_connector.RabbitMqConnector",
+                "init": {
+                    "queue": {
+                        "name": None,
+                        "routing_key": "routing",
+                        "queue_type": "direct",
+                        "compression": None,
+                        "auto_declare": True,
+                        "serializer": "json"
+                    }
+                },
+                "form": {}
+            }
         },
         "aws": {
             "config": {
@@ -80,7 +106,8 @@ def get_resource_types():
                 "verify_certs": True
             },
             "tags": ['elastic'],
-            "name": "Elasticsearch"
+            "name": "Elasticsearch",
+            "icon": "elasticsearch"
         },
         "pushover": {
             "config": {
@@ -88,7 +115,8 @@ def get_resource_types():
                 "user": "<user>"
             },
             "tags": ['pushover', 'message'],
-            "name": "Pushover"
+            "name": "Pushover",
+            "icon": "pushover"
         },
         "mysql": {
             "config": {
@@ -99,7 +127,8 @@ def get_resource_types():
                 "database": "<database>"
             },
             "tags": ['mysql', 'database'],
-            "name": "MySQL"
+            "name": "MySQL",
+            "icon": "mysql"
 
         },
         "mqtt": {
@@ -124,7 +153,8 @@ def get_resource_types():
                 "password": "<password>"
             },
             "tags": ['redis'],
-            "name": "Redis"
+            "name": "Redis",
+            "icon": "redis"
 
         },
         "mongodb": {
@@ -133,7 +163,8 @@ def get_resource_types():
                 "timeout": 5000
             },
             "tags": ['mongo', 'database', 'nosql'],
-            "name": "MongoDB"
+            "name": "MongoDB",
+            "icon": "mongo"
         },
         "trello": {
             "config": {
@@ -172,7 +203,8 @@ def get_resource_types():
                 "token": "<API-token>"
             },
             "tags": ["influx"],
-            "name": "InfluxDB"
+            "name": "InfluxDB",
+            "icon": "influxdb"
         },
         "mixpanel": {
             "config": {
@@ -182,7 +214,8 @@ def get_resource_types():
                 "password": "<service-account-password>"
             },
             "tags": ["mixpanel"],
-            "name": "MixPanel"
+            "name": "MixPanel",
+            "icon": "mixpanel"
         },
         # "scheduler": {
         #     "config": {
@@ -199,25 +232,33 @@ def get_resource_types():
                 "private_key": "<client-private-key>",
                 "api_url": "<url-of-mautic-instance>"
             },
-            "tags": ["mautic"],
-            "name": "Mautic"
+            "icon": "mautic",
+            "tags": ["mautic", "destination"],
+            "name": "Mautic",
+            "destination": {
+                "package": "tracardi.process_engine.destination.mautic_connector.MauticConnector",
+                "init": {
+                    "overwrite_with_blank": False
+                },
+                "form": {}
+            },
         },
         "airtable": {
             "config": {
                 "api_key": "<your-api-key>"
             },
             "tags": ["airtable"],
-            "name": "Airtable"
+            "name": "Airtable",
+            "icon": "airtable"
         }
     }
 
 
 def get_destinations():
     resource_types = get_resource_types()
-    for _, resource_type in resource_types.items():
-        if 'package' in resource_type:
-            yield resource_type['package'], resource_type
-
+    for resource_type in resource_types.values():
+        if 'destination' in resource_type:
+            yield resource_type["destination"]['package'], resource_type
 
 def get_type_of_resources():
     resource_types = get_resource_types()

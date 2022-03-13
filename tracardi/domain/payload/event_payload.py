@@ -3,7 +3,6 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 
-from ..context import Context
 from ..entity import Entity
 from ..event import Event
 from ..event_metadata import EventPayloadMetadata, EventMetadata
@@ -13,9 +12,10 @@ class EventPayload(BaseModel):
     type: str
     properties: Optional[dict] = {}
     options: Optional[dict] = {}
+    context: Optional[dict] = {}
 
     def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Optional[Entity], profile: Optional[Entity],
-                 options: dict, profile_less: bool) -> Event:
+                 profile_less: bool) -> Event:
 
         meta = EventMetadata(**metadata.dict())
         meta.profile_less = profile_less
@@ -27,5 +27,6 @@ class EventPayload(BaseModel):
                      type=self.type,
                      properties=self.properties,
                      source=source,  # Entity
-                     context=Context(config=options, params={})
+                     config=self.options,
+                     context=self.context
                      )

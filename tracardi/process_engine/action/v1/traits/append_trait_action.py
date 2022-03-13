@@ -87,6 +87,8 @@ class AppendTraitAction(ActionRunner):
             session = Session(**dot.session)
             self.session.replace(session)
 
+        self.update_profile()
+
         return Result(port="payload", value=payload)
 
 

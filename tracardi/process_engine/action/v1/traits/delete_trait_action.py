@@ -49,6 +49,8 @@ class DeleteTraitAction(ActionRunner):
         event = Event(**dot.event)
         self.event.replace(event)
 
+        self.update_profile()
+
         return Result(port="payload", value=payload)
 
 

@@ -329,3 +329,11 @@ async def aggregate_timespan_events(time_from: datetime, time_to: datetime,
         "aggs": aggregate_query
     }
     return await storage_manager(index="event").aggregate(query)
+
+
+async def refresh():
+    return await storage_manager('event').refresh()
+
+
+async def flush():
+    return await storage_manager('event').flush()
