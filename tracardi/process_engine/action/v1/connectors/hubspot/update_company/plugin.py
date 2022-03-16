@@ -17,13 +17,13 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class HubSpotCompanyAdder(ActionRunner):
+class HubSpotCompanyUpdater(ActionRunner):
 
     @staticmethod
-    async def build(**kwargs) -> 'HubSpotCompanyAdder':
+    async def build(**kwargs) -> 'HubSpotCompanyUpdater':
         config = Config(**kwargs)
         resource = await storage.driver.resource.load(config.source.id)
-        return HubSpotCompanyAdder(config, resource)
+        return HubSpotCompanyUpdater(config, resource)
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
@@ -44,6 +44,7 @@ class HubSpotCompanyAdder(ActionRunner):
                 self.config.properties[key] = str(value)
 
     async def run(self, payload):
+
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
 
@@ -51,20 +52,21 @@ class HubSpotCompanyAdder(ActionRunner):
         self.parse_mapping()
 
         try:
-            result = await self.client.add_company(
+            result = await self.client.update_company(
+                self.config.company_id,
                 self.config.properties
             )
             return Result(port="response", value=result)
 
         except HubSpotClientAuthException:
             try:
-                print(self.config.properties)
                 if self.config.is_token_got is False:
                     await self.client.get_token()
 
                 await self.client.update_token()
 
-                result = await self.client.add_company(
+                result = await self.client.update_company(
+                    self.config.company_id,
                     self.config.properties
                 )
 
@@ -94,7 +96,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='HubSpotCompanyAdder',
+            className='HubSpotCompanyUpdater',
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.6.2',
@@ -110,6 +112,7 @@ def register() -> Plugin:
                     "code": None,
                 },
                 "is_token_got": True,
+                "company_id": None,
                 "properties": [],
             },
             form=Form(
@@ -120,16 +123,20 @@ def register() -> Plugin:
                             FormField(
                                 id="source",
                                 name="HubSpot resource",
-                                description="Please select your HubSpot resource, containing your client id and "
-                                            "client secret.\n"
-                                            "If you haven't got access token yet, you also should select your "
-                                            "redirect url and your code.",
+                                description="Please select your HubSpot resource, containing your client id, "
+                                            "client secret, and refresh token.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "hubspot"})
                             ),
                             FormField(
                                 id="is_token_got",
                                 name="Token",
                                 component=FormComponent(type="bool", props={"label": "I've already got a token."}),
+                            ),
+                            FormField(
+                                id="company_id",
+                                name="Company id",
+                                description="Please write an id of the company you want to update.",
+                                component=FormComponent(type="text", props={"label": "Company id"})
                             ),
                             FormField(
                                 id="properties",
@@ -145,9 +152,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='HubSpot: add company',
-            brand='HubSpot',
-            desc='Adds a new company to HubSpot based on provided data.',
+            name='HubSpot: update company',
+            desc='Updates a company in Hubspot based on provided data.',
             icon='plugin',
             group=["Connectors"],
             documentation=Documentation(
@@ -161,3 +167,4 @@ def register() -> Plugin:
             )
         )
     )
+

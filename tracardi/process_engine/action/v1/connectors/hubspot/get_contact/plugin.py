@@ -1,4 +1,3 @@
-from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -10,64 +9,37 @@ from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotC
     HubSpotClientAuthException
 from tracardi.exceptions.exception import StorageException
 
-from datetime import datetime
-
 
 def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class HubSpotCompanyAdder(ActionRunner):
+class HubSpotContactGetter(ActionRunner):
 
     @staticmethod
-    async def build(**kwargs) -> 'HubSpotCompanyAdder':
+    async def build(**kwargs) -> 'HubSpotContactGetter':
         config = Config(**kwargs)
         resource = await storage.driver.resource.load(config.source.id)
-        return HubSpotCompanyAdder(config, resource)
+        return HubSpotContactGetter(config, resource)
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
         self.resource = resource
         self.client = HubSpotClient(**self.resource.credentials.get_credentials(self, None))
 
-    def parse_mapping(self):
-        for key, value in self.config.properties.items():
-
-            if isinstance(value, list):
-                if key == "tags":
-                    self.config.properties[key] = ",".join(value)
-
-                else:
-                    self.config.properties[key] = "|".join(value)
-
-            elif isinstance(value, datetime):
-                self.config.properties[key] = str(value)
-
     async def run(self, payload):
-        dot = self._get_dot_accessor(payload)
-        traverser = DictTraverser(dot)
-
-        self.config.properties = traverser.reshape(self.config.properties)
-        self.parse_mapping()
-
         try:
-            result = await self.client.add_company(
-                self.config.properties
-            )
+            result = await self.client.get_contact(self.config.contact_id)
             return Result(port="response", value=result)
 
         except HubSpotClientAuthException:
             try:
-                print(self.config.properties)
                 if self.config.is_token_got is False:
                     await self.client.get_token()
 
                 await self.client.update_token()
 
-                result = await self.client.add_company(
-                    self.config.properties
-                )
-
+                result = await self.client.get_contact(self.config.contact_id)
                 if self.debug:
                     self.resource.credentials.test = self.client.credentials
                 else:
@@ -94,13 +66,13 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='HubSpotCompanyAdder',
+            className='HubSpotContactGetter',
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.6.2',
             license="MIT",
             author="Marcin Gaca",
-            manual="add_hubspot_company_action",
+            manual="get_hubspot_contact_action",
             init={
                 "source": {
                     "client_id": None,
@@ -110,7 +82,7 @@ def register() -> Plugin:
                     "code": None,
                 },
                 "is_token_got": True,
-                "properties": [],
+                "contact_id": None,
             },
             form=Form(
                 groups=[
@@ -132,22 +104,19 @@ def register() -> Plugin:
                                 component=FormComponent(type="bool", props={"label": "I've already got a token."}),
                             ),
                             FormField(
-                                id="properties",
-                                name="Properties fields",
-                                description="You can add some more fields to your company. Just type in the alias of "
-                                            "the field as key, and a path as a value for this field. This is fully "
-                                            "optional.",
-                                component=FormComponent(type="keyValueList", props={"label": "Fields"})
-                            ),
+                                id="contact_id",
+                                name="Contact id",
+                                description="Please write an id of the contact you want to get.",
+                                component=FormComponent(type="text", props={"label": "Company id"})
+                            )
                         ]
                     )
                 ]
             )
         ),
         metadata=MetaData(
-            name='HubSpot: add company',
-            brand='HubSpot',
-            desc='Adds a new company to HubSpot based on provided data.',
+            name='HubSpot: get contact by Id',
+            desc='Gets a contact from HubSpot based on provided contact id.',
             icon='plugin',
             group=["Connectors"],
             documentation=Documentation(

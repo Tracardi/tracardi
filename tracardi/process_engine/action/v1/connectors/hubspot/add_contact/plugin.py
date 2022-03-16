@@ -17,13 +17,13 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class HubSpotCompanyAdder(ActionRunner):
+class HubSpotContactAdder(ActionRunner):
 
     @staticmethod
-    async def build(**kwargs) -> 'HubSpotCompanyAdder':
+    async def build(**kwargs) -> 'HubSpotContactAdder':
         config = Config(**kwargs)
         resource = await storage.driver.resource.load(config.source.id)
-        return HubSpotCompanyAdder(config, resource)
+        return HubSpotContactAdder(config, resource)
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
@@ -51,20 +51,19 @@ class HubSpotCompanyAdder(ActionRunner):
         self.parse_mapping()
 
         try:
-            result = await self.client.add_company(
+            result = await self.client.add_contact(
                 self.config.properties
             )
             return Result(port="response", value=result)
 
         except HubSpotClientAuthException:
             try:
-                print(self.config.properties)
                 if self.config.is_token_got is False:
                     await self.client.get_token()
 
                 await self.client.update_token()
 
-                result = await self.client.add_company(
+                result = await self.client.add_contact(
                     self.config.properties
                 )
 
@@ -94,13 +93,13 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='HubSpotCompanyAdder',
+            className='HubSpotContactAdder',
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.6.2',
             license="MIT",
             author="Marcin Gaca",
-            manual="add_hubspot_company_action",
+            manual="add_hubspot_contact_action",
             init={
                 "source": {
                     "client_id": None,
@@ -134,7 +133,7 @@ def register() -> Plugin:
                             FormField(
                                 id="properties",
                                 name="Properties fields",
-                                description="You can add some more fields to your company. Just type in the alias of "
+                                description="You can add some more fields to your contact. Just type in the alias of "
                                             "the field as key, and a path as a value for this field. This is fully "
                                             "optional.",
                                 component=FormComponent(type="keyValueList", props={"label": "Fields"})
@@ -145,9 +144,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='HubSpot: add company',
-            brand='HubSpot',
-            desc='Adds a new company to HubSpot based on provided data.',
+            name='HubSpot: add contact',
+            desc='Adds a new contact to HubSpot based on provided data.',
             icon='plugin',
             group=["Connectors"],
             documentation=Documentation(

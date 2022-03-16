@@ -250,6 +250,19 @@ def get_resource_types():
             "tags": ["airtable"],
             "name": "Airtable",
             "icon": "airtable"
+        },
+        "hubspot": {
+            "config": {
+                "client_id": "<your-client-id>",
+                "client_secret": "<your-client-secret>",
+                "refresh_token": "<your-refresh-token-optionally>",
+                "access_token": "<your-access-token-optionally>",
+                "redirect_url": "<your-redirect-url-optionally>",
+                "code": "<your-code-optionally-optionally>"
+              },
+            "icon": "plugin",
+            "tags": ["hubspot"],
+            "name": "HubSpot",
         }
     }
 
