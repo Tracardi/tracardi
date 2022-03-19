@@ -10,6 +10,7 @@ from tracardi.service.plugin.domain.result import Result
 
 class Configuration(BaseModel):
     value: str = ""
+    default: bool = True
 
     @validator("value")
     def validate_content(cls, value):
@@ -45,7 +46,10 @@ class ReshapePayloadAction(ActionRunner):
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
-        template = DictTraverser(dot)
+        if self.config.default is True:
+            template = DictTraverser(dot, default=None)
+        else:
+            template = DictTraverser(dot)
         output = json.loads(self.config.value)
         result = template.reshape(reshape_template=output)
 
@@ -60,7 +64,7 @@ def register() -> Plugin:
             className='ReshapePayloadAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"value": "{}"},
+            init={"value": "{}", "default": True},
             form=Form(groups=[
                 FormGroup(
                     name="Create payload object",
@@ -71,6 +75,12 @@ def register() -> Plugin:
                             description="Provide object as JSON to be injected into payload and returned "
                                         "on output port.",
                             component=FormComponent(type="json", props={"label": "object"})
+                        ),
+                        FormField(
+                            id="default",
+                            name="Missing values equal null",
+                            description="Values that are missing will become null",
+                            component=FormComponent(type="bool", props={"label": "Make missing values equal to null"})
                         )
                     ]
                 ),
