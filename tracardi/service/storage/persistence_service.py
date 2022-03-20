@@ -263,6 +263,15 @@ class PersistenceService:
     def __init__(self, storage: storage.ElasticStorage):
         self.storage = storage
 
+    async def exists(self, id: str) -> bool:
+        try:
+            return await self.storage.exists(id)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
     async def load(self, id: str):
         try:
             return await self.storage.load(id)

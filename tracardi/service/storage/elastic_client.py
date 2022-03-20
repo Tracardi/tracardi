@@ -43,12 +43,11 @@ class ElasticClient:
     async def get_mapping(self, index):
         return await self._client.indices.get_mapping(index=index)
 
-    # todo error handling move to service
-    async def exists(self, index, id):
+    async def exists(self, index, id) -> bool:
         try:
             return await self._client.exists(index=index, doc_type="_doc", id=id)
         except NotFoundError:
-            return None
+            return False
 
     async def search(self, index, query):
         logger.debug(f"SEARCH: {index}, {query}")
@@ -100,6 +99,7 @@ class ElasticClient:
         )
 
     async def update(self, index, id, record):
+        logger.debug(f"UPDATE INDEX: {index} at record {id} with {record}")
         return await self._client.update(index, body=record, id=id)
 
     async def remove_index(self, index):

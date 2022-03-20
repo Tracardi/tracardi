@@ -42,6 +42,9 @@ class ElasticStorage:
         self.index = index.resources[index_key]  # type: Index
         self.index_key = index_key
 
+    async def exists(self, id) -> bool:
+        return await self.storage.exists(self.index.get_read_index(), id)
+
     async def load(self, id) -> [dict, None]:
 
         try:

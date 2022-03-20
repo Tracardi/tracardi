@@ -1,7 +1,7 @@
+from tracardi.domain.storage_result import StorageResult
 from tracardi.service.storage.factory import storage_manager
-from uuid import UUID
 from tracardi.service.sha1_hasher import SHA1Encoder
-from typing import List, Union
+from typing import List, Optional
 from tracardi.domain.user import User
 
 
@@ -13,16 +13,9 @@ async def flush():
     return await storage_manager("user").flush()
 
 
-async def add_user(id: UUID, password: str, full_name: str, email: str, roles: List[str],
-                   disabled: bool):
-    return await storage_manager("user").upsert({
-        "id": str(id),
-        "password": SHA1Encoder.encode(password),
-        "full_name": full_name,
-        "email": email,
-        "roles": roles,
-        "disabled": disabled
-    })
+async def add_user(user: User):
+    user.encode_password()
+    return await storage_manager("user").upsert(user.dict())
 
 
 async def search_by_name(start: int, limit: int, name: str):
@@ -35,34 +28,29 @@ async def search_by_name(start: int, limit: int, name: str):
             }
         }
     }
+
+    # todo elastic structure is not allowed in driver
+
     return await storage_manager("user").query(query=query)
 
 
-async def edit_user(id: UUID, password: str, full_name: str, email: str, roles: List[str],
-                    disabled: bool, password_change: bool):
-    return await storage_manager("user").upsert({
-        "id": str(id),
-        "password": SHA1Encoder.encode(password) if password_change else password,
-        "full_name": full_name,
-        "email": email,
-        "roles": roles,
-        "disabled": disabled
-    })
+async def update_user(user: User):
+    return await storage_manager("user").upsert(user.dict())
 
 
-async def del_user(id: UUID):
-    return await storage_manager("user").delete(str(id))
+async def delete_user(id: str):
+    return await storage_manager("user").delete(id)
 
 
-async def get_by_id(id: UUID):
-    return await storage_manager("user").load(str(id))
+async def get_by_id(id: str):
+    return await storage_manager("user").load(id)
 
 
 async def load(start: int, limit: int):
     return await storage_manager("user").load_all(start, limit)
 
 
-async def get_by_credentials(email: str, password: str) -> Union[User, None]:
+async def get_by_credentials(email: str, password: str) -> Optional[User]:
     result = (await storage_manager("user").query({
         "query": {
             "bool": {
@@ -74,20 +62,19 @@ async def get_by_credentials(email: str, password: str) -> Union[User, None]:
             }
         }
     }))["hits"]["hits"]
+
     if result:
         return User(**result[0]["_source"])
     return None
 
 
-async def check_if_exists(email: str, id: UUID) -> bool:
-    return bool((await storage_manager("user").query({
-        "query": {
-            "bool": {
-                "should": [
-                    {"term": {"email": email}},
-                    {"term": {"_id": str(id)}}
-                ],
-                "minimum_should_match": 1
-            }
-        }
-    }))["hits"]["total"]["value"])
+async def search_by_token(token: str) -> StorageResult:
+    query = {
+        "query": {"term": {"token": str(token)}}
+    }
+    result = await storage_manager("user").query(query=query)
+    return StorageResult(result)
+
+
+async def check_if_exists(email: str) -> bool:
+    return await storage_manager("user").exists(id=email)

@@ -47,7 +47,6 @@ class Resource:
             "project": Index(multi_index=False, index="tracardi-flow-project", mapping=None, rel=None),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),
-            "token": Index(multi_index=False, index="tracardi-token", mapping="mappings/token-index.json", rel=None),
             "resource": Index(multi_index=False, index="tracardi-resource", mapping="mappings/resource-index.json",
                               rel=None),
             "event-source": Index(multi_index=False, index="tracardi-source",

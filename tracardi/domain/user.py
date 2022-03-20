@@ -1,5 +1,7 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
+
+from tracardi.service.sha1_hasher import SHA1Encoder
 
 
 class User(BaseModel):
@@ -9,4 +11,8 @@ class User(BaseModel):
     email: str
     roles: List[str]
     disabled: bool = False
+    token: Optional[str] = None
+
+    def encode_password(self):
+        self.password = SHA1Encoder.encode(self.password)
 
