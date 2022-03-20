@@ -21,6 +21,7 @@ import tracardi.service.storage.drivers.elastic.event_source
 import tracardi.service.storage.drivers.elastic.pro
 import tracardi.service.storage.drivers.elastic.value_threshold
 import tracardi.service.storage.drivers.elastic.destination
+import tracardi.service.storage.drivers.elastic.user_log
 
 
 class ElasticDriver:
@@ -117,3 +118,6 @@ class ElasticDriver:
     def destination(self):
         return tracardi.service.storage.drivers.elastic.destination
 
+    @property
+    def user_log(self):
+        return tracardi.service.storage.drivers.elastic.user_log
