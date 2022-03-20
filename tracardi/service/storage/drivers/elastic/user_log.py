@@ -16,3 +16,13 @@ async def load_logs(start: int = 0, limit: int = 100, query_string: str = None):
         ]
     }
     return await storage_manager("user-logs").query(query)
+
+
+async def add_log(email: str, successful: bool):
+    return await storage_manager("user-logs").upsert(
+        {
+            "email": email,
+            "successful": successful,
+            "timestamp": datetime.utcnow()
+        }
+    )
