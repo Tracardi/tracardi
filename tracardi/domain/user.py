@@ -16,3 +16,6 @@ class User(BaseModel):
     def encode_password(self):
         self.password = SHA1Encoder.encode(self.password)
 
+    def has_roles(self, roles) -> bool:
+        return len(set(self.roles).intersection(set(roles))) > 0
+
