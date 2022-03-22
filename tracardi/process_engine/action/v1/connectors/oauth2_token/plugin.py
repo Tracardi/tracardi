@@ -31,11 +31,10 @@ class TokenGetter(ActionRunner):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                     url=self._credentials.url,
-                    # todo what if there is no credentials
                     data={
                         "username": self._credentials.username,
                         "password": self._credentials.password
-                    }
+                    } if self._credentials.username and self._credentials.password else None
             ) as response:
                 result = await response.json()
 

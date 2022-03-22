@@ -5,7 +5,7 @@ import logging
 import aiohttp
 from typing import Optional
 
-from aiohttp import ClientConnectorError
+from aiohttp import ClientConnectorError, BasicAuth
 from pydantic import BaseModel, AnyHttpUrl
 
 from tracardi.config import tracardi
@@ -14,7 +14,6 @@ from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
 from tracardi.process_engine.destination.connector import Connector
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
@@ -22,8 +21,11 @@ logger.addHandler(log_handler)
 
 class HttpCredentials(BaseModel):
     url: AnyHttpUrl
-    username: str
-    password: str
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+    def has_basic_auth(self):
+        return self.username and self.password
 
 
 class HttpConfiguration(BaseModel):
@@ -82,6 +84,8 @@ class HttpConnector(Connector):
                         headers=config.headers,
                         cookies=config.cookies,
                         ssl=config.ssl_check,
+                        auth=BasicAuth(credentials.username,
+                                       credentials.password) if credentials.has_basic_auth() else None,
                         **config.get_params(data)
                 ) as response:
                     result = {
