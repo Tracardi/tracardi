@@ -84,7 +84,7 @@ class ElasticStorage:
         return await self.storage.search(self.index.get_read_index(), query)
 
     async def refresh(self, params=None, headers=None):
-        return await self.storage.refresh(self.index.get_write_index(), params, headers)
+        return await self.storage.refresh(self.index.get_read_index(), params, headers)
 
     async def load_by_query_string(self, query_string, limit=100):
         query = {
@@ -186,10 +186,10 @@ class ElasticStorage:
         return await self.storage.flush(self.index.get_write_index(), params, headers)
 
     async def update_by_query(self, query):
-        return await self.storage.update_by_query(index=self.index.get_write_index(), query=query)
+        return await self.storage.update_by_query(index=self.index.get_read_index(), query=query)
 
     async def delete_by_query(self, query):
-        return await self.storage.delete_by_query(index=self.index.get_write_index(), body=query)
+        return await self.storage.delete_by_query(index=self.index.get_read_index(), body=query)
 
     async def get_mapping(self, index):
         return await self.storage.get_mapping(index)
