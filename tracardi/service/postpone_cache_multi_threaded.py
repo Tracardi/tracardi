@@ -48,13 +48,13 @@ class InstanceCache:
     def get_instance(self, profile_id, instance_id) -> Optional[str]:
 
         if not self.exists(profile_id):
-            logger.info(f"Create instance {self.hash}.{profile_id} = {instance_id}")
+            logger.info(f"Create instance {profile_id} = {instance_id}")
             self.redis.client.hset(self.hash, profile_id, instance_id)
             return None
 
         value_bson = self.redis.client.hget(self.hash, profile_id)
         value = value_bson.decode('utf-8')
-        logger.info(f"Got instance {value} from {self.hash}.{profile_id}")
+        logger.info(f"Got instance {value} from {profile_id}")
 
         return value
 
@@ -63,5 +63,5 @@ class InstanceCache:
         self.redis.client.hset(self.hash, profile_id, instance_id)
 
     def reset(self, profile_id):
-        logger.debug(f"Clean instance {self.hash}.{profile_id}")
+        logger.debug(f"Clean instance {profile_id}")
         self.redis.client.hdel(self.hash, profile_id)
