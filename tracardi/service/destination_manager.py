@@ -1,6 +1,7 @@
 import asyncio
 from uuid import uuid4
 
+from tracardi.config import tracardi
 from tracardi.domain.api_instance import ApiInstance
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -51,11 +52,15 @@ class DestinationManager:
             if isinstance(destination_instance, Connector):
                 result = template.reshape(reshape_template=destination.mapping)
 
-                postponed_call = PostponedCall(
-                    profile_id,
-                    destination_instance.run,
-                    ApiInstance().id,
-                    result,  # *args
-                    self.delta)
-                postponed_call.wait = 5
-                postponed_call.run(asyncio.get_running_loop())
+                # Run postponed destination sync
+                if tracardi.postpone_destination_sync > 0:
+                    postponed_call = PostponedCall(
+                        profile_id,
+                        destination_instance.run,
+                        ApiInstance().id,
+                        result,  # *args
+                        self.delta)
+                    postponed_call.wait = 5
+                    postponed_call.run(asyncio.get_running_loop())
+                else:
+                    await destination_instance.run(result, self.delta)
