@@ -28,8 +28,9 @@ class ApiInstanceRecord(Entity):
 
 class ApiInstance(metaclass=Singleton):
     def __init__(self):
+        self.id = str(uuid4())
         self.record = ApiInstanceRecord(
-            id=str(uuid4()),
+            id=self.id,
             ip=local_ip
         )
         self._start_time = time()

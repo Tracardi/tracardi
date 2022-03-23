@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from tracardi.config import tracardi, redis_config
 from tracardi.exceptions.log_handler import log_handler
@@ -19,28 +20,20 @@ class PostponeCache:
     def exists(self, profile_id):
         return self.redis.client.hexists(self.hash, profile_id)
 
-    def get(self, profile_id, default_value) -> bool:
+    def get(self, profile_id) -> bool:
 
-        value_exists = self.exists(profile_id)
+        if not self.exists(profile_id):
+            logger.info(f"Create {self.hash}.{profile_id}")
+            self.redis.client.hset(self.hash, profile_id, '1')
+            return False
 
-        logger.info(f"{self.hash}.{profile_id} exists {value_exists}")
+        logger.info(f"Exists {self.hash}.{profile_id}")
 
-        if not value_exists:
-            default_value = 'yes' if default_value is True else "no"
-            logger.info(f"Create {self.hash}.{profile_id} = {default_value}")
-            self.redis.client.hset(self.hash, profile_id, default_value)
-            return default_value == "yes"
+        return True
 
-        value_bson = self.redis.client.hget(self.hash, profile_id)
-        value = value_bson.decode('utf-8')
-        logger.info(f"Got {value} from {self.hash}.{profile_id}")
-
-        return value == 'yes'
-
-    def set(self, profile_id, value):
-        value = "yes" if value else "no"
-        logger.info(f"Set {self.hash}.{profile_id} = {value}")
-        self.redis.client.hset(self.hash, profile_id, value)
+    def set(self, profile_id):
+        logger.info(f"Set {self.hash}.{profile_id}")
+        self.redis.client.hset(self.hash, profile_id, '1')
 
     def reset(self, profile_id):
         logger.debug(f"Clean {self.hash}.{profile_id}")
