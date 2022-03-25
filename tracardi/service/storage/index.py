@@ -64,8 +64,6 @@ class Resource:
             "api-instance": Index(multi_index=False, index="tracardi-api-instance",
                                   mapping="mappings/api-instance-index.json", rel=None),
             "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None),
-            "profile-purchase": Index(multi_index=False, index="tracardi-profiles-purchase",
-                                      mapping="mappings/profile-purchase-index.json", rel=None),
             "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json",
                                 rel=None),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",

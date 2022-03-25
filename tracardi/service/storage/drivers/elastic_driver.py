@@ -1,5 +1,4 @@
 import tracardi.service.storage.drivers.elastic.profile
-import tracardi.service.storage.drivers.elastic.profile_purchase
 import tracardi.service.storage.drivers.elastic.session
 import tracardi.service.storage.drivers.elastic.event
 import tracardi.service.storage.drivers.elastic.flow
@@ -33,10 +32,6 @@ class ElasticDriver:
     @property
     def pro(self):
         return tracardi.service.storage.drivers.elastic.pro
-
-    @property
-    def purchase(self):
-        return tracardi.service.storage.drivers.elastic.profile_purchase
 
     @property
     def raw(self):
