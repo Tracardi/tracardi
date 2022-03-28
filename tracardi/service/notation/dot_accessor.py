@@ -3,7 +3,12 @@ import re
 from dotty_dict import dotty
 from pydantic import BaseModel
 
-dot_notation_regex = re.compile(r"(?:payload|profile|event|session|flow|memory)@([\[\]0-9a-zA-a_\-\.]+(?<![\.\[])|\.\.\.)")
+dot_notation_regex = re.compile(
+    r"(?:payload|profile|event|session|flow|memory)@([\[\]0-9a-zA-a_\-\.]+(?<![\.\[])|\.\.\.)")
+
+
+class NotDotNotation:
+    pass
 
 
 class DotAccessor:
@@ -51,7 +56,7 @@ class DotAccessor:
                 raise KeyError("Invalid dot notation. You are trying to access {} "
                                "when it its value is not a dictionary `{}`.".format(value, str(e)))
 
-        return None
+        return NotDotNotation()
 
     def __init__(self, profile=None, session=None, payload=None, event=None, flow=None):
         self.flow = self._convert(flow, 'flow')
@@ -124,7 +129,9 @@ class DotAccessor:
 
             for prefix in self.storage.keys():
                 value = self._get_value(dot_notation, prefix)
-                if value is not None:
+                if not isinstance(value, NotDotNotation):
+                    if value is None:
+                        return None
                     return self.cast(value) if cast else value
 
         return self.cast(dot_notation) if cast else dot_notation
