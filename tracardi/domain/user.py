@@ -19,3 +19,9 @@ class User(BaseModel):
     def has_roles(self, roles) -> bool:
         return len(set(self.roles).intersection(set(roles))) > 0
 
+    def is_the_same_user(self, id):
+        return self.id == id
+
+    def is_admin(self):
+        return "admin" in self.roles
+
