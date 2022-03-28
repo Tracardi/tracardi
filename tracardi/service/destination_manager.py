@@ -1,8 +1,11 @@
 import asyncio
+import logging
 from uuid import uuid4
 
 from tracardi.config import tracardi
 from tracardi.domain.api_instance import ApiInstance
+from tracardi.exceptions.log_handler import log_handler
+from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.domain.destination import DestinationRecord, Destination
@@ -10,6 +13,11 @@ from tracardi.process_engine.destination.connector import Connector
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.postpone_call import PostponedCall
 from tracardi.service.storage.driver import storage
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 class DestinationManager:
@@ -50,6 +58,14 @@ class DestinationManager:
             destination_instance = destination_class(debug, resource, destination)
 
             if isinstance(destination_instance, Connector):
+                if destination.condition:
+                    condition = Condition()
+                    condition_result = await condition.evaluate(destination.condition, self.dot)
+                    if not condition_result:
+                        logger.info(f"Condition not met for destination {destination.name}. Data was not sent to "
+                                    f"this destination.")
+                        return
+
                 result = template.reshape(reshape_template=destination.mapping)
 
                 # Run postponed destination sync

@@ -206,38 +206,6 @@ class ExprTransformer(TransformerNamespace):
 
         raise ValueError("Unknown type `{}`".format(function))
 
-    # @staticmethod
-    # def op_compound_field(args):
-    #     print("comp")
-    #     if len(args) == 1:
-    #         # this is function without parameters
-    #         value_type = args[0]
-    #         parameter_less_function = True
-    #     else:
-    #         value_type, field = args
-    #         value = field._get_value()
-    #         parameter_less_function = False
-    #
-    #     if parameter_less_function is False:
-    #         if value_type == 'datetime':
-    #
-    #             if not isinstance(value, str):
-    #                 raise ValueError(
-    #                     "Value of `{}` must be string to compare it with datetime. Type of {} given".format(field.label,
-    #                                                                                                         type(value)))
-    #
-    #             date = dateparser.parse(value)
-    #             if not date:
-    #                 raise ValueError("Could not parse date `{}`".format(value))
-    #             return date
-    #     else:
-    #         if value_type == 'now':
-    #             return datetime.datetime.now()
-    #         if value_type == 'utcnow':
-    #             return datetime.datetime.utcnow()
-    #
-    #     raise ValueError("Unknown type `{}`".format(value_type))
-
     def op_field_sig(self, args):
         return args[0]
 
@@ -246,6 +214,9 @@ class ExprTransformer(TransformerNamespace):
 
     def op_is_null(self, args):
         return args[0].value is None
+
+    def op_is_not_null(self, args):
+        return args[0].value is not None
 
     def op_exists(self, args):
         return args[0].label in self._dot

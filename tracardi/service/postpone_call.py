@@ -19,6 +19,9 @@ scheduled_locally = False
 class PostponedCall:
 
     def __init__(self, profile_id, callable_coroutine, instance_id, *args):
+        self.instance_cache = instance_cache
+        self.global_postpone_flag = global_postpone_flag
+        self.global_schedule_flag = global_schedule_flag
         self.profile_id = profile_id
         self.callable_coroutine = callable_coroutine
         self.args = args
@@ -41,45 +44,45 @@ class PostponedCall:
         scheduled_locally = False
 
     def _execute(self, loop):
-
-        global_instance = instance_cache.get_instance(self.profile_id, None)
+        global_instance = self.instance_cache.get_instance(self.profile_id, None)
         if global_instance != self.instance_id:
             logger.info(
-                f"Execution on instance {self.instance_id} discarded. Execution passed to {global_instance}")
+                f"Instance: {self.instance_id}. Execution discarded. Execution passed to {global_instance}")
+            return
 
         try:
             # should the execution be postponed. If there was no second call then postpone is None.
-            if global_postpone_flag.get(self.profile_id) is False:
+            if self.global_postpone_flag.get(self.profile_id) is False:
                 # it is not postponed - run it now
                 self._run_scheduled()
 
                 # clean cache
-                global_postpone_flag.reset(self.profile_id)
-                global_schedule_flag.reset(self.profile_id)
-                instance_cache.reset(self.profile_id)
+                self.global_postpone_flag.reset(self.profile_id)
+                self.global_schedule_flag.reset(self.profile_id)
+                self.instance_cache.reset(self.profile_id)
 
             else:
                 # postpone call. Postpone flag is true
                 self._schedule_for_later(loop)
                 logger.info(
-                    f"Execution postponed for profile {self.profile_id}. Execute on instance {self.instance_id}")
+                    f"Instance: {self.instance_id}. Execution postponed for {self.wait}s for profile {self.profile_id}")
                 # delete postpone flag. It can be set again if there is another call.
-                global_postpone_flag.reset(self.profile_id)
+                self.global_postpone_flag.reset(self.profile_id)
 
         except Exception as e:
             logger.error(str(e))
 
-    def run(self, loop):
+    def run(self, loop, force_recreate=False):
         # set current instance
-        instance_cache.set_instance(self.profile_id, self.instance_id)
+        self.instance_cache.set_instance(self.profile_id, self.instance_id)
 
-        if not scheduled_locally:
+        if not scheduled_locally or force_recreate:
             # if there is no schedule local. Schedule for the first time.
             self._schedule_for_later(loop)
 
-        if global_schedule_flag.get(self.profile_id) is False:
+        if self.global_schedule_flag.get(self.profile_id) is False:
             # mark as scheduled globally
-            global_schedule_flag.set(self.profile_id)
+            self.global_schedule_flag.set(self.profile_id)
         else:
             # if this is a second call then postpone
-            global_postpone_flag.set(self.profile_id)
+            self.global_postpone_flag.set(self.profile_id)

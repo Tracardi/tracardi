@@ -36,6 +36,7 @@ op_value_or_field: op_value
 
 op_field_eq_field: op_field_sig OP op_field_sig
 op_between: op_field_sig BETWEEN_TERMINAL op_range
+op_is_not_null: op_field_sig "IS NOT NULL"i
 op_is_null: op_field_sig "IS NULL"i
 op_exists: OP_FIELD EXISTS_TERMINAL
 op_not_exists: OP_FIELD "NOT"i EXISTS_TERMINAL

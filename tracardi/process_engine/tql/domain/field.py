@@ -10,7 +10,12 @@ class Field:
     def _get_value(self):
         if self.value is None:
             try:
-                self.value = self.dot[self.label]
+                value = self.dot[self.label]
+                # If value did not change that means it does not exist.
+                if value == self.label:
+                    self.value = None
+                else:
+                    self.value = value
             except KeyError as e:
                 return MissingValue(str(e))
         return self.value
