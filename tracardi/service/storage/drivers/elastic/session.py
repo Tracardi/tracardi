@@ -16,8 +16,8 @@ async def save_session(session: Session, profile: Optional[Profile], profile_les
         if profile_less is False:
             if session.operation.new:
                 if session.profile is None or (isinstance(session.profile, Entity)
-                                                                    and isinstance(profile, Entity)
-                                                                    and session.profile.id != profile.id):
+                                               and isinstance(profile, Entity)
+                                               and session.profile.id != profile.id):
                     # save only profile Entity
                     session.profile = Entity(id=profile.id)
                 return await StorageFor(session).index().save()
