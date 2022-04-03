@@ -2,13 +2,17 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 
 
-class UpdateProfileAction(ActionRunner):
+class UpdateSessionAction(ActionRunner):
 
     def __init__(self, *args, **kwargs):
         pass
 
     async def run(self, payload):
-        self.update_profile()
+        if self.debug is True:
+            self.console.warning("Session may not be updated in debug mode.")
+        else:
+            self.session.operation.new = True
+        return None
 
 
 def register() -> Plugin:
@@ -16,16 +20,16 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='UpdateProfileAction',
+            className='UpdateSessionAction',
             inputs=["payload"],
             outputs=[],
-            version="0.6.0.1",
+            version="0.6.2",
             init=None,
-            manual="update_profile_action"
+            manual="update_session_action"
         ),
         metadata=MetaData(
-            name='Update profile',
-            desc='Updates profile in storage.',
+            name='Update session',
+            desc='Updates session in storage.',
             icon='store',
             group=["Operations"],
             documentation=Documentation(

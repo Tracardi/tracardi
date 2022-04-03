@@ -18,13 +18,13 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.operations.update_event_action',
+            module=__name__,
             className='UpdateEventAction',
             inputs=["payload"],
             outputs=[],
             version="0.6.0.1",
             init=None,
-            manual="update_profile_action"
+            manual="update_event_action"
         ),
         metadata=MetaData(
             name='Update event',
@@ -33,7 +33,7 @@ def register() -> Plugin:
             group=["Operations"],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                    "payload": PortDoc(desc="This port takes any payload object.")
                 },
                 outputs={}
             )
