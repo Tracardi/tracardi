@@ -14,13 +14,13 @@ async def save_sessions(profiles: List[Session]):
 async def save_session(session: Session, profile: Optional[Profile], profile_less, persist_session: bool = True):
     if persist_session:
         if profile_less is False:
-            if session.operation.new or session.profile is None or (isinstance(session.profile, Entity)
+            if session.operation.new:
+                if session.profile is None or (isinstance(session.profile, Entity)
                                                                     and isinstance(profile, Entity)
                                                                     and session.profile.id != profile.id):
-                # save only profile Entity
-                session.profile = Entity(id=profile.id)
-
-        return await StorageFor(session).index().save()
+                    # save only profile Entity
+                    session.profile = Entity(id=profile.id)
+                return await StorageFor(session).index().save()
 
     return BulkInsertResult()
 

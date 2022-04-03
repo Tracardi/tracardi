@@ -165,8 +165,16 @@ class TrackerPayload(BaseModel):
                     # Create new profile
                     is_new_profile = True
 
-        session.context = self.context
-        session.properties = self.properties
+        if isinstance(session.context, dict):
+            session.context.update(self.context)
+        else:
+            session.context = self.context
+
+        if isinstance(session.properties, dict):
+            session.properties.update(self.properties)
+        else:
+            session.properties = self.properties
+
         session.operation.new = is_new_session
 
         if profile_less is False and profile is not None:

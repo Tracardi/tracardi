@@ -1,3 +1,4 @@
+from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 
@@ -10,7 +11,7 @@ class UpdateSessionAction(ActionRunner):
     async def run(self, payload):
         if self.debug is True:
             self.console.warning("Session may not be updated in debug mode.")
-        else:
+        elif isinstance(self.session, Session):
             self.session.operation.new = True
         return None
 
