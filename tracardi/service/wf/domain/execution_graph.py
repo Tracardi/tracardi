@@ -368,6 +368,7 @@ class ExecutionGraph(BaseModel):
         for node in self.graph:  # type: Node
             task_start_time = time()
             sequence_number += 1
+            executed_node = False
 
             node_debug_info = DebugNodeInfo(
                 id=node.id,
@@ -393,6 +394,8 @@ class ExecutionGraph(BaseModel):
 
                 async for result, input_port, input_params, input_edge_id, task_start_time, active in \
                         self.run_task(node, payload, ready_upstream_results=actions_results):
+
+                    executed_node = active | executed_node
 
                     # Add information if edge is active
 
@@ -430,11 +433,6 @@ class ExecutionGraph(BaseModel):
                             # print(result.input == input_params)
                             # print(result.edge == input_edge_id)
                             raise result
-                            # raise DagError(str(result),
-                            #                port=input_port,
-                            #                input=input_params,
-                            #                edge=input_edge_id
-                            #                )
 
                         raise DagError(
                             "Action did not return Result or tuple of Results. Expected Result got {}".format(
@@ -443,12 +441,6 @@ class ExecutionGraph(BaseModel):
                             input=input_params,
                             edge=input_edge_id
                         )
-
-                    # todo remove after 14.02.2022
-                    # Save debug call info
-                    # debug_start_time = task_start_time - flow_start_time
-                    # debug_end_time = time() - flow_start_time
-                    # debug_run_time = debug_end_time - debug_start_time
 
                     if self.is_in_debug_mode(event):
                         node_debug_info.append_call_info(
@@ -462,45 +454,15 @@ class ExecutionGraph(BaseModel):
                             active=active
                         )
 
-                    # todo remove after 14.02.2022
-                    # call_debug_info = DebugCallInfo(
-                    #
-                    #     run=active,
-                    #
-                    #     profiler=Profiler(
-                    #         startTime=debug_start_time,
-                    #         endTime=debug_end_time,
-                    #         runTime=debug_run_time
-                    #     ),
-                    #
-                    #     input=DebugInput(
-                    #         edge=Entity(id=input_edge_id) if input_edge_id is not None else None,
-                    #         params=self._get_input_params(input_port, input_params)
-                    #     ),
-                    #     output=DebugOutput(
-                    #         edge=None,  # todo
-                    #         results=[result] if isinstance(result, Result) else result
-                    #     ),
-                    #
-                    #     init=node.init,
-                    #     profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
-                    #                                           and isinstance(node.object.profile, BaseModel) else {},
-                    #
-                    #     event=node.object.event.dict() if isinstance(node.object, ActionRunner)
-                    #                                       and isinstance(node.object.event, BaseModel) else {},
-                    #     session=node.object.session.dict() if isinstance(node.object, ActionRunner)
-                    #                                           and isinstance(node.object.session, BaseModel) else {}
-                    # )
-                    #
-                    # node_debug_info.calls.append(call_debug_info)
-                    log_list.append(
-                        Log(
-                            module=node.object.console.module,
-                            class_name=node.object.console.class_name,
-                            type='info',
-                            message=f"Node `{node_debug_info.name}` executed without errors."
+                    if executed_node:
+                        log_list.append(
+                            Log(
+                                module=node.object.console.module,
+                                class_name=node.object.console.class_name,
+                                type='info',
+                                message=f"Node `{node_debug_info.name}` edge {input_edge_id} executed without errors."
+                            )
                         )
-                    )
 
             except (DagError, DagExecError) as e:
 
@@ -518,11 +480,6 @@ class ExecutionGraph(BaseModel):
 
                 log_list.append(error_log)
 
-                # todo remove after 14.02.2022
-                # debug_start_time = task_start_time - flow_start_time
-                # debug_end_time = time() - flow_start_time
-                # debug_run_time = debug_end_time - debug_start_time
-
                 if self.is_in_debug_mode(event):
                     if e.input is not None and e.port is not None:
 
@@ -538,34 +495,6 @@ class ExecutionGraph(BaseModel):
                             error=str(e)
                         )
 
-                        # todo remove after 14.02.2022
-                        # call_debug_info = DebugCallInfo(
-                        #
-                        #     run=True,
-                        #
-                        #     profiler=Profiler(
-                        #         startTime=debug_start_time,
-                        #         endTime=debug_end_time,
-                        #         runTime=debug_run_time
-                        #     ),
-                        #     init=node.init,
-                        #     input=DebugInput(
-                        #         params=InputParams(port=e.port, value=e.input),
-                        #         edge=Entity(id=e.edge) if e.edge is not None else None
-                        #     ),
-                        #     output=DebugOutput(
-                        #         edge=None,
-                        #         results=None
-                        #     ),
-                        #     profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
-                        #                                           and isinstance(node.object.profile, BaseModel) else {},
-                        #     event=node.object.event.dict() if isinstance(node.object, ActionRunner)
-                        #                                       and isinstance(node.object.event, BaseModel) else {},
-                        #     session=node.object.session.dict() if isinstance(node.object, ActionRunner)
-                        #                                           and isinstance(node.object.session, BaseModel) else {},
-                        #     error=str(e)
-                        # )
-
                     else:
 
                         node_debug_info.append_call_info(
@@ -580,37 +509,6 @@ class ExecutionGraph(BaseModel):
                             error=str(e)
                         )
 
-                        # todo remove after 14.02.2022
-                        # call_debug_info = DebugCallInfo(
-                        #
-                        #     run=True,
-                        #
-                        #     profiler=Profiler(
-                        #         startTime=debug_start_time,
-                        #         endTime=debug_end_time,
-                        #         runTime=debug_run_time
-                        #     ),
-                        #     input=DebugInput(
-                        #         edge=Entity(id=e.edge) if e.edge is not None else None,
-                        #         params=None
-                        #     ),
-                        #     output=DebugOutput(
-                        #         edge=None,
-                        #         results=None
-                        #     ),
-                        #     init=node.init,
-                        #     error=str(e),
-                        #     profile=node.object.profile.dict() if isinstance(node.object, ActionRunner)
-                        #                                           and isinstance(node.object.profile, BaseModel) else {},
-                        #     event=node.object.event.dict() if isinstance(node.object, ActionRunner)
-                        #                                       and isinstance(node.object.event, BaseModel) else {},
-                        #     session=node.object.session.dict() if isinstance(node.object, ActionRunner)
-                        #                                           and isinstance(node.object.session, BaseModel) else {},
-                        # )
-
-                    # todo remove after 14.02.2022
-                    # node_debug_info.calls.append(call_debug_info)
-
                 # Stop workflow when there is an error
                 break
 
@@ -621,7 +519,7 @@ class ExecutionGraph(BaseModel):
 
                     # If node had call that means it was running
 
-                    if node_debug_info.calls:
+                    if executed_node:
                         execution_number += 1
                         node_debug_info.executionNumber = execution_number
                         debug_info.nodes[node_debug_info.id] = node_debug_info
