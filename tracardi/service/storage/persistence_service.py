@@ -459,6 +459,19 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
+    async def update_document(self, record: dict, id: str):
+        try:
+            record = {
+                "doc": record,
+                'doc_as_upsert': True
+            }
+            return await self.storage.update(id, record=record)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
     async def delete_by_query(self, query: dict):
         try:
             return await self.storage.delete_by_query(query=query)
