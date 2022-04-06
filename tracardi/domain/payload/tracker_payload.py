@@ -47,8 +47,9 @@ class TrackerPayload(BaseModel):
                 _event.metadata.debug = debugging
 
                 # Append session data
-                _event.session.start = session.metadata.time.insert
-                _event.session.duration = session.metadata.time.duration
+                if isinstance(session, Session):
+                    _event.session.start = session.metadata.time.insert
+                    _event.session.duration = session.metadata.time.duration
                 _event.context['ip'] = ip
 
                 event_list.append(_event)
@@ -104,7 +105,8 @@ class TrackerPayload(BaseModel):
                     # Create new profile
                     is_new_profile = True
 
-                    logger.info("New profile created at UTC {} with id {}".format(profile.metadata.time.insert, profile.id))
+                    logger.info(
+                        "New profile created at UTC {} with id {}".format(profile.metadata.time.insert, profile.id))
 
                 else:
 
@@ -128,7 +130,7 @@ class TrackerPayload(BaseModel):
                     else:
                         logger.info(
                             "Merged profile loaded with date {} UTC and id {}".format(profile.metadata.time.insert,
-                                                                                  profile.id))
+                                                                                      profile.id))
 
         else:
 
@@ -157,6 +159,7 @@ class TrackerPayload(BaseModel):
 
                     profile = None
 
+                # Although we tried to load profile it still does not exist.
                 if profile is None:
                     # Id exists but profile not exist in storage.
 
@@ -164,6 +167,10 @@ class TrackerPayload(BaseModel):
 
                     # Create new profile
                     is_new_profile = True
+
+                    # Update session as there is new profile. Previous session had no profile.id.
+                    session.profile = Entity(id=profile.id)
+                    is_new_session = True
 
         if isinstance(session.context, dict):
             session.context.update(self.context)

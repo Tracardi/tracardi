@@ -1,13 +1,13 @@
 import uuid
 from collections import defaultdict
 from datetime import datetime
-from typing import Optional, Any, List, Union, Callable
+from typing import Optional, List, Union, Callable
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
-from .metadata import Metadata
+from .metadata import ProfileMetadata
 from .pii import PII
 from .profile_traits import ProfileTraits
-from .time import Time
+from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..service.dot_notation_converter import DotNotationConverter
@@ -18,8 +18,7 @@ from ..process_engine.tql.condition import Condition
 
 
 class Profile(Entity):
-    mergedWith: Optional[str] = None
-    metadata: Optional[Metadata] = Metadata(time=Time())
+    metadata: Optional[ProfileMetadata] = ProfileMetadata(time=ProfileTime())
     operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()
@@ -32,7 +31,6 @@ class Profile(Entity):
     def replace(self, profile):
         if isinstance(profile, Profile):
             self.id = profile.id
-            self.mergedWith = profile.mergedWith
             self.metadata = profile.metadata
             self.operation = profile.operation
             self.stats = profile.stats
@@ -59,9 +57,9 @@ class Profile(Entity):
     def _mark_profiles_as_merged(profiles, merge_with) -> List['Profile']:
         disabled_profiles = []
 
-        for profile in profiles:
+        for profile in profiles:  # type: Profile
             profile.active = False
-            profile.mergedWith = merge_with
+            profile.metadata.merged_with = merge_with
             disabled_profiles.append(profile)
 
         return disabled_profiles
@@ -177,7 +175,7 @@ class Profile(Entity):
         """
         return Profile(
             id=str(uuid.uuid4()),
-            metadata=Metadata(time=Time(insert=datetime.utcnow()))
+            metadata=ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
         )
 
 
@@ -215,11 +213,10 @@ class Profiles(list):
             segments = list(set(segments))
 
         # Set id to merged id or current profile id.
-        id = current_profile.mergedWith if current_profile.mergedWith is not None else current_profile.id
+        id = current_profile.metadata.merged_with if current_profile.metadata.merged_with is not None else current_profile.id
 
         return Profile(
             id=id,
-            mergedWith=None,
             stats=stats,
             traits=traits,
             pii=piis,

@@ -15,6 +15,8 @@ async def save_session(session: Session, profile: Optional[Profile], profile_les
     if persist_session:
         if profile_less is False:
             if session.operation.new:
+                # Add new profile id to session if it does not exist, or profile id in session is different then
+                # the real profile id.
                 if session.profile is None or (isinstance(session.profile, Entity)
                                                and isinstance(profile, Entity)
                                                and session.profile.id != profile.id):
