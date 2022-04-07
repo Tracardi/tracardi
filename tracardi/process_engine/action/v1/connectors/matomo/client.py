@@ -1,5 +1,6 @@
 import aiohttp
 import json
+from .send_event.model.config import MatomoPayload
 
 
 class MatomoClientException(Exception):
@@ -12,17 +13,11 @@ class MatomoClient:
         self.token = token
         self.api_url = api_url
 
-    async def send_event(self, id_site: int, data: dict):
+    async def send_event(self, matomo_payload: MatomoPayload):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=f"{self.api_url}/matomo.php",
-                params={
-                    "token_auth": self.token,
-                    "idsite": id_site,
-                    "send_image": 0,
-                    "rec": 1,
-                    **{key: json.dumps(value) for key, value in data.items() if isinstance(value, dict)}
-                }
+                params=matomo_payload.dict()
             ) as response:
 
                 if response.status != 204:
