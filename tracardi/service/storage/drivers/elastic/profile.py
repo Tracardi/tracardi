@@ -23,9 +23,9 @@ async def load_merged_profile(id: str) -> Profile:
 
     entity = Entity(id=id)
     profile = await StorageFor(entity).index('profile').load(Profile)  # type: Profile
-    if profile is not None and profile.mergedWith is not None:
+    if profile is not None and profile.metadata.merged_with is not None:
         # Has merged profile
-        profile = await load_merged_profile(profile.mergedWith)
+        profile = await load_merged_profile(profile.metadata.merged_with)
 
     return profile
 

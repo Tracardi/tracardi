@@ -10,6 +10,7 @@ from .value_object.storage_info import StorageInfo
 
 class SessionTime(BaseModel):
     insert: Optional[datetime]
+    update: Optional[datetime] = None
     timestamp: Optional[int] = 0
     duration: float = 0
 
@@ -49,7 +50,8 @@ class Session(Entity):
     def storage_info() -> StorageInfo:
         return StorageInfo(
             'session',
-            Session
+            Session,
+            exclude={"operation": ...}
         )
 
     def get_platform(self):

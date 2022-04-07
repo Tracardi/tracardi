@@ -213,9 +213,9 @@ class RulesEngine:
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
         disabled_profiles = []
 
-        for profile in profiles:
+        for profile in profiles:   # type: Profile
             profile.active = False
-            profile.mergedWith = merge_with
+            profile.metadata.merged_with = merge_with
             disabled_profiles.append(profile)
 
         return disabled_profiles
