@@ -122,7 +122,7 @@ def register() -> Plugin:
                 outputs={}
             ),
             emits_event={
-                "x": "Defined in plugin"
+                "Delayed event": "delayed-event"
             }
         )
     )
