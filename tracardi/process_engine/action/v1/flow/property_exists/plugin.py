@@ -28,6 +28,7 @@ def register() -> Plugin:
         spec=Spec(
             module=__name__,
             className='PropertyExistsAction',
+            author="Risto Kowaczewski",
             inputs=["payload"],
             outputs=["true", "false"],
             version="0.6.2",

@@ -88,7 +88,7 @@ class Documentation(BaseModel):
 
 class MetaData(BaseModel):
     name: str
-    brand: Optional[str] = ""
+    brand: Optional[str] = "Tracardi"
     desc: Optional[str] = ""
     keywords: Optional[List[str]] = []
     type: str = 'flowNode'
