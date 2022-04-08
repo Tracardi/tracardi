@@ -10,7 +10,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
 from typing import Tuple, Optional
 from tracardi.domain.storage_result import StorageResult
-# from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.singleton import Singleton
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
@@ -20,7 +20,7 @@ from tracardi.process_engine.tql.transformer.filter_transformer import FilterTra
 
 _logger = logging.getLogger("PersistenceService")
 _logger.setLevel(tracardi.logging_level)
-# _logger.addHandler(log_handler)
+_logger.addHandler(log_handler)
 
 
 class SqlSearchQueryParser(metaclass=Singleton):
@@ -466,11 +466,14 @@ class PersistenceService:
                 'doc_as_upsert': True
             }
             return await self.storage.update(id, record=record)
+        except elasticsearch.exceptions.ConflictError as e:
+            _logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
+                            f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
-            raise StorageException(str(e))
+            raise StorageException(str(e), details=str(e))
 
     async def delete_by_query(self, query: dict):
         try:

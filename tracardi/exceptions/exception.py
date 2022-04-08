@@ -22,6 +22,8 @@ class FieldTypeConflictException(TracardiException):
             self.details = "Unknown"
 
     def explain(self):
+        if isinstance(self.details, str):
+            return self.details
         return ",".join(self.details)
 
 
