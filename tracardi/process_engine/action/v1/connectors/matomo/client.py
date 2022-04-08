@@ -1,5 +1,4 @@
 import aiohttp
-import json
 from .send_event.model.config import MatomoPayload
 
 
@@ -17,7 +16,7 @@ class MatomoClient:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=f"{self.api_url}/matomo.php",
-                params=matomo_payload.dict()
+                params=matomo_payload.to_dict()
             ) as response:
 
                 if response.status != 204:

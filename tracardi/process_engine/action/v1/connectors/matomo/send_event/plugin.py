@@ -26,11 +26,33 @@ class SendEventToMatomoAction(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-
+        # TODO DIMENSIONS
+        # TODO CONVERT TO ACTUAL DATA
         data = MatomoPayload(
-            idsite=2,
+            idsite=3,
+            action_name="page-view",
             url="http://localhost:8686/tracker/",
-            action_name="page-view"
+            _id="26a721e2-77d6-4b59-9933-2562dcf20273".replace("-", "")[0:16],
+            urlref=None,
+            _idvc=2,
+            _viewts=1649371076,
+            _idts=1649341076,
+            _rcn=None,
+            _rck=None,
+            res="1280x1024",
+            ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 "
+               "Safari/537.36",
+            lang="pl-PL",
+            uid="26a721e2-77d6-4b59-9933-2562dcf20273".replace("-", "")[0:16],
+            new_visit=1,
+            search="search-keyword",
+            search_cat="search-category",
+            search_count=13,
+            pv_id="123abc",
+            idgoal=1,
+            revenue=10,
+            gt_ms=60, # TODO TAKE LATER FROM EVENT
+
         )
 
         try:
