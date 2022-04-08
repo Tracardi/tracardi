@@ -459,13 +459,13 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def update_document(self, record: dict, id: str):
+    async def update_document(self, record: dict, id: str, retry_on_conflict=3):
         try:
             record = {
                 "doc": record,
                 'doc_as_upsert': True
             }
-            return await self.storage.update(id, record=record)
+            return await self.storage.update(id, record=record, retry_on_conflict=retry_on_conflict)
         except elasticsearch.exceptions.ConflictError as e:
             _logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
                             f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")

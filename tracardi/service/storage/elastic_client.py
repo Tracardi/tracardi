@@ -98,9 +98,9 @@ class ElasticClient:
             ids=ids
         )
 
-    async def update(self, index, id, record):
+    async def update(self, index, id, record, retry_on_conflict=3):
         logger.debug(f"UPDATE INDEX: {index} at record {id} with {record}")
-        return await self._client.update(index, body=record, id=id)
+        return await self._client.update(index, body=record, id=id, retry_on_conflict=retry_on_conflict)
 
     async def remove_index(self, index):
         logger.debug(f"REMOVE INDEX: {index}")

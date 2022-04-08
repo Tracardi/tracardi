@@ -20,7 +20,7 @@ async def update_session_duration(session: Session):
                 "duration": session.metadata.time.duration
             }
         }
-    })
+    }, retry_on_conflict=3)
 
 
 async def save_session(session: Session, profile: Optional[Profile], profile_less, persist_session: bool = True):
