@@ -13,10 +13,10 @@ class MatomoClient:
         self.api_url = api_url
 
     async def send_event(self, matomo_payload: MatomoPayload):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(headers={"X-FORWARDED-FOR": matomo_payload.cip}) as session:
             async with session.post(
                 url=f"{self.api_url}/matomo.php",
-                params=matomo_payload.to_dict()
+                params={"token_auth": self.token, **matomo_payload.to_dict()}
             ) as response:
 
                 if response.status != 204:

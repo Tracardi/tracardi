@@ -6,6 +6,8 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
 from .model.config import Config, MatomoPayload
+from tracardi.service.sha1_hasher import SHA1Encoder
+from tracardi.service.notation.dict_traverser import DictTraverser
 
 
 def validate(config: dict) -> Config:
@@ -26,33 +28,98 @@ class SendEventToMatomoAction(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        # TODO DIMENSIONS
-        # TODO CONVERT TO ACTUAL DATA
-        data = MatomoPayload(
-            idsite=3,
-            action_name="page-view",
-            url="http://localhost:8686/tracker/",
-            _id="26a721e2-77d6-4b59-9933-2562dcf20273".replace("-", "")[0:16],
-            urlref=None,
-            _idvc=2,
-            _viewts=1649371076,
-            _idts=1649341076,
-            _rcn=None,
-            _rck=None,
-            res="1280x1024",
-            ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 "
-               "Safari/537.36",
-            lang="pl-PL",
-            uid="26a721e2-77d6-4b59-9933-2562dcf20273".replace("-", "")[0:16],
-            new_visit=1,
-            search="search-keyword",
-            search_cat="search-category",
-            search_count=13,
-            pv_id="123abc",
-            idgoal=1,
-            revenue=10,
-            gt_ms=60, # TODO TAKE LATER FROM EVENT
+        traverser = DictTraverser(dot)
 
+        if 'session@context.screen.local.height' in dot and 'session@context.screen.local.width' in dot:
+            res = f"{dot['session@context.screen.local.height']}x{dot['session@context.screen.local.width']}"
+        else:
+            res = None
+
+        if "session@context.browser.local.browser.userAgent" in dot:
+            ua = dot["session@context.browser.local.browser.userAgent"]
+        else:
+            ua = None
+
+        if "session@context.browser.local.browser.language" in dot:
+            lang = dot["session@context.browser.local.browser.language"]
+        else:
+            lang = None
+
+        if "session@operation.new" in dot and dot["session@operation.new"] is True:
+            new_visit = 1
+        else:
+            new_visit = 0
+
+        if "event@context.performance.responseStart" in dot and "event@context.performance.navigationStart" in dot:
+            pf_net = int(dot["event@context.performance.responseStart"] -
+                         dot["event@context.performance.navigationStart"])
+        else:
+            pf_net = None
+
+        if "event@context.performance.domComplete" in dot and "event@context.performance.responseStart" in dot:
+            pf_srv = int(dot["event@context.performance.domComplete"] - dot["event@context.performance.responseStart"])
+        else:
+            pf_srv = None
+
+        if "event@context.performance.responseEnd" in dot and "event@context.performance.responseStart" in dot:
+            pf_tfr = int(dot["event@context.performance.responseEnd"] - dot["event@context.performance.responseStart"])
+        else:
+            pf_tfr = None
+
+        if "event@context.performance.domContentLoadedEventEnd" in dot and \
+                "event@context.performance.domContentLoadedEventStart" in dot:
+            pf_dm1 = int(dot["event@context.performance.domContentLoadedEventEnd"] -
+                         dot["event@context.performance.domContentLoadedEventStart"])
+        else:
+            pf_dm1 = None
+
+        if "event@context.performance.domComplete" in dot and \
+                "event@context.performance.domContentLoadedEventEnd" in dot:
+            pf_dm2 = int(dot["event@context.performance.domComplete"] -
+                         dot["event@context.performance.domContentLoadedEventEnd"])
+        else:
+            pf_dm2 = None
+
+        if "event@context.performance.loadEventEnd" in dot and \
+                "event@context.performance.loadEventStart" in dot:
+            pf_onl = int(dot["event@context.performance.loadEventEnd"] -
+                         dot["event@context.performance.loadEventStart"])
+        else:
+            pf_onl = None
+
+        data = MatomoPayload(
+            cip=self.event.context.get("ip", None),
+            idsite=self.config.site_id,
+            action_name=self.event.type,
+            url=self.event.context.get("page", {"url": None}).get("url", None),
+            _id=self.profile.id.replace("-", "")[0:16],
+            urlref=dot[self.config.url_ref] if self.config.url_ref is not None else None,
+            _idvc=self.profile.metadata.time.visit.count,
+            _viewts=self.profile.metadata.time.visit.last.timestamp() if self.profile.metadata.time.visit.last
+                                                                         is not None else None,
+            _idts=self.profile.metadata.time.insert,
+            _rcn=dot[self.config.rcn] if self.config.rcn is not None else None,
+            _rck=dot[self.config.rck] if self.config.rck is not None else None,
+            res=res,
+            ua=ua,
+            lang=lang,
+            uid=self.profile.id.replace("-", "")[0:16],
+            new_visit=new_visit,
+            search=dot[self.config.search_keyword] if self.config.search_keyword is not None else None,
+            search_cat=dot[self.config.search_category] if self.config.search_category is not None else None,
+            search_count=dot[self.config.search_results_count] if self.config.search_results_count is not None
+            else None,
+            pv_id=SHA1Encoder.encode(self.session.id)[0:6],  # TODO GET TO KNOW WHAT SHOULD IT BE
+            idgoal=int(dot[self.config.goal_id]) if self.config.goal_id is not None else None,
+            revenue=float(dot[self.config.revenue]) if self.config.revenue is not None else None,
+            gt_ms=60,  # TODO TAKE LATER FROM EVENT
+            dimensions=traverser.reshape(self.config.dimensions),
+            pf_net=pf_net,
+            pf_srv=pf_srv,
+            pf_tfr=pf_tfr,
+            pf_dm1=pf_dm1,
+            pf_dm2=pf_dm2,
+            pf_onl=pf_onl
         )
 
         try:
@@ -74,12 +141,22 @@ def register() -> Plugin:
             version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
-            #manual,
+            # manual,
             init={
                 "source": {
                     "id": None,
                     "name": None
-                }
+                },
+                "site_id": None,
+                "url_ref": None,
+                "rcn": None,
+                "rck": None,
+                "search_keyword": None,
+                "search_category": None,
+                "search_results_count": None,
+                "goal_id": None,
+                "revenue": None,
+                "dimensions": {}
             },
             form=Form(
                 groups=[
@@ -91,6 +168,105 @@ def register() -> Plugin:
                                 name="Matomo resource",
                                 description="Please select your Matomo resource, containing Matomo URL and token.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "matomo"})
+                            ),
+                            FormField(
+                                id="site_id",
+                                name="Site ID",
+                                description="Please provide a site ID, which will be used by Matomo to assign sent "
+                                            "event to given site. This ID should be an integer.",
+                                component=FormComponent(type="text", props={"label": "Site ID"})
+                            )
+                        ]
+                    ),
+                    FormGroup(
+                        name="Marketing configuration",
+                        fields=[
+                            FormField(
+                                id="url_ref",
+                                name="Referrer URL",
+                                description="If you have an URL that shows how the profile got to your website, you can"
+                                            "include it in information sent to Matomo, by providing a path to it below."
+                                            " This field is optional.",
+                                component=FormComponent(type="dotPath", props={"label": "Referrer URL"})
+                            ),
+                            FormField(
+                                id="rcn",
+                                name="Campaign name",
+                                description="If you know by which campaign the profile got to your website, you can "
+                                            "provide a path to its name. This field is optional.",
+                                component=FormComponent(type="dotPath", props={"label": "Campaign name"})
+                            ),
+                            FormField(
+                                id="rck",
+                                name="Campaign keyword",
+                                description="If you know the campaign that led the user to your website, you can "
+                                            "provide a path to a keyword associated with that campaign. This field "
+                                            "is optional",
+                                component=FormComponent(type="dotPath", props={"label": "Campaign keyword"})
+                            )
+                        ]
+                    ),
+                    FormGroup(
+                        name="Search configuration",
+                        fields=[
+                            FormField(
+                                id="search_keyword",
+                                name="Search keyword",
+                                description="If you know that the profile has searched for something on you page, you "
+                                            "can provide a path to the field containing search keyword typed by them. "
+                                            "This field is optional.",
+                                component=FormComponent(type="dotPath", props={"label": "Search keyword"})
+                            ),
+                            FormField(
+                                id="search_category",
+                                name="Search category",
+                                description="If you know the category of the search performed by profile, you can "
+                                            "include this category by providing a path to it. This field is also "
+                                            "optional.",
+                                component=FormComponent(type="dotPath", props={"label": "Search category"})
+                            ),
+                            FormField(
+                                id="search_results_count",
+                                name="Number of search results",
+                                description="If you know how many results were returned for performed search, you can "
+                                            "include this number by providing a path to it. This field is optional.",
+                                component=FormComponent(type="dotPath", props={"label": "Result"})
+                            )
+                        ]
+                    ),
+                    FormGroup(
+                        name="Goal configuration",
+                        fields=[
+                            FormField(
+                                id="goal_id",
+                                name="ID of the goal",
+                                description="If you know about presence of one of the goals previously defined in "
+                                            "Matomo, you can include this goal's ID by providing a path to it, or "
+                                            "setting it to one value. This field is optional.",
+                                component=FormComponent(type="dotPath", props={"label": "Goal ID"})
+                            ),
+                            FormField(
+                                id="revenue",
+                                name="Revenue of the goal",
+                                description="If you know the amount of revenue generated by the goal, you can include "
+                                            "this number (integer or float value) by providing a path to it. This field"
+                                            " is also optional.",
+                                component=FormComponent(type="dotPath", props={"label": "Revenue"})
+                            )
+                        ]
+                    ),
+                    FormGroup(
+                        name="Dimensions",
+                        fields=[
+                            FormField(
+                                id="dimensions",
+                                name="Custom dimensions",
+                                description="If you use Matomo with Custom Dimensions plugin, you can include up to "
+                                            "1000 custom dimensions, previously defined in Matomo. To do it, just type "
+                                            "the 'dimension' keyword with dimension ID at the end as the key, and path "
+                                            "to this dimension's value as the value. "
+                                            "(e.g. dimension17 - profile@pii.name)",
+                                component=FormComponent(type="keyValueList", props={"label": "Dimensions"})
                             )
                         ]
                     )

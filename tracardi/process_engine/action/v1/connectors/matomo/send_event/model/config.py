@@ -1,21 +1,32 @@
 from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
-from typing import Optional, Union
+from typing import Optional, Union, Dict, Any
 import random
 
 
 class Config(BaseModel):
     source: NamedEntity
-    urlref: Optional[str] = None
-    rck: Optional[str] = None
+    site_id: int
+    url_ref: Optional[str] = None
     rcn: Optional[str] = None
-    search: Optional[str] = None
-    search_cat: Optional[str] = None
-    id_goal: Optional[str] = None
+    rck: Optional[str] = None
+    search_keyword: Optional[str] = None
+    search_category: Optional[str] = None
+    search_results_count: Optional[str] = None
+    goal_id: Optional[str] = None
     revenue: Optional[str] = None
+    dimensions: Optional[Dict[str, Any]] = {}
+
+    @validator("dimensions")
+    def validate_dimensions(cls, value):
+        for key in value:
+            if not key.startswith("dimension"):
+                raise ValueError("Every dimension parameter has to start with 'dimension', e.g. 'dimension3'")
+        return value
 
 
 class MatomoPayload(BaseModel):
+    cip: str
     send_image: Optional[int] = 0
     idsite: int
     rec: Optional[int] = 1
@@ -43,6 +54,16 @@ class MatomoPayload(BaseModel):
     idgoal: Optional[int] = None
     revenue: Optional[Union[float, int]] = None
     gt_ms: int
+    dimensions: Optional[Dict[str, Any]]
+    pf_net: int
+    pf_srv: int
+    pf_tfr: int
+    pf_dm1: int
+    pf_dm2: int
+    pf_onl: int
 
     def to_dict(self):
-        return {key: value for key, value in self.dict().items() if value is not None}
+        return {
+            key: value for key, value in {**self.dict(), **self.dimensions}.items()
+            if value is not None and key != "dimensions"
+        }
