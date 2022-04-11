@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from tracardi.config import tracardi, redis_config
+from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.redis_client import RedisClient
 
@@ -14,7 +14,7 @@ class PostponeCache:
 
     def __init__(self, cache_type):
         logger.info(f"Cache for {cache_type} created")
-        self.redis = RedisClient(redis_config.redis_host)
+        self.redis = RedisClient()
         self.hash = cache_type
 
     def exists(self, profile_id):
@@ -39,7 +39,7 @@ class InstanceCache:
 
     def __init__(self, cache_type):
         logger.info(f"Cache for {cache_type} created")
-        self.redis = RedisClient(redis_config.redis_host)
+        self.redis = RedisClient()
         self.hash = cache_type
 
     def exists(self, profile_id):

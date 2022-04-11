@@ -88,6 +88,7 @@ class RedisConfig:
 
     def __init__(self, env):
         self.redis_host = env['REDIS_HOST'] if 'REDIS_HOST' in env else 'redis://localhost:6379'
+        self.redis_password = env['REDIS_PASSWORD'] if 'REDIS_PASSWORD' in env else None
 
 
 redis_config = RedisConfig(os.environ)
