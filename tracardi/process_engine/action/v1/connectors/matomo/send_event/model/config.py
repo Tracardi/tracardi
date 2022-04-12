@@ -55,12 +55,18 @@ class MatomoPayload(BaseModel):
     revenue: Optional[Union[float, int]] = None
     gt_ms: int
     dimensions: Optional[Dict[str, Any]]
-    pf_net: int
-    pf_srv: int
-    pf_tfr: int
-    pf_dm1: int
-    pf_dm2: int
-    pf_onl: int
+    pf_net: Optional[int] = None
+    pf_srv: Optional[int] = None
+    pf_tfr: Optional[int] = None
+    pf_dm1: Optional[int] = None
+    pf_dm2: Optional[int] = None
+    pf_onl: Optional[int] = None
+
+    @validator("pf_net", "pf_srv", "pf_tfr", "pf_dm1", "pf_dm2", "pf_onl")
+    def validate_performance_values(cls, value):
+        if value == 0:
+            value = None
+        return value
 
     def to_dict(self):
         return {

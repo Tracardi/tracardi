@@ -5,9 +5,11 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
+from .service.page_performance import PerformanceValueGetter
 from .model.config import Config, MatomoPayload
 from tracardi.service.sha1_hasher import SHA1Encoder
 from tracardi.service.notation.dict_traverser import DictTraverser
+import hashlib
 
 
 def validate(config: dict) -> Config:
@@ -50,42 +52,17 @@ class SendEventToMatomoAction(ActionRunner):
         else:
             new_visit = 0
 
-        if "event@context.performance.responseStart" in dot and "event@context.performance.navigationStart" in dot:
-            pf_net = int(dot["event@context.performance.responseStart"] -
-                         dot["event@context.performance.navigationStart"])
-        else:
-            pf_net = None
+        perf_data_service = PerformanceValueGetter(dot)
 
-        if "event@context.performance.domComplete" in dot and "event@context.performance.responseStart" in dot:
-            pf_srv = int(dot["event@context.performance.domComplete"] - dot["event@context.performance.responseStart"])
-        else:
-            pf_srv = None
-
-        if "event@context.performance.responseEnd" in dot and "event@context.performance.responseStart" in dot:
-            pf_tfr = int(dot["event@context.performance.responseEnd"] - dot["event@context.performance.responseStart"])
-        else:
-            pf_tfr = None
-
-        if "event@context.performance.domContentLoadedEventEnd" in dot and \
-                "event@context.performance.domContentLoadedEventStart" in dot:
-            pf_dm1 = int(dot["event@context.performance.domContentLoadedEventEnd"] -
-                         dot["event@context.performance.domContentLoadedEventStart"])
-        else:
-            pf_dm1 = None
-
-        if "event@context.performance.domComplete" in dot and \
-                "event@context.performance.domContentLoadedEventEnd" in dot:
-            pf_dm2 = int(dot["event@context.performance.domComplete"] -
-                         dot["event@context.performance.domContentLoadedEventEnd"])
-        else:
-            pf_dm2 = None
-
-        if "event@context.performance.loadEventEnd" in dot and \
-                "event@context.performance.loadEventStart" in dot:
-            pf_onl = int(dot["event@context.performance.loadEventEnd"] -
-                         dot["event@context.performance.loadEventStart"])
-        else:
-            pf_onl = None
+        response_start = perf_data_service.get_performance_value("responseStart")
+        redirect_start = perf_data_service.get_performance_value("redirectStart")
+        dom_complete = perf_data_service.get_performance_value("domComplete")
+        response_end = perf_data_service.get_performance_value("responseEnd")
+        dom_content_loaded = perf_data_service.get_performance_value("domContentLoadedEventStart")
+        dom_loading = perf_data_service.get_performance_value("domContentLoadedEventStart")
+        load_event_start = perf_data_service.get_performance_value("loadEventStart")
+        load_event_end = perf_data_service.get_performance_value("loadEventEnd")
+        request_start = perf_data_service.get_performance_value("requestStart")
 
         data = MatomoPayload(
             cip=self.event.context.get("ip", None),
@@ -96,7 +73,7 @@ class SendEventToMatomoAction(ActionRunner):
             urlref=dot[self.config.url_ref] if self.config.url_ref is not None else None,
             _idvc=self.profile.metadata.time.visit.count,
             _viewts=self.profile.metadata.time.visit.last.timestamp() if self.profile.metadata.time.visit.last
-                                                                         is not None else None,
+            is not None else None,
             _idts=self.profile.metadata.time.insert,
             _rcn=dot[self.config.rcn] if self.config.rcn is not None else None,
             _rck=dot[self.config.rck] if self.config.rck is not None else None,
@@ -109,17 +86,17 @@ class SendEventToMatomoAction(ActionRunner):
             search_cat=dot[self.config.search_category] if self.config.search_category is not None else None,
             search_count=dot[self.config.search_results_count] if self.config.search_results_count is not None
             else None,
-            pv_id=SHA1Encoder.encode(self.session.id)[0:6],  # TODO GET TO KNOW WHAT SHOULD IT BE
+            pv_id=self.make_pv_id(),
             idgoal=int(dot[self.config.goal_id]) if self.config.goal_id is not None else None,
             revenue=float(dot[self.config.revenue]) if self.config.revenue is not None else None,
-            gt_ms=60,  # TODO TAKE LATER FROM EVENT
+            gt_ms=int(response_end - request_start) if 0 not in (request_start, response_end) else None,
             dimensions=traverser.reshape(self.config.dimensions),
-            pf_net=pf_net,
-            pf_srv=pf_srv,
-            pf_tfr=pf_tfr,
-            pf_dm1=pf_dm1,
-            pf_dm2=pf_dm2,
-            pf_onl=pf_onl
+            pf_net=int(response_start - redirect_start) if 0 not in (response_start, redirect_start) else None,
+            pf_srv=int(dom_complete - response_start) if 0 not in (dom_complete, response_start) else None,
+            pf_tfr=int(response_end - response_start) if 0 not in (response_end, response_start) else None,
+            pf_dm2=int(dom_content_loaded - dom_complete) if 0 not in (dom_complete, dom_content_loaded) else None,
+            pf_dm1=int(dom_content_loaded - dom_loading) if 0 not in (dom_content_loaded, dom_loading) else None,
+            pf_onl=int(load_event_end - load_event_start) if 0 not in (load_event_end, load_event_start) else None
         )
 
         try:
@@ -128,6 +105,20 @@ class SendEventToMatomoAction(ActionRunner):
 
         except MatomoClientException as e:
             return Result(port="error", value=str(e))
+
+    def make_pv_id(self) -> str:
+        md5_hash = hashlib.md5(
+            f'{self.session.id}{self.event.context.get("page", {"url": ""}).get("url", "")}'.encode()
+        )
+        characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        def to_base(n, b):
+            return "0" if not n else to_base(n // b, b).lstrip("0") + characters[n % b]
+
+        result = to_base(int(md5_hash.hexdigest()[0:8], base=16), 62)
+
+        return "0" * (6 - len(result)) + result
+
 
 
 def register() -> Plugin:
