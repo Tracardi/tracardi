@@ -1,0 +1,38 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "revokable": {
+        "type": "boolean"
+      },
+      "default_value": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "required": {
+        "type": "boolean"
+      },
+      "auto_revoke": {
+        "type": "keyword"
+      }
+    }
+  }
+}

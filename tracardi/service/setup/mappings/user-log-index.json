@@ -1,0 +1,25 @@
+{
+  "index_patterns": [
+    "%%PREFIX%%-tracardi-user-log-*-*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "timestamp": {
+          "type": "date"
+        },
+        "successful": {
+          "type": "boolean"
+        },
+        "email": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

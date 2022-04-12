@@ -1,0 +1,105 @@
+{
+  "index_patterns": [
+    "%%PREFIX%%-tracardi-profile-*-*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "dynamic": false,
+      "date_detection": false,
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "metadata": {
+          "dynamic": false,
+          "properties": {
+            "time": {
+              "properties": {
+                "insert": {
+                  "type": "date"
+                },
+                "visit": {
+                  "properties": {
+                    "last": {
+                      "type": "date"
+                    },
+                    "current": {
+                      "type": "date"
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "stats": {
+          "dynamic": true,
+          "type": "object"
+        },
+        "traits": {
+          "properties": {
+            "private": {
+              "dynamic": true,
+              "type": "object"
+            },
+            "public": {
+              "dynamic": true,
+              "type": "object"
+            }
+          }
+        },
+        "pii": {
+          "dynamic": false,
+          "properties": {
+            "name": {
+              "type": "text"
+            },
+            "surname": {
+              "type": "text"
+            },
+            "birthDate": {
+              "type": "date"
+            },
+            "email": {
+              "type": "keyword"
+            },
+            "telephone": {
+              "type": "keyword"
+            },
+            "twitter": {
+              "type": "keyword"
+            },
+            "facebook": {
+              "type": "keyword"
+            },
+            "whatsapp": {
+              "type": "keyword"
+            },
+            "other": {
+              "dynamic": true,
+              "type": "object"
+            }
+          }
+        },
+        "segments": {
+          "type": "keyword",
+          "ignore_above": 64
+        },
+        "consents": {
+          "dynamic": true,
+          "type": "object"
+        },
+        "active": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

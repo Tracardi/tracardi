@@ -76,5 +76,13 @@ async def search_by_token(token: str) -> StorageResult:
     return StorageResult(result)
 
 
+async def search_by_role(role: str) -> StorageResult:
+    query = {
+        "query": {"term": {"role": str(role)}}
+    }
+    result = await storage_manager("user").query(query=query)
+    return StorageResult(result)
+
+
 async def check_if_exists(email: str) -> bool:
     return await storage_manager("user").exists(id=email)

@@ -1,0 +1,110 @@
+{
+  "index_patterns": [
+    "%%PREFIX%%-tracardi-event-*-*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "metadata": {
+          "properties": {
+            "time": {
+              "properties": {
+                "insert": {
+                  "type": "date"
+                },
+                "process_time": {
+                  "type": "float"
+                }
+              }
+            },
+            "status": {
+              "type": "keyword",
+              "null_value": "NULL"
+            },
+            "processed_by": {
+              "properties": {
+                "rules": {
+                  "type": "keyword"
+                },
+                "third_party": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "profile_less": {
+              "type": "boolean"
+            },
+            "debugged": {
+              "type": "boolean"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword",
+          "null_value": "NULL"
+        },
+        "properties": {
+          "dynamic": true,
+          "type": "object"
+        },
+        "source": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "session": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "start": {
+              "type": "date"
+            },
+            "duration": {
+              "type": "float"
+            }
+          }
+        },
+        "profile": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "aux": {
+          "dynamic": true,
+          "type": "object"
+        },
+        "config": {
+          "dynamic": true,
+          "type": "object"
+        },
+        "context": {
+          "dynamic": true,
+          "type": "object"
+        },
+        "tags": {
+          "properties": {
+            "values": {
+              "type": "keyword"
+            },
+            "count": {
+              "type": "double"
+            }
+          }
+        }
+      }
+    }
+  }
+}

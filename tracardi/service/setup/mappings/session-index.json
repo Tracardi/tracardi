@@ -1,0 +1,54 @@
+{
+  "index_patterns": [
+    "%%PREFIX%%-tracardi-session-*-*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "metadata": {
+          "properties": {
+            "time": {
+              "properties": {
+                "insert": {
+                  "type": "date"
+                },
+                "update": {
+                  "type": "date"
+                }
+              }
+            },
+            "timestamp": {
+              "type": "integer"
+            },
+            "duration": {
+              "type": "float"
+            }
+          }
+        },
+        "profile": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "context": {
+          "dynamic": true,
+          "type": "object"
+        },
+        "properties": {
+          "dynamic": true,
+          "type": "object"
+        }
+      }
+    }
+  }
+}
