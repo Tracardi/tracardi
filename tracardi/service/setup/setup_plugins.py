@@ -17,7 +17,7 @@ logger.addHandler(log_handler)
 
 
 async def add_plugin(module, install=False, upgrade=False):
-    print(module)
+
     try:
 
         # upgrade
