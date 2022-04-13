@@ -78,7 +78,7 @@ async def search_by_token(token: str) -> StorageResult:
 
 async def search_by_role(role: str) -> StorageResult:
     query = {
-        "query": {"term": {"role": str(role)}}
+        "query": {"term": {"roles": str(role)}}
     }
     result = await storage_manager("user").query(query=query)
     return StorageResult(result)
