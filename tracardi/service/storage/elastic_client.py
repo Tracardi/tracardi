@@ -64,6 +64,10 @@ class ElasticClient:
         async for doc in _generator:
             yield doc
 
+    @property
+    def cluster(self):
+        return self._client.cluster
+
     async def insert(self, index, records) -> BulkInsertResult:
 
         logger.debug(f"INSERT: {index}, {records}")
