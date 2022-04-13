@@ -1,0 +1,79 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "url": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "transitional": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "groups": {
+        "type": "keyword"
+      },
+      "icon": {
+        "type": "keyword",
+        "index": false
+      },
+      "configurable": {
+        "type": "boolean"
+      },
+      "hash": {
+        "type": "keyword"
+      },
+      "endpoints": {
+        "properties": {
+          "get": {
+            "properties": {
+              "url": {
+                "type": "keyword",
+                "index": false
+              },
+              "method": {
+                "type": "keyword",
+                "index": false
+              }
+            }
+          },
+          "post": {
+            "properties": {
+              "url": {
+                "type": "keyword",
+                "index": false
+              },
+              "method": {
+                "type": "keyword",
+                "index": false
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

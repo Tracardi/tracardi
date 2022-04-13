@@ -1,0 +1,46 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "event_id": {
+        "type": "keyword"
+      },
+      "profile_id": {
+        "type": "keyword"
+      },
+      "flow_id": {
+        "type": "keyword"
+      },
+      "origin": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {
+          "timestamp": {
+            "type": "date"
+          }
+        }
+      },
+      "class_name": {
+        "type": "keyword"
+      },
+      "module": {
+        "type": "text"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      },
+      "traceback": {
+        "type": "text",
+        "index": false
+      }
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": true,
+    "properties": {
+      "id": {
+        "type": "keyword",
+        "ignore_above": 64
+      },
+      "metadata": {
+        "properties": {
+          "time": {
+            "properties": {
+              "insert": {
+                "type": "date"
+              }
+            }
+          }
+        }
+      },
+      "plugin": {
+        "properties": {
+          "debug": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "properties": {
+              "desc": {
+                "type": "text"
+              },
+              "group": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "height": {
+                "type": "integer"
+              },
+              "width": {
+                "type": "integer"
+              },
+              "icon": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "keywords": {
+                "type": "text"
+              },
+              "name": {
+                "type": "text"
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 24
+              },
+              "tags": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "pro": {
+                "type": "boolean"
+              },
+              "documentation": {
+                "type": "keyword",
+                "index": false
+              },
+              "emits_event": {
+                "type": "keyword",
+                "index": false
+              }
+            }
+          },
+          "spec": {
+            "properties": {
+              "author": {
+                "type": "keyword",
+                "ignore_above": 64
+              },
+              "className": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "form": {
+                "type": "keyword",
+                "index": false
+              },
+              "id": {
+                "type": "keyword",
+                "ignore_above": 64
+              },
+              "init": {
+                "index": false,
+                "type": "keyword"
+              },
+              "node": {
+                "properties": {
+                  "on_remove": {
+                    "type": "keyword",
+                    "ignore_above": 128,
+                    "index": false
+                  },
+                  "on_create": {
+                    "type": "keyword",
+                    "ignore_above": 128,
+                    "index": false
+                  }
+                }
+              },
+              "inputs": {
+                "type": "keyword",
+                "ignore_above": 48
+              },
+              "outputs": {
+                "type": "keyword",
+                "ignore_above": 48
+              },
+              "license": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "manual": {
+               "type": "keyword",
+                "ignore_above": 64,
+                "index": false
+              },
+              "module": {
+                "type": "keyword",
+                "ignore_above": 128
+              },
+              "on_error_continue": {
+                "type": "boolean"
+              },
+              "on_error_repeat": {
+                "type": "integer"
+              },
+              "version": {
+                "type": "keyword",
+                "ignore_above": 32
+              }
+            }
+          },
+          "start": {
+            "type": "boolean"
+          }
+        }
+      },
+      "settings": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

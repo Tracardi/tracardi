@@ -1,0 +1,29 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "eventType": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "condition": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "machine_name": {
+        "type": "keyword"
+      }
+    }
+  }
+}

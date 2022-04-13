@@ -1,0 +1,29 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "profile_id": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type":   "date"
+      },
+      "ttl": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "last_value": {
+        "type": "keyword"
+      }
+    }
+  }
+}

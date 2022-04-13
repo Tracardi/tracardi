@@ -24,7 +24,7 @@ from ..domain.rule import Rule
 from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import log_handler
 
-logger = logging.getLogger("Segmentation")
+logger = logging.getLogger("Routing rule")
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 

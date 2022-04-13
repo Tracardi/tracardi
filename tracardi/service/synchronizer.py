@@ -52,7 +52,7 @@ class ProfileTracksSynchronizer:
     def __init__(self, profile: Optional[Entity], wait=0.1):
         self.wait = wait
         self.profile = profile
-        self.redis = RedisClient(redis_config.redis_host)
+        self.redis = RedisClient()
         self.hash = "profile-blocker"
 
     async def __aenter__(self):

@@ -1,0 +1,34 @@
+{
+  "index_patterns": [
+    "%%PREFIX%%-tracardi-log-*-*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "date": {
+          "type": "date"
+        },
+        "message": {
+          "type": "keyword"
+        },
+        "logger": {
+          "type": "keyword"
+        },
+        "file": {
+          "type": "keyword"
+        },
+        "line": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "projects": {
+        "type": "keyword"
+      },
+      "draft": {
+        "type": "keyword",
+        "index": false
+      },
+      "production": {
+        "type": "keyword",
+        "index": false
+      },
+      "backup": {
+        "type": "keyword",
+        "index": false
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "lock": {
+        "type": "boolean"
+      }
+    }
+  }
+}

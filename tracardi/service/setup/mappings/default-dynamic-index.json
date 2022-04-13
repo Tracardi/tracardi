@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": true,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "dynamic": false,
+        "properties": {
+          "time": {
+            "properties": {
+              "insert": {
+                "type": "date"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
