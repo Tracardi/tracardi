@@ -1,4 +1,5 @@
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver import storage
@@ -17,7 +18,7 @@ class FindPreviousSessionAction(ActionRunner):
     async def run(self, payload):
         result = await storage.driver.session.get_nth_last_session(
             profile_id=self.profile.id,
-            n=self.config.offset
+            n=(-1) * self.config.offset
         )
         if result is None:
             return Result(port="not_found", value=payload)
@@ -38,8 +39,25 @@ def register() -> Plugin:
             init={
                 "offset": -1
             },
-            #form=Form(),
-            #manual="get_prev_session_action"
+            form=Form(
+                groups=[
+                    FormGroup(
+                        name="Plugin configuration",
+                        fields=[
+                            FormField(
+                                id="offset",
+                                name="Offset",
+                                description="Please provide an integer between -10 and 0, representing the "
+                                            "number of the previous session, counting from present one. For example, "
+                                            "-1 will return last session, and -2 will return the session before the "
+                                            "last one.",
+                                component=FormComponent(type="text", props={"label": "Offset"})
+                            )
+                        ]
+                    )
+                ]
+            ),
+            manual="get_prev_session_action"
         ),
         metadata=MetaData(
             name='Get previous session',

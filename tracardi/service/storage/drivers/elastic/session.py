@@ -64,10 +64,10 @@ async def get_nth_last_session(profile_id: str, n: int):
         "query": {
             "term": {"profile.id": profile_id}
         },
-        "from": 1,
-        "size": 10,
+        "size": 11,
         "sort": [
-            {"metadata.time.timestamp": "desc"}
+            {"metadata.time.insert": "desc"}
         ]
     })
-    return result["hits"]["hits"][n - 1]["_source"] if len(result) >= n else None
+
+    return result["hits"]["hits"][n - 1]["_source"] if len(result["hits"]["hits"]) >= n else None
