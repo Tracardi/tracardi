@@ -57,3 +57,17 @@ async def refresh():
 
 async def flush():
     return await storage_manager('session').flush()
+
+
+async def get_nth_last_session(profile_id: str, n: int):
+    result = await storage_manager('session').query({
+        "query": {
+            "term": {"profile.id": profile_id}
+        },
+        "from": 1,
+        "size": 10,
+        "sort": [
+            {"metadata.time.timestamp": "desc"}
+        ]
+    })
+    return result["hits"]["hits"][n - 1]["_source"] if len(result) >= n else None
