@@ -265,10 +265,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Send event to Matomo',
-            desc='Sends currently processed event to Matomo.',
-            icon='plugin',
-            group=["Connectors"],
+            name='Register event',
+            desc='Sends current event to Matomo.',
+            icon='matomo',
+            brand='Matomo',
+            group=["Stats"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
