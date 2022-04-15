@@ -2,7 +2,7 @@ from pydantic import BaseModel, validator
 
 
 class Config(BaseModel):
-    offset: int
+    offset: int = -1
 
     @validator("offset")
     def validate_offset(cls, value):

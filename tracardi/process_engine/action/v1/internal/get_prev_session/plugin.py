@@ -16,13 +16,17 @@ class FindPreviousSessionAction(ActionRunner):
         self.config = Config(**kwargs)
 
     async def run(self, payload):
-        result = await storage.driver.session.get_nth_last_session(
-            profile_id=self.profile.id,
-            n=(-1) * self.config.offset
-        )
-        if result is None:
-            return Result(port="not_found", value=payload)
-        return Result(port="found", value=result)
+        if self.event.metadata.profile_less is False:
+            result = await storage.driver.session.get_nth_last_session(
+                profile_id=self.profile.id,
+                n=(-1) * self.config.offset
+            )
+            if result is not None:
+                return Result(port="found", value=result)
+        else:
+            self.console.warning("Can not find last session for profile less event.")
+
+        return Result(port="not_found", value=payload)
 
 
 def register() -> Plugin:
@@ -33,7 +37,7 @@ def register() -> Plugin:
             className='FindPreviousSessionAction',
             inputs=["payload"],
             outputs=["found", "not_found"],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
             init={
@@ -42,15 +46,13 @@ def register() -> Plugin:
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Plugin configuration",
+                        name="Session configuration",
                         fields=[
                             FormField(
                                 id="offset",
-                                name="Offset",
-                                description="Please provide an integer between -10 and 0, representing the "
-                                            "number of the previous session, counting from present one. For example, "
-                                            "-1 will return last session, and -2 will return the session before the "
-                                            "last one.",
+                                name="Session offset",
+                                description="Enter which session you want to get on the plugin exit. For example, "
+                                            "-1 will return last session, and -2 will return 2nd last session.",
                                 component=FormComponent(type="text", props={"label": "Offset"})
                             )
                         ]
@@ -61,9 +63,9 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Get previous session',
-            desc='Fetches one of previous sessions for current profile, according to config, and injects it into '
+            desc='Loads previous sessions for current profile, according to config, and injects it into '
                  'payload.',
-            icon='plugin',
+            icon='previous',
             group=["Input/Output"],
             documentation=Documentation(
                 inputs={

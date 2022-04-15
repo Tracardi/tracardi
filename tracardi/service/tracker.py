@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from typing import List, Optional
 
+import redis
 from deepdiff import DeepDiff
 
 from tracardi.config import tracardi, memory_cache
@@ -26,7 +27,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
-    EventValidationException
+    EventValidationException, TracardiException
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -410,7 +411,10 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
 async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool):
     if tracardi.sync_profile_tracks:
-        async with ProfileTracksSynchronizer(tracker_payload.profile, wait=1):
-            return await track_event(tracker_payload, ip=host, profile_less=profile_less)
+        try:
+            async with ProfileTracksSynchronizer(tracker_payload.profile, wait=1):
+                return await track_event(tracker_payload, ip=host, profile_less=profile_less)
+        except redis.exceptions.ConnectionError as e:
+            raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
     else:
         return await track_event(tracker_payload, ip=host, profile_less=profile_less)
