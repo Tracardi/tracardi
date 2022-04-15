@@ -42,6 +42,22 @@ async def save_session(session: Session, profile: Optional[Profile], profile_les
 
     return BulkInsertResult()
 
+# NOT USED FOR NOW
+async def get_first_session(profile_id: str) -> float:
+    result = await storage_manager("session").query({
+        "query": {
+            "term": {"profile.id": profile_id}
+        },
+        "size": 0,
+        "aggs": {
+            "first_session": {
+                "min": {"field": "metadata.time.insert"}
+            }
+        }
+    })
+    return result["aggregations"]["first_session"]["value"]
+#
+
 
 async def load(id: str) -> Session:
     return await StorageFor(Entity(id=id)).index("session").load(Session)
