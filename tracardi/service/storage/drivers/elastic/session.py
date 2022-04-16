@@ -42,6 +42,22 @@ async def save_session(session: Session, profile: Optional[Profile], profile_les
 
     return BulkInsertResult()
 
+# NOT USED FOR NOW
+async def get_first_session(profile_id: str) -> float:
+    result = await storage_manager("session").query({
+        "query": {
+            "term": {"profile.id": profile_id}
+        },
+        "size": 0,
+        "aggs": {
+            "first_session": {
+                "min": {"field": "metadata.time.insert"}
+            }
+        }
+    })
+    return result["aggregations"]["first_session"]["value"]
+#
+
 
 async def load(id: str) -> Session:
     return await StorageFor(Entity(id=id)).index("session").load(Session)
@@ -57,3 +73,17 @@ async def refresh():
 
 async def flush():
     return await storage_manager('session').flush()
+
+
+async def get_nth_last_session(profile_id: str, n: int):
+    result = await storage_manager('session').query({
+        "query": {
+            "term": {"profile.id": profile_id}
+        },
+        "size": 11,
+        "sort": [
+            {"metadata.time.insert": "desc"}
+        ]
+    })
+
+    return result["hits"]["hits"][n - 1]["_source"] if len(result["hits"]["hits"]) >= n else None

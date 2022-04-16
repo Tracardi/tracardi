@@ -250,6 +250,15 @@ def get_resource_types():
             "tags": ["airtable"],
             "name": "Airtable",
             "icon": "airtable"
+        },
+        "matomo": {
+            "config": {
+                "token": "<your-token>",
+                "api_url": "<your-matomo-url>"
+            },
+            "tags": ["matomo"],
+            "name": "Matomo",
+            #"icon": "matomo"
         }
     }
 

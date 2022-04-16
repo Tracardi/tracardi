@@ -181,6 +181,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.mautic.add_remove_segment.plugin',
         'tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin',
         'tracardi.process_engine.action.v1.connectors.airtable.fetch_records.plugin',
+        'tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin',
 
         # Internal
         'tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin',
@@ -190,6 +191,8 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.internal.query_string.plugin',
         'tracardi.process_engine.action.v1.operations.reduce_array.plugin',
         'tracardi.process_engine.action.v1.internal.get_prev_event.plugin',
+        'tracardi.process_engine.action.v1.internal.get_prev_session.plugin',
+
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',
