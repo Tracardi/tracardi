@@ -51,7 +51,7 @@ def register() -> Plugin:
                             FormField(
                                 id="offset",
                                 name="Session offset",
-                                description="Enter which session you want to get on the plugin exit. For example, "
+                                description="Enter the session you want to get on the plugin exit. For example, "
                                             "-1 will return last session, and -2 will return 2nd last session.",
                                 component=FormComponent(type="text", props={"label": "Offset"})
                             )

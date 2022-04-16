@@ -73,7 +73,7 @@ class SendEventToMatomoAction(ActionRunner):
             urlref=dot[self.config.url_ref] if self.config.url_ref is not None else None,
             _idvc=self.profile.metadata.time.visit.count,
             _viewts=self.profile.metadata.time.visit.last.timestamp() if self.profile.metadata.time.visit.last
-            is not None else None,
+                                                                         is not None else None,
             _idts=self.profile.metadata.time.insert,
             _rcn=dot[self.config.rcn] if self.config.rcn is not None else None,
             _rck=dot[self.config.rck] if self.config.rck is not None else None,
@@ -120,7 +120,6 @@ class SendEventToMatomoAction(ActionRunner):
         return "0" * (6 - len(result)) + result
 
 
-
 def register() -> Plugin:
     return Plugin(
         start=False,
@@ -139,9 +138,9 @@ def register() -> Plugin:
                     "name": None
                 },
                 "site_id": None,
-                "url_ref": None,
-                "rcn": None,
-                "rck": None,
+                "url_ref": "event@context.page.referer.host",
+                "rcn": "session@context.utm.campaign",
+                "rck": "session@context.utm.term",
                 "search_keyword": None,
                 "search_category": None,
                 "search_results_count": None,
@@ -171,6 +170,7 @@ def register() -> Plugin:
                     ),
                     FormGroup(
                         name="Marketing configuration",
+                        description="This part is optional and configured with default data.",
                         fields=[
                             FormField(
                                 id="url_ref",

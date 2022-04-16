@@ -30,10 +30,10 @@ def register() -> Plugin:
             init=None
         ),
         metadata=MetaData(
-            name='Read event source',
+            name='Get event source',
             desc='This plugin reads the source that the event came from.',
             icon='inbound',
-            group=["Operations"],
+            group=["Input/Output"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

@@ -57,21 +57,20 @@ def register() -> Plugin:
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Plugin configuration",
+                        name="Event configuration",
                         fields=[
                             FormField(
                                 name="Event type",
                                 id="event_type",
                                 description="Please provide event type that you want to load into payload.",
-                                component=FormComponent(type="text", props={"label": "Event type"})
+                                component=FormComponent(type="eventType", props={"label": "Event type"})
                             ),
                             FormField(
                                 name="Offset",
                                 id="offset",
                                 description="Please provide an integer between -10 and 0 inclusively. This integer "
-                                            "represents the number of the event, counting from the present one. For "
-                                            "example, 0 is current event, -1 is previous one, and -2 is one before the "
-                                            "last one.",
+                                            "is the number of the event, counting from the present one. For "
+                                            "example, 0 is current event, -1 is previous one, etc. ",
                                 component=FormComponent(type="text", props={"label": "Offset"})
                             )
                         ]
@@ -81,9 +80,9 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Get previous event',
-            desc='Injects one of the previous events for current profile into payload, according to given event type '
+            desc='Injects the previous event for current profile into payload, according to the event type '
                  'and offset value.',
-            icon='plugin',
+            icon='previous',
             group=["Input/Output"],
             documentation=Documentation(
                 inputs={
