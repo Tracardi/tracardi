@@ -337,3 +337,24 @@ async def refresh():
 
 async def flush():
     return await storage_manager('event').flush()
+
+
+async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
+    profile_term = {"profile.id": profile_id} if profile_id is not None else {"metadata.profile_less": True}
+
+    result = (await storage_manager("event").query({
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"type": event_type}},
+                    {"term": profile_term}
+                ]
+            }
+        },
+        "size": 11,
+        "sort": [
+            {"metadata.time.insert": "desc"}
+        ]
+    }))["hits"]["hits"]
+
+    return result[n]["_source"] if len(result) >= n + 1 else None
