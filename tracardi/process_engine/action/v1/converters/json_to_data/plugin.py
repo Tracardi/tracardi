@@ -10,53 +10,54 @@ def validate(config: dict):
     return Configuration(**config)
 
 
-class ConvertAction(ActionRunner):
+class JsonToObjectAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        path = dot[self.config.to_json]
+        json_string = dot[self.config.to_data]
+        result = json.loads(json_string)
 
-        result = json.dumps(dict(path), default=str)
-
-        return Result(port="payload", value={"json": result})
+        return Result(port="payload", value={"value": result})
 
 
 def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.converters.payload_to_json.plugin',
-            className='ConvertAction',
+            module=__name__,
+            className='JsonToObjectAction',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.6.0.1',
+            version='0.6.2',
             license="MIT",
-            author="Patryk Migaj",
+            author="Risto Kowaczewski",
             init={
-                "to_json": None
+                "to_data": None
             },
             form=Form(groups=[
                 FormGroup(
-                    name="Convert data to JSON string",
+                    name="Convert JSON string to data",
                     fields=[
                         FormField(
-                            id="to_json",
-                            name="Path to data",
-                            description="Path to data to be serialized to JSON. "
+                            id="to_data",
+                            name="Reference path",
+                            description="Reference path to JSON string to be converted"
                                         "E.g. profile@stats.counters.boughtProducts",
-                            component=FormComponent(type="dotPath", props={"label": "Field path"})
+                            component=FormComponent(type="dotPath", props={"label": "Reference path",
+                                                                           "defaultSourceValue": "event"})
                         )
                     ]
                 )
             ]),
         ),
         metadata=MetaData(
-            name='To JSON',
-            desc='This plugin converts objects to JSON',
+            name='JSON to data',
+            desc='Converts JSON to data objects',
             icon='json',
-            group=["Data processing"]
+            group=["Converters"],
+            tags=['json', 'object']
         )
     )
