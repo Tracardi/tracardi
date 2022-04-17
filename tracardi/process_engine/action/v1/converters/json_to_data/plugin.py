@@ -18,9 +18,11 @@ class JsonToObjectAction(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         json_string = dot[self.config.to_data]
-        result = json.loads(json_string)
-
-        return Result(port="payload", value={"value": result})
+        try:
+            result = json.loads(json_string)
+            return Result(port="payload", value={"value": result})
+        except json.JSONDecodeError:
+            return Result(port="error", value={"value": payload})
 
 
 def register() -> Plugin:
@@ -30,7 +32,7 @@ def register() -> Plugin:
             module=__name__,
             className='JsonToObjectAction',
             inputs=["payload"],
-            outputs=['payload'],
+            outputs=['payload', "error"],
             version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski",
