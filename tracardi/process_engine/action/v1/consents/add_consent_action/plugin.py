@@ -62,13 +62,20 @@ def register() -> Plugin:
                 "consents": None
             },
             manual="add_consents_action",
-            form=Form(groups=[
+            form=Form(
+                groups=[
                 FormGroup(
+                    name="Consent data reference",
+                    description="Please configure the reference to the event property that hold an information on "
+                                "granted consents.",
                     fields=[
                         FormField(
                             id="consents",
-                            name="Path to consents",
-                            description="Type path to consents that will be added to profile.",
+                            name="Reference to consents",
+                            description="Select the reference path to consents. The most possible use-case is when "
+                                        "customer grants consents by filling a form. This data is sent to Tracardi as "
+                                        "an event with properties set to granted consents. We need a reference path to "
+                                        "this data.",
                             component=FormComponent(
                                 type="forceDotPath",
                                 props={
@@ -83,7 +90,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Add consent',
             desc='This plugin adds consents to profile.',
-            icon='icon',
+            icon='consent',
             group=["Consents"],
             documentation=Documentation(
                 inputs={

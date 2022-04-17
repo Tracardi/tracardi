@@ -19,7 +19,7 @@ class PreviousEventGetter(ActionRunner):
         if self.event.metadata.profile_less is False:
             result = await storage.driver.event.get_nth_last_event(
                 profile_id=self.profile.id,
-                event_type=self.config.event_type,
+                event_type=self.config.event_type.id,
                 n=(-1) * self.config.offset
             )
 
@@ -29,7 +29,7 @@ class PreviousEventGetter(ActionRunner):
 
         else:
             result = await storage.driver.event.get_nth_last_event(
-                event_type=self.config.event_type,
+                event_type=self.config.event_type.id,
                 n=(-1) * self.config.offset
             )
 

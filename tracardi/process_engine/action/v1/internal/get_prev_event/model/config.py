@@ -1,8 +1,10 @@
 from pydantic import BaseModel, validator
 
+from tracardi.domain.named_entity import NamedEntity
+
 
 class Config(BaseModel):
-    event_type: str
+    event_type: NamedEntity
     offset: int
 
     @validator("offset")
