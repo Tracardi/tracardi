@@ -22,7 +22,9 @@ class TemplateAction(ActionRunner):
 
     async def run(self, payload):
         accessor = self._get_dot_accessor(payload)
-        return Result(port="payload", value=self.dot_template.render(self.config.template, accessor))
+        return Result(port="template", value={
+            "template": self.dot_template.render(self.config.template, accessor)
+        })
 
 
 def register() -> Plugin:
@@ -35,7 +37,7 @@ def register() -> Plugin:
             outputs=['payload'],
             version='0.6.0.1',
             license="MIT",
-            author="Dawid Kruk",
+            author="Dawid Kruk, Risto Kowaczewski",
             manual="template_action",
             init={
                 "template": ""
@@ -47,7 +49,8 @@ def register() -> Plugin:
                         FormField(
                             id="template",
                             name="Template",
-                            description="Provide template with placeholders.",
+                            description="Provide template with placeholders. Placeholders start with {{ and end "
+                                        "with }}. Data is referenced with dot notation. Example: {{profile@pii.name}}",
                             component=FormComponent(type="textarea", props={"label": "template"})
                         )
                     ]
