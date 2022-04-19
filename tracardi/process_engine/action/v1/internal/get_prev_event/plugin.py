@@ -16,10 +16,13 @@ class PreviousEventGetter(ActionRunner):
         self.config = Config(**kwargs)
 
     async def run(self, payload):
+
+        event_type = self.event.type if self.config.event_type.id == "@current" else self.config.event_type.id
+
         if self.event.metadata.profile_less is False:
             result = await storage.driver.event.get_nth_last_event(
                 profile_id=self.profile.id,
-                event_type=self.config.event_type.id,
+                event_type=event_type,
                 n=(-1) * self.config.offset
             )
 
@@ -29,7 +32,7 @@ class PreviousEventGetter(ActionRunner):
 
         else:
             result = await storage.driver.event.get_nth_last_event(
-                event_type=self.config.event_type.id,
+                event_type=event_type,
                 n=(-1) * self.config.offset
             )
 
@@ -50,7 +53,7 @@ def register() -> Plugin:
             license="MIT",
             author="Dawid Kruk",
             init={
-                "event_type": None,
+                "event_type": {"id": "@current", "name": "@current"},
                 "offset": -1
             },
             manual="get_prev_event_action",
@@ -62,7 +65,8 @@ def register() -> Plugin:
                             FormField(
                                 name="Event type",
                                 id="event_type",
-                                description="Please provide event type that you want to load into payload.",
+                                description="Please provide event type that you want to load into payload. If you want "
+                                            "current but previous event, insert @current.",
                                 component=FormComponent(type="eventType", props={"label": "Event type"})
                             ),
                             FormField(
