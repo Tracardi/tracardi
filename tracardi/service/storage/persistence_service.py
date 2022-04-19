@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Tuple, Optional
 from tracardi.domain.storage_result import StorageResult
 from tracardi.exceptions.log_handler import log_handler
+from tracardi.service.list_default_value import list_value_at_index
 from tracardi.service.singleton import Singleton
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
@@ -165,7 +166,7 @@ class SqlSearchQueryEngine:
 
         return QueryResult(**result.dict())
 
-    async def histogram(self, query: DatetimeRangePayload, query_type) -> QueryResult:
+    async def histogram(self, query: DatetimeRangePayload, query_type, group_by: str = None) -> QueryResult:
 
         def __interval(min: datetime, max: datetime):
 
@@ -192,7 +193,7 @@ class SqlSearchQueryEngine:
 
             return 1, 'd', "%y-%m-%d"
 
-        def __format(data, unit, interval, format):
+        def __format_count(data, unit, interval, format):
             for row in data:
                 # todo timestamp no timezone
                 timestamp = datetime.fromisoformat(row["key_as_string"].replace('Z', '+00:00'))
@@ -201,6 +202,29 @@ class SqlSearchQueryEngine:
                     'interval': "+{}{}".format(interval, unit),
                     "count": row["doc_count"]
                 }
+
+        def __format_count_by_bucket(data, unit, interval, format):
+
+            result = []
+            buckets = []
+            for bucket in data:
+                bucket_name = bucket['key'].lower()
+                buckets.append(bucket_name)
+
+                # Each bucket must have the same number of items
+                for number, row in enumerate(bucket['items_over_time']['buckets']):
+                    # todo timestamp no timezone
+                    timestamp = datetime.fromisoformat(row["key_as_string"].replace('Z', '+00:00'))
+
+                    item, result = list_value_at_index(result, number, default_value={
+                            "date": "{}".format(timestamp.strftime(format)),
+                            'interval': "+{}{}".format(interval, unit),
+                        })
+
+                    item[bucket_name] = row["doc_count"]
+                    result[number] = item
+
+            return result, buckets
 
         min_date_time, max_date_time = query.get_dates()  # type: datetime, datetime
         min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
@@ -215,48 +239,111 @@ class SqlSearchQueryEngine:
         else:
             es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
 
-        es_query = {
-            "size": 0,
-            "query": es_query['query'],
-            "aggs": {
-                "items_over_time": {
-                    "date_histogram": {
-                        "min_doc_count": 0,
-                        "field": time_field,
-                        "fixed_interval": f"{interval}{unit}",
-                        "extended_bounds": {
-                            "min": min_date_time,
-                            "max": max_date_time
+        if group_by is None:
+            es_query = {
+                "size": 0,
+                "query": es_query['query'],
+                "aggs": {
+                    "items_over_time": {
+                        "date_histogram": {
+                            "min_doc_count": 0,
+                            "field": time_field,
+                            "fixed_interval": f"{interval}{unit}",
+                            "extended_bounds": {
+                                "min": min_date_time,
+                                "max": max_date_time
+                            }
                         }
                     }
                 }
             }
-        }
+            if time_zone:
+                es_query['aggs']['items_over_time']['date_histogram']['time_zone'] = time_zone
 
-        if time_zone:
-            es_query['aggs']['items_over_time']['date_histogram']['time_zone'] = time_zone
+            try:
+                result = await self.persister.query(es_query)
+            except StorageException as e:
+                _logger.error("Could not query {}. Reason: {}".format(es_query, str(e)))
+                return QueryResult(total=0, result=[])
 
-        try:
-            result = await self.persister.query(es_query)
-        except StorageException as e:
-            _logger.error("Could not query {}. Reason: {}".format(es_query, str(e)))
-            return QueryResult(total=0, result=[])
+            try:
 
-        try:
-            qs = {
-                'total': result['hits']['total']['value'],
-                'result': list(__format(result['aggregations']['items_over_time']['buckets'], unit, interval, format))
-            }
+                qs = {
+                    'total': result['hits']['total']['value'],
+                    'result': list(
+                        __format_count(result['aggregations']['items_over_time']['buckets'], unit, interval, format)),
+                    'buckets': ['count']
+                }
+
+                return QueryResult(**qs)
+
+            except KeyError:
+                # When no result
+                qs = {
+                    'total': 0,
+                    'result': []
+                }
 
             return QueryResult(**qs)
-        except KeyError:
-            # When no result
-            qs = {
-                'total': 0,
-                'result': []
-            }
 
-        return QueryResult(**qs)
+        else:
+
+            es_query = {
+                "size": 0,
+                "query": es_query['query'],
+                "aggs": {
+                    "by_field": {
+                        "terms": {
+                            "field": group_by,
+                            "order": {
+                                "_count": "desc"
+                            },
+                            "size": 5
+                        },
+                        "aggs": {
+                            "items_over_time": {
+                                "date_histogram": {
+                                    "min_doc_count": 0,
+                                    "field": time_field,
+                                    "fixed_interval": f"{interval}{unit}",
+                                    "extended_bounds": {
+                                        "min": min_date_time,
+                                        "max": max_date_time
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if time_zone:
+                es_query['aggs']['by_field']['aggs']['items_over_time']['date_histogram']['time_zone'] = time_zone
+
+            try:
+                result = await self.persister.query(es_query)
+            except StorageException as e:
+                _logger.error("Could not query {}. Reason: {}".format(es_query, str(e)))
+                return QueryResult(total=0, result=[])
+
+            try:
+                buckets_result, buckets = __format_count_by_bucket(result['aggregations']['by_field']['buckets'], unit, interval, format)
+                qs = {
+                    'total': result['hits']['total']['value'],
+                    'result': buckets_result,
+                    'buckets': buckets
+
+                }
+
+                return QueryResult(**qs)
+
+            except KeyError:
+                # When no result
+                qs = {
+                    'total': 0,
+                    'result': []
+                }
+
+            return QueryResult(**qs)
 
 
 class PersistenceService:
@@ -447,9 +534,10 @@ class PersistenceService:
         engine = SqlSearchQueryEngine(self)
         return await engine.time_range(query, query_type)
 
-    async def histogram_by_sql_in_time_range(self, query: DatetimeRangePayload, query_type="tql") -> QueryResult:
+    async def histogram_by_sql_in_time_range(self, query: DatetimeRangePayload, query_type: str = "tql",
+                                             group_by: str = None) -> QueryResult:
         engine = SqlSearchQueryEngine(self)
-        return await engine.histogram(query, query_type)
+        return await engine.histogram(query, query_type, group_by)
 
     async def update_by_query(self, query: dict):
         try:
