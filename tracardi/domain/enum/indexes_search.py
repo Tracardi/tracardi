@@ -8,4 +8,5 @@ class IndexesSearch(str, Enum):
     event = "event"
     rule = "rule"
     segment = "segment"
-    flow = "flow"
+    flow = "flow",
+    log = "log"

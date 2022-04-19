@@ -34,7 +34,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.template_action',
             className='TemplateAction',
             inputs=["payload"],
-            outputs=['payload'],
+            outputs=['template'],
             version='0.6.0.1',
             license="MIT",
             author="Dawid Kruk, Risto Kowaczewski",
@@ -58,7 +58,7 @@ def register() -> Plugin:
             ]),
         ),
         metadata=MetaData(
-            name='Template data',
+            name='Template',
             desc='Returns a string where placeholders are replaced with given values.',
             icon='template',
             group=["Data processing"],
