@@ -64,50 +64,10 @@ def register() -> Plugin:
             module=__name__,
             className='PostponeEventAction',
             author="Risto Kowaczewski",
+            license="Tracardi Pro License",
             inputs=["payload"],
             outputs=[],
             version="0.6.2",
-            init={
-                'event_type': '',
-                'event_properties': '{}',
-                'delay': 60
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Event delay",
-                    description="Define when the even should be raised.",
-                    fields=[
-                        FormField(
-                            id="delay",
-                            name="Delay",
-                            description="Type number of seconds that the event should be postponed after the visit ends. "
-                                        "We consider that visit ends if there is no new event after X seconds. "
-                                        "Delay is the X variable in this "
-                                        "algorithm.",
-                            component=FormComponent(type="text", props={"label": "Delay in seconds"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Event details",
-                    description="Define event type and properties that will be rend to the system.",
-                    fields=[
-                        FormField(
-                            id="event_type",
-                            name="Raise event type",
-                            description="Type event type you would like to raise.",
-                            component=FormComponent(type="text", props={"label": "Event type"})
-                        ),
-                        FormField(
-                            id="event_properties",
-                            name="Event properties",
-                            description="Type additional properties to be sent with event. Event will fire within the "
-                                        "current profile context and with current session.",
-                            component=FormComponent(type="json", props={"label": "Event properties"})
-                        ),
-                    ]
-                ),
-            ]),
             manual=None
         ),
         metadata=MetaData(
@@ -123,6 +83,7 @@ def register() -> Plugin:
             ),
             emits_event={
                 "Delayed event": "delayed-event"
-            }
+            },
+            pro=True
         )
     )
