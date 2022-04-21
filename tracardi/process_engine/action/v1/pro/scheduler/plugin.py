@@ -73,7 +73,7 @@ class SchedulerPlugin(ActionRunner):
             logger.error(str(e))
             self.console.error(str(e))
             return Result(port="error", value={
-                "message": str(e),
+                "error": str(e),
                 "payload": payload
             })
 
@@ -91,7 +91,8 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             init={
                 "source": {
-                    "id": ""
+                    "id": "",
+                    "name": ""
                 },
                 "event_type": "",
                 "properties": "{}",

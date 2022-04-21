@@ -1,10 +1,9 @@
 from pydantic import BaseModel
-
-from tracardi.domain.entity import Entity
+from tracardi.domain.named_entity import NamedEntity
 
 
 class Configuration(BaseModel):
-    source: Entity
+    source: NamedEntity
     event_type: str
     properties: str = "{}"
     postpone: int
