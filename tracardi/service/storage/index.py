@@ -34,7 +34,8 @@ class Resource:
 
     def __init__(self):
         self.resources = {
-            "log": Index(multi_index=True, index='tracardi-log',
+            "log": Index(multi_index=True,
+                         index='tracardi-log',
                          mapping="mappings/log-index.json",
                          rel=None),
             "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json",

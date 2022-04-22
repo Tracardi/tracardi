@@ -337,6 +337,7 @@ class SqlSearchQueryEngine:
                 return QueryResult(**qs)
 
             except KeyError:
+                _logger.error("Error while formatting data. Reason: {}".format(es_query, str(e)))
                 # When no result
                 qs = {
                     'total': 0,
