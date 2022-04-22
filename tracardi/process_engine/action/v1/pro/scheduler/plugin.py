@@ -46,8 +46,8 @@ class SchedulerPlugin(ActionRunner):
                 schedule_at=schedule_at,
                 callback_host=self.credentials.callback_host,
                 source_id=self.event.source.id,
-                profile_id=self.profile.id,
-                session_id=self.session.id,
+                profile_id=self.profile.id if self.profile is not None else None,
+                session_id=self.session.id if self.session is not None else None,
                 event_type=self.config.event_type,
                 properties=json.loads(self.config.properties),
                 context=self.event.context
@@ -88,63 +88,14 @@ def register() -> Plugin:
             outputs=['response', 'error'],
             version='0.6.2',
             license="Tracardi Pro License",
-            author="Risto Kowaczewski",
-            init={
-                "source": {
-                    "id": "",
-                    "name": ""
-                },
-                "event_type": "",
-                "properties": "{}",
-                "postpone": 1
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Scheduled event settings",
-                    description="This action will schedule event with defined event type and properties. "
-                                "Event will have the same profile as current event.",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="Scheduler service",
-                            description="Please select your scheduler service.",
-                            component=FormComponent(type="resource", props={"label": "Service", "tag": "schedule"})
-                        ),
-                        FormField(
-                            id="postpone",
-                            name="Event delay in seconds",
-                            component=FormComponent(type="text", props={
-                                "label": "delay in seconds"
-                            })
-                        ),
-                    ]
-                ),
-                FormGroup(
-                    name="Event settings",
-                    fields=[
-                        FormField(
-                            id="event_type",
-                            name="Event type",
-                            description="Type event type",
-                            component=FormComponent(type="text", props={"label": "Event type"})
-                        ),
-                        FormField(
-                            id="properties",
-                            name="Properties",
-                            description="Type event properties.",
-                            component=FormComponent(type="json", props={"label": "Event properties"})
-                        )
-                    ]
-                )
-            ]
-            )
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Schedule event',
             desc='This plugin schedules events',
             icon='calendar',
             group=["Time"],
-            tags=["pro", "scheduler", "postpone"],
-            pro=False,
+            tags=["pro", "scheduler", "postpone", "delay"],
+            pro=True,
         )
     )
