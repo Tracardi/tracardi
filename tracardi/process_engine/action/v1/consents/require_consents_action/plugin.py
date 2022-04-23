@@ -1,4 +1,5 @@
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
@@ -20,6 +21,8 @@ class RequireConsentsAction(ActionRunner):
         if self.event.metadata.profile_less is True:
             self.console.warning("Cannot perform consent check on profile less event.")
             return Result(port="false", value=payload)
+
+        self.config.consent_ids = [consent["id"] for consent in self.config.consent_ids]
 
         for consent_id in self.config.consent_ids:
             consent_type = await storage.driver.consent_type.get_by_id(consent_id)
@@ -72,8 +75,29 @@ def register() -> Plugin:
             version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
-            #manual="require_consents_action",
-            #form=Form(),
+            manual="require_consents_action",
+            form=Form(
+                groups=[
+                    FormGroup(
+                        name="Consent requirements",
+                        fields=[
+                            FormField(
+                                id="consent_ids",
+                                name="IDs of required consents",
+                                description="Provide a list of IDs of consents that are required.",
+                                component=FormComponent(type="consentTypes")
+                            ),
+                            FormField(
+                                id="require_all",
+                                name="Require all",
+                                description="If set to ON, plugin will require all consents to be present and not "
+                                            "revoked. If set to OFF, plugin will require only on of provided consents.",
+                                component=FormComponent(type="bool", props={"label": "Require all"})
+                            )
+                        ]
+                    )
+                ]
+            ),
             init={
                 "consent_ids": [],
                 "require_all": False
