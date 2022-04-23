@@ -360,7 +360,7 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
     return result[n]["_source"] if len(result) >= n + 1 else None
 
 
-async def aggregate_by_type_for_source(source_id: str, time_span: str):
+async def aggregate_source_by_type(source_id: str, time_span: str):
     result = await storage_manager("event").query({
         "query": {
             "bool": {
@@ -384,7 +384,7 @@ async def aggregate_by_type_for_source(source_id: str, time_span: str):
             result["aggregations"]["by_type"]["buckets"]]
 
 
-async def aggregate_by_tags_for_source(source_id: str, time_span: str):
+async def aggregate_source_by_tags(source_id: str, time_span: str):
     result = await storage_manager("event").query({
         "query": {
             "bool": {
