@@ -47,7 +47,7 @@ async def create_indices():
                 map = add_prefix(map)
 
                 # Multi indices need templates. Index will be create automatically on first insert
-                result = await es.put_index_template(index.index, map)
+                result = await es.put_index_template(index.get_prefixed_template_name(), map)
 
                 if 'acknowledged' in result and result['acknowledged'] is True:
                     logger.info(
@@ -57,6 +57,10 @@ async def create_indices():
                             map_file)
                     )
                     yield "template", index.get_write_index()
+                else:
+                    logger.error(
+                        "Could not create the template for `{}`. Received result: {}".format(index.get_write_index(), result),
+                    )
 
             elif not await es.exists_index(index.get_write_index()):
 

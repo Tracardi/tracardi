@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 
+from ..api_instance import ApiInstance
 from ..entity import Entity
 from ..event import Event
 from ..event_metadata import EventPayloadMetadata, EventMetadata
@@ -19,6 +20,7 @@ class EventPayload(BaseModel):
 
         meta = EventMetadata(**metadata.dict())
         meta.profile_less = profile_less
+        meta.instance = Entity(id=ApiInstance().id)
 
         return Event(id=str(uuid4()),
                      metadata=meta,

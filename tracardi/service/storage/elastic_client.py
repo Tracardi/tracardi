@@ -43,6 +43,9 @@ class ElasticClient:
     async def get_mapping(self, index):
         return await self._client.indices.get_mapping(index=index)
 
+    async def exists_index_template(self, name):
+        return await self._client.indices.exists_index_template(name)
+
     async def exists(self, index, id) -> bool:
         try:
             return await self._client.exists(index=index, doc_type="_doc", id=id)
