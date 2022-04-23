@@ -358,3 +358,49 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
     }))["hits"]["hits"]
 
     return result[n]["_source"] if len(result) >= n + 1 else None
+
+
+async def aggregate_by_type_for_source(source_id: str, time_span: str):
+    result = await storage_manager("event").query({
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"source.id": source_id}},
+                    {"range": {"metadata.time.insert": {"gte": f"now-1{time_span}"}}}
+                ]
+            }
+        },
+        "size": 0,
+        "aggs": {
+            "by_type": {
+                "terms": {
+                    "field": "type"
+                }
+            }
+        }
+    })
+
+    return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
+            result["aggregations"]["by_type"]["buckets"]]
+
+
+async def aggregate_by_tags_for_source(source_id: str, time_span: str):
+    result = await storage_manager("event").query({
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"source.id": source_id}},
+                    {"range": {"metadata.time.insert": {"gte": f"now-1{time_span}"}}}
+                ]
+            }
+        },
+        "size": 0,
+        "aggs": {
+            "by_tag": {
+                "terms": {"field": "tags.values"}
+            }
+        }
+    })
+
+    return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
+            result["aggregations"]["by_tag"]["buckets"]]
