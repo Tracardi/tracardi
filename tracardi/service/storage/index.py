@@ -32,7 +32,9 @@ class Index:
         return self._index() + f"-{date.year}-{date.month}"
 
     def get_prefixed_template_name(self):
-        return "{}-{}".format(tracardi.config.elastic.instance_prefix, self.index)
+        if tracardi.config.elastic.instance_prefix != '':
+            return "{}-{}".format(tracardi.config.elastic.instance_prefix, self.index)
+        return self.index
 
 
 class Resource:
