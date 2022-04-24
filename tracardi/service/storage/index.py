@@ -75,7 +75,7 @@ class Resource:
                                 mapping="mappings/debug-info-index.json", rel=None),
             "api-instance": Index(multi_index=False, index="tracardi-api-instance",
                                   mapping="mappings/api-instance-index.json", rel=None),
-            "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None),
+            "schedule": Index(multi_index=False, index="tracardi-schedule", mapping="mappings/schedule-index.json", rel=None),
             "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json",
                                 rel=None),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",

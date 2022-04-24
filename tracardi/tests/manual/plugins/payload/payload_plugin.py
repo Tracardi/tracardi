@@ -15,7 +15,7 @@ class PayloadPlugin(ActionRunner):
 def register() -> Plugin:
     return Plugin(
         spec=Spec(
-            module='task_plugins.payload.payload_plugin',
+            module=__name__,
             className='PayloadPlugin',
             inputs=[],
             outputs=["payload"]
