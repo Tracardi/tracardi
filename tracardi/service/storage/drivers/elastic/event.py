@@ -404,3 +404,27 @@ async def aggregate_source_by_tags(source_id: str, time_span: str):
 
     return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
             result["aggregations"]["by_tag"]["buckets"]]
+
+
+async def count(query: dict = None):
+    return await storage_manager('event').count(query)
+
+
+async def get_avg_process_time():
+    result = await storage_manager("event").query({
+        "size": 0,
+        "aggs": {
+            "avg_process_time": {"avg": {"field": "metadata.time.process_time"}}
+        }
+    })
+
+    try:
+        return {
+            "avg": result['aggregations']['avg_process_time']['value'],
+            "records": result['hits']['total']['value']
+        }
+    except KeyError:
+        return {
+            "avg": 0,
+            "records": 0
+        }

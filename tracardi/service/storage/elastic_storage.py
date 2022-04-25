@@ -45,6 +45,9 @@ class ElasticStorage:
     async def exists(self, id) -> bool:
         return await self.storage.exists(self.index.get_read_index(), id)
 
+    async def count(self, query: dict = None) -> bool:
+        return await self.storage.count(self.index.get_read_index(), query)
+
     async def load(self, id) -> [dict, None]:
 
         try:

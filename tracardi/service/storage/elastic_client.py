@@ -140,6 +140,10 @@ class ElasticClient:
         logger.debug(f"UPDATED BY QUERY on INDEX: {index}")
         return await self._client.update_by_query(index=index, body=query)
 
+    async def count(self, index, query: dict = None):
+        logger.debug(f"COUNT on INDEX: {index}")
+        return await self._client.count(index=index, body=query)
+
     @staticmethod
     def _get_elastic_config():
 

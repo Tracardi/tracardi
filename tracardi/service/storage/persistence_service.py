@@ -370,6 +370,15 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
+    async def count(self, query: dict):
+        try:
+            return await self.storage.count(query)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
     async def get_mapping(self) -> IndexMapping:
         try:
             return IndexMapping(await self.storage.get_mapping(self.storage.index.get_read_index()))
