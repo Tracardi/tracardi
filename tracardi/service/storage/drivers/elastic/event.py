@@ -358,3 +358,25 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
     }))["hits"]["hits"]
 
     return result[n]["_source"] if len(result) >= n + 1 else None
+
+
+async def get_event_data_for_session(session_id: str, limit: int = 20):
+    result = await storage_manager("event").query({
+        "query": {
+            "term": {
+                "session.id": session_id
+            }
+        },
+        "size": limit,
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ]
+    })
+    return [{
+            "id": doc["_source"]["id"],
+            "insert": doc["_source"]["metadata"]["time"]["insert"],
+            "status": doc["_source"]["metadata"]["status"],
+            "type": doc["_source"]["type"]
+        } for doc in result["hits"]["hits"]], result["hits"]["total"]["value"] > len(result["hits"]["hits"])
