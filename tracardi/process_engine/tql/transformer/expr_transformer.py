@@ -20,6 +20,7 @@ operation_mapper = {
     '<': 'lessThan',
     'is null': 'isNull',
     'exists': 'exists',
+    'not exists': 'not exists',
     'startsWith': 'starts with',  # todo: implement,
     'endsWith': 'ends with',  # todo: implement,
     'matchesRegex': 'regex',  # todo: implement,
