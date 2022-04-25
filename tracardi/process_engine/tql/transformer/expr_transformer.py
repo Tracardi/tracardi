@@ -19,6 +19,7 @@ operation_mapper = {
     '>': 'greaterThan',
     '<': 'lessThan',
     'is null': 'isNull',
+    'exists': 'exists',
     'startsWith': 'starts with',  # todo: implement,
     'endsWith': 'ends with',  # todo: implement,
     'matchesRegex': 'regex',  # todo: implement,
@@ -121,7 +122,7 @@ class ExprTransformer(TransformerNamespace):
 
         value = args[0]
         if isinstance(value, Field):
-            return value._get_value()
+            return value.value
 
         return value
 
@@ -142,15 +143,19 @@ class ExprTransformer(TransformerNamespace):
         else:
             if function == 'datetime' and len(values) == 1:
                 value = values[0]
-                if not isinstance(value, str):
+
+                if isinstance(value, str):
+                    date = dateparser.parse(value)
+
+                    if not date:
+                        raise ValueError("Could not parse date `{}`".format(value))
+                elif isinstance(value, datetime.datetime):
+                    return value
+                else:
                     raise ValueError(
                         "Value of `{}` must be string to compare it with datetime. Type of {} given".format(value,
-                                                                                                            type(value)))
-
-                date = dateparser.parse(value)
-
-                if not date:
-                    raise ValueError("Could not parse date `{}`".format(value))
+                                                                                                            type(
+                                                                                                                value)))
                 return date
 
             if function == 'now' and len(values) == 1:
@@ -223,3 +228,15 @@ class ExprTransformer(TransformerNamespace):
 
     def op_not_exists(self, args):
         return args[0].label not in self._dot
+
+    def op_empty(self, args):
+        try:
+            return args[0].label in self._dot and args[0].value is not None and len(args[0].value) == 0
+        except AttributeError:
+            return False
+
+    def op_not_empty(self, args):
+        try:
+            return args[0].label not in self._dot or args[0].value is None or len(args[0].value) > 0
+        except AttributeError:
+            return True
