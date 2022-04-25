@@ -61,3 +61,7 @@ async def flush():
 
 async def delete(id: str):
     return await storage_manager('profile').delete(id)
+
+
+async def count(query: dict = None):
+    return await storage_manager('profile').count(query)

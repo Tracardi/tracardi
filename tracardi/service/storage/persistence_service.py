@@ -336,7 +336,8 @@ class SqlSearchQueryEngine:
 
                 return QueryResult(**qs)
 
-            except KeyError:
+            except KeyError as e:
+                _logger.error("Error while formatting data. Reason: {}".format(es_query, str(e)))
                 # When no result
                 qs = {
                     'total': 0,
@@ -363,6 +364,15 @@ class PersistenceService:
     async def load(self, id: str):
         try:
             return await self.storage.load(id)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
+    async def count(self, query: dict):
+        try:
+            return await self.storage.count(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

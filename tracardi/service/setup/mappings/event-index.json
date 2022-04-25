@@ -42,7 +42,14 @@
             "profile_less": {
               "type": "boolean"
             },
-            "debugged": {
+            "instance": {
+              "properties": {
+                "id": {
+                   "type": "keyword"
+                }
+              }
+            },
+            "debug": {
               "type": "boolean"
             }
           }

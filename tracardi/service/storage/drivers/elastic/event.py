@@ -380,3 +380,73 @@ async def get_event_data_for_session(session_id: str, limit: int = 20):
             "status": doc["_source"]["metadata"]["status"],
             "type": doc["_source"]["type"]
         } for doc in result["hits"]["hits"]], result["hits"]["total"]["value"] > len(result["hits"]["hits"])
+
+
+async def aggregate_source_by_type(source_id: str, time_span: str):
+    result = await storage_manager("event").query({
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"source.id": source_id}},
+                    {"range": {"metadata.time.insert": {"gte": f"now-1{time_span}"}}}
+                ]
+            }
+        },
+        "size": 0,
+        "aggs": {
+            "by_type": {
+                "terms": {
+                    "field": "type"
+                }
+            }
+        }
+    })
+
+    return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
+            result["aggregations"]["by_type"]["buckets"]]
+
+
+async def aggregate_source_by_tags(source_id: str, time_span: str):
+    result = await storage_manager("event").query({
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"source.id": source_id}},
+                    {"range": {"metadata.time.insert": {"gte": f"now-1{time_span}"}}}
+                ]
+            }
+        },
+        "size": 0,
+        "aggs": {
+            "by_tag": {
+                "terms": {"field": "tags.values"}
+            }
+        }
+    })
+
+    return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
+            result["aggregations"]["by_tag"]["buckets"]]
+
+
+async def count(query: dict = None):
+    return await storage_manager('event').count(query)
+
+
+async def get_avg_process_time():
+    result = await storage_manager("event").query({
+        "size": 0,
+        "aggs": {
+            "avg_process_time": {"avg": {"field": "metadata.time.process_time"}}
+        }
+    })
+
+    try:
+        return {
+            "avg": result['aggregations']['avg_process_time']['value'],
+            "records": result['hits']['total']['value']
+        }
+    except KeyError:
+        return {
+            "avg": 0,
+            "records": 0
+        }

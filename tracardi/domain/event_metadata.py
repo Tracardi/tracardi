@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import List, Optional, Any
 
 from pydantic import BaseModel
+
+from tracardi.domain.entity import Entity
 from tracardi.domain.time import Time
 
 
@@ -27,6 +29,7 @@ class EventMetadata(BaseModel):
     processed_by: EventProcessors = EventProcessors()
     profile_less: bool = False
     debug: bool = False
+    instance: Optional[Entity] = None
 
 
 class EventPayloadMetadata(BaseModel):

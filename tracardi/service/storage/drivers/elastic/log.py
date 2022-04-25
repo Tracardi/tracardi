@@ -1,5 +1,7 @@
+from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.storage_result import StorageResult
+from tracardi.service.storage.index import resources
 
 
 async def load_all(start: int = 0, limit: int = 100) -> StorageResult:
@@ -23,3 +25,12 @@ async def load_by_query_string(query_string: str, start: int = 0, limit: int = 1
         "size": limit
     })
     return StorageResult(result)
+
+
+async def exists():
+    if "log" not in resources.resources:
+        raise ConnectionError(f"Log index misconfiguration. Index does not exist.")
+
+    es = ElasticClient.instance()
+    index = resources.resources["log"]
+    return await es.exists_index_template(name=index.get_prefixed_template_name())

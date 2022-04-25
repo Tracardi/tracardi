@@ -43,6 +43,9 @@ class ElasticClient:
     async def get_mapping(self, index):
         return await self._client.indices.get_mapping(index=index)
 
+    async def exists_index_template(self, name):
+        return await self._client.indices.exists_index_template(name)
+
     async def exists(self, index, id) -> bool:
         try:
             return await self._client.exists(index=index, doc_type="_doc", id=id)
@@ -136,6 +139,10 @@ class ElasticClient:
     async def update_by_query(self, index, query):
         logger.debug(f"UPDATED BY QUERY on INDEX: {index}")
         return await self._client.update_by_query(index=index, body=query)
+
+    async def count(self, index, query: dict = None):
+        logger.debug(f"COUNT on INDEX: {index}")
+        return await self._client.count(index=index, body=query)
 
     @staticmethod
     def _get_elastic_config():

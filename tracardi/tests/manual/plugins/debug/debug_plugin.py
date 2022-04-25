@@ -15,7 +15,7 @@ class DebugPlugin(ActionRunner):
 def register() -> Plugin:
     return Plugin(
         spec=Spec(
-            module='task_plugins.debug.debug_plugin',
+            module=__name__,
             className='DebugPlugin',
             inputs=[],
             outputs=["payload"]

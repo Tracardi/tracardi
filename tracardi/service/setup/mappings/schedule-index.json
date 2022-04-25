@@ -10,21 +10,16 @@
         "type": "keyword"
       },
       "timestamp": {
-        "type":   "double"
+        "type":   "date"
+      },
+      "name": {
+        "type":   "text"
+      },
+      "description": {
+        "type":   "text"
       },
       "event": {
         "properties": {
-          "metadata": {
-            "properties": {
-              "time": {
-                "properties": {
-                  "insert": {
-                    "type": "date"
-                  }
-                }
-              }
-            }
-          },
           "type": {
             "type": "keyword"
           },

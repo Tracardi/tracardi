@@ -87,3 +87,7 @@ async def get_nth_last_session(profile_id: str, n: int):
     })
 
     return result["hits"]["hits"][n - 1]["_source"] if len(result["hits"]["hits"]) >= n else None
+
+
+async def count(query: dict = None):
+    return await storage_manager('session').count(query)
