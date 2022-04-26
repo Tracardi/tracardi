@@ -192,6 +192,10 @@ class ExprTransformer(TransformerNamespace):
                 tz_date = date.replace(tzinfo=pytz.utc).astimezone(timezone)
                 return timezone.normalize(tz_date)
 
+            if function == 'datetime.from_timestamp' and len(values) == 1:
+                timestamp, = values
+                return datetime.datetime.fromtimestamp(timestamp)
+
             if function == 'now.timezone' and len(values) == 1:
                 timezone, = values
                 timezone = pytz.timezone(timezone)
