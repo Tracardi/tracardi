@@ -235,13 +235,10 @@ class ExprTransformer(TransformerNamespace):
         return args[0].label not in self._dot
 
     def op_empty(self, args):
-        try:
-            return args[0].label in self._dot and args[0].value is not None and len(args[0].value) == 0
-        except AttributeError:
-            return False
+        return not self.op_not_empty(args)
 
     def op_not_empty(self, args):
         try:
-            return args[0].label not in self._dot or args[0].value is None or len(args[0].value) > 0
+            return args[0].label not in self._dot and args[0].value is None and len(args[0].value) > 0
         except AttributeError:
             return True
