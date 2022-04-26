@@ -184,10 +184,17 @@ class ExprTransformer(TransformerNamespace):
                 if passed_seconds is None:
                     raise ValueError("Could not parse `{}`".format(offset))
 
+                if isinstance(date, str):
+                    date = dateparser.parse(date)
+
                 return date + datetime.timedelta(seconds=passed_seconds)
 
             if function == 'datetime.timezone' and len(values) == 2:
                 date, timezone = values
+
+                if isinstance(date, str):
+                    date = dateparser.parse(date)
+
                 timezone = pytz.timezone(timezone)
                 tz_date = date.replace(tzinfo=pytz.utc).astimezone(timezone)
                 return timezone.normalize(tz_date)
@@ -235,10 +242,17 @@ class ExprTransformer(TransformerNamespace):
         return args[0].label not in self._dot
 
     def op_empty(self, args):
-        return not self.op_not_empty(args)
+        return args[0].label not in self._dot or args[0].value is None \
+               or (
+                       (
+                               isinstance(args[0].value, str)
+                               or isinstance(args[0].value, list)
+                               or isinstance(args[0].value, dict)
+                       ) and len(args[0].value) == 0
+               )
 
     def op_not_empty(self, args):
         try:
-            return args[0].label not in self._dot and args[0].value is None and len(args[0].value) > 0
+            return not self.op_empty(args)
         except AttributeError:
             return True
