@@ -137,7 +137,7 @@ We appreciate any help that helps make TRACARDI popular.
 
 # Donate
 
-You can support us on [BOUNTY-SOURCE](https://www.bountysource.com/teams/tracardi)
+You can support us on [Open Collective](https://www.opencollective.com/tracardi-cdp)
 
 # License
 
