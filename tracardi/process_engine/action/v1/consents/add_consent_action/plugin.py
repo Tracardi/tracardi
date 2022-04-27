@@ -6,6 +6,7 @@ from tracardi.service.plugin.domain.result import Result
 from .model.payload import Consents, Configuration
 from tracardi.service.storage.driver import storage
 from pytimeparse import parse
+from datetime import datetime
 
 
 def validate(config: dict):
@@ -39,8 +40,10 @@ class ConsentAdder(ActionRunner):
                         if consent_type.revokable is False:
                             self.profile.consents[consent_id] = {"revoke": None}
                         else:
-                            self.profile.consents[consent_id] = {"revoke": self.event.metadata.time.insert.timestamp() +
-                                                                           parse(consent_type.auto_revoke)}
+                            self.profile.consents[consent_id] = {"revoke": datetime.fromtimestamp(
+                                self.event.metadata.time.insert.timestamp() +
+                                parse(consent_type.auto_revoke
+                                      ))}
                     else:
                         self.console.warning(
                             f"The consent id `{consent_id}` was not appended to profile as there is no consent "

@@ -24,6 +24,12 @@ class RequireConsentsAction(ActionRunner):
 
         self.config.consent_ids = [consent["id"] for consent in self.config.consent_ids]
 
+        profile_consents_copy = self.profile.consents
+        for consent_id in profile_consents_copy:
+            revoke = self.profile.consents[consent_id]["revoke"]
+            if revoke is not None and revoke < self.event.metadata.time.insert:
+                self.profile.consents.pop(consent_id)
+
         for consent_id in self.config.consent_ids:
             consent_type = await storage.driver.consent_type.get_by_id(consent_id)
 
@@ -37,8 +43,7 @@ class RequireConsentsAction(ActionRunner):
 
                 if consent_type.revokable is True:
                     try:
-                        revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp() + \
-                            parse(consent_type.auto_revoke)
+                        revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp()
                     except AttributeError:
                         raise ValueError(f"Corrupted data - no revoke date provided for revokable consent "
                                          f"type {consent_id}")
@@ -52,8 +57,7 @@ class RequireConsentsAction(ActionRunner):
                         return Result(port="true", value=payload)
 
                     try:
-                        revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp() + \
-                            parse(consent_type.auto_revoke)
+                        revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp()
                     except AttributeError:
                         raise ValueError(f"Corrupted data - no revoke date provided for revokable consent "
                                          f"type {consent_id}")
@@ -90,8 +94,9 @@ def register() -> Plugin:
                             FormField(
                                 id="require_all",
                                 name="Require all",
-                                description="If set to ON, plugin will require all consents to be present and not "
-                                            "revoked. If set to OFF, plugin will require only on of provided consents.",
+                                description="If set to ON, plugin will require all of selected consents to be present "
+                                            "and not revoked. If set to OFF, plugin will require only on of provided "
+                                            "consents.",
                                 component=FormComponent(type="bool", props={"label": "Require all"})
                             )
                         ]
