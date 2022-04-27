@@ -192,6 +192,8 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.operations.reduce_array.plugin',
         'tracardi.process_engine.action.v1.internal.get_prev_event.plugin',
         'tracardi.process_engine.action.v1.internal.get_prev_session.plugin',
+        'tracardi.process_engine.action.v1.operations.write_to_memory.plugin',
+        'tracardi.process_engine.action.v1.operations.read_from_memory.plugin',
 
 
         # Metrics
@@ -200,6 +202,7 @@ async def add_plugins():
 
         # Consents
         'tracardi.process_engine.action.v1.consents.add_consent_action.plugin',
+        'tracardi.process_engine.action.v1.consents.require_consents_action.plugin',
 
         # Tracardi Pro
         'tracardi.process_engine.action.v1.pro.scheduler.plugin',

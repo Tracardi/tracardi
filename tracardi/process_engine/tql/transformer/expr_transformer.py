@@ -19,6 +19,8 @@ operation_mapper = {
     '>': 'greaterThan',
     '<': 'lessThan',
     'is null': 'isNull',
+    'exists': 'exists',
+    'not exists': 'not exists',
     'startsWith': 'starts with',  # todo: implement,
     'endsWith': 'ends with',  # todo: implement,
     'matchesRegex': 'regex',  # todo: implement,
@@ -121,7 +123,7 @@ class ExprTransformer(TransformerNamespace):
 
         value = args[0]
         if isinstance(value, Field):
-            return value._get_value()
+            return value.value
 
         return value
 
@@ -142,15 +144,19 @@ class ExprTransformer(TransformerNamespace):
         else:
             if function == 'datetime' and len(values) == 1:
                 value = values[0]
-                if not isinstance(value, str):
+
+                if isinstance(value, str):
+                    date = dateparser.parse(value)
+
+                    if not date:
+                        raise ValueError("Could not parse date `{}`".format(value))
+                elif isinstance(value, datetime.datetime):
+                    return value
+                else:
                     raise ValueError(
                         "Value of `{}` must be string to compare it with datetime. Type of {} given".format(value,
-                                                                                                            type(value)))
-
-                date = dateparser.parse(value)
-
-                if not date:
-                    raise ValueError("Could not parse date `{}`".format(value))
+                                                                                                            type(
+                                                                                                                value)))
                 return date
 
             if function == 'now' and len(values) == 1:
@@ -178,13 +184,24 @@ class ExprTransformer(TransformerNamespace):
                 if passed_seconds is None:
                     raise ValueError("Could not parse `{}`".format(offset))
 
+                if isinstance(date, str):
+                    date = dateparser.parse(date)
+
                 return date + datetime.timedelta(seconds=passed_seconds)
 
             if function == 'datetime.timezone' and len(values) == 2:
                 date, timezone = values
+
+                if isinstance(date, str):
+                    date = dateparser.parse(date)
+
                 timezone = pytz.timezone(timezone)
                 tz_date = date.replace(tzinfo=pytz.utc).astimezone(timezone)
                 return timezone.normalize(tz_date)
+
+            if function == 'datetime.from_timestamp' and len(values) == 1:
+                timestamp, = values
+                return datetime.datetime.fromtimestamp(timestamp)
 
             if function == 'now.timezone' and len(values) == 1:
                 timezone, = values
@@ -223,3 +240,19 @@ class ExprTransformer(TransformerNamespace):
 
     def op_not_exists(self, args):
         return args[0].label not in self._dot
+
+    def op_empty(self, args):
+        return args[0].label not in self._dot or args[0].value is None \
+               or (
+                       (
+                               isinstance(args[0].value, str)
+                               or isinstance(args[0].value, list)
+                               or isinstance(args[0].value, dict)
+                       ) and len(args[0].value) == 0
+               )
+
+    def op_not_empty(self, args):
+        try:
+            return not self.op_empty(args)
+        except AttributeError:
+            return True

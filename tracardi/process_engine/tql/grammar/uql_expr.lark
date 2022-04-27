@@ -24,6 +24,9 @@ expr: and_expr
         | op_exists
         | op_field_sig OP function
         | op_field_eq_field
+        | op_empty
+        | op_not_empty
+        | op_is_not_null
 
 op_field_sig: OP_FIELD
         | op_compound_value
@@ -40,6 +43,8 @@ op_is_not_null: op_field_sig "IS NOT NULL"i
 op_is_null: op_field_sig "IS NULL"i
 op_exists: OP_FIELD EXISTS_TERMINAL
 op_not_exists: OP_FIELD "NOT"i EXISTS_TERMINAL
+op_empty: op_field_sig EMPTY_TERMINAL
+op_not_empty: op_field_sig "NOT"i EMPTY_TERMINAL
 
 OP: /(!=|<=|>=|=>|=<|==|>|<)/
 
@@ -61,5 +66,6 @@ BETWEEN_TERMINAL: /(\r? \n|\s)+BETWEEN\s+/i
 AND_TERMINAL: /(\r? \n|\s)+AND(\r? \n|\s)+/i
 OR_TERMINAL: /(\r? \n|\s)+OR(\r? \n|\s)+/i
 EXISTS_TERMINAL: /EXISTS/i
+EMPTY_TERMINAL: /EMPTY/i
 
 %ignore WS
