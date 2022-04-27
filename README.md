@@ -8,6 +8,8 @@
 Tracardi is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery.
 Tracardi collects data from customer journeys and assigns it to a profile that is maintained throughout the period of interaction with the customer.
 
+You can support the project on [Open Collective](https://www.opencollective.com/tracardi-cdp)
+
 ## Screenshots
 
 ![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
