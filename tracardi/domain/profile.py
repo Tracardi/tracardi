@@ -1,7 +1,10 @@
 import uuid
 from collections import defaultdict
 from datetime import datetime
-from typing import Optional, List, Union, Callable
+from typing import Optional, List, Union, Callable, Dict
+
+from pydantic import BaseModel
+
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import ProfileMetadata
@@ -17,6 +20,10 @@ from .segment import Segment
 from ..process_engine.tql.condition import Condition
 
 
+class ConsentRevoke(BaseModel):
+    revoke: Optional[datetime] = None
+
+
 class Profile(Entity):
     metadata: Optional[ProfileMetadata] = ProfileMetadata(time=ProfileTime())
     operation: Optional[Operation] = Operation()
@@ -25,7 +32,7 @@ class Profile(Entity):
     pii: PII = PII()
     segments: Optional[list] = []
     interests: Optional[dict] = {}
-    consents: Optional[dict] = {}
+    consents: Optional[Dict[str, ConsentRevoke]] = {}
     active: bool = True
 
     def replace(self, profile):
