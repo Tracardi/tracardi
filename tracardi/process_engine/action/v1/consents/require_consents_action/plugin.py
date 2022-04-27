@@ -111,7 +111,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Require consents',
             desc='Checks if defined consents are granted by current profile.',
-            icon='plugin',
+            icon='consent',
             group=["Consents"],
             documentation=Documentation(
                 inputs={

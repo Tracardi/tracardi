@@ -60,8 +60,9 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Read from memory',
             desc='Reads value with given key from cross-instance memory.',
-            icon='plugin',
+            icon='redis',
             group=["Operations"],
+            tags=['redis'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

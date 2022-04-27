@@ -1,14 +1,19 @@
+from uuid import uuid4
+
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 
 
-class EndAction(ActionRunner):
+class GetUuid4Action(ActionRunner):
 
     def __init__(self, **kwargs):
         pass
 
     async def run(self, payload):
-        return None
+        return Result(port='uuid4', value={
+            "uuid4": str(uuid4())
+        })
 
 
 def register() -> Plugin:
@@ -16,24 +21,27 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='EndAction',
+            className='GetUuid4Action',
             inputs=["payload"],
-            outputs=[],
-            version='0.1',
+            outputs=['uuid4'],
+            version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski"
 
         ),
         metadata=MetaData(
-            name='End',
-            desc='Ends workflow.',
-            icon='stop',
-            group=["Input/Output"],
+            name='UUID4',
+            desc='Generates random UUID.',
+            icon='hash',
+            group=["Operations"],
+            tags=["hash", "id"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
-                outputs={}
+                outputs={
+                    "uuid4": PortDoc(desc="This port returns UUID4.")
+                }
             )
         )
     )
