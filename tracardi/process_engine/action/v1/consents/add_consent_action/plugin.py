@@ -5,6 +5,8 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from .model.payload import Consents, Configuration
 from tracardi.service.storage.driver import storage
+from pytimeparse import parse
+from datetime import datetime
 
 
 def validate(config: dict):
@@ -26,22 +28,28 @@ class ConsentAdder(ActionRunner):
 
             if not isinstance(consents_data, dict):
                 raise ValueError(
-                    "Consents must be defined as dict, with keys as consent-id and value as Consent object with revoke.")
+                    "Consents must be defined as object, with keys as consent-id and value as bool.")
 
             consents = Consents(__root__=consents_data)
-            for consent_id, consent in consents:
-                consent_type_data = await storage.driver.consent_type.get_by_id(consent_id)
+            for consent_id, granted in consents:
+                if granted is True:
+                    consent_type_data = await storage.driver.consent_type.get_by_id(consent_id)
 
-                if consent_type_data is not None:
-                    consent_type = ConsentType(**consent_type_data)
-                    if consent_type.revokable is False:
-                        consent.revoke = None
-                    self.profile.consents[consent_id] = consent
-                else:
-                    self.console.warning(f"The consent id `{consent_id}` was not appended to profile as there is no consent "
-                                         f"type `{consent_id}` defined in the system.")
+                    if consent_type_data is not None:
+                        consent_type = ConsentType(**consent_type_data)
+                        if consent_type.revokable is False:
+                            self.profile.consents[consent_id] = {"revoke": None}
+                        else:
+                            self.profile.consents[consent_id] = {"revoke": datetime.fromtimestamp(
+                                self.event.metadata.time.insert.timestamp() +
+                                parse(consent_type.auto_revoke
+                                      ))}
+                    else:
+                        self.console.warning(
+                            f"The consent id `{consent_id}` was not appended to profile as there is no consent "
+                            f"type `{consent_id}` defined in the system.")
 
-            return Result(port="payload", value=self.profile.consents)
+            return Result(port="payload", value=payload)
         else:
             self.console.error("Can not add profile consents on profile less event.")
             return Result(port="payload", value=None)
@@ -55,7 +63,7 @@ def register() -> Plugin:
             className='ConsentAdder',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.6.0.1',
+            version='0.6.3',
             license="MIT",
             author="Dawid Kruk",
             init={
@@ -64,28 +72,28 @@ def register() -> Plugin:
             manual="add_consents_action",
             form=Form(
                 groups=[
-                FormGroup(
-                    name="Consent data reference",
-                    description="Please configure the reference to the event property that hold an information on "
-                                "granted consents.",
-                    fields=[
-                        FormField(
-                            id="consents",
-                            name="Reference to consents",
-                            description="Select the reference path to consents. The most possible use-case is when "
-                                        "customer grants consents by filling a form. This data is sent to Tracardi as "
-                                        "an event with properties set to granted consents. We need a reference path to "
-                                        "this data.",
-                            component=FormComponent(
-                                type="forceDotPath",
-                                props={
-                                    "defaultSourceValue": "event"
-                                })
-                        )
-                    ]
+                    FormGroup(
+                        name="Consent data reference",
+                        description="Please configure the reference to the event property that hold an information on "
+                                    "granted consents.",
+                        fields=[
+                            FormField(
+                                id="consents",
+                                name="Reference to consents",
+                                description="Select the reference path to consents. The most possible use-case is when "
+                                            "customer grants consents by filling a form. This data is sent to Tracardi as "
+                                            "an event with properties set to granted consents. We need a reference path to "
+                                            "this data.",
+                                component=FormComponent(
+                                    type="forceDotPath",
+                                    props={
+                                        "defaultSourceValue": "event"
+                                    })
+                            )
+                        ]
 
-                ),
-            ]),
+                    ),
+                ]),
         ),
         metadata=MetaData(
             name='Add consent',
@@ -94,7 +102,7 @@ def register() -> Plugin:
             group=["Consents"],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                    "payload": PortDoc(desc="This port takes any payload object.")
                 },
                 outputs={
                     "payload": PortDoc(desc="This port returns given payload without any changes.")
