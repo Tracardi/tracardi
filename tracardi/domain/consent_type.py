@@ -6,7 +6,7 @@ from pytimeparse import parse
 class ConsentType(BaseModel):
     name: str
     description: str
-    revokable: bool
+    revokable: bool = False
     default_value: str
     enabled: bool = True
     tags: List[str] = []
@@ -20,8 +20,9 @@ class ConsentType(BaseModel):
         return value
 
     @validator('auto_revoke')
-    def auto_revoke_validator(cls, value):
+    def auto_revoke_validator(cls, value, values):
         if (value is not None and value != "") and (parse(value) is None or parse(value) < 0):
-            raise ValueError("Auto-revoke time is in invalid form. If you do not want to auto "
-                             "revoke consent leave it empty.")
+            raise ValueError("Auto-revoke time is in invalid form.")
+        if 'revokable' in values and values['revokable'] is True and not value:
+            raise ValueError("Auto-revoke time can not be empty if you require the consent to be revoked.")
         return value

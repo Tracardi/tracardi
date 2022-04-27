@@ -58,9 +58,9 @@ class RequireConsentsAction(ActionRunner):
 
                     try:
                         revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp()
-                    except AttributeError:
+                    except AttributeError as e:
                         raise ValueError(f"Corrupted data - no revoke date provided for revokable consent "
-                                         f"type {consent_id}")
+                                         f"type {consent_id}. Reason: {str(e)}")
 
                     if revoke_timestamp > self.event.metadata.time.insert.timestamp():
                         return Result(port="true", value=payload)
@@ -94,9 +94,9 @@ def register() -> Plugin:
                             FormField(
                                 id="require_all",
                                 name="Require all",
-                                description="If set to ON, plugin will require all of selected consents to be present "
-                                            "and not revoked. If set to OFF, plugin will require only on of provided "
-                                            "consents.",
+                                description="If set to ON, plugin will require all of selected consents to be granted "
+                                            "and not revoked. If set to OFF, plugin will require only one of defined "
+                                            "consents to be granted.",
                                 component=FormComponent(type="bool", props={"label": "Require all"})
                             )
                         ]
