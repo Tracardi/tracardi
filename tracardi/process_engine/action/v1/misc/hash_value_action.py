@@ -41,8 +41,8 @@ class GetValueHashAction(ActionRunner):
             result = hashlib.sha512(value.encode())
         else:
             result = hashlib.md5(value.encode())
-        return Result(port='uuid4', value={
-            "uuid4": result.hexdigest()
+        return Result(port='hash', value={
+            "hash": result.hexdigest()
         })
 
 
