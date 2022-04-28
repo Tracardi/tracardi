@@ -29,3 +29,7 @@ async def exists():
     index = resources.resources["api-instance"]
     index = index.get_write_index()
     return await es.exists_index(index)
+
+
+async def refresh():
+    return await storage_manager('api-instance').refresh()
