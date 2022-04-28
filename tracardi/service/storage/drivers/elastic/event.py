@@ -203,6 +203,12 @@ async def aggregate_event_tag() -> List[Dict[str, str]]:
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
+async def aggregate_event_status() -> List[Dict[str, str]]:
+    bucket_name = "by_status"
+    result = await _aggregate_event(bucket_name, "metadata.status")
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
 async def aggregate_events_by_source():
     result = await _aggregate_event(bucket_name='by_source', by="source.id")
     query_string = [f"id:{id}" for id in result.aggregations['by_source'][0]]
