@@ -41,6 +41,13 @@ class ConsentAdder(ActionRunner):
                         if consent_type.revokable is False:
                             self.profile.consents[consent_id] = ConsentRevoke(revoke=None)
                         else:
+                            revoke_offset = parse(consent_type.auto_revoke)
+
+                            if revoke_offset is None:
+                                raise ValueError(f"Error while adding consent type {consent_id}: consent is marked "
+                                                     f"as revokable, but has no auto revoke property, or auto revoke "
+                                                     f"property is incorrect.")
+
                             self.profile.consents[consent_id] = ConsentRevoke(revoke=datetime.fromtimestamp(
                                 self.event.metadata.time.insert.timestamp() +
                                 parse(consent_type.auto_revoke

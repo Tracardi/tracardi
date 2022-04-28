@@ -43,7 +43,7 @@ class RequireConsentsAction(ActionRunner):
 
                 if consent_type.revokable is True:
                     try:
-                        revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp()
+                        revoke_timestamp = self.profile.consents[consent_id]["revoke"].timestamp()
                     except AttributeError:
                         raise ValueError(f"Corrupted data - no revoke date provided for revokable consent "
                                          f"type {consent_id}")
