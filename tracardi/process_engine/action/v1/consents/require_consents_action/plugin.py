@@ -26,7 +26,7 @@ class RequireConsentsAction(ActionRunner):
 
         profile_consents_copy = self.profile.consents
         for consent_id in profile_consents_copy:
-            revoke = self.profile.consents[consent_id]["revoke"]
+            revoke = self.profile.consents[consent_id].revoke
             if revoke is not None and revoke < self.event.metadata.time.insert:
                 self.profile.consents.pop(consent_id)
 
