@@ -186,6 +186,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin',
 
         # Internal
+        'tracardi.process_engine.action.v1.internal.assign_profile_id.plugin',
         'tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin',
         'tracardi.process_engine.action.v1.internal.inject_event.plugin',
         'tracardi.process_engine.action.v1.internal.inject_profile.plugin',
