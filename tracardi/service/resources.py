@@ -257,6 +257,16 @@ def get_resource_types():
             "tags": ["matomo"],
             "name": "Matomo",
             "icon": "matomo"
+        },
+        "civi_crm": {
+            "config": {
+                "api_key": "<api-key>",
+                "site_key": "<site-key>",
+                "api_url": "<api-url>"
+            },
+            "tags": ["civi_crm"],
+            "name": "CiviCRM",
+            "icon": "civicrm"
         }
     }
 

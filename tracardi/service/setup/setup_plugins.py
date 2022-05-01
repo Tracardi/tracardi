@@ -184,6 +184,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin',
         'tracardi.process_engine.action.v1.connectors.airtable.fetch_records.plugin',
         'tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin',
+        'tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin',
 
         # Internal
         'tracardi.process_engine.action.v1.internal.assign_profile_id.plugin',

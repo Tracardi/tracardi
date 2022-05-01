@@ -39,3 +39,5 @@ python_weather
 influxdb-client
 grpcio
 grpcio-tools
+certifi
+ssl
