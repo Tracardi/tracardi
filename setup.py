@@ -56,7 +56,6 @@ setup(
         'grpcio',
         'grpcio-tools',
         'certifi',
-        'ssl'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
