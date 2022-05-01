@@ -72,8 +72,7 @@ def register() -> Plugin:
                             FormField(
                                 id="source",
                                 name="CiviCRM resource",
-                                description="Select your CiviCRM resource containing your site key, API key and API "
-                                            "URL.",
+                                description="Select CiviCRM resource.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "civi_crm"})
                             ),
                             FormField(
@@ -173,10 +172,12 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Add contact to CiviCRM',
-            desc='Adds new contact in CiviCRM according to given configuration.',
+            name='Add contact',
+            desc='Adds new contact in CiviCRM.',
+            brand='CiviCRM',
             icon='civicrm',
             group=["Connectors"],
+            tags=['crm', 'marketing'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
