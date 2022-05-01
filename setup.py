@@ -54,7 +54,9 @@ setup(
         'geopy',
         'influxdb-client',
         'grpcio',
-        'grpcio-tools'
+        'grpcio-tools',
+        'certifi',
+        'ssl'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
