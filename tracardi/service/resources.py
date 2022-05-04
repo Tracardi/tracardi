@@ -267,6 +267,15 @@ def get_resource_types():
             "tags": ["civi_crm"],
             "name": "CiviCRM",
             "icon": "civicrm"
+        },
+        "active_campaign": {
+            "config": {
+                "api_key": "<api-key>",
+                "api_url": "<api-url>"
+            },
+            "tags": ["active_campaign"],
+            "name": "ActiveCampaign",
+            "icon": "plugin"
         }
     }
 
