@@ -32,7 +32,7 @@ class ActiveCampaignClient:
                         if (await response.json())['errors'][0]["code"] == "duplicate":
                             contact = (await self.get_contact_by_email(data["email"]))
                             async with session.put(
-                                url=f"{self.api_url}/api/3/contacts/{contact['id']}",
+                                url=f"{self.api_url}/api/3/contacts/{contact['contact']['id']}",
                                 json={"contact": {key: data[key] for key in data if key != "email"}}
                             ) as put_response:
 
