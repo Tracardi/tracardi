@@ -109,6 +109,7 @@ def register() -> Plugin:
                                     type="keyValueList",
                                     props={
                                         "defaultValueSource": "event",
+                                        "helperMethod": "get_custom_fields",
                                         "availableValues": [
                                             {"label": key, "value": value}
                                             for key, value in {
