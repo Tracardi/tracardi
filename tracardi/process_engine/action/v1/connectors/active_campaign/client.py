@@ -87,7 +87,14 @@ class ActiveCampaignClient:
                 response = (await response.json())["contacts"]
 
                 try:
-                    return response[0]
+                    contact_id = response[0]["id"]
+                    async with session.get(f"{self.api_url}/api/3/contacts/{contact_id}") as get_response:
+
+                        if get_response.status != 200:
+                            raise ActiveCampaignClientException(await response.text())
+
+                        return await get_response.json()
+
                 except IndexError:
                     raise ActiveCampaignClientException(f"No contacts found for email {email}")
 
