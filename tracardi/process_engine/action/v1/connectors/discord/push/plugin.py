@@ -122,6 +122,6 @@ def register() -> Plugin:
             name='Discord push',
             desc='Sends message to discord webhook.',
             icon='discord',
-            group=["Connectors"]
+            group=["Messaging"]
         )
     )

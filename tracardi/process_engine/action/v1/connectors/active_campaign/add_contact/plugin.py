@@ -96,8 +96,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Add contact',
             desc='Creates or updates a contact in ActiveCampaign, according to provided configuration.',
-            icon='plugin',
-            group=["Connectors"],
+            icon='active-campaign',
+            group=["ActiveCampaign"],
             brand="ActiveCampaign",
             documentation=Documentation(
                 inputs={

@@ -110,7 +110,7 @@ def register() -> Plugin:
             brand='Mautic',
             desc='Fetches a profile from Mautic, based on provided ID.',
             icon='mautic',
-            group=["Marketing automation"],
+            group=["Mautic"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
