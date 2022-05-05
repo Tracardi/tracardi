@@ -128,8 +128,8 @@ def get_resource_types():
             },
             "tags": ['mysql', 'database'],
             "name": "MySQL",
-            "icon": "mysql"
-
+            "icon": "mysql",
+            "batch": "tracardi.process_engine.batch.mysql.MySQLBatch"
         },
         "mqtt": {
             "config": {
@@ -267,7 +267,7 @@ def get_resource_types():
             "tags": ["civi_crm"],
             "name": "CiviCRM",
             "icon": "civicrm"
-        }
+        },
     }
 
 
