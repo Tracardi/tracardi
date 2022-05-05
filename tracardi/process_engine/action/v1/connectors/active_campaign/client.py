@@ -93,7 +93,14 @@ class ActiveCampaignClient:
                         if get_response.status != 200:
                             raise ActiveCampaignClientException(await response.text())
 
-                        return await get_response.json()
+                        result = await get_response.json()
+                        result = {
+                            **result,
+                            "contactAutomations": {aut["automation"]: aut for aut in result["contactAutomations"]},
+                            "contactLists": {li["list"]: li for li in result["contactLists"]},
+                            "fieldValues": {val["field"]: val for val in result["fieldValues"]}
+                        }
+                        return result
 
                 except IndexError:
                     raise ActiveCampaignClientException(f"No contacts found for email {email}")
