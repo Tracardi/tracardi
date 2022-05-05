@@ -74,8 +74,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Fetch contact',
             desc='Fetches ActiveCampaign contact info based on given email address.',
-            icon='plugin',
-            group=["Connectors"],
+            icon='active-campaign',
+            group=["ActiveCampaign"],
             brand="ActiveCampaign",
             documentation=Documentation(
                 inputs={

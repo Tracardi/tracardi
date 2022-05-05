@@ -103,10 +103,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Fetch data from Airtable',
+            name='Fetch data',
             desc='Fetches data from given Airtable table, according to given query.',
             icon='airtable',
-            group=["Connectors"],
+            group=["AirTable"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

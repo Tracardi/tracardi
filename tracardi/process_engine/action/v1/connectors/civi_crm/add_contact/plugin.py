@@ -109,6 +109,7 @@ def register() -> Plugin:
                                     type="keyValueList",
                                     props={
                                         "defaultValueSource": "event",
+                                        "endpoint": "get_custom_fields",
                                         "availableValues": [
                                             {"label": key, "value": value}
                                             for key, value in {
@@ -194,7 +195,7 @@ def register() -> Plugin:
             desc='Adds new contact in CiviCRM.',
             brand='CiviCRM',
             icon='civicrm',
-            group=["Connectors"],
+            group=["Civi CRM"],
             tags=['crm', 'marketing'],
             documentation=Documentation(
                 inputs={

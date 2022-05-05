@@ -154,7 +154,7 @@ def register() -> Plugin:
             desc='Sends transactional e-mail via MailChimp API.',
             type='flowNode',
             icon='mailchimp',
-            group=["Mailing"],
+            group=["Mailchimp"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
