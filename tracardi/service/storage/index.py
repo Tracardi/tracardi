@@ -92,6 +92,7 @@ class Resource:
                                  rel=None),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),
+            "batch": Index(multi_index=False, index="tracardi-batch", mapping="mappings/batch-index.json", rel=None)
         }
 
     def add_indices(self, indices: dict):
