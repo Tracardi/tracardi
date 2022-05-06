@@ -109,10 +109,13 @@ def register() -> Plugin:
                                     type="keyValueList",
                                     props={
                                         "defaultValueSource": "event",
-                                        "endpoint": "get_custom_fields",
+                                        "endpoint": {
+                                            "url": f"/plugin/{__name__}/get_custom_fields",
+                                            "method": "post"
+                                        },
                                         "availableValues": [
-                                            {"label": key, "value": value}
-                                            for key, value in {
+                                            {"name": name, "id": key}
+                                            for name, key in {
                                                 "ID": "id",
                                                 "Contact ID": "contact_id",
                                                 "Contact subtype": "contact_sub_type",

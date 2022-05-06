@@ -51,5 +51,10 @@ class CiviCRMClient:
                 if response.status != 200 or (await response.json())["is_error"] == 1:
                     raise CiviCRMClientException(await response.text())
 
-                return [{"label": field["label"], "value": f"custom_{field['id']}"} for field in (await response.json())["values"]]
+                result = [{"name": field["label"], "id": f"custom_{field['id']}"} for field in (await response.json())["values"]]
+
+                return {
+                    "result": result,
+                    "total": len(result)
+                }
 
