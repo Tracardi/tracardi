@@ -2,12 +2,14 @@ import json
 from json import JSONDecodeError
 
 from tracardi.domain.resource import ResourceCredentials
+from tracardi.domain.resource_config import ResourceConfig
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.client import MongoClient
-from .model.configuration import PluginConfiguration, MongoConfiguration
+from .model.configuration import PluginConfiguration, MongoConfiguration, DatabaseConfig
 
 
 def validate(config: dict) -> PluginConfiguration:
@@ -38,11 +40,38 @@ class MongoConnectorAction(ActionRunner):
         except JSONDecodeError as e:
             raise ValueError("Can not parse this data as JSON. Error: `{}`".format(str(e)))
 
-        result = await self.client.find(self.config.database, self.config.collection, query)
+        result = await self.client.find(self.config.database.id, self.config.collection.id, query)
         return Result(port="payload", value={"result": result})
 
     # async def close(self):
     #     await self.client.close()
+
+
+class Endpoint(PluginEndpoint):
+
+    @staticmethod
+    async def fetch_databases(config):
+        config = ResourceConfig(**config)
+        resource = await storage.driver.resource.load(config.source.id)
+        mongo_config = MongoConfiguration(**resource.credentials.production)
+        client = MongoClient(mongo_config)
+        databases = await client.dbs()
+        return {
+            "total": len(databases),
+            "result": [{"name": db, "id": db} for db in databases]
+        }
+
+    @staticmethod
+    async def fetch_collections(config):
+        config = DatabaseConfig(**config)
+        resource = await storage.driver.resource.load(config.source.id)
+        mongo_config = MongoConfiguration(**resource.credentials.production)
+        client = MongoClient(mongo_config)
+        collections = await client.collections(config.database.id)
+        return {
+            "total": len(collections),
+            "result": [{"name": item, "id": item} for item in collections]
+        }
 
 
 def register() -> Plugin:
@@ -53,7 +82,7 @@ def register() -> Plugin:
             className='MongoConnectorAction',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski",
             manual="mongo_query_action",
@@ -86,14 +115,29 @@ def register() -> Plugin:
                         FormField(
                             id="database",
                             name="Database",
-                            description="Type database URI you want to connect to.",
-                            component=FormComponent(type="text", props={"label": "Database URI"})
+                            description="Select database URI you want to connect to. If you see error select resource "
+                                        "first so we know which resource to connect to fetch a list of databases.",
+                            component=FormComponent(type="autocomplete", props={
+                                "label": "Database URI",
+                                "endpoint": {
+                                    "url": Endpoint.url(__name__, "fetch_databases"),
+                                    "method": "post"
+                                }
+                            })
                         ),
                         FormField(
                             id="collection",
                             name="Collection",
-                            description="Type collection you would like to fetch data from.",
-                            component=FormComponent(type="text", props={"label": "Collection"})
+                            description="Select collection you would like to fetch data from. If you see error select "
+                                        "resource and database first so we know which resource and database to connect "
+                                        "to fetch a list of collections.",
+                            component=FormComponent(type="autocomplete", props={
+                                "label": "Collection",
+                                "endpoint": {
+                                    "url": Endpoint.url(__name__, "fetch_collections"),
+                                    "method": "post"
+                                }
+                            })
                         ),
                         FormField(
                             id="query",
@@ -112,4 +156,3 @@ def register() -> Plugin:
             group=["Connectors"]
         )
     )
-

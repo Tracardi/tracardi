@@ -1,8 +1,10 @@
+from tracardi.domain.resource_config import ResourceConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormField, \
     FormGroup, FormComponent
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
-from .model.config import Config, EndpointConfig
+from .model.config import Config
 from tracardi.process_engine.action.v1.connectors.civi_crm.client import CiviCRMClient, CiviCRMClientException
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.domain.result import Result
@@ -44,15 +46,14 @@ class AddCiviContactAction(ActionRunner):
             return Result(port="error", value={"detail": str(e)})
 
 
-class Endpoint:
+class Endpoint(PluginEndpoint):
 
     @staticmethod
-    async def get_custom_fields(config: dict, production: bool) -> list:
-        config = EndpointConfig(**config)
+    async def get_custom_fields(config: dict) -> list:
+        config = ResourceConfig(**config)
         resource = await storage.driver.resource.load(config.source.id)
-        client = CiviCRMClient(**(resource.credentials.production if production else resource.credentials.test))
-        result = await client.get_custom_fields()
-        return result
+        client = CiviCRMClient(**resource.credentials.production)
+        return await client.get_custom_fields()
 
 
 def register() -> Plugin:
@@ -69,8 +70,8 @@ def register() -> Plugin:
             # manual="add_civi_crm_contact_action",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
                 "contact_type": "Individual",
                 "fields": {}
@@ -110,7 +111,7 @@ def register() -> Plugin:
                                     props={
                                         "defaultValueSource": "event",
                                         "endpoint": {
-                                            "url": f"/plugin/{__name__}/get_custom_fields",
+                                            "url": Endpoint.url(__name__, "get_custom_fields"),
                                             "method": "post"
                                         },
                                         "availableValues": [
