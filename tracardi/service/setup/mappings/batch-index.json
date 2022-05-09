@@ -15,19 +15,15 @@
       "description": {
         "type": "text"
       },
+      "module": {
+        "type": "text"
+      },
       "config": {
         "type": "keyword",
         "index": false
       },
       "enabled": {
         "type": "boolean"
-      },
-      "resource": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          }
-        }
       }
     }
   }

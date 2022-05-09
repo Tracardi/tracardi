@@ -128,8 +128,7 @@ def get_resource_types():
             },
             "tags": ['mysql', 'database'],
             "name": "MySQL",
-            "icon": "mysql",
-            "batch": "tracardi.process_engine.batch.mysql.MySQLBatch"
+            "icon": "mysql"
         },
         "mqtt": {
             "config": {
@@ -276,6 +275,7 @@ def get_destinations():
     for resource_type in resource_types.values():
         if 'destination' in resource_type:
             yield resource_type["destination"]['package'], resource_type
+
 
 def get_type_of_resources():
     resource_types = get_resource_types()
