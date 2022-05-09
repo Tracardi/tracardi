@@ -1,0 +1,29 @@
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "progress": {
+        "type": "double"
+      },
+      "import_id": {
+        "type": "keyword"
+      }
+    }
+  }
+}
