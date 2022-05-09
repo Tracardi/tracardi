@@ -269,7 +269,7 @@ def register() -> Plugin:
             desc='Sends current event to Matomo.',
             icon='matomo',
             brand='Matomo',
-            group=["Stats"],
+            group=["Matomo"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

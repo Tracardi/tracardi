@@ -95,7 +95,7 @@ def register() -> Plugin:
             name='Post to Slack Channel',
             desc='Posts defined message to a Slack channel.',
             icon='slack',
-            group=["Connectors"],
+            group=["Messaging"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

@@ -101,10 +101,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Send data to Airtable',
+            name='Send data',
             desc='Adds a record to a given table in Airtable, according to provided schema.',
             icon='airtable',
-            group=["Connectors"],
+            group=["AirTable"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

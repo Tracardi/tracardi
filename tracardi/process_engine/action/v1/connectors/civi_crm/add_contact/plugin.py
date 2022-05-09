@@ -1,5 +1,7 @@
+from tracardi.domain.resource_config import ResourceConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormField, \
     FormGroup, FormComponent
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
 from .model.config import Config
@@ -44,6 +46,16 @@ class AddCiviContactAction(ActionRunner):
             return Result(port="error", value={"detail": str(e)})
 
 
+class Endpoint(PluginEndpoint):
+
+    @staticmethod
+    async def get_custom_fields(config: dict) -> list:
+        config = ResourceConfig(**config)
+        resource = await storage.driver.resource.load(config.source.id)
+        client = CiviCRMClient(**resource.credentials.production)
+        return await client.get_custom_fields()
+
+
 def register() -> Plugin:
     return Plugin(
         start=False,
@@ -58,8 +70,8 @@ def register() -> Plugin:
             # manual="add_civi_crm_contact_action",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
                 "contact_type": "Individual",
                 "fields": {}
@@ -98,9 +110,13 @@ def register() -> Plugin:
                                     type="keyValueList",
                                     props={
                                         "defaultValueSource": "event",
+                                        "endpoint": {
+                                            "url": Endpoint.url(__name__, "get_custom_fields"),
+                                            "method": "post"
+                                        },
                                         "availableValues": [
-                                            {"label": key, "value": value}
-                                            for key, value in {
+                                            {"name": name, "id": key}
+                                            for name, key in {
                                                 "ID": "id",
                                                 "Contact ID": "contact_id",
                                                 "Contact subtype": "contact_sub_type",
@@ -183,7 +199,7 @@ def register() -> Plugin:
             desc='Adds new contact in CiviCRM.',
             brand='CiviCRM',
             icon='civicrm',
-            group=["Connectors"],
+            group=["Civi CRM"],
             tags=['crm', 'marketing'],
             documentation=Documentation(
                 inputs={

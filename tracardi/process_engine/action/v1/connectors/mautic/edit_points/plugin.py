@@ -130,7 +130,7 @@ def register() -> Plugin:
             brand='Mautic',
             desc='Adds or subtracts points from a given contact in Mautic, based on provided contact ID.',
             icon='mautic',
-            group=["Marketing automation"],
+            group=["Mautic"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

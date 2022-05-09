@@ -111,6 +111,6 @@ def register() -> Plugin:
             name='Zapier webhook',
             desc='Sends message to zapier webhook.',
             icon='zapier',
-            group=["Connectors"]
+            group=["Zapier"]
         )
     )

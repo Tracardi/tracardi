@@ -133,7 +133,7 @@ def register() -> Plugin:
             brand="MailChimp",
             desc='Adds contact to MailChimp audience',
             icon='mailchimp',
-            group=["Mailing"],
+            group=["Mailchimp"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
