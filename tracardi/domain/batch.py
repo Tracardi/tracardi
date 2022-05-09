@@ -1,21 +1,19 @@
 from pydantic import BaseModel, validator
-from .entity import Entity
 from typing import Optional
 from tracardi.service.secrets import encrypt, decrypt
+from tracardi.domain.named_entity import NamedEntity
 
 
-class BatchRecord(BaseModel):
-    name: str
+class BatchRecord(NamedEntity):
     description: Optional[str] = ""
-    resource: Entity
+    module: str
     config: str
     enabled: bool = True
 
 
-class Batch(BaseModel):
-    name: str
+class Batch(NamedEntity):
     description: Optional[str] = ""
-    resource: Entity
+    module: str
     config: dict
     enabled: bool = True
 
@@ -27,9 +25,10 @@ class Batch(BaseModel):
 
     def encode(self) -> BatchRecord:
         return BatchRecord(
+            id=self.id,
             name=self.name,
             description=self.description,
-            resource=self.resource,
+            module=self.module,
             config=encrypt(self.config),
             enabled=self.enabled
         )
@@ -37,9 +36,10 @@ class Batch(BaseModel):
     @staticmethod
     def decode(record: BatchRecord) -> 'Batch':
         return Batch(
+            id=record.id,
             name=record.name,
             description=record.description,
-            resource=record.resource,
+            module=record.module,
             config=decrypt(record.config),
             enabled=record.enabled
         )
