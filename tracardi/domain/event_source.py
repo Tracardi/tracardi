@@ -13,6 +13,7 @@ class EventSource(Entity):
     transitional: Optional[bool] = False
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
+    returns_profile: Optional[bool] = False
 
     def __init__(self, **data: Any):
         data['timestamp'] = datetime.utcnow()

@@ -46,6 +46,9 @@
       "hash": {
         "type": "keyword"
       },
+      "returns_profile": {
+        "type": "boolean"
+      },
       "endpoints": {
         "properties": {
           "get": {
