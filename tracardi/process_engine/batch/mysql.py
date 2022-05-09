@@ -9,7 +9,7 @@ from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.storage.redis_client import RedisClient
 import asyncio
-import logging
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
 class MySQLBatchConfig(BaseModel):
@@ -17,6 +17,29 @@ class MySQLBatchConfig(BaseModel):
     table_name: str
     batch: int
     event_type: str
+
+
+class TableFetchConfig(BaseModel):
+    source: NamedEntity
+
+
+class Endpoint(PluginEndpoint):
+
+    @staticmethod
+    async def fetch_tables(config: dict):
+        config = TableFetchConfig(**config)
+        resource = await storage.driver.resource.load(config.source.id)
+        credentials = resource.credentials.production
+        pool = await Connection(**credentials).connect()
+        async with pool.acquire() as conn:
+            async with conn.cursor(aiomysql.DictCursor) as cursor:
+                await cursor.execute(f"SHOW TABLES;")
+                result = await cursor.fetchall()
+
+                return {
+                    "total": len(result),
+                    "result": [{"name": list(record.values())[0], "id": list(record.values())[0]} for record in result]
+                }
 
 
 class MySQLBatch(BatchRunner):
@@ -33,7 +56,13 @@ class MySQLBatch(BatchRunner):
             name="Table name",
             id="table_name",
             description="Provide a name of the table that you want to fetch data from.",
-            component=FormComponent(type="text", props={"label": "Table name"})
+            component=FormComponent(type="autocomplete", props={
+                "label": "Table",
+                "endpoint": {
+                    "url": Endpoint.url(__name__, "fetch_tables"),
+                    "method": "post"
+                }
+            })
         ),
         FormField(
             name="Batch",
