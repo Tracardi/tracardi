@@ -71,7 +71,7 @@ class ActiveCampaignClient:
                 if response.status != 200:
                     raise ActiveCampaignClientException(await response.text())
 
-                return [{"label": field["title"], "value": field["id"]} for field in (await response.json())["fields"]]
+                return [{"name": field["title"], "id": field["id"]} for field in (await response.json())["fields"]]
 
     async def get_contact_by_email(self, email: str):
         async with aiohttp.ClientSession(headers={
