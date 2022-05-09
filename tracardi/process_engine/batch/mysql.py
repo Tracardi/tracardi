@@ -6,6 +6,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
+import asyncio
 
 
 class MySQLBatchConfig(BaseModel):
@@ -31,6 +32,9 @@ class Endpoint(PluginEndpoint):
             async with conn.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute(f"SHOW TABLES;")
                 result = await cursor.fetchall()
+
+                pool.close()
+                # TODO CLOSE CONNECTION
 
                 return {
                     "total": len(result),
