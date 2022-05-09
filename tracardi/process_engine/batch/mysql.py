@@ -1,5 +1,3 @@
-import json
-from datetime import datetime, date
 import aiomysql
 from .batch_runner import BatchRunner
 from pydantic import BaseModel
@@ -7,8 +5,6 @@ from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
-from tracardi.service.storage.redis_client import RedisClient
-import asyncio
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
@@ -79,34 +75,10 @@ class MySQLBatch(BatchRunner):
         )
     ])])
 
-    @staticmethod
-    def to_dict(record):
-        def json_default(obj):
-            """JSON serializer for objects not serializable by default json code"""
-
-            if isinstance(obj, (datetime, date)):
-                return obj.isoformat()
-
-            return obj.decode('utf-8')
-
-        j = json.dumps(dict(record), default=json_default)
-        return json.loads(j)
-
-    async def run(self, config: dict, task_id: str):
-        self.config = MySQLBatchConfig(**config)
-        resource = await storage.driver.resource.load(self.config.source.id)
+    async def run(self, config: dict):
+        config = MySQLBatchConfig(**config)
+        resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
-        pool = await Connection(**credentials).connect()
-        async with pool.acquire() as conn:
-            async with conn.cursor(aiomysql.DictCursor) as cursor:
-                await cursor.execute(f"SELECT COUNT(1) as count FROM {self.config.table_name};")
-                quantity = (await cursor.fetchone())["count"]
+        config = {**config, **credentials}
 
-                redis_client = RedisClient()
-
-                # UPDATE PROGRESS
-                for x in range(0, 101):
-                    await asyncio.sleep(0.5)
-                    redis_client.client.set(f"TASK-{task_id}", x/100.0, ex=60 * 60)
-                pool.close()
-                await pool.wait_closed()
+        # TODO ADD TO CELERY WITH config VARIABLE PASSED TO FUNC
