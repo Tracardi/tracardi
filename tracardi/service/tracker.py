@@ -388,10 +388,15 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         raise UnauthorizedException(e)
 
     if source.transitional is True:
-        tracker_payload.options = {
+        tracker_payload.options.update({
             "saveSession": False,
             "saveEvents": False
-        }
+        })
+
+    if source.returns_profile is False:
+        tracker_payload.options.update({
+            "profile": False
+        })
 
     # Get session
     if tracker_payload.session.id is None:

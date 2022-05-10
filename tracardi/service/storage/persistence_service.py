@@ -326,6 +326,7 @@ class SqlSearchQueryEngine:
                 return QueryResult(total=0, result=[])
 
             try:
+
                 buckets_result, buckets = __format_count_by_bucket(result['aggregations']['by_field']['buckets'], unit, interval, format)
                 qs = {
                     'total': result['hits']['total']['value'],
@@ -337,7 +338,6 @@ class SqlSearchQueryEngine:
                 return QueryResult(**qs)
 
             except KeyError as e:
-                _logger.error("Error while formatting data. Reason: {}".format(es_query, str(e)))
                 # When no result
                 qs = {
                     'total': 0,

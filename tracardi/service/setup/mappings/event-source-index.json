@@ -49,6 +49,9 @@
       "returns_profile": {
         "type": "boolean"
       },
+      "permanent_profile_id": {
+        "type": "boolean"
+      },
       "endpoints": {
         "properties": {
           "get": {

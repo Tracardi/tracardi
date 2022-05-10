@@ -222,16 +222,16 @@ async def aggregate_events_by_source():
 async def load_events_heatmap(profile_id: str = None):
     if profile_id is not None:
         filter_query = {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "profile.id": profile_id
-                            }
-                        }
-                    ]
-                }
-            },
+                           "bool": {
+                               "must": [
+                                   {
+                                       "term": {
+                                           "profile.id": profile_id
+                                       }
+                                   }
+                               ]
+                           }
+                       },
     else:
         filter_query = {"match_all": {}}
 
@@ -381,11 +381,11 @@ async def get_event_data_for_session(session_id: str, limit: int = 20):
         ]
     })
     return [{
-            "id": doc["_source"]["id"],
-            "insert": doc["_source"]["metadata"]["time"]["insert"],
-            "status": doc["_source"]["metadata"]["status"],
-            "type": doc["_source"]["type"]
-        } for doc in result["hits"]["hits"]], result["hits"]["total"]["value"] > len(result["hits"]["hits"])
+        "id": doc["_source"]["id"],
+        "insert": doc["_source"]["metadata"]["time"]["insert"],
+        "status": doc["_source"]["metadata"]["status"],
+        "type": doc["_source"]["type"]
+    } for doc in result["hits"]["hits"]], result["hits"]["total"]["value"] > len(result["hits"]["hits"])
 
 
 async def aggregate_source_by_type(source_id: str, time_span: str):
@@ -408,8 +408,11 @@ async def aggregate_source_by_type(source_id: str, time_span: str):
         }
     })
 
-    return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
-            result["aggregations"]["by_type"]["buckets"]]
+    try:
+        return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
+                result["aggregations"]["by_type"]["buckets"]]
+    except KeyError:
+        return []
 
 
 async def aggregate_source_by_tags(source_id: str, time_span: str):
@@ -430,8 +433,11 @@ async def aggregate_source_by_tags(source_id: str, time_span: str):
         }
     })
 
-    return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
-            result["aggregations"]["by_tag"]["buckets"]]
+    try:
+        return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
+                result["aggregations"]["by_tag"]["buckets"]]
+    except KeyError:
+        return []
 
 
 async def count(query: dict = None):
