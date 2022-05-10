@@ -56,6 +56,7 @@ setup(
         'grpcio',
         'grpcio-tools',
         'certifi',
+        'celery == 5.2.6'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
