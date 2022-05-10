@@ -124,6 +124,6 @@ class MySQLImporter(Importer):
         config = MySQLImportConfig(**config)
         resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
-        config = {**config.dict(), **credentials}
-        print(config)
+
         # TODO ADD TO CELERY WITH config VARIABLE PASSED TO FUNC
+        # celery_task.deploy(config, credentials)
