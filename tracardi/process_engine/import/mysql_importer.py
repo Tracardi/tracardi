@@ -1,7 +1,6 @@
 import re
 
 import aiomysql
-import worker
 from .importer import Importer
 from pydantic import BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
@@ -9,6 +8,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
+from worker.celery_worker import run_celery_replay_job
 
 
 class MySQLImportConfig(BaseModel):
@@ -126,7 +126,7 @@ class MySQLImporter(Importer):
         resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
 
-        task = worker.celery_worker.run_celery_replay_job.delay(config, credentials)
+        task = run_celery_replay_job.delay(config, credentials)
         return {
             "task": str(task.id)
         }
