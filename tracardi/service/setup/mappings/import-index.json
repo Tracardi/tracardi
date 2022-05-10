@@ -16,7 +16,7 @@
         "type": "text"
       },
       "module": {
-        "type": "text"
+        "type": "keyword"
       },
       "config": {
         "type": "keyword",
@@ -24,6 +24,12 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "transitional": {
+        "type": "boolean"
+      },
+      "event_type": {
+        "type": "keyword"
       }
     }
   }

@@ -92,7 +92,7 @@ class Resource:
                                  rel=None),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),
-            "batch": Index(multi_index=False, index="tracardi-batch", mapping="mappings/batch-index.json", rel=None),
+            "import": Index(multi_index=False, index="tracardi-import", mapping="mappings/import-index.json", rel=None),
             "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None)
         }
 

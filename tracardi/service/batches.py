@@ -1,7 +1,7 @@
 def get_batches():
     return {
         "mysql": {
-            "module": "tracardi.process_engine.batch.mysql.MySQLBatch",
+            "module": "tracardi.process_engine.import.mysql_importer.MySQLImporter",
             "name": "MySQL"
         }
     }

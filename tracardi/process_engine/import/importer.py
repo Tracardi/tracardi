@@ -1,4 +1,4 @@
-class BatchRunner:
+class Importer:
 
     def __init__(self, debug: bool):
         self.debug = debug
