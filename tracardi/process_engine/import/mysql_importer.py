@@ -126,7 +126,7 @@ class MySQLImporter(Importer):
         resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
 
-        task = run_celery_replay_job.delay(config, credentials)
+        task = run_celery_replay_job.delay(config.dict(), credentials)
         return {
             "task": str(task.id)
         }
