@@ -56,7 +56,8 @@ setup(
         'grpcio',
         'grpcio-tools',
         'certifi',
-        'celery == 5.2.6'
+        'celery == 5.2.6',
+        'git+https://github.com/Tracardi/import-worker.git@master'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
