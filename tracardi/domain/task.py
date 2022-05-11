@@ -5,10 +5,13 @@ from typing import Optional
 
 
 class Task(NamedEntity):
-    timestamp: Optional[datetime] = datetime.utcnow()
-    status: str
-    progress: float
+    timestamp: Optional[datetime]
+    status: str = 'pending'
+    progress: float = 0
+    import_type: str = "missing"
     import_id: str
+    task_id: str
+    event_type: str = "missing"
 
     @validator("status")
     def validate_status(cls, value):

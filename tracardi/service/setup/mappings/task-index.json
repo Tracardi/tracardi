@@ -21,7 +21,16 @@
       "progress": {
         "type": "double"
       },
+      "task_id": {
+        "type": "keyword"
+      },
       "import_id": {
+        "type": "keyword"
+      },
+      "import_type": {
+        "type": "keyword"
+      },
+      "event_type": {
         "type": "keyword"
       }
     }

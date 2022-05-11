@@ -1,6 +1,12 @@
 import re
+from datetime import datetime
+from typing import Tuple
+from uuid import uuid4
 
 import aiomysql
+
+from tracardi.domain.import_config import ImportConfig
+from tracardi.domain.task import Task
 from .importer import Importer
 from pydantic import BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
@@ -121,12 +127,22 @@ class MySQLImporter(Importer):
             )
         ])])
 
-    async def run(self, config: dict):
-        config = MySQLImportConfig(**config)
+    async def run(self, task_name, import_config: ImportConfig) -> Tuple[str, str]:
+        config = MySQLImportConfig(**import_config.config)
         resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
+        celery_task = run_celery_replay_job.delay(config.dict(), credentials)
 
-        task = run_celery_replay_job.delay(config.dict(), credentials)
-        return {
-            "task": str(task.id)
-        }
+        task = Task(
+            timestamp=datetime.utcnow(),
+            id=str(uuid4()),
+            name=task_name if task_name else import_config.name,
+            import_type=import_config.name,
+            event_type=import_config.event_type,
+            import_id=import_config.id,
+            task_id=celery_task.id
+        )
+
+        await storage.driver.task.upsert_task(task)
+
+        return task.id, celery_task.id
