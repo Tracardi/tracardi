@@ -1,4 +1,5 @@
 from tracardi.domain.import_config import ImportConfig, ImportConfigRecord
+from tracardi.domain.storage_result import StorageResult
 from tracardi.service.storage.factory import storage_manager
 from typing import Optional
 
@@ -22,17 +23,18 @@ async def delete(id: str):
 
 async def load_all(limit: int = 100, query: str = None):
     if query is None:
-        return list(await storage_manager("import").load_all(limit=limit))
-
+        result = await storage_manager("import").load_all(limit=limit)
     else:
-        return [doc["_source"] for doc in (await storage_manager("import").query({
+        result = StorageResult(await storage_manager("import").query({
             "query": {
                 "wildcard": {
-                    "name": f"{query}*"
+                    "name": f"*{query}*"
                 }
             },
             "size": limit
-        }))["hits"]["hits"]]
+        }))
+
+    return list(result)
 
 
 async def refresh():
