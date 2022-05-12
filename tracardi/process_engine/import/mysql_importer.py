@@ -14,7 +14,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
-from worker.celery_worker import run_celery_replay_job
+from worker.celery_worker import run_celery_import_job
 
 
 class MySQLImportConfig(BaseModel):
@@ -131,7 +131,7 @@ class MySQLImporter(Importer):
         config = MySQLImportConfig(**import_config.config)
         resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
-        celery_task = run_celery_replay_job.delay(config.dict(), credentials)
+        celery_task = run_celery_import_job.delay(import_config.dict(), credentials, config.source.id)
 
         task = Task(
             timestamp=datetime.utcnow(),
