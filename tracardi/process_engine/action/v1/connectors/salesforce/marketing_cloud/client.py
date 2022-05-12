@@ -40,7 +40,7 @@ class MarketingCloudClient:
             async with method(
                     url=f"https://{self.subdomain}.rest.marketingcloudapis.com/data/v1/async/dataextensions/"
                         f"{extension_id}/rows",
-                    data={"items": [mapping]}
+                    json={"items": [mapping]}
             ) as response:
 
                 if response.status == 401:

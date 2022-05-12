@@ -113,6 +113,7 @@ def register() -> Plugin:
             desc='Sends data to Data Extension table in Salesforce Marketing Cloud, according to given mapping.',
             icon='plugin',
             group=["Salesforce"],
+            brand="Salesforce",
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
