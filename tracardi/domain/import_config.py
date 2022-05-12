@@ -16,6 +16,7 @@ class ImportConfigRecord(NamedEntity):
 class ImportConfig(NamedEntity):
     description: Optional[str] = ""
     event_type: str
+    # todo add source_id, tracardi_api_url
     module: str
     config: dict
     enabled: bool = True

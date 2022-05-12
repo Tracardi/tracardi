@@ -134,7 +134,7 @@ class MySQLImporter(Importer):
         celery_task = run_celery_import_job.delay(
             import_config.dict(),
             credentials,
-            config.source.id,
+            "@test-source",
             tracardi_api_url='http://192.168.1.103:8686'
         )
 
