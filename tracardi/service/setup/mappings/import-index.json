@@ -28,6 +28,19 @@
       "transitional": {
         "type": "boolean"
       },
+      "api_url": {
+        "type": "keyword"
+      },
+      "event_source": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
       "event_type": {
         "type": "keyword"
       }

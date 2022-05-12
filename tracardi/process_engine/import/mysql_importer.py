@@ -76,7 +76,7 @@ class Endpoint(PluginEndpoint):
                 }
 
 
-class MySQLImporter(Importer):
+class MySQLTableImporter(Importer):
     config_model = MySQLImportConfig
 
     init = {

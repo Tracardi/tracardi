@@ -5,11 +5,11 @@ from typing import Optional
 
 
 async def load(id: str) -> Optional[ImportConfig]:
-    batch = await storage_manager("import").load(id)
-    if batch is None:
+    import_configuration = await storage_manager("import").load(id)
+    if import_configuration is None:
         return None
-    batch = ImportConfigRecord(**batch)
-    return ImportConfig.decode(batch)
+    import_configuration = ImportConfigRecord(**import_configuration)
+    return ImportConfig.decode(import_configuration)
 
 
 async def save(batch: ImportConfig):
