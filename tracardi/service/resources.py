@@ -275,6 +275,16 @@ def get_resource_types():
             "tags": ["active_campaign"],
             "name": "ActiveCampaign",
             "icon": "plugin"
+        },
+        "marketing_cloud": {
+            "config": {
+                "client_id": "<your-client-id>",
+                "client_secret": "<your-client-secret>",
+                "subdomain": "<your-subdomain>"
+            },
+            "tags": ["marketing_cloud"],
+            "name": "Salesforce Marketing Cloud",
+            "icon": "plugin"
         }
     }
 

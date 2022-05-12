@@ -187,6 +187,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin',
         'tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin',
         'tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin',
+        'tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin',
 
         # Internal
         'tracardi.process_engine.action.v1.internal.assign_profile_id.plugin',
