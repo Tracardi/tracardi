@@ -131,7 +131,12 @@ class MySQLImporter(Importer):
         config = MySQLImportConfig(**import_config.config)
         resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
-        celery_task = run_celery_import_job.delay(import_config.dict(), credentials, config.source.id)
+        celery_task = run_celery_import_job.delay(
+            import_config.dict(),
+            credentials,
+            config.source.id,
+            tracardi_api_url='http://192.168.1.103:8686'
+        )
 
         task = Task(
             timestamp=datetime.utcnow(),
