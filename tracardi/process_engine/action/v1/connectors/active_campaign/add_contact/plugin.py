@@ -8,6 +8,7 @@ from tracardi.process_engine.action.v1.connectors.active_campaign.client import 
     ActiveCampaignClientException
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
 def validate(config: dict) -> Config:
@@ -39,13 +40,13 @@ class SendToActiveCampaignAction(ActionRunner):
             return Result(port="error", value={"detail": str(e)})
 
 
-class Endpoint:
+class Endpoint(PluginEndpoint):
 
     @staticmethod
-    async def get_custom_fields(config: dict, production: bool) -> list:
+    async def get_custom_fields(config: dict) -> list:
         config = EndpointConfig(**config)
         resource = await storage.driver.resource.load(config.source.id)
-        client = ActiveCampaignClient(**(resource.credentials.production if production else resource.credentials.test))
+        client = ActiveCampaignClient(**resource.credentials.production)
         result = await client.get_custom_fields()
         return result
 
@@ -82,14 +83,20 @@ def register() -> Plugin:
                     description="Map all fields from ActiveCampaign (email, first name, last name, custom fields) "
                                 "to dotted paths. Key should be the name of the field, and value should represent the "
                                 "path.",
-                    component=FormComponent(type="keyValueList", props={"defaultValueSource": "profile", # TODO MAP FIELDS
-                                                                    "availableValues": [
-                                                                        {"label": "First name", "value": "firstName"},
-                                                                        {"label": "Email", "value": "email"},
-                                                                        {"label": "Last name", "value": "lastName"},
-                                                                        {"label": "Phone", "value": "phone"}
-                                                                        ]
-                                                                        })
+                    component=FormComponent(type="keyValueList", props={
+                        "defaultValueSource": "profile",
+                        "availableValues": [
+                            {"name": "First name", "id": "firstName"}, {"name": "Last name", "id": "lastName"},
+                            {"name": "Phone number", "id": "phone"}, {"name": "Email address", "id": "email"},
+                            {"name": "Organization ID", "id": "orgid"}, {"name": "SegmentIO ID", "id": "segmentio_id"},
+                            {"name": "IP address", "id": "ip"}, {"name": "Organization", "id": "organization"},
+                            {"name": "Gravatar", "id": "gravatar"}
+                        ],
+                        "endpoint": {
+                            "method": "post",
+                            "url": Endpoint.url(__name__, "get_custom_fields")
+                        }
+                    })
                 )
             ])])
         ),
