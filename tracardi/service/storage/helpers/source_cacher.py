@@ -16,7 +16,7 @@ class SourceCacher:
 
         source = await self.get(entity)  # type: Optional[EventSource]
         if source is None:
-            raise ValueError("Invalid event source.")
+            raise ValueError(f"Invalid event source {source_id}.")
 
         if not source.enabled:
             raise ValueError("Event source disabled.")
