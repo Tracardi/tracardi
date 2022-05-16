@@ -37,48 +37,7 @@ def register() -> Plugin:
             outputs=["payload"],
             version='0.6.1',
             license="MIT",
-            author="Risto Kowaczewski",
-            init={
-                "start_coordinate": {"lat": None, "lng": None},
-                "end_coordinate": {"lat": None, "lng": None},
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Start point coordinates",
-                    fields=[
-                        FormField(
-                            id="start_coordinate.lat",
-                            name="Start latitude",
-                            description="Type start point latitude.",
-                            component=FormComponent(type="text", props={"label": "Start latitude"})
-                        ),
-                        FormField(
-                            id="start_coordinate.lng",
-                            name="Start longitude",
-                            description="Type start point longitude.",
-                            component=FormComponent(type="text", props={"label": "Start longitude"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="End point coordinates",
-                    fields=[
-                        FormField(
-                            id="end_coordinate.lat",
-                            name="End latitude",
-                            description="Type end point latitude, or a path to data tha has it.",
-                            component=FormComponent(type="dotPath", props={"label": "End latitude"})
-                        ),
-                        FormField(
-                            id="end_coordinate.lng",
-                            name="End longitude",
-                            description="Type end point longitude, or a path to data tha has it",
-                            component=FormComponent(type="dotPath", props={"label": "End longitude"})
-                        )
-                    ]
-                )
-            ]),
-
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Geo distance',
@@ -93,6 +52,7 @@ def register() -> Plugin:
                 outputs={
                     "payload": PortDoc(desc="Returns true if inside the radius, otherwise false.")
                 }
-            )
+            ),
+            pro=True
         )
     )

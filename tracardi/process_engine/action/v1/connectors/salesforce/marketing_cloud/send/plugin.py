@@ -111,7 +111,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Send to Data Extension',
             desc='Sends data to Data Extension table in Salesforce Marketing Cloud, according to given mapping.',
-            icon='plugin',
+            icon='salesforce',
             group=["Salesforce"],
             brand="Salesforce",
             documentation=Documentation(

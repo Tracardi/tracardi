@@ -37,59 +37,7 @@ def register() -> Plugin:
             outputs=["payload"],
             version='0.6.1',
             license="MIT",
-            author="Risto Kowaczewski",
-            init={
-                "center_coordinate": {"lat": None, "lng": None},
-                "test_coordinate": {"lat": None, "lng": None},
-                "radius": 10
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Center point coordinates",
-                    fields=[
-                        FormField(
-                            id="center_coordinate.lat",
-                            name="Center latitude",
-                            description="Type center point latitude.",
-                            component=FormComponent(type="text", props={"label": "Center latitude"})
-                        ),
-                        FormField(
-                            id="center_coordinate.lng",
-                            name="Center longitude",
-                            description="Type center point longitude.",
-                            component=FormComponent(type="text", props={"label": "Center longitude"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Test point coordinates",
-                    fields=[
-                        FormField(
-                            id="test_coordinate.lat",
-                            name="Test latitude",
-                            description="Type test point latitude, or a path to data tha has it.",
-                            component=FormComponent(type="dotPath", props={"label": "Test latitude"})
-                        ),
-                        FormField(
-                            id="test_coordinate.lng",
-                            name="Test longitude",
-                            description="Type test point longitude, or a path to data tha has it",
-                            component=FormComponent(type="dotPath", props={"label": "Test longitude"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Radius",
-                    fields=[
-                        FormField(
-                            id="radius",
-                            name="Radius from center point in kilometers",
-                            component=FormComponent(type="text", props={"label": "Radius"})
-                        )
-                    ]
-                ),
-            ]),
-
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Geo fence',
@@ -104,6 +52,7 @@ def register() -> Plugin:
                 outputs={
                     "payload": PortDoc(desc="Returns true if inside the radius, otherwise false.")
                 }
-            )
+            ),
+            pro=True
         )
     )
