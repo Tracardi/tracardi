@@ -63,8 +63,8 @@ def register() -> Plugin:
             ]),
         ),
         metadata=MetaData(
-            name='Inject profile into workflow',
-            desc='This node will inject profile into workflow',
+            name='Load profile into workflow',
+            desc='This node will load and inject profile into workflow',
             icon='profile',
             group=["Input/Output"]
         )

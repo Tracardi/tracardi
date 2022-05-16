@@ -67,98 +67,27 @@ def register() -> Plugin:
             className='AwsSqsAction',
             inputs=["payload"],
             outputs=["result", "error"],
-            version='0.6.1',
+            version='0.7.0',
             license="MIT",
             author="Bart Dobrosielski, Risto Kowaczewski",
-            init={
-                "source": {
-                    "id": None,
-                    "name": None
-                },
-                "message": {"type": "application/json", "content": "{}"},
-                "region_name": "us-west-2",
-                "queue_url": "",
-                "delay_seconds": "0",
-                "message_attributes": "{}"
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="SQS source",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="AWS SQS resource",
-                            description="Select AWS SQS resource.",
-                            required=True,
-                            component=FormComponent(type="resource", props={"label": "resource", "tag": "aws"})
-                        ),
-                        FormField(
-                            id="region_name",
-                            name="AWS region",
-                            description="Provide AWS region.",
-                            component=FormComponent(type="select", props={"items": {
-                                'af-south-1': 'af-south-1',
-                                'ap-east-1': 'ap-east-1',
-                                'ap-northeast-1': 'ap-northeast-1',
-                                'ap-northeast-2': 'ap-northeast-2',
-                                'ap-northeast-3': 'ap-northeast-3',
-                                'ap-south-1': 'ap-south-1',
-                                'ap-southeast-1': 'ap-southeast-1',
-                                'ap-southeast-2': 'ap-southeast-2',
-                                'ap-southeast-3': 'ap-southeast-3',
-                                'ca-central-1': 'ca-central-1',
-                                'eu-central-1': 'eu-central-1',
-                                'eu-north-1': 'eu-north-1',
-                                'eu-south-1': 'eu-south-1',
-                                'eu-west-1': 'eu-west-1',
-                                'eu-west-2': 'eu-west-2',
-                                'eu-west-3': 'eu-west-3',
-                                'me-south-1': 'me-south-1',
-                                'sa-east-1': 'sa-east-1',
-                                'us-east-1': 'us-east-1',
-                                'us-east-2': 'us-east-2',
-                                'us-west-1': 'us-west-1',
-                                'us-west-2': 'us-west-2'
-                            }})
-                        ),
-                        FormField(
-                            id="queue_url",
-                            name="AWS SQS url",
-                            description="Provide AWS SQS url.",
-                            component=FormComponent(type="text", props={"label": "url"})
-                        ),
-                    ]
-                ),
-                FormGroup(
-                    name="SQS Message",
-                    fields=[
-                        FormField(
-                            id="message",
-                            name="Message",
-                            description="Type message to be send. By selecting one of the tabs you define "
-                                        "the request content-type.",
-                            component=FormComponent(type="contentInput", props={"label": "Content", "rows": 6})
-                        ),
-                        FormField(
-                            id="message_attributes",
-                            name="Message attributes",
-                            description="Type attributes to be send along with message.",
-                            component=FormComponent(type="json", props={"label": "Attributes", "rows": 5})
-                        ),
-                        FormField(
-                            id="delay_seconds",
-                            name="Message delay",
-                            component=FormComponent(type="text", props={"label": "Delay"})
-                        )
-                    ]
-                ),
-            ]),
+            # init={
+            #     "source": {
+            #         "id": None,
+            #         "name": None
+            #     },
+            #     "message": {"type": "application/json", "content": "{}"},
+            #     "region_name": "us-west-2",
+            #     "queue_url": "",
+            #     "delay_seconds": "0",
+            #     "message_attributes": "{}"
+            # },
+            # form=None,
         ),
         metadata=MetaData(
-            name='Simple queue service',
-            desc='Plugin that sends a message to the Amazon AWS SQS queue',
+            name='Simple queue SQS',
+            desc='Sends a message to the Amazon AWS SQS queue',
             icon='aws',
-            tags=['aws'],
+            tags=['aws', 'queue'],
             group=["Amazon Web Services (AWS)"],
             documentation=Documentation(
                 inputs={
@@ -168,6 +97,7 @@ def register() -> Plugin:
                     "result": PortDoc(desc="Returns result."),
                     "error": PortDoc(desc="Gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )

@@ -32,40 +32,15 @@ def get_resource_types():
                 "form": {}
             }
         },
-        # "rabbitMQ": {
+        # "aws": {
         #     "config": {
-        #         "uri": "amqp://127.0.0.1:5672//",
-        #         "timeout": 5,
-        #         "virtual_host": None,
-        #         "port": 5672
+        #         "aws_access_key_id": "<key-id>",
+        #         "aws_secret_access_key": "<access-key>",
         #     },
-        #     "tags": ['rabbitmq', 'pro', 'destination'],
-        #     "name": "RabbitMQ",
-        #     "icon": "rabbitmq",
-        #     "destination": {
-        #         "package": "tracardi.process_engine.destination.rabbitmq_connector.RabbitMqConnector",
-        #         "init": {
-        #             "queue": {
-        #                 "name": None,
-        #                 "routing_key": "routing",
-        #                 "queue_type": "direct",
-        #                 "compression": None,
-        #                 "auto_declare": True,
-        #                 "serializer": "json"
-        #             }
-        #         },
-        #         "form": {}
-        #     }
+        #     "tags": ['aws', 'cloud', 'token'],
+        #     "name": "AWS IAM Credentials",
+        #     "icon": "aws"
         # },
-        "aws": {
-            "config": {
-                "aws_access_key_id": "<key-id>",
-                "aws_secret_access_key": "<access-key>",
-            },
-            "tags": ['aws', 'cloud', 'token'],
-            "name": "AWS IAM Credentials",
-            "icon": "aws"
-        },
         "smtp-server": {
             "config": {
                 "smtp": "<smpt-server-host>",
@@ -216,13 +191,6 @@ def get_resource_types():
             "name": "MixPanel",
             "icon": "mixpanel"
         },
-        # "scheduler": {
-        #     "config": {
-        #         "callback_host": "<callback-host>",
-        #     },
-        #     "tags": ["pro", "scheduler"],
-        #     "name": "Scheduler"
-        # },
         "mautic": {
             "config": {
                 "public_key": "<client-public-key>",

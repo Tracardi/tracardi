@@ -134,9 +134,10 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Set Trait',
-            desc='Returns payload with copied/set traits.',
+            name='Set profile trait',
+            desc='Copy event property to profile trait. This plugin copies event properties to defined destination.',
             icon='copy',
+            tags=['profile', 'event'],
             group=["Data processing"],
             documentation=Documentation(
                 inputs={
