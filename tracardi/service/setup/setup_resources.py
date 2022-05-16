@@ -32,15 +32,6 @@ def get_resource_types():
                 "form": {}
             }
         },
-        # "aws": {
-        #     "config": {
-        #         "aws_access_key_id": "<key-id>",
-        #         "aws_secret_access_key": "<access-key>",
-        #     },
-        #     "tags": ['aws', 'cloud', 'token'],
-        #     "name": "AWS IAM Credentials",
-        #     "icon": "aws"
-        # },
         "smtp-server": {
             "config": {
                 "smtp": "<smpt-server-host>",

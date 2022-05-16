@@ -69,40 +69,7 @@ def register() -> Plugin:
             className='ZapierWebHookAction',
             inputs=['payload'],
             outputs=["response", "error"],
-            init={
-                "url": None,
-                "body": "{}",
-                "timeout": 30
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Zapier webhook settings",
-                    fields=[
-                        FormField(
-                            id="url",
-                            name="Webhook URL",
-                            description="Type webhook URL to be called.",
-                            component=FormComponent(type="text", props={"label": "Url"})
-                        ),
-                        FormField(
-                            id="body",
-                            name="Request body",
-                            description="Type content to be send.",
-                            component=FormComponent(type="json", props={"label": "JSON"})
-                        ),
-                    ]),
-                FormGroup(
-                    name="Zapier advanced settings",
-                    fields=[
-                        FormField(
-                            id="timeout",
-                            name="Timeout",
-                            description="Type value in seconds for call time-out.",
-                            component=FormComponent(type="text", props={"label": "Time-out"})
-                        ),
-                    ])
-            ]),
-            version="0.6.1",
+            version="0.7.0",
             author="Risto Kowaczewski",
             license="MIT",
             manual="zapier_webhook_action"
@@ -111,6 +78,7 @@ def register() -> Plugin:
             name='Zapier webhook',
             desc='Sends message to zapier webhook.',
             icon='zapier',
-            group=["Zapier"]
+            group=["Zapier"],
+            pro=True
         )
     )
