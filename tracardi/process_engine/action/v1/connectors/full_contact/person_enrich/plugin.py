@@ -79,56 +79,15 @@ def register() -> Plugin:
             version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="fullcontact_webhook_action",
-            init={
-                "source": {
-                    "id": None
-                },
-                "pii": {
-                    "email": None,
-                    "emails": [],
-                    "phone": None,
-                    "phones": [],
-                    "location": None,
-                    "name": None
-                }
-            },
-            form=Form(groups=[
-                FormGroup(
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="FullContact resource",
-                            description="Select FullContact resource. Credentials from selected resource will be used "
-                                        "to connect the service.",
-                            required=True,
-                            component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    fields=[
-                        FormField(
-                            id="pii.email",
-                            name="E-mail",
-                            description="Type path to E-mail",
-                            component=FormComponent(type="dotPath", props={"label": "Path to e-mail", "forceMode": 1})
-                        ),
-                        FormField(
-                            id="pii.phone",
-                            name="Phone",
-                            description="Type path to phone",
-                            component=FormComponent(type="dotPath", props={"label": "Path to phone", "forceMode": 1})
-                        )
-                    ]
-                ),
-            ]),
+            manual="fullcontact_webhook_action"
         ),
         metadata=MetaData(
             name='Enrich profile',
             brand='Full contact',
             desc='This plugin retrieves data about the provided e-mail from FullContact service.',
             icon='fullcontact',
-            group=["Connectors"]
+            group=["Connectors"],
+            tags=['enhance', 'profile'],
+            pro=True
         )
     )
