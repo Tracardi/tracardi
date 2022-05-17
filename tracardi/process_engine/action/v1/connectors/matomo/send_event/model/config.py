@@ -53,7 +53,7 @@ class MatomoPayload(BaseModel):
     pv_id: str
     idgoal: Optional[int] = None
     revenue: Optional[Union[float, int]] = None
-    gt_ms: int
+    gt_ms: Optional[int] = None
     dimensions: Optional[Dict[str, Any]]
     pf_net: Optional[int] = None
     pf_srv: Optional[int] = None
