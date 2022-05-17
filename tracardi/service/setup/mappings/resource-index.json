@@ -38,9 +38,6 @@
         "type": "keyword",
         "index": false
       },
-      "consent": {
-        "type": "boolean"
-      },
       "destination": {
         "type": "keyword",
         "index": false
