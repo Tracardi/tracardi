@@ -73,6 +73,21 @@ class DotAccessor:
             'flow@': self.flow,
         }
 
+    @staticmethod
+    def source(key):
+        if key.startswith('profile@'):
+            return 'profile'
+        elif key.startswith('session@'):
+            return 'session'
+        elif key.startswith('flow@'):
+            return 'flow'
+        elif key.startswith('payload@'):
+            return 'payload'
+        elif key.startswith('event@'):
+            return 'event'
+
+        return None
+
     def __delitem__(self, key):
         if key.startswith('profile@'):
             key = key[len('profile@'):]

@@ -112,10 +112,11 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Auto merge event properties',
+            name='Merge event properties',
             desc='Automatically merges all event properties to profile traits.',
             icon='merge',
             group=["Data processing"],
+            tags=['traits', 'profile'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

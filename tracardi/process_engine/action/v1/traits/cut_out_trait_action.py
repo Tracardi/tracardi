@@ -63,10 +63,11 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Cut out trait',
+            name='Cut out profile trait',
             desc='Returns defined property from payload.',
             icon='property',
             group=["Data processing"],
+            tags=['traits', 'profile'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

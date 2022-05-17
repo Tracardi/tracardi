@@ -95,6 +95,7 @@ def register() -> Plugin:
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
             icon='copy-property',
             group=["Data processing"],
+            tags=['reshape', 'create'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

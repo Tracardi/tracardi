@@ -114,10 +114,11 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Append/Remove Trait',
+            name='Append/Remove profile trait',
             desc='Appends/Removes trait to/from existing profile trait.',
             icon='append',
             group=["Data processing"],
+            tags=['traits', 'profile'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

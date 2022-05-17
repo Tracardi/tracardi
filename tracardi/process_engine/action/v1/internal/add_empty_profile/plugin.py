@@ -14,14 +14,14 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
 
 
-class NewEventProfileAction(ActionRunner):
+class AddEmptyProfileAction(ActionRunner):
 
     def __init__(self, **kwargs):
         pass
 
     async def run(self, payload):
 
-        if self.debug is False:
+        if self.debug is True:
             self.console.warning(
                 "Your requested a change in event profile but events may not be updated in debug mode.")
         else:
@@ -65,7 +65,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='NewEventProfileAction',
+            className='AddEmptyProfileAction',
             inputs=["payload"],
             outputs=['payload'],
             version='0.7.0',

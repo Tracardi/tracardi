@@ -137,7 +137,7 @@ def register() -> Plugin:
             name='Set profile trait',
             desc='Copy event property to profile trait. This plugin copies event properties to defined destination.',
             icon='copy',
-            tags=['profile', 'event'],
+            tags=['profile', 'event', 'traits'],
             group=["Data processing"],
             documentation=Documentation(
                 inputs={

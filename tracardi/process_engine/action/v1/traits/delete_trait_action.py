@@ -82,11 +82,12 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Delete Trait',
+            name='Delete profile trait',
             desc='Deletes traits from profile or payload. Accepts dotted notation as definition of a field to be '
                  'deleted. Returns payload.',
             icon='remove',
             group=["Data processing"],
+            tags=['traits', 'profile'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

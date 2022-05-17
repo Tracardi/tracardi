@@ -87,6 +87,8 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.traits.auto_merge_properties_to_profile_action',
         'tracardi.process_engine.action.v1.traits.assign_condition_result.plugin',
         'tracardi.process_engine.action.v1.traits.condition_set.plugin',
+        'tracardi.process_engine.action.v1.traits.hash_traits_action',
+        'tracardi.process_engine.action.v1.traits.mask_traits_action',
 
         'tracardi.process_engine.action.v1.operations.merge_profiles_action',
         'tracardi.process_engine.action.v1.operations.segment_profile_action',
@@ -202,6 +204,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.internal.get_prev_event.plugin',
         'tracardi.process_engine.action.v1.internal.get_prev_session.plugin',
         'tracardi.process_engine.action.v1.internal.query_string.plugin',
+        'tracardi.process_engine.action.v1.internal.add_empty_session.plugin',
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',
