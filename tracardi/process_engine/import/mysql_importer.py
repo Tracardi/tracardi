@@ -1,4 +1,6 @@
+import asyncio
 import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import Tuple
 from uuid import uuid4
@@ -128,13 +130,25 @@ class MySQLTableImporter(Importer):
         ])])
 
     async def run(self, task_name, import_config: ImportConfig) -> Tuple[str, str]:
+
+        def add_to_celery(import_config, credentials):
+            return run_celery_import_job.delay(
+                import_config.dict(),
+                credentials
+            )
+
         config = MySQLImportConfig(**import_config.config)
         resource = await storage.driver.resource.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
-        celery_task = run_celery_import_job.delay(
-            import_config.dict(),
-            credentials
+
+        # Adding to celery is blocking,run in executor
+        executor = ThreadPoolExecutor(
+            max_workers=1,
         )
+        loop = asyncio. get_running_loop()
+        blocking_tasks = [loop.run_in_executor(executor, add_to_celery, import_config, credentials)]
+        completed, pending = await asyncio.wait(blocking_tasks)
+        celery_task = completed.pop().result()
 
         task = Task(
             timestamp=datetime.utcnow(),
