@@ -1,6 +1,7 @@
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 
 from .model.configuration import Configuration
@@ -55,6 +56,14 @@ def register() -> Plugin:
             name='Inject event into payload',
             desc='This node will inject event of given id into payload',
             icon='json',
-            group=["Input/Output"]
+            group=["Operations"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="Returns input payload.")
+                }
+            )
         )
     )

@@ -2,7 +2,8 @@ from tracardi.domain.profile import Profile
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 
 from .model.configuration import Configuration
@@ -27,9 +28,12 @@ class InjectProfile(ActionRunner):
 
         profile = Profile(**result['result'][0])
 
+        self.event.profile = profile
+        self.event.metadata.profile_less = False
+        self.event.update = True
         self.execution_graph.set_profiles(profile)
 
-        return Result(port="profile", value=result['result'][0])
+        return Result(port="payload", value=payload)
 
 
 def register() -> Plugin:
@@ -39,7 +43,7 @@ def register() -> Plugin:
             module=__name__,
             className='InjectProfile',
             inputs=['payload'],
-            outputs=['profile', 'error'],
+            outputs=['payload', 'error'],
             version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski",
@@ -63,9 +67,18 @@ def register() -> Plugin:
             ]),
         ),
         metadata=MetaData(
-            name='Load profile into workflow',
-            desc='This node will load and inject profile into workflow',
+            name='Load profile',
+            desc='Loads and injects profile into workflow and assigns it to current event.',
             icon='profile',
-            group=["Input/Output"]
+            group=["Operations"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="Returns input payload."),
+                    "error": PortDoc(desc="Returns error.")
+                }
+            )
         )
     )

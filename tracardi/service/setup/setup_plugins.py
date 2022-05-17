@@ -86,12 +86,17 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.traits.delete_trait_action',
         'tracardi.process_engine.action.v1.traits.auto_merge_properties_to_profile_action',
         'tracardi.process_engine.action.v1.traits.assign_condition_result.plugin',
+        'tracardi.process_engine.action.v1.traits.condition_set.plugin',
 
         'tracardi.process_engine.action.v1.operations.merge_profiles_action',
         'tracardi.process_engine.action.v1.operations.segment_profile_action',
         'tracardi.process_engine.action.v1.operations.update_profile_action',
         'tracardi.process_engine.action.v1.operations.update_event_action',
         'tracardi.process_engine.action.v1.operations.update_session_action',
+        'tracardi.process_engine.action.v1.operations.reduce_array.plugin',
+        'tracardi.process_engine.action.v1.operations.write_to_memory.plugin',
+        'tracardi.process_engine.action.v1.operations.read_from_memory.plugin',
+
         'tracardi.process_engine.action.v1.calculator_action',
         'tracardi.process_engine.action.v1.mapping_action',
         'tracardi.process_engine.action.v1.return_random_element_action',
@@ -102,7 +107,6 @@ async def add_plugins():
         # Geo
         'tracardi.process_engine.action.v1.geo.fence.circular.plugin',
         'tracardi.process_engine.action.v1.geo.distance.plugin',
-
 
         # Plugins
         'tracardi.process_engine.action.v1.traits.reshape_payload_action',
@@ -194,14 +198,10 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin',
         'tracardi.process_engine.action.v1.internal.inject_event.plugin',
         'tracardi.process_engine.action.v1.internal.inject_profile.plugin',
-        'tracardi.process_engine.action.v1.traits.condition_set.plugin',
-        'tracardi.process_engine.action.v1.internal.query_string.plugin',
-        'tracardi.process_engine.action.v1.operations.reduce_array.plugin',
+        'tracardi.process_engine.action.v1.internal.add_empty_profile.plugin',
         'tracardi.process_engine.action.v1.internal.get_prev_event.plugin',
         'tracardi.process_engine.action.v1.internal.get_prev_session.plugin',
-        'tracardi.process_engine.action.v1.operations.write_to_memory.plugin',
-        'tracardi.process_engine.action.v1.operations.read_from_memory.plugin',
-
+        'tracardi.process_engine.action.v1.internal.query_string.plugin',
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',

@@ -74,7 +74,7 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "payload": PortDoc(desc="This port input payload.")
+                    "payload": PortDoc(desc="Returns input payload.")
                 }
             )
         )

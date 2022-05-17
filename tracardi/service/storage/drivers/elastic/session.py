@@ -24,7 +24,6 @@ async def update_session_duration(session: Session):
 
 
 async def save_session(session: Session, profile: Optional[Profile], profile_less, persist_session: bool = True):
-
     if persist_session:
         if profile_less is False:
             if session.operation.new:
@@ -42,6 +41,11 @@ async def save_session(session: Session, profile: Optional[Profile], profile_les
 
     return BulkInsertResult()
 
+
+async def save(session: Session):
+    return await StorageFor(session).index().save()
+
+
 # NOT USED FOR NOW
 async def get_first_session(profile_id: str) -> float:
     result = await storage_manager("session").query({
@@ -56,6 +60,8 @@ async def get_first_session(profile_id: str) -> float:
         }
     })
     return result["aggregations"]["first_session"]["value"]
+
+
 #
 
 
