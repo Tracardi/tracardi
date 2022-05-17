@@ -33,7 +33,6 @@ class Resource(Entity):
     icon: str = None
     destination: Optional[DestinationConfig] = None
     enabled: Optional[bool] = True
-    consent: bool = False
 
     def __init__(self, **data: Any):
         data['timestamp'] = datetime.utcnow()
@@ -63,7 +62,6 @@ class ResourceRecord(Entity):
     groups: Union[List[str], str] = []
     icon: str = None
     destination: Optional[str] = None
-    consent: bool = False
 
     def __init__(self, **data: Any):
         data['timestamp'] = datetime.utcnow()
@@ -81,7 +79,6 @@ class ResourceRecord(Entity):
             groups=resource.groups,
             enabled=resource.enabled,
             icon=resource.icon,
-            consent=resource.consent,
             credentials=encrypt(resource.credentials)
         )
 
@@ -100,7 +97,6 @@ class ResourceRecord(Entity):
             groups=self.groups,
             icon=self.icon,
             enabled=self.enabled,
-            consent=self.consent,
             credentials=ResourceCredentials(**decrypted)
         )
 
