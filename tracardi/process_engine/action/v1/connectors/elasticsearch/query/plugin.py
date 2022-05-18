@@ -4,7 +4,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from .model.config import Config, Credentials
+from .model.config import Config, ElasticCredentials
 from elasticsearch import AsyncElasticsearch, ElasticsearchException
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
@@ -32,7 +32,7 @@ class ElasticSearchFetcher(ActionRunner):
 
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
-        credentials = credentials.get_credentials(self, Credentials)
+        credentials = credentials.get_credentials(self, ElasticCredentials)
 
         self._client = AsyncElasticsearch(
             [credentials.url],

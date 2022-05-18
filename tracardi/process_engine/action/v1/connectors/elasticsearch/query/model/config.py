@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, validator
 import json
 
@@ -26,10 +28,13 @@ class Config(BaseModel):
             raise ValueError(str(e))
 
 
-class Credentials(BaseModel):
+class ElasticCredentials(BaseModel):
     url: str
     port: int
     scheme: str
-    username: str
-    password: str
+    username: Optional[str] = None
+    password: Optional[str] = None
     verify_certs: bool
+
+    def has_credentials(self):
+        return self.username is not None and self.password is not None

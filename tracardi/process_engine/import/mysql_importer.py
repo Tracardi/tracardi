@@ -16,7 +16,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
-from worker.celery_worker import run_celery_import_job
+from worker.celery_worker import run_mysql_import_job
 
 
 class MySQLImportConfig(BaseModel):
@@ -132,7 +132,7 @@ class MySQLTableImporter(Importer):
     async def run(self, task_name, import_config: ImportConfig) -> Tuple[str, str]:
 
         def add_to_celery(import_config, credentials):
-            return run_celery_import_job.delay(
+            return run_mysql_import_job.delay(
                 import_config.dict(),
                 credentials
             )

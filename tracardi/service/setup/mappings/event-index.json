@@ -5,7 +5,8 @@
   "template": {
     "settings": {
       "number_of_shards": 5,
-      "number_of_replicas": 1
+      "number_of_replicas": 1,
+      "index.mapping.total_fields.limit": 1000
     },
     "mappings": {
       "dynamic": false,
@@ -59,6 +60,7 @@
           "null_value": "NULL"
         },
         "properties": {
+          "enabled": false,
           "dynamic": true,
           "type": "object"
         },
@@ -91,7 +93,8 @@
         },
         "aux": {
           "dynamic": true,
-          "type": "object"
+          "type": "object",
+          "enabled": false
         },
         "config": {
           "dynamic": true,
