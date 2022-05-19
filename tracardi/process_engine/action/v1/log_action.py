@@ -1,12 +1,14 @@
 from pydantic import BaseModel
 
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.notation.dot_template import DotTemplate
 
 
 class Configuration(BaseModel):
-    type: str = 'warning'
+    type: str
     message: str
 
 
@@ -20,6 +22,10 @@ class LogAction(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload):
+        dot = self._get_dot_accessor(payload)
+        template = DotTemplate()
+        self.config.message = template.render(self.config.message, dot)
+
         if self.config.type == 'warning':
             self.console.warning(self.config.message)
         elif self.config.type == 'error':
@@ -43,7 +49,28 @@ def register() -> Plugin:
             init={
                 "type": "warning",
                 "message": "<log-message>"
-            }
+            },
+            manual="log_message_action",
+            form=Form(
+                groups=[FormGroup(name="Log message plugin", fields=[
+                    FormField(
+                        id="type",
+                        name="Message type",
+                        description="Select type of the message that you want to log.",
+                        component=FormComponent(type="select", props={"items": {
+                            "warning": "Warning",
+                            "error": "Error",
+                            "info": "Info"
+                        }, "initValue": "warning"})
+                    ),
+                    FormField(
+                        id="message",
+                        name="Message",
+                        description="Provide a message that you want to log. You can use dot template here.",
+                        component=FormComponent(type="textarea", props={"label": "Message"})
+                    )
+                ])]
+            )
         ),
         metadata=MetaData(
             name='Log message',

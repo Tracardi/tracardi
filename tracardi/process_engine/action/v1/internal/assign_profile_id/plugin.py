@@ -48,6 +48,7 @@ def register() -> Plugin:
             license="MIT",
             author="Risto Kowaczewski",
             init={"value": ""},
+            manual="assign_profile_id_action",
             form=Form(groups=[
                 FormGroup(
                     name="Value to hash",
