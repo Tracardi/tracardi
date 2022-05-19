@@ -37,6 +37,7 @@ def register() -> Plugin:
             init={
                 "message": "Flow stopped due to error."
             },
+            manual="throw_error_action",
             form=Form(groups=[
                 FormGroup(
                     fields=[
