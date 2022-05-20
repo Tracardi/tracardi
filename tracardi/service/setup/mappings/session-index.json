@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "%%PREFIX%%-tracardi-session-*-*"
+    "data.%%PREFIX%%-tracardi-session-*-*"
   ],
   "template": {
     "settings": {
@@ -48,6 +48,11 @@
           "dynamic": true,
           "type": "object"
         }
+      }
+    },
+    "aliases": {
+      "%%ALIAS%%": {
+        "index": "data.%%PREFIX%%-tracardi-session-*-*"
       }
     }
   }

@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "%%PREFIX%%-tracardi-event-*-*"
+    "data.%%PREFIX%%-tracardi-event-*-*"
   ],
   "template": {
     "settings": {
@@ -114,6 +114,11 @@
             }
           }
         }
+      }
+    },
+    "aliases": {
+      "%%PREFIX%%-tracardi-event": {
+        "index": "data.%%PREFIX%%-tracardi-event-*-*"
       }
     }
   }

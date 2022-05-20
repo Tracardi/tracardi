@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "%%PREFIX%%-tracardi-user-log-*-*"
+    "data.%%PREFIX%%-tracardi-user-log-*-*"
   ],
   "template": {
     "settings": {
@@ -19,6 +19,11 @@
         "email": {
           "type": "keyword"
         }
+      }
+    },
+    "aliases": {
+      "%%ALIAS%%": {
+        "index": "data.%%PREFIX%%-tracardi-user-log-*-*"
       }
     }
   }

@@ -19,17 +19,19 @@ class Index:
         return self.prefix + self.index
 
     def get_read_index(self):
-        if self.multi_index is False:
-            return self._index()
-
-        return self._index() + "-*"
+        return self._index()
 
     def get_write_index(self):
+
+        # Single index writes to alias
+
         if self.multi_index is False:
             return self._index()
 
+        # Multi index must write to month index
+
         date = datetime.now()
-        return self._index() + f"-{date.year}-{date.month}"
+        return f"data.{self._index()}-{date.year}-{date.month}"
 
     def get_prefixed_template_name(self):
         if tracardi.config.elastic.instance_prefix != '':
@@ -75,7 +77,8 @@ class Resource:
                                 mapping="mappings/debug-info-index.json", rel=None),
             "api-instance": Index(multi_index=False, index="tracardi-api-instance",
                                   mapping="mappings/api-instance-index.json", rel=None),
-            "schedule": Index(multi_index=False, index="tracardi-schedule", mapping="mappings/schedule-index.json", rel=None),
+            "schedule": Index(multi_index=False, index="tracardi-schedule", mapping="mappings/schedule-index.json",
+                              rel=None),
             "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json",
                                 rel=None),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",
@@ -93,7 +96,9 @@ class Resource:
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json", rel=None),
             "import": Index(multi_index=False, index="tracardi-import", mapping="mappings/import-index.json", rel=None),
-            "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None)
+            "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None),
+            "mapping": Index(multi_index=False, index="tracardi-mapping", mapping="mappings/mapping-index.json",
+                             rel=None)
         }
 
     def add_indices(self, indices: dict):

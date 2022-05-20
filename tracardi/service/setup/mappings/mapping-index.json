@@ -6,11 +6,21 @@
   "mappings": {
     "dynamic": false,
     "properties": {
-      "id": {
+      "date": {
+        "type": "date"
+      },
+      "version": {
         "type": "keyword"
       },
-      "content": {
+      "index_name": {
         "type": "keyword"
+      },
+      "index": {
+        "type": "keyword"
+      },
+      "mapping": {
+        "enabled": false,
+        "type": "object"
       }
     }
   },

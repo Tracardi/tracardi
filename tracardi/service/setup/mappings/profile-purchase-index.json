@@ -44,5 +44,10 @@
         "type": "text"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {
+      "index": "data.%%ALIAS%%"
+    }
   }
 }

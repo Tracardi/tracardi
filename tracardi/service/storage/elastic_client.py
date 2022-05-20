@@ -117,6 +117,10 @@ class ElasticClient:
         logger.debug(f"CREATE INDEX: {index}")
         return await self._client.indices.create(index=index, ignore=400, body=mappings)
 
+    async def create_alias(self, index, alias):
+        logger.debug(f"CREATE ALIAS: {alias} = {index}")
+        return await self._client.indices.put_alias(index=index, name=alias)
+
     async def put_index_template(self, template_name, mappings):
         logger.debug(f"PUT INDEX TEMPLATE: {template_name}")
         return await self._client.indices.put_index_template(name=template_name, ignore=400, body=mappings)
@@ -125,8 +129,18 @@ class ElasticClient:
         logger.debug(f"EXISTS INDEX: {index}")
         return await self._client.indices.exists(index=index)
 
+    async def exists_alias(self, alias, index):
+        logger.debug(f"EXISTS ALIAS: {alias}")
+        return await self._client.indices.exists_alias(name=alias, index=index)
+
     async def list_indices(self):
         return await self._client.indices.get("*")
+
+    async def list_aliases(self):
+        return await self._client.indices.get_alias(name="*")
+
+    async def clone(self, source_index, destination_index):
+        return await self._client.indices.clone(index=source_index, target=destination_index)
 
     async def refresh(self, index, params=None, headers=None):
         logger.debug(f"REFRESH INDEX: {index}")

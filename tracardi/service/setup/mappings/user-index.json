@@ -29,5 +29,10 @@
          "null_value": "NULL"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {
+      "index": "data.%%ALIAS%%"
+    }
   }
 }

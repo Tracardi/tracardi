@@ -25,5 +25,10 @@
         "type": "integer"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {
+      "index": "data.%%ALIAS%%"
+    }
   }
 }

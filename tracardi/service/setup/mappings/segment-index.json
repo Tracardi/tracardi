@@ -25,5 +25,10 @@
         "type": "keyword"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {
+      "index": "data.%%ALIAS%%"
+    }
   }
 }

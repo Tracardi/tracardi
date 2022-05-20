@@ -25,3 +25,33 @@ def load(id: str, index, output):
 async def indices():
     es = ElasticClient.instance()
     return await es.list_indices()
+
+
+async def aliases():
+    es = ElasticClient.instance()
+    return await es.list_aliases()
+
+
+async def clone(source_index, destination_index):
+    es = ElasticClient.instance()
+    return await es.clone(source_index, destination_index)
+
+
+async def exists_index(index):
+    es = ElasticClient.instance()
+    return await es.exists_index(index)
+
+
+async def exists_alias(alias, index):
+    es = ElasticClient.instance()
+    return await es.exists_alias(alias, index=index)
+
+
+async def create_alias(index, alias):
+    es = ElasticClient.instance()
+    return await es.create_alias(index, alias)
+
+
+async def refresh(index):
+    es = ElasticClient.instance()
+    return await es.refresh(index)

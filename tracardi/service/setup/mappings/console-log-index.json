@@ -42,5 +42,10 @@
         "index": false
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {
+      "index": "data.%%ALIAS%%"
+    }
   }
 }
