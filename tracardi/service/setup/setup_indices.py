@@ -66,7 +66,7 @@ async def create_indices():
                         map_file)
                 )
 
-                yield "template", alias_index
+                yield "template", target_index, alias_index
 
             else:
 
