@@ -188,29 +188,46 @@ async def _aggregate_event(bucket_name, by) -> StorageAggregateResult:
         },
         "aggs": aggregate_query
     }
+
     return await storage_manager(index="event").aggregate(query)
 
 
 async def aggregate_event_type() -> List[Dict[str, str]]:
     bucket_name = "by_type"
     result = await _aggregate_event(bucket_name, "type")
+
+    if bucket_name not in result.aggregations:
+        return []
+
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
 async def aggregate_event_tag() -> List[Dict[str, str]]:
     bucket_name = "by_tag"
     result = await _aggregate_event(bucket_name, "tags.values")
+
+    if bucket_name not in result.aggregations:
+        return []
+
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
 async def aggregate_event_status() -> List[Dict[str, str]]:
     bucket_name = "by_status"
     result = await _aggregate_event(bucket_name, "metadata.status")
+
+    if bucket_name not in result.aggregations:
+        return []
+
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
 async def aggregate_events_by_source():
     result = await _aggregate_event(bucket_name='by_source', by="source.id")
+
+    if 'by_source' not in result.aggregations:
+        return []
+
     query_string = [f"id:{id}" for id in result.aggregations['by_source'][0]]
     query_string = " OR ".join(query_string)
     sources = await storage_manager('event-source').load_by_query_string(query_string)

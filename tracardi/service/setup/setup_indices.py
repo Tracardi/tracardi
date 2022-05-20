@@ -20,17 +20,35 @@ index_mapping = {
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+es = ElasticClient.instance()
 
 
 async def create_indices():
-
     def add_prefix(mapping, index: Index):
         json_map = json.dumps(mapping)
+
         json_map = json_map.replace("%%PREFIX%%-", f"{elastic.instance_prefix}-" if elastic.instance_prefix else "")
         json_map = json_map.replace("%%ALIAS%%", index.get_read_index())
+        json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
+
         return json.loads(json_map)
 
-    es = ElasticClient.instance()
+    def acknowledged(result):
+        return 'acknowledged' in result and result['acknowledged'] is True
+
+    async def remove_alias(alias_index):
+        if await es.exists_alias(alias_index, index=None):
+            result = await es.delete_alias(alias=alias_index, index="_all")
+            if acknowledged(result):
+                logger.info(f"Deleted old alias {alias_index}. New will be created", result)
+                return True
+        return False
+
+    async def create_alias(alias_index, target_index):
+        result = await es.create_alias(alias=alias_index, index=target_index)
+        if acknowledged(result):
+            logger.info(f"New alias {alias_index} for target `{target_index}` created.")
+
     for key, index in resources.resources.items():  # type: str, Index
 
         if index.mapping:
@@ -43,28 +61,45 @@ async def create_indices():
             map = json.load(file)
             map = add_prefix(map, index)
 
-            target_index = index.get_write_index()
+            target_index = index.get_aliased_data_index()
             alias_index = index.get_read_index()
 
             if index.multi_index is True:
 
-                # Multi indices need templates. Index will be create automatically on first insert
-                result = await es.put_index_template(index.get_prefixed_template_name(), map)
+                # Remove alias with all indexes first
+                await remove_alias(alias_index)
 
-                if 'acknowledged' not in result or result['acknowledged'] is not True:
+                template_name = index.get_prefixed_template_name()
+
+                # Multi indices need templates. Index will be create automatically on first insert
+                result = await es.put_index_template(template_name, map)
+
+                if not acknowledged(result):
                     logger.error(
-                        "Could not create the template for `{}`. Received result: {}".format(
-                            target_index,
+                        "Could not create the template `{}`. Received result: {}".format(
+                            template_name,
                             result),
                     )
                     continue
 
                 logger.info(
-                    "The template for `{}` index created. Mapping from `{}` was used. The index will be "
+                    "The index template `{}` with alias `{}` created. Mapping from `{}` was used. The index will be "
                     "auto created from template.".format(
-                        target_index,
+                        template_name,
+                        alias_index,
                         map_file)
                 )
+
+                # Create first empty index if not exists
+
+                if not await es.exists_index(target_index):
+                    result = await es.create_index(target_index, map['template'])
+                    if acknowledged(result):
+                        logger.info(
+                            "Empty index `{}` with alias `{}` created. ".format(
+                                target_index,
+                                alias_index)
+                        )
 
                 yield "template", target_index, alias_index
 
@@ -90,19 +125,20 @@ async def create_indices():
 
                     result = await es.create_index(target_index, map)
 
-                    if 'acknowledged' not in result or result['acknowledged'] is not True:
+                    if not acknowledged(result):
                         # Index not created
 
-                        logger.error("New {} `{}` was NOT CREATED. The following result was returned {}".format(
+                        logger.error("Index {} `{}` was NOT CREATED. The following result was returned {}".format(
                             'template' if index.multi_index else 'index',
                             target_index,
                             result)
                         )
                         continue
 
-                    logger.info("New {} `{}` created. Mapping from `{}` was used.".format(
+                    logger.info("New {} `{}` created with alias `{}`. Mapping from `{}` was used.".format(
                         'template' if index.multi_index else 'index',
                         target_index,
+                        alias_index,
                         map_file)
                     )
 
@@ -115,17 +151,11 @@ async def create_indices():
 
                     yield "index", target_index, alias_index
 
-                # elif original_index_exists and not alias_exist:  # Index exists but is not an alias.
-                #
-                #     # Correct missing alias
-                #
-                #     target_index_exists = await storage.driver.raw.exists_index(target_index)
-                #     if not target_index_exists:
-                #         await storage.driver.raw.clone(alias_index, target_index)
-                #         await storage.driver.raw.create_alias(target_index, target_index)
-                #         logger.info(f'New alias {target_index} for index {alias_index}')
-                #     else:
-                #         logger.error(f'Target index {target_index} exists. Could not override.')
-
                 else:
                     logger.info("Index `{}` exists.".format(target_index))
+
+                    # Remove alias with all indexes first
+                    await remove_alias(alias_index)
+
+                    # Add new alias
+                    await create_alias(alias_index, target_index)

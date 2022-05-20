@@ -59,7 +59,7 @@ class AmplitudeSendEvent(ActionRunner):
                 ip = self._get_value(dot, self.config.ip, allow_custom_value=True)
 
                 event = {
-                    "app_version": tracardi.version,
+                    "app_version": str(tracardi.version),
                     "insert_id": self.event.id if self.debug is False else None,
                     "user_id": self.profile.id,
                     "session_id": int(datetime.timestamp(

@@ -1,6 +1,8 @@
 import logging
 import os
 
+from tracardi.domain.version import Version
+
 ON_PREMISES = 'on-premises'
 AWS_CLOUD = 'aws-cloud'
 
@@ -29,7 +31,7 @@ class TracardiConfig:
         self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
         self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
-        self.version = '0.7.0'
+        self.version = Version('0.7.0.2')
 
 
 class MemoryCacheConfig:
@@ -76,12 +78,6 @@ class ElasticConfig:
             if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
         self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env \
             else logging.WARNING
-
-        # AWS env variables
-
-        # self.aws_access_key_id = env['AWS_ACCESS_KEY_ID'] if 'AWS_ACCESS_KEY_ID' in env else None
-        # self.aws_secret_access_key = env['AWS_SECRET_ACCESS_KEY'] if 'AWS_SECRET_ACCESS_KEY' in env else None
-        # self.aws_region = env['AWS_REGION'] if 'AWS_REGION' in env else None
 
 
 class RedisConfig:

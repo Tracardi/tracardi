@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "data.%%PREFIX%%-tracardi-log-*-*"
+    "%%VERSION%%.%%PREFIX%%-tracardi-log-*-*"
   ],
   "template": {
     "settings": {
@@ -32,7 +32,7 @@
     },
     "aliases": {
       "%%ALIAS%%": {
-        "index": "data.%%PREFIX%%-tracardi-log-*-*"
+        "index": "%%VERSION%%.%%PREFIX%%-tracardi-log-*-*"
       }
     }
   }

@@ -25,7 +25,7 @@
   },
   "aliases": {
     "%%ALIAS%%": {
-      "index": "data.%%ALIAS%%"
+      "index": "%%VERSION%%.%%ALIAS%%"
     }
   }
 }

@@ -121,6 +121,10 @@ class ElasticClient:
         logger.debug(f"CREATE ALIAS: {alias} = {index}")
         return await self._client.indices.put_alias(index=index, name=alias)
 
+    async def delete_alias(self, index, alias):
+        logger.debug(f"CREATE ALIAS: {alias} = {index}")
+        return await self._client.indices.delete_alias(name=alias, index=index)
+
     async def put_index_template(self, template_name, mappings):
         logger.debug(f"PUT INDEX TEMPLATE: {template_name}")
         return await self._client.indices.put_index_template(name=template_name, ignore=400, body=mappings)

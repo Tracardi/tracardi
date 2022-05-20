@@ -4,15 +4,22 @@ from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import resources, Index
 
 
-async def get_missing_indices():
+async def get_indices_status():
     es = ElasticClient.instance()
     for key, index in resources.resources.items():  # type: str, Index
-        _index = index.get_write_index()
+
         if not index.multi_index:
+            _index = index.get_aliased_data_index()
             if not await es.exists_index(_index):
-                yield "missing", _index
+                yield "missing_index", _index
             else:
-                yield "exists", _index
+                yield "existing_index", _index
+        else:
+            _template = index.get_prefixed_template_name()
+            if not await es.exists_index_template(_template):
+                yield "missing_template", _template
+            else:
+                yield "existing_template", _template
 
 
 async def remove_index(index):

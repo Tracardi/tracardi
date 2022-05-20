@@ -31,11 +31,26 @@ class Index:
         # Multi index must write to month index
 
         date = datetime.now()
-        return f"data.{self._index()}-{date.year}-{date.month}"
+        return f"{tracardi.config.tracardi.version.get_version_prefix()}.{self._index()}-{date.year}-{date.month}"
+
+    def get_aliased_data_index(self):
+
+        """
+        Returns the data index not the alias.
+        """
+        version_prefix = tracardi.config.tracardi.version.get_version_prefix()
+
+        if self.multi_index is False:
+            return f"{version_prefix}.{self._index()}"
+
+        # Multi index must write to month index
+
+        date = datetime.now()
+        return f"{version_prefix}.{self._index()}-{date.year}-{date.month}"
 
     def get_prefixed_template_name(self):
         if tracardi.config.elastic.instance_prefix != '':
-            return "{}-{}".format(tracardi.config.elastic.instance_prefix, self.index)
+            return "template.{}-{}".format(tracardi.config.elastic.instance_prefix, self.index)
         return self.index
 
 

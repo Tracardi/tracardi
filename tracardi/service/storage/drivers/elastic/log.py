@@ -33,4 +33,6 @@ async def exists():
 
     es = ElasticClient.instance()
     index = resources.resources["log"]
+    # Check for template as index will be created with first insert. So there may not be index but everything is ok
+    # because template exists.
     return await es.exists_index_template(name=index.get_prefixed_template_name())
