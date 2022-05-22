@@ -3,8 +3,8 @@ import os
 
 from tracardi.domain.version import Version
 
-ON_PREMISES = 'on-premises'
-AWS_CLOUD = 'aws-cloud'
+VERSION = '0.7.0'
+NAME = 'stalwart'
 
 
 def _get_logging_level(level: str) -> int:
@@ -31,7 +31,7 @@ class TracardiConfig:
         self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
         self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
-        self.version = Version('0.7.0.2')
+        self.version = Version(VERSION)
 
 
 class MemoryCacheConfig:
@@ -54,9 +54,10 @@ class ElasticConfig:
         if 'ELASTIC_HOST' in env and isinstance(env['ELASTIC_HOST'], str) and env['ELASTIC_HOST'].isnumeric():
             raise ValueError("Env ELASTIC_HOST must be sting")
 
-        self.instance_prefix = os.environ['INSTANCE_PREFIX'] if 'INSTANCE_PREFIX' in os.environ and os.environ['INSTANCE_PREFIX'] else ''
+        self.instance_prefix = os.environ['INSTANCE_PREFIX'] \
+            if 'INSTANCE_PREFIX' in os.environ and os.environ['INSTANCE_PREFIX'] \
+            else NAME
 
-        self.hosting = env['ELASTIC_HOSTING'] if 'ELASTIC_HOSTING' in env else ON_PREMISES  # Possible values ON_PREMISES|AWS_CLOUD
         self.host = env['ELASTIC_HOST'] if 'ELASTIC_HOST' in env else '127.0.0.1'
         self.host = self.host.split(",")
         self.sniff_on_start = env['ELASTIC_SNIFF_ON_START'] if 'ELASTIC_SNIFF_ON_START' in env else None

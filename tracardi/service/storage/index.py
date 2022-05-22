@@ -38,6 +38,7 @@ class Index:
         """
         Returns the data index not the alias.
         """
+
         version_prefix = tracardi.config.tracardi.version.get_version_prefix()
 
         if self.multi_index is False:
@@ -47,6 +48,19 @@ class Index:
 
         date = datetime.now()
         return f"{version_prefix}.{self._index()}-{date.year}-{date.month}"
+
+    def get_template_pattern(self):
+
+        """
+        Returns template pattern.
+        """
+
+        version_prefix = tracardi.config.tracardi.version.get_version_prefix()
+
+        if self.multi_index is False:
+            raise ValueError(f"Index {self._index()} is not multi index.")
+
+        return f"{version_prefix}.{self._index()}-*-*"
 
     def get_prefixed_template_name(self):
         if tracardi.config.elastic.instance_prefix != '':
@@ -116,6 +130,11 @@ class Resource:
                              rel=None)
         }
 
+    def get_index(self, name) -> Index:
+        if name in self.resources:
+            return self.resources[name]
+        raise ValueError(f"Index `{name}` does not exists.")
+
     def add_indices(self, indices: dict):
         for name, index in indices.items():
             if not isinstance(index, Index):
@@ -130,7 +149,9 @@ class Resource:
         self.resources.update(indices)
 
     def __getitem__(self, item):
-        return self.resources[item]
+        if item in self.resources:
+            return self.resources[item]
+        raise ValueError(f"Index `{item}` does not exists.")
 
     def __contains__(self, item):
         return item in self.resources

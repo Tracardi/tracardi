@@ -28,11 +28,8 @@ async def load_by_query_string(query_string: str, start: int = 0, limit: int = 1
 
 
 async def exists():
-    if "log" not in resources.resources:
-        raise ConnectionError(f"Log index misconfiguration. Index does not exist.")
-
     es = ElasticClient.instance()
-    index = resources.resources["log"]
+    index = resources.get_index("log")
     # Check for template as index will be created with first insert. So there may not be index but everything is ok
     # because template exists.
     return await es.exists_index_template(name=index.get_prefixed_template_name())

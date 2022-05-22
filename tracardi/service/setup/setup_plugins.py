@@ -8,7 +8,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.module_loader import pip_install, load_callable, import_package
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.register import Plugin
-
+from tracardi.service.storage.index import resources
 
 __local_dir = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
@@ -17,7 +17,6 @@ logger.addHandler(log_handler)
 
 
 async def add_plugin(module, install=False, upgrade=False):
-
     try:
 
         # upgrade
@@ -57,6 +56,7 @@ async def add_plugin(module, install=False, upgrade=False):
 
 
 async def add_plugins():
+
     result = defaultdict(list)
     plugins = [
         'tracardi.process_engine.action.v1.debug_payload_action',
@@ -220,11 +220,28 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.flow.postpone_event.plugin',
 
     ]
-    for plugin in plugins:
-        status = await add_plugin(plugin, install=False, upgrade=False)
-        if status is not None:
-            result["registered"].append(plugin)
-        else:
-            result["error"].append(plugin)
 
-    return result
+    action_index = resources.get_index('action')
+    action_index = action_index.get_write_index()
+    tries = 0
+    while True:
+
+        if tries > 3:
+            raise ConnectionError(f"Plugins NOT INSTALLED. Could not find index {action_index}")
+
+        if not await storage.driver.raw.exists_index(action_index):
+            tries += 1
+            logger.warning(f"No index {action_index}. Waiting to be created.")
+            await asyncio.sleep(5)
+            continue
+
+        await storage.driver.action.refresh()
+
+        for plugin in plugins:
+            status = await add_plugin(plugin, install=False, upgrade=False)
+            if status is not None:
+                result["registered"].append(plugin)
+            else:
+                result["error"].append(plugin)
+
+        return result

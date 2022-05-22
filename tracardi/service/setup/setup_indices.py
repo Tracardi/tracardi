@@ -24,10 +24,17 @@ es = ElasticClient.instance()
 
 
 async def create_indices():
+
+    output = {
+        "templates": [],
+        "indices": [],
+        "aliases": [],
+    }
+
     def add_prefix(mapping, index: Index):
         json_map = json.dumps(mapping)
 
-        json_map = json_map.replace("%%PREFIX%%-", f"{elastic.instance_prefix}-" if elastic.instance_prefix else "")
+        json_map = json_map.replace("%%PREFIX%%-", f"{elastic.instance_prefix}-")
         json_map = json_map.replace("%%ALIAS%%", index.get_read_index())
         json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
 
@@ -40,14 +47,16 @@ async def create_indices():
         if await es.exists_alias(alias_index, index=None):
             result = await es.delete_alias(alias=alias_index, index="_all")
             if acknowledged(result):
-                logger.info(f"Deleted old alias {alias_index}. New will be created", result)
+                logger.info(f"{alias_index} - Deleted old alias {alias_index}. New will be created", result)
                 return True
         return False
 
-    async def create_alias(alias_index, target_index):
-        result = await es.create_alias(alias=alias_index, index=target_index)
+    async def recreate_one_alias(alias_index, target_index):
+        result = await es.recreate_one_alias(alias=alias_index, index=target_index)
         if acknowledged(result):
-            logger.info(f"New alias {alias_index} for target `{target_index}` created.")
+            logger.info(f"{alias_index} - RECREATED alias {alias_index} for target `{target_index}` created.")
+        else:
+            raise ConnectionError(f"{alias_index} - Could not recreate alias {alias_index}")
 
     for key, index in resources.resources.items():  # type: str, Index
 
@@ -71,43 +80,50 @@ async def create_indices():
 
                 template_name = index.get_prefixed_template_name()
 
+                # if template exists it must be deleted. Only one template can be per index.
+
+                if await es.exists_index_template(template_name):
+                    result = await es.delete_index_template(template_name)
+                    if not acknowledged(result):
+                        raise ConnectionError(f"Can NOT DELETE template {template_name}.")
+                    logger.info(f"{alias_index} - DELETED template {template_name}.")
+
                 # Multi indices need templates. Index will be create automatically on first insert
                 result = await es.put_index_template(template_name, map)
 
                 if not acknowledged(result):
-                    logger.error(
+
+                    raise ConnectionError(
                         "Could not create the template `{}`. Received result: {}".format(
                             template_name,
                             result),
                     )
-                    continue
 
                 logger.info(
-                    "The index template `{}` with alias `{}` created. Mapping from `{}` was used. The index will be "
-                    "auto created from template.".format(
-                        template_name,
-                        alias_index,
-                        map_file)
+                    f"{alias_index} - The index template `{template_name}` with alias `{alias_index}` created. "
+                    f"Mapping from `{map_file}` was used. The index will be auto created from template."
                 )
 
                 # Create first empty index if not exists
 
                 if not await es.exists_index(target_index):
                     result = await es.create_index(target_index, map['template'])
-                    if acknowledged(result):
-                        logger.info(
-                            "Empty index `{}` with alias `{}` created. ".format(
-                                target_index,
-                                alias_index)
+                    if not acknowledged(result):
+                        raise ConnectionError(f"Could not create index {target_index}.")
+                    logger.info(
+                            f"{alias_index} - Empty index `{target_index}` with alias `{alias_index}` created. "
                         )
+                else:
+                    logger.info(f"{alias_index} - Index `{target_index}` already exists.")
 
-                yield "template", target_index, alias_index
+                output["templates"].append(target_index)
 
             else:
 
                 target_index_exists = await es.exists_index(target_index)
                 alias_exists = await storage.driver.raw.exists_alias(index=target_index, alias=alias_index)
 
+                # todo what if index exists but alias not, or alias exists but index not
                 if not target_index_exists and not alias_exists:
 
                     # todo Error may occur
@@ -128,34 +144,37 @@ async def create_indices():
                     if not acknowledged(result):
                         # Index not created
 
-                        logger.error("Index {} `{}` was NOT CREATED. The following result was returned {}".format(
-                            'template' if index.multi_index else 'index',
-                            target_index,
-                            result)
+                        raise ConnectionError(
+                            "Index {} `{}` was NOT CREATED. The following result was returned {}".format(
+                                'template' if index.multi_index else 'index',
+                                target_index,
+                                result)
                         )
-                        continue
 
-                    logger.info("New {} `{}` created with alias `{}`. Mapping from `{}` was used.".format(
-                        'template' if index.multi_index else 'index',
-                        target_index,
-                        alias_index,
-                        map_file)
-                    )
+                    logger.info(f"{alias_index} - New {'template' if index.multi_index else 'index'} `{target_index}` "
+                                f"created with alias `{alias_index}`. Mapping from `{map_file}` was used.")
 
                     if key in index_mapping and 'on-start' in index_mapping[key]:
                         if index_mapping[key]['on-start'] is not None:
-                            logger.info(f"Running on start for index `{key}`.")
+                            logger.info(f"{alias_index} - Running on start for index `{key}`.")
                             on_start = index_mapping[key]['on-start']
                             if callable(on_start):
                                 await on_start()
 
-                    yield "index", target_index, alias_index
+                    output['indices'].append(target_index)
 
                 else:
-                    logger.info("Index `{}` exists.".format(target_index))
+                    logger.info(f"{alias_index} - Index `{target_index}` exists.")
 
-                    # Remove alias with all indexes first
-                    await remove_alias(alias_index)
+            # After creating index recreate alias
 
-                    # Add new alias
-                    await create_alias(alias_index, target_index)
+            await recreate_one_alias(alias_index, target_index)
+
+            # Check if alias created
+
+            if not await es.exists_alias(alias_index):
+                raise ConnectionError(f"Could not recreate alias `{alias_index}` for index `{target_index}`")
+
+            output["aliases"].append(alias_index)
+
+    return output
