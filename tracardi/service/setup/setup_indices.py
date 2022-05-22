@@ -47,7 +47,7 @@ async def create_indices():
         if await es.exists_alias(alias_index, index=None):
             result = await es.delete_alias(alias=alias_index, index="_all")
             if acknowledged(result):
-                logger.info(f"{alias_index} - Deleted old alias {alias_index}. New will be created", result)
+                logger.info(f"{alias_index} - DELETED old alias {alias_index}. New will be created", result)
                 return True
         return False
 
@@ -72,6 +72,8 @@ async def create_indices():
 
             target_index = index.get_aliased_data_index()
             alias_index = index.get_read_index()
+
+            # -------- TEMPLATE --------
 
             if index.multi_index is True:
 
@@ -100,71 +102,35 @@ async def create_indices():
                     )
 
                 logger.info(
-                    f"{alias_index} - The index template `{template_name}` with alias `{alias_index}` created. "
+                    f"{alias_index} - CREATED template `{template_name}` with alias `{alias_index}`. "
                     f"Mapping from `{map_file}` was used. The index will be auto created from template."
                 )
 
-                # Create first empty index if not exists
+            # -------- INDEX --------
 
-                if not await es.exists_index(target_index):
-                    result = await es.create_index(target_index, map['template'])
-                    if not acknowledged(result):
-                        raise ConnectionError(f"Could not create index {target_index}.")
-                    logger.info(
-                            f"{alias_index} - Empty index `{target_index}` with alias `{alias_index}` created. "
-                        )
-                else:
-                    logger.info(f"{alias_index} - Index `{target_index}` already exists.")
+            if not await es.exists_index(target_index):
 
-                output["templates"].append(target_index)
+                # Creates index and alias in one shot.
+
+                mapping = map['template'] if index.multi_index else map
+                result = await es.create_index(target_index, mapping)
+
+                if not acknowledged(result):
+                    # Index not created
+
+                    raise ConnectionError(
+                        f"Index `{target_index}` was NOT CREATED. The following result was returned: {result}"
+                    )
+
+                logger.info(f"{alias_index} - CREATED New index `{target_index}` with alias `{alias_index}`. "
+                            f"Mapping from `{map_file}` was used.")
+
+                output['indices'].append(target_index)
 
             else:
+                logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
 
-                target_index_exists = await es.exists_index(target_index)
-                alias_exists = await storage.driver.raw.exists_alias(index=target_index, alias=alias_index)
-
-                # todo what if index exists but alias not, or alias exists but index not
-                if not target_index_exists and not alias_exists:
-
-                    # todo Error may occur
-                    """
-                        ERROR:app.setup.indices_setup:New index `tracardi-flow-action-plugins` was not created. The 
-                        following result was returned {'error': {'root_cause': [{'type': 'resource_already_exists_exception'
-                        , 'reason': 'index [tracardi-flow-action-plugins/fk4wGYqeROCd9Cp5vtfnaw] already exists', 
-                        'index_uuid': 'fk4wGYqeROCd9Cp5vtfnaw', 'index': 'tracardi-flow-action-plugins'}], 'type': 
-                        'resource_already_exists_exception', 'reason': 
-                        'index [tracardi-flow-action-plugins/fk4wGYqeROCd9Cp5vtfnaw] already exists', 'index_uuid': 
-                        'fk4wGYqeROCd9Cp5vtfnaw', 'index': 'tracardi-flow-action-plugins'}, 'status': 400}
-                    """
-
-                    # Creates index and alias in one shot.
-
-                    result = await es.create_index(target_index, map)
-
-                    if not acknowledged(result):
-                        # Index not created
-
-                        raise ConnectionError(
-                            "Index {} `{}` was NOT CREATED. The following result was returned {}".format(
-                                'template' if index.multi_index else 'index',
-                                target_index,
-                                result)
-                        )
-
-                    logger.info(f"{alias_index} - New {'template' if index.multi_index else 'index'} `{target_index}` "
-                                f"created with alias `{alias_index}`. Mapping from `{map_file}` was used.")
-
-                    if key in index_mapping and 'on-start' in index_mapping[key]:
-                        if index_mapping[key]['on-start'] is not None:
-                            logger.info(f"{alias_index} - Running on start for index `{key}`.")
-                            on_start = index_mapping[key]['on-start']
-                            if callable(on_start):
-                                await on_start()
-
-                    output['indices'].append(target_index)
-
-                else:
-                    logger.info(f"{alias_index} - Index `{target_index}` exists.")
+            # -------- ALIAS --------
 
             # After creating index recreate alias
 
@@ -176,5 +142,14 @@ async def create_indices():
                 raise ConnectionError(f"Could not recreate alias `{alias_index}` for index `{target_index}`")
 
             output["aliases"].append(alias_index)
+
+            # -------- SETUP --------
+
+            if key in index_mapping and 'on-start' in index_mapping[key]:
+                if index_mapping[key]['on-start'] is not None:
+                    logger.info(f"{alias_index} - Running on start for index `{key}`.")
+                    on_start = index_mapping[key]['on-start']
+                    if callable(on_start):
+                        await on_start()
 
     return output
