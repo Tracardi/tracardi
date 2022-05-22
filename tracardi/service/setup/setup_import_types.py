@@ -7,5 +7,9 @@ def get_import_types() -> dict:
         "elastic-index-importer": {
             "module": "tracardi.process_engine.import.elastic_importer.ElasticIndexImporter",
             "name": "Elastic Index Import"
+        },
+        "mysql-query-importer": {
+            "module": "tracardi.process_engine.import.mysql_query_importer.MySQLQueryImporter",
+            "name": "MySQL Query Import"
         }
     }
