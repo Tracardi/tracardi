@@ -3,7 +3,7 @@ from typing import List, Union, Tuple
 from .dag_error import DagError, DagGraphError
 from ..domain.edge import Edge
 from ..domain.edges import Edges
-from ..domain.execution_graph import ExecutionGraph
+from ..domain.graph_invoker import GraphInvoker
 from ..domain.dag_graph import DagGraph
 from ..domain.node import Node
 from ..domain.nodes import Nodes
@@ -76,7 +76,7 @@ class DagProcessor:
 
                     self._back_pass([edge.source.node_id])
 
-    def make_execution_dag(self, debug=False) -> ExecutionGraph:
+    def make_execution_dag(self, debug=False) -> GraphInvoker:
         self._last_nodes = set()
         # Find first nodes
         start_nodes = self._find_start_nodes(debug)
@@ -104,4 +104,4 @@ class DagProcessor:
         sorted = graph.topological_sort()
         sorted_nodes = [self._nodes[s] for s in sorted if s in self._nodes]
 
-        return ExecutionGraph(graph=sorted_nodes, start_nodes=start_node_ids, debug=debug)
+        return GraphInvoker(graph=sorted_nodes, start_nodes=start_node_ids, debug=debug)

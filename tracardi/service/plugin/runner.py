@@ -1,4 +1,5 @@
 from tracardi.domain.event import Event
+from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
@@ -16,6 +17,7 @@ class ActionRunner:
     node = None
     metrics = None
     execution_graph = None
+    tracker_payload = None  # type: TrackerPayload
     ux = None
 
     async def run(self, **kwargs):
@@ -41,3 +43,7 @@ class ActionRunner:
                     self.console.error("Can not update profile. Profile is empty.")
         else:
             self.console.warning("Profile update skipped. It will not be updated when debugging.")
+
+    def set_tracker_option(self, key, value):
+        if isinstance(self.tracker_payload, TrackerPayload):
+            self.tracker_payload.options[key] = value

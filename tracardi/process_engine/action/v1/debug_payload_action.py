@@ -9,7 +9,7 @@ from pydantic import BaseModel, validator
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
-from tracardi.service.wf.domain.execution_graph import ExecutionGraph
+from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -140,8 +140,8 @@ class DebugPayloadAction(ActionRunner):
                         self.session = None
 
                         # Remove session in all nodes because the event is session less
-                        graph = self.execution_graph  # type: ExecutionGraph
-                        if isinstance(graph, ExecutionGraph):
+                        graph = self.execution_graph  # type: GraphInvoker
+                        if isinstance(graph, GraphInvoker):
                             graph.set_sessions(None)
 
                     elif self.session is not None:
@@ -153,8 +153,8 @@ class DebugPayloadAction(ActionRunner):
                         self.profile = None
 
                         # Remove profiles in all nodes because the event is profile less
-                        graph = self.execution_graph  # type: ExecutionGraph
-                        if isinstance(graph, ExecutionGraph):
+                        graph = self.execution_graph  # type: GraphInvoker
+                        if isinstance(graph, GraphInvoker):
                             graph.set_profiles(None)
                     else:
                         if self.profile is not None and profile is not None:

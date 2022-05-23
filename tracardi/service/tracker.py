@@ -2,6 +2,7 @@ import asyncio
 import logging
 from datetime import datetime
 from typing import List, Optional
+from uuid import uuid4
 
 import redis
 from deepdiff import DeepDiff
@@ -24,7 +25,7 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.event_validator import validate
 from tracardi.domain.event import Event, VALIDATED, ERROR, WARNING, PROCESSED, INVALID
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
+from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
     EventValidationException, TracardiException
@@ -43,7 +44,7 @@ logger.addHandler(log_handler)
 cache = MemoryCache()
 
 
-async def _persist(profile_less, console_log: ConsoleLog, session: Session, events: List[Event],
+async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
     # Save profile
     try:
@@ -57,7 +58,7 @@ async def _persist(profile_less, console_log: ConsoleLog, session: Session, even
     # Save session
     try:
         persist_session = tracker_payload.is_on('saveSession', default=True)
-        save_session_result = await storage.driver.session.save_session(session, profile, profile_less, persist_session)
+        save_session_result = await storage.driver.session.save_session(session, profile, persist_session)
     except StorageException as e:
         raise FieldTypeConflictException("Could not save session. Error: {}".format(e.message), rows=e.details)
 
@@ -67,7 +68,6 @@ async def _persist(profile_less, console_log: ConsoleLog, session: Session, even
 
         # Set statuses
         log_event_journal = console_log.get_indexed_event_journal()
-        debugged = tracker_payload.is_debugging_on()
 
         for event in events:
 
@@ -101,6 +101,10 @@ async def _persist(profile_less, console_log: ConsoleLog, session: Session, even
     )
 
 
+def get_profile_id(profile: Profile):
+    return profile.id if isinstance(profile, Entity) else None
+
+
 async def validate_events_json_schemas(events, profile: Optional[Profile], session, console_log: ConsoleLog):
     for event in events:
         dot = DotAccessor(
@@ -128,7 +132,7 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
                 event.metadata.status = INVALID
                 console_log.append(
                     Console(
-                        profile_id=profile.id if isinstance(profile, Entity) else None,
+                        profile_id=get_profile_id(profile),
                         origin='profile',
                         class_name='EventValidator',
                         module='tracker',
@@ -164,7 +168,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         profile_copy = profile.dict(exclude={"operation": ...})
 
     # Get events
-    events = tracker_payload.get_events(session, profile, profile_less, ip)
+    events = tracker_payload.get_events(session, profile, has_profile, ip)
 
     # Validates json schemas of events, throws exception if data is not valid
     console_log = await validate_events_json_schemas(events, profile, session, console_log)
@@ -187,21 +191,29 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         debugger, ran_event_types, console_log, post_invoke_events, invoked_rules = await rules_engine.invoke(
             storage.driver.flow.load_production_flow,
             ux,
-            tracker_payload.source.id
+            tracker_payload
         )
 
-        # append invoked rules to event metadata
+        # Profile and session can change inside workflow
+        # Check if it should not be replaced.
+
+        if profile is not rules_engine.profile:
+            profile = rules_engine.profile
+
+        if session is not rules_engine.session:
+            session = rules_engine.session
+
+        # Append invoked rules to event metadata
 
         for event in events:
             if event.type in invoked_rules:
                 event.metadata.processed_by.rules = invoked_rules[event.type]
 
-        # Profile less events can not be segmented as there is no profile to segment
-        # todo wf can return profile so the above may not be true
+        # Segment only if there is profile
 
-        if profile_less is False:
+        if isinstance(profile, Profile):
             # Segment
-            segmentation_result = await segment(rules_engine.profile,
+            segmentation_result = await segment(profile,
                                                 ran_event_types,
                                                 storage.driver.segment.load_segments)
 
@@ -209,7 +221,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
         console_log.append(
             Console(
-                profile_id=rules_engine.profile.id if isinstance(rules_engine.profile, Entity) else None,
+                profile_id=get_profile_id(profile),
                 origin='profile',
                 class_name='RulesEngine',
                 module='tracker',
@@ -223,7 +235,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     save_tasks = []
     try:
         # Merge
-        profiles_to_disable = await merge(rules_engine.profile, limit=2000)
+        profiles_to_disable = await merge(profile, limit=2000)
         if profiles_to_disable is not None:
             task = asyncio.create_task(
                 StorageForBulk(profiles_to_disable).index('profile').save())
@@ -233,7 +245,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         logger.error(message)
         console_log.append(
             Console(
-                profile_id=rules_engine.profile.id if isinstance(rules_engine.profile, Entity) else None,
+                profile_id=get_profile_id(profile),
                 origin='profile',
                 class_name='merge',
                 module='app.api.track.service',
@@ -245,13 +257,13 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
 
     # Must be the last operation
     try:
-        if isinstance(rules_engine.profile, Profile) and rules_engine.profile.operation.needs_update():
+        if isinstance(profile, Profile) and profile.operation.needs_update():
             await storage.driver.profile.save_profile(profile)
     except Exception as e:
         message = "Profile update returned an error: `{}`".format(str(e))
         console_log.append(
             Console(
-                profile_id=rules_engine.profile.id if isinstance(rules_engine.profile, Entity) else None,
+                profile_id=get_profile_id(profile),
                 origin='profile',
                 class_name='tracker',
                 module='tracker',
@@ -279,7 +291,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             except Exception as e:
                 # todo - this appends error to the same profile - it rather should be en event error
                 console_log.append(Console(
-                    profile_id=rules_engine.profile.id if isinstance(rules_engine.profile, Entity) else None,
+                    profile_id=get_profile_id(profile),
                     origin='destination',
                     class_name='DestinationManager',
                     module='tracker',
@@ -309,7 +321,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         logger.error(message)
         console_log.append(
             Console(
-                profile_id=rules_engine.profile.id if isinstance(rules_engine.profile, Entity) else None,
+                profile_id=get_profile_id(profile),
                 origin='profile',
                 class_name='tracker',
                 module='tracker',
@@ -336,7 +348,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
 
             events = synced_events
 
-        collect_result = await _persist(profile_less, console_log, session, events, tracker_payload, profile)
+        collect_result = await _persist(console_log, session, events, tracker_payload, profile)
 
         # Save console log
         if console_log:
@@ -399,8 +411,9 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         })
 
     # Get session
-    if tracker_payload.session.id is None:
-        raise UnauthorizedException("Session must be set.")
+    if tracker_payload.session is None or tracker_payload.session.id is None:
+        # Generate random
+        tracker_payload.session = Session(id=str(uuid4()), metadata=SessionMetadata())
 
     # Load session from storage
     session = await storage.driver.session.load(tracker_payload.session.id)  # type: Session

@@ -21,7 +21,7 @@ logger.addHandler(log_handler)
 
 class TrackerPayload(BaseModel):
     source: Entity
-    session: Entity
+    session: Optional[Entity] = None
 
     metadata: Optional[EventPayloadMetadata]
     profile: Optional[Entity] = None

@@ -1,5 +1,6 @@
 from uuid import uuid4
 from tracardi.domain.entity import Entity
+from tracardi.domain.event import EventSession
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
@@ -17,19 +18,27 @@ class AddEmptySessionAction(ActionRunner):
 
         if self.debug is True:
             self.console.warning(
-                "Your requested a change in event session but events may not be updated in debug mode.")
-        else:
-            session = Session(
+                "Your requested an update of the event session but events may not be updated in debug mode.")
+
+        session = Session(
                 id=str(uuid4()),
                 profile=Entity(id=self.profile.id) if self.profile is not None else None,
                 metadata=SessionMetadata(),
                 operation=Operation(
-                    update=True
+                    update=True if self.debug is False else False
                 )
             )
-            self.event.session = session
-            self.execution_graph.set_sessions(session)
-            await storage.driver.session.save(session)
+        self.session = session
+        self.event.session = EventSession(
+                id=session.id,
+                start=session.metadata.time.insert,
+                duration=session.metadata.time.duration
+            )
+        self.event.update = True
+        self.execution_graph.set_sessions(session)
+        await storage.driver.session.save(session)
+
+        self.set_tracker_option("saveSession", True)
 
         return Result(port='payload', value=payload)
 

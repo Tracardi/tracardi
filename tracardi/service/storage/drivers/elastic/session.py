@@ -23,9 +23,10 @@ async def update_session_duration(session: Session):
     }, retry_on_conflict=3)
 
 
-async def save_session(session: Session, profile: Optional[Profile], profile_less, persist_session: bool = True):
+async def save_session(session: Session, profile: Optional[Profile], persist_session: bool = True):
     if persist_session:
-        if profile_less is False:
+
+        if isinstance(session, Session):
             if session.operation.new:
                 # Add new profile id to session if it does not exist, or profile id in session is different then
                 # the real profile id.

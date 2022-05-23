@@ -12,19 +12,16 @@ class ImportConfigRecord(NamedEntity):
     module: str
     config: str
     enabled: bool = True
-    transitional: bool = True
 
 
 class ImportConfig(NamedEntity):
     description: Optional[str] = ""
-    # todo add source_id, tracardi_api_url
     module: str
     config: dict
     enabled: bool = True
     api_url: AnyHttpUrl
     event_source: NamedEntity
     event_type: str
-    transitional: bool = True
 
     @validator("name")
     def validate_name(cls, value):
@@ -49,7 +46,6 @@ class ImportConfig(NamedEntity):
             module=self.module,
             config=encrypt(self.config),
             enabled=self.enabled,
-            transitional=self.transitional
         )
 
     @staticmethod
@@ -64,7 +60,6 @@ class ImportConfig(NamedEntity):
             module=record.module,
             config=decrypt(record.config),
             enabled=record.enabled,
-            transitional=record.transitional
         )
 
 

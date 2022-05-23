@@ -1,6 +1,9 @@
 from typing import Tuple, List
 
 from tracardi.domain.event import Event
+from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 from .debug_info import DebugInfo
 from .flow import Flow
 from .flow_history import FlowHistory
@@ -12,12 +15,11 @@ from tracardi.service.plugin.domain.console import Log
 
 class WorkFlow:
 
-    def __init__(self, flow_history: FlowHistory, session, profile):
+    def __init__(self, flow_history: FlowHistory, tracker_payload: TrackerPayload = None):
+        self.tracker_payload = tracker_payload
         self.flow_history = flow_history
-        self.profile = profile
-        self.session = session
 
-    async def invoke(self, flow: Flow, event: Event, ux: list, debug=False) -> Tuple[DebugInfo, List[Log], 'Event']:
+    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug=False) -> Tuple[DebugInfo, List[Log], 'Event', 'Profile', 'Session']:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.
@@ -44,16 +46,24 @@ class WorkFlow:
                 raise DagGraphError("Flow `{}` returned the following error: `{}`".format(flow.id, str(e)))
 
             # Init and run with event
-            await exec_dag.init(flow, self.flow_history, event, self.session, self.profile, ux)
+            await exec_dag.init(flow,
+                                self.flow_history,
+                                event,
+                                session,
+                                profile,
+                                self.tracker_payload,
+                                ux)
 
-            debug_info, log_list = await exec_dag.run(
+            debug_info, log_list, profile, session = await exec_dag.run(
                 payload={},
                 flow=flow,
-                event=event
+                event=event,
+                profile=profile,
+                session=session
             )
 
             await exec_dag.close()
 
-            return debug_info, log_list, event
+            return debug_info, log_list, event, profile, session
 
         raise RuntimeError("Workflow has circular reference.")
