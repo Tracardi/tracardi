@@ -5,7 +5,7 @@ from time import time
 from typing import List, Union, Tuple
 from pydantic import BaseModel
 
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, EventSession
 from tracardi.domain.flow import Flow
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
@@ -156,7 +156,11 @@ class GraphInvoker(BaseModel):
             if not isinstance(node.object, DagExecError):
                 node.object.session = session
                 if node.object.event:
-                    node.object.event.session = session
+                    node.object.event.session = EventSession(
+                        id=session.id,
+                        start=session.metadata.time.insert,
+                        duration=session.metadata.time.duration
+                    )
 
     async def run_task(self, node: Node, payload, ready_upstream_results: ActionsResults):
 

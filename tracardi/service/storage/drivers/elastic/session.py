@@ -47,6 +47,10 @@ async def save(session: Session):
     return await StorageFor(session).index().save()
 
 
+async def exist(id: str) -> bool:
+    return await storage_manager("session").exists(id)
+
+
 # NOT USED FOR NOW
 async def get_first_session(profile_id: str) -> float:
     result = await storage_manager("session").query({

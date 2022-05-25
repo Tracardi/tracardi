@@ -49,23 +49,23 @@ class AddEmptyProfileAction(ActionRunner):
 
         coroutines = [storage.driver.profile.save_profile(profile)]
 
-        if not self.event.session:
-            session = Session(
-                id=str(uuid4()),
-                profile=Entity(id=profile.id),
-                metadata=SessionMetadata(),
-                operation=Operation(update=True)
-            )
-            self.session = session
-            self.event.session = EventSession(
-                id=session.id,
-                start=session.metadata.time.insert,
-                duration=session.metadata.time.duration
-            )
-            self.execution_graph.set_sessions(session)
-            coroutines.append(storage.driver.session.save(session))
+        session = Session(
+            id=str(uuid4()),
+            profile=Entity(id=profile.id),
+            metadata=SessionMetadata(),
+            operation=Operation(update=True)
+        )
+        self.session = session
 
-        self.set_tracker_option("saveSession", True)
+        self.event.session = EventSession(
+            id=session.id, #todo existing id
+            start=session.metadata.time.insert,
+            duration=session.metadata.time.duration
+        )
+        self.execution_graph.set_sessions(session)
+
+        if not self.tracker_payload.is_on('saveSession', default=True):
+            coroutines.append(storage.driver.session.save(session))
 
         await asyncio.gather(*coroutines)
 
