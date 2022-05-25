@@ -130,6 +130,9 @@ class Resource:
                              rel=None)
         }
 
+    def list_aliases(self) -> set:
+        return {index.get_read_index() for name, index in self.resources.items()}
+
     def get_index(self, name) -> Index:
         if name in self.resources:
             return self.resources[name]

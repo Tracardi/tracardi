@@ -55,10 +55,15 @@ class AddEmptyProfileAction(ActionRunner):
             metadata=SessionMetadata(),
             operation=Operation(update=True)
         )
+
+        if self.session is not None:
+            self.console.warning(f"Old session {self.session.id} was replaced by new session {session.id}. "
+                                 f"Replacing session is not a good practice if you already have a session.")
+
         self.session = session
 
         self.event.session = EventSession(
-            id=session.id, #todo existing id
+            id=session.id,
             start=session.metadata.time.insert,
             duration=session.metadata.time.duration
         )

@@ -31,6 +31,15 @@ async def create_indices():
         "aliases": [],
     }
 
+    async def get_existing_aliases():
+        existing_aliases = await es.list_aliases()
+        alias2index = {}
+        for idx, aliases in existing_aliases.items():
+            for alias, _ in aliases['aliases'].items():
+                if alias[0] != '.' and 'tracardi' in alias:
+                    alias2index[alias] = idx
+        return alias2index
+
     def add_prefix(mapping, index: Index):
         json_map = json.dumps(mapping)
 
@@ -51,12 +60,14 @@ async def create_indices():
                 return True
         return False
 
-    async def recreate_one_alias(alias_index, target_index):
-        result = await es.recreate_one_alias(alias=alias_index, index=target_index)
+    async def recreate_one_alias(alias_index, new_index, old_index="_all"):
+        result = await es.recreate_one_alias(alias=alias_index, index=new_index, old_index=old_index)
         if acknowledged(result):
             logger.info(f"{alias_index} - RECREATED alias {alias_index} for target `{target_index}` created.")
         else:
             raise ConnectionError(f"{alias_index} - Could not recreate alias {alias_index}")
+
+    alias2index = await get_existing_aliases()
 
     for key, index in resources.resources.items():  # type: str, Index
 
@@ -130,11 +141,15 @@ async def create_indices():
             else:
                 logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
 
+            # -------- OLD ALIAS --------
+
+            old_index = alias2index[alias_index] if alias_index in alias2index else "_all"
+
             # -------- ALIAS --------
 
             # After creating index recreate alias
 
-            await recreate_one_alias(alias_index, target_index)
+            await recreate_one_alias(alias_index, new_index=target_index, old_index=old_index)
 
             # Check if alias created
 

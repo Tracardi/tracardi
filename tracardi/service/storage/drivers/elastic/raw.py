@@ -47,9 +47,9 @@ async def exists_alias(alias, index):
     return await es.exists_alias(alias, index=index)
 
 
-async def recreate_one_alias(index, alias):
-    es = ElasticClient.instance()
-    return await es.recreate_one_alias(index, alias)
+# async def recreate_one_alias(index, alias):
+#     es = ElasticClient.instance()
+#     return await es.recreate_one_alias(index, alias)
 
 
 async def refresh(index):

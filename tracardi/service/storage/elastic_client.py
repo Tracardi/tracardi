@@ -117,18 +117,43 @@ class ElasticClient:
         logger.debug(f"CREATE INDEX: {index}")
         return await self._client.indices.create(index=index, ignore=400, body=mappings)
 
-    async def recreate_one_alias(self, index, alias):
+    async def recreate_one_alias(self, index, alias, old_index="_all"):
 
         """
         Creates only one alias per index
         """
 
-        body = {
-            "actions": [
-                {"remove": {"index": "_all", "alias": alias}},
-                {"add": {"index": index, "alias": alias}}
-            ]
-        }
+        previous_alias = f"{alias}.prev"
+
+        if old_index != "_all":
+
+            if old_index == index:
+                body = {
+                    "actions": [
+                        {"remove": {"index": "_all", "alias": previous_alias}},
+                        {"remove": {"index": "_all", "alias": alias}},
+                        {"add": {"index": index, "alias": alias}}
+                    ]
+                }
+            else:
+                body = {
+                    "actions": [
+                        {"remove": {"index": "_all", "alias": previous_alias}},
+                        {"remove": {"index": "_all", "alias": alias}},
+                        {"add": {"index": old_index, "alias": previous_alias}},
+                        {"add": {"index": index, "alias": alias}}
+                    ]
+                }
+
+        else:
+            body = {
+                "actions": [
+                    {"remove": {"index": "_all", "alias": previous_alias}},
+                    {"remove": {"index": "_all", "alias": alias}},
+                    {"add": {"index": index, "alias": alias}}
+                ]
+            }
+
         return await self._client.indices.update_aliases(body=body)
 
     async def delete_alias(self, index, alias):
