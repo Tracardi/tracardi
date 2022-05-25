@@ -1,7 +1,7 @@
 import json
 import os
-
 from tracardi.config import tracardi, elastic
+from tracardi.domain.version import Version
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.setup.setup_plugins import add_plugins
 from tracardi.service.storage.driver import storage
@@ -24,21 +24,11 @@ es = ElasticClient.instance()
 
 
 async def create_indices():
-
     output = {
         "templates": [],
         "indices": [],
         "aliases": [],
     }
-
-    async def get_existing_aliases():
-        existing_aliases = await es.list_aliases()
-        alias2index = {}
-        for idx, aliases in existing_aliases.items():
-            for alias, _ in aliases['aliases'].items():
-                if alias[0] != '.' and 'tracardi' in alias:
-                    alias2index[alias] = idx
-        return alias2index
 
     def add_prefix(mapping, index: Index):
         json_map = json.dumps(mapping)
@@ -59,15 +49,6 @@ async def create_indices():
                 logger.info(f"{alias_index} - DELETED old alias {alias_index}. New will be created", result)
                 return True
         return False
-
-    async def recreate_one_alias(alias_index, new_index, old_index="_all"):
-        result = await es.recreate_one_alias(alias=alias_index, index=new_index, old_index=old_index)
-        if acknowledged(result):
-            logger.info(f"{alias_index} - RECREATED alias {alias_index} for target `{target_index}` created.")
-        else:
-            raise ConnectionError(f"{alias_index} - Could not recreate alias {alias_index}")
-
-    alias2index = await get_existing_aliases()
 
     for key, index in resources.resources.items():  # type: str, Index
 
@@ -105,7 +86,6 @@ async def create_indices():
                 result = await es.put_index_template(template_name, map)
 
                 if not acknowledged(result):
-
                     raise ConnectionError(
                         "Could not create the template `{}`. Received result: {}".format(
                             template_name,
@@ -118,6 +98,9 @@ async def create_indices():
                 )
 
             # -------- INDEX --------
+
+            if index.aliased is False:
+                target_index = index.get_read_index()
 
             if not await es.exists_index(target_index):
 
@@ -141,15 +124,51 @@ async def create_indices():
             else:
                 logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
 
-            # -------- OLD ALIAS --------
+    # Recreate all aliases
 
-            old_index = alias2index[alias_index] if alias_index in alias2index else "_all"
+    version = await storage.driver.version.load()
+    if version:
+        version = Version(**version)
 
-            # -------- ALIAS --------
+    actions = []
 
-            # After creating index recreate alias
+    for key, index in resources.resources.items():
+        if index.aliased:
+            alias_index = index.get_read_index()
 
-            await recreate_one_alias(alias_index, new_index=target_index, old_index=old_index)
+            previous_alias = f"{alias_index}.prev"
+            actions.append({"remove": {"index": "_all", "alias": alias_index}})
+            if index.multi_index:
+                target_index = index.get_template_pattern()
+            else:
+                target_index = index.get_aliased_data_index()
+
+            actions.append({"add": {"index": target_index, "alias": alias_index}})
+
+            if version and version.get_version_prefix() != tracardi.version.get_version_prefix():
+                actions.append({"remove": {"index": "_all", "alias": previous_alias}})
+                actions.append({"add": {
+                    "index": version.prefix_index_with_version(index.index, as_template=index.multi_index),
+                    "alias": previous_alias}})
+
+    if actions:
+        result = await es.update_aliases({
+            "actions": actions
+        })
+        if acknowledged(result):
+            logger.info(f"{alias_index} - RECREATED aliases.")
+        else:
+            raise ConnectionError(f"{alias_index} - Could not recreate aliases.")
+
+    # Check aliases
+
+    for key, index in resources.resources.items():
+
+        # After creating index recreate alias
+        if index.aliased:
+
+            target_index = index.get_aliased_data_index()
+            alias_index = index.get_read_index()
 
             # Check if alias created
 
@@ -158,13 +177,15 @@ async def create_indices():
 
             output["aliases"].append(alias_index)
 
-            # -------- SETUP --------
+        # -------- SETUP --------
 
-            if key in index_mapping and 'on-start' in index_mapping[key]:
-                if index_mapping[key]['on-start'] is not None:
-                    logger.info(f"{alias_index} - Running on start for index `{key}`.")
-                    on_start = index_mapping[key]['on-start']
-                    if callable(on_start):
-                        await on_start()
+        if key in index_mapping and 'on-start' in index_mapping[key]:
+            if index_mapping[key]['on-start'] is not None:
+                logger.info(f"{alias_index} - Running on start for index `{key}`.")
+                on_start = index_mapping[key]['on-start']
+                if callable(on_start):
+                    await on_start()
+
+    await storage.driver.version.save({"id": 0, **tracardi.version.dict()})
 
     return output

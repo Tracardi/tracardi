@@ -5,7 +5,8 @@ from tracardi.config import elastic
 
 
 class Index:
-    def __init__(self, multi_index, index, mapping, rel):
+    def __init__(self, multi_index, index, mapping, rel=None, aliased=True):
+        self.aliased = aliased
         self.multi_index = multi_index
         self.rel = rel
         self.index = index
@@ -16,7 +17,9 @@ class Index:
         self.mapping = mapping
 
     def _index(self):
-        return self.prefix + self.index
+        if self.aliased:
+            return self.prefix + self.index
+        return self.index
 
     def get_read_index(self):
         return self._index()
@@ -126,8 +129,8 @@ class Resource:
                             mapping="mappings/plugin-index.json", rel=None),
             "import": Index(multi_index=False, index="tracardi-import", mapping="mappings/import-index.json", rel=None),
             "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None),
-            "mapping": Index(multi_index=False, index="tracardi-mapping", mapping="mappings/mapping-index.json",
-                             rel=None)
+            "version": Index(multi_index=False, index="tracardi-version", mapping="mappings/version-index.json",
+                             aliased=False)
         }
 
     def list_aliases(self) -> set:

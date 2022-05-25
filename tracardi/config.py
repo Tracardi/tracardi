@@ -3,8 +3,8 @@ import os
 
 from tracardi.domain.version import Version
 
-VERSION = '0.9.0'
-NAME = 'new'
+VERSION = '0.7.15'
+NAME = 'new1'
 
 
 def _get_logging_level(level: str) -> int:
@@ -31,7 +31,7 @@ class TracardiConfig:
         self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
         self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
-        self.version = Version(VERSION)
+        self.version = Version(version=VERSION, name=NAME)
 
 
 class MemoryCacheConfig:
