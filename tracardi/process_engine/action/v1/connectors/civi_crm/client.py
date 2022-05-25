@@ -2,10 +2,17 @@ import json
 import ssl
 import aiohttp
 import certifi
+from pydantic import BaseModel, AnyHttpUrl
 
 
 class CiviCRMClientException(Exception):
     pass
+
+
+class CiviClientCredentials(BaseModel):
+    api_key: str
+    site_key: str
+    api_url: AnyHttpUrl
 
 
 class CiviCRMClient:
@@ -29,7 +36,7 @@ class CiviCRMClient:
                 }
             ) as response:
 
-                if response.status != 200 or (await response.json())["is_error"] == 1:
+                if response.status != 200 or (await response.json()).get("is_error", None) == 1:
                     raise CiviCRMClientException(await response.text())
 
                 return await response.json()
@@ -48,7 +55,7 @@ class CiviCRMClient:
                 }
             ) as response:
 
-                if response.status != 200 or (await response.json())["is_error"] == 1:
+                if response.status != 200 or (await response.json()).get("is_error", None) == 1:
                     raise CiviCRMClientException(await response.text())
 
                 result = [{"name": field["label"], "id": f"custom_{field['id']}"} for field in (await response.json())["values"]]
