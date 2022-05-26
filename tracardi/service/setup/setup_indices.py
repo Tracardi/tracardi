@@ -24,6 +24,7 @@ es = ElasticClient.instance()
 
 
 async def create_indices():
+
     output = {
         "templates": [],
         "indices": [],
@@ -33,7 +34,7 @@ async def create_indices():
     def add_prefix(mapping, index: Index):
         json_map = json.dumps(mapping)
 
-        json_map = json_map.replace("%%PREFIX%%-", f"{tracardi.version.name}-")
+        json_map = json_map.replace("%%PREFIX%%", tracardi.version.name)
         json_map = json_map.replace("%%ALIAS%%", index.get_read_index())
         json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
 
@@ -134,9 +135,10 @@ async def create_indices():
 
     for key, index in resources.resources.items():
         if index.aliased:
-            alias_index = index.get_read_index()
 
-            previous_alias = f"{alias_index}.prev"
+            alias_index = index.get_read_index()
+            previous_alias = index.get_prev_alias()
+
             actions.append({"remove": {"index": "_all", "alias": alias_index}})
             if index.multi_index:
                 target_index = index.get_template_pattern()

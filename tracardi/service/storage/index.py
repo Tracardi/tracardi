@@ -3,12 +3,11 @@ import tracardi.config
 
 
 class Index:
-    def __init__(self, multi_index, index, mapping, rel=None, aliased=True):
+    def __init__(self, multi_index, index, mapping, aliased=True):
         self.aliased = aliased
         self.multi_index = multi_index
-        self.rel = rel
         self.index = index
-        self.prefix = "{}-".format(tracardi.config.tracardi.version.name)
+        self.prefix = "{}.".format(tracardi.config.tracardi.version.name)
         self.mapping = mapping
 
     def _index(self):
@@ -18,6 +17,9 @@ class Index:
 
     def get_read_index(self):
         return self._index()
+
+    def get_prev_alias(self):
+        return f"{self.get_read_index()}.prev"
 
     def get_write_index(self):
 
@@ -61,67 +63,52 @@ class Index:
         return f"{version_prefix}.{self._index()}-*-*"
 
     def get_prefixed_template_name(self):
-        return "template.{}-{}".format(tracardi.config.tracardi.version.name, self.index)
+        return "template.{}.{}".format(tracardi.config.tracardi.version.name, self.index)
 
 
 class Resource:
 
     def __init__(self):
         self.resources = {
-            "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json", rel=None),
+            "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json"),
             "log": Index(multi_index=True,
                          index='tracardi-log',
-                         mapping="mappings/log-index.json",
-                         rel=None),
-            "user-logs": Index(multi_index=True, index="tracardi-user-log", mapping="mappings/user-log-index.json",
-                               rel=None),
+                         mapping="mappings/log-index.json"),
+            "user-logs": Index(multi_index=True, index="tracardi-user-log", mapping="mappings/user-log-index.json"),
 
-            "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json",
-                             rel='profile.id'),
-            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json",
-                             rel='_id'),
+            "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json"),
+            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json"),
             "console-log": Index(multi_index=False, index="tracardi-console-log",
-                                 mapping="mappings/console-log-index.json", rel=None),
-            "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json", rel=None),
-            "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json",
-                                  rel=None),
-            "project": Index(multi_index=False, index="tracardi-flow-project", mapping=None, rel=None),
+                                 mapping="mappings/console-log-index.json"),
+            "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json"),
+            "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json"),
 
-            "resource": Index(multi_index=False, index="tracardi-resource", mapping="mappings/resource-index.json",
-                              rel=None),
+            "resource": Index(multi_index=False, index="tracardi-resource", mapping="mappings/resource-index.json"),
             "event-source": Index(multi_index=False, index="tracardi-source",
-                                  mapping="mappings/event-source-index.json",
-                                  rel=None),
-            "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json", rel=None),
-            "rule": Index(multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json", rel=None),
-            "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json",
-                             rel=None),
+                                  mapping="mappings/event-source-index.json"),
+            "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json"),
+            "rule": Index(multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json"),
+            "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json"),
 
-            "stat-log": Index(multi_index=False, index="tracardi-stat-log", mapping=None, rel=None),
             "debug-info": Index(multi_index=False, index="tracardi-debug-info",
-                                mapping="mappings/debug-info-index.json", rel=None),
+                                mapping="mappings/debug-info-index.json"),
             "api-instance": Index(multi_index=False, index="tracardi-api-instance",
-                                  mapping="mappings/api-instance-index.json", rel=None),
-            "schedule": Index(multi_index=False, index="tracardi-schedule", mapping="mappings/schedule-index.json",
-                              rel=None),
-            "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json",
-                                rel=None),
+                                  mapping="mappings/api-instance-index.json"),
+            "schedule": Index(multi_index=False, index="tracardi-schedule", mapping="mappings/schedule-index.json"),
+            "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json"),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",
-                                  mapping="mappings/consent-type.json",
-                                  rel=None),
+                                  mapping="mappings/consent-type.json"),
 
             "validation-schema": Index(multi_index=False, index="tracardi-validation-schema",
-                                       mapping="mappings/validation-schema-index.json", rel=None),
+                                       mapping="mappings/validation-schema-index.json"),
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
-                                     mapping="mappings/value-threshold-index.json",
-                                     rel=None),
+                                     mapping="mappings/value-threshold-index.json"),
             "destination": Index(multi_index=False, index='tracardi-destination',
-                                 mapping="mappings/destination-index.json",
-                                 rel=None),
+                                 mapping="mappings/destination-index.json"),
             "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
-                            mapping="mappings/plugin-index.json", rel=None),
-            "import": Index(multi_index=False, index="tracardi-import", mapping="mappings/import-index.json", rel=None),
-            "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json", rel=None),
+                            mapping="mappings/plugin-index.json"),
+            "import": Index(multi_index=False, index="tracardi-import", mapping="mappings/import-index.json"),
+            "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
             "version": Index(multi_index=False, index="tracardi-version", mapping="mappings/version-index.json",
                              aliased=False)
         }
