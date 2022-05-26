@@ -47,9 +47,18 @@ async def exists_alias(alias, index):
     return await es.exists_alias(alias, index=index)
 
 
-# async def recreate_one_alias(index, alias):
-#     es = ElasticClient.instance()
-#     return await es.recreate_one_alias(index, alias)
+async def reindex(source, destination, wait_for_completion=True):
+    es = ElasticClient.instance()
+    return await es.reindex(source, destination, wait_for_completion)
+
+
+async def task_status(task_id):
+    es = ElasticClient.instance()
+    return await es._client.tasks.get(task_id)
+
+
+async def delete_task(task_id):
+    raise NotImplemented("Not implemented")
 
 
 async def refresh(index):

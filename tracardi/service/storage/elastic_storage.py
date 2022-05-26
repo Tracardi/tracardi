@@ -89,6 +89,9 @@ class ElasticStorage:
     async def refresh(self, params=None, headers=None):
         return await self.storage.refresh(self.index.get_read_index(), params, headers)
 
+    async def reindex(self, source, destination, wait_for_completion=True):
+        return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
+
     async def load_by_query_string(self, query_string, limit=100):
         query = {
             "size": limit,

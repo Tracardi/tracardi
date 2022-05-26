@@ -40,6 +40,17 @@ class ElasticClient:
         except NotFoundError:
             return None
 
+    async def reindex(self, source, destination, wait_for_completion=True):
+        return await self._client.reindex(body={
+            "source": {
+                "index": source
+            },
+            "dest": {
+                "index": destination
+            },
+
+        }, wait_for_completion=wait_for_completion)
+
     async def get_mapping(self, index):
         return await self._client.indices.get_mapping(index=index)
 

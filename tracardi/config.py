@@ -3,8 +3,8 @@ import os
 
 from tracardi.domain.version import Version
 
-VERSION = '0.7.15'
-NAME = 'new1'
+VERSION = '0.7.0'
+NAME = 'puppy'
 
 
 def _get_logging_level(level: str) -> int:
