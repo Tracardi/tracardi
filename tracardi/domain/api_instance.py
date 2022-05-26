@@ -39,6 +39,7 @@ class ApiInstance(metaclass=Singleton):
         passed_time = time() - self._start_time
         self.record.track_rps = (self.record.track_requests / passed_time) if passed_time > 0 \
             else self.record.track_requests/0.000001
+        self.record.timestamp = datetime.utcnow()
         return self.record
 
     def reset(self):
