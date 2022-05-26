@@ -1,10 +1,12 @@
+import hashlib
 import logging
 import os
 
 from tracardi.domain.version import Version
 
 VERSION = '0.7.0'
-NAME = 'puppy'
+NAME = os.environ['INSTANCE_PREFIX'] if 'INSTANCE_PREFIX' in os.environ and os.environ[
+    'INSTANCE_PREFIX'] else hashlib.md5(VERSION.encode('utf-8')).hexdigest()[:5]
 
 
 def _get_logging_level(level: str) -> int:
@@ -25,8 +27,10 @@ class TracardiConfig:
     def __init__(self, env):
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
-        self.sync_profile_tracks = (env['SYNC_PROFILE_TRACKS'].lower() == 'yes') if 'SYNC_PROFILE_TRACKS' in env else False
-        self.postpone_destination_sync = int(env['POSTPONE_DESTINATION_SYNC']) if 'POSTPONE_DESTINATION_SYNC' in env else 0
+        self.sync_profile_tracks = (
+                    env['SYNC_PROFILE_TRACKS'].lower() == 'yes') if 'SYNC_PROFILE_TRACKS' in env else False
+        self.postpone_destination_sync = int(
+            env['POSTPONE_DESTINATION_SYNC']) if 'POSTPONE_DESTINATION_SYNC' in env else 0
         self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
         self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
         self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
@@ -53,10 +57,6 @@ class ElasticConfig:
 
         if 'ELASTIC_HOST' in env and isinstance(env['ELASTIC_HOST'], str) and env['ELASTIC_HOST'].isnumeric():
             raise ValueError("Env ELASTIC_HOST must be sting")
-
-        self.instance_prefix = os.environ['INSTANCE_PREFIX'] \
-            if 'INSTANCE_PREFIX' in os.environ and os.environ['INSTANCE_PREFIX'] \
-            else NAME
 
         self.host = env['ELASTIC_HOST'] if 'ELASTIC_HOST' in env else '127.0.0.1'
         self.host = self.host.split(",")

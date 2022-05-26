@@ -1,7 +1,5 @@
 from datetime import datetime
-
 import tracardi.config
-from tracardi.config import elastic
 
 
 class Index:
@@ -10,10 +8,7 @@ class Index:
         self.multi_index = multi_index
         self.rel = rel
         self.index = index
-        if elastic.instance_prefix:
-            self.prefix = "{}-".format(elastic.instance_prefix)
-        else:
-            self.prefix = ''
+        self.prefix = "{}-".format(tracardi.config.tracardi.version.name)
         self.mapping = mapping
 
     def _index(self):
@@ -66,9 +61,7 @@ class Index:
         return f"{version_prefix}.{self._index()}-*-*"
 
     def get_prefixed_template_name(self):
-        if tracardi.config.elastic.instance_prefix != '':
-            return "template.{}-{}".format(tracardi.config.elastic.instance_prefix, self.index)
-        return self.index
+        return "template.{}-{}".format(tracardi.config.tracardi.version.name, self.index)
 
 
 class Resource:
