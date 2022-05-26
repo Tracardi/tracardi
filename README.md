@@ -35,6 +35,7 @@ a legacy system you can integrate TRACARDI easily. Use TRACARDI for:
  * **Automation** - TRACARDI is a great framework for creating
    marketing automation apps. You can send your data to other systems easily
 
+If you want to see Tracardi in action subscribe to our [Youtube channel](https://bit.ly/3pbdbPR).
 
 # Installation
 
@@ -43,22 +44,51 @@ The easiest way to run Tracardi is to run it as a docker container. If you are l
 In order to do that you must have docker installed on your local machine. 
 Please refer to docker installation manual to see how to install docker.
 
-## Dependencies
+## One line installation
 
-Tracardi need elasticsearch as its backend. Please pull and run elasticsearch single node docker before you start Tracardi. 
+Open tracardi project and run:
+
+```
+docker-compose up
+```
+
+Visit http://127.0.0.1:8787 and complete installation in Tracardi GUI. 
+
+## Run each docker container one-by-one
+
+### Dependencies
+
+Tracardi need elasticsearch and redis as its backend. 
+
+#### Elasticsearch
+
+Please pull and run elasticsearch single node docker before you start Tracardi. 
 
 You can do it with this command.
 ```
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.13.2
 ```
 
-## Start Tracardi API
+#### Redis
+
+If you use features as destinations, import, or synchronized events then you will need a redis instance as well. 
+
+Start it with:
+
+```
+docker run -p 6379:6379 redis
+```
+
+### Run Tracardi API
 
 Now pull and run Tracardi backend.
 
 ```
-docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 -e USER_NAME=admin -e PASSWORD=admin tracardi/tracardi-api
+docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 -e REDIS_HOST=redis://<your-laptop-ip>:6379 tracardi/tracardi-api
 ```
+
+You can remove `-e REDIS_HOST=redis://<your-laptop-ip>:6379` if you did not start redis. Without redis some system features are 
+unavailable. 
 
 Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variable to reference your laptop's IP. 
 
@@ -71,7 +101,7 @@ Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variab
 For more trouble shooting solutions go to [http://docs.tracardi.com/trouble/](http://docs.tracardi.com/trouble/)
 
 
-## Start Tracardi GUI
+### Open Tracardi GUI
 
 Now pull and run Tracardi Graphical User Interface.
 
@@ -102,7 +132,7 @@ docker run -p 8585:8585 tracardi/tracardi-docs
 
 ## Log-in
 
-Visit http://127.0.0.1:8787 and login to Tracardi GUI with default username: admin and password: admin. 
+Visit http://127.0.0.1:8787 and complete installation in Tracardi GUI. 
 
 ## System Documentation
 
