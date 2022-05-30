@@ -22,7 +22,7 @@ class AsyncProfileTracksSynchronizer:
     async def __aenter__(self):
         while True:
             if await self._is_profile_processed():
-                logger.warning(f"Waiting for /track/{self.profile.id} to finish")
+                logger.info(f"Waiting for /track/{self.profile.id} to finish")
                 await asyncio.sleep(self.wait)
             else:
                 await self._set_profile_process_id()
@@ -58,7 +58,7 @@ class ProfileTracksSynchronizer:
     async def __aenter__(self):
         while True:
             if self._is_profile_processed():
-                logger.warning(f"Waiting for /track/{self.profile.id} to finish")
+                logger.info(f"Waiting for /track/{self.profile.id} to finish")
                 await asyncio.sleep(self.wait)
             else:
                 self._set_profile_process_id()
