@@ -98,11 +98,13 @@
         },
         "config": {
           "dynamic": true,
-          "type": "object"
+          "type": "object",
+          "enabled": false
         },
         "context": {
           "dynamic": true,
-          "type": "object"
+          "type": "object",
+          "enabled": false
         },
         "tags": {
           "properties": {

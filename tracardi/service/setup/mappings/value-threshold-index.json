@@ -16,13 +16,15 @@
         "type":   "date"
       },
       "ttl": {
-        "type": "integer"
+        "type": "integer",
+        "index": false
       },
       "name": {
         "type": "keyword"
       },
       "last_value": {
-        "type": "keyword"
+        "type": "keyword",
+        "index": false
       }
     }
   },

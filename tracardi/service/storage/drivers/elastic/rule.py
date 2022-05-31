@@ -55,7 +55,7 @@ async def load_rule(event_type: str, source_id: str):
     memory_cache = MemoryCache()
 
     if 'rules' not in memory_cache:
-        logger.info("Loading routing rules with {}".format(query))
+        logger.debug("Loading routing rules with {}".format(query))
         flows_data = await storage_manager(index="rule").filter(query)
         memory_cache['rules'] = CacheItem(data=flows_data, ttl=1)
 

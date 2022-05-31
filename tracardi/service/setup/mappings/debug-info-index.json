@@ -10,7 +10,8 @@
         "type": "keyword"
       },
       "content": {
-        "type": "keyword"
+        "type": "keyword",
+        "index": false
       }
     }
   },

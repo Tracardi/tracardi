@@ -22,6 +22,7 @@
         "type": "integer"
       },
       "all_track_requests": {
+        "index": false,
         "type": "integer"
       }
     }

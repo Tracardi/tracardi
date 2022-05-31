@@ -64,7 +64,7 @@ class RulesEngine:
             rules = await rules_loading_task
 
             if len(rules) == 0:
-                logger.info(f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")
+                logger.debug(f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")
 
             for rule in rules:
 
