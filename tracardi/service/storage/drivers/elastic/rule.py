@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
+memory_cache = MemoryCache()
+
 
 def load_rules(source: Entity, events: List[Event]) -> List[Tuple[Task, Event]]:
     return [(
@@ -51,13 +53,11 @@ async def load_rule(event_type: str, source_id: str):
         }
     }
 
-    # todo set MemoryCache ttl from env
-    memory_cache = MemoryCache()
-
     if 'rules' not in memory_cache:
         logger.debug("Loading routing rules with {}".format(query))
         flows_data = await storage_manager(index="rule").filter(query)
-        memory_cache['rules'] = CacheItem(data=flows_data, ttl=1)
+        # todo set MemoryCache ttl from env
+        memory_cache['rules'] = CacheItem(data=flows_data, ttl=15)
 
     rules = list(memory_cache['rules'].data)
 

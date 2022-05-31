@@ -9,6 +9,7 @@ from deepdiff import DeepDiff
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
+from tracardi.process_engine.debugger import Debugger
 
 from tracardi.service.console_log import ConsoleLog
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
@@ -44,25 +45,26 @@ logger.addHandler(log_handler)
 cache = MemoryCache()
 
 
-async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
-                   tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
-    # Save profile
+async def _save_profile(profile):
     try:
-        if isinstance(profile, Profile) and profile.operation.new:
-            save_profile_result = await storage.driver.profile.save_profile(profile)
+        if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
+            return await storage.driver.profile.save_profile(profile)
         else:
-            save_profile_result = BulkInsertResult()
+            return BulkInsertResult()
+
     except StorageException as e:
         raise FieldTypeConflictException("Could not save profile. Error: {}".format(e.message), rows=e.details)
 
-    # Save session
+
+async def _save_session(tracker_payload, session, profile):
     try:
         persist_session = tracker_payload.is_on('saveSession', default=True)
-        save_session_result = await storage.driver.session.save_session(session, profile, persist_session)
+        return await storage.driver.session.save_session(session, profile, persist_session)
     except StorageException as e:
         raise FieldTypeConflictException("Could not save session. Error: {}".format(e.message), rows=e.details)
 
-    # Save events
+
+async def _save_events(tracker_payload, console_log, events):
     try:
         persist_events = tracker_payload.is_on('saveEvents', default=True)
 
@@ -92,15 +94,25 @@ async def _persist(console_log: ConsoleLog, session: Session, events: List[Event
                 else:
                     event.metadata.status = PROCESSED
 
-        save_events_result = await storage.driver.event.save_events(events, persist_events)
+        return await storage.driver.event.save_events(events, persist_events)
 
     except StorageException as e:
         raise FieldTypeConflictException("Could not save event. Error: {}".format(e.message), rows=e.details)
 
+
+async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
+                   tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
+
+    results = await asyncio.gather(
+        _save_profile(profile),
+        _save_session(tracker_payload, session, profile),
+        _save_events(tracker_payload, console_log, events)
+    )
+
     return CollectResult(
-        session=save_session_result,
-        profile=save_profile_result,
-        events=save_events_result
+        profile=results[0],
+        session=results[1],
+        events=results[2]
     )
 
 
@@ -259,54 +271,58 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         )
 
     # Must be the last operation
-    try:
-        if isinstance(profile, Profile) and profile.operation.needs_update():
-            await storage.driver.profile.save_profile(profile)
-    except Exception as e:
-        message = "Profile update returned an error: `{}`".format(str(e))
-        console_log.append(
-            Console(
-                profile_id=get_profile_id(profile),
-                origin='profile',
-                class_name='tracker',
-                module='tracker',
-                type='error',
-                message=message,
-                traceback=get_traceback(e)
-            )
-        )
-        logger.error(message)
+    # try:
+    #     if isinstance(profile, Profile) and profile.operation.needs_update():
+    #         save_tasks.append(asyncio.create_task(storage.driver.profile.save_profile(profile)))
+    # except Exception as e:
+    #     message = "Profile update returned an error: `{}`".format(str(e))
+    #     console_log.append(
+    #         Console(
+    #             profile_id=get_profile_id(profile),
+    #             origin='profile',
+    #             class_name='tracker',
+    #             module='tracker',
+    #             type='error',
+    #             message=message,
+    #             traceback=get_traceback(e)
+    #         )
+    #     )
+    #     logger.error(message)
 
     # Send to destination
 
     if has_profile and profile_copy is not None:
-        profile_delta = DeepDiff(profile_copy, profile.dict(exclude={"operation": ...}), ignore_order=True)
-        if profile_delta:
-            logger.info("Profile changed. Destination scheduled to run.")
-            try:
-                destination_manager = DestinationManager(profile_delta,
-                                                         profile,
-                                                         session,
-                                                         payload=None,
-                                                         event=None,
-                                                         flow=None)
-                await destination_manager.send_data(profile.id, debug=False)
-            except Exception as e:
-                # todo - this appends error to the same profile - it rather should be en event error
-                console_log.append(Console(
-                    profile_id=get_profile_id(profile),
-                    origin='destination',
-                    class_name='DestinationManager',
-                    module='tracker',
-                    type='error',
-                    message=str(e),
-                    traceback=get_traceback(e)
-                ))
-                logger.error(str(e))
+        new_profile = profile.dict(exclude={"operation": ...})
+
+        if profile_copy != new_profile:
+            profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)
+            if profile_delta:
+                logger.info("Profile changed. Destination scheduled to run.")
+                try:
+                    destination_manager = DestinationManager(profile_delta,
+                                                             profile,
+                                                             session,
+                                                             payload=None,
+                                                             event=None,
+                                                             flow=None)
+                    # todo performance - could be not awaited add to save_task
+                    await destination_manager.send_data(profile.id, debug=False)
+                except Exception as e:
+                    # todo - this appends error to the same profile - it rather should be en event error
+                    console_log.append(Console(
+                        profile_id=get_profile_id(profile),
+                        origin='destination',
+                        class_name='DestinationManager',
+                        module='tracker',
+                        type='error',
+                        message=str(e),
+                        traceback=get_traceback(e)
+                    ))
+                    logger.error(str(e))
 
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
-            if debugger.has_call_debug_trace():
+            if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
                 # Save debug info
                 save_tasks.append(
                     asyncio.create_task(
@@ -315,9 +331,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                         )
                     )
                 )
-
-            # Run tasks
-            await asyncio.gather(*save_tasks)
 
     except Exception as e:
         message = "Error during saving debug info: `{}`".format(str(e))
@@ -357,6 +370,10 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         if console_log:
             encoded_console_log = list(console_log.get_encoded())
             save_tasks.append(asyncio.create_task(StorageForBulk(encoded_console_log).index('console-log').save()))
+
+    if save_tasks:
+        # Run tasks
+        await asyncio.gather(*save_tasks)
 
     # Prepare response
     result = {}
