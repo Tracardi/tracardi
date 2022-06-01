@@ -61,10 +61,5 @@
         "type": "boolean"
       }
     }
-  },
-  "aliases": {
-    "%%ALIAS%%": {
-      "index": "%%VERSION%%.%%ALIAS%%"
-    }
   }
 }

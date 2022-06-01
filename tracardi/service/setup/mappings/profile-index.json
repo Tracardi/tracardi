@@ -100,11 +100,6 @@
           "type": "boolean"
         }
       }
-    },
-    "aliases": {
-      "%%ALIAS%%": {
-        "index": "%%VERSION%%.%%PREFIX%%.tracardi-profile-*-*"
-      }
     }
   }
 }

@@ -23,10 +23,5 @@
         "type": "keyword"
       }
     }
-  },
-  "aliases": {
-    "%%ALIAS%%": {
-      "index": "%%VERSION%%.%%ALIAS%%"
-    }
   }
 }

@@ -43,10 +43,5 @@
         "index": false
       }
     }
-  },
-  "aliases": {
-    "%%ALIAS%%": {
-      "index": "%%VERSION%%.%%ALIAS%%"
-    }
   }
 }

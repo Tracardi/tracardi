@@ -117,11 +117,6 @@
           }
         }
       }
-    },
-    "aliases": {
-      "%%PREFIX%%.tracardi-event": {
-        "index": "%%VERSION%%.%%PREFIX%%.tracardi-event-*-*"
-      }
     }
   }
 }

@@ -157,10 +157,5 @@
         }
       }
     }
-  },
-  "aliases": {
-    "%%ALIAS%%": {
-      "index": "%%VERSION%%.%%ALIAS%%"
-    }
   }
 }

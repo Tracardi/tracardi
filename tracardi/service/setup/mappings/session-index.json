@@ -49,11 +49,6 @@
           "type": "object"
         }
       }
-    },
-    "aliases": {
-      "%%ALIAS%%": {
-        "index": "%%VERSION%%.%%PREFIX%%.tracardi-session-*-*"
-      }
     }
   }
 }

@@ -20,11 +20,6 @@
           "type": "keyword"
         }
       }
-    },
-    "aliases": {
-      "%%ALIAS%%": {
-        "index": "%%VERSION%%.%%PREFIX%%.tracardi-user-log-*-*"
-      }
     }
   }
 }

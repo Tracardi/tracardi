@@ -13,10 +13,5 @@
         "type": "text"
       }
     }
-  },
-  "aliases": {
-    "%%ALIAS%%": {
-      "index": "%%VERSION%%.%%ALIAS%%"
-    }
   }
 }
