@@ -57,10 +57,7 @@ async def task_status(task_id):
     return await es._client.tasks.get(task_id)
 
 
-async def delete_task(task_id):
-    raise NotImplemented("Not implemented")
-
-
 async def refresh(index):
     es = ElasticClient.instance()
     return await es.refresh(index)
+
