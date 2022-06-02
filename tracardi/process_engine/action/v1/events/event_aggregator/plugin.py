@@ -83,6 +83,6 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="Returns the aggregation result.")
                 }
             ),
-            pro=False
+            pro=True
         )
     )
