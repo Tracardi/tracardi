@@ -26,7 +26,7 @@ async def search(query):
     return await storage_manager("event").query({"query": query})
 
 
-async def count_events_by_type(event_type: str, time_span: int) -> int:
+async def count_events_by_type(profile_id: str, event_type: str, time_span: int) -> int:
     query = {
         "query": {
             "bool": {
@@ -39,8 +39,13 @@ async def count_events_by_type(event_type: str, time_span: int) -> int:
                         }
                     },
                     {
-                        "match": {
+                        "term": {
                             "type": event_type
+                        }
+                    },
+                    {
+                        "term": {
+                            "profile.id": profile_id
                         }
                     }
                 ]
@@ -48,8 +53,37 @@ async def count_events_by_type(event_type: str, time_span: int) -> int:
         }
 
     }
+
+
     result = await storage_manager("event").query(query)
     return result["hits"]["total"]['value']
+
+
+async def aggregate_event_by_field_within_time(profile_id, field, time_span):
+    query = {
+        "bool": {
+            "must": [
+                {
+                    "range": {
+                        "metadata.time.insert": {
+                            "gte": "now-{}s".format(time_span),
+                            "lte": "now"}
+                    }
+                },
+                {
+                    "term": {
+                        "profile.id": profile_id
+                    }
+                }
+            ]
+        }
+    }
+
+    result = await _aggregate_event("events_bucket", field, filter_query=query)
+    return {
+        "total": result.total,
+        "buckets": result.aggregations['events_bucket'][0]
+    }
 
 
 async def heatmap_by_event_type(event_type=None):
@@ -171,21 +205,24 @@ async def aggregate_profile_events(profile_id: str, aggregate_query: dict) -> St
     return await storage_manager(index="event").aggregate(query)
 
 
-async def _aggregate_event(bucket_name, by) -> StorageAggregateResult:
+async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=15) -> StorageAggregateResult:
     aggregate_query = {
         bucket_name: {
             "terms": {
                 "field": by,
-                "size": 15,
+                "size": buckets_size,
             }
         }
     }
 
+    if filter_query is None:
+        filter_query = {
+            "match_all": {}
+        }
+
     query = {
         "size": 0,
-        "query": {
-            "match_all": {}
-        },
+        "query": filter_query,
         "aggs": aggregate_query
     }
 

@@ -11,7 +11,7 @@ def validate(config: dict) -> Configuration:
     return Configuration(**config)
 
 
-class EventCounter(ActionRunner):
+class EventAggregator(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
@@ -20,9 +20,9 @@ class EventCounter(ActionRunner):
 
         time_span_in_sec = parse(self.config.time_span.strip("-"))
 
-        no_of_events = await storage.driver.event.count_events_by_type(
+        no_of_events = await storage.driver.event.aggregate_event_by_field_within_time(
             self.profile.id,
-            self.config.event_type.id,
+            self.config.field,
             time_span_in_sec
         )
         return Result(port="payload", value={"events": no_of_events})
@@ -32,31 +32,30 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.events.event_counter.plugin',
-            className='EventCounter',
+            module=__name__,
+            className='EventAggregator',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.6.2',
-            license="MIT",
-            author="Dawid Kruk",
-            manual="event_counter_action",
+            version='0.7.0',
+            license="Tracardi Pro",
+            author="Risto Kowaczewski",
             init={
-                "event_type": None,
+                "field": "",
                 "time_span": "-15m"
             },
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Event counter settings",
-                        description="Event counter reads how many events of defined type were triggered "
+                        name="Event aggregation settings",
+                        description="Event aggregator counts how many events of defined field were triggered "
                                     "within defined time.",
                         fields=[
                             FormField(
-                                id="event_type",
-                                name="Event type",
-                                description="Select event type you would like to count.",
-                                component=FormComponent(type="eventType", props={
-                                    "label": "Event type"
+                                id="field",
+                                name="Aggregate by field",
+                                description="Select field you would like to aggregate.",
+                                component=FormComponent(type="text", props={
+                                    "label": "Field"
                                 })
                             ),
                             FormField(
@@ -72,8 +71,8 @@ def register() -> Plugin:
                 ])
         ),
         metadata=MetaData(
-            name='Event counter',
-            desc='This plugin reads how many events of defined type were triggered within defined time.',
+            name='Event aggregator',
+            desc='This plugin aggregates and counts events by defined field within defined time.',
             icon='event',
             group=["Stats"],
             documentation=Documentation(
@@ -81,9 +80,9 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="Reads payload object.")
                 },
                 outputs={
-                    "payload": PortDoc(desc="Returns number of event of given type.")
+                    "payload": PortDoc(desc="Returns the aggregation result.")
                 }
             ),
-            pro=True
+            pro=False
         )
     )

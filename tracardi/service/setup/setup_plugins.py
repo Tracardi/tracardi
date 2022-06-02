@@ -114,7 +114,12 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.traits.reshape_payload_action',
         'tracardi.process_engine.action.v1.detect_client_agent_action',
 
+
+        # Events
         'tracardi.process_engine.action.v1.events.event_counter.plugin',
+        'tracardi.process_engine.action.v1.events.event_aggregator.plugin',
+
+        # Validation
         'tracardi.process_engine.action.v1.json_schema_validation_action',
 
         # String
