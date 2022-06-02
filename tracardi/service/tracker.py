@@ -97,7 +97,7 @@ async def _save_events(tracker_payload, console_log, events):
         return await storage.driver.event.save_events(events, persist_events)
 
     except StorageException as e:
-        raise FieldTypeConflictException("Could not save event. Error: {}".format(e.message), rows=e.details)
+        raise FieldTypeConflictException("Could not save event. Error: {}".format(str(e)), rows=e.details)
 
 
 async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
