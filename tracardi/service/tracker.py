@@ -53,7 +53,7 @@ async def _save_profile(profile):
             return BulkInsertResult()
 
     except StorageException as e:
-        raise FieldTypeConflictException("Could not save profile. Error: {}".format(e.message), rows=e.details)
+        raise FieldTypeConflictException("Could not save profile. Error: {}".format(str(e)), rows=e.details)
 
 
 async def _save_session(tracker_payload, session, profile):
@@ -61,7 +61,7 @@ async def _save_session(tracker_payload, session, profile):
         persist_session = tracker_payload.is_on('saveSession', default=True)
         return await storage.driver.session.save_session(session, profile, persist_session)
     except StorageException as e:
-        raise FieldTypeConflictException("Could not save session. Error: {}".format(e.message), rows=e.details)
+        raise FieldTypeConflictException("Could not save session. Error: {}".format(str(e)), rows=e.details)
 
 
 async def _save_events(tracker_payload, console_log, events):
