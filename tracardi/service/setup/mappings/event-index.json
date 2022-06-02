@@ -108,8 +108,7 @@
         },
         "indexed": {
           "dynamic": true,
-          "type": "object",
-          "index": true
+          "type": "object"
         },
         "tags": {
           "properties": {
