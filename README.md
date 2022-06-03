@@ -100,6 +100,13 @@ Tracardi must connect to elastic. To do that you have to set ELASTIC_HOST variab
 
 For more trouble shooting solutions go to [http://docs.tracardi.com/trouble/](http://docs.tracardi.com/trouble/)
 
+### Connecting Tracardi to Elastic via SSL connection
+
+If you have an elasticsearch instance and you would like to connect to it via HTTPS this is the command you may find useful. 
+
+```
+docker run -p 8686:80 -e ELASTIC_HOST=https://user:password@<your-laptop-ip>:9200 -e ELASTIC_VERIFY_CERTS=no -e REDIS_HOST=redis://<your-laptop-ip>:6379 tracardi/tracardi-api
+```
 
 ### Open Tracardi GUI
 
