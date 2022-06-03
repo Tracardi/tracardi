@@ -122,6 +122,9 @@
           }
         }
       }
+    },
+    "aliases": {
+      "%%PREFIX%%.tracardi-event": {}
     }
   }
 }

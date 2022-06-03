@@ -29,5 +29,8 @@
          "null_value": "NULL"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }

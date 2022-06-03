@@ -27,5 +27,8 @@
         "index": false
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }

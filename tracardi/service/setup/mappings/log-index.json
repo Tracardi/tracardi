@@ -30,6 +30,9 @@
           "type": "keyword"
         }
       }
+    },
+    "aliases": {
+      "%%PREFIX%%.tracardi-log": {}
     }
   }
 }

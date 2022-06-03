@@ -14,5 +14,8 @@
         "index": false
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }

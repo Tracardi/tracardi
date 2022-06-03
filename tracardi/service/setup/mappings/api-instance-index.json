@@ -26,5 +26,8 @@
         "type": "integer"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }

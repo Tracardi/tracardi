@@ -25,5 +25,8 @@
         "type": "keyword"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }
