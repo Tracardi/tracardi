@@ -61,5 +61,8 @@
         "type": "boolean"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }

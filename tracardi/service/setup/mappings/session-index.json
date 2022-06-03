@@ -50,6 +50,9 @@
           "type": "object"
         }
       }
+    },
+    "aliases": {
+      "%%PREFIX%%.tracardi-session": {}
     }
   }
 }

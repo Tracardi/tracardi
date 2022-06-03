@@ -58,5 +58,8 @@
         "type": "keyword"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }

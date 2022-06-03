@@ -37,5 +37,8 @@
         "type": "boolean"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }

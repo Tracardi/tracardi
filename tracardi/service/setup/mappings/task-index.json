@@ -34,5 +34,8 @@
         "type": "keyword"
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }
