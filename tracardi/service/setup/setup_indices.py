@@ -31,14 +31,13 @@ async def create_indices():
         "aliases": [],
     }
 
-    def add_prefix(mapping, index: Index):
-        json_map = json.dumps(mapping)
-
+    def add_prefix(json_map, index: Index):
         json_map = json_map.replace("%%PREFIX%%", tracardi.version.name)
         json_map = json_map.replace("%%ALIAS%%", index.get_read_index())
         json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
-
-        return json.loads(json_map)
+        json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)
+        json_map = json_map.replace("%%SHARDS%%", elastic.shards)
+        return json_map
 
     def acknowledged(result):
         return 'acknowledged' in result and result['acknowledged'] is True
@@ -60,8 +59,9 @@ async def create_indices():
 
         with open(os.path.join(__local_dir, map_file)) as file:
 
-            map = json.load(file)
+            map = file.read()
             map = add_prefix(map, index)
+            map = json.loads(map)
 
             target_index = index.get_aliased_data_index()
             alias_index = index.get_read_index()

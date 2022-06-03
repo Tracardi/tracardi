@@ -1,7 +1,7 @@
 {
   "settings": {
-    "number_of_shards": 3,
-    "number_of_replicas": 1
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%
   },
   "mappings": {
     "dynamic": false,
