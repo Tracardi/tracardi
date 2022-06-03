@@ -8,6 +8,10 @@
     "number_of_replicas": %%REPLICAS%%
     },
     "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
+      },
       "dynamic": false,
       "date_detection": false,
       "properties": {

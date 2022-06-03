@@ -25,6 +25,8 @@ async def get_indices_status():
             _alias = index.get_read_index()
             if not await es.exists_alias(_alias, index=_index):
                 yield "missing_alias", _alias
+            else:
+                yield "existing_alias", _alias
 
         else:
             _template = index.get_prefixed_template_name()
