@@ -4,7 +4,7 @@ import os
 
 from tracardi.domain.version import Version
 
-VERSION = '0.7.1'
+VERSION = '0.7.0'
 NAME = os.environ['INSTANCE_PREFIX'] if 'INSTANCE_PREFIX' in os.environ and os.environ[
     'INSTANCE_PREFIX'] else hashlib.md5(VERSION.encode('utf-8')).hexdigest()[:5]
 
