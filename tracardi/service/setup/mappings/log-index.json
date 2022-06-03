@@ -9,6 +9,10 @@
       "index.refresh_interval": "30s"
     },
     "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
+      },
       "dynamic": false,
       "properties": {
         "date": {

@@ -23,6 +23,20 @@ logger.addHandler(log_handler)
 es = ElasticClient.instance()
 
 
+async def update_current_version():
+    prev_version = await storage.driver.version.load()
+
+    if not prev_version:
+        await storage.driver.version.save({"id": 0, **tracardi.version.dict()})
+    else:
+        prev_version = Version(**prev_version)
+        head_version = tracardi.version.get_head_with_prev_version(prev_version)
+
+        if head_version != prev_version:
+            await storage.driver.version.save({"id": 0, **head_version.dict()})
+            logger.info(f"Saved current version {head_version}")
+
+
 async def create_indices():
 
     output = {
@@ -127,17 +141,12 @@ async def create_indices():
 
     # Recreate all aliases
 
-    version = await storage.driver.version.load()
-    if version:
-        version = Version(**version)
-
     actions = []
 
     for key, index in resources.resources.items():
         if index.aliased:
 
             alias_index = index.get_read_index()
-            previous_alias = index.get_prev_alias()
 
             actions.append({"remove": {"index": "_all", "alias": alias_index}})
             if index.multi_index:
@@ -146,12 +155,6 @@ async def create_indices():
                 target_index = index.get_aliased_data_index()
 
             actions.append({"add": {"index": target_index, "alias": alias_index}})
-
-            if version and version.get_version_prefix() != tracardi.version.get_version_prefix():
-                actions.append({"remove": {"index": "_all", "alias": previous_alias}})
-                actions.append({"add": {
-                    "index": version.prefix_index_with_version(index.index, as_template=index.multi_index),
-                    "alias": previous_alias}})
 
     if actions:
         result = await es.update_aliases({
@@ -187,7 +190,5 @@ async def create_indices():
                 on_start = index_mapping[key]['on-start']
                 if callable(on_start):
                     await on_start()
-
-    await storage.driver.version.save({"id": 0, **tracardi.version.dict()})
 
     return output
