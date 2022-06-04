@@ -16,10 +16,10 @@ class EventPayload(BaseModel):
     context: Optional[dict] = {}
 
     def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Optional[Entity], profile: Optional[Entity],
-                 profile_less: bool) -> Event:
+                 has_profile: bool) -> Event:
 
         meta = EventMetadata(**metadata.dict())
-        meta.profile_less = profile_less
+        meta.profile_less = not has_profile
         meta.instance = Entity(id=ApiInstance().id)
 
         return Event(id=str(uuid4()),
