@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List, Union, Callable, Dict
 
 from pydantic import BaseModel
-
+from pydantic.utils import deep_update
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import ProfileMetadata
@@ -116,7 +116,8 @@ class Profile(Entity):
 
                     yield event_type, segment_id, msg
 
-    async def merge(self, load_profiles_to_merge_callable: Callable, limit: int = 2000) -> Union['Profiles', None]:
+    async def merge(self, load_profiles_to_merge_callable: Callable, limit: int = 2000,
+                    override_old_data: bool = True) -> Union['Profiles', None]:
 
         """
         This method mutates current profile.
@@ -142,7 +143,8 @@ class Profile(Entity):
             # Are there any profiles to merge?
             if len(profiles_to_merge) > 0:
                 # Add current profile to existing ones and get merged profile
-                merged_profile = Profiles.merge(profiles_to_merge, self)
+                merged_profile = Profiles.merge(profiles_to_merge, current_profile=self,
+                                                override_old_data=override_old_data)
 
                 # Replace current profile with merged profile
                 self.replace(merged_profile)
@@ -186,24 +188,43 @@ class Profile(Entity):
         )
 
 
-class Profiles(list):
+class Profiles(List[Profile]):
 
     @staticmethod
-    def merge(existing_profiles: List[Profile], current_profile: Profile) -> Profile:
+    def merge(existing_profiles: List[Profile], current_profile: Profile, override_old_data=True) -> Profile:
 
-        profiles = existing_profiles + [current_profile]
+        all_profiles = existing_profiles + [current_profile]
 
-        traits = [profile.traits.dict() for profile in profiles]
-        traits = merge({}, traits)
+        if override_old_data is False:
+            """
+                Marge do not loose data. Conflicts are resoled to list of values.
+                E.g. Name="bill" + Name="Wiliam"  = Name=['bill','wiliam']
+            """
 
-        piis = [profile.pii.dict() for profile in profiles]
-        piis = merge({}, piis)
+            traits = [profile.traits.dict() for profile in all_profiles]
+            piis = [profile.pii.dict() for profile in all_profiles]
+            traits = merge({}, traits)
+            piis = merge({}, piis)
+        else:
+            """
+                Marge overrides data. Conflicts are resoled to single value. Latest wins.
+                E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
+            """
+
+            current_profile_dict = current_profile.dict()
+            for profile in all_profiles:
+                current_profile_dict['traits'] = deep_update(current_profile_dict['traits'], profile.traits.dict())
+                current_profile_dict['pii'] = deep_update(current_profile_dict['pii'], profile.pii.dict())
+            traits = current_profile_dict['traits']
+            piis = current_profile_dict['pii']
+
+        # Merge stats, consents, segments, etc.
 
         consents = {}
         segments = []
         interests = defaultdict(int)
         stats = ProfileStats()
-        for profile in profiles:  # Type: Profile
+        for profile in all_profiles:  # Type: Profile
 
             stats.visits += profile.stats.visits
             stats.views += profile.stats.views

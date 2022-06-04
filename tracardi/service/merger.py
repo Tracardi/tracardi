@@ -57,7 +57,7 @@ def append(base, key, value):
     return base
 
 
-def merge(base, dict_list):
+def merge(base: dict, dict_list: list) -> dict:
     for key in set().union(*dict_list):
         for data in dict_list:
             if key in data:

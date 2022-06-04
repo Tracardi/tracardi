@@ -35,14 +35,14 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
     return [Profile(**profile) for profile in profiles]
 
 
-async def save_profile(profile: Profile):
+async def save_profile(profile: Profile, refresh_after_save=False):
 
     if tracardi.cache_profiles is not False:
         cache = ProfileCache()
         cache.save_profile(profile)
 
     result = await StorageFor(profile).index().save()
-    if elastic.refresh_profiles_after_save:
+    if refresh_after_save or elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
     return result
 
