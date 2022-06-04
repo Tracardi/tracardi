@@ -37,12 +37,12 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
 
-    def get_events(self, session: Optional[Session], profile: Optional[Profile], profile_less, ip: str) -> List[Event]:
+    def get_events(self, session: Optional[Session], profile: Optional[Profile], has_profile, ip: str) -> List[Event]:
         event_list = []
         if self.events:
             debugging = self.is_debugging_on()
             for event in self.events:  # type: EventPayload
-                _event = event.to_event(self.metadata, self.source, session, profile, profile_less)
+                _event = event.to_event(self.metadata, self.source, session, profile, has_profile)
                 _event.metadata.status = COLLECTED
                 _event.metadata.debug = debugging
 
