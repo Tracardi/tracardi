@@ -35,7 +35,7 @@ class RulesEngine:
     def __init__(self,
                  session: Session,
                  profile: Optional[Profile],
-                 events_rules: List[Tuple[Task, Event]],
+                 events_rules: List[Tuple[List[Dict], Event]],
                  console_log=None
                  ):
 
@@ -54,14 +54,11 @@ class RulesEngine:
         debugger = Debugger()
         invoked_rules = defaultdict(list)
 
-        for rules_loading_task, event in self.events_rules:
+        for rules, event in self.events_rules:
 
             # skip invalid events
             if event.metadata.status == INVALID:
                 continue
-
-            # Loads rules only for event.type
-            rules = await rules_loading_task
 
             if len(rules) == 0:
                 logger.debug(f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")

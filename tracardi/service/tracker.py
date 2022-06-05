@@ -194,7 +194,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     rules_engine = RulesEngine(
         session,
         profile,
-        events_rules=storage.driver.rule.load_rules(tracker_payload.source, events),
+        events_rules=await storage.driver.rule.load_rules(tracker_payload.source, events),
         console_log=console_log
     )
 
