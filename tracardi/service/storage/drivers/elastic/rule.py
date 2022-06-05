@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
-memory_cache = MemoryCache()
-
-
 def load_rules(source: Entity, events: List[Event]) -> List[Tuple[Task, Event]]:
     return [(
         asyncio.create_task(load_rule(event.type, source.id)),
@@ -53,15 +50,7 @@ async def load_rule(event_type: str, source_id: str):
         }
     }
 
-    if 'rules' not in memory_cache:
-        logger.debug("Loading routing rules with {}".format(query))
-        flows_data = await storage_manager(index="rule").filter(query)
-        # todo set MemoryCache ttl from env
-        memory_cache['rules'] = CacheItem(data=flows_data, ttl=15)
-
-    rules = list(memory_cache['rules'].data)
-
-    return rules
+    return list(await storage_manager(index="rule").filter(query))
 
 
 async def load_flow_rules(flow_id: str) -> List[Rule]:
