@@ -3,12 +3,15 @@ import json
 import logging
 
 import aiohttp
-from typing import Optional
+from typing import Optional, List
 
 from aiohttp import ClientConnectorError, BasicAuth
 from pydantic import BaseModel, AnyHttpUrl
 
 from tracardi.config import tracardi
+from tracardi.domain.event import Event
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
@@ -64,7 +67,7 @@ class HttpConnector(Connector):
                     "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
                                                                                name))
 
-    async def run(self, data, delta):
+    async def run(self, data, delta, profile: Profile, session: Session, events: List[Event]):
         try:
             credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
             credentials = HttpCredentials(**credentials)

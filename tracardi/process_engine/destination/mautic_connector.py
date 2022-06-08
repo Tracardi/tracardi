@@ -1,11 +1,16 @@
+from typing import List
+
 from tracardi.process_engine.destination.connector import Connector
 from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
 from tracardi.service.storage.driver import storage
+from ...domain.event import Event
+from ...domain.profile import Profile
+from ...domain.session import Session
 
 
 class MauticConnector(Connector):
 
-    async def run(self, data, delta) -> None:
+    async def run(self, data, delta, profile: Profile, session: Session, events: List[Event]) -> None:
 
         if "email" not in data:
             raise ValueError("Given mapping must contain email.")

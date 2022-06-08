@@ -289,37 +289,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     #     )
     #     logger.error(message)
 
-    # Send to destination
-
-    if has_profile and profile_copy is not None:
-        new_profile = profile.dict(exclude={"operation": ...})
-
-        if profile_copy != new_profile:
-            profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)
-            if profile_delta:
-                logger.info("Profile changed. Destination scheduled to run.")
-                try:
-                    destination_manager = DestinationManager(profile_delta,
-                                                             profile,
-                                                             session,
-                                                             payload=None,
-                                                             event=None,
-                                                             flow=None)
-                    # todo performance - could be not awaited add to save_task
-                    await destination_manager.send_data(profile.id, debug=False)
-                except Exception as e:
-                    # todo - this appends error to the same profile - it rather should be en event error
-                    console_log.append(Console(
-                        profile_id=get_profile_id(profile),
-                        origin='destination',
-                        class_name='DestinationManager',
-                        module='tracker',
-                        type='error',
-                        message=str(e),
-                        traceback=get_traceback(e)
-                    ))
-                    logger.error(str(e))
-
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
             if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
@@ -370,6 +339,37 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         if console_log:
             encoded_console_log = list(console_log.get_encoded())
             save_tasks.append(asyncio.create_task(StorageForBulk(encoded_console_log).index('console-log').save()))
+
+    # Send to destination
+
+    if has_profile and profile_copy is not None:
+        new_profile = profile.dict(exclude={"operation": ...})
+
+        if profile_copy != new_profile:
+            profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)
+            if profile_delta:
+                logger.info("Profile changed. Destination scheduled to run.")
+                try:
+                    destination_manager = DestinationManager(profile_delta,
+                                                             profile,
+                                                             session,
+                                                             payload=None,
+                                                             event=None,
+                                                             flow=None)
+                    # todo performance - could be not awaited add to save_task
+                    await destination_manager.send_data(profile.id, events, debug=False)
+                except Exception as e:
+                    # todo - this appends error to the same profile - it rather should be en event error
+                    console_log.append(Console(
+                        profile_id=get_profile_id(profile),
+                        origin='destination',
+                        class_name='DestinationManager',
+                        module='tracker',
+                        type='error',
+                        message=str(e),
+                        traceback=get_traceback(e)
+                    ))
+                    logger.error(str(e))
 
     if save_tasks:
         # Run tasks

@@ -25,6 +25,8 @@ class DestinationManager:
     def __init__(self, delta, profile=None, session=None, payload=None, event=None, flow=None):
         self.dot = DotAccessor(profile, session, payload, event, flow)
         self.delta = delta
+        self.profile = profile
+        self.session = session
 
     @staticmethod
     async def _load_destinations():
@@ -38,7 +40,7 @@ class DestinationManager:
             raise ValueError(f"Can not find class in package on {package}")
         return ".".join(parts[:-1]), parts[-1]
 
-    async def send_data(self, profile_id, debug):
+    async def send_data(self, profile_id, events, debug):
 
         template = DictTraverser(self.dot, default=None)
 
@@ -75,8 +77,12 @@ class DestinationManager:
                         destination_instance.run,
                         ApiInstance().id,
                         result,  # *args
-                        self.delta)
-                    postponed_call.wait = 5
+                        self.delta,
+                        self.profile,
+                        self.session,
+                        events
+                    )
+                    postponed_call.wait = tracardi.postpone_destination_sync
                     postponed_call.run(asyncio.get_running_loop())
                 else:
-                    await destination_instance.run(result, self.delta)
+                    await destination_instance.run(result, self.delta, self.profile, self.session, events)
