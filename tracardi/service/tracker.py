@@ -102,7 +102,6 @@ async def _save_events(tracker_payload, console_log, events):
 
 async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
-
     results = await asyncio.gather(
         _save_profile(profile),
         _save_session(tracker_payload, session, profile),
@@ -412,10 +411,10 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     return result
 
 
-async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool):
-
+async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str]):
     try:
-        source = await source_cache.validate_source(source_id=tracker_payload.source.id, allowed_bridges=['rest'])
+        source = await source_cache.validate_source(source_id=tracker_payload.source.id,
+                                                    allowed_bridges=allowed_bridges)
     except ValueError as e:
         raise UnauthorizedException(e)
 
@@ -447,12 +446,14 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 
-async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool):
+async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
+                                      allowed_bridges: List[str]):
     if tracardi.sync_profile_tracks:
         try:
             async with ProfileTracksSynchronizer(tracker_payload.profile, wait=1):
-                return await track_event(tracker_payload, ip=host, profile_less=profile_less)
+                return await track_event(tracker_payload, ip=host, profile_less=profile_less,
+                                         allowed_bridges=allowed_bridges)
         except redis.exceptions.ConnectionError as e:
             raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
     else:
-        return await track_event(tracker_payload, ip=host, profile_less=profile_less)
+        return await track_event(tracker_payload, ip=host, profile_less=profile_less, allowed_bridges=allowed_bridges)
