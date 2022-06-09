@@ -415,7 +415,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
 async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool):
 
     try:
-        source = await source_cache.validate_source(source_id=tracker_payload.source.id)
+        source = await source_cache.validate_source(source_id=tracker_payload.source.id, allowed_bridges=['rest'])
     except ValueError as e:
         raise UnauthorizedException(e)
 

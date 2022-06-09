@@ -15,6 +15,8 @@ class EventSource(Entity):
     groups: Union[List[str], str] = []
     returns_profile: Optional[bool] = False
     permanent_profile_id: Optional[bool] = False
+    manual: Optional[str] = None
+    locked: bool = False
 
     def __init__(self, **data: Any):
         data['timestamp'] = datetime.utcnow()
