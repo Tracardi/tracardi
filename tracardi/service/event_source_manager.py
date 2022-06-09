@@ -4,7 +4,7 @@ from tracardi.service.storage.driver import storage
 
 def event_source_types():
     standard_inbound_sources = {
-        "javascript": {
+        "mqtt": {
             "name": "mqtt",
             "tags": ["mqtt", "inbound"]
         },
