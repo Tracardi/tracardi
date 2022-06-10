@@ -1,8 +1,13 @@
 from pydantic import BaseModel
 
 
+class SubVersion(BaseModel):
+    version: str
+    name: str
+
+
 class Version(BaseModel):
-    prev_version: 'Version' = None
+    prev_version: SubVersion = None
     version: str
     name: str
 
@@ -11,7 +16,7 @@ class Version(BaseModel):
 
     def get_head_with_prev_version(self, prev: 'Version'):
         version_copy = self.copy(update={'prev_version': None})
-        version_copy.prev_version = Version(
+        version_copy.prev_version = SubVersion(
             version=prev.version,
             name=prev.name
         )
@@ -19,10 +24,10 @@ class Version(BaseModel):
         return version_copy
 
     def has_prev_version(self):
-        return self. prev_version is not None
+        return self.prev_version is not None
 
     def __eq__(self, other):
         return other and self.version == other.version and self.name == other.name
 
     def __str__(self):
-        return f"Version {self.version}.{self.name} ({self.prev_version.version if isinstance(self.prev_version, Version) else 'No previous version'})"
+        return f"Version {self.version}.{self.name} ({self.prev_version.version if isinstance(self.prev_version, SubVersion) else 'No previous version'})"
