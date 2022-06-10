@@ -37,6 +37,7 @@ class TracardiConfig:
         self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
+        self.tokens_in_redis = (env["TOKENS_IN_REDIS"].lower() == "yes") if "TOKENS_IN_REDIS" in env else True
 
 
 class MemoryCacheConfig:
