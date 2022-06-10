@@ -10,7 +10,7 @@ class Version(BaseModel):
         return self.version.replace(".", "")
 
     def get_head_with_prev_version(self, prev: 'Version'):
-        version_copy = Version(**self.dict())
+        version_copy = self.copy(exclude={'prev_version'})
         version_copy.prev_version = Version(
             version=prev.version,
             name=prev.name
