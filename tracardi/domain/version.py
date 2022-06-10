@@ -10,7 +10,7 @@ class Version(BaseModel):
         return self.version.replace(".", "")
 
     def get_head_with_prev_version(self, prev: 'Version'):
-        version_copy = Version(**self.dict())
+        version_copy = self.copy(update={'prev_version': None})
         version_copy.prev_version = Version(
             version=prev.version,
             name=prev.name
@@ -22,9 +22,7 @@ class Version(BaseModel):
         return self. prev_version is not None
 
     def __eq__(self, other):
-        return other and self.version == other.version and self.name == other.name \
-               and self.prev_version.version == other.prev_version.version \
-               and self.prev_version.name == other.prev_version.name
+        return other and self.version == other.version and self.name == other.name
 
     def __str__(self):
-        return f"Version {self.version}.{self.name} ({self.prev_version.version if self.prev_version else 'No previous version'})"
+        return f"Version {self.version}.{self.name} ({self.prev_version.version if isinstance(self.prev_version, Version) else 'No previous version'})"
