@@ -15,7 +15,12 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "prev_version": {
+        "type": "object",
+        "enabled": false
       }
     }
   }
 }
+

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -7,7 +9,7 @@ class SubVersion(BaseModel):
 
 
 class Version(BaseModel):
-    prev_version: SubVersion = None
+    prev_version: Optional[SubVersion] = None
     version: str
     name: str
 
