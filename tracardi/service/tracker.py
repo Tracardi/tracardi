@@ -18,7 +18,7 @@ from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.merging import merge
 from tracardi.service.notation.dot_accessor import DotAccessor
 
-from tracardi.domain.event_payload_validator import EventPayloadValidator
+from tracardi.domain.event_payload_validator import EventTypeManager
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.console import Console
@@ -133,7 +133,7 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
         if event_type not in cache:
             logger.info(f"Refreshed validation schema for event type {event_type}.")
             event_payload_validator = await storage.driver.event_management.load_schema(
-                dot.event['type'])  # type: EventPayloadValidator
+                dot.event['type'])  # type: EventTypeManager
             cache[event_type] = CacheItem(data=event_payload_validator, ttl=memory_cache.event_validator_ttl)
 
         validation_data = cache[event_type].data
