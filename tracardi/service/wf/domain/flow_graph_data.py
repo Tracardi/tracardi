@@ -136,3 +136,20 @@ class FlowGraphData(BaseModel):
                     yield edge
 
         self.edges = list(__remove())
+
+    def traverse_graph_for_distances(self, start_at_id: str, distance_map: dict = None, curr_distance: int = 0):
+
+        if distance_map is None:
+            distance_map = {}
+
+        if distance_map.get(start_at_id, -1) < curr_distance:
+            distance_map[start_at_id] = curr_distance
+        children = [edge.target for edge in self.get_nodes_out_edges(start_at_id)]
+
+        for child in children:
+            self.traverse_graph_for_distances(child, distance_map, curr_distance + 1)
+
+        return distance_map
+
+
+
