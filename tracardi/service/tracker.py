@@ -249,7 +249,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     save_tasks = []
     try:
         # Merge
-        profiles_to_disable = await merge(profile, limit=2000)
+        profiles_to_disable = await merge(profile, override_old_data=True, limit=2000)
         if profiles_to_disable is not None:
             task = asyncio.create_task(
                 StorageForBulk(profiles_to_disable).index('profile').save())
