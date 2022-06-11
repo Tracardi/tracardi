@@ -139,6 +139,9 @@ class FlowGraphData(BaseModel):
 
     def traverse_graph_for_distances(self, start_at_id: str, distance_map: dict = None, curr_distance: int = 0,
                                      path: list = None):
+        """
+        DFS here
+        """
 
         if distance_map is None:
             distance_map = {}
