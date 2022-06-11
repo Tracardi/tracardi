@@ -137,17 +137,24 @@ class FlowGraphData(BaseModel):
 
         self.edges = list(__remove())
 
-    def traverse_graph_for_distances(self, start_at_id: str, distance_map: dict = None, curr_distance: int = 0):
+    def traverse_graph_for_distances(self, start_at_id: str, distance_map: dict = None, curr_distance: int = 0,
+                                     path: list = None):
 
         if distance_map is None:
             distance_map = {}
 
+        if path is None:
+            path = []
+
         if distance_map.get(start_at_id, -1) < curr_distance:
             distance_map[start_at_id] = curr_distance
-        children = [edge.target for edge in self.get_nodes_out_edges(start_at_id)]
+
+        #  (edge.target not in path) equivalent to (edge.target is not a parent/grandparent/... of curr node) so
+        #  we're avoiding cycles here, also considering the case when the node is it's own parent and child
+        children = [edge.target for edge in self.get_nodes_out_edges(start_at_id) if edge.target not in path]
 
         for child in children:
-            self.traverse_graph_for_distances(child, distance_map, curr_distance + 1)
+            self.traverse_graph_for_distances(child, distance_map, curr_distance + 1, [*path, child])
 
         return distance_map
 
