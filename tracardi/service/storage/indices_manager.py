@@ -37,13 +37,3 @@ async def get_indices_status():
             _template_pattern = index.get_template_pattern()
             if not await es.exists_alias(_alias, index=_template_pattern):
                 yield "missing_alias", _alias
-
-
-async def remove_index(index):
-    es = ElasticClient.instance()
-    index = resources.get_index(index)
-    if await es.exists_index(index.get_write_index()):
-        try:
-            await es.remove_index(index.get_read_index())
-        except elasticsearch.exceptions.NotFoundError:
-            pass
