@@ -132,7 +132,7 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
 
         if event_type not in cache:
             logger.info(f"Refreshed validation schema for event type {event_type}.")
-            event_payload_validator = await storage.driver.event_management.load_schema(
+            event_payload_validator = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
             cache[event_type] = CacheItem(data=event_payload_validator, ttl=memory_cache.event_validator_ttl)
 
