@@ -381,7 +381,7 @@ class PersistenceService:
 
     async def get_mapping(self) -> IndexMapping:
         try:
-            return IndexMapping(await self.storage.get_mapping(self.storage.index.get_read_index()))
+            return IndexMapping(await self.storage.get_mapping(self.storage.index.get_index_alias()))
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

@@ -47,7 +47,7 @@ async def create_indices():
 
     def add_prefix(json_map, index: Index):
         json_map = json_map.replace("%%PREFIX%%", tracardi.version.name)
-        json_map = json_map.replace("%%ALIAS%%", index.get_read_index())
+        json_map = json_map.replace("%%ALIAS%%", index.get_index_alias())
         json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
         json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)
         json_map = json_map.replace("%%SHARDS%%", elastic.shards)
@@ -78,7 +78,7 @@ async def create_indices():
             map = json.loads(map)
 
             target_index = index.get_aliased_data_index()
-            alias_index = index.get_read_index()
+            alias_index = index.get_index_alias()
 
             # -------- TEMPLATE --------
 
@@ -115,7 +115,7 @@ async def create_indices():
             # -------- INDEX --------
 
             if index.aliased is False:
-                target_index = index.get_read_index()
+                target_index = index.get_index_alias()
 
             if not await es.exists_index(target_index):
 
@@ -146,7 +146,7 @@ async def create_indices():
     for key, index in resources.resources.items():
         if index.aliased:
 
-            alias_index = index.get_read_index()
+            alias_index = index.get_index_alias()
 
             actions.append({"remove": {"index": "_all", "alias": alias_index}})
             if index.multi_index:
@@ -173,7 +173,7 @@ async def create_indices():
         if index.aliased:
 
             target_index = index.get_aliased_data_index()
-            alias_index = index.get_read_index()
+            alias_index = index.get_index_alias()
 
             # Check if alias created
 

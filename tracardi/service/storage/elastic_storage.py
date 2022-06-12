@@ -43,15 +43,15 @@ class ElasticStorage:
         self.index_key = index_key
 
     async def exists(self, id) -> bool:
-        return await self.storage.exists(self.index.get_read_index(), id)
+        return await self.storage.exists(self.index.get_index_alias(), id)
 
     async def count(self, query: dict = None) -> bool:
-        return await self.storage.count(self.index.get_read_index(), query)
+        return await self.storage.count(self.index.get_index_alias(), query)
 
     async def load(self, id) -> [dict, None]:
 
         try:
-            index = self.index.get_read_index()
+            index = self.index.get_index_alias()
             if not self.index.multi_index:
                 result = await self.storage.get(index, id)
                 output = result['_source']
@@ -79,15 +79,15 @@ class ElasticStorage:
 
     async def delete(self, id):
         if not self.index.multi_index:
-            return await self.storage.delete(self.index.get_read_index(), id)
+            return await self.storage.delete(self.index.get_index_alias(), id)
         else:
             return await self.delete_by("_id", id)
 
     async def search(self, query):
-        return await self.storage.search(self.index.get_read_index(), query)
+        return await self.storage.search(self.index.get_index_alias(), query)
 
     async def refresh(self, params=None, headers=None):
-        return await self.storage.refresh(self.index.get_read_index(), params, headers)
+        return await self.storage.refresh(self.index.get_index_alias(), params, headers)
 
     async def reindex(self, source, destination, wait_for_completion=True):
         return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
@@ -155,7 +155,7 @@ class ElasticStorage:
                 }
             }
         }
-        return await self.storage.delete_by_query(self.index.get_read_index(), query)
+        return await self.storage.delete_by_query(self.index.get_index_alias(), query)
 
     async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
                              limit=1000):
@@ -192,7 +192,7 @@ class ElasticStorage:
         return await self.storage.flush(self.index.get_write_index(), params, headers)
 
     async def update_by_query(self, query):
-        return await self.storage.update_by_query(index=self.index.get_read_index(), query=query)
+        return await self.storage.update_by_query(index=self.index.get_index_alias(), query=query)
 
     async def update(self, id, record, retry_on_conflict=3):
         return await self.storage.update(index=self.index.get_write_index(),
@@ -201,7 +201,7 @@ class ElasticStorage:
                                          retry_on_conflict=retry_on_conflict)
 
     async def delete_by_query(self, query):
-        return await self.storage.delete_by_query(index=self.index.get_read_index(), body=query)
+        return await self.storage.delete_by_query(index=self.index.get_index_alias(), body=query)
 
     async def get_mapping(self, index):
         return await self.storage.get_mapping(index)
