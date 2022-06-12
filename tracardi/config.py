@@ -5,8 +5,7 @@ import os
 from tracardi.domain.version import Version
 
 VERSION = '0.7.1'
-NAME = os.environ['INSTANCE_PREFIX'] if 'INSTANCE_PREFIX' in os.environ and os.environ[
-    'INSTANCE_PREFIX'] else hashlib.md5(VERSION.encode('utf-8')).hexdigest()[:5]
+NAME = os.environ.get('INSTANCE_PREFIX', None)
 
 
 def _get_logging_level(level: str) -> int:

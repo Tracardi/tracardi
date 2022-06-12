@@ -1,7 +1,8 @@
 [
+  "Added indices: ; removed indices: ",
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-debug-info",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-flow",
     "multi": false,
     "script": null,
     "worker": "reindex",
@@ -9,8 +10,8 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-destination",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-rule",
     "multi": false,
     "script": null,
     "worker": "reindex",
@@ -18,8 +19,8 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-api-instance",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-task",
     "multi": false,
     "script": null,
     "worker": "reindex",
@@ -27,8 +28,8 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-source",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-events-tags",
     "multi": false,
     "script": null,
     "worker": "reindex",
@@ -36,8 +37,8 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-events-tags",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-segment",
     "multi": false,
     "script": null,
     "worker": "reindex",
@@ -45,8 +46,8 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-profile",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-user-log",
     "multi": true,
     "script": null,
     "worker": "reindex",
@@ -54,26 +55,17 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-console-log",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-event",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-event",
     "multi": true,
-    "script": "Map temp = new HashMap();\ntemp.putAll(ctx._source);\ntemp.tags.count = (float)ctx._source.tags.count;\ntemp.session.start = Instant.parse(ctx._source.session.start + \"Z\").toEpochMilli();\nctx._source = [:];\nctx._source.putAll(temp);",
+    "script": "Map temp = new HashMap();\ntemp.putAll(ctx._source);\n//temp.tags.count = (float)ctx._source.tags.count;\n//temp.session.start = Instant.parse(ctx._source.session.start + \"Z\").toEpochMilli();\nctx._source = [:];\nctx._source.putAll(temp);",
     "worker": "reindex",
     "custom_worker_required": null,
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-flow-action-plugins",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-debug-info",
     "multi": false,
     "script": null,
     "worker": "reindex",
@@ -81,98 +73,8 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-segment",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-consent-type",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-flow",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-validation-schema",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-resource",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-state-threshold",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-rule",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-schedule",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-task",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-user",
-    "multi": false,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-user-log",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-log",
     "multi": true,
     "script": null,
     "worker": "reindex",
@@ -180,26 +82,8 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-log",
-    "multi": true,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-session",
-    "multi": true,
-    "script": null,
-    "worker": "reindex",
-    "custom_worker_required": null,
-    "asynchronous": true
-  },
-  {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-pro",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-import",
     "multi": false,
     "script": null,
     "worker": "reindex",
@@ -207,8 +91,125 @@
     "asynchronous": true
   },
   {
-    "id": "d20fe4f7-1c21-4b69-9683-efb3f73790c3",
-    "name": "tracardi-import",
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-source",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-consent-type",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-flow-action-plugins",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-destination",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-api-instance",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-session",
+    "multi": true,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-profile",
+    "multi": true,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-validation-schema",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-resource",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-console-log",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-state-threshold",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-schedule",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-pro",
+    "multi": false,
+    "script": null,
+    "worker": "reindex",
+    "custom_worker_required": null,
+    "asynchronous": true
+  },
+  {
+    "id": "3e431f1c-bbf1-43e5-9b2c-e46f64b33e47",
+    "index": "tracardi-user",
     "multi": false,
     "script": null,
     "worker": "reindex",

@@ -4,7 +4,7 @@ from typing import Optional
 
 class MigrationSchema(BaseModel):
     id: str
-    name: str
+    index: str
     multi: bool
     script: Optional[str] = None
     worker: str
