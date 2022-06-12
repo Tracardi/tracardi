@@ -15,11 +15,8 @@ class Index:
             return self.prefix + self.index
         return self.index
 
-    def get_read_index(self):
+    def get_index_alias(self):
         return self._index()
-
-    def get_prev_alias(self):
-        return f"{self.get_read_index()}.prev"
 
     def get_write_index(self):
 
@@ -114,7 +111,7 @@ class Resource:
         }
 
     def list_aliases(self) -> set:
-        return {index.get_read_index() for name, index in self.resources.items()}
+        return {index.get_index_alias() for name, index in self.resources.items()}
 
     def get_index(self, name) -> Index:
         if name in self.resources:
