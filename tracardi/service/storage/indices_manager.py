@@ -2,6 +2,7 @@ import elasticsearch
 
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import resources, Index
+from tracardi.config import tracardi
 
 
 async def get_indices_status():
@@ -44,6 +45,6 @@ async def remove_index(index):
     index = resources.get_index(index)
     if await es.exists_index(index.get_write_index()):
         try:
-            await es.remove_index(index.get_read_index())
+            await es.remove_index(f"{tracardi.version.get_version_prefix()}.{index.get_read_index()}")
         except elasticsearch.exceptions.NotFoundError:
             pass
