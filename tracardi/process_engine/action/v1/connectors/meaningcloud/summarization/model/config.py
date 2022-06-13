@@ -9,6 +9,12 @@ class Config(BaseModel):
     lang: Optional[str] = "auto"
     sentences: str
 
+    @validator("source")
+    def must_not_be_empty(cls, value):
+        if value.id == "":
+            raise ValueError("This field can not be empty")
+        return value
+
     @validator("text")
     def validate_text(cls, value):
         if value is None or len(value) == 0:
