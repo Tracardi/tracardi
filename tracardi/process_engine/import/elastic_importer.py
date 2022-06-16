@@ -10,7 +10,7 @@ from tracardi.domain.import_config import ImportConfig
 from tracardi.domain.task import Task
 from tracardi.process_engine.action.v1.connectors.elasticsearch.query.model.config import ElasticCredentials
 from .importer import Importer
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
@@ -23,9 +23,21 @@ class ElasticIndexImportConfig(BaseModel):
     index: NamedEntity
     batch: int
 
+    @validator("source", "index")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
+
 
 class ElasticSourceConfig(BaseModel):
     source: NamedEntity
+
+    @validator("source")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
 
 
 class Endpoint(PluginEndpoint):
