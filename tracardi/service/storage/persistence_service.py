@@ -88,13 +88,8 @@ class SqlSearchQueryEngine:
         es_query = {
             "from": query.start,
             "size": query.limit,
-            'sort': [{time_field: 'desc'}]
-        }
-
-        if query.where:
-            es_query['query'] = {'query_string': {"query": query.where}}
-        else:
-            es_query['query'] = {'range': {
+            'sort': [{time_field: 'desc'}],
+            "query": {"bool": {"filter": {"range": {
                 time_field: {
                     'from': min_date_time,
                     'to': max_date_time,
@@ -102,8 +97,11 @@ class SqlSearchQueryEngine:
                     'include_upper': True,
                     'boost': 1.0,
                     'time_zone': time_zone if time_zone else "UTC"
-                }
-            }}
+                }}
+            }}}}
+
+        if query.where:
+            es_query['query']["bool"]["must"] = {'query_string': {"query": query.where}}
 
         return es_query
 
@@ -217,9 +215,9 @@ class SqlSearchQueryEngine:
                     timestamp = datetime.fromisoformat(row["key_as_string"].replace('Z', '+00:00'))
 
                     item, result = list_value_at_index(result, number, default_value={
-                            "date": "{}".format(timestamp.strftime(format)),
-                            'interval': "+{}{}".format(interval, unit),
-                        })
+                        "date": "{}".format(timestamp.strftime(format)),
+                        'interval': "+{}{}".format(interval, unit),
+                    })
 
                     item[bucket_name] = row["doc_count"]
                     result[number] = item
@@ -327,7 +325,8 @@ class SqlSearchQueryEngine:
 
             try:
 
-                buckets_result, buckets = __format_count_by_bucket(result['aggregations']['by_field']['buckets'], unit, interval, format)
+                buckets_result, buckets = __format_count_by_bucket(result['aggregations']['by_field']['buckets'], unit,
+                                                                   interval, format)
                 qs = {
                     'total': result['hits']['total']['value'],
                     'result': buckets_result,
