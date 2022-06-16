@@ -118,6 +118,7 @@ async def add_plugins():
         # Events
         'tracardi.process_engine.action.v1.events.event_counter.plugin',
         'tracardi.process_engine.action.v1.events.event_aggregator.plugin',
+        'tracardi.process_engine.action.v1.events.event_discarder.plugin',
 
         # Validation
         'tracardi.process_engine.action.v1.json_schema_validation_action',
