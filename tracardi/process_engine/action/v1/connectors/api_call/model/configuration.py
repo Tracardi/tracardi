@@ -8,7 +8,8 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dot_template import DotTemplate
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
-from pydantic import AnyHttpUrl, BaseModel, validator
+from pydantic import BaseModel, validator
+from tracardi.domain.named_entity import NamedEntity
 
 
 class Method(str, Enum):
@@ -36,8 +37,15 @@ class Content(BaseModel):
         return json.loads(self.content)
 
 
+class Credentials(BaseModel):
+    url: str
+    password: Optional[str] = None
+    username: Optional[str] = None
+
+
 class RemoteCallConfiguration(BaseModel):
-    url: AnyHttpUrl
+    source: NamedEntity
+    endpoint: str
     timeout: int = 30
     method: Method = Method.get
     headers: Optional[dict] = {}
