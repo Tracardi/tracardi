@@ -65,7 +65,7 @@ class StartAction(ActionRunner):
             result = await storage.driver.event.load_event_by_type(self.config.event_type.id, limit=10)
             if result.total == 0:
                 raise ValueError(
-                    f"There is no event with type '{self.config.event_type}'. Check configuration for event type."
+                    f"There is no event with type '{self.config.event_type.id}'. Check configuration for event type."
                 )
             events = list(result)
 
