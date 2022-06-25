@@ -1,10 +1,9 @@
-import json
-from json import JSONDecodeError
-from typing import Optional, Union
+from typing import Optional
 from enum import Enum
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dot_template import DotTemplate
 from pydantic import AnyHttpUrl, BaseModel
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Method(str, Enum):
@@ -14,7 +13,7 @@ class Method(str, Enum):
     delete = 'delete'
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     url: AnyHttpUrl
     timeout: int = 30
     method: Method = Method.get

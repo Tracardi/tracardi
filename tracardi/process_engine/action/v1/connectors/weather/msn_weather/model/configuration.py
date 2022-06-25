@@ -1,7 +1,8 @@
 from pydantic import BaseModel, validator
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class PluginConfiguration(BaseModel):
+class PluginConfiguration(PluginConfig):
     system: str = "c"
     city: str
 

@@ -1,12 +1,13 @@
-from pydantic import BaseModel, validator, AnyHttpUrl
+from pydantic import validator, AnyHttpUrl
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     uix_mf_source: AnyHttpUrl = "http://localhost:8686"
     title: str = ""
     message: str = ""

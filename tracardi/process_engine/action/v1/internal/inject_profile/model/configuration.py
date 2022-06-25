@@ -1,7 +1,8 @@
 from pydantic import BaseModel, validator
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     query: str
 
     @validator("query")

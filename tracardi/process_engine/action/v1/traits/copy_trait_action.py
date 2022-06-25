@@ -13,6 +13,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
+from tracardi.service.plugin.domain.config import PluginConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -22,7 +23,7 @@ class TraitsConfiguration(BaseModel):
     set: dict = {}
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     traits: TraitsConfiguration
 
 

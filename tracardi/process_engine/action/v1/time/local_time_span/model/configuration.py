@@ -2,10 +2,11 @@ from typing import Union
 
 import pytz
 from datetime import datetime
-from pydantic import BaseModel, validator
+from pydantic import validator
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class TimeSpanConfiguration(BaseModel):
+class TimeSpanConfiguration(PluginConfig):
     timezone: str
     start: Union[str, datetime]
     end: Union[str, datetime]

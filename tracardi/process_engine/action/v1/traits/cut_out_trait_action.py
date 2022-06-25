@@ -1,12 +1,13 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation, Documentation, PortDoc
+    Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class CutOutTraitConfig(BaseModel):
+class CutOutTraitConfig(PluginConfig):
     trait: str
 
     @validator("trait")

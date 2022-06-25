@@ -2,16 +2,17 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from pydantic import BaseModel, validator
+from pydantic import validator
 from typing import Dict, Union
 from tracardi.service.event_validator import validate as validate_with_schema
 from tracardi.exceptions.exception import EventValidationException
 from tracardi.domain.event_payload_validator import EventTypeManager, ValidationSchema
 import jsonschema
 import json
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     validation_schema: Union[str, Dict[str, Dict]]
 
     @validator("validation_schema")

@@ -22,7 +22,7 @@ class RequireConsentsAction(ActionRunner):
             self.console.warning("Cannot perform consent check on profile less event.")
             return Result(port="false", value=payload)
 
-        self.config.consent_ids = [consent["id"] for consent in self.config.consent_ids]
+        consent_ids = [consent["id"] for consent in self.config.consent_ids]
 
         profile_consents_copy = self.profile.consents
         for consent_id in profile_consents_copy:
@@ -30,7 +30,7 @@ class RequireConsentsAction(ActionRunner):
             if revoke is not None and revoke < self.event.metadata.time.insert:
                 self.profile.consents.pop(consent_id)
 
-        for consent_id in self.config.consent_ids:
+        for consent_id in consent_ids:
             consent_type = await storage.driver.consent_type.get_by_id(consent_id)
 
             if consent_type is None:
@@ -43,7 +43,7 @@ class RequireConsentsAction(ActionRunner):
 
                 if consent_type.revokable is True:
                     try:
-                        revoke_timestamp = self.profile.consents[consent_id]["revoke"].timestamp()
+                        revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp()
                     except AttributeError:
                         raise ValueError(f"Corrupted data - no revoke date provided for revokable consent "
                                          f"type {consent_id}")

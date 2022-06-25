@@ -14,7 +14,8 @@ async def validate(config: dict) -> Config:
         **(await storage.driver.resource.load(plugin_config.source.id)).credentials.production
     )
     client = TrelloClient(credentials.api_key, credentials.token)
-    plugin_config.list_id = await client.get_list_id(plugin_config.board_url, plugin_config.list_name)
+    list_id = await client.get_list_id(plugin_config.board_url, plugin_config.list_name)
+    plugin_config = Config(**plugin_config.dict(exclude={"list_id"}), list_id=list_id)
     return plugin_config
 
 
@@ -35,10 +36,10 @@ class TrelloCardRemover(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.card_name = dot[self.config.card_name]
+        card_name = dot[self.config.card_name]
 
         try:
-            result = await self._client.delete_card(self.config.list_id, self.config.card_name)
+            result = await self._client.delete_card(self.config.list_id, card_name)
         except (ConnectionError, ValueError) as e:
             self.console.error(str(e))
             return Result(port="error", value=payload)

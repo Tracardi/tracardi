@@ -1,13 +1,14 @@
 from dotty_dict import dotty
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.service.plugin.domain.result import Result
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     traits_type: str = "public"
     sub_traits: str = ""
 

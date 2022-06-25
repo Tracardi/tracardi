@@ -31,8 +31,8 @@ class SmtpDispatcherAction(ActionRunner):
         try:
             dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
             template = DotTemplate()
-            self.config.message.message = template.render(self.config.message.message, dot)
-            self.post.send(self.config.message)
+            message = template.render(self.config.message.message, dot)
+            self.post.send(message)
             return Result(port='payload', value={"result": payload})
         except Exception as e:
             self.console.error(repr(e))

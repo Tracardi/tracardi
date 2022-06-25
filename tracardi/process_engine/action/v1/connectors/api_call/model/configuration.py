@@ -9,6 +9,7 @@ from tracardi.service.notation.dot_template import DotTemplate
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from pydantic import AnyHttpUrl, BaseModel, validator
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Method(str, Enum):
@@ -36,7 +37,7 @@ class Content(BaseModel):
         return json.loads(self.content)
 
 
-class RemoteCallConfiguration(BaseModel):
+class RemoteCallConfiguration(PluginConfig):
     url: AnyHttpUrl
     timeout: int = 30
     method: Method = Method.get

@@ -2,11 +2,12 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     api_url: str
     uix_source: str
     popup_title: str
@@ -70,7 +71,7 @@ class QuestionPopupPlugin(ActionRunner):
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
 
-        self.config.content = template.render(self.config.content, dot)
+        content = template.render(self.config.content, dot)
 
         self.ux.append({
             "tag": "div",
@@ -82,7 +83,7 @@ class QuestionPopupPlugin(ActionRunner):
                 "data-left-button-text": self.config.left_button_text,
                 "data-right-button-text": self.config.right_button_text,
                 "data-popup-title": self.config.popup_title,
-                "data-content": self.config.content,
+                "data-content": content,
                 "data-horizontal-position": self.config.horizontal_pos,
                 "data-vertical-position": self.config.vertical_pos,
                 "data-popup-lifetime": self.config.popup_lifetime,

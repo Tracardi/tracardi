@@ -27,10 +27,10 @@ class FetchActiveCampaignProfileByEmailAction(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.email = dot[self.config.email]
+        email = dot[self.config.email]
 
         try:
-            result = await self.client.get_contact_by_email(self.config.email)
+            result = await self.client.get_contact_by_email(email)
             return Result(port="result", value=result)
 
         except ActiveCampaignClientException as e:

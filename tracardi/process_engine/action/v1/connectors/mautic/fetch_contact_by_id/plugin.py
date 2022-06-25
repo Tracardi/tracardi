@@ -30,17 +30,17 @@ class MauticContactByIDFetcher(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
 
-        self.config.contact_id = dot[self.config.contact_id]
+        contact_id = dot[self.config.contact_id]
 
         try:
-            result = await self.client.fetch_contact_by_id(str(self.config.contact_id))
+            result = await self.client.fetch_contact_by_id(str(contact_id))
             return Result(port="response", value=result)
 
         except MauticClientAuthException:
             try:
                 await self.client.update_token()
 
-                result = await self.client.fetch_contact_by_id(str(self.config.contact_id))
+                result = await self.client.fetch_contact_by_id(str(contact_id))
 
                 if self.debug:
                     self.resource.credentials.test = self.client.credentials

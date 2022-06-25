@@ -6,7 +6,6 @@ from .model.config import Config, Token
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.meaningcloud.client import MeaningCloudClient
-from fastapi import HTTPException
 
 
 def validate(config: dict) -> Config:
@@ -27,20 +26,20 @@ class CorporateReputationPlugin(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.text = dot[self.config.text]
-        self.config.lang = dot[self.config.lang]
+        text = dot[self.config.text]
+        lang = dot[self.config.lang]
 
         try:
             result = await self.client.corporate_reputation(
-                self.config.text,
-                self.config.lang,
+                text,
+                lang,
                 self.config.relaxed_typography,
                 self.config.focus,
                 self.config.company_type
             )
             return Result(port="response", value=result)
 
-        except HTTPException as e:
+        except Exception as e:
             return Result(port="error", value={"error": str(e)})
 
 

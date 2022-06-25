@@ -1,7 +1,7 @@
 from typing import Union, List
-from pydantic import BaseModel
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     key: Union[str, List[str]]
     save_in: str
