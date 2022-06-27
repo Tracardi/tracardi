@@ -58,7 +58,7 @@ class RemoteCallAction(ActionRunner):
                 params = self.config.get_params(dot)
                 url = make_url(dot=dot, credentials=self.credentials, endpoint=self.config.endpoint)
 
-                self.console.log("Request to {}".format(url))
+                self.console.log("Making {} request to {}".format(self.config.method.upper(), url))
 
                 async with session.request(
                         method=self.config.method,

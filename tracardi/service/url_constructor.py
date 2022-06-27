@@ -14,7 +14,7 @@ def make_url(credentials: ApiCredentials, dot: DotAccessor, endpoint: str) -> st
     scheme, host = credentials.url.split("://")
 
     if host[-1] == '/':
-        host = host[:-1]
+        host = host.strip("/")
 
     url = scheme + "://"
     if credentials.username:
