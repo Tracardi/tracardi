@@ -252,6 +252,8 @@ def register() -> Plugin:
             keywords=['start node'],
             type="startNode",
             icon='start',
+            width=200,
+            height=200,
             group=["Input/Output"],
             documentation=Documentation(
                 inputs={},
