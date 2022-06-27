@@ -1,9 +1,10 @@
 from typing import List, Any
 from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     source: NamedEntity
     type: str = 'select'
     query: str = "SELECT 1"

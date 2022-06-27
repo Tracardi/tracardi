@@ -1,14 +1,15 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from device_detector import DeviceDetector
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class AgentConfiguration(BaseModel):
+class AgentConfiguration(PluginConfig):
     agent: str
 
     @validator("agent")
@@ -19,7 +20,7 @@ class AgentConfiguration(BaseModel):
         if value != value.strip():
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        return value
+        return value.strip()
 
 
 def validate(config: dict) -> AgentConfiguration:
@@ -30,7 +31,6 @@ class DetectClientAgentAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
-        self.config.agent = self.config.agent.strip()
 
     def detect_device(self, ua):
         try:

@@ -1,5 +1,6 @@
-from pydantic import validator, create_model, AnyHttpUrl
+from pydantic import validator, AnyHttpUrl
 from pydantic.main import BaseModel
+from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.named_entity import NamedEntity
 
 
@@ -19,7 +20,7 @@ class Content(BaseModel):
         return v
 
 
-class AwsSqsConfiguration(BaseModel):
+class AwsSqsConfiguration(PluginConfig):
     source: NamedEntity
     message: Content
     region_name: str

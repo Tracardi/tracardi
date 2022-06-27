@@ -265,3 +265,21 @@ class FlowRecord(NamedEntity):
         if not self.production:
             raise ValueError("Production up is empty.")
         self.draft = self.production
+
+    def set_enabled(self, enabled: bool = True) -> None:
+        self.enabled = enabled
+        production_flow = self.get_production_workflow()
+        production_flow.enabled = enabled
+        self.production = encrypt(production_flow.dict())
+        draft_flow = self.get_draft_workflow()
+        draft_flow.enabled = enabled
+        self.draft = encrypt(draft_flow.dict())
+
+    def set_lock(self, lock: bool = True) -> None:
+        self.lock = lock
+        production_flow = self.get_production_workflow()
+        production_flow.lock = lock
+        self.production = encrypt(production_flow.dict())
+        draft_flow = self.get_draft_workflow()
+        draft_flow.lock = lock
+        self.draft = encrypt(draft_flow.dict())

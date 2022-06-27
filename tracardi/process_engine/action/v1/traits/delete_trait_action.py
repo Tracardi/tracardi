@@ -8,9 +8,10 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class DeleteTraitConfiguration(BaseModel):
+class DeleteTraitConfiguration(PluginConfig):
     delete: List[str]
 
     @validator("delete")

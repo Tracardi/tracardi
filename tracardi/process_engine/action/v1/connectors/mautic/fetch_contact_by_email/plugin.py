@@ -30,17 +30,17 @@ class MauticContactByEmailFetcher(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
 
-        self.config.contact_email = dot[self.config.contact_email]
+        contact_email = dot[self.config.contact_email]
 
         try:
-            result = await self.client.fetch_contact_by_email(str(self.config.contact_email))
+            result = await self.client.fetch_contact_by_email(str(contact_email))
             return Result(port="response", value=result)
 
         except MauticClientAuthException:
             try:
                 await self.client.update_token()
 
-                result = await self.client.fetch_contact_by_email(str(self.config.contact_email))
+                result = await self.client.fetch_contact_by_email(str(contact_email))
 
                 if self.debug:
                     self.resource.credentials.test = self.client.credentials

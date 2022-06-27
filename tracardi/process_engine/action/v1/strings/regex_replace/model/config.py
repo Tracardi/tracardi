@@ -1,7 +1,8 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     string: str
     find_regex: str
     replace_with: str

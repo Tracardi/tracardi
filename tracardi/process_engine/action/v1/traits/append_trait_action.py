@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Any, Union
 
-from pydantic import BaseModel, validator
+from pydantic import validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -9,9 +9,10 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     append: Optional[Dict[str, Any]] = {}
     remove: Optional[Dict[str, Union[Any, List[Any]]]] = {}
 

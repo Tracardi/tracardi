@@ -1,8 +1,9 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.process_engine.tql.condition import Condition
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     condition: str
     true_action: str = 'add'
     false_action: str = 'remove'

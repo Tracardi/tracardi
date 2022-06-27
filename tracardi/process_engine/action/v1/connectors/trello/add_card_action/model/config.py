@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, Union
 from datetime import datetime
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Card(BaseModel):
@@ -12,7 +13,7 @@ class Card(BaseModel):
     due: Optional[Union[str, datetime]] = None
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     source: NamedEntity
     board_url: str
     list_name: str

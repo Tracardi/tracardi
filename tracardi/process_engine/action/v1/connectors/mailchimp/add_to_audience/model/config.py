@@ -1,14 +1,11 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
+from tracardi.domain.named_entity import NamedEntity
 from typing import Dict, Any
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Source(BaseModel):
-    name: str
-    id: str
-
-
-class Config(BaseModel):
-    source: Source
+class Config(PluginConfig):
+    source: NamedEntity
     list_id: str
     email: str
     merge_fields: Dict[str, Any]

@@ -31,10 +31,10 @@ class SendToAirtableAction(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
-        self.config.mapping = traverser.reshape(self.config.mapping)
+        mapping = traverser.reshape(self.config.mapping)
 
         try:
-            result = await self.client.add_record(self.config.base_id, self.config.table_name, self.config.mapping)
+            result = await self.client.add_record(self.config.base_id, self.config.table_name, mapping)
             return Result(port="response", value=result)
 
         except AirtableClientException as e:

@@ -29,33 +29,35 @@ class MauticContactAdder(ActionRunner):
         self.resource = resource
         self.client = MauticClient(**self.resource.credentials.get_credentials(self, None))
 
-    def parse_mapping(self):
-        for key, value in self.config.additional_mapping.items():
+    @staticmethod
+    def parse_mapping(mapping):
+        for key, value in mapping.items():
 
             if isinstance(value, list):
                 if key == "tags":
-                    self.config.additional_mapping[key] = ",".join(value)
+                    mapping[key] = ",".join(value)
 
                 else:
-                    self.config.additional_mapping[key] = "|".join(value)
+                    mapping[key] = "|".join(value)
 
             elif isinstance(value, datetime):
-                self.config.additional_mapping[key] = str(value)
+                mapping[key] = str(value)
+        return mapping
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
 
-        self.config.email = dot[self.config.email]
+        email = dot[self.config.email]
 
-        self.config.additional_mapping = traverser.reshape(self.config.additional_mapping)
-        self.parse_mapping()
+        mapping = traverser.reshape(self.config.additional_mapping)
+        mapping = self.parse_mapping(mapping)
 
         try:
             result = await self.client.add_contact(
-                email=self.config.email,
+                email=email,
                 overwrite_with_blank=self.config.overwrite_with_blank,
-                **self.config.additional_mapping
+                **mapping
             )
             return Result(port="response", value=result)
 
@@ -64,9 +66,9 @@ class MauticContactAdder(ActionRunner):
                 await self.client.update_token()
 
                 result = await self.client.add_contact(
-                    email=self.config.email,
+                    email=email,
                     overwrite_with_blank=self.config.overwrite_with_blank,
-                    **self.config.additional_mapping
+                    **mapping
                 )
 
                 if self.debug:

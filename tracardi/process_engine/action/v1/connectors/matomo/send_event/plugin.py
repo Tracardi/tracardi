@@ -7,7 +7,6 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
 from .service.page_performance import PerformanceValueGetter
 from .model.config import Config, MatomoPayload
-from tracardi.service.sha1_hasher import SHA1Encoder
 from tracardi.service.notation.dict_traverser import DictTraverser
 import hashlib
 

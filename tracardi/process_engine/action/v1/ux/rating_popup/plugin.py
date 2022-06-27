@@ -4,9 +4,10 @@ from tracardi.service.plugin.runner import ActionRunner
 from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     api_url: str
     uix_source: str
     title: str
@@ -62,7 +63,7 @@ class RatingPopupPlugin(ActionRunner):
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
 
-        self.config.message = template.render(self.config.message, dot)
+        message = template.render(self.config.message, dot)
 
         self.ux.append({
             "tag": "div",
@@ -71,7 +72,7 @@ class RatingPopupPlugin(ActionRunner):
                 "data-position-vertical": self.config.vertical_position,
                 "data-position-horizontal": self.config.horizontal_position,
                 "data-title": self.config.title,
-                "data-message": self.config.message,
+                "data-message": message,
                 "data-event-type": self.config.event_type,
                 "data-api-url": self.config.api_url,
                 "data-theme": "dark" if self.config.dark_theme else "",

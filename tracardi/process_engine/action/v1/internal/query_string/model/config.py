@@ -1,8 +1,9 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 from pytimeparse import parse as parse_time
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     index: str
     time_range: str
     query: str = ""

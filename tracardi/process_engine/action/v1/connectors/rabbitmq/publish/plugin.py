@@ -26,8 +26,6 @@ class RabbitPublisherAction(ActionRunner):
     def __init__(self, config: PluginConfiguration, credentials: ResourceCredentials):
         self.source = credentials.get_credentials(self, output=RabbitSourceConfiguration)
         self.config = config
-        if self.config.queue.compression == "none":
-            self.config.queue.compression = None
 
     async def run(self, payload):
         try:

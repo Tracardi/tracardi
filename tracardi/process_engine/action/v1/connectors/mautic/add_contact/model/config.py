@@ -1,9 +1,10 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.domain.named_entity import NamedEntity
-from typing import Dict, Any, Optional
+from typing import Dict, Any
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     source: NamedEntity
     email: str
     additional_mapping: Dict[str, Any]

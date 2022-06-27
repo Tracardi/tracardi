@@ -1,7 +1,8 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     event_type: str
     event_properties: str = "{}"
     delay: int = 60
@@ -15,5 +16,5 @@ class Configuration(BaseModel):
     @validator("delay")
     def validate_delay(cls, value):
         if value < 15:
-            raise ValueError("Delay must be bigger then 15 seconds.")
+            raise ValueError("Delay must be bigger than or equal to 15 seconds.")
         return value
