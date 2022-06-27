@@ -29,17 +29,17 @@ class DataExtensionSender(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
-        self.config.mapping = traverser.reshape(self.config.mapping)
+        mapping = traverser.reshape(self.config.mapping)
 
         try:
-            await self.client.add_record(self.config.mapping, self.config.extension_id, self.config.update)
+            await self.client.add_record(mapping, self.config.extension_id, self.config.update)
             return Result(port="success", value=payload)
 
         except MarketingCloudAuthException:
             await self.client.get_token()
 
             try:
-                await self.client.add_record(self.config.mapping, self.config.extension_id, self.config.update)
+                await self.client.add_record(mapping, self.config.extension_id, self.config.update)
 
                 resource = await storage.driver.resource.load(self.config.source.id)
                 if self.debug:

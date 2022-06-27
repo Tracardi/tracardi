@@ -27,11 +27,11 @@ class TopicsExtractionPlugin(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.text = dot[self.config.text]
-        self.config.lang = dot[self.config.lang]
+        text = dot[self.config.text]
+        lang = dot[self.config.lang]
 
         try:
-            result = await self.client.topics_extraction(self.config.text, self.config.lang)
+            result = await self.client.topics_extraction(text, lang)
             return Result(port="response", value=result)
 
         except TracardiException as e:

@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     name: str
     value: str
     ttl: int = 30 * 60

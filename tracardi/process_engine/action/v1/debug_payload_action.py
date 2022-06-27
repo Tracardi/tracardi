@@ -1,11 +1,10 @@
-import asyncio
 import json
 import re
 from datetime import datetime
 from json import JSONDecodeError
 from typing import Tuple, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import validator
 
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.factory import StorageFor
@@ -19,9 +18,10 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class DebugConfiguration(BaseModel):
+class DebugConfiguration(PluginConfig):
     type: str = ""
     profile_less: bool = False
     session_less: bool = False

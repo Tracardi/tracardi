@@ -30,15 +30,15 @@ class InfluxFetcher(ActionRunner):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
 
-        self.config.filters = traverser.reshape(self.config.filters)
-        self.config.stop = str(dot[self.config.stop])
-        self.config.start = str(dot[self.config.start])
+        filters = traverser.reshape(self.config.filters)
+        stop = str(dot[self.config.stop])
+        start = str(dot[self.config.start])
 
-        self.config.filters = [f'filter(fn:(r) => r.{key} == "{value}")' for key, value in self.config.filters.items()]
+        filters = [f'filter(fn:(r) => r.{key} == "{value}")' for key, value in filters.items()]
         query = "\n |> ".join([
             fr'from(bucket:"{self.config.bucket}")',
-            fr"range(start: {self.config.start}, stop: {self.config.stop})",
-            *self.config.filters
+            fr"range(start: {start}, stop: {stop})",
+            *filters
         ])
 
         if self.config.aggregation not in (None, ""):

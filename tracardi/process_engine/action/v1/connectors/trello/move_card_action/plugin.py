@@ -14,8 +14,9 @@ async def validate(config: dict) -> Config:
         **(await storage.driver.resource.load(plugin_config.source.id)).credentials.production
     )
     client = TrelloClient(credentials.api_key, credentials.token)
-    plugin_config.list_id1 = await client.get_list_id(plugin_config.board_url, plugin_config.list_name1)
-    plugin_config.list_id2 = await client.get_list_id(plugin_config.board_url, plugin_config.list_name2)
+    list_id1 = await client.get_list_id(plugin_config.board_url, plugin_config.list_name1)
+    list_id2 = await client.get_list_id(plugin_config.board_url, plugin_config.list_name2)
+    plugin_config = Config(**plugin_config.dict(exclude={"list_id1", "list_id2"}), list_id1=list_id1, list_id2=list_id2)
     return plugin_config
 
 
@@ -36,10 +37,10 @@ class TrelloCardMover(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.card_name = dot[self.config.card_name]
+        card_name = dot[self.config.card_name]
 
         try:
-            result = await self._client.move_card(self.config.list_id1, self.config.list_id2, self.config.card_name)
+            result = await self._client.move_card(self.config.list_id1, self.config.list_id2, card_name)
         except (ConnectionError, ValueError) as e:
             self.console.error(str(e))
             return Result(port="error", value={})

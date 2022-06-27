@@ -1,14 +1,15 @@
 from typing import Union
 
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class DecrementConfig(BaseModel):
+class DecrementConfig(PluginConfig):
     field: str
     decrement: Union[float, int]
 

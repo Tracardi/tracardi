@@ -30,10 +30,10 @@ class SendToActiveCampaignAction(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
-        self.config.fields = traverser.reshape(self.config.fields)
+        fields = traverser.reshape(self.config.fields)
 
         try:
-            result = await self.client.send_contact(self.config.fields)
+            result = await self.client.send_contact(fields)
             return Result(port="success", value=result)
 
         except ActiveCampaignClientException as e:

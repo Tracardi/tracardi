@@ -30,13 +30,13 @@ class AddCiviContactAction(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
-        self.config.fields = traverser.reshape(self.config.fields)
+        fields = traverser.reshape(self.config.fields)
 
         try:
             result = await self.client.add_contact(
                 data={
                     "contact_type": self.config.contact_type,
-                    **{field: self.config.fields[field] for field in self.config.fields if self.config.fields[field]
+                    **{field: fields[field] for field in fields if fields[field]
                        is not None}
                 }
             )

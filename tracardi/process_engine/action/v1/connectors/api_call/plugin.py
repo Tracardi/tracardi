@@ -33,13 +33,13 @@ class RemoteCallAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             traverser = DictTraverser(dot)
 
-            self.config.cookies = traverser.reshape(reshape_template=self.config.cookies)
-            self.config.headers = traverser.reshape(reshape_template=self.config.headers)
+            cookies = traverser.reshape(reshape_template=self.config.cookies)
+            headers = traverser.reshape(reshape_template=self.config.headers)
 
-            self._validate_key_value(self.config.headers, "Header")
-            self._validate_key_value(self.config.cookies, "Cookie")
+            self._validate_key_value(headers, "Header")
+            self._validate_key_value(cookies, "Cookie")
 
-            self.config.headers['ContentType'] = self.config.body.type
+            headers['ContentType'] = self.config.body.type
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
             async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -49,8 +49,8 @@ class RemoteCallAction(ActionRunner):
                 async with session.request(
                         method=self.config.method,
                         url=str(self.config.url),
-                        headers=self.config.headers,
-                        cookies=self.config.cookies,
+                        headers=headers,
+                        cookies=cookies,
                         ssl=self.config.ssl_check,
                         **params
                 ) as response:

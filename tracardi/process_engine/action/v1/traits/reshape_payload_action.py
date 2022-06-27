@@ -1,14 +1,15 @@
 import json
 from json import JSONDecodeError
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     value: str = ""
     default: bool = True
 
@@ -42,7 +43,7 @@ class ReshapePayloadAction(ActionRunner):
 
     async def run(self, payload):
         if not isinstance(payload, dict):
-            self.console.warning("Payload is not dict that is why you will not be able to read it. ")
+            self.console.warning("Payload has to be an object.")
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 

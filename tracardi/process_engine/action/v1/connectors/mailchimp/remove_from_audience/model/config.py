@@ -1,13 +1,10 @@
-from pydantic import BaseModel, validator
+from pydantic import validator, BaseModel
+from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.domain.named_entity import NamedEntity
 
 
-class Source(BaseModel):
-    name: str
-    id: str
-
-
-class Config(BaseModel):
-    source: Source
+class Config(PluginConfig):
+    source: NamedEntity
     email: str
     list_id: str
     delete: bool

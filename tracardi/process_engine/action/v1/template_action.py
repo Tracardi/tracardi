@@ -3,10 +3,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_template import DotTemplate
-from pydantic import BaseModel
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     template: str
 
 

@@ -1,19 +1,20 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from pydantic import BaseModel, validator
+from pydantic import validator
 from typing import List
 from random import randint
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     list_of_items: List[str]
 
     @validator("list_of_items")
     def validate_list_of_items(cls, value):
         if not value:
-            raise ValueError("This list have to contain at least one element.")
+            raise ValueError("This list has to contain at least one element.")
         return value
 
 

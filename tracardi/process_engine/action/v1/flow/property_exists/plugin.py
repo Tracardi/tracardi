@@ -17,9 +17,9 @@ class PropertyExistsAction(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         if self.config.property in dot:
-            return Result(port="true", value=payload), Result(port="false", value=None)
+            return Result(port="true", value=payload), Result(port="false", value=payload)
 
-        return Result(port="false", value=payload), Result(port="true", value=None)
+        return Result(port="false", value=payload), Result(port="true", value=payload)
 
 
 def register() -> Plugin:

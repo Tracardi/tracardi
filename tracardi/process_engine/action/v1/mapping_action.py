@@ -4,9 +4,10 @@ from tracardi.service.plugin.runner import ActionRunner
 from pydantic import BaseModel, validator
 from typing import Dict, Any
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     value: str
     case_sensitive: bool
     mapping: Dict[str, Any]
@@ -32,16 +33,16 @@ class MappingAction(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.value = dot[self.config.value].lower() \
+        value = dot[self.config.value].lower() \
             if not self.config.case_sensitive and isinstance(dot[self.config.value], str) else dot[self.config.value]
 
-        self.config.mapping = {
+        mapping = {
             dot[key].lower() if not self.config.case_sensitive and isinstance(dot[key], str) else dot[key]:
             dot[value].lower() if not self.config.case_sensitive and isinstance(dot[value], str) else dot[value]
             for key, value in self.config.mapping.items()
         }
 
-        value = self.config.mapping.get(self.config.value, None)
+        value = mapping.get(value, None)
 
         return Result(port="result", value={"value": value})
 

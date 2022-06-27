@@ -17,17 +17,17 @@ class RegexReplacer(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.string = dot[self.config.string]
-        self.config.replace_with = dot[self.config.replace_with]
+        string = dot[self.config.string]
+        replace_with = dot[self.config.replace_with]
 
-        if re.search(self.config.find_regex, self.config.string):
+        if re.search(self.config.find_regex, string):
             return Result(port="replaced", value={"value": re.sub(
                 self.config.find_regex,
-                self.config.replace_with,
-                self.config.string
+                replace_with,
+                string
             )})
         else:
-            return Result(port="not_found", value={"value": self.config.string})
+            return Result(port="not_found", value={"value": string})
 
 
 def register() -> Plugin:

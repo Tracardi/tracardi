@@ -1,8 +1,8 @@
-from pydantic import BaseModel
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     source: NamedEntity
     url: str = "https://api2.amplitude.com/2/httpapi"
     timeout: int = 15

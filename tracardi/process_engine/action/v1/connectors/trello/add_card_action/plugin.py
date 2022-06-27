@@ -16,7 +16,8 @@ async def validate(config: dict) -> Config:
         **(await storage.driver.resource.load(plugin_config.source.id)).credentials.production
     )
     client = TrelloClient(credentials.api_key, credentials.token)
-    plugin_config.list_id = await client.get_list_id(plugin_config.board_url, plugin_config.list_name)
+    list_id = await client.get_list_id(plugin_config.board_url, plugin_config.list_name)
+    plugin_config = Config(**plugin_config.dict(exclude={"list_id"}), list_id=list_id)
     return plugin_config
 
 
@@ -38,19 +39,19 @@ class TrelloCardAdder(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         coords = dot[self.config.card.coordinates]
-        self.config.card.coordinates = f"{coords['latitude']}," \
+        coords = f"{coords['latitude']}," \
                                        f"{coords['longitude']}" if isinstance(coords, dict) else coords
 
-        self.config.card.due = str(dot[self.config.card.due]) if self.config.card.due is not None else None
-
         traverser = DictTraverser(dot)
-        self.config.card = Card(**traverser.reshape(self.config.card.dict()))
+        card = Card(**traverser.reshape(self.config.card.dict()))
 
         template = DotTemplate()
-        self.config.card.desc = template.render(self.config.card.desc, dot)
+        card.desc = template.render(self.config.card.desc, dot)
+        card.due = str(dot[self.config.card.due]) if self.config.card.due is not None else None
+        card.coordinates = coords
 
         try:
-            result = await self._client.add_card(self.config.list_id, **self.config.card.dict())
+            result = await self._client.add_card(self.config.list_id, **card.dict())
         except (ConnectionError, ValueError) as e:
             self.console.error(str(e))
             return Result(port="error", value=payload)

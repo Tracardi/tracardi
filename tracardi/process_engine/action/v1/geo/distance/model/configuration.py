@@ -1,6 +1,7 @@
 from typing import Union
 
 from pydantic import BaseModel
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class GeoPosition(BaseModel):
@@ -8,6 +9,6 @@ class GeoPosition(BaseModel):
     lng: Union[float, str]
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     start_coordinate: GeoPosition
     end_coordinate: GeoPosition

@@ -1,15 +1,16 @@
 import json
 from json import JSONDecodeError
 
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     value: str = "{}"
     destination: str = "payload"
 

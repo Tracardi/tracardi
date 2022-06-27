@@ -27,11 +27,11 @@ class DeepCategorizationPlugin(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.text = dot[self.config.text]
+        text = dot[self.config.text]
 
         try:
 
-            result = await self.client.deep_categorization(self.config.text, self.config.model)
+            result = await self.client.deep_categorization(text, self.config.model)
             return Result(port="response", value=result)
 
         except TracardiException as e:
