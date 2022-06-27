@@ -150,7 +150,8 @@ def register() -> Plugin:
                         FormField(
                             id="endpoint",
                             name="Endpoint",
-                            description="Type endpoint that should be called. Feel free to use dot templates.",
+                            description="Type endpoint that should be called. Feel free to use dot templates, e.g. "
+                                        "/some/{{payload@value}}/endpoint.",
                             component=FormComponent(type="text", props={"label": "Endpoint"})
                         ),
                         FormField(
