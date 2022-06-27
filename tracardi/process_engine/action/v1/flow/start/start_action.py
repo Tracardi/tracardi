@@ -183,8 +183,15 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
-                    name="Production run configuration",
                     fields=[
+                        FormField(
+                            id="event_types",
+                            name="Accept only the following event types",
+                            description="This node will tart the workflow only if the following event types are consumed. "
+                                        "If left empty the node will trigger regardless the event type. All event types "
+                                        "will be accepted.",
+                            component=FormComponent(type="eventTypes", props={"label": "Event types"})
+                        ),
                         FormField(
                             id="debug",
                             name="Collect debugging information",
@@ -193,16 +200,11 @@ def register() -> Plugin:
                                         "compute power.",
                             component=FormComponent(type="bool", props={"label": "Collect debugging information"})
                         ),
-                        FormField(
-                            id="event_types",
-                            name="Trigger start on these event types",
-                            description="If left empty triggers regardless the event type.",
-                            component=FormComponent(type="eventTypes", props={"label": "Event types"})
-                        ),
                     ]
                 ),
                 FormGroup(
-                    name="Debug run configuration",
+                    name="Debugging configuration",
+                    description="In debug mode the following event will be injected into workflow.",
                     fields=[
                         FormField(
                             id="profile_less",
