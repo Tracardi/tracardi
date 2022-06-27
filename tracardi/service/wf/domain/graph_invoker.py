@@ -160,7 +160,7 @@ class GraphInvoker(BaseModel):
                         id=session.id,
                         start=session.metadata.time.insert,
                         duration=session.metadata.time.duration
-                    )
+                    ) if session is not None else None
 
     async def run_task(self, node: Node, payload, ready_upstream_results: ActionsResults):
 
