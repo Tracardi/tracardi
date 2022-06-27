@@ -27,7 +27,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Discard Event',
-            desc='Discards current event - it does not get saved after workflow ends.',
+            desc='Discards current event - Current event will not be saved if this action is used.',
             icon='error',
             group=["Flow control"],
             documentation=Documentation(
