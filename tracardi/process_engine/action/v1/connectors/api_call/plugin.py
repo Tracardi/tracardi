@@ -56,10 +56,13 @@ class RemoteCallAction(ActionRunner):
             async with aiohttp.ClientSession(timeout=timeout) as session:
 
                 params = self.config.get_params(dot)
+                url = make_url(dot=dot, credentials=self.credentials, endpoint=self.config.endpoint)
+
+                self.console.log("Request to {}".format(url))
 
                 async with session.request(
                         method=self.config.method,
-                        url=make_url(dot=dot, credentials=self.credentials, endpoint=self.config.endpoint),
+                        url=url,
                         headers=headers,
                         cookies=cookies,
                         ssl=self.config.ssl_check,
