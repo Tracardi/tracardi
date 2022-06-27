@@ -10,7 +10,7 @@ import aiomysql
 from tracardi.domain.import_config import ImportConfig
 from tracardi.domain.task import Task
 from .importer import Importer
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
@@ -25,14 +25,32 @@ class MySQLImportConfig(BaseModel):
     table_name: NamedEntity
     batch: int
 
+    @validator("source", "database_name", "table_name")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
+
 
 class TableFetcherConfig(BaseModel):
     source: NamedEntity
     database_name: NamedEntity
 
+    @validator("source", "database_name")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
+
 
 class DatabaseFetcherConfig(BaseModel):
     source: NamedEntity
+
+    @validator("source")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
 
 
 class Endpoint(PluginEndpoint):

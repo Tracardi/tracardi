@@ -30,9 +30,21 @@ class MySQLQueryImportConfig(BaseModel):
             raise ValueError("Provided query cannot contain LIMIT keyword ans has to start with SELECT keyword.")
         return value
 
+    @validator("source", "database_name")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
+
 
 class DatabaseFetcherConfig(BaseModel):
     source: NamedEntity
+
+    @validator("source")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
 
 
 class Endpoint(PluginEndpoint):
