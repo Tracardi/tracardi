@@ -37,12 +37,6 @@ class Content(BaseModel):
         return json.loads(self.content)
 
 
-class Credentials(BaseModel):
-    url: str
-    password: Optional[str] = None
-    username: Optional[str] = None
-
-
 class RemoteCallConfiguration(BaseModel):
     source: NamedEntity
     endpoint: str

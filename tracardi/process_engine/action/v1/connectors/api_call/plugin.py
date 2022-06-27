@@ -7,10 +7,10 @@ from json import JSONDecodeError
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from .model.configuration import RemoteCallConfiguration, Credentials
+from .model.configuration import RemoteCallConfiguration
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.url_constructor import ApiCredentials, make_url
 
 
 def validate(config: dict) -> RemoteCallConfiguration:
@@ -27,7 +27,7 @@ class RemoteCallAction(ActionRunner):
 
     def __init__(self, config: RemoteCallConfiguration, credentials: ResourceCredentials):
         self.config = config
-        self.credentials = credentials.get_credentials(self, Credentials)
+        self.credentials = credentials.get_credentials(self, ApiCredentials)
 
     @staticmethod
     def _validate_key_value(values, label):
@@ -36,21 +36,6 @@ class RemoteCallAction(ActionRunner):
                 raise ValueError(
                     "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
                                                                                name))
-
-    def construct_url(self, payload):
-        scheme, host = self.credentials.url.split("://")
-        url = scheme + "://"
-        if self.credentials.username:
-            url += self.credentials.username
-        if self.credentials.password:
-            url += ':' + self.credentials.password
-        if self.credentials.username or self.credentials.password:
-            url += '@'
-        url += host
-        dot = self._get_dot_accessor(payload=payload)
-        template = DotTemplate()
-        url += template.render(self.config.endpoint, dot)
-        return url
 
     async def run(self, payload):
 
@@ -74,7 +59,7 @@ class RemoteCallAction(ActionRunner):
 
                 async with session.request(
                         method=self.config.method,
-                        url=self.construct_url(payload),
+                        url=make_url(dot=dot, credentials=self.credentials, endpoint=self.config.endpoint),
                         headers=self.config.headers,
                         cookies=self.config.cookies,
                         ssl=self.config.ssl_check,
