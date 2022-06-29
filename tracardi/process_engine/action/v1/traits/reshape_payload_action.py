@@ -92,11 +92,11 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Make payload',
+            name='Create payload',
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
             icon='copy-property',
             group=["Data processing"],
-            tags=['reshape', 'create'],
+            tags=['reshape', 'create', 'payload', 'data'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

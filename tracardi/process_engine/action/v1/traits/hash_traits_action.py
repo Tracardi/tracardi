@@ -104,11 +104,11 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Hash traits',
-            desc='Hash defined profile traits.',
+            name='Hash data',
+            desc='Hash defined data e.g. profile traits.',
             icon='hash',
             group=["Operations"],
-            tags=['profile', 'trait'],
+            tags=['profile', 'trait', 'data'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
