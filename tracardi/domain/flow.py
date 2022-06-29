@@ -66,7 +66,6 @@ class Flow(GraphFlow):
             id=self.id,
             description=self.description,
             name=self.name,
-            enabled=self.enabled,
             projects=self.projects,
             draft=production,
             production=production,
@@ -79,7 +78,6 @@ class Flow(GraphFlow):
             id=self.id,
             description=self.description,
             name=self.name,
-            enabled=self.enabled,
             projects=self.projects,
             lock=self.lock
         )
@@ -90,12 +88,11 @@ class Flow(GraphFlow):
             id=str(uuid.uuid4()) if id is None else id,
             name="Empty",
             wf_schema=FlowSchema(version=str(tracardi.version)),
-            enabled=False,
             flowGraph=FlowGraphData(nodes=[], edges=[])
         )
 
     @staticmethod
-    def build(name: str, description: str = None, enabled=True, id=None, lock=False, projects=None) -> 'Flow':
+    def build(name: str, description: str = None, id=None, lock=False, projects=None) -> 'Flow':
         if projects is None:
             projects = ["General"]
 
@@ -104,7 +101,6 @@ class Flow(GraphFlow):
             name=name,
             wf_schema=FlowSchema(version=str(tracardi.version)),
             description=description,
-            enabled=enabled,
             projects=projects,
             lock=lock,
             flowGraph=FlowGraphData(
@@ -256,7 +252,6 @@ class PluginRecord(BaseModel):
 
 class FlowRecord(NamedEntity):
     description: Optional[str] = None
-    enabled: Optional[bool] = True
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
     production: Optional[str] = ''
@@ -281,7 +276,7 @@ class FlowRecord(NamedEntity):
         return Flow(**decrypted)
 
     def get_empty_workflow(self, id) -> 'Flow':
-        return Flow.build(id=id, name=self.name, description=self.description, enabled=self.enabled,
+        return Flow.build(id=id, name=self.name, description=self.description,
                           projects=self.projects, lock=self.lock)
 
     def restore_production_from_backup(self):
@@ -293,15 +288,6 @@ class FlowRecord(NamedEntity):
         if not self.production:
             raise ValueError("Production up is empty.")
         self.draft = self.production
-
-    def set_enabled(self, enabled: bool = True) -> None:
-        self.enabled = enabled
-        production_flow = self.get_production_workflow()
-        production_flow.enabled = enabled
-        self.production = encrypt(production_flow.dict())
-        draft_flow = self.get_draft_workflow()
-        draft_flow.enabled = enabled
-        self.draft = encrypt(draft_flow.dict())
 
     def set_lock(self, lock: bool = True) -> None:
         self.lock = lock

@@ -34,9 +34,6 @@
         "type": "keyword",
         "index": false
       },
-      "enabled": {
-        "type": "boolean"
-      },
       "lock": {
         "type": "boolean"
       }
