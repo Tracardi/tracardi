@@ -126,7 +126,8 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
             session=session,
             payload=None,
             event=event,
-            flow=None
+            flow=None,
+            memory=None
         )
         event_type = dot.event['type']
 
@@ -354,7 +355,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                                                              session,
                                                              payload=None,
                                                              event=None,
-                                                             flow=None)
+                                                             flow=None,
+                                                             memory=None)
                     # todo performance - could be not awaited add to save_task
                     await destination_manager.send_data(profile.id, events, debug=False)
                 except Exception as e:

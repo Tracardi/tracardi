@@ -3,7 +3,6 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import Resource, ResourceCredentials
-from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dot_template import DotTemplate
 
 from .service.sendman import PostMan
@@ -29,7 +28,7 @@ class SmtpDispatcherAction(ActionRunner):
 
     async def run(self, payload):
         try:
-            dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+            dot = self._get_dot_accessor(payload)
             template = DotTemplate()
             message = template.render(self.config.message.message, dot)
             self.post.send(message)

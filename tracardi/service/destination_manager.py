@@ -22,8 +22,8 @@ logger.addHandler(log_handler)
 
 class DestinationManager:
 
-    def __init__(self, delta, profile=None, session=None, payload=None, event=None, flow=None):
-        self.dot = DotAccessor(profile, session, payload, event, flow)
+    def __init__(self, delta, profile=None, session=None, payload=None, event=None, flow=None, memory=None):
+        self.dot = DotAccessor(profile, session, payload, event, flow, memory)
         self.delta = delta
         self.profile = profile
         self.session = session

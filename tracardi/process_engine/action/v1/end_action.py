@@ -8,6 +8,7 @@ class EndAction(ActionRunner):
         pass
 
     async def run(self, payload):
+        print(self.memory)
         return None
 
 

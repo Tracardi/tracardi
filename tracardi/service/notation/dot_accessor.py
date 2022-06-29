@@ -40,6 +40,8 @@ class DotAccessor:
             return self.payload
         elif dot_notation.startswith('event@...'):
             return self.event
+        elif dot_notation.startswith('memory@...'):
+            return self.memory
 
         return None
 
@@ -58,12 +60,13 @@ class DotAccessor:
 
         return NotDotNotation()
 
-    def __init__(self, profile=None, session=None, payload=None, event=None, flow=None):
+    def __init__(self, profile=None, session=None, payload=None, event=None, flow=None, memory=None):
         self.flow = self._convert(flow, 'flow')
         self.event = self._convert(event, 'event')
         self.payload = self._convert(payload, 'payload')
         self.session = self._convert(session, 'session')
         self.profile = self._convert(profile, 'profile')
+        self.memory = self._convert(memory, 'memory')
 
         self.storage = {
             'profile@': self.profile,
@@ -71,6 +74,7 @@ class DotAccessor:
             'payload@': self.payload,
             'session@': self.session,
             'flow@': self.flow,
+            'memory@': self.memory,
         }
 
     @staticmethod
@@ -85,6 +89,8 @@ class DotAccessor:
             return 'payload'
         elif key.startswith('event@'):
             return 'event'
+        elif key.startswith('memory@'):
+            return 'memory'
 
         return None
 
@@ -103,6 +109,9 @@ class DotAccessor:
         elif key.startswith('event@'):
             key = key[len('event@'):]
             del self.event[key]
+        elif key.startswith('memory@'):
+            key = key[len('memory@'):]
+            del self.memory[key]
         else:
             raise ValueError(
                 "Invalid dot notation. Accessor not available. " +
@@ -123,6 +132,9 @@ class DotAccessor:
         elif key.startswith('event@'):
             key = key[len('event@'):]
             self.event[key] = self.__getitem__(value) if not isinstance(value, dict) else value
+        elif key.startswith('memory@'):
+            key = key[len('memory@'):]
+            self.memory[key] = self.__getitem__(value) if not isinstance(value, dict) else value
         else:
             raise ValueError(
                 "Invalid dot notation. Accessor not available. " +
