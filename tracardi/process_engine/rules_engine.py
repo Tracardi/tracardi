@@ -111,9 +111,6 @@ class RulesEngine:
                     debugger[event.type].append({rule.name: debug_info})
                     continue
 
-                if not flow.enabled:
-                    continue
-
                 # Validates rule source. Type was verified before
 
                 if source_id:
