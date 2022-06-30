@@ -58,10 +58,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Read from memory',
+            name='Read from Redis',
             desc='Reads value with given key from cross-instance memory.',
             icon='redis',
-            group=["Operations"],
+            group=["Redis"],
             tags=['redis'],
             documentation=Documentation(
                 inputs={

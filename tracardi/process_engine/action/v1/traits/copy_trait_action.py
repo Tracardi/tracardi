@@ -112,9 +112,7 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
-                    name="Set profile traits",
-                    description="Define what data from event is to be copied to profile. You can also copy data the "
-                                "other way around.",
+                    name="Copy data",
                     fields=[
                         FormField(
                             id="traits",

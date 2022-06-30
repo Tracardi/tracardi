@@ -82,10 +82,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Write to memory',
+            name='Write to Redis',
             desc='Writes given data to cross-instance memory.',
             icon='redis',
-            group=["Operations"],
+            group=["Redis"],
             tags=['redis'],
             documentation=Documentation(
                 inputs={
