@@ -1,5 +1,6 @@
 from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class PushOverAuth(BaseModel):
@@ -7,7 +8,7 @@ class PushOverAuth(BaseModel):
     user: str
 
 
-class PushOverConfiguration(BaseModel):
+class PushOverConfiguration(PluginConfig):
     source: NamedEntity
     message: str
 

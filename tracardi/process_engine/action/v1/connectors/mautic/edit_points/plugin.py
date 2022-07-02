@@ -31,17 +31,17 @@ class MauticPointsEditor(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
 
-        self.config.contact_id = dot[self.config.contact_id]
+        contact_id = dot[self.config.contact_id]
 
         try:
-            await self.actions[self.config.action](int(self.config.contact_id), int(self.config.points))
+            await self.actions[self.config.action](int(contact_id), int(self.config.points))
             return Result(port="success", value=payload)
 
         except MauticClientAuthException:
             try:
                 await self.client.update_token()
 
-                await self.actions[self.config.action](int(self.config.contact_id), int(self.config.points))
+                await self.actions[self.config.action](int(contact_id), int(self.config.points))
 
                 if self.debug:
                     self.resource.credentials.test = self.client.credentials

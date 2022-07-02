@@ -1,8 +1,9 @@
 from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     source: NamedEntity
     text: str
     model: str

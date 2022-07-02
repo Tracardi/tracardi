@@ -10,21 +10,21 @@
     },
     "dynamic": false,
     "properties": {
-      "validation": {
-        "index": false,
-        "type": "keyword"
-      },
       "id": {
-        "type": "keyword"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "description": {
         "type": "keyword"
       },
       "name": {
         "type": "keyword"
+      },
+      "description": {
+        "type": "keyword"
+      },
+      "validation": {
+        "index": false,
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
       }
     }
   },

@@ -18,10 +18,11 @@ class ConditionSetPlugin(ActionRunner):
         condition = Condition()
         dot = self._get_dot_accessor(payload)
 
+        conditions = {}
         for key, value in self.config.conditions.items():
-            self.config.conditions[key] = await condition.evaluate(value, dot)
+            conditions[key] = await condition.evaluate(value, dot)
 
-        return Result(port='result', value=self.config.conditions)
+        return Result(port='result', value=conditions)
 
 
 def register() -> Plugin:

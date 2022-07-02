@@ -1,8 +1,9 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 from typing import Dict
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     conditions: Dict[str, str]
 
     @validator("conditions")

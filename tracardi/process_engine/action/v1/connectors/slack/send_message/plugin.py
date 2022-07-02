@@ -28,13 +28,13 @@ class SlackPoster(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.channel = dot[self.config.channel]
+        channel = dot[self.config.channel]
 
         template = DotTemplate()
-        self.config.message = template.render(self.config.message, dot)
+        message = template.render(self.config.message, dot)
 
         try:
-            response = await self._client.send_to_channel_as_bot(self.config.channel, self.config.message)
+            response = await self._client.send_to_channel_as_bot(channel, message)
         except ConnectionError as e:
             self.console.error(str(e))
             return Result(port="error", value={"detail": str(e)})

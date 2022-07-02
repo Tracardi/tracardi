@@ -17,7 +17,7 @@ class SourceCacher:
     def __init__(self):
         self._cache = MemoryCache()
 
-    async def validate_source(self, source_id) -> Optional[EventSource]:
+    async def validate_source(self, source_id, allowed_bridges: list) -> Optional[EventSource]:
         entity = Entity(id=source_id)
 
         source = await self.get(entity)  # type: Optional[EventSource]
@@ -26,6 +26,9 @@ class SourceCacher:
 
         if not source.enabled:
             raise ValueError("Event source disabled.")
+
+        if source.type not in allowed_bridges:
+            raise ValueError(f"Event source `{source_id}` is not within allowed bridge types {allowed_bridges}.")
 
         return source
 

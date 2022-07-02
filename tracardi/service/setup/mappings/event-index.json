@@ -111,7 +111,7 @@
           "type": "object",
           "enabled": false
         },
-        "indexed": {
+        "traits": {
           "dynamic": true,
           "type": "object"
         },

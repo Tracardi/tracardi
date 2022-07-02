@@ -23,6 +23,12 @@ class ImportConfig(NamedEntity):
     event_source: NamedEntity
     event_type: str
 
+    @validator("event_source")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
+
     @validator("name")
     def validate_name(cls, value):
         if len(value) == 0:

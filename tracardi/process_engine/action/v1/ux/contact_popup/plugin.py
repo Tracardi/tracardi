@@ -4,9 +4,10 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from pydantic import BaseModel, validator
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     uix_source: str
     api_url: str
     content: str
@@ -55,7 +56,7 @@ class ContactPopupPlugin(ActionRunner):
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
 
-        self.config.content = template.render(self.config.content, dot)
+        content = template.render(self.config.content, dot)
 
         self.ux.append({
             "tag": "link",
@@ -68,7 +69,7 @@ class ContactPopupPlugin(ActionRunner):
             "tag": "div",
             "props": {
                 "class": "tracardi-uix-contact-widget",
-                "data-message": self.config.content,
+                "data-message": content,
                 "data-contact-type": self.config.contact_type,
                 "data-api-url": self.config.api_url,
                 "data-source-id": self.event.source.id,

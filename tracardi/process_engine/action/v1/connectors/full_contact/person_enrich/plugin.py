@@ -4,7 +4,6 @@ from aiohttp import ClientConnectorError
 from tracardi.domain.resource import Resource, ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.service.notation.dict_traverser import DictTraverser
-from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -32,7 +31,7 @@ class FullContactAction(ActionRunner):
         self.config = config
 
     async def run(self, payload):
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+        dot = self._get_dot_accessor(payload)
 
         try:
 

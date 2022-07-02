@@ -1,12 +1,13 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation, Documentation, PortDoc
+    Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class CutOutTraitConfig(BaseModel):
+class CutOutTraitConfig(PluginConfig):
     trait: str
 
     @validator("trait")
@@ -63,11 +64,11 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Cut out profile trait',
-            desc='Returns defined property from payload.',
+            name='Cut out data',
+            desc='Returns a part of referenced data as payload.',
             icon='property',
             group=["Data processing"],
-            tags=['traits', 'profile'],
+            tags=['traits', 'profile', 'memory', 'reference', 'data'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

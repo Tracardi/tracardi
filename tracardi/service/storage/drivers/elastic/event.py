@@ -18,6 +18,10 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
+async def load(id: str):
+    return await storage_manager("event").load(id)
+
+
 def _get_name(source_names_idx, id):
     return source_names_idx[id] if id in source_names_idx else id
 
@@ -53,8 +57,6 @@ async def count_events_by_type(profile_id: str, event_type: str, time_span: int)
         }
 
     }
-
-
     result = await storage_manager("event").query(query)
     return result["hits"]["total"]['value']
 

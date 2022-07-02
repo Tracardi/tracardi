@@ -40,7 +40,7 @@ class SchedulerPlugin(ActionRunner):
 
     async def run(self, payload):
         try:
-            client = SchedulerClient(tracardi.config.tracardi.tracardi_pro_host)
+            client = SchedulerClient(tracardi.config.tracardi.tracardi_scheduler_host)
             schedule_at = str(datetime.utcnow() + timedelta(seconds=self.config.postpone))
             result = await client.schedule(
                 schedule_at=schedule_at,
@@ -86,7 +86,7 @@ def register() -> Plugin:
             className='SchedulerPlugin',
             inputs=["payload"],
             outputs=['response', 'error'],
-            version='0.6.2',
+            version='0.7.1',
             license="Tracardi Pro License",
             author="Risto Kowaczewski"
         ),
@@ -95,7 +95,7 @@ def register() -> Plugin:
             desc='This plugin schedules events',
             icon='calendar',
             group=["Time"],
-            tags=["pro", "scheduler", "postpone", "delay"],
+            tags=["pro", "scheduler", "postpone", "delay", "event"],
             pro=True,
         )
     )

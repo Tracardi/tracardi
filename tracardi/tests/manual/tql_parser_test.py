@@ -44,10 +44,11 @@ if __name__ == "__main__":
     payload = data
     resource = Resource(id="3", type="event")
     context = {}
+    memory = {}
     event = Event(metadata=EventMetadata(time=EventTime()),
                   id="event-id", type="type", source=resource, context=context, profile=profile, session=session)
     flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.6.0"))
-    dot = DotAccessor(profile, session, payload, event, flow)
+    dot = DotAccessor(profile, session, payload, event, flow, memory)
 
     query = ExprTransformer(dot=dot).transform(t)
     pprint(query)

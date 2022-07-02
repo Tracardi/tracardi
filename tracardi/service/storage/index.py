@@ -15,11 +15,8 @@ class Index:
             return self.prefix + self.index
         return self.index
 
-    def get_read_index(self):
+    def get_index_alias(self):
         return self._index()
-
-    def get_prev_alias(self):
-        return f"{self.get_read_index()}.prev"
 
     def get_write_index(self):
 
@@ -99,8 +96,8 @@ class Resource:
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",
                                   mapping="mappings/consent-type.json"),
 
-            "validation-schema": Index(multi_index=False, index="tracardi-validation-schema",
-                                       mapping="mappings/validation-schema-index.json"),
+            "event-management": Index(multi_index=False, index="tracardi-event-management",
+                                       mapping="mappings/event-management-index.json"),
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
                                      mapping="mappings/value-threshold-index.json"),
             "destination": Index(multi_index=False, index='tracardi-destination',
@@ -114,7 +111,7 @@ class Resource:
         }
 
     def list_aliases(self) -> set:
-        return {index.get_read_index() for name, index in self.resources.items()}
+        return {index.get_index_alias() for name, index in self.resources.items()}
 
     def get_index(self, name) -> Index:
         if name in self.resources:

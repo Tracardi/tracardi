@@ -1,13 +1,20 @@
 from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     source: NamedEntity
     text: str
     lang: Optional[str] = "auto"
     sentences: str
+
+    @validator("source")
+    def must_not_be_empty(cls, value):
+        if value.id == "":
+            raise ValueError("This field can not be empty")
+        return value
 
     @validator("text")
     def validate_text(cls, value):

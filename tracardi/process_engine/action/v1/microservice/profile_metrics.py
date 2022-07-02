@@ -14,6 +14,7 @@ from tracardi.domain.credentials import Credentials
 from tracardi.domain.stat_payload import StatPayload
 from tracardi.service.microservice import MicroserviceApi
 from tracardi.domain.entity import Entity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class ResourceConfiguration(BaseModel):
@@ -22,7 +23,7 @@ class ResourceConfiguration(BaseModel):
     password: str = "admin"
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     source: Entity
     timeout: int = 15
 

@@ -13,6 +13,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
+from tracardi.service.plugin.domain.config import PluginConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -22,7 +23,7 @@ class TraitsConfiguration(BaseModel):
     set: dict = {}
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     traits: TraitsConfiguration
 
 
@@ -111,9 +112,7 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
-                    name="Set profile traits",
-                    description="Define what data from event is to be copied to profile. You can also copy data the "
-                                "other way around.",
+                    name="Copy data",
                     fields=[
                         FormField(
                             id="traits",
@@ -134,10 +133,10 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Set profile trait',
+            name='Copy data',
             desc='Copy event property to profile trait. This plugin copies event properties to defined destination.',
             icon='copy',
-            tags=['profile', 'event', 'traits'],
+            tags=['profile', 'event', 'traits', 'memory', 'reference', 'data'],
             group=["Data processing"],
             documentation=Documentation(
                 inputs={

@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Dict, Union
+from typing import Dict
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     consents: str
 
 

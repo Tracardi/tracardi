@@ -1,10 +1,11 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 from pytimeparse import parse
 
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     event_type: NamedEntity
     time_span: str
 

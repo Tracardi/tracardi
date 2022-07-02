@@ -224,7 +224,12 @@ def get_resource_types():
             },
             "tags": ["civi_crm"],
             "name": "CiviCRM",
-            "icon": "civicrm"
+            "icon": "civicrm",
+            "destination": {
+                "package": "tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector",
+                "init": {},
+                "form": {}
+            },
         },
         "active_campaign": {
             "config": {

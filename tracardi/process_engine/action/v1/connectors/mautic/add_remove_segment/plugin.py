@@ -31,17 +31,17 @@ class MauticSegmentEditor(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
 
-        self.config.contact_id = dot[self.config.contact_id]
+        contact_id = dot[self.config.contact_id]
 
         try:
-            await self.actions[self.config.action](self.config.contact_id, self.config.segment)
+            await self.actions[self.config.action](contact_id, self.config.segment)
             return Result(port="success", value=payload)
 
         except MauticClientAuthException:
             try:
                 await self.client.update_token()
 
-                await self.actions[self.config.action](self.config.contact_id, self.config.segment)
+                await self.actions[self.config.action](contact_id, self.config.segment)
 
                 if self.debug:
                     self.resource.credentials.test = self.client.credentials

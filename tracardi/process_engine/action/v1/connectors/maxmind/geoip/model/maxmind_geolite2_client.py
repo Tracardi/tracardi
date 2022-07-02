@@ -5,9 +5,10 @@ import os
 from pydantic import BaseModel
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.singleton import Singleton
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class PluginConfiguration(BaseModel):
+class PluginConfiguration(PluginConfig):
     source: NamedEntity
     ip: str
 

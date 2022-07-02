@@ -1,19 +1,15 @@
 import jsonschema
 from pydantic import BaseModel, validator
 from typing import Dict, List
-from tracardi.service.secrets import encrypt, decrypt
+from tracardi.service.secrets import b64_encoder, b64_decoder
 from typing import Optional
 
 
-class EventPayloadValidator(BaseModel):
-    validation: dict
-    event_type: str
-    name: str
-    description: Optional[str] = "No description provided"
-    enabled: bool
-    tags: List[str] = []
+class ValidationSchema(BaseModel):
+    json_schema: dict
+    enabled: bool = False
 
-    @validator("validation")
+    @validator("json_schema")
     def validate_schemas_format(cls, v):
         for value in v.values():
             try:
@@ -24,33 +20,37 @@ class EventPayloadValidator(BaseModel):
                                  f"Error message: {str(e)}")
         return v
 
+
+class EventTypeManager(BaseModel):
+    name: str
+    event_type: str
+    description: Optional[str] = "No description provided"
+    tags: List[str] = []
+    validation: ValidationSchema
+
     def encode(self) -> 'EventPayloadValidatorRecord':
         return EventPayloadValidatorRecord(
-            validation=encrypt(self.validation),
+            validation=b64_encoder(self.validation),  # Encodes whole validation schema
             id=self.event_type.lower().replace(" ", "-"),
             name=self.name,
             description=self.description,
-            enabled=self.enabled,
             tags=self.tags
         )
 
     @staticmethod
-    def decode(record: 'EventPayloadValidatorRecord') -> 'EventPayloadValidator':
-        return EventPayloadValidator(
-            validation=decrypt(record.validation),
+    def decode(record: 'EventPayloadValidatorRecord') -> 'EventTypeManager':
+        return EventTypeManager(
+            validation=ValidationSchema(**b64_decoder(record.validation)),
             event_type=record.id,
             name=record.name,
             description=record.description,
-            enabled=record.enabled,
             tags=record.tags
         )
 
 
 class EventPayloadValidatorRecord(BaseModel):
-    validation: str
+    validation: str  # Encrypted validation schema
     id: str
     name: str
     description: str
-    enabled: bool
     tags: List[str]
-

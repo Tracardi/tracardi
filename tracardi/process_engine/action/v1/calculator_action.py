@@ -1,4 +1,5 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
+from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.event import Event
 from tracardi.domain.session import Session
 from tracardi.domain.profile import Profile
@@ -9,7 +10,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.process_engine.tql.equation import MathEquation
 
 
-class CalculatorConfig(BaseModel):
+class CalculatorConfig(PluginConfig):
     calc_dsl: str
 
     @validator("calc_dsl")

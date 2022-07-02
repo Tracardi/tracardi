@@ -16,6 +16,7 @@ class ActionRunner:
     console = None  # type: Console
     node = None
     metrics = None
+    memory = None
     execution_graph = None
     tracker_payload = None  # type: TrackerPayload
     ux = None
@@ -30,7 +31,7 @@ class ActionRunner:
         pass
 
     def _get_dot_accessor(self, payload) -> DotAccessor:
-        return DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+        return DotAccessor(self.profile, self.session, payload, self.event, self.flow, self.memory)
 
     def update_profile(self):
         if self.debug is not True:

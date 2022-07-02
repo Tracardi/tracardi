@@ -30,6 +30,34 @@ class Flow(GraphFlow):
     lock: bool = False
     wf_schema: FlowSchema = FlowSchema()
 
+    def arrange_nodes(self):
+        if self.flowGraph is not None:
+            targets = {edge.target for edge in self.flowGraph.edges}
+            starting_nodes = [node for node in self.flowGraph.nodes if node.id not in targets]
+
+            start_at = [0, 0]
+            for starting_node in starting_nodes:
+                node_to_distance_map = self.flowGraph.traverse_graph_for_distances(start_at_id=starting_node.id)
+
+                for node_id in node_to_distance_map:
+                    node = self.flowGraph.get_node_by_id(node_id)
+                    node.position.y = start_at[1] + 150 * node_to_distance_map[node_id]
+
+                distance_to_nodes_map = {}
+                for node_id in node_to_distance_map:
+                    if node_to_distance_map[node_id] not in distance_to_nodes_map:
+                        distance_to_nodes_map[node_to_distance_map[node_id]] = []
+                    distance_to_nodes_map[node_to_distance_map[node_id]].append(node_id)
+
+                for node_ids in distance_to_nodes_map.values():
+                    nodes = [self.flowGraph.get_node_by_id(node_id) for node_id in node_ids]
+                    row_center = start_at[0] - 200 * len(nodes) + 250
+                    for node in nodes:
+                        node.position.x = row_center - node.data.metadata.width//2
+                        row_center += node.data.metadata.width
+
+                start_at[0] += len(max(distance_to_nodes_map.values(), key=len)) * 200
+
     def get_production_workflow_record(self) -> 'FlowRecord':
 
         production = encrypt(self.dict())
@@ -38,7 +66,6 @@ class Flow(GraphFlow):
             id=self.id,
             description=self.description,
             name=self.name,
-            enabled=self.enabled,
             projects=self.projects,
             draft=production,
             production=production,
@@ -51,7 +78,6 @@ class Flow(GraphFlow):
             id=self.id,
             description=self.description,
             name=self.name,
-            enabled=self.enabled,
             projects=self.projects,
             lock=self.lock
         )
@@ -62,12 +88,11 @@ class Flow(GraphFlow):
             id=str(uuid.uuid4()) if id is None else id,
             name="Empty",
             wf_schema=FlowSchema(version=str(tracardi.version)),
-            enabled=False,
             flowGraph=FlowGraphData(nodes=[], edges=[])
         )
 
     @staticmethod
-    def build(name: str, description: str = None, enabled=True, id=None, lock=False, projects=None) -> 'Flow':
+    def build(name: str, description: str = None, id=None, lock=False, projects=None) -> 'Flow':
         if projects is None:
             projects = ["General"]
 
@@ -76,7 +101,6 @@ class Flow(GraphFlow):
             name=name,
             wf_schema=FlowSchema(version=str(tracardi.version)),
             description=description,
-            enabled=enabled,
             projects=projects,
             lock=lock,
             flowGraph=FlowGraphData(
@@ -228,7 +252,6 @@ class PluginRecord(BaseModel):
 
 class FlowRecord(NamedEntity):
     description: Optional[str] = None
-    enabled: Optional[bool] = True
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
     production: Optional[str] = ''
@@ -253,7 +276,7 @@ class FlowRecord(NamedEntity):
         return Flow(**decrypted)
 
     def get_empty_workflow(self, id) -> 'Flow':
-        return Flow.build(id=id, name=self.name, description=self.description, enabled=self.enabled,
+        return Flow.build(id=id, name=self.name, description=self.description,
                           projects=self.projects, lock=self.lock)
 
     def restore_production_from_backup(self):
@@ -265,3 +288,12 @@ class FlowRecord(NamedEntity):
         if not self.production:
             raise ValueError("Production up is empty.")
         self.draft = self.production
+
+    def set_lock(self, lock: bool = True) -> None:
+        self.lock = lock
+        production_flow = self.get_production_workflow()
+        production_flow.lock = lock
+        self.production = encrypt(production_flow.dict())
+        draft_flow = self.get_draft_workflow()
+        draft_flow.lock = lock
+        self.draft = encrypt(draft_flow.dict())

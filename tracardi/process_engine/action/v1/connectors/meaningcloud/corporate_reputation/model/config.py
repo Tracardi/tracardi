@@ -1,9 +1,10 @@
 from pydantic import BaseModel, validator
 from typing import Optional
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(BaseModel):
+class Config(PluginConfig):
     source: NamedEntity
     text: str
     lang: Optional[str] = "auto"

@@ -59,7 +59,6 @@ async def add_plugins():
 
     result = defaultdict(list)
     plugins = [
-        'tracardi.process_engine.action.v1.debug_payload_action',
         'tracardi.process_engine.action.v1.flow.start.start_action',
         'tracardi.process_engine.action.v1.flow.property_exists.plugin',
         'tracardi.process_engine.action.v1.end_action',
@@ -118,6 +117,7 @@ async def add_plugins():
         # Events
         'tracardi.process_engine.action.v1.events.event_counter.plugin',
         'tracardi.process_engine.action.v1.events.event_aggregator.plugin',
+        'tracardi.process_engine.action.v1.events.event_discarder.plugin',
 
         # Validation
         'tracardi.process_engine.action.v1.json_schema_validation_action',

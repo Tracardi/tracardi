@@ -27,11 +27,11 @@ class SummarizationPlugin(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.text = dot[self.config.text]
-        self.config.lang = dot[self.config.lang]
+        text = dot[self.config.text]
+        lang = dot[self.config.lang]
 
         try:
-            result = await self.client.summarize(self.config.text, self.config.lang, int(self.config.sentences))
+            result = await self.client.summarize(text, lang, int(self.config.sentences))
             return Result(port="response", value=result)
 
         except TracardiException as e:

@@ -32,11 +32,10 @@ class FetchFromAirtableAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
 
-        if self.config.formula is not None:
-            self.config.formula = template.render(self.config.formula, dot)
+        formula = template.render(self.config.formula, dot) if self.config.formula is not None else None
 
         try:
-            result = await self.client.get_records(self.config.base_id, self.config.table_name, self.config.formula)
+            result = await self.client.get_records(self.config.base_id, self.config.table_name, formula)
             return Result(port="response", value=result)
 
         except AirtableClientException as e:

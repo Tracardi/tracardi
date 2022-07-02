@@ -1,10 +1,9 @@
-from typing import Union
-
-from pydantic import BaseModel, validator
+from pydantic import validator
 from pytimeparse import parse
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     field: str
     time_span: str
 

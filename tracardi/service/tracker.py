@@ -18,7 +18,7 @@ from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.merging import merge
 from tracardi.service.notation.dot_accessor import DotAccessor
 
-from tracardi.domain.event_payload_validator import EventPayloadValidator
+from tracardi.domain.event_payload_validator import EventTypeManager
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.console import Console
@@ -102,7 +102,6 @@ async def _save_events(tracker_payload, console_log, events):
 
 async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
-
     results = await asyncio.gather(
         _save_profile(profile),
         _save_session(tracker_payload, session, profile),
@@ -127,14 +126,15 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
             session=session,
             payload=None,
             event=event,
-            flow=None
+            flow=None,
+            memory=None
         )
         event_type = dot.event['type']
 
         if event_type not in cache:
             logger.info(f"Refreshed validation schema for event type {event_type}.")
-            event_payload_validator = await storage.driver.validation_schema.load_schema(
-                dot.event['type'])  # type: EventPayloadValidator
+            event_payload_validator = await storage.driver.event_management.load_event_type_metadata(
+                dot.event['type'])  # type: EventTypeManager
             cache[event_type] = CacheItem(data=event_payload_validator, ttl=memory_cache.event_validator_ttl)
 
         validation_data = cache[event_type].data
@@ -250,7 +250,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     save_tasks = []
     try:
         # Merge
-        profiles_to_disable = await merge(profile, limit=2000)
+        profiles_to_disable = await merge(profile, override_old_data=True, limit=2000)
         if profiles_to_disable is not None:
             task = asyncio.create_task(
                 StorageForBulk(profiles_to_disable).index('profile').save())
@@ -288,37 +288,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     #         )
     #     )
     #     logger.error(message)
-
-    # Send to destination
-
-    if has_profile and profile_copy is not None:
-        new_profile = profile.dict(exclude={"operation": ...})
-
-        if profile_copy != new_profile:
-            profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)
-            if profile_delta:
-                logger.info("Profile changed. Destination scheduled to run.")
-                try:
-                    destination_manager = DestinationManager(profile_delta,
-                                                             profile,
-                                                             session,
-                                                             payload=None,
-                                                             event=None,
-                                                             flow=None)
-                    # todo performance - could be not awaited add to save_task
-                    await destination_manager.send_data(profile.id, debug=False)
-                except Exception as e:
-                    # todo - this appends error to the same profile - it rather should be en event error
-                    console_log.append(Console(
-                        profile_id=get_profile_id(profile),
-                        origin='destination',
-                        class_name='DestinationManager',
-                        module='tracker',
-                        type='error',
-                        message=str(e),
-                        traceback=get_traceback(e)
-                    ))
-                    logger.error(str(e))
 
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
@@ -371,6 +340,38 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             encoded_console_log = list(console_log.get_encoded())
             save_tasks.append(asyncio.create_task(StorageForBulk(encoded_console_log).index('console-log').save()))
 
+    # Send to destination
+
+    if has_profile and profile_copy is not None:
+        new_profile = profile.dict(exclude={"operation": ...})
+
+        if profile_copy != new_profile:
+            profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)
+            if profile_delta:
+                logger.info("Profile changed. Destination scheduled to run.")
+                try:
+                    destination_manager = DestinationManager(profile_delta,
+                                                             profile,
+                                                             session,
+                                                             payload=None,
+                                                             event=None,
+                                                             flow=None,
+                                                             memory=None)
+                    # todo performance - could be not awaited add to save_task
+                    await destination_manager.send_data(profile.id, events, debug=False)
+                except Exception as e:
+                    # todo - this appends error to the same profile - it rather should be en event error
+                    console_log.append(Console(
+                        profile_id=get_profile_id(profile),
+                        origin='destination',
+                        class_name='DestinationManager',
+                        module='tracker',
+                        type='error',
+                        message=str(e),
+                        traceback=get_traceback(e)
+                    ))
+                    logger.error(str(e))
+
     if save_tasks:
         # Run tasks
         await asyncio.gather(*save_tasks)
@@ -412,10 +413,10 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     return result
 
 
-async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool):
-
+async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str]):
     try:
-        source = await source_cache.validate_source(source_id=tracker_payload.source.id)
+        source = await source_cache.validate_source(source_id=tracker_payload.source.id,
+                                                    allowed_bridges=allowed_bridges)
     except ValueError as e:
         raise UnauthorizedException(e)
 
@@ -447,12 +448,14 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 
-async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool):
+async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
+                                      allowed_bridges: List[str]):
     if tracardi.sync_profile_tracks:
         try:
             async with ProfileTracksSynchronizer(tracker_payload.profile, wait=1):
-                return await track_event(tracker_payload, ip=host, profile_less=profile_less)
+                return await track_event(tracker_payload, ip=host, profile_less=profile_less,
+                                         allowed_bridges=allowed_bridges)
         except redis.exceptions.ConnectionError as e:
             raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
     else:
-        return await track_event(tracker_payload, ip=host, profile_less=profile_less)
+        return await track_event(tracker_payload, ip=host, profile_less=profile_less, allowed_bridges=allowed_bridges)

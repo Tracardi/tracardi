@@ -5,7 +5,8 @@ from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
 from .model.config import Config
-from tracardi.process_engine.action.v1.connectors.civi_crm.client import CiviCRMClient, CiviCRMClientException
+from tracardi.process_engine.action.v1.connectors.civi_crm.client import CiviCRMClient, CiviCRMClientException, \
+    CiviClientCredentials
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -25,18 +26,18 @@ class AddCiviContactAction(ActionRunner):
 
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
-        self.client = CiviCRMClient(**credentials.get_credentials(self))
+        self.client = CiviCRMClient(**credentials.get_credentials(self, CiviClientCredentials).dict())
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
-        self.config.fields = traverser.reshape(self.config.fields)
+        fields = traverser.reshape(self.config.fields)
 
         try:
             result = await self.client.add_contact(
                 data={
                     "contact_type": self.config.contact_type,
-                    **{field: self.config.fields[field] for field in self.config.fields if self.config.fields[field]
+                    **{field: fields[field] for field in fields if fields[field]
                        is not None}
                 }
             )

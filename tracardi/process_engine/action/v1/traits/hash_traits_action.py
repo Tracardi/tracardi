@@ -1,9 +1,6 @@
 import hashlib
 import json
 from typing import List
-
-from pydantic import BaseModel
-
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -11,9 +8,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     traits: List[str]
     func: str = 'md5'
 
@@ -106,11 +104,11 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Hash traits',
-            desc='Hash defined profile traits.',
+            name='Hash data',
+            desc='Hash defined data e.g. profile traits.',
             icon='hash',
             group=["Operations"],
-            tags=['profile', 'trait'],
+            tags=['profile', 'trait', 'data'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

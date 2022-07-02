@@ -19,13 +19,13 @@ class WriteToMemoryAction(ActionRunner):
 
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
-        self.config.value = dot[self.config.value]
-        self.config.value = b64_encoder(self.config.value)
+        value = dot[self.config.value]
+        value = b64_encoder(value)
 
         try:
             self.client.client.set(
                 name=f"TRACARDI-USER-MEMORY-{self.config.key}",
-                value=self.config.value,
+                value=value,
                 ex=self.config.ttl
             )
             return Result(port="success", value=payload)
@@ -82,10 +82,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Write to memory',
+            name='Write to Redis',
             desc='Writes given data to cross-instance memory.',
             icon='redis',
-            group=["Operations"],
+            group=["Redis"],
             tags=['redis'],
             documentation=Documentation(
                 inputs={

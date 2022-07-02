@@ -2,11 +2,15 @@ import asyncio
 import aiohttp
 from aiohttp import ClientConnectorError
 from tracardi.service.notation.dict_traverser import DictTraverser
+from json import JSONDecodeError
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.configuration import RemoteCallConfiguration
+from tracardi.domain.resource import ResourceCredentials
+from tracardi.service.storage.driver import storage
+from tracardi.service.url_constructor import ApiCredentials, make_url
 
 
 def validate(config: dict) -> RemoteCallConfiguration:
@@ -15,8 +19,15 @@ def validate(config: dict) -> RemoteCallConfiguration:
 
 class RemoteCallAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    @staticmethod
+    async def build(**kwargs) -> 'RemoteCallAction':
+        config = RemoteCallConfiguration(**kwargs)
+        resource = await storage.driver.resource.load(config.source.id)
+        return RemoteCallAction(config, resource.credentials)
+
+    def __init__(self, config: RemoteCallConfiguration, credentials: ResourceCredentials):
+        self.config = config
+        self.credentials = credentials.get_credentials(self, ApiCredentials)
 
     @staticmethod
     def _validate_key_value(values, label):
@@ -33,31 +44,40 @@ class RemoteCallAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             traverser = DictTraverser(dot)
 
-            self.config.cookies = traverser.reshape(reshape_template=self.config.cookies)
-            self.config.headers = traverser.reshape(reshape_template=self.config.headers)
+            cookies = traverser.reshape(reshape_template=self.config.cookies)
+            headers = traverser.reshape(reshape_template=self.config.headers)
 
-            self._validate_key_value(self.config.headers, "Header")
-            self._validate_key_value(self.config.cookies, "Cookie")
+            self._validate_key_value(headers, "Header")
+            self._validate_key_value(cookies, "Cookie")
 
-            self.config.headers['ContentType'] = self.config.body.type
+            headers['ContentType'] = self.config.body.type
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
             async with aiohttp.ClientSession(timeout=timeout) as session:
 
                 params = self.config.get_params(dot)
+                url = make_url(dot=dot, credentials=self.credentials, endpoint=self.config.endpoint)
+
+                self.console.log("Making {} request to {}".format(self.config.method.upper(), url))
 
                 async with session.request(
                         method=self.config.method,
-                        url=str(self.config.url),
-                        headers=self.config.headers,
-                        cookies=self.config.cookies,
+                        url=url,
+                        headers=headers,
+                        cookies=cookies,
                         ssl=self.config.ssl_check,
                         **params
                 ) as response:
 
+                    try:
+                        content = await response.json()
+
+                    except JSONDecodeError:
+                        content = await response.text()
+
                     result = {
                         "status": response.status,
-                        "content": await response.json(),
+                        "content": content,
                         "cookies": response.cookies
                     }
 
@@ -83,7 +103,8 @@ def register() -> Plugin:
             outputs=["response", "error"],
             init={
                 "method": "post",
-                "url": None,
+                "source": {"name": None, "id": None},
+                "endpoint": None,
                 "timeout": 30,
                 "headers": {},
                 "cookies": {},
@@ -94,6 +115,12 @@ def register() -> Plugin:
                 FormGroup(
                     name="Remote call settings",
                     fields=[
+                        FormField(
+                            id="source",
+                            name="Resource",
+                            description="Select your API resource containing your URL and API credentials.",
+                            component=FormComponent(type="resource", props={"tag": "api"})
+                        ),
                         FormField(
                             id="method",
                             name="Method",
@@ -109,10 +136,11 @@ def register() -> Plugin:
                             })
                         ),
                         FormField(
-                            id="url",
-                            name="URL",
-                            description="Type URL to be called.",
-                            component=FormComponent(type="text", props={"label": "Url"})
+                            id="endpoint",
+                            name="Endpoint",
+                            description="Type endpoint that should be called. Feel free to use dot templates, e.g. "
+                                        "/some/{{payload@value}}/endpoint.",
+                            component=FormComponent(type="text", props={"label": "Endpoint"})
                         ),
                         FormField(
                             id="body",

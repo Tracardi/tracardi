@@ -44,7 +44,8 @@ class PostponeEventAction(ActionRunner):
                 ip=ip
             )
         )
-        await synchronized_event_tracking(tracker_payload, host="http://localhost", profile_less=False)
+        await synchronized_event_tracking(tracker_payload, host="http://localhost", profile_less=False,
+                                          allowed_bridges=['rest'])
 
     async def run(self, payload):
         if self.profile is None:

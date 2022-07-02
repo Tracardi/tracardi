@@ -7,9 +7,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class MergeProfileConfiguration(BaseModel):
+class MergeProfileConfiguration(PluginConfig):
     mergeBy: List[str]
 
     @validator("mergeBy")

@@ -1,13 +1,12 @@
-from pydantic import BaseModel
-
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     type: str
     message: str
 
@@ -24,14 +23,14 @@ class LogAction(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
-        self.config.message = template.render(self.config.message, dot)
+        message = template.render(self.config.message, dot)
 
         if self.config.type == 'warning':
-            self.console.warning(self.config.message)
+            self.console.warning(message)
         elif self.config.type == 'error':
-            self.console.error(self.config.message)
+            self.console.error(message)
         elif self.config.type == 'info':
-            self.console.log(self.config.message)
+            self.console.log(message)
         return Result(port="payload", value=payload)
 
 

@@ -3,7 +3,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.domain.resource import ResourceCredentials, Resource
 from .model.maxmind_geolite2_client import GeoIpConfiguration, \
     PluginConfiguration, MaxMindGeoLite2, GeoLiteCredentials
@@ -30,7 +29,7 @@ class GeoIPAction(ActionRunner):
 
     async def run(self, payload):
         try:
-            dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+            dot = self._get_dot_accessor(payload)
 
             ip = dot[self.config.ip]
 

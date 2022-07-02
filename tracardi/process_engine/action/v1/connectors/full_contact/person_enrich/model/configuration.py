@@ -2,6 +2,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class PII(BaseModel):
@@ -13,7 +14,7 @@ class PII(BaseModel):
     name: Optional[str] = None
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     source: NamedEntity
     pii: PII
     timeout: int = 30

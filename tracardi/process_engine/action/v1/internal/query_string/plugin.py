@@ -21,14 +21,14 @@ class CountRecordsAction(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
-        self.config.query = template.render(self.config.query, dot)
+        query = template.render(self.config.query, dot)
 
         try:
 
             time_span = parse_time(self.config.time_range)
 
             result = await storage_manager(self.config.index).storage.count_by_query_string(
-                self.config.query,
+                query,
                 f"{time_span}s" if time_span < 0 else ""
             )
 

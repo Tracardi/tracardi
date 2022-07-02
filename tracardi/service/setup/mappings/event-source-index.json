@@ -31,6 +31,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "locked": {
+        "type": "boolean"
+      },
       "transitional": {
         "type": "boolean"
       },
@@ -55,6 +58,10 @@
       },
       "permanent_profile_id": {
         "type": "boolean"
+      },
+      "manual": {
+        "type": "keyword",
+        "index": false
       },
       "endpoints": {
         "properties": {

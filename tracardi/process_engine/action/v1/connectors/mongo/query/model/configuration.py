@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from tracardi.domain.entity import Entity
+from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.resource_id import ResourceId
 
@@ -10,7 +10,7 @@ class MongoConfiguration(BaseModel):
     timeout: int = 5000
 
 
-class PluginConfiguration(BaseModel):
+class PluginConfiguration(PluginConfig):
     source: NamedEntity
     database: NamedEntity
     collection: NamedEntity

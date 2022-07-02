@@ -9,9 +9,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     traits: List[str]
 
 
@@ -75,11 +76,11 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Mask traits',
-            desc='Mask defined profile traits.',
+            name='Mask data',
+            desc='Mask defined data, e.g. profile traits.',
             icon='hash',
             group=["Operations"],
-            tags=['profile', 'trait'],
+            tags=['profile', 'trait', 'data'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

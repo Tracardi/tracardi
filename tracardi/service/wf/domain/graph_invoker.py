@@ -102,7 +102,8 @@ class GraphInvoker(BaseModel):
                                       payload=dot_payload[0] if len(dot_payload) == 1 else {},
                                       # this is fine, input params has only one value
                                       event=node.object.event,
-                                      flow=node.object.flow)
+                                      flow=node.object.flow,
+                                      memory=node.object.memory)
 
                     if node.run_once.type == 'value':
                         value = dot[node.run_once.value]
@@ -160,7 +161,7 @@ class GraphInvoker(BaseModel):
                         id=session.id,
                         start=session.metadata.time.insert,
                         duration=session.metadata.time.duration
-                    )
+                    ) if session is not None else None
 
     async def run_task(self, node: Node, payload, ready_upstream_results: ActionsResults):
 
@@ -337,6 +338,7 @@ class GraphInvoker(BaseModel):
         errors = []
         objects = []
         metrics = {}
+        memory = {}
         for node in self.graph:
             # Init object
             try:
@@ -351,6 +353,7 @@ class GraphInvoker(BaseModel):
                 node.object.console = Console(node.className, node.module)
                 node.object.id = node.id
                 node.object.metrics = metrics
+                node.object.memory = memory
                 node.object.ux = ux
                 node.object.tracker_payload = tracker_payload
                 node.object.execution_graph = self

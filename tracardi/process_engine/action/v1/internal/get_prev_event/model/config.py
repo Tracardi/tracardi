@@ -1,11 +1,19 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 
 from tracardi.domain.named_entity import NamedEntity
 
+from tracardi.service.plugin.domain.config import PluginConfig
 
-class Config(BaseModel):
+
+class Config(PluginConfig):
     event_type: NamedEntity
     offset: int
+
+    @validator("event_type")
+    def must_not_be_empty(cls, value):
+        if value.id == "":
+            raise ValueError("This field can not be empty")
+        return value
 
     @validator("offset")
     def validate_offset(cls, value):

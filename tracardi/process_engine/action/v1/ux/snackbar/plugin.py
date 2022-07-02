@@ -1,13 +1,14 @@
-from pydantic import BaseModel, validator, AnyHttpUrl
+from pydantic import validator, AnyHttpUrl
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
+class Configuration(PluginConfig):
     type: str = "success"
     message: str
     hide_after: str
@@ -41,14 +42,14 @@ class SnackBarUx(ActionRunner):
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
 
-        self.config.message = template.render(self.config.message, dot)
+        message = template.render(self.config.message, dot)
 
         self.ux.append({
             "tag": "div",
             "props": {
                 "class": "tracardi-uix-snackbar",
                 "data-type": self.config.type,
-                "data-message": self.config.message,
+                "data-message": message,
                 "data-vertical": self.config.position_y,
                 "data-horizontal": self.config.position_x,
                 "data-auto-hide": self.config.hide_after
