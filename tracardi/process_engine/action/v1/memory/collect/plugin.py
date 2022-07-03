@@ -53,7 +53,7 @@ def register() -> Plugin:
                 "name": None,
                 "type": "list"
             },
-            manual="payload_memory_collector_action",
+            manual="memory/payload_memory_collector_action",
             form=Form(
                 groups=[
                     FormGroup(
