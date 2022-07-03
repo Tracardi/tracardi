@@ -1,4 +1,4 @@
-from tracardi.domain.migration_schema import MigrationSchema
+from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List
 import json
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -57,24 +57,27 @@ class MigrationManager:
 
         final_schemas = []
         for schema in schemas:
-            if schema.multi is True:
-                from_indices = await self.get_multi_indices(template_name=schema.index)
+            if schema.copy_index.multi is True:
+                from_indices = await self.get_multi_indices(template_name=schema.copy_index.from_index)
                 for from_index in from_indices:
                     final_schemas.append(MigrationSchema(
-                        id=sha1(from_index),
-                        index=from_index.split('.')[-1],
-                        multi=schema.multi,
+                        id=sha1(from_index.encode("utf-8")).hexdigest(),
+                        copy_index=CopyIndex(
+                            from_index=from_index,
+                            to_index=f"{self.to_version.get_version_prefix()}.{self.to_version.name}."
+                                     f"{schema.copy_index.to_index}",
+                            multi=schema.copy_index.multi,
+                            script=schema.copy_index.script
+                        ),
                         asynchronous=schema.asynchronous,
-                        script=schema.script,
-                        worker=schema.worker,
-                        from_index=from_index,
-                        to_index=f"{self.to_version.get_version_prefix()}.{self.to_version.name}."
-                                 f"{from_index.split('.')[-1]}"
+                        worker=schema.worker
                     ))
 
             else:
-                schema.from_index = f"{self.from_version.get_version_prefix()}.{self.from_version.name}.{schema.index}"
-                schema.to_index = f"{self.to_version.get_version_prefix()}.{self.to_version.name}.{schema.index}"
+                schema.copy_index.from_index = f"{self.from_version.get_version_prefix()}." \
+                                               f"{self.from_version.name}.{schema.copy_index.from_index}"
+                schema.copy_index.to_index = f"{self.to_version.get_version_prefix()}." \
+                                             f"{self.to_version.name}.{schema.copy_index.to_index}"
                 final_schemas.append(schema)
 
         final_schemas = [schema.dict() for schema in final_schemas]
