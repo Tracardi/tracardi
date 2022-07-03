@@ -59,6 +59,8 @@ async def add_plugins():
 
     result = defaultdict(list)
     plugins = [
+        'tracardi.process_engine.action.v1.memory.collect.plugin',
+
         'tracardi.process_engine.action.v1.flow.start.start_action',
         'tracardi.process_engine.action.v1.flow.property_exists.plugin',
         'tracardi.process_engine.action.v1.end_action',
