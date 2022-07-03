@@ -2,7 +2,8 @@
 
 [![Stargazers repo roster for @tracardi/tracardi](https://reporoster.com/stars/tracardi/tracardi)](https://github.com/tracardi/tracardi/stargazers)
 
-![contributors](https://opencollective.com/tracardi-cdp/tiers/badge.svg) [![Become a backer](https://opencollective.com/tracardi-cdp/tiers/backers.svg?avatarHeight=36)](https://opencollective.com/tracardi-cdp)
+![contributors](https://opencollective.com/tracardi-cdp/tiers/badge.svg) 
+[![Become a backer](https://opencollective.com/tracardi-cdp/tiers/backers.svg?avatarHeight=36)](https://opencollective.com/tracardi-cdp)
 
 # Open-source Customer Engagement and Data Platform
 
