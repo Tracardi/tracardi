@@ -17,7 +17,7 @@ class ArrayReducer(ActionRunner):
     async def run(self, payload):
         dot = self._get_dot_accessor(payload)
         array_to_reduce = dot[self.config.array]
-        result = {"counts": {}, "max": None, "min": None}
+        result = {"counts": {}, "max": None, "min": None, "total": len(array_to_reduce)}
 
         try:
             for element in array_to_reduce:
