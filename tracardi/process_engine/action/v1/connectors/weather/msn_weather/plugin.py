@@ -16,7 +16,7 @@ class WeatherAction(ActionRunner):
         self.config = validate(kwargs)
         self.client = AsyncWeatherClient(self.config.system.upper())
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             city = self.config.city
 

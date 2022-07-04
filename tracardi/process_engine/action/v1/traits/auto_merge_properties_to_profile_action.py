@@ -54,7 +54,7 @@ class AutoMergePropertiesToProfileAction(ActionRunner):
             source.update(value)
             return source
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if self.profile is not None:
 
             self.update_profile()

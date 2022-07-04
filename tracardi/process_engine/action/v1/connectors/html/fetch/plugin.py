@@ -26,7 +26,7 @@ class HtmlPageFetchAction(ActionRunner):
                     "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
                                                                                name))
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
 

@@ -47,7 +47,7 @@ class PostponeEventAction(ActionRunner):
         await synchronized_event_tracking(tracker_payload, host="http://localhost", profile_less=False,
                                           allowed_bridges=['rest'])
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None):
         if self.profile is None:
             raise ValueError("Profile less events can not be delayed.")
         postponed_call = PostponedCall(

@@ -32,7 +32,7 @@ class TextClassificationAction(ActionRunner):
             'press': 'IPTC'
         }
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.config.model not in self.models:
             raise ValueError(f"Model `{self.config.model}` is incorrect. Available models are `{self.models}`")

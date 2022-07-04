@@ -16,7 +16,7 @@ class InjectEvent(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         event = await storage_manager("event").load(self.config.event_id)
         if event is None:
             self.console.warning("Event id `{}` does not exist.".format(self.config.event_id))

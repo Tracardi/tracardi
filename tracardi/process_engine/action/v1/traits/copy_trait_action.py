@@ -37,7 +37,7 @@ class CopyTraitAction(ActionRunner):
         self.config = validate(kwargs)
         self.mapping = self.config.traits.set
 
-    async def run(self, payload: dict):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 

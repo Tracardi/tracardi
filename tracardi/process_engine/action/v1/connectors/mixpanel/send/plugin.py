@@ -29,7 +29,7 @@ class MixPanelSender(ActionRunner):
             **credentials.get_credentials(self, MixPanelCredentials).dict()
         )
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
 

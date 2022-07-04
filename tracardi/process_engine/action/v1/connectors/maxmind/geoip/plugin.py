@@ -27,7 +27,7 @@ class GeoIPAction(ActionRunner):
         self.client = MaxMindGeoLite2(geoip2_config)
         self.config = config
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             dot = self._get_dot_accessor(payload)
 

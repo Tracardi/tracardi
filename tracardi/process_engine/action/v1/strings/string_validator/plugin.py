@@ -16,7 +16,7 @@ class StringValidatorAction(ActionRunner):
         self.config = validate(kwargs)
         self.validator = Validator(self.config)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         string = dot[self.config.data]
 

@@ -26,7 +26,7 @@ class PushoverAction(ActionRunner):
         self.pushover_config = config
         self.credentials = credentials.get_credentials(self, output=PushOverAuth)  # type: PushOverAuth
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         async with aiohttp.ClientSession() as session:
 
             dot = self._get_dot_accessor(payload)

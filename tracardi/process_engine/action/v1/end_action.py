@@ -7,8 +7,7 @@ class EndAction(ActionRunner):
     def __init__(self, **kwargs):
         pass
 
-    async def run(self, payload):
-        print(self.memory)
+    async def run(self, payload: dict, in_edge=None):
         return None
 
 

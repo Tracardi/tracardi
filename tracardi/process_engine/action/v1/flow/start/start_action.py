@@ -154,7 +154,6 @@ class StartAction(ActionRunner):
         return Result(port="payload", value=self.event.dict())
 
     async def run(self, *args, **kwargs) -> Optional[Result]:
-        self.memory['test'] = 1
         if self.debug is True:
             return await self.debug_run()
         else:

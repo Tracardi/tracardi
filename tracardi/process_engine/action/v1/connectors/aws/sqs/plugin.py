@@ -26,7 +26,7 @@ class AwsSqsAction(ActionRunner):
         self.aws_config = config
         self.credentials = credentials.get_credentials(self, output=AwsIamAuth)  # type: AwsIamAuth
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
 
             session = get_session()

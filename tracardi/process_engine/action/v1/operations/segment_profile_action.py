@@ -10,7 +10,7 @@ class SegmentProfileAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
             self.profile.operation.segment = True
         else:

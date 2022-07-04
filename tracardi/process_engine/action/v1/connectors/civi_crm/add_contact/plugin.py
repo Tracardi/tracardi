@@ -28,7 +28,7 @@ class AddCiviContactAction(ActionRunner):
         self.config = config
         self.client = CiviCRMClient(**credentials.get_credentials(self, CiviClientCredentials).dict())
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
         fields = traverser.reshape(self.config.fields)

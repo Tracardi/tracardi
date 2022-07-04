@@ -10,7 +10,7 @@ class NewProfileAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is True:
             self.console.warning("Can not check if profile is new in profile less events.")
         elif isinstance(self.profile, Profile) and self.profile.operation.new:

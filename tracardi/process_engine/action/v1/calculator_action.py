@@ -29,7 +29,7 @@ class CalculatorAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload: dict):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         calc_lines = [line.strip() for line in self.config.calc_dsl.split("\n")]
 
         dot = self._get_dot_accessor(payload)

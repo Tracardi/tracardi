@@ -31,7 +31,7 @@ class MappingAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = Config(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         value = dot[self.config.value].lower() \
             if not self.config.case_sensitive and isinstance(dot[self.config.value], str) else dot[self.config.value]

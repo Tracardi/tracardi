@@ -44,7 +44,7 @@ class CtaMessageUx(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         self.ux.append({
             "tag": "div",
             "props": {

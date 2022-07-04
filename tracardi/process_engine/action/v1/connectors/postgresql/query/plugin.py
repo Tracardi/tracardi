@@ -30,7 +30,7 @@ class PostgreSQLConnectorAction(ActionRunner):
         self.timeout = config.timeout
         self.db = None
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
 
             self.db = await self.credentials.get_credentials(self, Connection).connect()

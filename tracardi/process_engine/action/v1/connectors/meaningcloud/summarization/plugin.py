@@ -25,7 +25,7 @@ class SummarizationPlugin(ActionRunner):
         self.config = config
         self.client = MeaningCloudClient(credentials.get_credentials(self, Token).token)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         text = dot[self.config.text]
         lang = dot[self.config.lang]

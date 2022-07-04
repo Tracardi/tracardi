@@ -40,7 +40,7 @@ class DetectClientAgentAction(ActionRunner):
             self.console.error(str(e))
             return {}
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
             if not isinstance(self.session.context, dict):

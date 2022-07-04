@@ -1,6 +1,7 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.wf.domain.edge import Edge
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 
@@ -14,7 +15,7 @@ class PayloadMemoryCollector(ActionRunner):
     def __init__(self, **kwargs):
         self.config = Config(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge: Edge = None) -> Result:
 
         if self.config.name in self.memory:
 
@@ -31,7 +32,11 @@ class PayloadMemoryCollector(ActionRunner):
                 self.memory[self.config.name] = []
 
         if self.config.type == 'dict':
-            self.console.warning("Dictionary collection is not implemented yet.")
+            if not in_edge.has_name():
+                raise ValueError(f"Edge id {in_edge.id} has no name. Could not create object with payload value. "
+                                 f"Edge name is used to save payload value.")
+
+            self.memory[self.config.name][in_edge.data.name.replace(" ", "-")] = payload
         elif self.config.type == 'list':
             self.memory[self.config.name].append(payload)
 
