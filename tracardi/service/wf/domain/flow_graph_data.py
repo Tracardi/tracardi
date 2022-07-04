@@ -87,7 +87,7 @@ class NodePort:
 
 
 class EdgeData(BaseModel):
-    name: str = None
+    name: str = ""
 
 
 class Edge(BaseModel):
