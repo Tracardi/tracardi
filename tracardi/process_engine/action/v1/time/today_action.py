@@ -38,7 +38,7 @@ class TodayAction(ActionRunner):
         self.config = validate(kwargs)
         self.week_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         if self.config.timezone is not None:
             time_zone = dot[self.config.timezone]

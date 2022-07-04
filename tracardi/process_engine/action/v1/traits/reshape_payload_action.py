@@ -41,7 +41,7 @@ class ReshapePayloadAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = Configuration(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if not isinstance(payload, dict):
             self.console.warning("Payload has to be an object.")
 

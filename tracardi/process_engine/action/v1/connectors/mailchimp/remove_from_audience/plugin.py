@@ -24,7 +24,7 @@ class MailChimpAudienceRemover(ActionRunner):
         self.config = config
         self._client = MailChimpAudienceEditor(credentials.get_credentials(self, Token).token)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         emails = dot[self.config.email]
         emails = emails if isinstance(emails, list) else [emails]

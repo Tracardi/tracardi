@@ -1,6 +1,6 @@
 import importlib
 
-from ..domain.flow_graph_data import FlowGraphData
+from ..domain.flow_graph_data import FlowGraphData, EdgeData
 from ..domain.connection import Connection
 from ..domain.edge import Edge
 from ..domain.dag_graph import DagGraph
@@ -42,7 +42,8 @@ class FlowGraphConverter:
         edges = [Edge(
             id=edge.id,
             source=Connection(node_id=edge.source, param=edge.sourceHandle),
-            target=Connection(node_id=edge.target, param=edge.targetHandle)
+            target=Connection(node_id=edge.target, param=edge.targetHandle),
+            data=edge.data
         ) for edge in self.data.edges]
 
         return DagGraph(nodes=nodes, edges=edges)

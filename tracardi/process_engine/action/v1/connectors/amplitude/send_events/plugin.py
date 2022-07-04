@@ -43,7 +43,7 @@ class AmplitudeSendEvent(ActionRunner):
             return None
         return value
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
 

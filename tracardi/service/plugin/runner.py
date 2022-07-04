@@ -21,7 +21,7 @@ class ActionRunner:
     tracker_payload = None  # type: TrackerPayload
     ux = None
 
-    async def run(self, **kwargs):
+    async def run(self, payload: dict, in_edge=None):
         pass
 
     async def close(self):

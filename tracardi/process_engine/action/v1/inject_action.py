@@ -42,7 +42,7 @@ class InjectAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = Configuration(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if self.debug is True:
             self.event.metadata.debug = True
 

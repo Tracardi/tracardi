@@ -20,7 +20,7 @@ class LocalTimeSpanAction(ActionRunner):
         regex = re.compile(r'^[a-zA-z\-]+\/[a-zA-z\-]+$', re.I)
         return regex.match(str(timezone))
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         time_zone = dot[self.config.timezone]
 

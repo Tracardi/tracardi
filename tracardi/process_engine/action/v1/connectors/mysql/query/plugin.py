@@ -31,7 +31,7 @@ class MysqlConnectorAction(ActionRunner):
         self.config = config
         self.connection = credentials.get_credentials(self, output=Connection)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             self.pool = await self.connection.connect(self.config.timeout)
 

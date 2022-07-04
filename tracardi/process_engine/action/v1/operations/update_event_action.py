@@ -7,7 +7,7 @@ class UpdateEventAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None):
         self.event.update = True
         if self.debug is True:
             self.console.warning("Events may not be updated in debug mode.")

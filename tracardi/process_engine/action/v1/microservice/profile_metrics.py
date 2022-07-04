@@ -52,7 +52,7 @@ class ProfileMetricsApi(ActionRunner):
             )
         )
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         # todo run in background
 

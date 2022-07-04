@@ -31,7 +31,7 @@ class IfAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload: dict):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.config.condition is None:
             raise ValueError("Condition is not set. Define it in config section.")

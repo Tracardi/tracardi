@@ -13,7 +13,7 @@ class task1(ActionRunner):
     def __init__(self, condition):
         self.condition = condition
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         print("Hello 1!")
         print("conditional=", self.condition)
         print("payload", payload)
@@ -57,7 +57,7 @@ class task4(ActionRunner):
 
 class task7(ActionRunner):
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         print("Hello, 2!")
         return Result(port="NODE2_o", value=[2])
 

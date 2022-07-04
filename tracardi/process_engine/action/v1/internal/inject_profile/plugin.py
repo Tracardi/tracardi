@@ -18,7 +18,7 @@ class InjectProfile(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         result = await storage.driver.raw.index("profile").query_by_sql(self.config.query, start=0, limit=2)
 
         if result['total'] != 1:

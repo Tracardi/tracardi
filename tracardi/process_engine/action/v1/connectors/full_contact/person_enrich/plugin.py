@@ -30,7 +30,7 @@ class FullContactAction(ActionRunner):
                                                        output=FullContactSourceConfiguration)  # type: FullContactSourceConfiguration
         self.config = config
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
 
         try:

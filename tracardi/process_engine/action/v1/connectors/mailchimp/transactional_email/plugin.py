@@ -31,7 +31,7 @@ class TransactionalMailSender(ActionRunner):
             resource.credentials
         )
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         message = self._dot_template.render(self.config.message.content.content, dot)
         recipient_emails = dot[self.config.message.recipient]

@@ -14,12 +14,12 @@ class PropertyExistsAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None):
         dot = self._get_dot_accessor(payload)
         if self.config.property in dot:
-            return Result(port="true", value=payload), Result(port="false", value=payload)
+            return Result(port="true", value=payload)
 
-        return Result(port="false", value=payload), Result(port="true", value=payload)
+        return Result(port="false", value=payload)
 
 
 def register() -> Plugin:

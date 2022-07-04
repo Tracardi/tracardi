@@ -37,7 +37,7 @@ class MergeProfilesAction(ActionRunner):
         config = validate(kwargs)
         self.merge_key = [key.lower() for key in config.mergeBy]
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
             self.profile.operation.merge = self.merge_key
         else:

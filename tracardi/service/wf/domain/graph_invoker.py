@@ -78,6 +78,8 @@ class GraphInvoker(BaseModel):
     async def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, in_edge: Edge = None):
         try:
 
+            params['in_edge'] = in_edge
+
             if node.skip is True:
                 coroutine = self._skip_node(node, params)
             else:

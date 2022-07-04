@@ -41,7 +41,7 @@ class ElasticSearchFetcher(ActionRunner):
             port=credentials.port
         )
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
             res = await self._client.search(

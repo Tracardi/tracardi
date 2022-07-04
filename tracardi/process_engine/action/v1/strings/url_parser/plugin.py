@@ -18,7 +18,7 @@ class ParseURLParameters(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload)
         page_url = dot[self.config.url]

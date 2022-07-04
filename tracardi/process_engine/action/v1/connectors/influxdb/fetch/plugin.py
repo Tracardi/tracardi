@@ -26,7 +26,7 @@ class InfluxFetcher(ActionRunner):
         self.credentials = credentials.get_credentials(self, InfluxCredentials)
         self.client = InfluxDBClient(self.credentials.url, self.credentials.token)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
 

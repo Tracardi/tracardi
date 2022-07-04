@@ -15,7 +15,7 @@ class ValueThresholdAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is True and self.profile is None:
             self.console.warning(f"Could not assign value {self.config.value} to profile. The {self.event.type} "
                                  "event is profile-less. There is no profile within this event.")
