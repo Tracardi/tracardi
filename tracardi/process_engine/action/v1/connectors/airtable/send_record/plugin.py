@@ -28,7 +28,7 @@ class SendToAirtableAction(ActionRunner):
         self.config = config
         self.client = AirtableClient(token=credentials.get_credentials(self, APIKey).api_key)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
         mapping = traverser.reshape(self.config.mapping)

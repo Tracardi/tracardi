@@ -17,7 +17,7 @@ class WriteToMemoryAction(ActionRunner):
         self.config = Config(**kwargs)
         self.client = RedisClient()
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         value = dot[self.config.value]
         value = b64_encoder(value)

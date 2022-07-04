@@ -20,7 +20,7 @@ class TemplateAction(ActionRunner):
         self.config = validate(kwargs)
         self.dot_template = DotTemplate()
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         accessor = self._get_dot_accessor(payload)
         return Result(port="template", value={
             "template": self.dot_template.render(self.config.template, accessor)

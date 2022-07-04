@@ -27,7 +27,7 @@ class MixPanelFunnelFetcher(ActionRunner):
             **credentials.get_credentials(self, MixPanelCredentials).dict()
         )
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         to_date = self.config.to_date if self.config.to_date is not None else datetime.utcnow().strftime("%Y-%m-%d")
 
         dot = self._get_dot_accessor(payload)

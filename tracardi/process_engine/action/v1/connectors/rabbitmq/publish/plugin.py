@@ -27,7 +27,7 @@ class RabbitPublisherAction(ActionRunner):
         self.source = credentials.get_credentials(self, output=RabbitSourceConfiguration)
         self.config = config
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             with Connection(self.source.uri, connect_timeout=self.source.timeout) as conn:
                 queue_publisher = QueuePublisher(conn, config=self.config)

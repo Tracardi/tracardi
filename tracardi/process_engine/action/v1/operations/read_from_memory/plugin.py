@@ -17,7 +17,7 @@ class ReadFromMemoryAction(ActionRunner):
         self.config = Config(**kwargs)
         self.client = RedisClient()
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             result = self.client.client.get(name=f"TRACARDI-USER-MEMORY-{self.config.key}")
             return Result(port="success", value={"value": b64_decoder(result)})

@@ -27,7 +27,7 @@ class SleepAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         await sleep(float(self.config.wait))
         return Result(port="payload", value=payload)
 

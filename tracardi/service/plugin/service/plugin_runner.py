@@ -20,7 +20,7 @@ class PluginTestResult:
 
 
 def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=None, event=None, flow=None,
-               node=None) -> PluginTestResult:
+               node=None, in_edge=None) -> PluginTestResult:
     async def main(plugin, init, payload):
         try:
 

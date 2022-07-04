@@ -8,7 +8,7 @@ class NewVisitAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.session is None:
             self.console.warning("Can not check if visit is new is session is not available.")

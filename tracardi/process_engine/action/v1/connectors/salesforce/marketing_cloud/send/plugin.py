@@ -26,7 +26,7 @@ class DataExtensionSender(ActionRunner):
         self.config = config
         self.client = MarketingCloudClient(**credentials.get_credentials(self))
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
         mapping = traverser.reshape(self.config.mapping)

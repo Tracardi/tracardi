@@ -15,7 +15,7 @@ class FindPreviousSessionAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = Config(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is False:
             result = await storage.driver.session.get_nth_last_session(
                 profile_id=self.profile.id,

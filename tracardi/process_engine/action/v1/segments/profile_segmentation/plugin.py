@@ -28,7 +28,7 @@ class ProfileSegmentAction(ActionRunner):
                 profile.segments.remove(segment)
             self.profile.replace(profile)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is False:
             dot = self._get_dot_accessor(payload)
             condition = Condition()

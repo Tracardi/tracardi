@@ -21,7 +21,7 @@ class AddEmptyProfileAction(ActionRunner):
     def __init__(self, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         now = datetime.utcnow()
         profile = Profile(

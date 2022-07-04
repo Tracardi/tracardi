@@ -37,7 +37,7 @@ class CopyTraitAction(ActionRunner):
         self.config = validate(kwargs)
         self.mapping = self.config.traits.set
 
-    async def run(self, payload: dict):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
@@ -136,7 +136,7 @@ def register() -> Plugin:
             name='Copy data',
             desc='Copy event property to profile trait. This plugin copies event properties to defined destination.',
             icon='copy',
-            tags=['profile', 'event', 'traits', 'memory', 'reference', 'data'],
+            tags=['profile', 'event', 'traits', 'memory', 'reference', 'data', "read"],
             group=["Data processing"],
             documentation=Documentation(
                 inputs={

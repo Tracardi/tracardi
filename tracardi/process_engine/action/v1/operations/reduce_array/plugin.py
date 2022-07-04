@@ -14,10 +14,10 @@ class ArrayReducer(ActionRunner):
     def __init__(self, **kwargs):
         self.config = Config(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         array_to_reduce = dot[self.config.array]
-        result = {"counts": {}, "max": None, "min": None}
+        result = {"counts": {}, "max": None, "min": None, "total": len(array_to_reduce)}
 
         try:
             for element in array_to_reduce:

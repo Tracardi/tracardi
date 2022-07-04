@@ -16,7 +16,7 @@ class EventCounter(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload) -> Result:
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         time_span_in_sec = parse(self.config.time_span.strip("-"))
 

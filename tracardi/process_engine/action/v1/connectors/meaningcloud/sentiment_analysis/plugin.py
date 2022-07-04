@@ -27,7 +27,7 @@ class SentimentAnalysisAction(ActionRunner):
         self.credentials = credentials.get_credentials(self, output=Token)
         self.config = config
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
         async with aiohttp.ClientSession() as session:

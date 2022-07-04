@@ -75,8 +75,10 @@ class GraphInvoker(BaseModel):
     def _null_params(node):
         pass
 
-    async def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, edge_id):
+    async def _run_in_event_loop(self, tasks, node: Node, params, _port, _task_result, in_edge: Edge = None):
         try:
+
+            params['in_edge'] = in_edge
 
             if node.skip is True:
                 coroutine = self._skip_node(node, params)
@@ -123,7 +125,7 @@ class GraphInvoker(BaseModel):
                                            coroutine,
                                            port=_port,
                                            params=_task_result,
-                                           edge_id=edge_id,
+                                           edge_id=in_edge.id if isinstance(in_edge, Edge) else None,
                                            active=True)
         except TypeError as e:
             args_spec = inspect.getfullargspec(node.object.run)
@@ -181,7 +183,7 @@ class GraphInvoker(BaseModel):
             _payload = {}
 
             params = {"payload": payload}
-            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, None)
+            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
 
         elif node.graph.in_edges:
 
@@ -230,7 +232,7 @@ class GraphInvoker(BaseModel):
                                 params,
                                 end_port,
                                 upstream_result.value,
-                                edge.id)
+                                in_edge=edge)
 
                         else:
 

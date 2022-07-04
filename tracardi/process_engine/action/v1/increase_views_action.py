@@ -10,7 +10,7 @@ class IncreaseViewsAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.event.metadata.profile_less is True:
             self.console.warning("Can not increase profile views in profile less events.")

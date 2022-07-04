@@ -36,7 +36,7 @@ class TrelloCardAdder(ActionRunner):
         self._client = client
         self.config = config
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         coords = dot[self.config.card.coordinates]
         coords = f"{coords['latitude']}," \

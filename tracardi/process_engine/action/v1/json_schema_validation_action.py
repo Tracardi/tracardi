@@ -40,7 +40,7 @@ class SchemaValidator(ActionRunner):
     def __init__(self, **kwargs):
         self.config = Config(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         payload_validator = EventTypeManager(
             validation=ValidationSchema(json_schema=self.config.validation_schema, enabled=True),

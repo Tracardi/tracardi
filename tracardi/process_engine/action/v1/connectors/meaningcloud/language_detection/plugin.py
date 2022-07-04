@@ -34,7 +34,7 @@ class LanguageDetectAction(ActionRunner):
         self.message = config.message
         self.client = HttpClient(credentials.get_credentials(self, Token).token, config.timeout)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
         string = template.render(self.message, dot)

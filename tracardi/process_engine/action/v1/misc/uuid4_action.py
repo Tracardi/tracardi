@@ -10,7 +10,7 @@ class GetUuid4Action(ActionRunner):
     def __init__(self, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         return Result(port='uuid4', value={
             "uuid4": str(uuid4())
         })

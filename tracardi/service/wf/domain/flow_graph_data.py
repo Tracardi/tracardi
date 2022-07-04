@@ -86,6 +86,10 @@ class NodePort:
         )
 
 
+class EdgeData(BaseModel):
+    name: str = ""
+
+
 class Edge(BaseModel):
     source: str
     sourceHandle: str
@@ -93,6 +97,7 @@ class Edge(BaseModel):
     targetHandle: str
     id: str
     type: str
+    data: EdgeData = EdgeData()
 
     def __eq__(self, other: 'Edge'):
         return other.source == self.source and \
@@ -160,6 +165,3 @@ class FlowGraphData(BaseModel):
             self.traverse_graph_for_distances(child, distance_map, curr_distance + 1, [*path, child])
 
         return distance_map
-
-
-

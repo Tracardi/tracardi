@@ -30,7 +30,7 @@ class GoogleSheetsIntegratorAction(ActionRunner):
         self.config = config
         self.service_account_credentials = credentials.get_credentials(self)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         scopes = ['https://www.googleapis.com/auth/spreadsheets']
         sample_spreadsheet_id = self.config.spreadsheet_id

@@ -34,7 +34,7 @@ class MongoConnectorAction(ActionRunner):
         self.client = MongoClient(mongo_config)
         self.config = config
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             query = json.loads(self.config.query)
         except JSONDecodeError as e:

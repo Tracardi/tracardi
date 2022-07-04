@@ -27,7 +27,7 @@ class MauticContactByEmailFetcher(ActionRunner):
         self.resource = resource
         self.client = MauticClient(**self.resource.credentials.get_credentials(self, None))
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
 
         contact_email = dot[self.config.contact_email]

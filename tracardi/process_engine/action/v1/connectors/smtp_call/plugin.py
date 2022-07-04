@@ -26,7 +26,7 @@ class SmtpDispatcherAction(ActionRunner):
         self.config = config
         self.post = PostMan(smtp_config)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             dot = self._get_dot_accessor(payload)
             template = DotTemplate()
