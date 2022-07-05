@@ -11,6 +11,7 @@ from hashlib import sha1
 from tracardi.service.storage.driver import storage
 from pathlib import Path
 from tracardi.domain.version import Version
+import re
 
 
 class MigrationNotFoundException(Exception):
@@ -46,26 +47,25 @@ class MigrationManager:
             return [MigrationSchema(**schema) for schema in json.load(f) if isinstance(schema, dict)]  # avoid comments
 
     async def get_multi_indices(self, template_name):
+        template = fr"{self.from_version.get_version_prefix()}." \
+                   fr"{self.from_version.name}.{template_name}-[0-9]{'{4}'}-[0-9]+"
         es = ElasticClient.instance()
-        return [index for index in await es.list_indices() if index.startswith(
-            f"{self.from_version.get_version_prefix()}.{self.from_version.name}.{template_name}"
-        )]
+        return [index for index in await es.list_indices() if re.fullmatch(template, index)]
 
-    async def start_migration(self, ids: List[str], elastic_host: str) -> None:
+    async def get_customized_schemas(self) -> List[MigrationSchema]:
+        general_schemas = self.get_schemas()
 
-        schemas = [schema for schema in self.get_schemas() if schema.id in ids]
-
-        final_schemas = []
-        for schema in schemas:
+        customized_schemas = []
+        for schema in general_schemas:
             if schema.copy_index.multi is True:
                 from_indices = await self.get_multi_indices(template_name=schema.copy_index.from_index)
                 for from_index in from_indices:
-                    final_schemas.append(MigrationSchema(
-                        id=sha1(from_index.encode("utf-8")).hexdigest(),
+                    to_index = f"{schema.copy_index.to_index}{re.findall(r'-[0-9]{4}-[0-9]+', from_index)[0]}"
+                    customized_schemas.append(MigrationSchema(
+                        id=sha1(f"{from_index}{to_index}".encode("utf-8")).hexdigest(),
                         copy_index=CopyIndex(
                             from_index=from_index,
-                            to_index=f"{self.to_version.get_version_prefix()}.{self.to_version.name}."
-                                     f"{schema.copy_index.to_index}",
+                            to_index=f"{self.to_version.get_version_prefix()}.{self.to_version.name}.{to_index}",
                             multi=schema.copy_index.multi,
                             script=schema.copy_index.script
                         ),
@@ -78,9 +78,13 @@ class MigrationManager:
                                                f"{self.from_version.name}.{schema.copy_index.from_index}"
                 schema.copy_index.to_index = f"{self.to_version.get_version_prefix()}." \
                                              f"{self.to_version.name}.{schema.copy_index.to_index}"
-                final_schemas.append(schema)
+                customized_schemas.append(schema)
 
-        final_schemas = [schema.dict() for schema in final_schemas]
+        return customized_schemas
+
+    async def start_migration(self, ids: List[str], elastic_host: str) -> None:
+
+        final_schemas = [schema.dict() for schema in await self.get_customized_schemas() if schema.id in ids]
 
         def add_to_celery(given_schemas: List, elastic: str):
             return run_migration_job.delay(given_schemas, elastic)

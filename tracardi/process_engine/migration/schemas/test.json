@@ -126,7 +126,7 @@
       "from_index": "tracardi-flow",
       "to_index": "tracardi-flow",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\n//row.remove(\"enabled\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.remove(\"enabled\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -198,7 +198,7 @@
       "from_index": "tracardi-event",
       "to_index": "tracardi-event",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\n//row.traits = <type object>;\n//row.remove(\"indexed\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.traits = [:];\nrow.remove(\"indexed\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -222,7 +222,7 @@
       "from_index": "tracardi-source",
       "to_index": "tracardi-source",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\n//row.locked = <type boolean>;\n//row.manual = <type keyword>;\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.locked = false;\nrow.manual = \"\";\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
