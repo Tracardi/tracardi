@@ -1,6 +1,6 @@
+from pydantic import BaseModel, validator
 from typing import Optional
-
-from pydantic import BaseModel
+from hashlib import md5
 
 
 class SubVersion(BaseModel):
@@ -11,7 +11,11 @@ class SubVersion(BaseModel):
 class Version(BaseModel):
     prev_version: Optional[SubVersion] = None
     version: str
-    name: str
+    name: Optional[str] = None
+
+    @validator("name")
+    def validate_prefix(cls, value, values):
+        return value if value is not None else md5(values["version"].encode('utf-8')).hexdigest()[:5]
 
     def get_version_prefix(self):
         return self.version.replace(".", "")
