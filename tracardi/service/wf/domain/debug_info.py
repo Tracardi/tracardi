@@ -103,14 +103,17 @@ class DebugInfo(BaseModel):
     nodes: Dict[str, DebugNodeInfo] = {}
     edges: Dict[str, DebugEdgeInfo] = {}
 
-    def add_debug_edge_info(self, input_edge_id, active):
-        if input_edge_id is not None:
-            if input_edge_id not in self.edges:
-                self.edges[input_edge_id] = DebugEdgeInfo(
-                    active=[active]
-                )
-            else:
-                self.edges[input_edge_id].active.append(active)
+    def _add_debug_edge_info(self, input_edge_id, active):
+        if input_edge_id not in self.edges:
+            self.edges[input_edge_id] = DebugEdgeInfo(
+                active=[active]
+            )
+        else:
+            self.edges[input_edge_id].active.append(active)
+
+    def add_debug_edge_info(self, input_edges):
+        for edge_id, active in input_edges.edges.items():
+            self._add_debug_edge_info(edge_id, active)
 
     def has_nodes(self):
         return len(self.nodes) > 0

@@ -20,6 +20,7 @@ class ActionRunner:
     execution_graph = None
     tracker_payload = None  # type: TrackerPayload
     ux = None
+    merge_out_payloads = False
 
     async def run(self, payload: dict, in_edge=None):
         pass
