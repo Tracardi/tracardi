@@ -21,6 +21,8 @@ class DebugNodeInfo(BaseModel):
     name: str = None
     sequenceNumber: int = None
     executionNumber: Optional[int] = None
+    errors: int = 0
+    warnings: int = 0
     calls: List[DebugCallInfo] = []
     profiler: Profiler
 
@@ -43,7 +45,9 @@ class DebugNodeInfo(BaseModel):
                          output_edge: Optional[Entity],
                          output_params: Optional[InputParams],
                          active,
-                         error=None):
+                         error=None,
+                         errors=0,
+                         warnings=0):
 
         debug_start_time = task_start_time - flow_start_time
         debug_end_time = time() - flow_start_time
@@ -76,9 +80,14 @@ class DebugNodeInfo(BaseModel):
                                                                                                    BaseModel) else {},
             session=node.object.session.dict() if isinstance(node.object, ActionRunner) and isinstance(
                 node.object.session, BaseModel) else {},
-            error=error
+            error=error,
+
+            errors=errors,
+            warnings=warnings
         )
 
+        self.warnings += warnings
+        self.errors += errors
         self.calls.append(call_debug_info)
 
 
