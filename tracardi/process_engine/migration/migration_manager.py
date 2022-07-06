@@ -1,5 +1,5 @@
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
-from typing import Optional, List
+from typing import Optional, List, Dict
 import json
 from tracardi.service.storage.elastic_client import ElasticClient
 from worker.celery_worker import run_migration_job
@@ -82,9 +82,12 @@ class MigrationManager:
 
         return customized_schemas
 
-    async def start_migration(self, ids: List[str], elastic_host: str) -> None:
+    async def start_migration(self, ids: List[str], elastic_host: str) -> Dict[str, Optional[List[List[str]]]]:
 
         final_schemas = [schema.dict() for schema in await self.get_customized_schemas() if schema.id in ids]
+
+        if not final_schemas:
+            return {"started_migrations": None}
 
         def add_to_celery(given_schemas: List, elastic: str):
             return run_migration_job.delay(given_schemas, elastic)
@@ -97,7 +100,8 @@ class MigrationManager:
         completed, pending = await asyncio.wait(blocking_tasks)
         celery_task = completed.pop().result()
 
-        for task_name, task_id in celery_task.wait():
+        started_migration_tasks = []
+        for task_name, task_id in celery_task.wait(timeout=40.0, propagate=True):
             task = Task(
                 timestamp=datetime.utcnow(),
                 id=task_id,
@@ -109,3 +113,8 @@ class MigrationManager:
             )
 
             await storage.driver.task.upsert_task(task)
+
+            started_migration_tasks.append([task_name, task_id])
+
+        return {"started_migrations": started_migration_tasks}
+

@@ -10,7 +10,7 @@ class ApiCredentials(BaseModel):
     username: Optional[str] = None
 
 
-def make_url(credentials: ApiCredentials, dot: DotAccessor, endpoint: str) -> str:
+def make_url(credentials: ApiCredentials, dot: Optional[DotAccessor] = None, endpoint: Optional[str] = None) -> str:
     scheme, host = credentials.url.split("://")
 
     if host[-1] == '/':
@@ -24,6 +24,29 @@ def make_url(credentials: ApiCredentials, dot: DotAccessor, endpoint: str) -> st
     if credentials.username or credentials.password:
         url += '@'
     url += host
-    template = DotTemplate()
-    url += template.render(endpoint, dot)
+    if dot is not None and endpoint:
+        template = DotTemplate()
+        url += template.render(endpoint, dot)
+    return url
+
+
+class SchemeError(Exception):
+    pass
+
+
+def construct_url(host: str, scheme: Optional[str] = None, username: Optional[str] = None,
+                  password: Optional[str] = None):
+    if scheme is None:
+        if "://" in host:
+            scheme, host = host.split("://")
+        else:
+            raise SchemeError("No scheme provided for URL.")
+
+    url = scheme + "://"
+    if username:
+        url += username
+    if password:
+        url += ":" + password
+
+    url += host
     return url
