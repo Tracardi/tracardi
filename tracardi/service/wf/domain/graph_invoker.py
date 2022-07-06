@@ -1,6 +1,8 @@
 import asyncio
 import importlib
 import inspect
+import json
+
 from time import time
 from typing import List, Union, Tuple, Optional
 from pydantic import BaseModel
@@ -11,7 +13,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner, JoinSettings
 from tracardi.service.plugin.domain.console import Console, Log
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
@@ -26,6 +28,7 @@ from ..utils.dag_error import DagError, DagExecError
 from .edge import Edge
 from .node import Node
 from .tasks_results import ActionsResults
+from ...notation.dict_traverser import DictTraverser
 from ...notation.dot_accessor import DotAccessor
 from ...value_threshold_manager import ValueThresholdManager
 
@@ -39,8 +42,8 @@ class InputEdges:
         self.edges[id] = active
 
     def has_active_edges(self) -> bool:
-        for edge in self.edges:
-            if edge is True:
+        for _, active in self.edges.items():
+            if active is True:
                 return True
         return False
 
@@ -52,6 +55,9 @@ class InputEdges:
         if edges_ids:
             return edges_ids[0]
         return None
+
+    def __len__(self):
+        return len(self.edges)
 
 
 class GraphInvoker(BaseModel):
@@ -274,15 +280,12 @@ class GraphInvoker(BaseModel):
                                                             active=False
                                                             )
 
-        print(len(tasks))
-
         # Yield async tasks results
 
         joined_output_results = {}
         joined_input_port = None
         joined_input_params = []
         joined_output_port = None
-        joined_input_edge_ids = []
         joined_profile_reference = None
         joined_session_reference = None
 
@@ -291,7 +294,6 @@ class GraphInvoker(BaseModel):
         for task, input_port, input_params, edge, active in tasks:
 
             input_edge_id = edge.id if edge is not None else None
-            input_edges.add_edge(input_edge_id, active)
 
             # Get previous session and profile. Session or profile can be override so we need to be sure when the
             # reference has changed
@@ -335,36 +337,55 @@ class GraphInvoker(BaseModel):
                     traceback=get_traceback(e)
                 )
 
-            if node.object.merge_out_payloads is False:
-
-                yield result, \
-                      input_port, input_params, \
-                      [input_edge_id] if input_edge_id is not None else [], \
-                      task_start_time, \
-                      active, \
-                      _current_profile_reference, \
-                      _current_session_reference, \
-                      node.object.console.get_status(), input_edges
-
-            else:
+            if node.object.join_output():
 
                 """ Collect results """
+
+                input_edges.add_edge(input_edge_id, active)
+
                 if isinstance(edge, Edge):
                     key = edge.data.name if edge.has_name() else edge.id
                     joined_input_port = input_port
                     joined_output_results[key] = result.value
                     joined_output_port = result.port
                     joined_input_params.append(input_params)
-                    joined_input_edge_ids.append(edge.id)
+                    joined_profile_reference = _current_profile_reference
+                    joined_session_reference = _current_session_reference
 
-        if node.object.merge_out_payloads is True:
+            else:
+
+                """ Yield results one by one """
+
+                _single_input_edge = InputEdges()
+                _single_input_edge.add_edge(input_edge_id, active)
+
+                yield result, \
+                      input_port, input_params, \
+                      task_start_time, \
+                      _current_profile_reference, \
+                      _current_session_reference, \
+                      node.object.console.get_status(), _single_input_edge
+
+        if node.object.join_output():
+
+            """ Yield collected results """
+
+            if node.object.join.template:
+                output = json.loads(node.object.join.template)
+                if output:
+                    dot = DotAccessor(joined_profile_reference, joined_session_reference, joined_output_results if isinstance(joined_output_results, dict) else None)
+
+                    if node.object.join.default is True:
+                        template = DictTraverser(dot, default=None)
+                    else:
+                        template = DictTraverser(dot)
+
+                    joined_output_results = template.reshape(reshape_template=output)
 
             yield Result(port=joined_output_port,
                          value=joined_output_results), \
                   joined_input_port, joined_input_params, \
-                  joined_input_edge_ids, \
                   task_start_time, \
-                  True, \
                   joined_profile_reference, \
                   joined_session_reference, \
                   node.object.console.get_status(), \
@@ -504,8 +525,8 @@ class GraphInvoker(BaseModel):
                 if node.block_flow is True:
                     continue
 
-                async for result, input_port, input_params, input_edge_ids, \
-                          task_start_time, active, \
+                async for result, input_port, input_params, \
+                          task_start_time,  \
                           _profile_reference_to_update, _session_reference_to_update, \
                           node_console_status, input_edges in \
                         self.run_node(node, payload, ready_upstream_results=actions_results):

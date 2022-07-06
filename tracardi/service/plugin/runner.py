@@ -1,8 +1,16 @@
+from pydantic import BaseModel
+
 from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
+
+
+class JoinSettings(BaseModel):
+    merge: bool = False
+    template: str = ""
+    default: bool = True
 
 
 class ActionRunner:
@@ -20,7 +28,7 @@ class ActionRunner:
     execution_graph = None
     tracker_payload = None  # type: TrackerPayload
     ux = None
-    merge_out_payloads = False
+    join = None
 
     async def run(self, payload: dict, in_edge=None):
         pass
@@ -49,3 +57,6 @@ class ActionRunner:
     def set_tracker_option(self, key, value):
         if isinstance(self.tracker_payload, TrackerPayload):
             self.tracker_payload.options[key] = value
+
+    def join_output(self) -> bool:
+        return isinstance(self.join, JoinSettings) and self.join.merge is True

@@ -1,6 +1,6 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.runner import ActionRunner, JoinSettings
 from tracardi.service.wf.domain.edge import Edge
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
@@ -13,8 +13,12 @@ def validate(config: dict) -> Config:
 class JoinPayloads(ActionRunner):
 
     def __init__(self, **kwargs):
-        self.merge_out_payloads = True
         self.config = Config(**kwargs)
+        self.join = JoinSettings(
+            merge=True,
+            template=self.config.reshape,
+            default=self.config.default
+        )
 
     async def run(self, payload: dict, in_edge: Edge = None) -> Result:
         return Result(port="payload", value=payload)
@@ -32,30 +36,27 @@ def register() -> Plugin:
             license="MIT",
             author="Risto Kowaczewski",
             init={
-                "name": None,
-                "type": "list"
+                "reshape": "{}",
+                "default": True
             },
             manual="memory/join_output_payloads",
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Payload memory collector configuration",
+                        name="Join payloads settings",
                         fields=[
                             FormField(
-                                id="name",
-                                name="Name of collection",
-                                description="Please provide the name under which the collection will be saved.",
-                                component=FormComponent(type="text", props={"label": "Name"})
+                                id="reshape",
+                                name="Reshape output payload",
+                                description="Type transformation JSON to reshape the output payload",
+                                component=FormComponent(type="json", props={"label": "Transformation object"})
                             ),
                             FormField(
-                                id="type",
-                                name="Type of collection",
-                                description="Select type of collection. Type of `Dictionary` requires named connections "
-                                            "in the workflow.",
-                                component=FormComponent(type="select", props={"label": "Name", "items": {
-                                    "list": "List",
-                                    "dict": "Dictionary"
-                                }})
+                                id="default",
+                                name="Missing values equal null",
+                                description="Values that are missing will become null",
+                                component=FormComponent(type="bool",
+                                                        props={"label": "Make missing values equal to null"})
                             )
                         ]
                     )
@@ -66,6 +67,7 @@ def register() -> Plugin:
             name='Join',
             desc='Joins input data into one payload.',
             tags=['memory', 'join', "payload"],
+            type="startNode",
             icon='flow',
             group=["Operations"],
             documentation=Documentation(
