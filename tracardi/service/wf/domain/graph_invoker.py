@@ -302,7 +302,8 @@ class GraphInvoker(BaseModel):
                   task_start_time, \
                   active, \
                   _current_profile_reference, \
-                  _current_session_reference
+                  _current_session_reference, \
+                  node.object.console.get_status()
 
     @staticmethod
     def _add_results(task_results: ActionsResults, node: Node, result: Result) -> ActionsResults:
@@ -418,6 +419,8 @@ class GraphInvoker(BaseModel):
                 name=node.name,
                 sequenceNumber=sequence_number,
                 executionNumber=None,
+                errors=0,
+                warnings=0,
                 profiler=Profiler(
                     startTime=task_start_time,
                     endTime=task_start_time,
@@ -437,18 +440,17 @@ class GraphInvoker(BaseModel):
 
                 async for result, input_port, input_params, input_edge_id, \
                           task_start_time, active, \
-                          _profile_reference_to_update, _session_reference_to_update in \
+                          _profile_reference_to_update, _session_reference_to_update, \
+                          node_console_status in \
                         self.run_task(node, payload, ready_upstream_results=actions_results):
 
                     # If the profile or session changed during node execution change its reference in graph invoker
 
                     if _profile_reference_to_update:
                         profile = _profile_reference_to_update
-                        print(node.name, "Profile changed")
 
                     if _session_reference_to_update:
                         session = _session_reference_to_update
-                        print(node.name, "Session changed")
 
                     executed_node = active | executed_node
 
@@ -506,7 +508,9 @@ class GraphInvoker(BaseModel):
                             input_params=self._get_input_params(input_port, input_params),
                             output_edge=None,
                             output_params=[result] if isinstance(result, Result) else result,
-                            active=active
+                            active=active,
+                            errors=node_console_status.errors,
+                            warnings=node_console_status.warnings
                         )
 
                     if executed_node:
@@ -547,7 +551,9 @@ class GraphInvoker(BaseModel):
                             output_edge=None,
                             output_params=None,
                             active=True,
-                            error=str(e)
+                            error=str(e),
+                            errors=1,
+                            warnings=0
                         )
 
                     else:
@@ -561,7 +567,9 @@ class GraphInvoker(BaseModel):
                             output_edge=None,
                             output_params=None,
                             active=True,
-                            error=str(e)
+                            error=str(e),
+                            errors=1,
+                            warnings=0
                         )
 
                 # Stop workflow when there is an error
