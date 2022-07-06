@@ -118,3 +118,6 @@ class MigrationManager:
 
         return {"started_migrations": started_migration_tasks}
 
+    @classmethod
+    def get_available_migrations_for_version(cls, version: Version) -> List[str]:
+        return [migration[0] for migration in cls.available_migrations if migration[1] == version.get_version_prefix()]
