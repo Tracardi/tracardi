@@ -419,6 +419,8 @@ class GraphInvoker(BaseModel):
                 name=node.name,
                 sequenceNumber=sequence_number,
                 executionNumber=None,
+                errors=0,
+                warnings=0,
                 profiler=Profiler(
                     startTime=task_start_time,
                     endTime=task_start_time,
