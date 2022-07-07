@@ -1,3 +1,5 @@
+from typing import Dict
+
 from pydantic import BaseModel
 
 from tracardi.domain.event import Event
@@ -7,10 +9,21 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
 
 
-class JoinSettings(BaseModel):
-    merge: bool = False
+class ReshapeTemplate(BaseModel):
     template: str = ""
     default: bool = True
+
+
+class JoinSettings(BaseModel):
+    merge: bool = False
+    reshape: Dict[str, ReshapeTemplate] = None
+    type: str = 'dict'
+
+    def has_reshape_templates(self) -> bool:
+        return self.reshape is not None
+
+    def get_reshape_template(self, port) -> ReshapeTemplate:
+        return self.reshape[port]
 
 
 class ActionRunner:

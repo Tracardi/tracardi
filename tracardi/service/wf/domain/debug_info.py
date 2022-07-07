@@ -112,8 +112,8 @@ class DebugInfo(BaseModel):
             self.edges[input_edge_id].active.append(active)
 
     def add_debug_edge_info(self, input_edges):
-        for edge_id, active in input_edges.edges.items():
-            self._add_debug_edge_info(edge_id, active)
+        for edge_id, edge in input_edges.edges.items(): # type: str, InputEdge
+            self._add_debug_edge_info(edge_id, edge.active)
 
     def has_nodes(self):
         return len(self.nodes) > 0

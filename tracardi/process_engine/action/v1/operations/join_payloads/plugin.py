@@ -1,6 +1,6 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi.service.plugin.runner import ActionRunner, JoinSettings
+from tracardi.service.plugin.runner import ActionRunner, JoinSettings, ReshapeTemplate
 from tracardi.service.wf.domain.edge import Edge
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
@@ -16,8 +16,12 @@ class JoinPayloads(ActionRunner):
         self.config = Config(**kwargs)
         self.join = JoinSettings(
             merge=True,
-            template=self.config.reshape,
-            default=self.config.default
+            reshape={  # Reshape definition for payload output port
+                "payload": ReshapeTemplate(
+                    template=self.config.reshape,
+                    default=self.config.default)
+            },
+            type=self.config.type
         )
 
     async def run(self, payload: dict, in_edge: Edge = None) -> Result:
@@ -37,7 +41,8 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             init={
                 "reshape": "{}",
-                "default": True
+                "default": True,
+                "type": "dict"
             },
             manual="memory/join_output_payloads",
             form=Form(
@@ -50,6 +55,16 @@ def register() -> Plugin:
                                 name="Reshape output payload",
                                 description="Type transformation JSON to reshape the output payload",
                                 component=FormComponent(type="json", props={"label": "Transformation object"})
+                            ),
+                            FormField(
+                                id="type",
+                                name="Type of join",
+                                description="Select type of collection. Type of `Dictionary` uses the connection names "
+                                            "as keys in dictionary.",
+                                component=FormComponent(type="select", props={"label": "Name", "items": {
+                                    "list": "List",
+                                    "dict": "Dictionary"
+                                }})
                             ),
                             FormField(
                                 id="default",
