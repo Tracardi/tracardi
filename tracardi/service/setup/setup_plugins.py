@@ -79,7 +79,6 @@ async def add_plugins():
 
         'tracardi.process_engine.action.v1.detect_client_agent_action',
         'tracardi.process_engine.action.v1.misc.uuid4_action',
-        'tracardi.process_engine.action.v1.misc.hash_value_action',
 
         'tracardi.process_engine.action.v1.traits.copy_trait_action',
         'tracardi.process_engine.action.v1.traits.append_trait_action',
