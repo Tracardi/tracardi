@@ -7,12 +7,13 @@ from ..domain.console import Console
 
 
 class PluginTestResult:
-    def __init__(self, output, profile=None, session=None, event=None, console=None):
+    def __init__(self, output, profile=None, session=None, event=None, console=None, flow=None):
         self.event = event
         self.session = session
         self.profile = profile
         self.output = output
         self.console = console
+        self.flow = flow
 
     def __repr__(self):
         return f"output=`{self.output}`\nprofile=`{self.profile}`\nsession=`{self.session}`\nevent=`{self.session}`" \
@@ -47,7 +48,8 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
                 profile,
                 session,
                 event,
-                console
+                console,
+                flow
             )
 
         except Exception as e:

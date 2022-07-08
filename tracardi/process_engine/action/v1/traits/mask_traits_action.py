@@ -35,12 +35,20 @@ class MaskTraitsAction(ActionRunner):
                 self.console.warning("Flow values can not be hashed.")
                 continue
 
+            elif not dot.validate(trait) or trait not in dot:
+                self.console.warning(f"Given trait {trait} is invalid or does not exist.")
+                continue
+
             dot[trait] = "###"
 
-        profile = Profile(**dot.profile)
-        self.profile.replace(profile)
-        session = Session(**dot.session)
-        self.session.replace(session)
+        if dot.profile:
+            profile = Profile(**dot.profile)
+            self.profile.replace(profile)
+
+        if dot.session:
+            session = Session(**dot.session)
+            self.session.replace(session)
+
         event = Event(**dot.event)
         self.event.replace(event)
 
