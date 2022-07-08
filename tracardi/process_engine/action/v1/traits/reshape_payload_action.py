@@ -94,7 +94,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Create payload',
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
-            icon='copy-property',
+            icon='transform',
             group=["Data processing"],
             tags=['reshape', 'create', 'payload', 'data'],
             documentation=Documentation(
