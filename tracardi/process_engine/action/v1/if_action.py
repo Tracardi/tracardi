@@ -77,6 +77,7 @@ def register() -> Plugin:
             name='If',
             desc='This a conditional action that conditionally runs a branch of workflow.',
             keywords=['condition'],
+            type="condNode",
             icon='if',
             group=['Flow control'],
             documentation=Documentation(

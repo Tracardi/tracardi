@@ -76,9 +76,9 @@ class SqlSearchQueryEngine:
 
         query['from'] = start
         query['size'] = limit
-
+        print(query)
         result = await self.persister.query(query)
-
+        print(result)
         return StorageResult(result).dict()
 
     @staticmethod
