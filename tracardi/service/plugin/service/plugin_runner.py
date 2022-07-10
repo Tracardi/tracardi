@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from ..runner import ActionRunner
 from ..domain.console import Console
+from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 
 
 class PluginTestResult:
@@ -40,6 +41,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
             plugin.console = console
             plugin.flow = flow
             plugin.node = node
+            plugin.execution_graph = GraphInvoker(graph=[], start_nodes=[])
 
             output = await plugin.run(payload)
 

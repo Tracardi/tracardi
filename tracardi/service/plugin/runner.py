@@ -38,7 +38,7 @@ class ActionRunner:
     node = None
     metrics = None
     memory = None
-    execution_graph = None
+    execution_graph = None  # GraphInvoker
     tracker_payload = None  # type: TrackerPayload
     ux = None
     join = None

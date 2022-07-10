@@ -69,8 +69,7 @@ class AddEmptyProfileAction(ActionRunner):
             start=session.metadata.time.insert,
             duration=session.metadata.time.duration
         )
-        if self.execution_graph is not None:
-            self.execution_graph.set_sessions(session)
+        self.execution_graph.set_sessions(session)
 
         if self.tracker_payload is not None and not self.tracker_payload.is_on('saveSession', default=True):
             coroutines.append(storage.driver.session.save(session))
