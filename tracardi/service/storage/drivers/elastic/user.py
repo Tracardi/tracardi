@@ -29,9 +29,13 @@ async def search_by_name(start: int, limit: int, name: str):
         }
     }
 
-    # todo elastic structure is not allowed in driver
+    result = []
 
-    return await storage_manager("user").query(query=query)
+    for record in (await storage_manager("user").query(query=query))["hits"]["hits"]:
+        user = User(**record["_source"])
+        result.append({**user.dict(exclude={"token"}), "expired": user.is_expired()})
+
+    return result
 
 
 async def update_user(user: User):
