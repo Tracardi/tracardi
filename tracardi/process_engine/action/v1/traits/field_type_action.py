@@ -29,7 +29,7 @@ class FieldTypeAction(ActionRunner):
             float: "float",
             None: "null",
             dict: "object"
-        }.get(type(value) if value is not None else None, "unknown")
+        }.get(type(value) if value is not None else None, str(type(value)))
 
         value_length = len(value) if hasattr(value, "__len__") else None
 
@@ -51,12 +51,12 @@ def register() -> Plugin:
                 "field": None
             },
             manual="field_type_action",
-            form=Form(groups=[FormGroup(name="Plugin configuration", fields=[
+            form=Form(groups=[FormGroup(fields=[
                 FormField(
                     id="field",
-                    name="Path to field",
-                    description="Please provide a path to the field that you want to get information about.",
-                    component=FormComponent(type="dotPath", props={"label": "Path"})
+                    name="Reference to data field",
+                    description="Please type a path to the field that you want to get information about type.",
+                    component=FormComponent(type="dotPath", props={"label": "Path", "defaultSourceValue": "event"})
                 )
             ])])
         ),

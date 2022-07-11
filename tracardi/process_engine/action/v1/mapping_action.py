@@ -17,7 +17,7 @@ class Config(PluginConfig):
         if not value:
             raise ValueError("Mapping cannot be empty.")
         if not values["case_sensitive"] and len({key.lower() for key in value}) != len(value):
-            raise ValueError("Inserting two keys that differ only in letter case without case sensitivity enabled, " 
+            raise ValueError("Inserting two keys that differ only in letter case without case sensitivity enabled, "
                              "may cause plugin malfunction.")
         return value
 
@@ -38,7 +38,7 @@ class MappingAction(ActionRunner):
 
         mapping = {
             dot[key].lower() if not self.config.case_sensitive and isinstance(dot[key], str) else dot[key]:
-            dot[value].lower() if not self.config.case_sensitive and isinstance(dot[value], str) else dot[value]
+                dot[value].lower() if not self.config.case_sensitive and isinstance(dot[value], str) else dot[value]
             for key, value in self.config.mapping.items()
         }
 
@@ -72,8 +72,9 @@ def register() -> Plugin:
                             FormField(
                                 id="value",
                                 name="Value",
-                                description="Please provide a path to the value to match.",
-                                component=FormComponent(type="dotPath", props={"label": "Value"})
+                                description="Please type a reference path to the value to match.",
+                                component=FormComponent(type="dotPath",
+                                                        props={"label": "Value", "defaultSourceValue": "payload"})
                             ),
                             FormField(
                                 id="case_sensitive",
@@ -83,9 +84,9 @@ def register() -> Plugin:
                             ),
                             FormField(
                                 id="mapping",
-                                name="Set of data to match",
-                                description="Please provide key-value pairs. Value will be returned if the value"
-                                            "is the same as the key from this set.",
+                                name="Set of replacements",
+                                description="Please provide key-value pairs. The value will be returned if the referenced "
+                                            "value is the same as the key from this set.",
                                 component=FormComponent(type="keyValueList", props={"label": "List"})
                             )
                         ]
@@ -96,7 +97,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Value mapping',
-            desc='It returns matching value form the set of data.',
+            desc='It returns matching value from the set of data.',
             icon='map-properties',
             group=["Data processing"],
             documentation=Documentation(
