@@ -47,6 +47,10 @@ async def refresh():
     return await storage_manager("event-tags").refresh()
 
 
+async def flush():
+    return await storage_manager("event-tags").flush()
+
+
 async def add(event_type: str, tags: List[str]):
     search_result = await get_by_type(event_type=event_type)
     storage = storage_manager("event-tags")
