@@ -13,8 +13,8 @@ class IfConfiguration(PluginConfig):
 
     @validator("condition")
     def is_valid_condition(cls, value):
-        _condition = Condition()
         try:
+            _condition = Condition()
             _condition.parse(value)
         except Exception as e:
             raise ValueError(str(e))

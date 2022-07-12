@@ -1,10 +1,12 @@
+from time import time
 from typing import Tuple, List
 
+from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from .debug_info import DebugInfo
+from .debug_info import DebugInfo, FlowDebugInfo
 from .flow import Flow
 from .flow_history import FlowHistory
 from ..utils.dag_error import DagGraphError
@@ -19,7 +21,8 @@ class WorkFlow:
         self.tracker_payload = tracker_payload
         self.flow_history = flow_history
 
-    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug=False) -> Tuple[DebugInfo, List[Log], 'Event', 'Profile', 'Session']:
+    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug=False) -> Tuple[
+        DebugInfo, List[Log], 'Event', 'Profile', 'Session']:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.
@@ -45,22 +48,36 @@ class WorkFlow:
             except DagGraphError as e:
                 raise DagGraphError("Flow `{}` returned the following error: `{}`".format(flow.id, str(e)))
 
-            # Init and run with event
-            await exec_dag.init(flow,
-                                self.flow_history,
-                                event,
-                                session,
-                                profile,
-                                self.tracker_payload,
-                                ux)
-
-            debug_info, log_list, profile, session = await exec_dag.run(
-                payload={},
-                flow=flow,
-                event=event,
-                profile=profile,
-                session=session
+            flow_start_time = time()
+            debug_info = DebugInfo(
+                timestamp=flow_start_time,
+                flow=FlowDebugInfo(id=flow.id, name=flow.name),
+                event=Entity(id=event.id)
             )
+            log_list = []
+
+            # Init and run with event
+            debug_info = await exec_dag.init(
+                debug_info,
+                log_list,
+                flow,
+                self.flow_history,
+                event,
+                session,
+                profile,
+                self.tracker_payload,
+                ux)
+
+            if not debug_info.has_errors():
+
+                debug_info, log_list, profile, session = await exec_dag.run(
+                    payload={},
+                    event=event,
+                    profile=profile,
+                    session=session,
+                    debug_info=debug_info,
+                    log_list=log_list
+                )
 
             await exec_dag.close()
 

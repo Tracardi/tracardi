@@ -9,20 +9,19 @@ from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel
 
 from tracardi.domain.event import Event, EventSession
-from tracardi.domain.flow import Flow
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.plugin.runner import ActionRunner, JoinSettings
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.console import Console, Log, ConsoleStatus
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
 
 from .debug_call_info import Profiler
-from .debug_info import DebugInfo, DebugNodeInfo, FlowDebugInfo
+from .debug_info import DebugInfo, DebugNodeInfo
 from .entity import Entity
-from .init_result import InitResult
+from .error_debug_info import ErrorDebugInfo
 from .input_params import InputParams
 from ..service.excetions import get_traceback
 from ..utils.dag_error import DagError, DagExecError
@@ -350,7 +349,8 @@ class GraphInvoker(BaseModel):
 
                 if isinstance(edge, Edge):
 
-                    input_edges.add_edge(input_edge_id, InputEdge(id=input_edge_id, active=active, port=input_port, params=input_params))
+                    input_edges.add_edge(input_edge_id, InputEdge(id=input_edge_id, active=active, port=input_port,
+                                                                  params=input_params))
 
                     key = edge.data.name if edge.has_name() else edge.id
 
@@ -370,7 +370,9 @@ class GraphInvoker(BaseModel):
                 _single_input_edge = InputEdges()
                 if input_edge_id is not None:
                     """ Skip if there is no input edge """
-                    _single_input_edge.add_edge(input_edge_id, InputEdge(id=input_edge_id, active=active, port=input_port, params=input_params))
+                    _single_input_edge.add_edge(input_edge_id,
+                                                InputEdge(id=input_edge_id, active=active, port=input_port,
+                                                          params=input_params))
 
                 yield result, \
                       task_start_time, \
@@ -439,13 +441,13 @@ class GraphInvoker(BaseModel):
 
         return task_class(**params)
 
-    async def init(self, flow, flow_history, event, session, profile, tracker_payload: TrackerPayload,
-                   ux: list) -> InitResult:
-        errors = []
-        objects = []
+    async def init(self, debug_info: DebugInfo, log_list: List[Log], flow, flow_history, event, session, profile,
+                   tracker_payload: TrackerPayload,
+                   ux: list):
+
         metrics = {}
         memory = {}
-        for node in self.graph:
+        for node_number, node in enumerate(self.graph):
             # Init object
             try:
                 node.object = await self._get_object(self.debug, node, node.init)
@@ -464,18 +466,34 @@ class GraphInvoker(BaseModel):
                 node.object.tracker_payload = tracker_payload
                 node.object.execution_graph = self
 
-                objects.append("{}.{}".format(node.module, node.className))
             except Exception as e:
                 msg = "`{}`. This error occurred when initializing node `{}`. ".format(
-                    str(e), node.id) + "Check __init__ of `{}.{}`".format(node.module, node.className)
+                    str(e), node.id) + "Check node configuration or __init__ of `{}.{}`".format(node.module,
+                                                                                                node.className)
 
-                errors.append(msg)
+                debug_info.flow.add_error(ErrorDebugInfo(
+                    msg=msg, line=443, file=__file__
+                ))
+                debug_info.add_node_info(DebugNodeInfo(
+                    id=node.id,
+                    name=node.name,
+                    sequenceNumber=node_number,
+                    errors=1,
+                    warnings=0,
+                    profiler=Profiler(startTime=0, endTime=0, runTime=0)
+                ))
+                log_list.append(Log(
+                    module=node.module,
+                    class_name=node.className,
+                    type='error',
+                    message=msg
+                ))
                 node.object = DagExecError(
                     msg,
                     traceback=get_traceback(e)
                 )
 
-        return InitResult(errors=errors, objects=objects)
+        return debug_info
 
     async def close(self):
         tasks = []
@@ -497,18 +515,12 @@ class GraphInvoker(BaseModel):
         """
         return event.metadata.debug is True or self.debug is True
 
-    async def run(self, payload, flow: Flow, event: Event, profile: Profile, session: Session) -> Tuple[
+    async def run(self, payload, event: Event, profile: Profile, session: Session, debug_info: DebugInfo,
+                  log_list: List[Log]) -> Tuple[
         DebugInfo, List[Log], Profile, Session]:
 
         actions_results = ActionsResults()
-        flow_start_time = time()
-        debug_info = DebugInfo(
-            timestamp=flow_start_time,
-            flow=FlowDebugInfo(id=flow.id, name=flow.name),
-            event=Entity(id=event.id)
-        )
-
-        log_list = []
+        flow_start_time = debug_info.timestamp
 
         sequence_number = 0
         execution_number = 0
@@ -690,7 +702,8 @@ class GraphInvoker(BaseModel):
                     if executed_node:
                         execution_number += 1
                         node_debug_info.executionNumber = execution_number
-                        debug_info.nodes[node_debug_info.id] = node_debug_info
+                        # debug_info.nodes[node_debug_info.id] = node_debug_info
+                        debug_info.add_node_info(node_debug_info)
 
                 # Collect console logs set inside plugins
                 if isinstance(node.object, ActionRunner):
