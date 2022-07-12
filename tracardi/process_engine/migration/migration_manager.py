@@ -12,6 +12,7 @@ from tracardi.service.storage.driver import storage
 from pathlib import Path
 from tracardi.domain.version import Version
 import re
+from celery.exceptions import TimeoutError as CeleryTimeoutError
 
 
 class MigrationNotFoundException(Exception):
@@ -20,7 +21,7 @@ class MigrationNotFoundException(Exception):
 
 class MigrationManager:
     available_migrations = {
-        ("070", "071"): "test"
+        ("0.7.0", "0.7.1"): "test"
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
@@ -31,12 +32,12 @@ class MigrationManager:
     def get_schemas(self):
         try:
             filename = self.available_migrations[
-                (self.from_version.get_version_prefix(), self.to_version.get_version_prefix())
+                (self.from_version.version, self.to_version.version)
             ]
 
         except KeyError:
             raise MigrationNotFoundException(
-                f"Migration from {self.from_version.get_version_prefix()} to {self.to_version.get_version_prefix()} "
+                f"Migration from {self.from_version.version} to {self.to_version.version} "
                 f"not found."
             )
 
@@ -56,6 +57,7 @@ class MigrationManager:
         general_schemas = self.get_schemas()
 
         customized_schemas = []
+        es = ElasticClient.instance()
         for schema in general_schemas:
             if schema.copy_index.multi is True:
                 from_indices = await self.get_multi_indices(template_name=schema.copy_index.from_index)
@@ -78,10 +80,10 @@ class MigrationManager:
                                                f"{self.from_version.name}.{schema.copy_index.from_index}"
                 schema.copy_index.to_index = f"{self.to_version.get_version_prefix()}." \
                                              f"{self.to_version.name}.{schema.copy_index.to_index}"
-                customized_schemas.append(schema)
+                if await es.exists_index(schema.copy_index.from_index):
+                    customized_schemas.append(schema)
 
         return customized_schemas
-
 
     async def start_migration(self, ids: List[str], elastic_host: str) -> Dict[str, Optional[List[List[str]]]]:
 
@@ -102,24 +104,33 @@ class MigrationManager:
         celery_task = completed.pop().result()
 
         started_migration_tasks = []
-        for task_name, task_id in celery_task.wait(timeout=40.0, propagate=True):
-            task = Task(
-                timestamp=datetime.utcnow(),
-                id=task_id,
-                name=task_name,
-                import_type="migration",
-                event_type="<no-event-type>",
-                import_id=task_id,
-                task_id=task_id
-            )
+        try:
+            for task_name, task_id in celery_task.wait(timeout=40.0, propagate=True):
+                task = Task(
+                    timestamp=datetime.utcnow(),
+                    id=task_id,
+                    name=task_name,
+                    import_type="migration",
+                    event_type="<no-event-type>",
+                    import_id=task_id,
+                    task_id=task_id
+                )
 
-            await storage.driver.task.upsert_task(task)
+                await storage.driver.task.upsert_task(task)
 
-            started_migration_tasks.append([task_name, task_id])
+                started_migration_tasks.append([task_name, task_id])
+
+        except CeleryTimeoutError:
+            return {"started_migrations": [*started_migration_tasks, [[
+                f"{'Rest of operations' if started_migration_tasks else 'Operations'} timed out. This is probably "
+                f"due to Tracardi Worker being not available. Tasks will be executed as soon as Worker becomes "
+                f"available.",
+                None
+            ]]]}
 
         return {"started_migrations": started_migration_tasks}
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
-        return [migration[0] for migration in cls.available_migrations if migration[1] == version.get_version_prefix()]
+        return [migration[0] for migration in cls.available_migrations if migration[1] == version.version]
 
