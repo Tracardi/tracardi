@@ -1,8 +1,11 @@
 import asyncio
 import importlib
 import inspect
+import json
+from collections import defaultdict
+
 from time import time
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel
 
 from tracardi.domain.event import Event, EventSession
@@ -11,8 +14,8 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.console import Console, Log
+from tracardi.service.plugin.runner import ActionRunner, JoinSettings
+from tracardi.service.plugin.domain.console import Console, Log, ConsoleStatus
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
 
@@ -26,8 +29,43 @@ from ..utils.dag_error import DagError, DagExecError
 from .edge import Edge
 from .node import Node
 from .tasks_results import ActionsResults
+from ...notation.dict_traverser import DictTraverser
 from ...notation.dot_accessor import DotAccessor
 from ...value_threshold_manager import ValueThresholdManager
+
+
+class InputEdge(BaseModel):
+    id: str
+    active: bool
+    port: str
+    params: dict = None
+
+
+class InputEdges:
+
+    def __init__(self):
+        self.edges = {}  # type: Dict[str, InputEdge]
+
+    def add_edge(self, id: str, edge: InputEdge):
+        self.edges[id] = edge
+
+    def has_active_edges(self) -> bool:
+        for _, edge in self.edges.items():
+            if edge.active is True:
+                return True
+        return False
+
+    def has_edge(self, id) -> bool:
+        return self.edges[id] if id in self.edges else False
+
+    def get_first_edge(self) -> Optional[InputEdge]:
+        edges_ids = list(self.edges.keys())
+        if edges_ids:
+            return self.edges[edges_ids[0]]
+        return None
+
+    def __len__(self):
+        return len(self.edges)
 
 
 class GraphInvoker(BaseModel):
@@ -36,9 +74,9 @@ class GraphInvoker(BaseModel):
     debug: bool = False
 
     @staticmethod
-    def _add_to_event_loop(tasks, coroutine, port, params, edge_id, active) -> list:
+    def _add_to_event_loop(tasks, coroutine, port, params, edge: Edge, active) -> list:
         task = asyncio.create_task(coroutine)
-        tasks.append((task, port, params, edge_id, active))
+        tasks.append((task, port, params, edge, active))
         return tasks
 
     @staticmethod
@@ -125,7 +163,7 @@ class GraphInvoker(BaseModel):
                                            coroutine,
                                            port=_port,
                                            params=_task_result,
-                                           edge_id=in_edge.id if isinstance(in_edge, Edge) else None,
+                                           edge=in_edge if isinstance(in_edge, Edge) else None,
                                            active=True)
         except TypeError as e:
             args_spec = inspect.getfullargspec(node.object.run)
@@ -165,7 +203,8 @@ class GraphInvoker(BaseModel):
                         duration=session.metadata.time.duration
                     ) if session is not None else None
 
-    async def run_task(self, node: Node, payload, ready_upstream_results: ActionsResults):
+    async def run_node(self, node: Node, payload, ready_upstream_results: ActionsResults) -> AsyncIterable[Tuple[
+        Result, float, Optional[Profile], Optional[Session], ConsoleStatus, InputEdges]]:
 
         task_start_time = time()
 
@@ -211,7 +250,7 @@ class GraphInvoker(BaseModel):
                                                         void_result_coroutine,
                                                         end_port,
                                                         None,
-                                                        edge.id,
+                                                        edge,
                                                         active=False)
 
                     else:
@@ -246,13 +285,21 @@ class GraphInvoker(BaseModel):
                                                             void_result_coroutine,
                                                             end_port,
                                                             upstream_result.value,
-                                                            edge.id,
+                                                            edge,
                                                             active=False
                                                             )
 
         # Yield async tasks results
 
-        for task, input_port, input_params, input_edge_id, active in tasks:
+        joined_output_results = defaultdict(dict)
+        joined_profile_reference = None
+        joined_session_reference = None
+
+        input_edges = InputEdges()
+
+        for task, input_port, input_params, edge, active in tasks:
+
+            input_edge_id = edge.id if edge is not None else None
 
             # Get previous session and profile. Session or profile can be override so we need to be sure when the
             # reference has changed
@@ -266,6 +313,7 @@ class GraphInvoker(BaseModel):
             try:
 
                 result = await task
+
                 if node.append_input_payload:
                     result = Result.append_input(result, input_params)
 
@@ -296,13 +344,68 @@ class GraphInvoker(BaseModel):
                     traceback=get_traceback(e)
                 )
 
-            yield result, \
-                  input_port, input_params, \
-                  input_edge_id, \
-                  task_start_time, \
-                  active, \
-                  _current_profile_reference, \
-                  _current_session_reference
+            if node.object.join_output():
+
+                """ Collect results """
+
+                if isinstance(edge, Edge):
+
+                    input_edges.add_edge(input_edge_id, InputEdge(id=input_edge_id, active=active, port=input_port, params=input_params))
+
+                    key = edge.data.name if edge.has_name() else edge.id
+
+                    joined_profile_reference = _current_profile_reference
+                    joined_session_reference = _current_session_reference
+
+                    if result:
+                        """
+                        Map port and payload by edge key
+                        """
+                        joined_output_results[result.port][key] = result.value
+
+            else:
+
+                """ Yield results one by one """
+
+                _single_input_edge = InputEdges()
+                if input_edge_id is not None:
+                    """ Skip if there is no input edge """
+                    _single_input_edge.add_edge(input_edge_id, InputEdge(id=input_edge_id, active=active, port=input_port, params=input_params))
+
+                yield result, \
+                      task_start_time, \
+                      _current_profile_reference, \
+                      _current_session_reference, \
+                      node.object.console.get_status(), _single_input_edge
+
+        if node.object.join_output():
+
+            """ Yield collected results """
+
+            for out_port, out_payload in joined_output_results.items():
+
+                # todo template per port
+
+                if node.object.join.has_reshape_templates():
+                    output = json.loads(node.object.join.get_reshape_template(out_port).template)
+                    if output:
+                        dot = DotAccessor(node.object.profile, node.object.session,
+                                          out_payload if isinstance(out_payload, dict) else None)
+
+                        if node.object.join.get_reshape_template(out_port).default is True:
+                            template = DictTraverser(dot, default=None)
+                        else:
+                            template = DictTraverser(dot)
+
+                        out_payload = template.reshape(reshape_template=output)
+
+                yield Result(port=out_port,
+                             value=out_payload), \
+                      task_start_time, \
+                      joined_profile_reference, \
+                      joined_session_reference, \
+                      node.object.console.get_status(), \
+                      input_edges
 
     @staticmethod
     def _add_results(task_results: ActionsResults, node: Node, result: Result) -> ActionsResults:
@@ -336,7 +439,8 @@ class GraphInvoker(BaseModel):
 
         return task_class(**params)
 
-    async def init(self, flow, flow_history, event, session, profile, tracker_payload: TrackerPayload, ux: list) -> InitResult:
+    async def init(self, flow, flow_history, event, session, profile, tracker_payload: TrackerPayload,
+                   ux: list) -> InitResult:
         errors = []
         objects = []
         metrics = {}
@@ -418,6 +522,8 @@ class GraphInvoker(BaseModel):
                 name=node.name,
                 sequenceNumber=sequence_number,
                 executionNumber=None,
+                errors=0,
+                warnings=0,
                 profiler=Profiler(
                     startTime=task_start_time,
                     endTime=task_start_time,
@@ -435,26 +541,25 @@ class GraphInvoker(BaseModel):
                 if node.block_flow is True:
                     continue
 
-                async for result, input_port, input_params, input_edge_id, \
-                          task_start_time, active, \
-                          _profile_reference_to_update, _session_reference_to_update in \
-                        self.run_task(node, payload, ready_upstream_results=actions_results):
+                async for result, \
+                          task_start_time, \
+                          _profile_reference_to_update, _session_reference_to_update, \
+                          node_console_status, input_edges in \
+                        self.run_node(node, payload, ready_upstream_results=actions_results):
 
                     # If the profile or session changed during node execution change its reference in graph invoker
 
                     if _profile_reference_to_update:
                         profile = _profile_reference_to_update
-                        print(node.name, "Profile changed")
 
                     if _session_reference_to_update:
                         session = _session_reference_to_update
-                        print(node.name, "Session changed")
 
-                    executed_node = active | executed_node
+                    executed_node = input_edges.has_active_edges() | executed_node
 
-                    # Add information if edge is active
+                    # Add information if ony of the input edge is active
 
-                    debug_info.add_debug_edge_info(input_edge_id, active)
+                    debug_info.add_debug_edge_info(input_edges)
 
                     # Process result
 
@@ -474,50 +579,54 @@ class GraphInvoker(BaseModel):
                                     # Result is proper object
                                     actions_results = self._add_results(actions_results, node, sub_result)
                             else:
+                                _edge = input_edges.get_first_edge()
                                 raise DagError(
                                     "Action did not return Result or tuple of Results. Expected Result got {}".format(
                                         type(result)),
-                                    port=input_port,
-                                    input=input_params,
-                                    edge=input_edge_id
+                                    port=_edge.port,
+                                    input=_edge.params,
+                                    edge=_edge.id
                                 )
                     else:
                         # result can be DagExecError this means that this node raised exception
                         if isinstance(result, DagExecError):
-                            # print(result.port == input_port)
-                            # print(result.input == input_params)
-                            # print(result.edge == input_edge_id)
                             raise result
+
+                        _edge = input_edges.get_first_edge()
 
                         raise DagError(
                             "Action did not return Result or tuple of Results. Expected Result got {}".format(
                                 type(result)),
-                            port=input_port,
-                            input=input_params,
-                            edge=input_edge_id
+                            port=_edge.port,
+                            input=_edge.params,
+                            edge=_edge.id
                         )
 
                     if self.is_in_debug_mode(event):
-                        node_debug_info.append_call_info(
-                            flow_start_time,
-                            task_start_time,
-                            node,
-                            input_edge=Entity(id=input_edge_id) if input_edge_id is not None else None,
-                            input_params=self._get_input_params(input_port, input_params),
-                            output_edge=None,
-                            output_params=[result] if isinstance(result, Result) else result,
-                            active=active
-                        )
+                        for input_edge_id, input_edge in input_edges.edges.items():  # type: str, InputEdge
+                            node_debug_info.append_call_info(
+                                flow_start_time,
+                                task_start_time,
+                                node,
+                                input_edge=Entity(id=input_edge_id) if input_edge_id is not None else None,
+                                input_params=self._get_input_params(input_edge.port, input_edge.params),
+                                output_edge=None,
+                                output_params=[result] if isinstance(result, Result) else result,
+                                active=input_edge.active,
+                                errors=node_console_status.errors,
+                                warnings=node_console_status.warnings
+                            )
 
                     if executed_node:
-                        log_list.append(
-                            Log(
-                                module=node.object.console.module,
-                                class_name=node.object.console.class_name,
-                                type='info',
-                                message=f"Node `{node_debug_info.name}` edge {input_edge_id} executed without errors."
+                        for input_edge_id, _ in input_edges.edges.items():  # type: str, InputEdge
+                            log_list.append(
+                                Log(
+                                    module=node.object.console.module,
+                                    class_name=node.object.console.class_name,
+                                    type='info',
+                                    message=f"Node `{node_debug_info.name}` edge {input_edge_id} executed without errors."
+                                )
                             )
-                        )
 
             except (DagError, DagExecError) as e:
 
@@ -547,7 +656,9 @@ class GraphInvoker(BaseModel):
                             output_edge=None,
                             output_params=None,
                             active=True,
-                            error=str(e)
+                            error=str(e),
+                            errors=1,
+                            warnings=0
                         )
 
                     else:
@@ -561,7 +672,9 @@ class GraphInvoker(BaseModel):
                             output_edge=None,
                             output_params=None,
                             active=True,
-                            error=str(e)
+                            error=str(e),
+                            errors=1,
+                            warnings=0
                         )
 
                 # Stop workflow when there is an error

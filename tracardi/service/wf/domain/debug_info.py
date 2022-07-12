@@ -21,6 +21,8 @@ class DebugNodeInfo(BaseModel):
     name: str = None
     sequenceNumber: int = None
     executionNumber: Optional[int] = None
+    errors: int = 0
+    warnings: int = 0
     calls: List[DebugCallInfo] = []
     profiler: Profiler
 
@@ -43,7 +45,9 @@ class DebugNodeInfo(BaseModel):
                          output_edge: Optional[Entity],
                          output_params: Optional[InputParams],
                          active,
-                         error=None):
+                         error=None,
+                         errors=0,
+                         warnings=0):
 
         debug_start_time = task_start_time - flow_start_time
         debug_end_time = time() - flow_start_time
@@ -76,9 +80,14 @@ class DebugNodeInfo(BaseModel):
                                                                                                    BaseModel) else {},
             session=node.object.session.dict() if isinstance(node.object, ActionRunner) and isinstance(
                 node.object.session, BaseModel) else {},
-            error=error
+            error=error,
+
+            errors=errors,
+            warnings=warnings
         )
 
+        self.warnings += warnings
+        self.errors += errors
         self.calls.append(call_debug_info)
 
 
@@ -94,14 +103,17 @@ class DebugInfo(BaseModel):
     nodes: Dict[str, DebugNodeInfo] = {}
     edges: Dict[str, DebugEdgeInfo] = {}
 
-    def add_debug_edge_info(self, input_edge_id, active):
-        if input_edge_id is not None:
-            if input_edge_id not in self.edges:
-                self.edges[input_edge_id] = DebugEdgeInfo(
-                    active=[active]
-                )
-            else:
-                self.edges[input_edge_id].active.append(active)
+    def _add_debug_edge_info(self, input_edge_id, active):
+        if input_edge_id not in self.edges:
+            self.edges[input_edge_id] = DebugEdgeInfo(
+                active=[active]
+            )
+        else:
+            self.edges[input_edge_id].active.append(active)
+
+    def add_debug_edge_info(self, input_edges):
+        for edge_id, edge in input_edges.edges.items(): # type: str, InputEdge
+            self._add_debug_edge_info(edge_id, edge.active)
 
     def has_nodes(self):
         return len(self.nodes) > 0

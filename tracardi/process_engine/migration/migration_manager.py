@@ -82,6 +82,7 @@ class MigrationManager:
 
         return customized_schemas
 
+
     async def start_migration(self, ids: List[str], elastic_host: str) -> Dict[str, Optional[List[List[str]]]]:
 
         final_schemas = [schema.dict() for schema in await self.get_customized_schemas() if schema.id in ids]
@@ -121,3 +122,4 @@ class MigrationManager:
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
         return [migration[0] for migration in cls.available_migrations if migration[1] == version.get_version_prefix()]
+

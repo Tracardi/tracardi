@@ -79,7 +79,6 @@ async def add_plugins():
 
         'tracardi.process_engine.action.v1.detect_client_agent_action',
         'tracardi.process_engine.action.v1.misc.uuid4_action',
-        'tracardi.process_engine.action.v1.misc.hash_value_action',
 
         'tracardi.process_engine.action.v1.traits.copy_trait_action',
         'tracardi.process_engine.action.v1.traits.append_trait_action',
@@ -91,6 +90,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.traits.hash_traits_action',
         'tracardi.process_engine.action.v1.traits.mask_traits_action',
 
+        'tracardi.process_engine.action.v1.operations.join_payloads.plugin',
         'tracardi.process_engine.action.v1.operations.merge_profiles_action',
         'tracardi.process_engine.action.v1.operations.segment_profile_action',
         'tracardi.process_engine.action.v1.operations.update_profile_action',
@@ -114,6 +114,7 @@ async def add_plugins():
         # Plugins
         'tracardi.process_engine.action.v1.traits.reshape_payload_action',
         'tracardi.process_engine.action.v1.detect_client_agent_action',
+        'tracardi.process_engine.action.v1.traits.field_type_action',
 
 
         # Events

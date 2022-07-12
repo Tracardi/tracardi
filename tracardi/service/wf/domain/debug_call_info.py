@@ -33,6 +33,8 @@ class DebugCallInfo(BaseModel):
     session: Optional[dict] = {}
     error: Optional[str] = None
     run: bool = False
+    errors: int = 0
+    warnings: int = 0
 
     def has_error(self):
         return self.error is not None

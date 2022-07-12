@@ -27,6 +27,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='End',
             desc='Ends workflow.',
+            type="startNode",
             icon='stop',
             group=["Input/Output"],
             documentation=Documentation(

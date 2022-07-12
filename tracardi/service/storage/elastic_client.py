@@ -24,7 +24,6 @@ class ElasticClient:
         await self._client.close()
 
     async def get(self, index, id):
-        logger.debug(f"GET DOCUMENT: {index}, {id}")
         return await self._client.get(index=index, doc_type='_doc', id=id)
 
     # todo error handling move to service
@@ -64,11 +63,9 @@ class ElasticClient:
             return False
 
     async def search(self, index, query):
-        logger.debug(f"SEARCH: {index}, {query}")
         return await self._client.search(index=index, body=query)
 
     async def scan(self, index, query):
-        logger.debug(f"SCAN INDEX: {index}, {query}")
         _generator = helpers.async_scan(
             self._client,
             query=query,
@@ -83,8 +80,6 @@ class ElasticClient:
         return self._client.cluster
 
     async def insert(self, index, records) -> BulkInsertResult:
-
-        logger.debug(f"INSERT: {index}, {records}")
 
         if not isinstance(records, list):
             raise ValueError("Insert expects payload to be list.")
@@ -117,43 +112,35 @@ class ElasticClient:
         )
 
     async def update(self, index, id, record, retry_on_conflict=3):
-        logger.debug(f"UPDATE INDEX: {index} at record {id} with {record}")
         return await self._client.update(index, body=record, id=id, retry_on_conflict=retry_on_conflict)
 
     async def remove_index(self, index):
-        logger.debug(f"REMOVE INDEX: {index}")
         return await self._client.indices.delete(index=index)
 
     async def create_index(self, index, mappings):
-        logger.debug(f"CREATE INDEX: {index}")
         return await self._client.indices.create(index=index, ignore=400, body=mappings)
 
     async def update_aliases(self, body):
         return await self._client.indices.update_aliases(body=body)
 
     async def delete_alias(self, index, alias):
-        logger.debug(f"CREATE ALIAS: {alias} = {index}")
         return await self._client.indices.delete_alias(name=alias, index=index)
 
     async def put_index_template(self, template_name, mappings, params=None):
-        logger.debug(f"PUT INDEX TEMPLATE: {template_name}")
         return await self._client.indices.put_index_template(name=template_name,
                                                              ignore=400,
                                                              body=mappings,
                                                              params=params)
 
     async def delete_index_template(self, template_name, params=None):
-        logger.debug(f"DELETE INDEX TEMPLATE: {template_name}")
         return await self._client.indices.delete_index_template(
             name=template_name,
             params=params)
 
     async def exists_index(self, index):
-        logger.debug(f"EXISTS INDEX: {index}")
         return await self._client.indices.exists(index=index)
 
     async def exists_alias(self, alias, index=None):
-        logger.debug(f"EXISTS ALIAS: {alias}")
         return await self._client.indices.exists_alias(name=alias, index=index)
 
     async def list_indices(self):
@@ -166,20 +153,45 @@ class ElasticClient:
         return await self._client.indices.clone(index=source_index, target=destination_index)
 
     async def refresh(self, index, params=None, headers=None):
-        logger.debug(f"REFRESH INDEX: {index}")
         return await self._client.indices.refresh(index=index, params=params, headers=headers)
 
     async def flush(self, index, params=None, headers=None):
-        logger.debug(f"FLUSH INDEX: {index}")
         return await self._client.indices.flush(index=index, params=params, headers=headers)
 
     async def update_by_query(self, index, query):
-        logger.debug(f"UPDATED BY QUERY on INDEX: {index}")
         return await self._client.update_by_query(index=index, body=query)
 
     async def count(self, index, query: dict = None):
-        logger.debug(f"COUNT on INDEX: {index}")
         return await self._client.count(index=index, body=query)
+
+    """ Snapshots """
+
+    async def create_snapshot_repository(self, name, repo):
+        return await self._client.snapshot.create_repository(repository=name, body=repo)
+
+    async def get_snapshot_repository(self, name):
+        return await self._client.snapshot.get_repository(repository=name)
+
+    async def delete_snapshot_repository(self, name):
+        return await self._client.snapshot.delete_repository(repository=name)
+
+    async def get_repository_snapshots(self, name):
+        return await self._client.snapshot.status(repository=name)
+
+    async def create_snapshot(self, repo, snapshot, body=None, params=None):
+        return await self._client.snapshot.create(repo, snapshot, body=body, params=params)
+
+    async def restore_snapshot(self, repo, snapshot, body=None, params=None):
+        return await self._client.snapshot.restore(repo, snapshot, body=body, params=params)
+
+    async def delete_snapshot(self, repo, snapshot, params=None):
+        return await self._client.snapshot.delete(repo, snapshot, params=params)
+
+    async def get_snapshot(self, repo, snapshot, params=None):
+        return await self._client.snapshot.get(repo, snapshot, params=params)
+
+    async def get_snapshot_status(self, repo, snapshot, params=None):
+        return await self._client.snapshot.status(repository=repo, snapshot=snapshot, params=params)
 
     @staticmethod
     def _get_elastic_config():
