@@ -22,17 +22,16 @@
       "name": {
         "type": "keyword"
       },
+      "type": {
+        "type": "keyword"
+      },
       "progress": {
         "type": "double"
       },
-      "task_id": {
-        "type": "keyword"
-      },
-      "import_id": {
-        "type": "keyword"
-      },
-      "import_type": {
-        "type": "keyword"
+      "params": {
+        "type": "object",
+        "enabled": false,
+        "dynamic": true
       },
       "event_type": {
         "type": "keyword"

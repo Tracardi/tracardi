@@ -110,9 +110,8 @@ class MigrationManager:
                     timestamp=datetime.utcnow(),
                     id=task_id,
                     name=task_name,
-                    import_type="migration",
-                    event_type="<no-event-type>",
-                    import_id=task_id,
+                    type="upgrade",
+                    params={},
                     task_id=task_id
                 )
 
