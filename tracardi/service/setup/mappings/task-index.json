@@ -28,6 +28,9 @@
       "progress": {
         "type": "double"
       },
+      "task_id": {
+        "type": "keyword"
+      },
       "params": {
         "type": "object",
         "enabled": false,
