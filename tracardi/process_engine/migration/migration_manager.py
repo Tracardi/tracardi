@@ -13,6 +13,7 @@ from pathlib import Path
 from tracardi.domain.version import Version
 import re
 from celery.exceptions import TimeoutError as CeleryTimeoutError
+from tracardi.service.storage.index import resources
 
 
 class MigrationNotFoundException(Exception):
@@ -85,49 +86,25 @@ class MigrationManager:
 
         return customized_schemas
 
-    async def start_migration(self, ids: List[str], elastic_host: str) -> Dict[str, Optional[List[List[str]]]]:
+    async def start_migration(self, ids: List[str], elastic_host: str) -> None:
 
         final_schemas = [schema.dict() for schema in await self.get_customized_schemas() if schema.id in ids]
 
         if not final_schemas:
-            return {"started_migrations": None}
+            return
 
-        def add_to_celery(given_schemas: List, elastic: str):
-            return run_migration_job.delay(given_schemas, elastic)
+        def add_to_celery(given_schemas: List, elastic: str, task_index_name: str):
+            return run_migration_job.delay(given_schemas, elastic, task_index_name)
+
+        task_index = resources.get_index("task").get_write_index()
 
         executor = ThreadPoolExecutor(
             max_workers=1,
         )
         loop = asyncio.get_running_loop()
-        blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host)]
+        blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host, task_index)]
         completed, pending = await asyncio.wait(blocking_tasks)
-        celery_task = completed.pop().result()
-
-        started_migration_tasks = []
-        try:
-            for task_name, task_id in celery_task.wait(timeout=40.0, propagate=True):
-                task = Task(
-                    timestamp=datetime.utcnow(),
-                    id=task_id,
-                    name=task_name,
-                    type="upgrade",
-                    params={},
-                    task_id=task_id
-                )
-
-                await storage.driver.task.upsert_task(task)
-
-                started_migration_tasks.append([task_name, task_id])
-
-        except CeleryTimeoutError:
-            return {"started_migrations": [*started_migration_tasks, [[
-                f"{'Rest of operations' if started_migration_tasks else 'Operations'} timed out. This is probably "
-                f"due to Tracardi Worker being not available. Tasks will be executed as soon as Worker becomes "
-                f"available.",
-                None
-            ]]]}
-
-        return {"started_migrations": started_migration_tasks}
+        _ = completed.pop().result()
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
