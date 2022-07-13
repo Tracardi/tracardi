@@ -140,9 +140,8 @@ class MySQLQueryImporter(Importer):
             timestamp=datetime.utcnow(),
             id=str(uuid4()),
             name=task_name if task_name else import_config.name,
-            import_type=import_config.name,
-            event_type=import_config.event_type,
-            import_id=import_config.id,
+            type="import",
+            params=import_config.dict(),
             task_id=celery_task.id
         )
 
