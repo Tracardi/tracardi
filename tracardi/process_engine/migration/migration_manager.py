@@ -104,7 +104,9 @@ class MigrationManager:
         loop = asyncio.get_running_loop()
         blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host, task_index)]
         completed, pending = await asyncio.wait(blocking_tasks)
-        _ = completed.pop().result()
+        celery_task = completed.pop().result()
+
+        return celery_task.id
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
