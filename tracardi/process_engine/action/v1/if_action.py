@@ -69,7 +69,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual="if_action",
-            version='0.6.0.1',
+            version='0.7.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
