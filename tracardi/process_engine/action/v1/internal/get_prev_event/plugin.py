@@ -67,7 +67,9 @@ def register() -> Plugin:
                                 id="event_type",
                                 description="Please provide event type that you want to load into payload. If you want "
                                             "current but previous event, insert @current.",
-                                component=FormComponent(type="eventType", props={"label": "Event type"})
+                                component=FormComponent(type="eventType", props={"label": "Event type", "props": {
+                                    "defaultValueSet": [{"id": "@current", "name": "@current"}]
+                                }})
                             ),
                             FormField(
                                 name="Offset",
