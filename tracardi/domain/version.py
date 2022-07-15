@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from typing import Optional
+from typing import Optional, List
 from hashlib import md5
 
 
@@ -12,6 +12,7 @@ class Version(BaseModel):
     prev_version: Optional[SubVersion] = None
     version: str
     name: Optional[str] = None
+    upgrades: List[str] = []
 
     @validator("name")
     def validate_prefix(cls, value, values):

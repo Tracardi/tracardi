@@ -19,6 +19,9 @@
       "prev_version": {
         "type": "object",
         "enabled": false
+      },
+      "upgrades": {
+        "type": "keyword"
       }
     }
   }
