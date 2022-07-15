@@ -46,8 +46,7 @@ class AddEmptyProfileAction(ActionRunner):
         else:
             self.event.update = True
 
-        if self.execution_graph is not None:
-            self.execution_graph.set_profiles(profile)
+        self.execution_graph.set_profiles(profile)
 
         coroutines = [storage.driver.profile.save_profile(profile)]
 
