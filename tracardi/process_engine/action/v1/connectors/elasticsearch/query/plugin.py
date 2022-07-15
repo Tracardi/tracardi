@@ -111,6 +111,7 @@ def register() -> Plugin:
             desc='Gets data from given Elasticsearch resource',
             icon='elasticsearch',
             group=["Connectors"],
+            tags=['database', 'nosql'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

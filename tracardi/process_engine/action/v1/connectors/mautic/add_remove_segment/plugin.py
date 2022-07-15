@@ -132,6 +132,7 @@ def register() -> Plugin:
             desc='Edits segmentation of given contact in Mautic, based on provided contact ID.',
             icon='mautic',
             group=["Mautic"],
+            tags=['mailing'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

@@ -118,6 +118,7 @@ def register() -> Plugin:
             name='Send e-mail via SMTP',
             desc='This plugin sends mail via defined smtp server.',
             type='flowNode',
+            tags=['mailing'],
             width=200,
             height=100,
             icon='email',

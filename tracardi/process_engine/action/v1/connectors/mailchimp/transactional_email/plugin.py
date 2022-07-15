@@ -155,6 +155,7 @@ def register() -> Plugin:
             type='flowNode',
             icon='mailchimp',
             group=["Mailchimp"],
+            tags=['mailing'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

@@ -1,11 +1,13 @@
 import asyncio
 import json
+from typing import Tuple
 
 from tracardi.domain.api_instance import ApiInstance
 from tracardi.domain.entity import Entity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.domain.settings import Settings
 from tracardi.domain.time import Time
 from tracardi.process_engine.action.v1.flow.postpone_event.model.configuration import Configuration
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -60,7 +62,7 @@ class PostponeEventAction(ActionRunner):
         return None
 
 
-def register() -> Plugin:
+def register() -> Tuple[Plugin, Settings]:
     return Plugin(
         start=False,
         spec=Spec(
@@ -78,6 +80,7 @@ def register() -> Plugin:
             desc='Raise event that is delayed X seconds after the customer visit ends.',
             icon='event',
             group=["Operations"],
+            tags=['pro', 'scheduler', 'schedule'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any payload object.")
@@ -89,4 +92,4 @@ def register() -> Plugin:
             },
             pro=True
         )
-    )
+    ), Settings(hidden=True)

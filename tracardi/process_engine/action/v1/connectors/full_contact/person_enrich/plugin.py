@@ -1,7 +1,10 @@
+from typing import Tuple
+
 import aiohttp
 import asyncio
 from aiohttp import ClientConnectorError
 from tracardi.domain.resource import Resource, ResourceCredentials
+from tracardi.domain.settings import Settings
 from tracardi.service.storage.driver import storage
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.runner import ActionRunner
@@ -67,7 +70,7 @@ class FullContactAction(ActionRunner):
             return Result(port="payload", value=None), Result(port="error", value="FullContact webhook timed out.")
 
 
-def register() -> Plugin:
+def register() -> Tuple[Plugin, Settings]:
     return Plugin(
         start=False,
         spec=Spec(
@@ -86,7 +89,7 @@ def register() -> Plugin:
             desc='This plugin retrieves data about the provided e-mail from FullContact service.',
             icon='fullcontact',
             group=["Connectors"],
-            tags=['enhance', 'profile'],
+            tags=['enhance', 'profile', 'contact'],
             pro=True
         )
-    )
+    ), Settings(hidden=True)

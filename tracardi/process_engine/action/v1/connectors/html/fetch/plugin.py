@@ -62,15 +62,15 @@ class HtmlPageFetchAction(ActionRunner):
                     }
 
                     if response.status in [200, 201, 202, 203]:
-                        return Result(port="response", value=result), Result(port="error", value=None)
+                        return Result(port="response", value=result)
                     else:
-                        return Result(port="response", value=None), Result(port="error", value=result)
+                        return Result(port="error", value=result)
 
         except ClientConnectorError as e:
-            return Result(port="response", value=None), Result(port="error", value=str(e))
+            return Result(port="error", value=str(e))
 
         except asyncio.exceptions.TimeoutError:
-            return Result(port="response", value=None), Result(port="error", value="Remote call timed out.")
+            return Result(port="error", value="Remote call timed out.")
 
 
 def register() -> Plugin:
@@ -82,7 +82,7 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["response", "error"],
             init={
-                "method": "post",
+                "method": "get",
                 "url": None,
                 "timeout": 30,
                 "headers": {},

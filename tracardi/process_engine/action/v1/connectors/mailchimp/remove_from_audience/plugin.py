@@ -113,6 +113,7 @@ def register() -> Plugin:
             desc='Removes contact to MailChimp audience or archives it.',
             icon='mailchimp',
             group=["Mailchimp"],
+            tags=['mailing'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

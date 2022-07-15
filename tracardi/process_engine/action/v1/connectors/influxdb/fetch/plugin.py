@@ -1,3 +1,6 @@
+from typing import Tuple
+
+from tracardi.domain.settings import Settings
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -59,7 +62,7 @@ class InfluxFetcher(ActionRunner):
             return Result(port="error", value={"error": str(e)})
 
 
-def register() -> Plugin:
+def register() -> Tuple[Plugin, Settings]:
     return Plugin(
         start=False,
         spec=Spec(
@@ -145,7 +148,8 @@ def register() -> Plugin:
             name='Fetch from InfluxDB',
             desc='Gets data from provided InfluxDB resource.',
             icon='influxdb',
-            group=["Connectors"],
+            group=["InfluxDB"],
+            tags=['database', 'analytics'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -156,4 +160,4 @@ def register() -> Plugin:
                 }
             )
         )
-    )
+    ), Settings(hidden=True)

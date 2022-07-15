@@ -1,5 +1,7 @@
 from datetime import datetime, time
+from typing import Tuple
 
+from tracardi.domain.settings import Settings
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -81,7 +83,7 @@ class InfluxSender(ActionRunner):
             return Result(port="error", value=payload)
 
 
-def register() -> Plugin:
+def register() -> Tuple[Plugin, Settings]:
     return Plugin(
         start=False,
         spec=Spec(
@@ -170,7 +172,8 @@ def register() -> Plugin:
             name='Send to InfluxDB',
             desc='Sends data to InfluxDB.',
             icon='influxdb',
-            group=["Connectors"],
+            group=["InfluxDB"],
+            tags=['database', 'analytics'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -181,4 +184,4 @@ def register() -> Plugin:
                 }
             )
         )
-    )
+    ), Settings(hidden=True)

@@ -112,6 +112,7 @@ def register() -> Plugin:
             desc='Fetches a profile from Mautic, based on provided email address.',
             icon='mautic',
             group=["Mautic"],
+            tags=['mailing'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

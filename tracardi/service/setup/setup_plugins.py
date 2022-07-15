@@ -4,6 +4,7 @@ import os
 from collections import defaultdict
 
 from tracardi.config import tracardi
+from tracardi.domain.settings import Settings
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.module_loader import pip_install, load_callable, import_package
 from tracardi.service.storage.driver import storage
@@ -38,6 +39,16 @@ async def add_plugin(module, install=False, upgrade=False):
         plugin = load_callable(module, 'register')
         plugin_data = plugin()  # type: Plugin
 
+        # If register returns tuple then is has to be Plugin and Settings
+
+        settings = None
+        if isinstance(plugin_data, tuple):
+            if len(plugin_data) != 2:
+                raise ValueError("Invalid result of plugin registration. Expected a tuple of Plugin and Settings")
+            plugin_data, settings = plugin_data
+            if not isinstance(plugin_data, Plugin) and not isinstance(settings, Settings):
+                raise ValueError("Invalid result of plugin registration. Expected a tuple of Plugin and Settings")
+
         if len(plugin_data.spec.inputs) > 1:
             raise ValueError(
                 "Node can not have more then 1 input port. Found {} that is {}".format(
@@ -49,7 +60,7 @@ async def add_plugin(module, install=False, upgrade=False):
 
         await asyncio.sleep(0)
         logger.info(f"Module `{plugin_data.spec.module}` was REGISTERED.")
-        return await storage.driver.action.save_plugin(plugin_data)
+        return await storage.driver.action.save_plugin(plugin_data, settings)
 
     except ModuleNotFoundError as e:
         logger.error(f"Module `{module}` was NOT INSTALLED as it raised an error `{str(e)}`.")

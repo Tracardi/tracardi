@@ -102,6 +102,7 @@ def register() -> Plugin:
             name='Pushover push',
             desc='Connects to Pushover app and pushes message.',
             icon='pushover',
-            group=["Messaging"]
+            group=["Messaging"],
+            tags=['messaging']
         )
     )

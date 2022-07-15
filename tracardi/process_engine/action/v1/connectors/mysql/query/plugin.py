@@ -192,6 +192,7 @@ def register() -> Plugin:
             desc='Connects to mysql and reads data.',
             icon='mysql',
             group=["Connectors"],
+            tags=['database', 'sql'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

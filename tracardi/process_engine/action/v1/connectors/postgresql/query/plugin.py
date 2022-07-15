@@ -126,6 +126,7 @@ def register() -> Plugin:
             desc='Connects to postgreSQL and reads data.',
             icon='postgres',
             group=["Connectors"],
+            tags=['database', 'sql'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

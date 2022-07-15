@@ -128,6 +128,7 @@ def register() -> Plugin:
             desc='Gets funnel given by ID for current profile.',
             icon='mixpanel',
             group=["Mixpanel"],
+            tags=['analytics'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

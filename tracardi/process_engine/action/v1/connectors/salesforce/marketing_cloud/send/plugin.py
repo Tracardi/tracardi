@@ -114,6 +114,7 @@ def register() -> Plugin:
             icon='salesforce',
             group=["Salesforce"],
             brand="Salesforce",
+            tags=['crm'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

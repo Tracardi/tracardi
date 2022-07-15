@@ -1,3 +1,4 @@
+from tracardi.domain.settings import Settings
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.plugin.domain.register import Plugin
 
@@ -7,8 +8,12 @@ from tracardi.domain.flow_action_plugin import FlowActionPlugin
 from tracardi.service.storage.factory import StorageFor
 
 
-async def save_plugin(plugin_data: Plugin):
-    action_plugin = FlowActionPlugin(id=plugin_data.spec.get_id(), plugin=plugin_data)
+async def save_plugin(plugin_data: Plugin, settings=None):
+
+    if settings is None:
+        settings = Settings()
+
+    action_plugin = FlowActionPlugin(id=plugin_data.spec.get_id(), plugin=plugin_data, settings=settings)
     record = FlowActionPluginRecord.encode(action_plugin)
     return await StorageFor(record).index().save()
 

@@ -106,6 +106,7 @@ def register() -> Plugin:
             icon='active-campaign',
             group=["ActiveCampaign"],
             brand="ActiveCampaign",
+            tags=['crm', 'marketing'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

@@ -157,6 +157,7 @@ def register() -> Plugin:
             desc='Publishes payload to rabbitmq.',
             icon='rabbitmq',
             group=["Connectors"],
+            tags=['queue'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

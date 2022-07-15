@@ -106,6 +106,7 @@ def register() -> Plugin:
             desc='Sends processed event to MixPanel project.',
             icon='mixpanel',
             group=["Mixpanel"],
+            tags=['analytics'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

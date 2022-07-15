@@ -431,6 +431,7 @@ def register() -> Plugin:
             brand='Amplitude',
             desc='Sends request to Amplitude API endpoint to register event.',
             icon='amplitude',
-            group=["Amplitude"]
+            group=["Amplitude"],
+            tags=['analytics'],
         )
     )

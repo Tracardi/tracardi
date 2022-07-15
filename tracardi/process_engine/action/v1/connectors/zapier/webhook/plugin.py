@@ -49,15 +49,15 @@ class ZapierWebHookAction(ActionRunner):
                     }
 
                     if response.status in [200, 201, 202, 203, 204]:
-                        return Result(port="response", value=result), Result(port="error", value=None)
+                        return Result(port="response", value=result)
                     else:
-                        return Result(port="response", value=None), Result(port="error", value=result)
+                        return Result(port="error", value=result)
 
         except ClientConnectorError as e:
-            return Result(port="response", value=None), Result(port="error", value=str(e))
+            return Result(port="error", value=str(e))
 
         except asyncio.exceptions.TimeoutError:
-            return Result(port="response", value=None), Result(port="error", value="Zapier webhook timed out.")
+            return Result(port="error", value="Zapier webhook timed out.")
 
 
 def register() -> Plugin:
@@ -78,6 +78,7 @@ def register() -> Plugin:
             desc='Sends message to zapier webhook.',
             icon='zapier',
             group=["Zapier"],
+            tags=['automation'],
             pro=True
         )
     )
