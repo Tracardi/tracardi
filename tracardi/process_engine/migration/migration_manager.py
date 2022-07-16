@@ -101,8 +101,6 @@ class MigrationManager:
         if not final_schemas:
             return
 
-        await self.save_version_update()
-
         def add_to_celery(given_schemas: List, elastic: str, task_index_name: str):
             return run_migration_job.delay(given_schemas, elastic, task_index_name)
 
@@ -115,6 +113,8 @@ class MigrationManager:
         blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host, task_index)]
         completed, pending = await asyncio.wait(blocking_tasks)
         celery_task = completed.pop().result()
+
+        await self.save_version_update()
 
         return celery_task.id
 
