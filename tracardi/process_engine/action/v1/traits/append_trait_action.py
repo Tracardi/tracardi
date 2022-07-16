@@ -44,7 +44,12 @@ class AppendTraitAction(ActionRunner):
                     # Make it a list with original value
                     dot[destination] = [dot[destination]]
 
-                if value not in dot[destination]:
+                if isinstance(value, list):
+                    for v in value:
+                        if v not in dot[destination]:
+                            dot[destination].append(v)
+
+                elif value not in dot[destination]:
                     dot[destination].append(value)
             else:
                 dot[destination] = value
@@ -112,11 +117,12 @@ def register() -> Plugin:
             },
             version='0.1',
             license="MIT",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual="append_remove_trait_action"
         ),
         metadata=MetaData(
             name='Append/Remove data',
-            desc='Appends/Removes trait to/from existing profile trait.',
+            desc='Appends/Removes trait to/from given destination',
             icon='append',
             group=["Data processing"],
             tags=['traits', 'profile', 'reference', 'data'],
