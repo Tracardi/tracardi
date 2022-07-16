@@ -38,3 +38,8 @@ class Version(BaseModel):
 
     def __str__(self):
         return f"Version {self.version}.{self.name} ({self.prev_version.version if isinstance(self.prev_version, SubVersion) else 'No previous version'})"
+
+    def add_upgrade(self, name: str) -> None:
+        upgrades = set(self.upgrades)
+        upgrades.add(name)
+        self.upgrades = list(upgrades)

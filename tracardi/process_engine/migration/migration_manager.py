@@ -5,15 +5,13 @@ from tracardi.service.storage.elastic_client import ElasticClient
 from worker.celery_worker import run_migration_job
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from tracardi.domain.task import Task
-from datetime import datetime
 from hashlib import sha1
 from tracardi.service.storage.driver import storage
 from pathlib import Path
 from tracardi.domain.version import Version
 import re
-from celery.exceptions import TimeoutError as CeleryTimeoutError
 from tracardi.service.storage.index import resources
+from typing import Union
 
 
 class MigrationNotFoundException(Exception):
@@ -54,7 +52,7 @@ class MigrationManager:
         es = ElasticClient.instance()
         return [index for index in await es.list_indices() if re.fullmatch(template, index)]
 
-    async def get_customized_schemas(self) -> List[MigrationSchema]:
+    async def get_customized_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
         general_schemas = self.get_schemas()
 
         customized_schemas = []
@@ -84,11 +82,21 @@ class MigrationManager:
                 if await es.exists_index(schema.copy_index.from_index):
                     customized_schemas.append(schema)
 
-        return customized_schemas
+        target_version = await storage.driver.version.load_by_version_and_name(
+            self.to_version.version,
+            self.to_version.name
+        )
+        warn = f"{self.from_version.get_version_prefix()}.{self.from_version.name}" in target_version.get(
+            "upgrades",
+            []
+        )
+
+        return {"warn": warn, "schemas": customized_schemas}
 
     async def start_migration(self, ids: List[str], elastic_host: str) -> None:
 
-        final_schemas = [schema.dict() for schema in await self.get_customized_schemas() if schema.id in ids]
+        customized_schemas = await self.get_customized_schemas()
+        final_schemas = [schema.dict() for schema in customized_schemas["schemas"] if schema.id in ids]
 
         if not final_schemas:
             return
@@ -106,9 +114,21 @@ class MigrationManager:
         completed, pending = await asyncio.wait(blocking_tasks)
         celery_task = completed.pop().result()
 
+        await self.save_version_update()
+
         return celery_task.id
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
         return [migration[0] for migration in cls.available_migrations if migration[1] == version.version]
+
+    async def save_version_update(self):
+        version = await storage.driver.version.load_by_version_and_name(
+            self.to_version.version,
+            self.to_version.name
+        )
+        version_id = version["id"]
+        version = Version(**version)
+        version.add_upgrade(f"{self.from_version.get_version_prefix()}.{self.from_version.name}")
+        await storage.driver.version.save({"id": version_id, **version.dict()})
 
