@@ -72,7 +72,7 @@ class MysqlConnectorAction(ActionRunner):
             self.pool.close()
             await self.pool.wait_closed()
 
-    async def on_error(self):
+    async def on_error(self, **kwargs):
         await self.close()
 
     @staticmethod
@@ -165,7 +165,7 @@ def register() -> Plugin:
                                         "It will replace placeholders one by one so order matters.",
                             component=FormComponent(
                                 type="listOfDotPaths",
-                                props={"label": "List of data"})
+                                props={"label": "List of data", "allowDuplicates": True})
                         )
                     ]
                 ),
