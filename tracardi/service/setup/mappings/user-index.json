@@ -31,6 +31,9 @@
       "token": {
          "type": "keyword",
          "null_value": "NULL"
+      },
+      "expiration_timestamp": {
+        "type": "long"
       }
     }
   },
