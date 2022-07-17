@@ -32,10 +32,12 @@ class StartAction(ActionRunner):
         event = Event(**event_data)
         event.metadata.profile_less = self.config.profile_less
 
-        try:
-            event.properties = json.loads(self.config.properties)
-        except JSONDecodeError as e:
-            self.console.warning(str(e))
+        # Do it only for made-up events - when no event ID and event type is specified
+        if (not self.config.event_id) and not (self.config.event_type and self.config.event_type.id):
+            try:
+                event.properties = json.loads(self.config.properties)
+            except JSONDecodeError as e:
+                self.console.warning(str(e))
 
         if event.session is not None:
             session_entity = Entity(id=event.session.id)
