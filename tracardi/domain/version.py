@@ -33,7 +33,7 @@ class Version(BaseModel):
     def has_prev_version(self):
         return self.prev_version is not None
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Version') -> bool:
         return other and self.version == other.version and self.name == other.name
 
     def __str__(self):
