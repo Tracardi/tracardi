@@ -230,7 +230,7 @@ def register() -> Plugin:
                         FormField(
                             id="event_id",
                             name="Event ID",
-                            description="You can load particular event for debug purpose by id. This field is optional. "
+                            description="You can load event by its id for debug purpose. This field is optional. "
                                         "If provided than id takes precedence before event type.",
                             component=FormComponent(type="text", props={"label": "Event ID"})
                         ),
@@ -238,7 +238,7 @@ def register() -> Plugin:
                             id="event_type",
                             name="Event type",
                             description="You can load event of selected type in debug mode. If left empty, generates "
-                                        "debug-event-type event or loads event by id.",
+                                        "debug-event-type event or loads event by id if provided.",
                             component=FormComponent(type="eventType", props={"label": "Event type"})
                         ),
                     ]
