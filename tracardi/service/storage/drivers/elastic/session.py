@@ -67,9 +67,6 @@ async def get_first_session(profile_id: str) -> float:
     return result["aggregations"]["first_session"]["value"]
 
 
-#
-
-
 async def load(id: str) -> Session:
     return await StorageFor(Entity(id=id)).index("session").load(Session)
 

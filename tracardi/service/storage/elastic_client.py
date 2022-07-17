@@ -24,10 +24,12 @@ class ElasticClient:
         await self._client.close()
 
     async def get(self, index, id):
+        # WARNING this method does not work on aliases
         return await self._client.get(index=index, doc_type='_doc', id=id)
 
     # todo error handling move to service
     async def delete(self, index, id):
+        # WARNING this method does not work on aliases
         try:
             return await self._client.delete(index=index, doc_type="_doc", id=id)
         except NotFoundError:
@@ -57,6 +59,7 @@ class ElasticClient:
         return await self._client.indices.exists_index_template(name)
 
     async def exists(self, index, id) -> bool:
+        # WARNING this method does not work on aliases
         try:
             return await self._client.exists(index=index, doc_type="_doc", id=id)
         except NotFoundError:

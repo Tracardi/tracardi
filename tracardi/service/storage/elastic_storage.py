@@ -43,6 +43,8 @@ class ElasticStorage:
         self.index_key = index_key
 
     async def exists(self, id) -> bool:
+        if self.index.multi_index:
+            return await self.load(id) is not None
         return await self.storage.exists(self.index.get_index_alias(), id)
 
     async def count(self, query: dict = None) -> bool:
