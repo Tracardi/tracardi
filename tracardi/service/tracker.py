@@ -410,6 +410,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Add UX to response
     result['ux'] = ux
 
+    result['response'] = {}
+
     return result
 
 
