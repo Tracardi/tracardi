@@ -51,7 +51,6 @@ class ElasticStorage:
         return await self.storage.count(self.index.get_index_alias(), query)
 
     async def load(self, id) -> [dict, None]:
-
         try:
             index = self.index.get_index_alias()
             if not self.index.multi_index:
