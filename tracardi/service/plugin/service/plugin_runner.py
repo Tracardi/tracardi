@@ -4,15 +4,17 @@ from uuid import uuid4
 
 from ..runner import ActionRunner
 from ..domain.console import Console
+from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 
 
 class PluginTestResult:
-    def __init__(self, output, profile=None, session=None, event=None, console=None):
+    def __init__(self, output, profile=None, session=None, event=None, console=None, flow=None):
         self.event = event
         self.session = session
         self.profile = profile
         self.output = output
         self.console = console
+        self.flow = flow
 
     def __repr__(self):
         return f"output=`{self.output}`\nprofile=`{self.profile}`\nsession=`{self.session}`\nevent=`{self.session}`" \
@@ -39,6 +41,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
             plugin.console = console
             plugin.flow = flow
             plugin.node = node
+            plugin.execution_graph = GraphInvoker(graph=[], start_nodes=[])
 
             output = await plugin.run(payload)
 
@@ -47,7 +50,8 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
                 profile,
                 session,
                 event,
-                console
+                console,
+                flow
             )
 
         except Exception as e:

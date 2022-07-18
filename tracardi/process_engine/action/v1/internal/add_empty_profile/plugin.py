@@ -45,6 +45,7 @@ class AddEmptyProfileAction(ActionRunner):
                 "Your requested an update of event profile but events may not be updated in debug mode.")
         else:
             self.event.update = True
+
         self.execution_graph.set_profiles(profile)
 
         coroutines = [storage.driver.profile.save_profile(profile)]
@@ -69,7 +70,7 @@ class AddEmptyProfileAction(ActionRunner):
         )
         self.execution_graph.set_sessions(session)
 
-        if not self.tracker_payload.is_on('saveSession', default=True):
+        if self.tracker_payload is not None and not self.tracker_payload.is_on('saveSession', default=True):
             coroutines.append(storage.driver.session.save(session))
 
         await asyncio.gather(*coroutines)
