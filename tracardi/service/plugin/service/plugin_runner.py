@@ -23,6 +23,7 @@ class PluginTestResult:
 
 def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=None, event=None, flow=None,
                node=None, in_edge=None) -> PluginTestResult:
+
     async def main(plugin, init, payload):
         try:
 
@@ -43,7 +44,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
             plugin.node = node
             plugin.execution_graph = GraphInvoker(graph=[], start_nodes=[])
 
-            output = await plugin.run(payload)
+            output = await plugin.run(payload, in_edge=in_edge)
 
             return PluginTestResult(
                 output,
