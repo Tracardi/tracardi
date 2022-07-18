@@ -25,6 +25,9 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
       }
     }
   },
