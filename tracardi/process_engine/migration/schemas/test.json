@@ -248,7 +248,7 @@
       "multi": false,
       "script": null
     },
-    "worker": "reindex",
+    "worker": "user_reindex",
     "conflicts": null,
     "asynchronous": true
   },
