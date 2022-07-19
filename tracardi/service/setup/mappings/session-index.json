@@ -51,7 +51,8 @@
         },
         "properties": {
           "dynamic": true,
-          "type": "object"
+          "type": "object",
+          "enabled": false
         }
       }
     },
