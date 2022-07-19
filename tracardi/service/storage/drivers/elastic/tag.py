@@ -10,23 +10,28 @@ logger.setLevel(tracardi.logging_level)
 memory_cache = MemoryCache()
 
 
+async def refresh_tags_cache_for_type(event_type: str):
+    key = "tags-type-{}".format(event_type)
+    logger.info("Refreshing memory cache for {}".format(key))
+    records = list(await get_by_type(event_type))
+    if len(records) > 1:
+        raise ValueError("There is more then 1 record in tags index for event type {}. ".format(event_type))
+    if records and len(records) > 0:
+        result = records.pop()  # There is only one record
+        cache_data = EventTag(**result).tags
+    else:
+        cache_data = []
+    logger.info("Refreshed value for {} is {}".format(key, cache_data))
+    memory_cache[key] = CacheItem(
+        data=cache_data,
+        ttl=memory_cache_config.tags_ttl
+    )
+
+
 async def get_tags(event_type) -> list:
     key = "tags-type-{}".format(event_type)
     if key not in memory_cache:
-        logger.info("Refreshing memory cache for {}".format(key))
-        records = list(await get_by_type(event_type))
-        if len(records) > 1:
-            raise ValueError("There is more then 1 record in tags index for event type {}. ".format(event_type))
-        if records and len(records) > 0:
-            result = records.pop()  # There is only one record
-            cache_data = EventTag(**result).tags
-        else:
-            cache_data = []
-        logger.info("Refreshed value for {} is {}".format(key, cache_data))
-        memory_cache[key] = CacheItem(
-            data=cache_data,
-            ttl=memory_cache_config.tags_ttl
-        )
+        await refresh_tags_cache_for_type(event_type)
 
     return memory_cache[key].data
 
