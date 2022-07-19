@@ -143,8 +143,10 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
         for event in events:
             if event.is_persistent():
                 try:
-                    event.tags.values = (tag.lower() for tag in
-                                         set(event.tags.values + tuple(await get_tags(event.type))))
+                    event.tags.values = (tag.lower() for tag in set(
+                            tuple(event.tags.values) + tuple(await get_tags(event.type))
+                        )
+                    )
                 except ValueError as e:
                     logger.error(str(e))
                 finally:
