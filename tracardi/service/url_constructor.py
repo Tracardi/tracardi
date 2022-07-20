@@ -50,7 +50,7 @@ def construct_url(host: str, scheme: Optional[str] = None, username: Optional[st
 
     url += host.strip("/")
 
-    if host[:-5] != ':9200':
+    if not url.endswith(':9200'):
         url += ':9200'
 
     return url
