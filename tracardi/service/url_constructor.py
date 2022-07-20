@@ -42,6 +42,9 @@ def construct_url(host: str, scheme: Optional[str] = None, username: Optional[st
         else:
             raise SchemeError("No scheme provided for URL.")
 
+    else:
+        host = host.split("://")[-1]
+
     url = scheme + "://"
     if username:
         url += username
