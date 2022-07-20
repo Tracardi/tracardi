@@ -48,5 +48,9 @@ def construct_url(host: str, scheme: Optional[str] = None, username: Optional[st
     if password:
         url += ":" + password
 
-    url += host
+    url += host.strip("/")
+
+    if host[:-5] != ':9200':
+        url += ':9200'
+
     return url
