@@ -34,7 +34,7 @@ class SchemeError(Exception):
     pass
 
 
-def construct_url(host: str, scheme: Optional[str] = None, username: Optional[str] = None,
+def construct_elastic_url(host: str, scheme: Optional[str] = None, username: Optional[str] = None,
                   password: Optional[str] = None):
     if scheme is None:
         if "://" in host:
