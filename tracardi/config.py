@@ -60,7 +60,7 @@ class ElasticConfig:
         if 'ELASTIC_HOST' in env and isinstance(env['ELASTIC_HOST'], str) and env['ELASTIC_HOST'].isnumeric():
             raise ValueError("Env ELASTIC_HOST must be sting")
 
-        self.host = env['ELASTIC_HOST'] if 'ELASTIC_HOST' in env else '127.0.0.1'
+        self.host = env['ELASTIC_HOST'] if 'ELASTIC_HOST' in env else '127.0.0.1:9200'
         self.host = self.host.split(",")
         self.replicas = env['ELASTIC_INDEX_REPLICAS'] if 'ELASTIC_INDEX_REPLICAS' in env else "1"
         self.shards = env['ELASTIC_INDEX_SHARDS'] if 'ELASTIC_INDEX_SHARDS' in env else "5"
