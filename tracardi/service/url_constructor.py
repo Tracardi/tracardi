@@ -42,6 +42,9 @@ def construct_elastic_url(host: str, scheme: Optional[str] = None, username: Opt
         else:
             raise SchemeError("No scheme provided for URL.")
 
+    else:
+        host = host.split("://")[-1]
+
     url = scheme + "://"
     if username:
         url += username
