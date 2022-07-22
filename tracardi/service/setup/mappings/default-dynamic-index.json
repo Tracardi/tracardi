@@ -8,13 +8,13 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": true,
+    "dynamic": "true",
     "properties": {
       "id": {
         "type": "keyword"
       },
       "metadata": {
-        "dynamic": false,
+        "dynamic": "false",
         "properties": {
           "time": {
             "properties": {

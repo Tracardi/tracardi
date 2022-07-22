@@ -8,7 +8,7 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": false,
+    "dynamic": "false",
     "properties": {
       "id": {
         "type": "keyword"
@@ -34,7 +34,7 @@
       "params": {
         "type": "object",
         "enabled": false,
-        "dynamic": true
+        "dynamic": "true"
       },
       "event_type": {
         "type": "keyword"
