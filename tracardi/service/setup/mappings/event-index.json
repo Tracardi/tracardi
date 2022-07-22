@@ -14,7 +14,7 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": false,
+      "dynamic": "false",
       "properties": {
         "id": {
           "type": "keyword"
@@ -66,7 +66,7 @@
         },
         "properties": {
           "enabled": false,
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object"
         },
         "source": {
@@ -97,22 +97,22 @@
           }
         },
         "aux": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object",
           "enabled": false
         },
         "config": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object",
           "enabled": false
         },
         "context": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object",
           "enabled": false
         },
         "traits": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object"
         },
         "tags": {

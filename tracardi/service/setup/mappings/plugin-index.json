@@ -8,7 +8,7 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": true,
+    "dynamic": "true",
     "properties": {
       "id": {
         "type": "keyword",

@@ -8,7 +8,7 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": false,
+    "dynamic": "false",
     "properties": {
       "id": {
         "type": "keyword"
@@ -28,11 +28,11 @@
             "type": "keyword"
           },
           "properties": {
-            "dynamic": true,
+            "dynamic": "true",
             "type": "object"
           },
           "context": {
-            "dynamic": true,
+            "dynamic": "true",
             "type": "object"
           },
           "session": {

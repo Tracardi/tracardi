@@ -12,14 +12,14 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": false,
+      "dynamic": "false",
       "date_detection": false,
       "properties": {
         "id": {
           "type": "keyword"
         },
         "metadata": {
-          "dynamic": false,
+          "dynamic": "false",
           "properties": {
             "time": {
               "properties": {
@@ -44,23 +44,23 @@
           }
         },
         "stats": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object"
         },
         "traits": {
           "properties": {
             "private": {
-              "dynamic": true,
+              "dynamic": "true",
               "type": "object"
             },
             "public": {
-              "dynamic": true,
+              "dynamic": "true",
               "type": "object"
             }
           }
         },
         "pii": {
-          "dynamic": false,
+          "dynamic": "false",
           "properties": {
             "name": {
               "type": "text"
@@ -87,7 +87,7 @@
               "type": "keyword"
             },
             "other": {
-              "dynamic": true,
+              "dynamic": "true",
               "type": "object"
             }
           }
@@ -97,7 +97,7 @@
           "ignore_above": 64
         },
         "consents": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object"
         },
         "active": {

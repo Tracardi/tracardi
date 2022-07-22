@@ -13,7 +13,7 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": false,
+      "dynamic": "false",
       "properties": {
         "date": {
           "type": "date"

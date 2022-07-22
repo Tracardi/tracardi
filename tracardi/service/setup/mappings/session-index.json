@@ -13,7 +13,7 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": false,
+      "dynamic": "false",
       "properties": {
         "id": {
           "type": "keyword"
@@ -46,11 +46,11 @@
           }
         },
         "context": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object"
         },
         "properties": {
-          "dynamic": true,
+          "dynamic": "true",
           "type": "object",
           "enabled": false
         }

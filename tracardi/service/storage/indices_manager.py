@@ -59,12 +59,13 @@ async def check_indices_mappings_consistency():
         es_mapping = es_mapping[index.get_version_write_index()]
 
         # This change is needed as mappings in ES change - god knows why
+        # ES casts it to string, because "dynamic" is enum type, not boolean ~ god
 
-        try:
+        #try:
             # todo find all dynamic fields and change to bool
-            es_mapping["mappings"]['dynamic'] = es_mapping["mappings"]['dynamic'].lower() == 'true'
-        except KeyError:
-            pass
+            #es_mapping["mappings"]['dynamic'] = es_mapping["mappings"]['dynamic'].lower() == 'true'
+        #except KeyError:
+            #pass
 
         diff = DeepDiff(es_mapping, system_mapping, exclude_paths=["root['aliases']"])
 
