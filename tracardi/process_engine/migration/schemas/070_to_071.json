@@ -6,9 +6,9 @@
       "from_index": "tracardi-validation-schema",
       "to_index": "tracardi-event-management",
       "multi": false,
-      "script": "ctx._source.tags = new String[] {};"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.tags = new String[] {};\nctx._source = [:];\nctx._source.putAll(row);"
     },
-    "worker": "reindex",
+    "worker": "validation_schema_reindex_071",
     "conflicts": null,
     "asynchronous": true
   },
@@ -32,7 +32,7 @@
       "multi": false,
       "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.expiration_timestamp = null;\nctx._source = [:];\nctx._source.putAll(row);"
     },
-    "worker": "user_reindex",
+    "worker": "user_reindex_071",
     "conflicts": null,
     "asynchronous": true
   },
@@ -54,7 +54,7 @@
       "from_index": "tracardi-source",
       "to_index": "tracardi-source",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.locked = false;\nrow.manual = null;\nrow.tags = new String[] {\"rest\", \"api\"};\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.type = \"rest\";\nrow.locked = false;\nrow.manual = null;\nrow.tags = new String[] {\"rest\", \"api\"};\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
