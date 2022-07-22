@@ -1,5 +1,9 @@
+import os
 from datetime import datetime
-import tracardi.config
+
+from tracardi.config import tracardi, elastic
+
+_local_dir = os.path.dirname(__file__)
 
 
 class Index:
@@ -7,13 +11,29 @@ class Index:
         self.aliased = aliased
         self.multi_index = multi_index
         self.index = index
-        self.prefix = "{}.".format(tracardi.config.tracardi.version.name)
+        self.prefix = "{}.".format(tracardi.version.name)
         self.mapping = mapping
+
+    def get_mapping(self):
+        if self.mapping:
+            mapping_file = self.mapping
+        else:
+            mapping_file = 'mappings/default-dynamic-index.json'
+
+        return os.path.join(f"{_local_dir}/../setup", mapping_file)
 
     def _index(self):
         if self.aliased:
             return self.prefix + self.index
         return self.index
+
+    def prepare_mappings(self, mapping):
+        json_map = mapping.replace("%%PREFIX%%", tracardi.version.name)
+        json_map = json_map.replace("%%ALIAS%%", self.get_index_alias())
+        json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
+        json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)
+        json_map = json_map.replace("%%SHARDS%%", elastic.shards)
+        return json_map
 
     def get_index_alias(self):
         return self._index()
@@ -28,7 +48,15 @@ class Index:
         # Multi index must write to month index
 
         date = datetime.now()
-        return f"{tracardi.config.tracardi.version.get_version_prefix()}.{self._index()}-{date.year}-{date.month}"
+        return f"{tracardi.version.get_version_prefix()}.{self._index()}-{date.year}-{date.month}"
+
+    def get_version_write_index(self) -> str:
+        if self.multi_index:
+            return self.get_write_index()
+        elif self.aliased:
+            return self.get_aliased_data_index()
+        else:
+            return self.index
 
     def get_aliased_data_index(self):
 
@@ -36,7 +64,7 @@ class Index:
         Returns the data index not the alias.
         """
 
-        version_prefix = tracardi.config.tracardi.version.get_version_prefix()
+        version_prefix = tracardi.version.get_version_prefix()
 
         if self.multi_index is False:
             return f"{version_prefix}.{self._index()}"
@@ -52,7 +80,7 @@ class Index:
         Returns template pattern.
         """
 
-        version_prefix = tracardi.config.tracardi.version.get_version_prefix()
+        version_prefix = tracardi.version.get_version_prefix()
 
         if self.multi_index is False:
             raise ValueError(f"Index {self._index()} is not multi index.")
@@ -60,7 +88,7 @@ class Index:
         return f"{version_prefix}.{self._index()}-*-*"
 
     def get_prefixed_template_name(self):
-        return "template.{}.{}".format(tracardi.config.tracardi.version.name, self.index)
+        return "template.{}.{}".format(tracardi.version.name, self.index)
 
 
 class Resource:

@@ -1,4 +1,6 @@
-import elasticsearch
+import json
+
+from deepdiff import DeepDiff
 
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import resources, Index
@@ -37,3 +39,41 @@ async def get_indices_status():
             _template_pattern = index.get_template_pattern()
             if not await es.exists_alias(_alias, index=_template_pattern):
                 yield "missing_alias", _alias
+
+
+async def check_indices_mappings_consistency():
+    result = {}
+
+    es = ElasticClient.instance()
+    for key, index in resources.resources.items():  # type: str, Index
+        system_mapping_file = index.get_mapping()
+
+        with open(system_mapping_file) as file:
+            system_mapping = file.read()
+            system_mapping = index.prepare_mappings(system_mapping)
+            system_mapping = json.loads(system_mapping)
+            if index.multi_index:
+                system_mapping = system_mapping['template']
+            del system_mapping['settings']
+        es_mapping = await es.get_mapping(index.get_write_index())
+        es_mapping = es_mapping[index.get_version_write_index()]
+
+        # This change is needed as mappings in ES change - god knows why
+
+        try:
+            # todo find all dynamic fields and change to bool
+            es_mapping["mappings"]['dynamic'] = es_mapping["mappings"]['dynamic'].lower() == 'true'
+        except KeyError:
+            pass
+
+        diff = DeepDiff(es_mapping, system_mapping, exclude_paths=["root['aliases']"])
+
+        if diff:
+
+            result[index.get_version_write_index()] = json.loads(json.dumps(diff.to_dict(), default=str))
+            # print(index.index)
+            # print(diff)
+            # print(es_mapping)
+            # print(system_mapping)
+
+        return result

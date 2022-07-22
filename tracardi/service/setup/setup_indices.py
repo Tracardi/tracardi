@@ -1,6 +1,6 @@
 import json
 import os
-from tracardi.config import tracardi, elastic
+from tracardi.config import tracardi
 from tracardi.domain.version import Version
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.setup.setup_plugins import add_plugins
@@ -45,14 +45,6 @@ async def create_indices():
         "aliases": [],
     }
 
-    def add_prefix(json_map, index: Index):
-        json_map = json_map.replace("%%PREFIX%%", tracardi.version.name)
-        json_map = json_map.replace("%%ALIAS%%", index.get_index_alias())
-        json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
-        json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)
-        json_map = json_map.replace("%%SHARDS%%", elastic.shards)
-        return json_map
-
     def acknowledged(result):
         return 'acknowledged' in result and result['acknowledged'] is True
 
@@ -66,15 +58,12 @@ async def create_indices():
 
     for key, index in resources.resources.items():  # type: str, Index
 
-        if index.mapping:
-            map_file = index.mapping
-        else:
-            map_file = 'mappings/default-dynamic-index.json'
+        map_file = index.get_mapping()
 
-        with open(os.path.join(__local_dir, map_file)) as file:
+        with open(map_file) as file:
 
             map = file.read()
-            map = add_prefix(map, index)
+            map = index.prepare_mappings(map)
             map = json.loads(map)
 
             target_index = index.get_aliased_data_index()
