@@ -1,3 +1,4 @@
+import urllib.parse
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dot_template import DotTemplate
 from pydantic import BaseModel
@@ -57,3 +58,11 @@ def construct_elastic_url(host: str, scheme: Optional[str] = None, username: Opt
         url += ':9200'
 
     return url
+
+
+def url_query_params_to_dict(url_query_params):
+    params = dict(urllib.parse.parse_qs(url_query_params))
+    for key, value in params.items():
+        if len(value) == 1:
+            params[key] = value[0]
+    return params

@@ -58,23 +58,9 @@ async def check_indices_mappings_consistency():
         es_mapping = await es.get_mapping(index.get_write_index())
         es_mapping = es_mapping[index.get_version_write_index()]
 
-        # This change is needed as mappings in ES change - god knows why
-        # ES casts it to string, because "dynamic" is enum type, not boolean ~ god
-
-        #try:
-            # todo find all dynamic fields and change to bool
-            #es_mapping["mappings"]['dynamic'] = es_mapping["mappings"]['dynamic'].lower() == 'true'
-        #except KeyError:
-            #pass
-
         diff = DeepDiff(es_mapping, system_mapping, exclude_paths=["root['aliases']"])
 
         if diff:
-
             result[index.get_version_write_index()] = json.loads(json.dumps(diff.to_dict(), default=str))
-            # print(index.index)
-            # print(diff)
-            # print(es_mapping)
-            # print(system_mapping)
 
         return result
