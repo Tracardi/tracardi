@@ -159,6 +159,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.ux.rating_popup.plugin',
         'tracardi.process_engine.action.v1.ux.question_popup.plugin',
         'tracardi.process_engine.action.v1.ux.contact_popup.plugin',
+        'tracardi.process_engine.action.v1.ux.generic.plugin',
 
         # Connectors
         'tracardi.process_engine.action.v1.connectors.html.fetch.plugin',
