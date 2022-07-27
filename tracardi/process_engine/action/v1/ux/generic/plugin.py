@@ -61,7 +61,7 @@ def register() -> Plugin:
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Plugin configuration",
+                        name="Custom widget configuration",
                         fields=[
                             FormField(
                                 id="uix_source",
