@@ -9,10 +9,9 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 class Config(PluginConfig):
     uix_source: str
-    path: str
     props: dict
 
-    @validator("path")
+    @validator("uix_source")
     def validate_file_path(cls, value):
         if isinstance(value, str) and not value.endswith(".js"):
             raise ValueError("Widget file has to be .js file.")
@@ -38,7 +37,7 @@ class GenericUixPlugin(ActionRunner):
         })
         self.ux.append({
             "tag": "script",
-            "props": {"src": f"{self.config.uix_source}{self.config.path}"}
+            "props": {"src": f"{self.config.uix_source}"}
         })
         return Result(port="payload", value=payload)
 
@@ -57,7 +56,6 @@ def register() -> Plugin:
             manual="generic_uix_action",
             init={
                 "uix_source": None,
-                "path": None,
                 "props": {}
             },
             form=Form(
@@ -72,16 +70,10 @@ def register() -> Plugin:
                                 component=FormComponent(type="text", props={"label": "URL"})
                             ),
                             FormField(
-                                id="path",
-                                name="File path",
-                                description="Type the path to the file in selected UIX source, e.g. /files/widget.js",
-                                component=FormComponent(type="text", props={"label": "Path"})
-                            ),
-                            FormField(
                                 id="props",
                                 name="Widget props",
                                 description="Type properties as key-value pairs for the widget. "
-                                            "You can reference the values as  dotted paths.",
+                                            "You can reference the values as dotted paths.",
                                 component=FormComponent(type="keyValueList", props={"label": "Props"})
                             )
                         ]
