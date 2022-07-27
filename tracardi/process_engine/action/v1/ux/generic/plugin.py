@@ -15,7 +15,7 @@ class Config(PluginConfig):
     @validator("path")
     def validate_file_path(cls, value):
         if isinstance(value, str) and not value.endswith(".js"):
-            raise ValueError("Given file has to be .js file.")
+            raise ValueError("Widget file has to be .js file.")
         return value
 
 
@@ -68,20 +68,20 @@ def register() -> Plugin:
                             FormField(
                                 id="uix_source",
                                 name="UIX source",
-                                description="Provide URL where the micro frontend source is located.",
+                                description="Type URL to the micro frontend source code.",
                                 component=FormComponent(type="text", props={"label": "URL"})
                             ),
                             FormField(
                                 id="path",
                                 name="File path",
-                                description="Provide a path to the file in selected UIX source, e.g. /files/widget.js",
+                                description="Type the path to the file in selected UIX source, e.g. /files/widget.js",
                                 component=FormComponent(type="text", props={"label": "Path"})
                             ),
                             FormField(
                                 id="props",
                                 name="Widget props",
-                                description="Here provide key-value pairs of appropriate properties for the widget that"
-                                            " you've chosen. You can use dot paths as values.",
+                                description="Type properties as key-value pairs for the widget. "
+                                            "You can reference the values as  dotted paths.",
                                 component=FormComponent(type="keyValueList", props={"label": "Props"})
                             )
                         ]
@@ -91,7 +91,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Show custom widget',
-            desc='Shows question popup to user, according to configuration.',
+            desc='Shows custom ReactJS widget.',
             icon='react',
             group=["UIX Widgets"],
             documentation=Documentation(
