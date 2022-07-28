@@ -1,0 +1,142 @@
+from pydantic import validator
+
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormComponent, FormField
+from tracardi.service.plugin.domain.config import PluginConfig
+
+from password_generator import PasswordGenerator
+
+
+class Config(PluginConfig):
+    max_length: int
+    min_length: int
+    uppercase: int
+    lowercase: int
+    special_characters: int
+
+    @validator("min_length")
+    def check_min_max_value(cls, value, values):
+        if value > values["max_length"]:
+            raise ValueError("Minimum length is bigger than maximum length")
+        return value
+
+
+def validate(config: dict) -> Config:
+    return Config(**config)
+
+
+class PasswordGeneratorAction(ActionRunner):
+    def __init__(self, **kwargs):
+        self.pgo = PasswordGenerator()
+        self.config = validate(kwargs)
+        self.pgo.minlen = self.config.min_length
+        self.pgo.maxlen = self.config.max_length
+        self.pgo.minuchars = self.config.uppercase
+        self.pgo.minlchars = self.config.lowercase
+        self.pgo.minschars = self.config.special_characters
+
+    async def run(self, payload: dict, in_edge=None) -> Result:
+        password = self.pgo.generate()
+        return Result(port="password", value={"password": password})
+
+
+def register() -> Plugin:
+    return Plugin(
+        start=False,
+        spec=Spec(
+            module=__name__,
+            className='PasswordGeneratorAction',
+            inputs=["payload"],
+            outputs=["password"],
+            version='0.7.2',
+            license="MIT",
+            author="Mateusz Zitaruk",
+            init={"min_length": None,
+                  "max_length": None,
+                  "uppercase": None,
+                  "lowercase": None,
+                  "special_characters": None},
+            manual="password_generator_action",
+            form=Form(
+                groups=[
+                    FormGroup(
+                        name="Plugin config",
+                        fields=[
+                            FormField(
+                                id="max_length",
+                                name="Password maximum length",
+                                description="Please provide maximum length of password.",
+                                component=FormComponent(
+                                    type="text",
+                                    props={
+                                        "label": "Maximum length"
+                                    }
+                                )
+
+                            ),
+                            FormField(
+                                id="min_length",
+                                name="Password minimum length",
+                                description="Please provide minimum length of password.",
+                                component=FormComponent(
+                                    type="text",
+                                    props={
+                                        "label": "Minimum length"
+                                    }
+                                )
+
+                            ),
+                            FormField(
+                                id="uppercase",
+                                name="Uppercase characters",
+                                description="Please provide number of uppercase characters.",
+                                component=FormComponent(
+                                    type="text",
+                                    props={
+                                        "label": "Uppercase"
+                                    }
+                                )
+                            ),
+                            FormField(
+                                id="lowercase",
+                                name="Lowercase characters",
+                                description="Please provide numer of lowercase characters.",
+                                component=FormComponent(
+                                    type="text",
+                                    props={
+                                        "label": "Lowercase"
+                                    }
+                                )
+                            ),
+                            FormField(
+                                id="special_characters",
+                                name="Special characters",
+                                description="Please provide number of special characters.",
+                                component=FormComponent(
+                                    type="text",
+                                    props={
+                                        "label": "Special characters"
+                                    }
+                                )
+                            ),
+                        ]
+                    )
+                ]
+            )
+
+        ),
+        metadata=MetaData(
+            name='Generate password',
+            desc='Generate new password according to user input',
+            icon='plugin',
+            group=["Operations"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={"password": PortDoc(desc="This port returns generated password.")}
+            )
+        )
+    )
