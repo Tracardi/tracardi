@@ -62,7 +62,7 @@ def register() -> Plugin:
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Plugin config",
+                        name="Plugin configuration ",
                         fields=[
                             FormField(
                                 id="max_length",
