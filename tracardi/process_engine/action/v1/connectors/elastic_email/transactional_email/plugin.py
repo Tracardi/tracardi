@@ -17,6 +17,8 @@ from ElasticEmail.model.body_content_type import BodyContentType
 from ElasticEmail.model.transactional_recipient import TransactionalRecipient
 from ElasticEmail.model.email_transactional_message_data import EmailTransactionalMessageData
 
+from .model.config import Connection
+
 
 def validate(config: dict) -> Config:
     return Config(**config)
@@ -25,14 +27,14 @@ def validate(config: dict) -> Config:
 class ElasticEmailTransactionalMailSender(ActionRunner):
     @staticmethod
     async def build(**kwargs) -> 'ElasticEmailTransactionalMailSender':
-        config = validate(**kwargs)
+        config = validate(kwargs)
         resource = await storage.driver.resource.load(config.source.id)
         return ElasticEmailTransactionalMailSender(config, resource)
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
         self.resource = resource
-        self.creds = self.resource.credentials.get_credentials(self, None)
+        self.creds = self.resource.credentials.get_credentials(self, output=Connection)
         self._dot_template = DotTemplate()
         # self.client = ElasticEmail(**self.resource.credentials.get_credentials(self, None))
 
@@ -53,11 +55,11 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        message = self._dot_template.render(self.config.message.content.content, dot)
+        message = self._dot_template.render(self.config.message.content, dot)
         recipient_emails = dot[self.config.message.recipient]
         recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
         configuration = ElasticEmail.Configuration()
-        configuration.api_key['apikey'] = self.creds['api_key']
+        configuration.api_key['apikey'] = self.creds.api_key
         validate_email(self.config.sender_email)
         valid_recipient_emails = []
         for email in recipient_emails:
@@ -68,19 +70,13 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
                 self.console.warning("Recipient e-mail {} is not valid email. This e-mail was skipped.".format(email))
                 continue
 
-        email_body = []
-        if self.config.message.content.type == "text/html":
-            email_body.append(BodyPart(
-                content_type=BodyContentType("HTML"),
-                content=message,
-                charset="utf-8",
-            ))
-        else:
-            email_body.append(BodyPart(
+        email_body = [
+            BodyPart(
                 content_type=BodyContentType("PlainText"),
                 content=message,
                 charset="utf-8",
-            ))
+            )
+        ]
         email_transactional_message_data = EmailTransactionalMessageData(
             recipients=TransactionalRecipient(
                 to=recipient_emails,
@@ -97,7 +93,7 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
                 api_instance = emails_api.EmailsApi(api_client)
 
                 api_response = api_instance.emails_transactional_post(email_transactional_message_data)
-                return Result(port="response", value=api_response)
+                return Result(port="response", value=api_response.to_dict())
         except Exception as e:
             # except ElasticEmail.ApiException as e:
             return Result(port="error", value={"error": str(e), "msg": ""})
@@ -111,7 +107,7 @@ def register() -> Plugin:
             className='ElasticEmailTransactionalMailSender',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.7.6',
+            version='0.7.2',
             license="MIT",
             author="Ben Ullrich",
             manual="elastic_email_transactional_action",

@@ -6,7 +6,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from .model.config import Config
+from .model.config import Config, Connection
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import Resource
 import ElasticEmail
@@ -25,14 +25,14 @@ def validate(config: dict) -> Config:
 class ElasticEmailBulkMailSender(ActionRunner):
     @staticmethod
     async def build(**kwargs) -> 'ElasticEmailBulkMailSender':
-        config = validate(**kwargs)
+        config = validate(kwargs)
         resource = await storage.driver.resource.load(config.source.id)
         return ElasticEmailBulkMailSender(config, resource)
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
         self.resource = resource
-        self.creds = self.resource.credentials.get_credentials(self, None)
+        self.creds = self.resource.credentials.get_credentials(self, output=Connection)
         self._dot_template = DotTemplate()
         # self.client = ElasticEmail(**self.resource.credentials.get_credentials(self, None))
 
@@ -96,7 +96,7 @@ class ElasticEmailBulkMailSender(ActionRunner):
             with ElasticEmail.ApiClient(configuration) as api_client:
                 api_instance = emails_api.EmailsApi(api_client)
                 api_response = api_instance.emails_post(email_transactional_message_data)
-                return Result(port="response", value=api_response)
+                return Result(port="response", value=api_response.to_dict())
         except Exception as e:
             # except ElasticEmail.ApiException as e:
             return Result(port="error", value={"error": str(e), "msg": ""})
@@ -110,7 +110,7 @@ def register() -> Plugin:
             className='ElasticEmailBulkMailSender',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.7.4',
+            version='0.7.2',
             license="MIT",
             author="Ben Ullrich",
             manual="elastic_email_bulk_action",

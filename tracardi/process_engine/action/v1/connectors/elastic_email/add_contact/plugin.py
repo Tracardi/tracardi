@@ -4,13 +4,14 @@ import ElasticEmail
 from ElasticEmail.api import contacts_api
 from ElasticEmail.model.contact_payload import ContactPayload
 from ElasticEmail.model.contact_status import ContactStatus
+from ElasticEmail.model.email_send import EmailSend
 
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from .model.config import Config
+from .model.config import Config, Connection
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import Resource
 
@@ -29,7 +30,7 @@ class ElasticEmailContactAdder(ActionRunner):
     def __init__(self, config: Config, resource: Resource):
         self.config = config
         self.resource = resource
-        self.creds = self.resource.credentials.get_credentials(self, None)
+        self.creds = self.resource.credentials.get_credentials(self, output=Connection)
         # self.client = ElasticEmail(**self.resource.credentials.get_credentials(self, None))
 
     @staticmethod
@@ -57,19 +58,31 @@ class ElasticEmailContactAdder(ActionRunner):
         mapping = self.parse_mapping(mapping)
         configuration = ElasticEmail.Configuration()
         configuration.api_key['apikey'] = self.creds['api_key']
-        # configuration.api_key_prefix['apikey'] = 'Bearer'
+
+        contact_other = {}
         contact_status = mapping.get('status')
         if contact_status:
             del mapping['status']
+
+        contact_other['status'] = ContactStatus(contact_status or "Active")
         list_names = mapping.get('list_names')
         if list_names:
             list_names = list_names.split(',')
             del mapping['list_names']
+        first_name = mapping.get('FirstName')
+        if first_name:
+            del mapping['FirstName']
+            contact_other['first_name'] = first_name
+        last_name = mapping.get('LastName')
+        if last_name:
+            del mapping['LastName']
+            contact_other['last_name'] = last_name
+
         contact_payload = [
             ContactPayload(
-                # status=ContactStatus(contact_status or "Active"),
                 email=email,
-                # **mapping,
+                custom_fields=mapping,
+                **contact_other,
             ),
         ]
         try:
@@ -80,7 +93,10 @@ class ElasticEmailContactAdder(ActionRunner):
                     api_response = api_instance.contacts_post(contact_payload, listnames=list_names)
                 else:
                     api_response = api_instance.contacts_post(contact_payload)
-                return Result(port="response", value=api_response)
+                if isinstance(api_response, EmailSend):
+                    return Result(port="response", value=api_response.to_dict())
+                else:
+                    return Result(port="response", value=api_response)
         except Exception as e:
             return Result(port="error", value={"error": str(e), "msg": ""})
 
@@ -93,7 +109,7 @@ def register() -> Plugin:
             className='ElasticEmailContactAdder',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.7.3',
+            version='0.7.2',
             license="MIT",
             author="Ben Ullrich",
             manual="elastic_email_contact_action",
