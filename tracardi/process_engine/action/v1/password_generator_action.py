@@ -51,7 +51,7 @@ def register() -> Plugin:
             className='PasswordGeneratorAction',
             inputs=["payload"],
             outputs=["password"],
-            version='0.7.2',
+            version='0.7.1',
             license="MIT",
             author="Mateusz Zitaruk",
             init={
