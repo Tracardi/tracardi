@@ -54,11 +54,13 @@ def register() -> Plugin:
             version='0.7.2',
             license="MIT",
             author="Mateusz Zitaruk",
-            init={"min_length": 8,
-                  "max_length": 12,
-                  "uppercase": 2,
-                  "lowercase": 4,
-                  "special_characters": 2},
+            init={
+                "min_length": 8,
+                "max_length": 12,
+                "uppercase": 2,
+                "lowercase": 4,
+                "special_characters": 2
+            },
             manual="password_generator_action",
             form=Form(
                 groups=[
