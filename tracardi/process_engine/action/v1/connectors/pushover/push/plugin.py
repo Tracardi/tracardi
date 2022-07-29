@@ -3,7 +3,8 @@ import aiohttp
 
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_template import DotTemplate
@@ -27,24 +28,42 @@ class PushoverAction(ActionRunner):
         self.credentials = credentials.get_credentials(self, output=PushOverAuth)  # type: PushOverAuth
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        async with aiohttp.ClientSession() as session:
+        try:
 
-            dot = self._get_dot_accessor(payload)
-            template = DotTemplate()
+            async with aiohttp.ClientSession() as session:
 
-            data = {
-                "token": self.credentials.token,
-                "user": self.credentials.user,
-                "message": template.render(self.pushover_config.message, dot)
-            }
+                dot = self._get_dot_accessor(payload)
+                template = DotTemplate()
 
-            result = await session.post(url='https://api.pushover.net/1/messages.json',
-                                        data=urllib.parse.urlencode(data),
-                                        headers={"Content-type": "application/x-www-form-urlencoded"})
+                data = {
+                    "token": self.credentials.token,
+                    "user": self.credentials.user,
+                    "message": template.render(self.pushover_config.message, dot)
+                }
 
-            return Result(port="payload", value={
-                "status": result.status,
-                "body": await result.json()
+                response = await session.post(url='https://api.pushover.net/1/messages.json',
+                                            data=urllib.parse.urlencode(data),
+                                            headers={"Content-type": "application/x-www-form-urlencoded"})
+
+                if response.status != 200:
+                    result = await response.json()
+                    self.console.error(f"Could not connect to Pushover API. Error port triggered with the response {result}")
+                    return Result(port="error", value={
+                        "message": "Could not connect to Pushover API.",
+                        "status": response.status,
+                        "response": result
+                    })
+
+                return Result(port="payload", value={
+                    "status": response.status,
+                    "response": await response.json()
+                })
+
+        except Exception as e:
+            return Result(port="error", value={
+                "message": repr(e),
+                "status": None,
+                "response": None
             })
 
 
@@ -55,8 +74,8 @@ def register() -> Plugin:
             module=__name__,
             className='PushoverAction',
             inputs=["payload"],
-            outputs=['payload'],
-            version='0.6.1',
+            outputs=['payload', 'error'],
+            version='0.7.1',
             license="MIT",
             author="Bartosz Dobrosielski, Risto Kowaczewski",
             manual="send_pushover_msg_action",
@@ -103,6 +122,15 @@ def register() -> Plugin:
             desc='Connects to Pushover app and pushes message.',
             icon='pushover',
             group=["Messaging"],
-            tags=['messaging']
+            tags=['messaging'],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns a response from Pushover API."),
+                    "error": PortDoc(desc="This port gets triggered if an error occurs.")
+                }
+            )
         )
     )
