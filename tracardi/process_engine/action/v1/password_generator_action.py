@@ -56,7 +56,7 @@ def register() -> Plugin:
             author="Mateusz Zitaruk",
             init={
                 "min_length": 8,
-                "max_length": 12,
+                "max_length": 13,
                 "uppercase": 2,
                 "lowercase": 4,
                 "special_characters": 2
