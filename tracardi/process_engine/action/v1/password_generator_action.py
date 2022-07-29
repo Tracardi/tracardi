@@ -133,7 +133,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Generate password',
             desc='Generate new password according to user input',
-            icon='plugin',
+            icon='password',
             group=["Operations"],
             documentation=Documentation(
                 inputs={

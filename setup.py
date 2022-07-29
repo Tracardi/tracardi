@@ -57,6 +57,7 @@ setup(
         'grpcio-tools',
         'certifi',
         'celery == 5.2.6',
+        'random-password-generator==2.2.0',
         'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker'
     ],
     classifiers=[
