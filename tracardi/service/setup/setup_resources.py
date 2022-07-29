@@ -199,6 +199,14 @@ def get_resource_types():
                 "form": {}
             },
         },
+        "elastic-email": {
+            "config": {
+                "api_key": "<api-key>",
+            },
+            "icon": "elastic-email",
+            "tags": ["elastic-email", "destination"],
+            "name": "ElasticEmail",
+        },
         "airtable": {
             "config": {
                 "api_key": "<your-api-key>"
