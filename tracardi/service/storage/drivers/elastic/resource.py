@@ -43,6 +43,10 @@ async def load_by_tag(tag):
 
 async def load(id: str) -> Resource:
     resource_config_record = await load_record(id)  # type: ResourceRecord
+
+    if not resource_config_record.enabled:
+        raise ValueError('Resource id {} disabled.'.format(id))
+
     if resource_config_record is None:
         raise ValueError('Resource id {} does not exist.'.format(id))
 
