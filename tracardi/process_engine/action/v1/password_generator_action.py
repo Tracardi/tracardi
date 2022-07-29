@@ -19,7 +19,8 @@ class Config(PluginConfig):
     @validator("min_length")
     def check_min_max_value(cls, value, values):
         if value > values["max_length"]:
-            raise ValueError("Minimum length is bigger than maximum length")
+            raise ValueError(
+                f'Minimal length {value} cannot be bigger than given maximal length {values["max_length"]}')
         return value
 
 
@@ -53,11 +54,11 @@ def register() -> Plugin:
             version='0.7.2',
             license="MIT",
             author="Mateusz Zitaruk",
-            init={"min_length": None,
-                  "max_length": None,
-                  "uppercase": None,
-                  "lowercase": None,
-                  "special_characters": None},
+            init={"min_length": 8,
+                  "max_length": 12,
+                  "uppercase": 2,
+                  "lowercase": 4,
+                  "special_characters": 2},
             manual="password_generator_action",
             form=Form(
                 groups=[
@@ -71,7 +72,7 @@ def register() -> Plugin:
                                 component=FormComponent(
                                     type="text",
                                     props={
-                                        "label": "Maximum length"
+                                        "label": "Maximum password length"
                                     }
                                 )
 
@@ -83,7 +84,7 @@ def register() -> Plugin:
                                 component=FormComponent(
                                     type="text",
                                     props={
-                                        "label": "Minimum length"
+                                        "label": "Minimum password length"
                                     }
                                 )
 
@@ -95,7 +96,7 @@ def register() -> Plugin:
                                 component=FormComponent(
                                     type="text",
                                     props={
-                                        "label": "Uppercase"
+                                        "label": "Number of uppercase letters"
                                     }
                                 )
                             ),
@@ -106,7 +107,7 @@ def register() -> Plugin:
                                 component=FormComponent(
                                     type="text",
                                     props={
-                                        "label": "Lowercase"
+                                        "label": "Number of lowercase letters"
                                     }
                                 )
                             ),
@@ -117,7 +118,7 @@ def register() -> Plugin:
                                 component=FormComponent(
                                     type="text",
                                     props={
-                                        "label": "Special characters"
+                                        "label": "Number of special characters"
                                     }
                                 )
                             ),
