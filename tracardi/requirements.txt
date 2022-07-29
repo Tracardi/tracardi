@@ -44,3 +44,4 @@ grpcio-tools
 certifi
 celery==5.2.6
 random-password-generator==2.2.0
+git+https://github.com/elasticemail/elasticemail-python.git
