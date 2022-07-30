@@ -9,12 +9,12 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 class Config(PluginConfig):
     source: NamedEntity
-    index: str
+    index: NamedEntity
     query: str
 
     @validator("index")
     def validate_index(cls, value):
-        if value is None or len(value) == 0:
+        if value is None or (isinstance(value, NamedEntity) and not value.id):
             raise ValueError("This field cannot be empty.")
         return value
 
