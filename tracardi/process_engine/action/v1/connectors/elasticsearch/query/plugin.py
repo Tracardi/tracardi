@@ -97,7 +97,8 @@ class ElasticSearchFetcher(ActionRunner):
         try:
             res = await self._client.search(
                 index=self.config.index.id,
-                query=json.loads(self.config.query)
+                query=json.loads(self.config.query),
+                size=20
             )
             await self._client.close()
 
