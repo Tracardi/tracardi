@@ -18,8 +18,12 @@ class EventAggregator(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-
         time_span_in_sec = parse(self.config.time_span.strip("-"))
+        if self.profile.id == '@debug-profile-id':
+            self.console.warning(
+                f"Please load correct profile. This plug-in may not find data for profile {self.profile.id}."
+                f"Reason for this may be that you did not define an event type in the start node in the Debugging "
+                f"configuration section.")
 
         no_of_events = await storage.driver.event.aggregate_event_by_field_within_time(
             self.profile.id,
