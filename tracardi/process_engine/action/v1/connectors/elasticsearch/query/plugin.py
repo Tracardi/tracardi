@@ -1,15 +1,14 @@
 import json
 
+from tracardi.domain.resources.elastic_resource_config import ElasticResourceConfig, ElasticCredentials
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from .model.config import Config, ElasticCredentials
-from elasticsearch import AsyncElasticsearch, ElasticsearchException
+from .model.config import Config
+from elasticsearch import ElasticsearchException
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
-from pydantic import BaseModel, validator
-from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
@@ -25,45 +24,12 @@ def validate(config: dict):
     return config
 
 
-class ElasticSourceConfig(BaseModel):
-    source: NamedEntity
-
-    @validator("source")
-    def validate_named_entities(cls, value):
-        if not value.id:
-            raise ValueError(f"This field cannot be empty.")
-        return value
-
-
 class Endpoint(PluginEndpoint):
 
     @staticmethod
     async def fetch_indices(config: dict):
-        config = ElasticSourceConfig(**config)
-        resource = await storage.driver.resource.load(config.source.id)
-        credentials = ElasticCredentials(**resource.credentials.production)
-
-        if credentials.has_credentials():
-            client = AsyncElasticsearch(
-                [credentials.url],
-                http_auth=(credentials.username, credentials.password),
-                scheme=credentials.scheme,
-                port=credentials.port
-            )
-        else:
-            client = AsyncElasticsearch(
-                [credentials.url],
-                scheme=credentials.scheme,
-                port=credentials.port
-            )
-
-        indices = await client.indices.get("*")
-        indices = indices.keys()
-
-        return {
-            "total": len(indices),
-            "result": [{"name": record, "id": record} for record in indices]
-        }
+        config = ElasticResourceConfig(**config)
+        return await config.get_indices()
 
 
 class ElasticSearchFetcher(ActionRunner):
@@ -76,23 +42,26 @@ class ElasticSearchFetcher(ActionRunner):
 
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
-        credentials = credentials.get_credentials(self, ElasticCredentials)
+        credentials = credentials.get_credentials(self, ElasticCredentials)  # type: ElasticCredentials
 
-        self._client = AsyncElasticsearch(
-            [credentials.url],
-            http_auth=(credentials.username, credentials.password),
-            scheme=credentials.scheme,
-            port=credentials.port
-        )
+        self._client = credentials.get_client()
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
+            query = json.loads(self.config.query)
+
+            if 'size' not in query:
+                query["size"] = 20
+
+            if query["size"] > 50:
+                self.console.warning("Fetching more then 50 records may impact the GUI performance.")
+
             res = await self._client.search(
                 index=self.config.index.id,
-                body=json.loads(self.config.query),
-                size=20
+                query=query
             )
+
             await self._client.close()
 
         except ElasticsearchException as e:

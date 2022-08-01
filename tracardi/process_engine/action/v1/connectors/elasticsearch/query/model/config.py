@@ -1,8 +1,5 @@
-from typing import Optional
-
-from pydantic import BaseModel, validator
+from pydantic import validator
 import json
-
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -27,15 +24,3 @@ class Config(PluginConfig):
 
         except json.JSONDecodeError as e:
             raise ValueError(str(e))
-
-
-class ElasticCredentials(BaseModel):
-    url: str
-    port: int
-    scheme: str
-    username: Optional[str] = None
-    password: Optional[str] = None
-    verify_certs: bool
-
-    def has_credentials(self):
-        return self.username is not None and self.password is not None
