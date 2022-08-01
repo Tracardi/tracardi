@@ -8,6 +8,9 @@ from .model.config import Config, ElasticCredentials
 from elasticsearch import AsyncElasticsearch, ElasticsearchException
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
+from pydantic import BaseModel, validator
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
 def validate(config: dict):
@@ -20,6 +23,47 @@ def validate(config: dict):
         raise ValueError(str(e))
 
     return config
+
+
+class ElasticSourceConfig(BaseModel):
+    source: NamedEntity
+
+    @validator("source")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError(f"This field cannot be empty.")
+        return value
+
+
+class Endpoint(PluginEndpoint):
+
+    @staticmethod
+    async def fetch_indices(config: dict):
+        config = ElasticSourceConfig(**config)
+        resource = await storage.driver.resource.load(config.source.id)
+        credentials = ElasticCredentials(**resource.credentials.production)
+
+        if credentials.has_credentials():
+            client = AsyncElasticsearch(
+                [credentials.url],
+                http_auth=(credentials.username, credentials.password),
+                scheme=credentials.scheme,
+                port=credentials.port
+            )
+        else:
+            client = AsyncElasticsearch(
+                [credentials.url],
+                scheme=credentials.scheme,
+                port=credentials.port
+            )
+
+        indices = await client.indices.get("*")
+        indices = indices.keys()
+
+        return {
+            "total": len(indices),
+            "result": [{"name": record, "id": record} for record in indices]
+        }
 
 
 class ElasticSearchFetcher(ActionRunner):
@@ -45,7 +89,7 @@ class ElasticSearchFetcher(ActionRunner):
 
         try:
             res = await self._client.search(
-                index=self.config.index,
+                index=self.config.index.id,
                 body=json.loads(self.config.query),
                 size=20
             )
@@ -93,7 +137,13 @@ def register() -> Plugin:
                                 id="index",
                                 name="Elasticsearch index",
                                 description="Please select Elasticsearch index you want to search.",
-                                component=FormComponent(type="text", props={"label": "index"})
+                                component=FormComponent(type="autocomplete", props={
+                                    "label": "Index",
+                                    "endpoint": {
+                                        "url": Endpoint.url(__name__, "fetch_indices"),
+                                        "method": "post"
+                                    }
+                                })
                             ),
                             FormField(
                                 id="query",
