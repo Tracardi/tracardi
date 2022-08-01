@@ -1,4 +1,4 @@
-git+https://github.com/Tracardi/worker.git@master
+git+https://github.com/Tracardi/worker.git@0.7.1-dev
 
 pydantic
 aiohttp
