@@ -140,7 +140,10 @@ def register() -> Plugin:
                                             "or HTML content. You can use templates in both HTML and text types, "
                                             "something like 'Hello {{profile@pii.name}}!' will result in calling "
                                             "the customer by their name in the message text.",
-                                component=FormComponent(type="contentInput", props={"label": "Message body"})
+                                component=FormComponent(type="contentInput", props={
+                                    "label": "Message body",
+                                    "allowedTypes": ["text/plain", "text/html"]
+                                })
                             )
                         ]
                     )
