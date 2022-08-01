@@ -23,7 +23,7 @@ class EventAggregator(ActionRunner):
 
         no_of_events = await storage.driver.event.aggregate_event_by_field_within_time(
             self.profile.id,
-            self.config.field,
+            self.config.field.id,
             time_span_in_sec
         )
         return Result(port="payload", value={"events": no_of_events})
