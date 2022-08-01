@@ -14,7 +14,7 @@ class ResourceType(NamedEntity):
     config: dict
     tags: List[str]
     icon: Optional[str] = "plugin"
-    destination: Optional[DestinationData] = None,
+    destination: Optional[DestinationData] = None
     manual: Optional[str] = None
     pro: Optional[dict] = None
 
