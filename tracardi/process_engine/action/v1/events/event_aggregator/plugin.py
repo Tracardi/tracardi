@@ -1,3 +1,4 @@
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -40,7 +41,7 @@ def register() -> Plugin:
             license="Tracardi Pro",
             author="Risto Kowaczewski",
             init={
-                "field": "",
+                "field": None,
                 "time_span": "-15m"
             },
             form=Form(
@@ -54,8 +55,13 @@ def register() -> Plugin:
                                 id="field",
                                 name="Aggregate by field",
                                 description="Select field you would like to aggregate.",
-                                component=FormComponent(type="text", props={
-                                    "label": "Field"
+                                component=FormComponent(type="autocomplete", props={
+                                    "label": "Field",
+                                    "endpoint": {
+                                        "url": "/storage/mapping/event/metadata",
+                                        "method": "get"
+                                    },
+                                    "onlyValueWithOptions": False
                                 })
                             ),
                             FormField(
