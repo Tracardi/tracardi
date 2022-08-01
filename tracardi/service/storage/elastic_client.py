@@ -65,8 +65,8 @@ class ElasticClient:
         except NotFoundError:
             return False
 
-    async def search(self, index, query, size=10):
-        return await self._client.search(index=index, body=query, size=size)
+    async def search(self, index, query):
+        return await self._client.search(index=index, body=query)
 
     async def scan(self, index, query):
         _generator = helpers.async_scan(
