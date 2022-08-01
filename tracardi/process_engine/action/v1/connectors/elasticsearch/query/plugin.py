@@ -119,7 +119,7 @@ def register() -> Plugin:
                     "id": None
                 },
                 "index": None,
-                "query": "{\"query\":{}}"
+                "query": "{\"query\":{\"match_all\":{}}}"
             },
             manual="elasticsearch_query_action",
             form=Form(
