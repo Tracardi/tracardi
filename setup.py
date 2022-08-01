@@ -58,7 +58,7 @@ setup(
         'certifi',
         'celery == 5.2.6',
         'random-password-generator==2.2.0',
-        'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker'
+        'worker @ git+https://github.com/Tracardi/worker.git@0.7.1-dev#egg=worker'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
