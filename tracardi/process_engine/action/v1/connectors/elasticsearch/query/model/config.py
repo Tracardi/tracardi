@@ -5,6 +5,7 @@ import json
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
+from typing import Union, List
 
 
 class Config(PluginConfig):
@@ -30,7 +31,7 @@ class Config(PluginConfig):
 
 
 class ElasticCredentials(BaseModel):
-    url: str
+    url: Union[str, List[str]]
     port: int
     scheme: str
     username: Optional[str] = None
@@ -39,3 +40,6 @@ class ElasticCredentials(BaseModel):
 
     def has_credentials(self):
         return self.username is not None and self.password is not None
+
+    def get_url(self):
+        return [self.url] if isinstance(self.url, str) else self.url
