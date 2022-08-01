@@ -5,7 +5,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config, ElasticCredentials
-from elasticsearch import AsyncElasticsearch, ElasticsearchException
+from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
 from pydantic import BaseModel, validator
@@ -44,20 +44,20 @@ class Endpoint(PluginEndpoint):
         credentials = ElasticCredentials(**resource.credentials.production)
 
         if credentials.has_credentials():
-            client = AsyncElasticsearch(
-                [credentials.url],
+            client = ElasticClient(
+                hosts=credentials.get_url(),
                 http_auth=(credentials.username, credentials.password),
                 scheme=credentials.scheme,
                 port=credentials.port
             )
         else:
-            client = AsyncElasticsearch(
-                [credentials.url],
+            client = ElasticClient(
+                hosts=credentials.get_url(),
                 scheme=credentials.scheme,
                 port=credentials.port
             )
 
-        indices = await client.indices.get("*")
+        indices = await client.list_indices()
         indices = indices.keys()
 
         return {
@@ -78,24 +78,30 @@ class ElasticSearchFetcher(ActionRunner):
         self.config = config
         credentials = credentials.get_credentials(self, ElasticCredentials)
 
-        self._client = AsyncElasticsearch(
-            [credentials.url],
-            http_auth=(credentials.username, credentials.password),
-            scheme=credentials.scheme,
-            port=credentials.port
-        )
+        if credentials.has_credentials():
+            self._client = ElasticClient(
+                hosts=credentials.get_url(),
+                http_auth=(credentials.username, credentials.password),
+                scheme=credentials.scheme,
+                port=credentials.port
+            )
+        else:
+            self._client = ElasticClient(
+                hosts=credentials.get_url(),
+                scheme=credentials.scheme,
+                port=credentials.port
+            )
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
             res = await self._client.search(
                 index=self.config.index.id,
-                body=json.loads(self.config.query),
-                size=20
+                query=json.loads(self.config.query)
             )
             await self._client.close()
 
-        except ElasticsearchException as e:
+        except Exception as e:
             self.console.error(str(e))
             return Result(port="error", value={})
 
