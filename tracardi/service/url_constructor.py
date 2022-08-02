@@ -47,10 +47,9 @@ def construct_elastic_url(host: str, scheme: Optional[str] = None, username: Opt
         host = host.split("://")[-1]
 
     url = scheme + "://"
-    if username:
-        url += username
-    if password:
-        url += ":" + password
+
+    if username and password:
+        url += f"{username}:{password}@"
 
     url += host.strip("/")
 
