@@ -12,10 +12,13 @@ class HttpClient:
 
     async def _run_with_retries(self, func: Callable, *args, **kwargs):
         for retry in range(self.retries):
-
             response = await func(*args, **kwargs)
             if response.status in self.accept_status or retry == self.retries - 1:
                 return response
+
+    @asynccontextmanager
+    async def request(self, *args, **kwargs):
+        yield await self._run_with_retries(self.client.request, *args, **kwargs)
 
     @asynccontextmanager
     async def get(self, *args, **kwargs):
