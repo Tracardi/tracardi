@@ -3,7 +3,7 @@ from typing import Union, Tuple, Callable
 from contextlib import asynccontextmanager
 
 
-class GenericHttpClient:
+class HttpClient:
 
     def __init__(self, retries: int = 1, accept_status: Union[int, Tuple[int]] = 200, *args, **kwargs):
         self.client = aiohttp.ClientSession(*args, **kwargs)
@@ -33,7 +33,7 @@ class GenericHttpClient:
     async def delete(self, *args, **kwargs):
         yield await self._run_with_retries(self.client.delete, *args, **kwargs)
 
-    async def __aenter__(self) -> 'GenericHttpClient':
+    async def __aenter__(self) -> 'HttpClient':
         return self
 
     async def __aexit__(self, exc_t, exc_v, exc_tb) -> None:
