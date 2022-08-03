@@ -99,7 +99,9 @@ def get_resource_types():
         "mqtt": {
             "config": {
                 "url": "<url>",
-                "port": "<port>"
+                "port": "<port>",
+                "username": "<username>",
+                "password": "<password>"
             },
             "tags": ['mqtt', 'queue'],
             "name": "MQTT"

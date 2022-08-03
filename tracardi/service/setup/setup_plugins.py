@@ -183,6 +183,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin',
         'tracardi.process_engine.action.v1.connectors.pushover.push.plugin',
         'tracardi.process_engine.action.v1.connectors.discord.push.plugin',
+        'tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin',
 
         'tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin',
         'tracardi.process_engine.action.v1.connectors.mysql.query.plugin',

@@ -58,6 +58,7 @@ setup(
         'certifi',
         'celery == 5.2.6',
         'random-password-generator==2.2.0',
+        'asyncio-mqtt==0.12.1',
         'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker'
     ],
     classifiers=[
