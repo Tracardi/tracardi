@@ -1,20 +1,17 @@
-from typing import Optional
-
-from pydantic import BaseModel, validator
+from pydantic import validator
 import json
-
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Config(PluginConfig):
     source: NamedEntity
-    index: str
+    index: NamedEntity
     query: str
 
     @validator("index")
     def validate_index(cls, value):
-        if value is None or len(value) == 0:
+        if value is None or (isinstance(value, NamedEntity) and not value.id):
             raise ValueError("This field cannot be empty.")
         return value
 
@@ -27,15 +24,3 @@ class Config(PluginConfig):
 
         except json.JSONDecodeError as e:
             raise ValueError(str(e))
-
-
-class ElasticCredentials(BaseModel):
-    url: str
-    port: int
-    scheme: str
-    username: Optional[str] = None
-    password: Optional[str] = None
-    verify_certs: bool
-
-    def has_credentials(self):
-        return self.username is not None and self.password is not None

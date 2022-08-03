@@ -72,6 +72,7 @@ async def add_plugins():
     plugins = [
         'tracardi.process_engine.action.v1.memory.collect.plugin',
 
+        'tracardi.process_engine.action.v1.password_generator_action',
         'tracardi.process_engine.action.v1.flow.start.start_action',
         'tracardi.process_engine.action.v1.flow.property_exists.plugin',
         'tracardi.process_engine.action.v1.end_action',
@@ -159,6 +160,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.ux.rating_popup.plugin',
         'tracardi.process_engine.action.v1.ux.question_popup.plugin',
         'tracardi.process_engine.action.v1.ux.contact_popup.plugin',
+        'tracardi.process_engine.action.v1.ux.generic.plugin',
 
         # Connectors
         'tracardi.process_engine.action.v1.connectors.html.fetch.plugin',
@@ -181,6 +183,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin',
         'tracardi.process_engine.action.v1.connectors.pushover.push.plugin',
         'tracardi.process_engine.action.v1.connectors.discord.push.plugin',
+        'tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin',
 
         'tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin',
         'tracardi.process_engine.action.v1.connectors.mysql.query.plugin',

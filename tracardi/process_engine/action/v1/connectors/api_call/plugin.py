@@ -7,10 +7,12 @@ from json import JSONDecodeError
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.tracardi_http_client import HttpClient
+from tracardi.service.wf.domain.node import Node
 from .model.configuration import RemoteCallConfiguration
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
-from tracardi.service.url_constructor import ApiCredentials, make_url
+from tracardi.service.url_constructor import ApiCredentials
 
 
 def validate(config: dict) -> RemoteCallConfiguration:
@@ -27,7 +29,7 @@ class RemoteCallAction(ActionRunner):
 
     def __init__(self, config: RemoteCallConfiguration, credentials: ResourceCredentials):
         self.config = config
-        self.credentials = credentials.get_credentials(self, ApiCredentials)
+        self.credentials = credentials.get_credentials(self, ApiCredentials)  # Type: ApiCredentials
 
     @staticmethod
     def _validate_key_value(values, label):
@@ -52,11 +54,13 @@ class RemoteCallAction(ActionRunner):
 
             headers['ContentType'] = self.config.body.type
 
+            node = self.node  # type: Node
+
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with HttpClient(timeout=timeout, retries=node.on_connection_error_repeat) as session:
 
                 params = self.config.get_params(dot)
-                url = make_url(dot=dot, credentials=self.credentials, endpoint=self.config.endpoint)
+                url = self.credentials.get_url(dot=dot, endpoint=self.config.endpoint)
 
                 self.console.log("Making {} request to {}".format(self.config.method.upper(), url))
 
@@ -82,15 +86,15 @@ class RemoteCallAction(ActionRunner):
                     }
 
                     if response.status in [200, 201, 202, 203]:
-                        return Result(port="response", value=result), Result(port="error", value=None)
+                        return Result(port="response", value=result)
                     else:
-                        return Result(port="response", value=None), Result(port="error", value=result)
+                        return Result(port="error", value=result)
 
         except ClientConnectorError as e:
-            return Result(port="response", value=None), Result(port="error", value=str(e))
+            return Result(port="error", value=str(e))
 
         except asyncio.exceptions.TimeoutError:
-            return Result(port="response", value=None), Result(port="error", value="Remote call timed out.")
+            return Result(port="error", value="Remote call timed out.")
 
 
 def register() -> Plugin:

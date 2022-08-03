@@ -27,6 +27,11 @@ async def indices():
     return await es.list_indices()
 
 
+async def health():
+    es = ElasticClient.instance()
+    return await es.cluster.health()
+
+
 async def aliases():
     es = ElasticClient.instance()
     return await es.list_aliases()

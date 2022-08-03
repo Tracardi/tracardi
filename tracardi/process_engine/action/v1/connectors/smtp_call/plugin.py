@@ -6,7 +6,7 @@ from tracardi.domain.resource import Resource, ResourceCredentials
 from tracardi.service.notation.dot_template import DotTemplate
 
 from .service.sendman import PostMan
-from .model.smtp_configuration import Configuration, SmtpConfiguration
+from .model.smtp_configuration import Configuration, SmtpConfiguration, Message
 
 
 async def validate(config: dict) -> Configuration:
@@ -31,7 +31,14 @@ class SmtpDispatcherAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             template = DotTemplate()
             message = template.render(self.config.message.message, dot)
-            self.post.send(message)
+            message_obj = Message(
+                send_to=dot[self.config.message.send_to],
+                send_from=dot[self.config.message.send_from],
+                title=self.config.message.title,
+                reply_to=dot[self.config.message.reply_to],
+                message=message
+            )
+            self.post.send(message_obj)
             return Result(port='payload', value={"result": payload})
         except Exception as e:
             self.console.error(repr(e))
