@@ -227,6 +227,8 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.internal.get_prev_session.plugin',
         'tracardi.process_engine.action.v1.internal.query_string.plugin',
         'tracardi.process_engine.action.v1.internal.add_empty_session.plugin',
+        'tracardi.process_engine.action.v1.internal.entity.upsert.plugin',
+        'tracardi.process_engine.action.v1.internal.entity.load.plugin',
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',

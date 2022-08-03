@@ -6,7 +6,7 @@ from tracardi.service.storage.factory import StorageFor, storage_manager
 
 async def load_by_id(entity_id) -> EntityRecord:
     entity = Entity(id=entity_id)
-    return await StorageFor(entity).index("event").load(EntityRecord)  # type: EntityRecord
+    return await StorageFor(entity).index("entity").load(EntityRecord)  # type: EntityRecord
 
 
 async def upsert(entity: EntityRecord) -> BulkInsertResult:
@@ -14,8 +14,8 @@ async def upsert(entity: EntityRecord) -> BulkInsertResult:
 
 
 async def refresh():
-    return await storage_manager('event').refresh()
+    return await storage_manager('entity').refresh()
 
 
 async def flush():
-    return await storage_manager('event').flush()
+    return await storage_manager('entity').flush()
