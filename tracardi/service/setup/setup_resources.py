@@ -1,10 +1,10 @@
-from tracardi.domain.resource_type import ResourceType, DestinationData
+from tracardi.domain.resource_type import ResourceSettings, DestinationData
 from typing import List
 
 
-def get_resource_types() -> List[ResourceType]:
+def get_resource_types() -> List[ResourceSettings]:
     return [
-        ResourceType(
+        ResourceSettings(
             id="web-page",
             name="Web page",
             icon="web",
@@ -14,7 +14,7 @@ def get_resource_types() -> List[ResourceType]:
                 "password": "<password>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="api",
             name="API endpoint",
             icon="cloud",
@@ -37,7 +37,7 @@ def get_resource_types() -> List[ResourceType]:
                 }
             )
         ),
-        ResourceType(
+        ResourceSettings(
             id="smtp-server",
             name="SMTP",
             tags=["mail", "smtp"],
@@ -48,7 +48,7 @@ def get_resource_types() -> List[ResourceType]:
                 "password": "<password>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="ip-geo-locator",
             name="MaxMing Geo-Location",
             tags=["api", "geo-locator"],
@@ -58,7 +58,7 @@ def get_resource_types() -> List[ResourceType]:
                 "accountId": "<accound-id>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="postgresql",
             name="PostgreSQL",
             tags=["database", "postgresql"],
@@ -70,7 +70,7 @@ def get_resource_types() -> List[ResourceType]:
                 "database": "<database>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="elastic-search",
             name="Elasticsearch",
             tags=["elastic"],
@@ -84,7 +84,7 @@ def get_resource_types() -> List[ResourceType]:
                 "verify_certs": True
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="pushover",
             name="Pushover",
             tags=["pushover", "message"],
@@ -94,7 +94,7 @@ def get_resource_types() -> List[ResourceType]:
             },
             icon="pushover"
         ),
-        ResourceType(
+        ResourceSettings(
             id="mysql",
             name="MySQL",
             icon="mysql",
@@ -107,7 +107,7 @@ def get_resource_types() -> List[ResourceType]:
                 "database": "<database>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="mqtt",
             name="MQTT",
             tags=["mqtt", "queue"],
@@ -118,7 +118,7 @@ def get_resource_types() -> List[ResourceType]:
                 "password": "<password>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="twilio",
             name="Twilio",
             tags=["token", "twilio"],
@@ -126,7 +126,7 @@ def get_resource_types() -> List[ResourceType]:
                 "token": "<token>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="redis",
             name="Redis",
             tags=["redis"],
@@ -138,7 +138,7 @@ def get_resource_types() -> List[ResourceType]:
             },
             manual="redis_resource"
         ),
-        ResourceType(
+        ResourceSettings(
             id="mongodb",
             name="MongoDB",
             tags=["mongo", "database", "nosql"],
@@ -148,7 +148,7 @@ def get_resource_types() -> List[ResourceType]:
                 "timeout": 5000
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="trello",
             name="Trello",
             tags=["trello"],
@@ -157,7 +157,7 @@ def get_resource_types() -> List[ResourceType]:
                 "api_key": "<trello-api-key>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="token",
             name="Token",
             tags=["token"],
@@ -165,7 +165,7 @@ def get_resource_types() -> List[ResourceType]:
                 "token": "<token>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="google-cloud-service-account",
             name="Google Cloud service account",
             tags=["gcp-service-account"],
@@ -182,7 +182,7 @@ def get_resource_types() -> List[ResourceType]:
                 "client_x509_cert_url": "<client-x509-cert-url>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="influxdb",
             name="InfluxDB",
             tags=["influx"],
@@ -192,7 +192,7 @@ def get_resource_types() -> List[ResourceType]:
                 "token": "<API-token>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="mixpanel",
             name="MixPanel",
             tags=["mixpanel"],
@@ -204,7 +204,7 @@ def get_resource_types() -> List[ResourceType]:
                 "password": "<service-account-password>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="mautic",
             name="Mautic",
             icon="mautic",
@@ -221,7 +221,7 @@ def get_resource_types() -> List[ResourceType]:
                 }
             )
         ),
-        ResourceType(
+        ResourceSettings(
             id="airtable",
             name="AirTable",
             icon="airtable",
@@ -230,7 +230,7 @@ def get_resource_types() -> List[ResourceType]:
                 "api_key": "<your-api-key>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="matomo",
             name="Matomo",
             tags=["matomo"],
@@ -240,7 +240,7 @@ def get_resource_types() -> List[ResourceType]:
                 "api_url": "<your-matomo-url>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="civi_crm",
             name="CiviCRM",
             icon="civicrm",
@@ -254,7 +254,7 @@ def get_resource_types() -> List[ResourceType]:
                 package="tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector"
             )
         ),
-        ResourceType(
+        ResourceSettings(
             id="active_campaign",
             name="ActiveCampaign",
             tags=["active_campaign"],
@@ -263,7 +263,7 @@ def get_resource_types() -> List[ResourceType]:
                 "api_url": "<api-url>"
             }
         ),
-        ResourceType(
+        ResourceSettings(
             id="marketing_cloud",
             name="Salesforce Marketing Cloud",
             tags=["marketing_cloud"],

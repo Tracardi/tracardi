@@ -10,7 +10,7 @@ class DestinationData(BaseModel):
     form: Optional[Form] = {}
 
 
-class ResourceType(NamedEntity):
+class ResourceSettings(NamedEntity):
     config: dict
     tags: List[str]
     icon: Optional[str] = "plugin"

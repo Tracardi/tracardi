@@ -37,7 +37,8 @@ class MqttPublishAction(ActionRunner):
                 await client.publish(
                     self.config.topic,
                     payload=self.config.payload.encode(),
-                    qos=int(self.config.qos)
+                    qos=int(self.config.qos),
+                    retain=self.config.retain
                 )
 
             return Result(port="payload", value=payload)
