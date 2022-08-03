@@ -1,4 +1,4 @@
-from tracardi.domain.resource_type import ResourceSettings, DestinationData
+from tracardi.domain.resource_settings import ResourceSettings, DestinationData
 from typing import List
 
 
