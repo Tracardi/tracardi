@@ -1,6 +1,7 @@
 import asyncio
 import json
 
+from tracardi.service.tracardi_http_client import HttpClient
 import aiohttp
 from aiohttp import ClientConnectorError
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
@@ -33,11 +34,15 @@ class ZapierWebHookAction(ActionRunner):
         try:
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with HttpClient(
+                self.node.on_connection_error_repeat,
+                [200, 201, 202, 203, 204],
+                timeout=timeout
+            ) as client:
 
                 converter = DictTraverser(self._get_dot_accessor(payload))
                 body_as_dict = json.loads(self.config.body)
-                async with session.request(
+                async with client.request(
                         method="POST",
                         url=str(self.config.url),
                         json=converter.reshape(body_as_dict)

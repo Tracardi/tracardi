@@ -1,4 +1,4 @@
-import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.domain.resources.token import Token
 
 from tracardi.domain.resource import ResourceCredentials
@@ -39,7 +39,7 @@ class TextClassificationAction(ActionRunner):
 
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
-        async with aiohttp.ClientSession() as session:
+        async with HttpClient(self.node.on_connection_error_repeat) as client:
             params = {
                 "key": self.credentials.token,
                 "txt": template.render(self.config.text, dot),
@@ -50,7 +50,7 @@ class TextClassificationAction(ActionRunner):
                 params['title'] = dot[self.config.title]
 
             try:
-                async with session.post('https://api.meaningcloud.com/class-2.0', params=params) as response:
+                async with client.post('https://api.meaningcloud.com/class-2.0', params=params) as response:
                     if response.status != 200:
                         raise ConnectionError("Could not connect to service https://api.meaningcloud.com. "
                                               f"It returned `{response.status}` status.")

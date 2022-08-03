@@ -32,7 +32,11 @@ class LanguageDetectAction(ActionRunner):
 
     def __init__(self, config: Configuration, credentials: ResourceCredentials):
         self.message = config.message
-        self.client = HttpClient(credentials.get_credentials(self, Token).token, config.timeout)
+        self.client = HttpClient(
+            credentials.get_credentials(self, Token).token,
+            config.timeout,
+            self.node.on_connection_error_repeat
+        )
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

@@ -26,6 +26,7 @@ class MixPanelFunnelFetcher(ActionRunner):
         self.client = MixPanelAPIClient(
             **credentials.get_credentials(self, MixPanelCredentials).dict()
         )
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         to_date = self.config.to_date if self.config.to_date is not None else datetime.utcnow().strftime("%Y-%m-%d")

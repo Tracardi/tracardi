@@ -3,6 +3,7 @@ import ssl
 import aiohttp
 import certifi
 from pydantic import BaseModel, AnyHttpUrl
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 class CiviCRMClientException(Exception):
@@ -21,11 +22,19 @@ class CiviCRMClient:
         self.api_url = api_url
         self.api_key = api_key
         self.site_key = site_key
+        self.retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def add_contact(self, data):
         ssl_context = ssl.create_default_context(cafile=certifi.where())
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context)) as session:
-            async with session.post(
+        async with HttpClient(
+            self.retries,
+            200,
+            connector=aiohttp.TCPConnector(ssl=ssl_context)
+        ) as client:
+            async with client.post(
                 url=self.api_url,
                 params={
                     "api_key": self.api_key,
@@ -43,8 +52,12 @@ class CiviCRMClient:
 
     async def get_custom_fields(self):
         ssl_context = ssl.create_default_context(cafile=certifi.where())
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context)) as session:
-            async with session.get(
+        async with HttpClient(
+                self.retries,
+                200,
+                connector=aiohttp.TCPConnector(ssl=ssl_context)
+        ) as client:
+            async with client.get(
                 url=self.api_url,
                 params={
                     "api_key": self.api_key,

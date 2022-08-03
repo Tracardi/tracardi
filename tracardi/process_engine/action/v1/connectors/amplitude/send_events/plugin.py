@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 
 import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 from aiohttp import ClientConnectorError
 from tracardi.config import tracardi
 from tracardi.domain.resource import ResourceCredentials
@@ -50,7 +51,11 @@ class AmplitudeSendEvent(ActionRunner):
             dot = self._get_dot_accessor(payload)
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with HttpClient(
+                self.node.on_connection_error_repeat,
+                [200, 201, 202, 203],
+                timeout=timeout
+            ) as client:
 
                 platform = self._get_value(dot, self.config.platform)
                 properties = self._get_value(dot, self.config.event_properties)
@@ -103,7 +108,7 @@ class AmplitudeSendEvent(ActionRunner):
 
                 # print(params)
 
-                async with session.post(
+                async with client.post(
                         url=str(self.config.url),
                         headers=headers,
                         data=json.dumps(params)

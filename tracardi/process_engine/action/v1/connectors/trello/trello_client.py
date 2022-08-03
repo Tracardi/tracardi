@@ -1,4 +1,4 @@
-import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 class TrelloClient:
@@ -6,11 +6,15 @@ class TrelloClient:
     def __init__(self, api_key: str, token: str):
         self.api_key = api_key
         self.token = token
+        self.retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def get_list_id(self, board_url: str, list_name: str) -> str:
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
+        async with HttpClient(self.retries) as client:
+            async with client.get(
                     url=f'https://api.trello.com/1/members/me/boards?key={self.api_key}&token={self.token}'
             ) as response:
                 result = await response.json()
@@ -23,7 +27,7 @@ class TrelloClient:
                 if not boards:
                     raise ValueError("Given board does not exist")
 
-            async with session.get(
+            async with client.get(
                     url=f'https://api.trello.com/1/boards/{boards.pop()["id"]}/lists?'
                         f'key={self.api_key}&token={self.token}'
             ) as response:
@@ -40,8 +44,8 @@ class TrelloClient:
 
     async def add_card(self, list_id: str, **kwargs) -> dict:
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with HttpClient(self.retries) as client:
+            async with client.post(
                     url=f"https://api.trello.com/1/cards?key={self.api_key}&token={self.token}",
                     params={
                         "idList": list_id
@@ -57,8 +61,8 @@ class TrelloClient:
                 return result
 
     async def delete_card(self, list_id: str, card_name: str) -> dict:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
+        async with HttpClient(self.retries) as client:
+            async with client.get(
                     url=f"https://api.trello.com/1/lists/{list_id}/cards?key={self.api_key}&token={self.token}"
             ) as response:
 
@@ -75,7 +79,7 @@ class TrelloClient:
 
                 card_id = cards.pop()["id"]
 
-            async with session.delete(
+            async with client.delete(
                     url=f"https://api.trello.com/1/cards/{card_id}?key={self.api_key}&token={self.token}"
             ) as response:
 
@@ -88,8 +92,8 @@ class TrelloClient:
                 return result
 
     async def move_card(self, current_list_id: str, list_id: str, card_name: str) -> dict:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
+        async with HttpClient(self.retries) as client:
+            async with client.get(
                     url=f"https://api.trello.com/1/lists/{current_list_id}/cards?key={self.api_key}&token={self.token}"
             ) as response:
 
@@ -106,7 +110,7 @@ class TrelloClient:
 
                 card_id = cards.pop()["id"]
 
-            async with session.put(
+            async with client.put(
                     url=f"https://api.trello.com/1/cards/{card_id}?key={self.api_key}&token={self.token}",
                     data={
                         "idList": list_id
@@ -121,8 +125,8 @@ class TrelloClient:
                 return result
 
     async def add_member(self, list_id: str, card_name: str, member_id: str) -> dict:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
+        async with HttpClient(self.retries) as client:
+            async with client.get(
                     url=f"https://api.trello.com/1/lists/{list_id}/cards?key={self.api_key}&token={self.token}"
             ) as response:
                 result = await response.json()
@@ -137,7 +141,7 @@ class TrelloClient:
 
                 card_id = cards.pop()["id"]
 
-            async with session.put(
+            async with client.put(
                     url=f"https://api.trello.com/1/cards/{card_id}/idMembers?key={self.api_key}&token={self.token}",
                     data={
                         "value": member_id

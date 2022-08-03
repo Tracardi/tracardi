@@ -27,6 +27,7 @@ class MauticSegmentEditor(ActionRunner):
         self.resource = resource
         self.client = MauticClient(**self.resource.credentials.get_credentials(self, None))
         self.actions = {"add": self.client.add_to_segment, "remove": self.client.remove_from_segment}
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
