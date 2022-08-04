@@ -37,7 +37,7 @@ class EntityUpsertAction(ActionRunner):
         )
 
         result = await storage.driver.entity.upsert(record)
-        return Result(port="payload", value=result)
+        return Result(port="payload", value={"entity": result})
 
 
 def register() -> Plugin:

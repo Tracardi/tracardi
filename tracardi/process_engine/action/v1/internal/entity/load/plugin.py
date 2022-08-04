@@ -16,12 +16,22 @@ class EntityLoadAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
 
-        if self.profile is None:
-            self.console.warning("This is profile-less event. Entity will be loaded without the profile reference.")
+        try:
+            if self.profile is None:
+                self.console.warning("This is profile-less event. Entity will be loaded without the profile reference.")
 
-        result = await storage.driver.entity.load_by_id(self.config.id)
-        return Result(port="result", value=result)
+            result = await storage.driver.entity.load_by_id(self.config.id)
 
+            if result is None:
+                return Result(port="missing", value=payload)
+
+            return Result(port="result", value={
+                "entity": result
+            })
+        except Exception as e:
+            return Result(port="error", value={
+                "message": str(e)
+            })
 
 def register() -> Plugin:
     return Plugin(
@@ -30,7 +40,7 @@ def register() -> Plugin:
             module=__name__,
             className='EntityLoadAction',
             inputs=["payload"],
-            outputs=["result"],
+            outputs=["result", "missing", "error"],
             version='0.7.2',
             license="MIT",
             author="Risto Kowaczewski",
@@ -49,7 +59,9 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "payload": PortDoc(desc="This port returns input payload.")
+                    "result": PortDoc(desc="This port returns response if entity exists."),
+                    "missing": PortDoc(desc="This port returns payload if entity does not exist."),
+                    "error": PortDoc(desc="This port returns error message.")
                 }
             )
         )
