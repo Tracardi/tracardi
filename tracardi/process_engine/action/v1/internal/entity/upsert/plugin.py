@@ -79,7 +79,7 @@ def register() -> Plugin:
                         FormField(
                             id="reference_profile",
                             name="Connect entity with profile",
-                            description="Entity will be assigned woth current profile if this feature is switched on.",
+                            description="Entity will be assigned with current profile if this feature is switched on.",
                             component=FormComponent(type="bool",
                                                     props={"label": "Assign entity to current profile"})
                         ),

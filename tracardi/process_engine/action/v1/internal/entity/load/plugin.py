@@ -37,7 +37,7 @@ class EntityLoadAction(ActionRunner):
             if self.profile is None:
                 self.console.warning("This is profile-less event. Entity will be loaded without the profile reference.")
 
-            # todo load by self.config.type
+            # todo load by self.config.type, and self.profile.id
             result = await storage.driver.entity.load_by_id(self.config.id)
 
             if result is None:
@@ -68,7 +68,8 @@ def register() -> Plugin:
                 "type": {
                     "id": "",
                     "name": ""
-                }
+                },
+                "reference_profile": True
             },
             form=Form(
                 groups=[
@@ -95,7 +96,13 @@ def register() -> Plugin:
                                         "method": "post"
                                     }
                                 })
-                            )
+                            ),
+                            FormField(
+                                id="reference_profile",
+                                name="Load entity only if belongs to current profile",
+                                component=FormComponent(type="bool",
+                                                        props={"label": "Must reference current profile"})
+                            ),
                         ]
                     ),
 

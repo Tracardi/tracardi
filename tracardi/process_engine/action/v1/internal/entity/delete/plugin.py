@@ -37,7 +37,7 @@ class EntityDeleteAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             entity_id = dot[self.config.id]
 
-            # todo load by self.config.type
+            # todo load by self.config.type, and self.profile.id
             result = await storage.driver.entity.delete_by_id(entity_id)
 
             return Result(port="result", value={
@@ -65,7 +65,8 @@ def register() -> Plugin:
                 "type": {
                     "id": "",
                     "name": ""
-                }
+                },
+                "reference_profile": True
             },
             form=Form(
                 groups=[
@@ -92,7 +93,13 @@ def register() -> Plugin:
                                         "method": "post"
                                     }
                                 })
-                            )
+                            ),
+                            FormField(
+                                id="reference_profile",
+                                name="Delete entity only if belongs to current profile",
+                                component=FormComponent(type="bool",
+                                                        props={"label": "Must reference current profile"})
+                            ),
                         ]
                     )
                 ]
