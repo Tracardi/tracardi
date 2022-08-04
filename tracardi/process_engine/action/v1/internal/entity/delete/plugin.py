@@ -1,6 +1,6 @@
-from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from .model.config import Configuration
+from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -26,7 +26,7 @@ class Endpoint(PluginEndpoint):
         }
 
 
-class EntityLoadAction(ActionRunner):
+class EntityDeleteAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
@@ -34,14 +34,11 @@ class EntityLoadAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
 
         try:
-            if self.profile is None:
-                self.console.warning("This is profile-less event. Entity will be loaded without the profile reference.")
+            dot = self._get_dot_accessor(payload)
+            entity_id = dot[self.config.id]
 
             # todo load by self.config.type
-            result = await storage.driver.entity.load_by_id(self.config.id)
-
-            if result is None:
-                return Result(port="missing", value=payload)
+            result = await storage.driver.entity.delete_by_id(entity_id)
 
             return Result(port="result", value={
                 "entity": result
@@ -57,14 +54,14 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='EntityLoadAction',
+            className='EntityDeleteAction',
             inputs=["payload"],
-            outputs=["result", "missing", "error"],
+            outputs=["result", "error"],
             version='0.7.2',
             license="MIT",
             author="Risto Kowaczewski",
             init={
-                "id": None,
+                "id": "",
                 "type": {
                     "id": "",
                     "name": ""
@@ -73,7 +70,7 @@ def register() -> Plugin:
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Entity settings",
+                        name="Entity delete settings",
                         fields=[
                             FormField(
                                 id="id",
@@ -97,14 +94,13 @@ def register() -> Plugin:
                                 })
                             )
                         ]
-                    ),
-
+                    )
                 ]
             )
         ),
         metadata=MetaData(
-            name='Load entity',
-            desc='Loads entity by its id.',
+            name='Delete entity',
+            desc='Deletes entity by its id.',
             icon='entity',
             group=["Input/Output"],
             documentation=Documentation(
