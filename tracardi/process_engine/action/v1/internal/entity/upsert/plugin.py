@@ -22,22 +22,27 @@ class EntityUpsertAction(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload: dict, in_edge=None):
-        if self.profile is None and self.config.reference_profile is True:
-            self.console.warning("This is profile-less event. Entity will be saved without the profile reference.")
+        try:
+            if self.profile is None and self.config.reference_profile is True:
+                self.console.warning("This is profile-less event. Entity will be saved without the profile reference.")
 
-        record = EntityRecord(
-            timestamp=datetime.utcnow(),
-            id=self.config.id,
-            type=self.config.type,
-            profile=Entity(id=self.profile.id) \
-                if isinstance(self.profile, Profile) and self.config.reference_profile is True \
-                else NullableEntity(id=None),
-            properties=json.loads(self.config.properties),
-            traits=json.loads(self.config.traits)
-        )
+            record = EntityRecord(
+                timestamp=datetime.utcnow(),
+                id=self.config.id,
+                type=self.config.type,
+                profile=Entity(id=self.profile.id) \
+                    if isinstance(self.profile, Profile) and self.config.reference_profile is True \
+                    else NullableEntity(id=None),
+                properties=json.loads(self.config.properties),
+                traits=json.loads(self.config.traits)
+            )
 
-        result = await storage.driver.entity.upsert(record)
-        return Result(port="payload", value={"entity": result})
+            result = await storage.driver.entity.upsert(record)
+            return Result(port="payload", value={"entity": result})
+        except Exception as e:
+            return Result(port="error", value={
+                "message": str(e)
+            })
 
 
 def register() -> Plugin:
@@ -47,7 +52,7 @@ def register() -> Plugin:
             module=__name__,
             className='EntityUpsertAction',
             inputs=["payload"],
-            outputs=["payload"],
+            outputs=["payload", "error"],
             version='0.7.2',
             license="MIT",
             author="Risto Kowaczewski",
@@ -108,7 +113,8 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "payload": PortDoc(desc="This port returns input payload.")
+                    "payload": PortDoc(desc="This port returns input payload."),
+                    "error": PortDoc(desc="This port returns error message.")
                 }
             )
         )
