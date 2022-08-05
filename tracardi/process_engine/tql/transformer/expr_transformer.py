@@ -129,14 +129,14 @@ class ExprTransformer(TransformerNamespace):
 
     def op_compound_value(self, args):
 
-        if len(args) < 2:
-            raise ValueError("Please provide params for function {}".format(args))
-
         function = args[0]
 
-        values = args[1:]
+        if len(args) > 1:
+            values = args[1:]
+        else:
+            values = []
 
-        if values[0] is None:
+        if not values or values[0] is None:
             if function == 'now':
                 return datetime.datetime.now()
             if function == 'utcnow':
