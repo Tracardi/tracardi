@@ -3,12 +3,9 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import Tuple
 from uuid import uuid4
-
-from elasticsearch import AsyncElasticsearch
-
 from tracardi.domain.import_config import ImportConfig
+from tracardi.domain.resources.elastic_resource_config import ElasticResourceConfig
 from tracardi.domain.task import Task
-from tracardi.process_engine.action.v1.connectors.elasticsearch.query.model.config import ElasticCredentials
 from .importer import Importer
 from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
@@ -30,45 +27,12 @@ class ElasticIndexImportConfig(BaseModel):
         return value
 
 
-class ElasticSourceConfig(BaseModel):
-    source: NamedEntity
-
-    @validator("source")
-    def validate_named_entities(cls, value):
-        if not value.id:
-            raise ValueError(f"This field cannot be empty.")
-        return value
-
-
 class Endpoint(PluginEndpoint):
 
     @staticmethod
     async def fetch_indices(config: dict):
-        config = ElasticSourceConfig(**config)
-        resource = await storage.driver.resource.load(config.source.id)
-        credentials = ElasticCredentials(**resource.credentials.production)
-
-        if credentials.has_credentials():
-            client = AsyncElasticsearch(
-                [credentials.url],
-                http_auth=(credentials.username, credentials.password),
-                scheme=credentials.scheme,
-                port=credentials.port
-            )
-        else:
-            client = AsyncElasticsearch(
-                [credentials.url],
-                scheme=credentials.scheme,
-                port=credentials.port
-            )
-
-        indices = await client.indices.get("*")
-        indices = indices.keys()
-
-        return {
-            "total": len(indices),
-            "result": [{"name": record, "id": record} for record in indices]
-        }
+        config = ElasticResourceConfig(**config)
+        return await config.get_indices()
 
 
 class ElasticIndexImporter(Importer):

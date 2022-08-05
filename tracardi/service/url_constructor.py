@@ -2,7 +2,7 @@ import urllib.parse
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dot_template import DotTemplate
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Tuple
 
 
 class ApiCredentials(BaseModel):
@@ -10,25 +10,46 @@ class ApiCredentials(BaseModel):
     password: Optional[str] = None
     username: Optional[str] = None
 
+    def _get_url(self) -> Tuple[str, str]:
+        url = self.url
 
-def make_url(credentials: ApiCredentials, dot: Optional[DotAccessor] = None, endpoint: Optional[str] = None) -> str:
-    scheme, host = credentials.url.split("://")
+        url_chunks = self.url.split("://")
 
-    if host[-1] == '/':
-        host = host.strip("/")
+        if len(url_chunks) == 2:
+            scheme, url = url_chunks
+        elif len(url_chunks) == 1:
+            scheme = 'http'
+        else:
+            raise ValueError("Invalid URL")
 
-    url = scheme + "://"
-    if credentials.username:
-        url += credentials.username
-    if credentials.password:
-        url += ':' + credentials.password
-    if credentials.username or credentials.password:
-        url += '@'
-    url += host
-    if dot is not None and endpoint:
-        template = DotTemplate()
-        url += template.render(endpoint, dot)
-    return url
+        if url[-1] == '/':
+            url = url.strip("/")
+
+        return scheme, url
+
+    def get_credentials(self):
+        if self.username and self.password:
+            return f"{self.username}:{self.password}"
+        return None
+
+    def get_url(self, dot: Optional[DotAccessor] = None, endpoint: Optional[str] = None) -> str:
+
+        scheme, url = self._get_url()
+        credentials = self.get_credentials()
+
+        if credentials:
+            url = f"{scheme}://{credentials}@{url}"
+        else:
+            url = f"{scheme}://{url}"
+
+        if endpoint:
+            if dot is not None:
+                template = DotTemplate()
+                url += template.render(endpoint, dot)
+            else:
+                url += endpoint
+
+        return url
 
 
 class SchemeError(Exception):
@@ -47,10 +68,9 @@ def construct_elastic_url(host: str, scheme: Optional[str] = None, username: Opt
         host = host.split("://")[-1]
 
     url = scheme + "://"
-    if username:
-        url += username
-    if password:
-        url += ":" + password
+
+    if username and password:
+        url += f"{username}:{password}@"
 
     url += host.strip("/")
 

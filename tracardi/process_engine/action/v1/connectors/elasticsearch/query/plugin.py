@@ -1,13 +1,15 @@
 import json
 
+from tracardi.domain.resources.elastic_resource_config import ElasticResourceConfig, ElasticCredentials
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from .model.config import Config, ElasticCredentials
-from elasticsearch import AsyncElasticsearch, ElasticsearchException
+from .model.config import Config
+from elasticsearch import ElasticsearchException
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
 def validate(config: dict):
@@ -22,6 +24,14 @@ def validate(config: dict):
     return config
 
 
+class Endpoint(PluginEndpoint):
+
+    @staticmethod
+    async def fetch_indices(config: dict):
+        config = ElasticResourceConfig(**config)
+        return await config.get_indices()
+
+
 class ElasticSearchFetcher(ActionRunner):
 
     @staticmethod
@@ -32,23 +42,26 @@ class ElasticSearchFetcher(ActionRunner):
 
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
-        credentials = credentials.get_credentials(self, ElasticCredentials)
+        credentials = credentials.get_credentials(self, ElasticCredentials)  # type: ElasticCredentials
 
-        self._client = AsyncElasticsearch(
-            [credentials.url],
-            http_auth=(credentials.username, credentials.password),
-            scheme=credentials.scheme,
-            port=credentials.port
-        )
+        self._client = credentials.get_client()
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
+            query = json.loads(self.config.query)
+
+            if 'size' not in query:
+                query["size"] = 20
+
+            if query["size"] > 50:
+                self.console.warning("Fetching more then 50 records may impact the GUI performance.")
+
             res = await self._client.search(
-                index=self.config.index,
-                body=json.loads(self.config.query),
-                size=20
+                index=self.config.index.id,
+                query=query
             )
+
             await self._client.close()
 
         except ElasticsearchException as e:
@@ -75,7 +88,7 @@ def register() -> Plugin:
                     "id": None
                 },
                 "index": None,
-                "query": "{\"query\":{}}"
+                "query": "{\"query\":{\"match_all\":{}}}"
             },
             manual="elasticsearch_query_action",
             form=Form(
@@ -93,7 +106,13 @@ def register() -> Plugin:
                                 id="index",
                                 name="Elasticsearch index",
                                 description="Please select Elasticsearch index you want to search.",
-                                component=FormComponent(type="text", props={"label": "index"})
+                                component=FormComponent(type="autocomplete", props={
+                                    "label": "Index",
+                                    "endpoint": {
+                                        "url": Endpoint.url(__name__, "fetch_indices"),
+                                        "method": "post"
+                                    }
+                                })
                             ),
                             FormField(
                                 id="query",

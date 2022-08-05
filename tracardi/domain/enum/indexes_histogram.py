@@ -6,3 +6,4 @@ class IndexesHistogram(str, Enum):
     profile = "profile"
     event = "event"
     log = "log"
+    entity = "entity"

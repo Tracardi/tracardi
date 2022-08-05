@@ -14,7 +14,6 @@ from pydantic import AnyHttpUrl, BaseModel, validator
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
-
 class Method(str, Enum):
     post = "post"
     get = "get"

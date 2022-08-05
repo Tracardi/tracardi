@@ -3,7 +3,7 @@ from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from ssl import create_default_context
-from tracardi.config import tracardi
+from tracardi.config import tracardi, ElasticConfig
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.log_handler import log_handler
@@ -197,41 +197,41 @@ class ElasticClient:
         return await self._client.snapshot.status(repository=repo, snapshot=snapshot, params=params)
 
     @staticmethod
-    def _get_elastic_config():
+    def get_elastic_config(elastic_config: ElasticConfig):
 
         kwargs = {}
 
-        if config.elastic.host:
-            kwargs['hosts'] = config.elastic.host
-        if config.elastic.scheme:
-            kwargs['scheme'] = config.elastic.scheme
-        if config.elastic.sniffer_timeout:
-            kwargs['sniffer_timeout'] = config.elastic.sniffer_timeout
-        if config.elastic.sniff_on_start:
-            kwargs['sniff_on_start'] = config.elastic.sniff_on_start
-        if config.elastic.sniff_on_connection_fail:
-            kwargs['sniff_on_connection_fail'] = config.elastic.sniff_on_connection_fail
-        if config.elastic.maxsize:
-            kwargs['maxsize'] = config.elastic.maxsize
+        if elastic_config.host:
+            kwargs['hosts'] = elastic_config.host
+        if elastic_config.scheme:
+            kwargs['scheme'] = elastic_config.scheme
+        if elastic_config.sniffer_timeout:
+            kwargs['sniffer_timeout'] = elastic_config.sniffer_timeout
+        if elastic_config.sniff_on_start:
+            kwargs['sniff_on_start'] = elastic_config.sniff_on_start
+        if elastic_config.sniff_on_connection_fail:
+            kwargs['sniff_on_connection_fail'] = elastic_config.sniff_on_connection_fail
+        if elastic_config.maxsize:
+            kwargs['maxsize'] = elastic_config.maxsize
 
-        if config.elastic.cafile:
-            context = create_default_context(cafile=config.elastic.cafile)
+        if elastic_config.cafile:
+            context = create_default_context(cafile=elastic_config.cafile)
             kwargs['ssl_context'] = context
 
-        if config.elastic.http_auth_password and config.elastic.http_auth_username:
-            kwargs['http_auth'] = (config.elastic.http_auth_username, config.elastic.http_auth_password)
+        if elastic_config.http_auth_password and elastic_config.http_auth_username:
+            kwargs['http_auth'] = (elastic_config.http_auth_username, elastic_config.http_auth_password)
 
-        if config.elastic.cloud_id:
-            kwargs['cloud_id'] = config.elastic.cloud_id
+        if elastic_config.cloud_id:
+            kwargs['cloud_id'] = elastic_config.cloud_id
 
-        if config.elastic.api_key and config.elastic.api_key_id:
-            kwargs['api_key'] = (config.elastic.api_key_id, config.elastic.api_key)
+        if elastic_config.api_key and elastic_config.api_key_id:
+            kwargs['api_key'] = (elastic_config.api_key_id, elastic_config.api_key)
 
-        if config.elastic.http_compress:
-            kwargs['http_compress'] = config.elastic.http_compress
+        if elastic_config.http_compress:
+            kwargs['http_compress'] = elastic_config.http_compress
 
-        if config.elastic.verify_certs is not None:
-            kwargs['verify_certs'] = config.elastic.verify_certs
+        if elastic_config.verify_certs is not None:
+            kwargs['verify_certs'] = elastic_config.verify_certs
 
         return kwargs
 
@@ -241,7 +241,7 @@ class ElasticClient:
         global _singleton
 
         def get_elastic_client():
-            kwargs = ElasticClient._get_elastic_config()
+            kwargs = ElasticClient.get_elastic_config(config.elastic)
             return ElasticClient(**kwargs)
 
         if _singleton is None:

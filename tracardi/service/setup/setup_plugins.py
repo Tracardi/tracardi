@@ -184,6 +184,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin',
         'tracardi.process_engine.action.v1.connectors.pushover.push.plugin',
         'tracardi.process_engine.action.v1.connectors.discord.push.plugin',
+        'tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin',
 
         'tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin',
         'tracardi.process_engine.action.v1.connectors.mysql.query.plugin',
@@ -230,6 +231,9 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.internal.get_prev_session.plugin',
         'tracardi.process_engine.action.v1.internal.query_string.plugin',
         'tracardi.process_engine.action.v1.internal.add_empty_session.plugin',
+        'tracardi.process_engine.action.v1.internal.entity.upsert.plugin',
+        'tracardi.process_engine.action.v1.internal.entity.load.plugin',
+        'tracardi.process_engine.action.v1.internal.entity.delete.plugin',
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',

@@ -24,6 +24,7 @@ import tracardi.service.storage.drivers.elastic.user_log
 import tracardi.service.storage.drivers.elastic.import_config
 import tracardi.service.storage.drivers.elastic.version
 import tracardi.service.storage.drivers.elastic.snapshot
+import tracardi.service.storage.drivers.elastic.entity
 
 
 class ElasticDriver:
@@ -131,3 +132,7 @@ class ElasticDriver:
     @property
     def snapshot(self):
         return tracardi.service.storage.drivers.elastic.snapshot
+
+    @property
+    def entity(self):
+        return tracardi.service.storage.drivers.elastic.entity

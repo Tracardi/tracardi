@@ -1,26 +1,32 @@
-def get_resource_types():
-    return {
-        "web-page": {
-            "config": {
+from tracardi.domain.resource_settings import ResourceSettings, DestinationData
+from typing import List
+
+
+def get_resource_types() -> List[ResourceSettings]:
+    return [
+        ResourceSettings(
+            id="web-page",
+            name="Web page",
+            icon="web",
+            tags=["web-page", "input", "output"],
+            config={
                 "user": "<user>",
                 "password": "<password>"
-            },
-            "tags": ['web-page', "input", "output"],
-            "name": "Web page",
-            "icon": "web"
-        },
-        "api": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="api",
+            name="API endpoint",
+            icon="cloud",
+            config={
                 "url": "<url>",
                 "username": "<username>",
                 "password": "<password>"
             },
-            "tags": ['api', "destination"],
-            "name": "API endpoint",
-            "icon": "cloud",
-            "destination": {
-                "package": "tracardi.process_engine.destination.http_connector.HttpConnector",
-                "init": {
+            tags=['api', "destination"],
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.http_connector.HttpConnector",
+                init={
                     "method": "post",
                     "timeout": 30,
                     "headers": {
@@ -28,126 +34,142 @@ def get_resource_types():
                     },
                     "cookies": {},
                     "ssl_check": True
-                },
-                "form": {}
-            }
-        },
-        "smtp-server": {
-            "config": {
+                }
+            )
+        ),
+        ResourceSettings(
+            id="smtp-server",
+            name="SMTP",
+            tags=["mail", "smtp"],
+            config={
                 "smtp": "<smpt-server-host>",
                 "port": "<port>",
                 "username": "<username>",
                 "password": "<password>"
-            },
-            "tags": ['mail', 'smtp'],
-            "name": "SMTP"
-        },
-        "ip-geo-locator": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="ip-geo-locator",
+            name="MaxMing Geo-Location",
+            tags=["api", "geo-locator"],
+            config={
                 "host": "geolite.info",
                 "license": "<license-key>",
                 "accountId": "<accound-id>"
-            },
-            "tags": ['api', 'geo-locator'],
-            "name": "MaxMind Geo-Location"
-        },
-        "postgresql": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="postgresql",
+            name="PostgreSQL",
+            tags=["database", "postgresql"],
+            config={
                 "host": "<url>",
                 "port": 5432,
                 "user": "<username>",
                 "password": "<password>",
                 "database": "<database>"
-            },
-            "tags": ['database', 'postgresql'],
-            "name": "PostgreSQL"
-        },
-        "elastic-search": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="elastic-search",
+            name="Elasticsearch",
+            tags=["elastic"],
+            icon="elasticsearch",
+            config={
                 "url": "<url>",
                 "port": 9200,
                 "scheme": "http",
                 "username": "<username>",
                 "password": "<password>",
                 "verify_certs": True
-            },
-            "tags": ['elastic'],
-            "name": "Elasticsearch",
-            "icon": "elasticsearch"
-        },
-        "pushover": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="pushover",
+            name="Pushover",
+            tags=["pushover", "message"],
+            config={
                 "token": "<token>",
                 "user": "<user>"
             },
-            "tags": ['pushover', 'message'],
-            "name": "Pushover",
-            "icon": "pushover"
-        },
-        "mysql": {
-            "config": {
+            icon="pushover"
+        ),
+        ResourceSettings(
+            id="mysql",
+            name="MySQL",
+            icon="mysql",
+            tags=["mysql", "database"],
+            config={
                 "host": "localhost",
                 "port": 3306,
                 "user": "<username>",
                 "password": "<password>",
                 "database": "<database>"
-            },
-            "tags": ['mysql', 'database'],
-            "name": "MySQL",
-            "icon": "mysql"
-        },
-        "mqtt": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="mqtt",
+            name="MQTT",
+            tags=["mqtt", "queue"],
+            config={
                 "url": "<url>",
-                "port": "<port>"
-            },
-            "tags": ['mqtt', 'queue'],
-            "name": "MQTT"
-        },
-        "twilio": {
-            "config": {
+                "port": "<port>",
+                 "username": "<username>",
+                "password": "<password>"
+            }
+        ),
+        ResourceSettings(
+            id="twilio",
+            name="Twilio",
+            tags=["token", "twilio"],
+            config={
                 "token": "<token>"
-            },
-            "tags": ['token', 'twilio'],
-            "name": "Twilio"
-        },
-        "redis": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="redis",
+            name="Redis",
+            tags=["redis"],
+            icon="redis",
+            config={
                 "url": "<url>",
                 "user": "<user>",
                 "password": "<password>"
             },
-            "tags": ['redis'],
-            "name": "Redis",
-            "icon": "redis"
-
-        },
-        "mongodb": {
-            "config": {
+            manual="redis_resource"
+        ),
+        ResourceSettings(
+            id="mongodb",
+            name="MongoDB",
+            tags=["mongo", "database", "nosql"],
+            icon="mongo",
+            config={
                 "uri": "mongodb://127.0.0.1:27017/",
                 "timeout": 5000
-            },
-            "tags": ['mongo', 'database', 'nosql'],
-            "name": "MongoDB",
-            "icon": "mongo"
-        },
-        "trello": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="trello",
+            name="Trello",
+            tags=["trello"],
+            config={
                 "token": "<trello-api-token>",
                 "api_key": "<trello-api-key>"
-            },
-            "tags": ["trello"],
-            "name": "Trello"
-        },
-        "token": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="token",
+            name="Token",
+            tags=["token"],
+            config={
                 "token": "<token>"
-            },
-            "tags": ['token'],
-            "name": "Token"
-        },
-        "google-cloud-service-account": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="google-cloud-service-account",
+            name="Google Cloud service account",
+            tags=["gcp-service-account"],
+            config={
                 "type": "service_account",
                 "project_id": "<project-id>",
                 "private_key_id": "<private-key-id>",
@@ -158,118 +180,121 @@ def get_resource_types():
                 "token_uri": "https://oauth2.googleapis.com/token",
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
                 "client_x509_cert_url": "<client-x509-cert-url>"
-            },
-            "tags": ['gcp-service-account'],
-            "name": "Google Cloud Service Account"
-        },
-        "influxdb": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="influxdb",
+            name="InfluxDB",
+            tags=["influx"],
+            icon="influx",
+            config={
                 "url": "http://localhost:8086",
                 "token": "<API-token>"
-            },
-            "tags": ["influx"],
-            "name": "InfluxDB",
-            "icon": "influxdb"
-        },
-        "mixpanel": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="mixpanel",
+            name="MixPanel",
+            tags=["mixpanel"],
+            icon="mixpanel",
+            config={
                 "token": "<your-project-token>",
                 "server_prefix": "US | EU",
                 "username": "<service-account-username>",
                 "password": "<service-account-password>"
-            },
-            "tags": ["mixpanel"],
-            "name": "MixPanel",
-            "icon": "mixpanel"
-        },
-        "mautic": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="mautic",
+            name="Mautic",
+            icon="mautic",
+            tags=["mautic", "destination"],
+            config={
                 "public_key": "<client-public-key>",
                 "private_key": "<client-private-key>",
                 "api_url": "<url-of-mautic-instance>"
             },
-            "icon": "mautic",
-            "tags": ["mautic", "destination"],
-            "name": "Mautic",
-            "destination": {
-                "package": "tracardi.process_engine.destination.mautic_connector.MauticConnector",
-                "init": {
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.mautic_connector.MauticConnector",
+                init={
                     "overwrite_with_blank": False
                 },
                 "form": {}
             },
         },
-        "elastic-email": {
-            "config": {
+        ResourceSettings(
+            id="elastic-email",
+            "name"="ElasticEmail",
+            "config"={
                 "api_key": "<api-key>",
             },
-            "icon": "elastic-email",
-            "tags": ["elastic-email", "destination"],
-            "name": "ElasticEmail",
-        },
-        "airtable": {
-            "config": {
+            "icon"="elastic-email",
+            "tags"=["elastic-email", "destination"]
+        ),
+        ResourceSettings(
+            id="airtable",
+            name="AirTable",
+            icon="airtable",
+            tags=["airtable"],
+            config={
                 "api_key": "<your-api-key>"
-            },
-            "tags": ["airtable"],
-            "name": "Airtable",
-            "icon": "airtable"
-        },
-        "matomo": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="matomo",
+            name="Matomo",
+            tags=["matomo"],
+            icon="matomo",
+            config={
                 "token": "<your-token>",
                 "api_url": "<your-matomo-url>"
-            },
-            "tags": ["matomo"],
-            "name": "Matomo",
-            "icon": "matomo"
-        },
-        "civi_crm": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="civi_crm",
+            name="CiviCRM",
+            icon="civicrm",
+            tags=["civi_crm"],
+            config={
                 "api_key": "<api-key>",
                 "site_key": "<site-key>",
                 "api_url": "<api-url>"
             },
-            "tags": ["civi_crm"],
-            "name": "CiviCRM",
-            "icon": "civicrm",
-            "destination": {
-                "package": "tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector",
-                "init": {},
-                "form": {}
-            },
-        },
-        "active_campaign": {
-            "config": {
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector"
+            )
+        ),
+        ResourceSettings(
+            id="active_campaign",
+            name="ActiveCampaign",
+            tags=["active_campaign"],
+            config={
                 "api_key": "<api-key>",
                 "api_url": "<api-url>"
-            },
-            "tags": ["active_campaign"],
-            "name": "ActiveCampaign",
-            "icon": "plugin"
-        },
-        "marketing_cloud": {
-            "config": {
+            }
+        ),
+        ResourceSettings(
+            id="marketing_cloud",
+            name="Salesforce Marketing Cloud",
+            tags=["marketing_cloud"],
+            config={
                 "client_id": "<your-client-id>",
                 "client_secret": "<your-client-secret>",
                 "subdomain": "<your-subdomain>"
-            },
-            "tags": ["marketing_cloud"],
-            "name": "Salesforce Marketing Cloud",
-            "icon": "plugin"
-        }
-    }
+            }
+        )
+    ]
 
 
 def get_destinations():
     resource_types = get_resource_types()
-    for resource_type in resource_types.values():
-        if 'destination' in resource_type:
-            yield resource_type["destination"]['package'], resource_type
+    for resource_type in resource_types:
+        if resource_type.destination is not None:
+            yield resource_type.destination.package, resource_type.dict()
 
 
 def get_type_of_resources():
     resource_types = get_resource_types()
-    for key, resource_type in resource_types.items():
-        if 'pro' not in resource_type:
-            yield key, resource_type
+    for resource_type in resource_types:
+        if resource_type.pro is None:
+            yield resource_type.id, resource_type.dict()

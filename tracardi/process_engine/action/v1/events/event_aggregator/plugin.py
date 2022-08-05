@@ -1,3 +1,4 @@
+from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -17,12 +18,16 @@ class EventAggregator(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-
         time_span_in_sec = parse(self.config.time_span.strip("-"))
+        if self.profile.id == '@debug-profile-id':
+            self.console.warning(
+                f"Please load correct profile. This plug-in may not find data for profile {self.profile.id}."
+                f"Reason for this may be that you did not define an event type in the start node in the Debugging "
+                f"configuration section.")
 
         no_of_events = await storage.driver.event.aggregate_event_by_field_within_time(
             self.profile.id,
-            self.config.field,
+            self.config.field.id,
             time_span_in_sec
         )
         return Result(port="payload", value={"events": no_of_events})
@@ -40,7 +45,7 @@ def register() -> Plugin:
             license="Tracardi Pro",
             author="Risto Kowaczewski",
             init={
-                "field": "",
+                "field": None,
                 "time_span": "-15m"
             },
             form=Form(
@@ -54,8 +59,13 @@ def register() -> Plugin:
                                 id="field",
                                 name="Aggregate by field",
                                 description="Select field you would like to aggregate.",
-                                component=FormComponent(type="text", props={
-                                    "label": "Field"
+                                component=FormComponent(type="autocomplete", props={
+                                    "label": "Field",
+                                    "endpoint": {
+                                        "url": "/storage/mapping/event/metadata",
+                                        "method": "get"
+                                    },
+                                    "onlyValueWithOptions": False
                                 })
                             ),
                             FormField(

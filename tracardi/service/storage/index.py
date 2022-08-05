@@ -96,6 +96,7 @@ class Resource:
     def __init__(self):
         self.resources = {
             "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json"),
+            "entity": Index(multi_index=False, index="tracardi-entity", mapping="mappings/entity-index.json"),
             "log": Index(multi_index=True,
                          index='tracardi-log',
                          mapping="mappings/log-index.json"),
