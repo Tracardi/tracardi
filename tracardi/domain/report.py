@@ -57,3 +57,7 @@ class Report(NamedEntity):
         )
         return json.loads(query)
 
+    @property
+    def expected_query_params(self) -> List[str]:
+        return re.findall(self._regex, json.dumps(self.query))
+
