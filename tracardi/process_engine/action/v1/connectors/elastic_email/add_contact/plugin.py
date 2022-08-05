@@ -29,9 +29,7 @@ class ElasticEmailContactAdder(ActionRunner):
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
-        self.resource = resource
-        self.creds = self.resource.credentials.get_credentials(self, output=Connection)
-        # self.client = ElasticEmail(**self.resource.credentials.get_credentials(self, None))
+        self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
 
     @staticmethod
     def parse_mapping(mapping):
@@ -49,6 +47,10 @@ class ElasticEmailContactAdder(ActionRunner):
         return mapping
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+
+        configuration = ElasticEmail.Configuration()
+        configuration.api_key['apikey'] = self.credentials.api_key
+
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
 
@@ -56,8 +58,6 @@ class ElasticEmailContactAdder(ActionRunner):
 
         mapping = traverser.reshape(self.config.additional_mapping)
         mapping = self.parse_mapping(mapping)
-        configuration = ElasticEmail.Configuration()
-        configuration.api_key['apikey'] = self.creds['api_key']
 
         contact_other = {}
         contact_status = mapping.get('status')

@@ -218,8 +218,7 @@ def get_resource_types() -> List[ResourceSettings]:
                 package="tracardi.process_engine.destination.mautic_connector.MauticConnector",
                 init={
                     "overwrite_with_blank": False
-                },
-                form={}
+                }
             )
         ),
         ResourceSettings(

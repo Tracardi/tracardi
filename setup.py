@@ -4,6 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
+
 setup(
     name='tracardi',
     version='0.7.2-dev',
@@ -59,7 +60,8 @@ setup(
         'celery == 5.2.6',
         'random-password-generator==2.2.0',
         'asyncio-mqtt==0.12.1',
-        'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker'
+        'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker',
+        'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@master#ElasticEmail'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
