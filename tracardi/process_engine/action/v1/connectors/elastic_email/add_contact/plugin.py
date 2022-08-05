@@ -1,10 +1,12 @@
 from datetime import datetime
+from multiprocessing.pool import ApplyResult
 
 import ElasticEmail
 from ElasticEmail.api import contacts_api
 from ElasticEmail.model.contact_payload import ContactPayload
 from ElasticEmail.model.contact_status import ContactStatus
 from ElasticEmail.model.email_send import EmailSend
+from asyncio import sleep
 
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -65,17 +67,19 @@ class ElasticEmailContactAdder(ActionRunner):
             del mapping['status']
 
         contact_other['status'] = ContactStatus(contact_status or "Active")
-        list_names = mapping.get('list_names')
-        if list_names:
-            list_names = list_names.split(',')
+        email_list_names = mapping.get('list_names')
+        if email_list_names:
+            email_list_names = email_list_names.split(',')
             del mapping['list_names']
-        first_name = mapping.get('FirstName')
+
+        first_name = mapping.get('first_name')
         if first_name:
-            del mapping['FirstName']
+            del mapping['first_name']
             contact_other['first_name'] = first_name
-        last_name = mapping.get('LastName')
+
+        last_name = mapping.get('last_name')
         if last_name:
-            del mapping['LastName']
+            del mapping['last_name']
             contact_other['last_name'] = last_name
 
         contact_payload = [
@@ -88,17 +92,26 @@ class ElasticEmailContactAdder(ActionRunner):
         try:
             with ElasticEmail.ApiClient(configuration) as api_client:
                 api_instance = contacts_api.ContactsApi(api_client)
-                if list_names:
-                    # api_response = await api_instance.contacts_post(contact_payload, listnames=list_names, async_req=True)
-                    api_response = api_instance.contacts_post(contact_payload, listnames=list_names)
+
+                if email_list_names:
+                    thread = api_instance.contacts_post(contact_payload, listnames=email_list_names, async_req=True)  # type: ApplyResult
                 else:
-                    api_response = api_instance.contacts_post(contact_payload)
+                    thread = api_instance.contacts_post(contact_payload, async_req=True)  # type: ApplyResult
+
+                # Do not block the event loop
+                await sleep(0)
+
+                # Fetch result
+                api_response = thread.get()
+
+                # todo do not know why EmailSend is checked both calls returns list of Contacts
                 if isinstance(api_response, EmailSend):
                     return Result(port="response", value=api_response.to_dict())
                 else:
-                    return Result(port="response", value=api_response)
+                    return Result(port="response", value={"result": [item.to_dict() for item in api_response]})
+
         except Exception as e:
-            return Result(port="error", value={"error": str(e), "msg": ""})
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:
@@ -144,7 +157,7 @@ def register() -> Plugin:
                                 name="Additional fields",
                                 description="You can add some more fields to your contact. Just type in the alias of "
                                             "the field as key, and a path as a value for this field. This is fully "
-                                            "optional. (Example: lastname: profile@pii.last_name",
+                                            "optional. (Example: last_name: profile@pii.last_name",
                                 component=FormComponent(type="keyValueList", props={"label": "Fields"})
                             ),
                         ]
