@@ -1,58 +1,108 @@
 import uuid
-from tracardi_graph_runner.domain.flow import Flow as GraphFlow
+from tracardi.service.wf.domain.flow import Flow as GraphFlow
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel
-from tracardi_graph_runner.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
-from tracardi_plugin_sdk.domain.register import MetaData, Plugin, Spec, Form
-from ..service.secrets import decrypt, encrypt
+from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
+from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents
+
+from ..config import tracardi
+from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 import logging
 
 logger = logging.getLogger("Flow")
-logger.setLevel(logging.WARNING)
+logger.setLevel(tracardi.logging_level)
+
+
+class FlowSchema(BaseModel):
+    version: str = tracardi.version.version
+    uri: str = 'http://www.tracardi.com/2021/WFSchema'
+    server_version: str = None
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.server_version = tracardi.version.version
 
 
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
-    draft: Optional[str] = ""
     lock: bool = False
+    wf_schema: FlowSchema = FlowSchema()
 
-    # Persistence
+    def arrange_nodes(self):
+        if self.flowGraph is not None:
+            targets = {edge.target for edge in self.flowGraph.edges}
+            starting_nodes = [node for node in self.flowGraph.nodes if node.id not in targets]
 
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'flow',
-            FlowRecord
+            start_at = [0, 0]
+            for starting_node in starting_nodes:
+                node_to_distance_map = self.flowGraph.traverse_graph_for_distances(start_at_id=starting_node.id)
+
+                for node_id in node_to_distance_map:
+                    node = self.flowGraph.get_node_by_id(node_id)
+                    node.position.y = start_at[1] + 150 * node_to_distance_map[node_id]
+
+                distance_to_nodes_map = {}
+                for node_id in node_to_distance_map:
+                    if node_to_distance_map[node_id] not in distance_to_nodes_map:
+                        distance_to_nodes_map[node_to_distance_map[node_id]] = []
+                    distance_to_nodes_map[node_to_distance_map[node_id]].append(node_id)
+
+                for node_ids in distance_to_nodes_map.values():
+                    nodes = [self.flowGraph.get_node_by_id(node_id) for node_id in node_ids]
+                    row_center = start_at[0] - 200 * len(nodes) + 250
+                    for node in nodes:
+                        node.position.x = row_center - node.data.metadata.width//2
+                        row_center += node.data.metadata.width
+
+                start_at[0] += len(max(distance_to_nodes_map.values(), key=len)) * 200
+
+    def get_production_workflow_record(self) -> 'FlowRecord':
+
+        production = encrypt(self.dict())
+
+        return FlowRecord(
+            id=self.id,
+            description=self.description,
+            name=self.name,
+            projects=self.projects,
+            draft=production,
+            production=production,
+            lock=self.lock
         )
 
-    def encode(self) -> 'FlowRecord':
-        return FlowRecord.encode(self)
+    def get_empty_workflow_record(self) -> 'FlowRecord':
 
-    def encode_draft(self, draft: 'Flow'):
-        self.draft = encrypt(draft.dict())
-
-    def decode_draft(self) -> 'Flow':
-        flow = decrypt(self.draft)
-        return Flow.construct(_fields_set=self.__fields_set__, **flow)
+        return FlowRecord(
+            id=self.id,
+            description=self.description,
+            name=self.name,
+            projects=self.projects,
+            lock=self.lock
+        )
 
     @staticmethod
     def new(id: str = None) -> 'Flow':
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name="Empty",
-            enabled=False,
+            wf_schema=FlowSchema(version=str(tracardi.version)),
             flowGraph=FlowGraphData(nodes=[], edges=[])
         )
 
     @staticmethod
-    def build(name: str, description: str = None, enabled=True, id=None) -> 'Flow':
+    def build(name: str, description: str = None, id=None, lock=False, projects=None) -> 'Flow':
+        if projects is None:
+            projects = ["General"]
+
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
             name=name,
+            wf_schema=FlowSchema(version=str(tracardi.version)),
             description=description,
-            enabled=enabled,
+            projects=projects,
+            lock=lock,
             flowGraph=FlowGraphData(
                 nodes=[],
                 edges=[]
@@ -80,11 +130,12 @@ class SpecRecord(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[str] = ""
-    form: Optional[Form]
+    node: Optional[NodeEvents] = None
+    form: Optional[str] = ""
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.0.1'
+    version: Optional[str] = '0.6.2'
 
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':
@@ -95,7 +146,8 @@ class SpecRecord(BaseModel):
             inputs=spec.inputs,
             outputs=spec.outputs,
             init=encrypt(spec.init),
-            form=spec.form,
+            node=spec.node,
+            form=b64_encoder(spec.form),
             manual=spec.manual,
             author=spec.author,
             license=spec.license,
@@ -110,7 +162,8 @@ class SpecRecord(BaseModel):
             inputs=self.inputs,
             outputs=self.outputs,
             init=decrypt(self.init),
-            form=self.form,
+            node=self.node,
+            form=b64_decoder(self.form),
             manual=self.manual,
             author=self.author,
             license=self.license,
@@ -118,11 +171,65 @@ class SpecRecord(BaseModel):
         )
 
 
+class MetaDataRecord(BaseModel):
+    name: str
+    brand: Optional[str] = ""
+    desc: Optional[str] = ""
+    keywords: Optional[List[str]] = []
+    type: str = 'flowNode'
+    width: int = 300
+    height: int = 100
+    icon: str = 'plugin'
+    documentation: Optional[str] = ""
+    group: Optional[List[str]] = ["General"]
+    tags: List[str] = []
+    pro: bool = False
+    frontend: bool = False
+    emits_event: Optional[str] = ""
+
+    @staticmethod
+    def encode(metadata: MetaData) -> 'MetaDataRecord':
+        return MetaDataRecord(
+            name=metadata.name,
+            brand=metadata.brand,
+            desc=metadata.desc,
+            keywords=metadata.keywords,
+            type=metadata.type,
+            width=metadata.width,
+            height=metadata.height,
+            icon=metadata.icon,
+            documentation=b64_encoder(metadata.documentation),
+            group=metadata.group,
+            tags=metadata.tags,
+            pro=metadata.pro,
+            frontend=metadata.frontend,
+            emits_event=b64_encoder(metadata.emits_event)
+        )
+
+    def decode(self) -> MetaData:
+        return MetaData(
+            name=self.name,
+            brand=self.brand,
+            desc=self.desc,
+            keywords=self.keywords,
+            type=self.type,
+            width=self.width,
+            height=self.height,
+            icon=self.icon,
+            documentation=b64_decoder(self.documentation),
+            group=self.group,
+            tags=self.tags,
+            pro=self.pro,
+            frontend=self.frontend,
+            emits_event=b64_decoder(self.emits_event)
+        )
+
+
 class PluginRecord(BaseModel):
     start: bool = False
     debug: bool = False
     spec: SpecRecord
-    metadata: MetaData
+    metadata: MetaDataRecord
 
     @staticmethod
     def encode(plugin: Plugin) -> 'PluginRecord':
@@ -130,7 +237,7 @@ class PluginRecord(BaseModel):
             start=plugin.start,
             debug=plugin.debug,
             spec=SpecRecord.encode(plugin.spec),
-            metadata=plugin.metadata
+            metadata=MetaDataRecord.encode(plugin.metadata)
         )
 
     def decode(self) -> Plugin:
@@ -138,67 +245,17 @@ class PluginRecord(BaseModel):
             "start": self.start,
             "debug": self.debug,
             "spec": self.spec.decode(),
-            "metadata": self.metadata
+            "metadata": self.metadata.decode()
         }
         return Plugin.construct(_fields_set=self.__fields_set__, **data)
 
 
-class NodeRecord(BaseModel):
-    id: str
-    type: str
-    position: Position
-    data: PluginRecord
-
-    @staticmethod
-    def encode(node: Node):
-        return NodeRecord(
-            id=node.id,
-            type=node.type,
-            position=node.position,
-            data=PluginRecord.encode(node.data)
-        )
-
-    def decode(self) -> Node:
-        data = {
-            "id": self.id,
-            "type": self.type,
-            "data": self.data.decode(),
-            "position": self.position
-        }
-        return Node.construct(_fields_set=self.__fields_set__, **data)
-
-
-class FlowGraphDataRecord(BaseModel):
-    nodes: List[NodeRecord]
-    edges: List[Edge]
-
-    @staticmethod
-    def encode(flowGraph: FlowGraphData) -> 'FlowGraphDataRecord':
-        if flowGraph:
-            return FlowGraphDataRecord(
-                edges=flowGraph.edges,
-                nodes=[NodeRecord.encode(node) for node in flowGraph.nodes]
-            )
-
-        return FlowGraphDataRecord(
-            edges=[],
-            nodes=[]
-        )
-
-    def decode(self) -> FlowGraphData:
-        data = {
-            "edges": self.edges,
-            "nodes": [node.decode() for node in self.nodes],
-        }
-        return FlowGraphData.construct(_fields_set=self.__fields_set__, **data)
-
-
 class FlowRecord(NamedEntity):
     description: Optional[str] = None
-    flowGraph: Optional[FlowGraphDataRecord] = None
-    enabled: Optional[bool] = True
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
+    production: Optional[str] = ''
+    backup: Optional[str] = ''
     lock: bool = False
 
     # Persistence
@@ -210,36 +267,33 @@ class FlowRecord(NamedEntity):
             FlowRecord
         )
 
-    @staticmethod
-    def encode(flow: Flow) -> 'FlowRecord':
-        return FlowRecord(
-            id=flow.id,
-            description=flow.description,
-            name=flow.name,
-            enabled=flow.enabled,
-            flowGraph=FlowGraphDataRecord.encode(flow.flowGraph),
-            projects=flow.projects,
-            draft=flow.draft,
-            lock=flow.lock
+    def get_production_workflow(self) -> 'Flow':
+        decrypted = decrypt(self.production)
+        return Flow(**decrypted)
 
-        )
+    def get_draft_workflow(self) -> 'Flow':
+        decrypted = decrypt(self.draft)
+        return Flow(**decrypted)
 
-    def decode(self) -> Flow:
-        data = {
-            "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "enabled": self.enabled,
-            "projects": self.projects,
-            "draft": self.draft,
-            "lock": self.lock,
-            "flowGraph": self.flowGraph.decode() if self.flowGraph else None,
-        }
-        return Flow.construct(_fields_set=self.__fields_set__, **data)
+    def get_empty_workflow(self, id) -> 'Flow':
+        return Flow.build(id=id, name=self.name, description=self.description,
+                          projects=self.projects, lock=self.lock)
 
-    def decode_draft(self) -> 'Flow':
-        flow = decrypt(self.draft)
-        return Flow(**flow)
+    def restore_production_from_backup(self):
+        if not self.backup:
+            raise ValueError("Back up is empty.")
+        self.production = self.backup
 
-    def encode_draft(self, draft: 'Flow'):
-        self.draft = encrypt(draft.dict())
+    def restore_draft_from_production(self):
+        if not self.production:
+            raise ValueError("Production up is empty.")
+        self.draft = self.production
+
+    def set_lock(self, lock: bool = True) -> None:
+        self.lock = lock
+        production_flow = self.get_production_workflow()
+        production_flow.lock = lock
+        self.production = encrypt(production_flow.dict())
+        draft_flow = self.get_draft_workflow()
+        draft_flow.lock = lock
+        self.draft = encrypt(draft_flow.dict())

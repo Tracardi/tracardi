@@ -1,0 +1,63 @@
+{
+  "index_patterns": [
+    "%%VERSION%%.%%PREFIX%%.tracardi-session-*-*"
+  ],
+  "template": {
+    "settings": {
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%,
+      "index.refresh_interval": "3s"
+    },
+    "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
+      },
+      "dynamic": "false",
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "metadata": {
+          "properties": {
+            "time": {
+              "properties": {
+                "insert": {
+                  "type": "date"
+                },
+                "update": {
+                  "type": "date"
+                }
+              }
+            },
+            "timestamp": {
+              "type": "integer"
+            },
+            "duration": {
+              "type": "float"
+            }
+          }
+        },
+        "profile": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "context": {
+          "dynamic": "true",
+          "type": "object"
+        },
+        "properties": {
+          "dynamic": "true",
+          "type": "object",
+          "enabled": false
+        }
+      }
+    },
+    "aliases": {
+      "%%PREFIX%%.tracardi-session": {}
+    }
+  }
+}

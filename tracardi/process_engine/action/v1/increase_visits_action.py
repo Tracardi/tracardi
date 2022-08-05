@@ -1,6 +1,6 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 
 from tracardi.domain.profile_stats import ProfileStats
 
@@ -10,13 +10,16 @@ class IncreaseVisitsAction(ActionRunner):
     def __init__(self, *args, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
-        if self.profile.stats is None:
-            self.profile.stats = ProfileStats()
+        if self.event.metadata.profile_less is True:
+            self.console.warning("Can not increase profile visits in profile less events.")
+        else:
+            if self.profile.stats is None:
+                self.profile.stats = ProfileStats()
 
-        if self.session is not None and self.session.operation.new:
-            self.profile.increase_visits()
+            if self.session is not None and self.session.operation.new:
+                self.profile.increase_visits()
 
         return Result(port="payload", value=payload)
 
@@ -38,10 +41,15 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Increase visits',
             desc='Increases visit field in profile and returns payload.',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='plus',
-            group=["Stats"]
+            group=["Stats"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns object received by plugin in input.")
+                }
+            )
         )
     )

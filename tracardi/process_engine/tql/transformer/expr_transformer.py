@@ -1,5 +1,9 @@
+import datetime
+
 import dateparser
-from tracardi_dot_notation.dot_accessor import DotAccessor
+import pytimeparse
+import pytz
+from tracardi.service.notation.dot_accessor import DotAccessor
 
 from ..domain.field import Field
 from .function_transformer import FunctionTransformer
@@ -15,6 +19,8 @@ operation_mapper = {
     '>': 'greaterThan',
     '<': 'lessThan',
     'is null': 'isNull',
+    'exists': 'exists',
+    'not exists': 'not exists',
     'startsWith': 'starts with',  # todo: implement,
     'endsWith': 'ends with',  # todo: implement,
     'matchesRegex': 'regex',  # todo: implement,
@@ -53,8 +59,8 @@ class ExprTransformer(TransformerNamespace):
     def OP(self, args):
         return args.value
 
-    def OP_INTEGER(self, args):
-        return int(args.value)
+    def OP_NUMBER(self, args):
+        return float(args.value)
 
     def OP_STRING(self, args):
         return args.value.strip('"')
@@ -75,6 +81,10 @@ class ExprTransformer(TransformerNamespace):
             return value1 < value2
         elif operation == '<=':
             return value1 <= value2
+        elif operation == '=<':
+            return value1 <= value2
+        elif operation == '=>':
+            return value1 >= value2
 
     def op_condition(self, args):
         value1, operation, value2 = args
@@ -107,40 +117,111 @@ class ExprTransformer(TransformerNamespace):
     def OP_VALUE_TYPE(self, args):
         return args.value
 
+    def op_value_or_field(self, args):
+        if len(args) != 1:
+            raise ValueError("Expected 1 arg.")
+
+        value = args[0]
+        if isinstance(value, Field):
+            return value.value
+
+        return value
+
     def op_compound_value(self, args):
-        value_type, value = args
-        if value_type == 'datetime':
 
-            if not isinstance(value, str):
-                raise ValueError(
-                    "Value of `{}` must be string to compare it with datetime. Type of {} given".format(value,
-                                                                                                        type(value)))
+        function = args[0]
 
-            date = dateparser.parse(value)
+        if len(args) > 1:
+            values = args[1:]
+        else:
+            values = []
 
-            if not date:
-                raise ValueError("Could not parse date `{}`".format(value))
-            return date
-        raise ValueError("Unknown type `{}`".format(value_type))
+        if not values or values[0] is None:
+            if function == 'now':
+                return datetime.datetime.now()
+            if function == 'utcnow':
+                return datetime.datetime.utcnow()
+        else:
+            if function == 'datetime' and len(values) == 1:
+                value = values[0]
 
-    @staticmethod
-    def op_compound_field(args):
-        value_type, field = args
+                if isinstance(value, str):
+                    date = dateparser.parse(value)
 
-        value = field._get_value()
-        if value_type == 'datetime':
+                    if not date:
+                        raise ValueError("Could not parse date `{}`".format(value))
+                elif isinstance(value, datetime.datetime):
+                    return value
+                else:
+                    raise ValueError(
+                        "Value of `{}` must be string to compare it with datetime. Type of {} given".format(value,
+                                                                                                            type(
+                                                                                                                value)))
+                return date
 
-            if not isinstance(value, str):
-                raise ValueError(
-                    "Value of `{}` must be string to compare it with datetime. Type of {} given".format(field.label,
-                                                                                                        type(value)))
+            if function == 'now' and len(values) == 1:
+                timezone = values[0]
+                return datetime.datetime.now(pytz.timezone(timezone))
 
-            date = dateparser.parse(value)
-            if not date:
-                raise ValueError("Could not parse date `{}`".format(value))
-            return date
+            if function == 'now.offset' and len(values) == 1:
+                offset = values[0]
+                passed_seconds = pytimeparse.parse(offset)
+                if passed_seconds is None:
+                    raise ValueError("Could not parse `{}`".format(offset))
+                return datetime.datetime.now() + datetime.timedelta(seconds=passed_seconds)
 
-        raise ValueError("Unknown type `{}`".format(value_type))
+            if function == 'now.timezone.offset' and len(values) == 2:
+                timezone, offset = values
+                passed_seconds = pytimeparse.parse(offset)
+                if passed_seconds is None:
+                    raise ValueError("Could not parse `{}`".format(offset))
+                timezone = pytz.timezone(timezone)
+                return datetime.datetime.now(timezone) + datetime.timedelta(seconds=passed_seconds)
+
+            if function == 'datetime.offset' and len(values) == 2:
+                date, offset = values
+                passed_seconds = pytimeparse.parse(offset)
+                if passed_seconds is None:
+                    raise ValueError("Could not parse `{}`".format(offset))
+
+                if isinstance(date, str):
+                    date = dateparser.parse(date)
+
+                return date + datetime.timedelta(seconds=passed_seconds)
+
+            if function == 'datetime.timezone' and len(values) == 2:
+                date, timezone = values
+
+                if isinstance(date, str):
+                    date = dateparser.parse(date)
+
+                timezone = pytz.timezone(timezone)
+                tz_date = date.replace(tzinfo=pytz.utc).astimezone(timezone)
+                return timezone.normalize(tz_date)
+
+            if function == 'datetime.from_timestamp' and len(values) == 1:
+                timestamp, = values
+                return datetime.datetime.fromtimestamp(timestamp)
+
+            if function == 'now.timezone' and len(values) == 1:
+                timezone, = values
+                timezone = pytz.timezone(timezone)
+                tz_date = datetime.datetime.now().replace(tzinfo=pytz.utc).astimezone(timezone)
+                return timezone.normalize(tz_date)
+
+            if function == 'lowercase' and len(values) == 1:
+                value = values[0]
+                if isinstance(value, str):
+                    return value.lower()
+                return value
+
+            if function == 'uppercase' and len(values) == 1:
+                value = values[0]
+                if isinstance(value, str):
+                    return value.upper()
+                return value
+
+        raise ValueError("Unknown type `{}`".format(function))
 
     def op_field_sig(self, args):
         return args[0]
@@ -151,8 +232,27 @@ class ExprTransformer(TransformerNamespace):
     def op_is_null(self, args):
         return args[0].value is None
 
+    def op_is_not_null(self, args):
+        return args[0].value is not None
+
     def op_exists(self, args):
         return args[0].label in self._dot
 
     def op_not_exists(self, args):
         return args[0].label not in self._dot
+
+    def op_empty(self, args):
+        return args[0].label not in self._dot or args[0].value is None \
+               or (
+                       (
+                               isinstance(args[0].value, str)
+                               or isinstance(args[0].value, list)
+                               or isinstance(args[0].value, dict)
+                       ) and len(args[0].value) == 0
+               )
+
+    def op_not_empty(self, args):
+        try:
+            return not self.op_empty(args)
+        except AttributeError:
+            return True

@@ -14,9 +14,16 @@ class FieldTypeConflictException(TracardiException):
 
     def __init__(self, *args, rows=None):
         TracardiException.__init__(self, *args)
-        self.details = [row['index']['error']['reason'] for row in rows]
+        if isinstance(rows, list):
+            self.details = [row['index']['error']['reason'] for row in rows]
+        elif isinstance(rows, str):
+            self.details = rows
+        else:
+            self.details = "Unknown"
 
     def explain(self):
+        if isinstance(self.details, str):
+            return self.details
         return ",".join(self.details)
 
 
@@ -29,4 +36,19 @@ class UnauthorizedException(TracardiException):
 
 
 class WorkflowException(Exception):
+    pass
+
+
+class ConnectionException(TracardiException):
+
+    def __init__(self, *args, response=None):
+        TracardiException.__init__(self, *args)
+        self.response = response
+
+
+class LoginException(TracardiException):
+    pass
+
+
+class EventValidationException(TracardiException):
     pass

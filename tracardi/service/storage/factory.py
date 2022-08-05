@@ -1,6 +1,6 @@
 import elasticsearch
-from typing import Union
-from tracardi.service.storage.elastic_storage import ElasticStorage
+from typing import Union, List, Optional
+from tracardi.service.storage.elastic_storage import ElasticStorage, ElasticFiledSort
 from tracardi.service.storage.persistence_service import PersistenceService
 from tracardi.domain.entity import Entity
 from pydantic import BaseModel
@@ -23,6 +23,10 @@ class BaseStorageCrud:
         service = self._get_storage_service()
         return await service.delete(self.entity.id)
 
+    async def refresh(self) -> dict:
+        service = self._get_storage_service()
+        return await service.refresh()
+
     def _get_storage_service(self):
         return storage_manager(self.index)
 
@@ -43,6 +47,18 @@ class EntityStorageCrud(BaseStorageCrud):
     async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
         service = self._get_storage_service()
         return await service.load_by(field, value, limit)
+
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+        service = self._get_storage_service()
+        return await service.load_by_query_string(query_string, limit)
+
+    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+        service = self._get_storage_service()
+        return await service.match_by(field, value, limit)
+
+    async def load_by_values(self, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None, limit: int = 100):
+        service = self._get_storage_service()
+        return await service.load_by_values(key_value_pairs, sort_by, limit=limit)
 
     async def delete_by(self, field, value) -> dict:
         service = self._get_storage_service()
@@ -83,10 +99,17 @@ class CollectionCrud:
         self.index = index
         self.storage = storage_manager(self.index)
 
-    async def save(self, replace_id: bool = True) -> BulkInsertResult:
+    async def save(self, replace_id: bool = True, exclude=None) -> BulkInsertResult:
         if not isinstance(self.payload, list):
             raise TracardiException("CollectionCrud data payload must be list.")
-        data = [p.dict() for p in self.payload if isinstance(p, BaseModel)]
+
+        data = []
+        for p in self.payload:
+            if isinstance(p, BaseModel):
+                data.append(p.dict(exclude=exclude))
+            elif isinstance(p, dict):
+                data.append(p)
+
         return await self.storage.upsert(data, replace_id)
 
     async def load(self, start: int = 0, limit: int = 100) -> StorageResult:
@@ -95,25 +118,30 @@ class CollectionCrud:
             return await self.storage.load_all(start, limit)
 
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args):
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
-    async def uniq_field_value(self, field) -> AggResult:
+    async def uniq_field_value(self, field, search=None, limit=500) -> AggResult:
         try:
             query = {
                 "size": "0",
                 "aggs": {
                     "uniq": {
                         "terms": {
-                            "field": field
+                            "field": field,
+                            "size": limit
                         }
                     }
                 }
             }
             return AggResult('uniq', await self.storage.query(query), return_counts=False)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            message, details = e.args
-            raise StorageException(str(e), message=message, details=details)
+            if len(e.args):
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
 
 
 class StorageFor:

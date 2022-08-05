@@ -1,14 +1,15 @@
 from typing import Union
 
-from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from pydantic import validator
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class DecrementConfig(BaseModel):
+class DecrementConfig(PluginConfig):
     field: str
     decrement: Union[float, int]
 
@@ -28,14 +29,9 @@ class DecrementAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
+        dot = self._get_dot_accessor(payload)
 
         try:
 
@@ -48,13 +44,13 @@ class DecrementAction(ActionRunner):
             value = 0
 
         if type(value) != int:
-            raise ValueError("Filed `{}` value is not numeric.".format(self.config.field))
+            raise ValueError("Value of field '{}' is not numeric.".format(self.config.field))
 
         value -= self.config.decrement
 
         dot[self.config.field] = value
-
-        self.profile.replace(Profile(**dot.profile))
+        if self.event.metadata.profile_less is False:
+            self.profile.replace(Profile(**dot.profile))
 
         return Result(port="payload", value=payload)
 
@@ -104,10 +100,16 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Decrement counter',
             desc='Decrement profile stats.counters value. Returns payload',
-            type='flowNode',
-            width=200,
-            height=100,
             icon='minus',
-            group=["Stats"]
+            group=["Stats"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns taken object with field from configuration decremented "
+                                            "by value from configuration.")
+                }
+            )
         )
     )

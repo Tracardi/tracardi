@@ -1,72 +1,97 @@
 import logging
 
+from pydantic import BaseModel
+
 from tracardi.config import tracardi
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.runner import ActionRunner
 from deepdiff import DeepDiff
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi_dot_notation.dot_accessor import DotAccessor
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
+from tracardi.service.plugin.domain.config import PluginConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 
 
+class TraitsConfiguration(BaseModel):
+    set: dict = {}
+
+
+class Configuration(PluginConfig):
+    traits: TraitsConfiguration
+
+
+def validate(config: dict):
+    return Configuration(**config)
+
+
 class CopyTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'copy' not in kwargs:
-            raise ValueError("Please define copy in config section.")
-        if not isinstance(kwargs['copy'], dict):
-            raise ValueError("Please define copy as dictionary not {}.".format(type(kwargs['copy'])))
+        self.config = validate(kwargs)
+        self.mapping = self.config.traits.set
 
-        self.mapping = kwargs['copy']
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
-    async def run(self, payload: dict):
-
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         for destination, value in self.mapping.items():
             dot[destination] = value
 
         logger.debug("NEW PROFILE: {}".format(dot.profile))
 
-        if not isinstance(dot.profile['traits']['private'], dict):
-            raise ValueError(
-                "Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
-                "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
+        if self.event.metadata.profile_less is False:
+            if 'traits' not in dot.profile:
+                raise ValueError("Missing traits in profile.")
 
-        if not isinstance(dot.profile['traits']['public'], dict):
-            raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
-                             "E.g. `name`: `{}`".format(dot.profile['traits']['public'],
-                                                        dot.profile['traits']['public']))
+            if 'private' not in dot.profile['traits']:
+                raise ValueError("Missing `traits.private` in profile.")
 
-        profile = Profile(**dot.profile)
+            if 'public' not in dot.profile['traits']:
+                raise ValueError("Missing `traits.public` in profile.")
+
+            if not isinstance(dot.profile['traits']['private'], dict):
+                raise ValueError(
+                    "Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
+                    "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
+
+            if not isinstance(dot.profile['traits']['public'], dict):
+                raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
+                                 "E.g. `name`: `{}`".format(dot.profile['traits']['public'],
+                                                            dot.profile['traits']['public']))
+
+            profile = Profile(**dot.profile)
+
+            flat_profile = flatten(profile.dict())
+            flat_dot_profile = flatten(Profile(**dot.profile).dict())
+            diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
+
+            if diff_result and 'dictionary_item_removed' in diff_result:
+                errors = [item.replace("root[", "profile[") for item in diff_result['dictionary_item_removed']]
+                error_msg = "Some values were not added to profile. Profile schema seems not to have path: {}. " \
+                            "This node is probably misconfigured.".format(errors)
+                raise ValueError(error_msg)
+
+            self.profile.replace(profile)
+        else:
+            if dot.profile:
+                self.console.warning("Profile changes were discarded in node `Set Trait`. This event is profile "
+                                     "less so there is no profile.")
+
         event = Event(**dot.event)
-        session = Session(**dot.session)
-
-        flat_profile = flatten(profile.dict())
-        flat_dot_profile = flatten(Profile(**dot.profile).dict())
-        diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
-
-        if diff_result and 'dictionary_item_removed' in diff_result:
-            errors = [item.replace("root[", "profile[") for item in diff_result['dictionary_item_removed']]
-            error_msg = "Some values were not added to profile. Profile schema seems not to have path: {}. " \
-                        "This node is probably misconfigured.".format(errors)
-            raise ValueError(error_msg)
-
-        self.profile.replace(profile)
-        self.session.replace(session)
         self.event.replace(event)
+
+        if 'id' in dot.session:
+            session = Session(**dot.session)
+            self.session.replace(session)
+
+        self.update_profile()
 
         return Result(port="payload", value=payload)
 
@@ -80,22 +105,46 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["payload"],
             init={
-                "copy": {
-                    "target1": "source1",
-                    "target2": "source2",
+                "traits": {
+                    "set": {
+                    }
                 }
             },
-            version='0.1',
+            form=Form(groups=[
+                FormGroup(
+                    name="Copy data",
+                    fields=[
+                        FormField(
+                            id="traits",
+                            name="Define the copy/set actions",
+                            description="Provide source and target data along with action you would like to perform.",
+                            component=FormComponent(type="copyTraitsInput",
+                                                    props={"actions": {"set": "Set to"},
+                                                           "defaultAction": "set",
+                                                           "defaultSource": "event@properties",
+                                                           "defaultTarget": "profile@traits"
+                                                           })
+                        )
+                    ]
+                ),
+            ]),
+            version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Copy/Set Trait',
-            desc='Returns payload with copied/set traits.',
-            type='flowNode',
-            width=100,
-            height=100,
+            name='Copy data',
+            desc='Copy event property to profile trait. This plugin copies event properties to defined destination.',
             icon='copy',
-            group=["Data processing"]
+            tags=['profile', 'event', 'traits', 'memory', 'reference', 'data', "read"],
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns given payload modified according to configuration.")
+                }
+            )
         )
     )

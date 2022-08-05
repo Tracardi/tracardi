@@ -1,0 +1,45 @@
+{
+  "settings": {
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%
+  },
+  "mappings": {
+    "_meta": {
+      "version": "%%VERSION%%",
+      "name": "%%PREFIX%%"
+    },
+    "dynamic": "false",
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "projects": {
+        "type": "keyword"
+      },
+      "draft": {
+        "type": "keyword",
+        "index": false
+      },
+      "production": {
+        "type": "keyword",
+        "index": false
+      },
+      "backup": {
+        "type": "keyword",
+        "index": false
+      },
+      "lock": {
+        "type": "boolean"
+      }
+    }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
+  }
+}

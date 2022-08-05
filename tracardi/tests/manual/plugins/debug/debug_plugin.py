@@ -1,6 +1,6 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.runner import ActionRunner
 
 
 class DebugPlugin(ActionRunner):
@@ -8,14 +8,14 @@ class DebugPlugin(ActionRunner):
     def __init__(self):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         return Result(port="payload", value=payload)
 
 
 def register() -> Plugin:
     return Plugin(
         spec=Spec(
-            module='task_plugins.debug.debug_plugin',
+            module=__name__,
             className='DebugPlugin',
             inputs=[],
             outputs=["payload"]

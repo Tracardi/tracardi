@@ -1,13 +1,13 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
 
 
 class EndAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         pass
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None):
         return None
 
 
@@ -15,7 +15,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.end_action',
+            module=__name__,
             className='EndAction',
             inputs=["payload"],
             outputs=[],
@@ -27,10 +27,14 @@ def register() -> Plugin:
         metadata=MetaData(
             name='End',
             desc='Ends workflow.',
-            type='flowNode',
-            width=100,
-            height=100,
+            type="startNode",
             icon='stop',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={}
+            )
         )
     )

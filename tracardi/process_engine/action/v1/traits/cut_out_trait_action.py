@@ -1,32 +1,35 @@
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from pydantic import validator
 
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
+
+
+class CutOutTraitConfig(PluginConfig):
+    trait: str
+
+    @validator("trait")
+    def trait_should_not_be_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Trait should not be empty")
+
+        return value
+
+
+def validate(config: dict):
+    return CutOutTraitConfig(**config)
 
 
 class CutOutTraitAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        if 'trait' not in kwargs:
-            raise ValueError("Please define trait in config section.")
+        self.property = validate(kwargs)
 
-        if kwargs['trait'] == 'undefined':
-            raise ValueError("Please define trait in config section. It has default value of undefined.")
-
-        self.property = kwargs['trait']
-
-    async def run(self, payload: dict):
-
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
-
-        return Result(port="trait", value=dot[self.property])
+    async def run(self, payload: dict, in_edge=None) -> Result:
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
+        return Result(port="trait", value=dot[self.property.trait])
 
 
 def register() -> Plugin:
@@ -42,32 +45,37 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Cut data to payload",
                     fields=[
                         FormField(
                             id="trait",
-                            name="Path to trait",
-                            description="Provide path to field that you would like to return as output. "
+                            name="Path to data",
+                            description="Provide path to field that you would like to return as output payload. "
                                         "E.g. event@session.context.browser.browser.userAgent",
-                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
-                            validation=FormFieldValidation(
-                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
-                                message="This field must be in Tracardi dot path format."
-                            )
+                            component=FormComponent(type="dotPath", props={"label": "Field path",
+                                                                           "defaultSourceValue": "event",
+                                                                           "forceMode": 1})
                         )
                     ]
                 )
             ]),
-            version='0.1',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Cut out trait',
-            desc='Returns defined property from payload.',
-            type='flowNode',
-            width=200,
-            height=100,
+            name='Cut out data',
+            desc='Returns a part of referenced data as payload.',
             icon='property',
-            group=["Data processing"]
+            group=["Data processing"],
+            tags=['traits', 'profile', 'memory', 'reference', 'data'],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "trait": PortDoc(desc="This port returns field selected from payload in configuration.")
+                }
+            )
         )
     )

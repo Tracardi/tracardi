@@ -6,7 +6,7 @@ class DotNotationConverter:
     def __init__(self, profile):
         self.profile = profile
 
-    def get_profile_fiel_value_pair(self, dot_notation):
+    def get_profile_file_value_pair(self, dot_notation):
         if dot_notation.startswith('profile@'):
             field = dot_notation[len('profile@'):]
             dot = dotty(self.profile.dict())

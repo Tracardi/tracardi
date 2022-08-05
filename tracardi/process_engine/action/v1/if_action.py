@@ -1,19 +1,20 @@
-from pydantic import BaseModel, validator
-from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from pydantic import validator
+from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.runner import ActionRunner
 
 from tracardi.process_engine.tql.condition import Condition
 
 
-class IfConfiguration(BaseModel):
+class IfConfiguration(PluginConfig):
     condition: str
 
     @validator("condition")
     def is_valid_condition(cls, value):
-        _condition = Condition()
         try:
+            _condition = Condition()
             _condition.parse(value)
         except Exception as e:
             raise ValueError(str(e))
@@ -30,18 +31,18 @@ class IfAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload: dict):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.config.condition is None:
             raise ValueError("Condition is not set. Define it in config section.")
 
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+        dot = self._get_dot_accessor(payload)
 
         condition = Condition()
         if await condition.evaluate(self.config.condition, dot):
-            return Result(port="TRUE", value=payload)
+            return Result(port="true", value=payload)
         else:
-            return Result(port="FALSE", value=payload)
+            return Result(port="false", value=payload)
 
 
 def register() -> Plugin:
@@ -51,14 +52,15 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.if_action',
             className='IfAction',
             inputs=["payload"],
-            outputs=["TRUE", "FALSE"],
+            outputs=["true", "false"],
             init={"condition": ""},
             form=Form(groups=[
                 FormGroup(
+                    name="Condition statement",
                     fields=[
                         FormField(
                             id="condition",
-                            name="Condition statement",
+                            name="If condition statement",
                             description="Provide condition for IF statement. If the condition is met then the payload "
                                         "will be returned on TRUE port if not then FALSE port is triggered.",
                             component=FormComponent(type="textarea", props={"label": "condition"})
@@ -67,7 +69,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual="if_action",
-            version='0.2',
+            version='0.7.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
@@ -75,11 +77,17 @@ def register() -> Plugin:
             name='If',
             desc='This a conditional action that conditionally runs a branch of workflow.',
             keywords=['condition'],
-            type='flowNode',
-            width=200,
-            height=100,
+            type="condNode",
             icon='if',
-            editor='text',
-            group=['Conditions']
+            group=['Flow control'],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={
+                    "true": PortDoc(desc="Returns payload if the defined condition is met."),
+                    "false": PortDoc(desc="Returns payload if the defined condition is NOT met.")
+                }
+            )
         )
     )

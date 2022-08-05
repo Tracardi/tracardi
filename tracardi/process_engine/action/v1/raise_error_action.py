@@ -1,12 +1,12 @@
-from pydantic import BaseModel
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
-from tracardi_plugin_sdk.action_runner import ActionRunner
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
 
 from tracardi.exceptions.exception import WorkflowException
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class ErrorConfiguration(BaseModel):
+class ErrorConfiguration(PluginConfig):
     message: str = "Workflow stopped"
 
 
@@ -19,7 +19,7 @@ class RaiseErrorAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None):
         raise WorkflowException(self.config.message)
 
 
@@ -31,12 +31,13 @@ def register() -> Plugin:
             className='RaiseErrorAction',
             inputs=["payload"],
             outputs=[],
-            version='0.1',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski",
             init={
                 "message": "Flow stopped due to error."
             },
+            manual="throw_error_action",
             form=Form(groups=[
                 FormGroup(
                     fields=[
@@ -53,10 +54,13 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Throw error',
             desc='Throws an error and stops workflow.',
-            type='flowNode',
-            width=100,
-            height=100,
-            icon='stop',
-            group=["Input/Output"]
+            icon='error',
+            group=["Error reporting"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON like object.")
+                },
+                outputs={}
+            )
         )
     )

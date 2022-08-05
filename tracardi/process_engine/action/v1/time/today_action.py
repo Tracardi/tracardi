@@ -1,11 +1,11 @@
-import re
 from datetime import datetime
 
 import pytz
 from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 
 
 class TodayConfiguration(BaseModel):
@@ -19,12 +19,12 @@ class TodayConfiguration(BaseModel):
         if value != value.strip():
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        if not re.match(
-                r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
-                value.strip()
-        ):
-            raise ValueError("This field must be in form of dot notation. E.g. "
-                             "session@context.time.tz")
+        # if not re.match(
+        #         r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
+        #         value.strip()
+        # ):
+        #     raise ValueError("This field must be in form of dot notation. E.g. "
+        #                      "session@context.time.tz")
         return value
 
 
@@ -38,7 +38,7 @@ class TodayAction(ActionRunner):
         self.config = validate(kwargs)
         self.week_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         if self.config.timezone is not None:
             time_zone = dot[self.config.timezone]
@@ -103,7 +103,7 @@ def register() -> Plugin:
                         FormField(
                             id="timezone",
                             name="Path to timezone",
-                            description="Provide path to field that has timezone. "
+                            description="Type path to field that has timezone. "
                                         "E.g. session@context.time.tz",
                             component=FormComponent(type="dotPath", props={"label": "Timezone"})
                         )
@@ -114,11 +114,16 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Today',
-            desc='Gets today object, that consists day of week, date and current time.',
-            type='flowNode',
-            width=100,
-            height=100,
+            desc='Returns information about current time, month, day, etc. It will consists of day of the week, date and current time.',
             icon='today',
-            group=["Time"]
+            group=["Time"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns payload containing current date, time, etc.")
+                }
+            )
         )
     )

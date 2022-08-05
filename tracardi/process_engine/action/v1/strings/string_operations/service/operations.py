@@ -1,0 +1,23 @@
+def convert(string):
+    return {
+        "capitalize": string.capitalize(),
+        "casefold": string.casefold(),
+        "encode": string.encode(),
+        "isalnum": string.isalnum(),
+        "isalpha": string.isalpha(),
+        "isascii": string.isascii(),
+        "isdecimal": string.isdecimal(),
+        "isdigit": string.isdigit(),
+        "isidentifier": string.isidentifier(),
+        "islower": string.islower(),
+        "isnumeric": string.isnumeric(),
+        "isprintable": string.isprintable(),
+        "isspace": string.isspace(),
+        "istitle": string.istitle(),
+        "isupper": string.isupper(),
+        "lower": string.lower(),
+        "lstrip": string.lstrip(),
+        "swapcase": string.swapcase(),
+        "title": string.title(),
+        "upper": string.upper()
+    }

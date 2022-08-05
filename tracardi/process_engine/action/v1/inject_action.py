@@ -1,38 +1,78 @@
 import json
 from json import JSONDecodeError
-from typing import Dict, Union
 
-from pydantic import BaseModel, validator
-from tracardi_dot_notation.dict_traverser import DictTraverser
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from pydantic import validator
+from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Configuration(BaseModel):
-    value: Union[str, Dict] = ""
+class Configuration(PluginConfig):
+    value: str = "{}"
+    destination: str = "payload"
 
     @validator("value")
     def validate_content(cls, value):
         try:
-            # Try parsing JSON
-            return json.loads(value)
+            if isinstance(value, dict):
+                value = json.dumps(value)
+            return value
+
         except JSONDecodeError as e:
             raise ValueError(str(e))
 
 
 def validate(config: dict) -> Configuration:
-    return Configuration(**config)
+    config = Configuration(**config)
+
+    # Try parsing JSON just for validation purposes
+    try:
+        json.loads(config.value)
+    except JSONDecodeError as e:
+        raise ValueError(str(e))
+
+    return config
 
 
 class InjectAction(ActionRunner):
 
     def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+        self.config = Configuration(**kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
+        if self.debug is True:
+            self.event.metadata.debug = True
+
         converter = DictTraverser(self._get_dot_accessor(payload))
-        return Result(value=converter.reshape(self.config.value), port="payload")
+
+        try:
+            output = json.loads(self.config.value)
+        except JSONDecodeError as e:
+            raise ValueError(str(e))
+
+        inject = converter.reshape(output)
+        if self.config.destination == 'event-properties':
+            self.event.properties = inject
+        elif self.config.destination == 'profile-pii':
+            self.profile.pii = inject
+        elif self.config.destination == 'profile-traits-public':
+            self.profile.traits.public = inject
+        elif self.config.destination == 'profile-traits-private':
+            self.profile.traits.private = inject
+        elif self.config.destination == 'profile-interests':
+            self.profile.interests = inject
+        elif self.config.destination == 'profile-counters':
+            self.profile.stats.counters = inject
+        elif self.config.destination == 'profile-consents':
+            self.profile.consents = inject
+        elif self.config.destination == 'session-context':
+            self.session.context = inject
+        elif self.config.destination == 'payload':
+            return Result(value=inject, port="payload")
+        return Result(value={}, port="payload")
 
 
 def register() -> Plugin:
@@ -44,7 +84,7 @@ def register() -> Plugin:
             className='InjectAction',
             inputs=[],
             outputs=["payload"],
-            init={"value": ""},
+            init={"value": "{}", "destination": "payload"},
             form=Form(groups=[
                 FormGroup(
                     name="Create payload object",
@@ -52,26 +92,45 @@ def register() -> Plugin:
                         FormField(
                             id="value",
                             name="Object to inject",
-                            description="Provide object as JSON to be injected into payload and returned "
+                            description="Type object as JSON to be injected into payload and returned "
                                         "on output port.",
                             component=FormComponent(type="json", props={"label": "object"})
+                        ),
+                        FormField(
+                            id="destination",
+                            name="Inject data into",
+                            description="Select where the data should be injected.",
+                            component=FormComponent(type="select", props={"label": "Destination", "items":{
+                                'event-properties': "Event Properties",
+                                'payload': "Payload",
+                                'profile-pii': "Profile PII",
+                                'profile-traits-public': "Public Profile Traits",
+                                'profile-traits-private': "Private Profile Traits",
+                                'profile-interests': "Profile Interests",
+                                'profile-counters': "Profile Counters",
+                                'profile-consents': "Profile Consents",
+                                'session-context': "Session Context"
+                            }})
                         )
                     ]
                 ),
             ]),
             manual='inject_action',
-            version='0.1',
+            version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Inject',
-            desc='Injector.',
+            desc='Injects data into selected object (e.g. payload, event properties, session context, etc).',
             keywords=['start node'],
-            type='flowNode',
-            width=100,
-            height=100,
             icon='json',
-            group=["Input/Output"]
+            group=["Input/Output"],
+            documentation=Documentation(
+                inputs={},
+                outputs={
+                    "payload": PortDoc(desc="This port returns object received by plugin in configuration.")
+                }
+            )
         )
     )

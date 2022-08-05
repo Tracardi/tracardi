@@ -1,18 +1,20 @@
 from asyncio import sleep
 
-from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormComponent, FormField
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from pydantic import validator
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormComponent, FormField, \
+    Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class SleepConfiguration(BaseModel):
+class SleepConfiguration(PluginConfig):
     wait: float
 
     @validator('wait')
     def is_bigger_then_zero(cls, value):
         if value < 0:
-            raise ValueError("I can not wait less then zero seconds.")
+            raise ValueError("Wait value has to be greater than or equal to 0.")
         return value
 
 
@@ -25,7 +27,7 @@ class SleepAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         await sleep(float(self.config.wait))
         return Result(port="payload", value=payload)
 
@@ -44,6 +46,7 @@ def register() -> Plugin:
             init={"wait": 1},
             form=Form(groups=[
                 FormGroup(
+                    name="Delay workflow",
                     fields=[
                         FormField(
                             id="wait",
@@ -63,11 +66,16 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Wait',
-            desc='Waits workflow for given time.',
-            type='flowNode',
-            width=100,
-            height=100,
+            desc='Stops workflow for given time.',
             icon='sleep',
-            group=["Time"]
+            group=["Time"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns exactly same payload as given one.")
+                }
+            )
         )
     )

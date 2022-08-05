@@ -1,0 +1,99 @@
+{
+  "settings": {
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%
+  },
+  "mappings": {
+    "_meta": {
+      "version": "%%VERSION%%",
+      "name": "%%PREFIX%%"
+    },
+    "dynamic": "false",
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "url": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "locked": {
+        "type": "boolean"
+      },
+      "transitional": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "groups": {
+        "type": "keyword"
+      },
+      "icon": {
+        "type": "keyword",
+        "index": false
+      },
+      "configurable": {
+        "type": "boolean"
+      },
+      "hash": {
+        "type": "keyword"
+      },
+      "returns_profile": {
+        "type": "boolean"
+      },
+      "permanent_profile_id": {
+        "type": "boolean"
+      },
+      "manual": {
+        "type": "keyword",
+        "index": false
+      },
+      "endpoints": {
+        "properties": {
+          "get": {
+            "properties": {
+              "url": {
+                "type": "keyword",
+                "index": false
+              },
+              "method": {
+                "type": "keyword",
+                "index": false
+              }
+            }
+          },
+          "post": {
+            "properties": {
+              "url": {
+                "type": "keyword",
+                "index": false
+              },
+              "method": {
+                "type": "keyword",
+                "index": false
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
+  }
+}

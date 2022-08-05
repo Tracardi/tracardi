@@ -1,0 +1,134 @@
+{
+  "index_patterns": [
+    "%%VERSION%%.%%PREFIX%%.tracardi-event-*-*"
+  ],
+  "template": {
+    "settings": {
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%,
+      "index.mapping.total_fields.limit": 2000,
+      "index.refresh_interval": "10s"
+    },
+    "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
+      },
+      "dynamic": "false",
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "metadata": {
+          "properties": {
+            "time": {
+              "properties": {
+                "insert": {
+                  "type": "date"
+                },
+                "process_time": {
+                  "type": "float"
+                }
+              }
+            },
+            "status": {
+              "type": "keyword",
+              "null_value": "NULL"
+            },
+            "processed_by": {
+              "properties": {
+                "rules": {
+                  "type": "keyword"
+                },
+                "third_party": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "profile_less": {
+              "type": "boolean"
+            },
+            "instance": {
+              "properties": {
+                "id": {
+                   "type": "keyword"
+                }
+              }
+            },
+            "debug": {
+              "type": "boolean"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword",
+          "null_value": "NULL"
+        },
+        "properties": {
+          "enabled": false,
+          "dynamic": "true",
+          "type": "object"
+        },
+        "source": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "session": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "start": {
+              "type": "date"
+            },
+            "duration": {
+              "type": "float"
+            }
+          }
+        },
+        "profile": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "aux": {
+          "dynamic": "true",
+          "type": "object",
+          "enabled": false
+        },
+        "config": {
+          "dynamic": "true",
+          "type": "object",
+          "enabled": false
+        },
+        "context": {
+          "dynamic": "true",
+          "type": "object",
+          "enabled": false
+        },
+        "traits": {
+          "dynamic": "true",
+          "type": "object"
+        },
+        "tags": {
+          "properties": {
+            "values": {
+              "type": "keyword"
+            },
+            "count": {
+              "type": "double"
+            }
+          }
+        }
+      }
+    },
+    "aliases": {
+      "%%PREFIX%%.tracardi-event": {}
+    }
+  }
+}

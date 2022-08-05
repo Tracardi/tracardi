@@ -1,20 +1,20 @@
 from typing import Union
 
-from pydantic import BaseModel, validator
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    FormFieldValidation
-from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.result import Result
+from pydantic import validator
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class IncrementConfig(BaseModel):
+class IncrementConfig(PluginConfig):
     field: str
     increment: Union[int, float]
 
     @validator('field')
-    def field_must_match(cls, value, values, **kwargs):
+    def field_must_match(cls, value):
         if not value.startswith('profile@stats.counters'):
             raise ValueError(f"Only fields inside `profile@stats.counters` can be incremented. Field `{value}` given.")
         return value
@@ -29,14 +29,9 @@ class IncrementAction(ActionRunner):
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
-        dot = DotAccessor(
-            self.profile,
-            self.session,
-            payload if isinstance(payload, dict) else None,
-            self.event,
-            self.flow)
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         try:
 
@@ -55,7 +50,8 @@ class IncrementAction(ActionRunner):
 
         dot[self.config.field] = value
 
-        self.profile.replace(Profile(**dot.profile))
+        if self.event.metadata.profile_less is False:
+            self.profile.replace(Profile(**dot.profile))
 
         return Result(port="payload", value=payload)
 
@@ -77,11 +73,7 @@ def register() -> Plugin:
                             name="Path to field",
                             description="Provide path to field that should be incremented. "
                                         "E.g. profile@stats.counters.boughtProducts",
-                            component=FormComponent(type="dotPath", props={"label": "Field path"}),
-                            validation=FormFieldValidation(
-                                regex=r"^[a-zA-Z0-9\@\.\-_]+$",
-                                message="This field must be in Tracardi dot path format."
-                            )
+                            component=FormComponent(type="dotPath", props={"label": "Field path"})
                         )
                     ]
                 ),
@@ -96,11 +88,7 @@ def register() -> Plugin:
                                 type="text",
                                 props={
                                     "label": "Incrementation"
-                                }),
-                            validation=FormFieldValidation(
-                                regex=r"^\d+$",
-                                message="This field must be numeric."
-                            )
+                                })
                         )
                     ]
 
@@ -113,11 +101,16 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Increment counter',
-            desc='Increment profile stats.counters value. Returns payload',
-            type='flowNode',
-            width=200,
-            height=100,
+            desc='Increments given field in payload, returns payload.',
             icon='plus',
-            group=["Stats"]
+            group=["Stats"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns object received by plugin in input.")
+                }
+            )
         )
     )

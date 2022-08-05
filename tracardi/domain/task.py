@@ -1,52 +1,19 @@
-from typing import Any, Optional
-from uuid import uuid4
-from tracardi.domain.payload.event_payload import EventPayload
-
-from tracardi.domain.payload.tracker_payload import TrackerPayload
-
-from tracardi.domain.context import Context
-from tracardi.domain.metadata import Metadata
-from tracardi.domain.value_object.storage_info import StorageInfo
-
-from tracardi.domain.entity import Entity
+from tracardi.domain.named_entity import NamedEntity
+from datetime import datetime
+from pydantic import validator
+from typing import Optional
 
 
-class TaskEvent(Entity):
-    metadata: Metadata
-    type: str
-    properties: Optional[dict] = {}
-
-    source: Entity
-    session: Entity
-    profile: Entity
-    context: Context
-    options: Optional[dict] = {}
-
-    def to_tracker_payload(self) -> TrackerPayload:
-        return TrackerPayload(
-            metadata=self.metadata,
-            source=self.source,
-            session=self.session,
-            profile=self.profile,
-            context=self.context,
-            events=[EventPayload(type=self.type, properties=self.properties, options=self.options)]
-        )
-
-
-class Task(Entity):
-    id: str = None
-    timestamp: float
-    event: TaskEvent
+class Task(NamedEntity):
+    task_id: str
+    timestamp: Optional[datetime]
     status: str = 'pending'
+    progress: float = 0
+    type: str
+    params: dict = {}
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if self.id is None:
-            self.id = str(uuid4())
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'task',
-            Task
-        )
+    @validator("status")
+    def validate_status(cls, value):
+        if value not in ("pending", "running", "error", "done", "cancelled"):
+            raise ValueError(f"Status must be one of: pending, running, error, done, cancelled. {value} given.")
+        return value

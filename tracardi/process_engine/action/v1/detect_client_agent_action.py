@@ -1,17 +1,15 @@
 import asyncio
-import re
 from concurrent.futures import ThreadPoolExecutor
-
 from device_detector import DeviceDetector
-from pydantic import BaseModel, validator
+from pydantic import validator
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+    Documentation, PortDoc
+from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.domain.config import PluginConfig
 
-from tracardi_dot_notation.dot_accessor import DotAccessor
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
-from tracardi_plugin_sdk.domain.result import Result
-from tracardi_plugin_sdk.action_runner import ActionRunner
 
-
-class AgentConfiguration(BaseModel):
+class AgentConfiguration(PluginConfig):
     agent: str
 
     @validator("agent")
@@ -22,13 +20,7 @@ class AgentConfiguration(BaseModel):
         if value != value.strip():
             raise ValueError(f"This field must not have space. Space is at the end or start of '{value}'")
 
-        if not re.match(
-            r'^(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+$',
-            value.strip()
-        ):
-            raise ValueError("This field must be in form of dot notation. E.g. "
-                             "session@context.browser.browser.userAgent")
-        return value
+        return value.strip()
 
 
 def validate(config: dict) -> AgentConfiguration:
@@ -39,20 +31,22 @@ class DetectClientAgentAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
-        self.config.agent = self.config.agent.strip()
 
-    @staticmethod
-    def detect_device(ua):
-        detector = DeviceDetector(ua, skip_bot_detection=False)
-        return detector.parse()
+    def detect_device(self, ua):
+        try:
+            detector = DeviceDetector(ua, skip_bot_detection=False)
+            return detector.parse()
+        except Exception as e:
+            self.console.error(str(e))
+            return {}
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
             if not isinstance(self.session.context, dict):
                 raise KeyError("No session context defined.")
 
-            dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
+            dot = self._get_dot_accessor(payload)
             ua = dot[self.config.agent]
 
             with ThreadPoolExecutor(max_workers=10) as pool:
@@ -68,7 +62,7 @@ class DetectClientAgentAction(ActionRunner):
                     "model": {
                         "name": device.device_model(),
                         "brand": {
-                            "name": device.device_brand_name(),
+                            "name": device.device_brand(),
                         },
                         "type": device.device_type()
                     },
@@ -142,6 +136,7 @@ def register() -> Plugin:
             },
             form=Form(groups=[
                 FormGroup(
+                    name="Detect client type",
                     fields=[
                         FormField(
                             id="agent",
@@ -154,20 +149,24 @@ def register() -> Plugin:
                 )
             ]),
             manual="detect_client_agent_action",
-            version='0.1.1',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Get client agent',
+            name='Detect device',
             desc='It will parse any user agent string and detect the browser, operating system, device used (desktop, '
-                 'tablet, mobile, tv, cars, console, etc.), brand and model. It detects thousands '
-                 'of user agent strings, even from rare and obscure browsers and devices. It returns an '
-                 'object containing all the information',
-            type='flowNode',
-            width=200,
-            height=100,
+                 'tablet, mobile, tv, cars, console, etc.), brand and model.',
             icon='browser',
-            group=["Data processing"]
+            group=["Data processing"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                },
+                outputs={
+                    "payload": PortDoc(desc="This port returns information about user's client, so browser, "
+                                            "device info, etc.")
+                }
+            )
         )
     )

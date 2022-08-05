@@ -5,7 +5,7 @@ expr: and_expr
         | or_expr
 ?op_value:  OP_NULL
         | OP_BOOL
-        | OP_INTEGER
+        | OP_NUMBER
         | OP_FLOAT
         | OP_STRING
         | op_array
@@ -24,18 +24,27 @@ expr: and_expr
         | op_exists
         | op_field_sig OP function
         | op_field_eq_field
+        | op_empty
+        | op_not_empty
+        | op_is_not_null
 
 op_field_sig: OP_FIELD
-        | op_compound_field
+        | op_compound_value
 
 op_value_sig: op_value
     | op_compound_value
 
+op_value_or_field: op_value
+    | OP_FIELD
+
 op_field_eq_field: op_field_sig OP op_field_sig
 op_between: op_field_sig BETWEEN_TERMINAL op_range
+op_is_not_null: op_field_sig "IS NOT NULL"i
 op_is_null: op_field_sig "IS NULL"i
 op_exists: OP_FIELD EXISTS_TERMINAL
 op_not_exists: OP_FIELD "NOT"i EXISTS_TERMINAL
+op_empty: op_field_sig EMPTY_TERMINAL
+op_not_empty: op_field_sig "NOT"i EMPTY_TERMINAL
 
 OP: /(!=|<=|>=|=>|=<|==|>|<)/
 
@@ -47,10 +56,9 @@ OP_NULL: "NULL"i
 OP_BOOL: /(TRUE|FALSE)/i
 OP_FIELD: /(payload|session|event|profile|flow|source|context)\@[a-zA-Z0-9\._\-]+/
 OP_STRING: ESCAPED_STRING
-OP_VALUE_TYPE: /[a-zA-Z0-9]+/
-op_compound_value: OP_VALUE_TYPE "(" op_value ")"
-op_compound_field: OP_VALUE_TYPE "(" OP_FIELD ")"
-OP_INTEGER: /\d+/
+OP_VALUE_TYPE: /[a-zA-Z0-9\._]+/
+op_compound_value: OP_VALUE_TYPE "(" [op_value_or_field ("," op_value_or_field)*] ")"
+OP_NUMBER: /[+-]?([0-9]*[.])?[0-9]+/
 OP_FLOAT: NUMBER
 OP_TIME: /\d+(m|s|h|d)/
 
@@ -58,5 +66,6 @@ BETWEEN_TERMINAL: /(\r? \n|\s)+BETWEEN\s+/i
 AND_TERMINAL: /(\r? \n|\s)+AND(\r? \n|\s)+/i
 OR_TERMINAL: /(\r? \n|\s)+OR(\r? \n|\s)+/i
 EXISTS_TERMINAL: /EXISTS/i
+EMPTY_TERMINAL: /EMPTY/i
 
 %ignore WS

@@ -1,0 +1,37 @@
+{
+  "settings": {
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%
+  },
+  "mappings": {
+    "_meta": {
+      "version": "%%VERSION%%",
+      "name": "%%PREFIX%%"
+    },
+    "dynamic": "false",
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "ip": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date"
+      },
+      "track_rps": {
+        "type": "float"
+      },
+      "track_requests": {
+        "type": "integer"
+      },
+      "all_track_requests": {
+        "index": false,
+        "type": "integer"
+      }
+    }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
+  }
+}

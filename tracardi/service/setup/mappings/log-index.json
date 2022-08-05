@@ -1,0 +1,42 @@
+{
+  "index_patterns": [
+    "%%VERSION%%.%%PREFIX%%.tracardi-log-*-*"
+  ],
+  "template": {
+    "settings": {
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%,
+      "index.refresh_interval": "30s"
+    },
+    "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
+      },
+      "dynamic": "false",
+      "properties": {
+        "date": {
+          "type": "date"
+        },
+        "message": {
+          "type": "keyword"
+        },
+        "logger": {
+          "type": "keyword"
+        },
+        "file": {
+          "type": "keyword"
+        },
+        "line": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "keyword"
+        }
+      }
+    },
+    "aliases": {
+      "%%PREFIX%%.tracardi-log": {}
+    }
+  }
+}

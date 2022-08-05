@@ -1,0 +1,32 @@
+{
+  "index_patterns": [
+    "%%VERSION%%.%%PREFIX%%.tracardi-user-log-*-*"
+  ],
+  "template": {
+    "settings": {
+    "number_of_shards": %%SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%
+    },
+    "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
+      },
+      "dynamic": "false",
+      "properties": {
+        "timestamp": {
+          "type": "date"
+        },
+        "successful": {
+          "type": "boolean"
+        },
+        "email": {
+          "type": "keyword"
+        }
+      }
+    },
+    "aliases": {
+      "%%PREFIX%%.tracardi-user-log": {}
+    }
+  }
+}
