@@ -28,6 +28,7 @@ class Report(NamedEntity):
     def validate_entity(cls, value):
         if value not in ("profile", "session", "event", "entity"):
             raise ValueError(f"Entity has to be one of: profile, session, event, entity. `{value}` given.")
+        return value
 
     def encode(self) -> ReportRecord:
         return ReportRecord(
@@ -66,4 +67,12 @@ class Report(NamedEntity):
     @property
     def expected_query_params(self) -> List[str]:
         return re.findall(self._regex, json.dumps(self.query))
+
+    def __eq__(self, other: 'Report') -> bool:
+        return self.id == other.id \
+            and json.dumps(self.query) == json.dumps(other.query) \
+            and self.name == other.name \
+            and self.entity == other.entity \
+            and self.description == other.description \
+            and self.tags == other.tags
 
