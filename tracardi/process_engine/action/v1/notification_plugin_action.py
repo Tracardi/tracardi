@@ -47,22 +47,25 @@ class NotificationGeneratorAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         url = 'https://api.novu.co/v1/events/trigger'
-
+        dot = self._get_dot_accessor(payload)
         timeout = aiohttp.ClientTimeout(total=15)
         params = {
             "name": self.config.template_name,
             "to": {
-                "subscriberId": self.profile.id,
+                "subscriberId": dot[self.config.subscriber_id],
+                "email": dot[self.config.recipient_email]
             },
             "payload": json.loads(self.config.payload)
         }
+        print(params)
         async with HttpClient(timeout=timeout, retries=self.node.on_connection_error_repeat) as client:
             async with client.request(
                     method='post',
                     url=url,
-                    headers={"Authorization": f"ApiKey {self.credentials.token}"},
+                    headers={"Authorization": f"ApiKey {self.credentials.token}",
+                             "Content Type": "application/json"},
                     ssl=False,
-                    **params
+                    json=params
             ) as response:
                 try:
                     content = await response.json()
@@ -100,47 +103,50 @@ def register() -> Plugin:
                 "payload": "{}"
             },
             manual="novu_plugin_action",
-            #     form=Form(
-            #         groups=[
-            #             FormGroup(
-            #                 name="Novu notification plugin configuration",
-            #                 fields=[
-            #                     FormField(
-            #                         id="source",
-            #                         name="Resource",
-            #                         description="Select your api key resource containing your key from novu",
-            #                         component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
-            #                     ),
-            #                     FormField(
-            #                         id="name",
-            #                         name="Novu template name",
-            #                         description="Provide your template name.",
-            #                         component=FormComponent(type="text")
-            #                     ),
-            #                     FormField(
-            #                         id="to[recipient_email]",
-            #                         name="Recipient email address",
-            #                         description="Provide email address of this notification recipient.",
-            #                         component=FormComponent(type="text")
-            #                     )
-            #                 ]
-            #             )
-            #         ]
-            #     )
-            # ),
-            metadata=MetaData(
-                name="Novu notification plugin",
-                desc="Create and send notification to chosen recipient.",
-                icon="globe",
-                group=["Connectors"],
-                documentation=Documentation(
-                    inputs={
-                        "payload": PortDoc(desc="This port takes payload object.")
-                    },
-                    outputs={"value": PortDoc(desc="This port returns request status code.")}
-                )
+            form=Form(
+                groups=[
+                    FormGroup(
+                        name="Novu notification plugin configuration",
+                        fields=[
+                            FormField(
+                                id="source",
+                                name="Resource",
+                                description="Select your api key resource containing your key from novu",
+                                component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
+                            ),
+                            FormField(
+                                id="template_name",
+                                name="Novu template name",
+                                description="Provide your template name.",
+                                component=FormComponent(type="text")
+                            ),
+                            FormField(
+                                id="subscriber_id",
+                                name="Recipient email address",
+                                description="Provide email address of this notification recipient.",
+                                component=FormComponent(type="dotPath")
+                            ),
+                            FormField(
+                                id="recipient_email",
+                                name="Subscriber ID",
+                                description="Provide subscriber ID",
+                                component=FormComponent(type="dotPath")
+                            )
+                        ]
+                    )
+                ]
+            )
+        ),
+        metadata=MetaData(
+            name="Novu trigger plugin",
+            desc="Create and send notification to chosen recipient.",
+            icon="globe",
+            group=["Connectors"],
+            documentation=Documentation(
+                inputs={
+                    "payload": PortDoc(desc="This port takes payload object.")
+                },
+                outputs={"value": PortDoc(desc="This port returns request status code.")}
             )
         )
     )
-
-
