@@ -24,7 +24,7 @@ class ReportManager:
     def get_expected_fields(self):
         return self.report.expected_query_params
 
-    def get_report(self, params: dict) -> dict:
+    async def get_report(self, params: dict) -> dict:
         try:
             built_query = self.report.get_built_query(**params)
 
