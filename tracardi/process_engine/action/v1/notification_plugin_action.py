@@ -58,7 +58,7 @@ class NotificationGeneratorAction(ActionRunner):
             "payload": json.loads(self.config.payload)
         }
 
-        async with HttpClient(self.node.on_connection_error_repeat, 200,
+        async with HttpClient(self.node.on_connection_error_repeat, [200, 201, 202, 203],
                               timeout=timeout) as client:
             async with client.post(
                     url=url,
