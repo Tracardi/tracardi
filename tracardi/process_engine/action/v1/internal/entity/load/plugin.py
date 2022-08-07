@@ -16,7 +16,7 @@ class Endpoint(PluginEndpoint):
     @staticmethod
     async def get_entity_types(config: dict):
         # Returns only 800 types
-        result = await storage.driver.entity.unique_entity_types(bucket_name="type", buckets_size=800)
+        result = await storage.driver.index.unique_entity_types(bucket_name="type", buckets_size=800)
         return {
             "total": result.total,
             "result": [{

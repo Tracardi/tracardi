@@ -32,7 +32,7 @@ class ReportManager:
             raise ReportManagerException(str(e))
 
         try:
-            return await storage_manager(self.report.entity).query(built_query)
+            return await storage_manager(self.report.index).query(built_query)
 
         except Exception as e:
             raise ReportManagerException(str(e))

@@ -22,7 +22,7 @@
       "tags": {
         "type": "keyword"
       },
-      "entity": {
+      "index": {
         "type": "text"
       },
       "query": {
