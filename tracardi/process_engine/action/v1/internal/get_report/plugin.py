@@ -1,12 +1,13 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from .model.config import Config, EndpointConfig
+from .model.config import Config
 from tracardi.service.report_manager import ReportManager, ReportManagerException
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 import json
+from tracardi.domain.entity import NullableEntity
 
 
 def validate(config: dict) -> Config:
@@ -16,17 +17,17 @@ def validate(config: dict) -> Config:
 class Endpoint(PluginEndpoint):
 
     @staticmethod
-    async def get_params(config: dict) -> str:
-        config = EndpointConfig(**config)
-        if not config.report_config.report.id:
-            return json.dumps({})
+    async def get_params(config: dict) -> dict:
+        config = NullableEntity(**config)
+        if not config.id:
+            return {}
 
         try:
-            manager = await ReportManager.build(config.report_config.report.id)
-            return json.dumps({key: f"<{key.replace('_', '-')}>" for key in manager.get_expected_fields()})
+            manager = await ReportManager.build(config.id)
+            return {key: f"<{key.replace('_', '-')}>" for key in manager.get_expected_fields()}
 
         except ReportManagerException as _:
-            return json.dumps({})
+            return {}
 
 
 class GetReportAction(ActionRunner):
@@ -98,7 +99,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Get report',
             desc='Loads given report\'s results into payload.',
-            icon='plugin',
+            icon='report',
             group=["Input/Output"],
             documentation=Documentation(
                 inputs={
