@@ -71,57 +71,8 @@ def register() -> Plugin:
             version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="sentiment_analysis_action",
-            init={
-                "source": {
-                    "id": None,
-                    "name": None
-                },
-                "language": "en",
-                "text": None
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Text sentiment resource",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="MeaningCloud resource",
-                            description="Select MeaningCloud resource. Authentication credentials will be used to "
-                                        "connect to MeaningCloud server.",
-                            component=FormComponent(
-                                type="resource",
-                                props={"label": "resource", "tag": "token"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Text sentiment settings",
-                    fields=[
-                        FormField(
-                            id="language",
-                            name="Language",
-                            description="Select language.",
-                            component=FormComponent(type="select", props={
-                                "label": "Language",
-                                "items": {
-                                    "en": "English",
-                                    "sp": "Spanish",
-                                    "fr": "French",
-                                    "it": "Italian",
-                                    "pt": "Portuguese",
-                                    "ct": "Catalan"
-                                }
-                            })
-                        ),
-                        FormField(
-                            id="text",
-                            name="Text",
-                            description="Type text to classify.",
-                            component=FormComponent(type="textarea", props={"rows": 8})
-                        )
-                    ])
-            ]),
+            manual="sentiment_analysis_action"
+
         ),
         metadata=MetaData(
             name='Sentiment analysis',
@@ -129,6 +80,7 @@ def register() -> Plugin:
             desc='It connects to the service that predicts sentiment from a given sentence.',
             icon='paragraph',
             group=["Machine learning"],
+            tags=['ai', 'ml'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -137,6 +89,7 @@ def register() -> Plugin:
                     "result": PortDoc(desc="Returns result."),
                     "error": PortDoc(desc="Gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )

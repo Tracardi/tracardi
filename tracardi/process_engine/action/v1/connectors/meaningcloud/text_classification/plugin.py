@@ -82,78 +82,7 @@ def register() -> Plugin:
             version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="text_classification_action",
-            init={
-                "source": {
-                    "id": None,
-                    "name": None
-                },
-                "language": "en",
-                "model": "social",
-                "title": None,
-                "text": None
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Text classification resource",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="MeaningCloud resource",
-                            description="Select MeaningCloud resource. Authentication credentials will be used to "
-                                        "connect to MeaningCloud server.",
-                            component=FormComponent(
-                                type="resource",
-                                props={"label": "resource", "tag": "token"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Text classification settings",
-                    fields=[
-                        FormField(
-                            id="language",
-                            name="Language",
-                            description="Select language.",
-                            component=FormComponent(type="select", props={
-                                "label": "Language",
-                                "items": {
-                                    "en": "English",
-                                    "sp": "Spanish",
-                                    "fr": "French",
-                                    "it": "Italian",
-                                    "pt": "Portuguese",
-                                    "ct": "Catalan"
-                                }
-                            })
-                        ),
-                        FormField(
-                            id="model",
-                            name="Model",
-                            description="Select classification model. Reference the documentation for more details.",
-                            component=FormComponent(type="select", props={
-                                "label": "Model",
-                                "items": {
-                                    "press": "IPTC",
-                                    "social": "Social Text"
-                                }
-                            })
-                        ),
-                        FormField(
-                            id="text",
-                            name="Text",
-                            description="Type text to classify.",
-                            component=FormComponent(type="textarea", props={"rows": 8})
-                        ),
-                        FormField(
-                            id="title",
-                            name="Title",
-                            required=False,
-                            description="This field is optional. Type title to make better classification.",
-                            component=FormComponent(type="dotPath", props={"label": "Title"})
-                        )
-                    ])
-            ]),
+            manual="text_classification_action"
         ),
         metadata=MetaData(
             name='Text classification',
@@ -161,6 +90,7 @@ def register() -> Plugin:
             desc='It connects to the service that classifies a given sentence.',
             icon='ai',
             group=["Machine learning"],
+            tags=['ai', 'ml'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port input payload object.")
@@ -169,6 +99,7 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="Returns a classification response."),
                     "error": PortDoc(desc="Returns error.")
                 }
-            )
+            ),
+            pro=True
         )
     )

@@ -78,44 +78,7 @@ def register() -> Plugin:
             version='0.7.1',
             license="MIT",
             author="Bartosz Dobrosielski, Risto Kowaczewski",
-            manual="send_pushover_msg_action",
-            init={
-                "source": None,
-                "message": ""
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Pushover source",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="Pushover authentication",
-                            description="Select pushover resource",
-                            component=FormComponent(
-                                type="resource",
-                                props={"label": "resource", "tag": "pushover"}
-                            )
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Pushover message",
-                    fields=[
-                        FormField(
-                            id="message",
-                            name="Message",
-                            description="Type message. Message can be in form of message template.",
-                            component=FormComponent(
-                                type="textarea",
-                                props={
-                                    "label": "Message template"
-                                })
-                        )
-                    ]
-
-                ),
-            ]),
-
+            manual="send_pushover_msg_action"
         ),
         metadata=MetaData(
             name='Pushover push',
@@ -131,6 +94,7 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port returns a response from Pushover API."),
                     "error": PortDoc(desc="This port gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )

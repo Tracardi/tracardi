@@ -49,57 +49,7 @@ def register() -> Plugin:
             version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
-            manual="deep_categorization_action",
-            init={
-                "source": {
-                    "name": None,
-                    "id": None
-                },
-                "text": None,
-                "model": None
-            },
-            form=Form(
-                groups=[
-                    FormGroup(
-                        name="Plugin configuration",
-                        fields=[
-                            FormField(
-                                id="source",
-                                name="MeaningCloud resource",
-                                description="Please select your MeaningCloud resource that contains your API token.",
-                                component=FormComponent(type="resource", props={"label": "Resource"})
-                            ),
-                            FormField(
-                                id="text",
-                                name="Path to text",
-                                description="Please type in the path to the text that you want to analyze.",
-                                component=FormComponent(type="dotPath", props={"label": "Text"})
-                            ),
-                            FormField(
-                                id="model",
-                                name="Model",
-                                description="Please type in the model to analyze your text with (for example "
-                                            "IAB_2.0-tier4_en stands for IAB 2.0 Tier 4 model for english language).",
-                                component=FormComponent(type="select", props={"label": "Model", "items": {
-                                    "IAB_2.0": "IAB 2.0",
-                                    "IAB_2.0-tier3": "IAB 2.0 Tier3",
-                                    "IAB_2.0-tier4_en": "IAB 2.0 Tier 4",
-                                    "Emotion": 'Emotion',
-                                    "IntentionAnalysis": "Intention analysis",
-                                    "VoC-Generic": "VoC Generic",
-                                    "VoC-Banking": "VoC Banking",
-                                    "VoC-Insurance": "VoC Insurance",
-                                    "VoC-Retail": "VoC Retail",
-                                    "VoC-Telco": "VoC Telco",
-                                    "VoE-Performance": "VoE Performance",
-                                    "VoE-Organization": "VoE Organization",
-                                    "VoE-ExitInterview": "VoE ExitInterview"
-                                }})
-                            )
-                        ]
-                    )
-                ]
-            )
+            manual="deep_categorization_action"
         ),
         metadata=MetaData(
             name='Categorize text',
@@ -107,6 +57,7 @@ def register() -> Plugin:
             desc='Categorizes text using MeaningCloud\'s deep categorization API.',
             icon='ai',
             group=["Machine learning"],
+            tags=['ai', 'ml'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -115,6 +66,7 @@ def register() -> Plugin:
                     "response": PortDoc(desc="This port returns a response from MeaningCloud."),
                     "error": PortDoc(desc="This port gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )
