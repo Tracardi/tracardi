@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 class StorageResult:
     def __init__(self, result=None):
         if result is None:
@@ -23,6 +26,9 @@ class StorageResult:
             "total": self.total,
             "result": list(self)
         }
+
+    def transform_hits(self, func: Callable) -> None:
+        self._hits = [{**hit, "_source": func(hit["_source"])} for hit in self._hits]
 
     def __len__(self):
         return self.chunk
