@@ -99,7 +99,7 @@ def register() -> Plugin:
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Novu notification plugin configuration",
+                        name="Novu notification configuration",
                         fields=[
                             FormField(
                                 id="source",
