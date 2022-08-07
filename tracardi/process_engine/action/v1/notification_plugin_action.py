@@ -1,6 +1,6 @@
 import json
 from json import JSONDecodeError
-from typing import Optional
+from typing import Optional, Union, Tuple
 
 import aiohttp
 
@@ -57,10 +57,10 @@ class NotificationGeneratorAction(ActionRunner):
             },
             "payload": json.loads(self.config.payload)
         }
-        print(params)
-        async with HttpClient(timeout=timeout, retries=self.node.on_connection_error_repeat) as client:
-            async with client.request(
-                    method='post',
+
+        async with HttpClient(self.node.on_connection_error_repeat, 200,
+                              timeout=timeout) as client:
+            async with client.post(
                     url=url,
                     headers={"Authorization": f"ApiKey {self.credentials.token}",
                              "Content Type": "application/json"},
@@ -99,7 +99,6 @@ def register() -> Plugin:
                 "template_name": None,
                 "subscriber_id": "profile@id",
                 "recipient_email": "profile@pii.email",
-
                 "payload": "{}"
             },
             manual="novu_plugin_action",
@@ -118,19 +117,19 @@ def register() -> Plugin:
                                 id="template_name",
                                 name="Novu template name",
                                 description="Provide your template name.",
-                                component=FormComponent(type="text")
+                                component=FormComponent(type="text", props={"label": "Template name"})
                             ),
                             FormField(
                                 id="subscriber_id",
                                 name="Recipient email address",
-                                description="Provide email address of this notification recipient.",
-                                component=FormComponent(type="dotPath")
+                                description="Provide path to subscriber ID.",
+                                component=FormComponent(type="dotPath", props={"label": "Subscriber ID"})
                             ),
                             FormField(
                                 id="recipient_email",
                                 name="Subscriber ID",
-                                description="Provide subscriber ID",
-                                component=FormComponent(type="dotPath")
+                                description="Please type a reference path to email address.",
+                                component=FormComponent(type="dotPath", props={"label": "Email address"})
                             )
                         ]
                     )
@@ -146,7 +145,9 @@ def register() -> Plugin:
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
-                outputs={"value": PortDoc(desc="This port returns request status code.")}
+                outputs={
+                    "response": PortDoc(desc="This port returns response status and content."),
+                    "error": PortDoc(desc="This port returns error if request will fail ")}
             )
         )
     )
