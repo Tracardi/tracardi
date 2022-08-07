@@ -24,6 +24,14 @@ async def delete(id: str):
     return await storage_manager("report").delete(id)
 
 
+async def refresh():
+    return await storage_manager("report").refresh()
+
+
+async def flush():
+    return await storage_manager("report").flush()
+
+
 async def search_by_name(name: str) -> List[Report]:
     query = {
         "query": {

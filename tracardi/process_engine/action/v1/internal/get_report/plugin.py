@@ -97,7 +97,7 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Get report',
+            name='Load report data',
             desc='Loads given report\'s results into payload.',
             icon='report',
             group=["Input/Output"],
@@ -106,8 +106,8 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "result": PortDoc(desc="This port returns results of given report if the action was successful."),
-                    "error": PortDoc(desc="This port returns error info if there was an error fetching the report.")
+                    "result": PortDoc(desc="This port returns results of selected report on success."),
+                    "error": PortDoc(desc="This port returns error info")
                 }
             )
         )
