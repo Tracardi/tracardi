@@ -71,8 +71,6 @@ async def add_plugins():
     result = defaultdict(list)
     plugins = [
         'tracardi.process_engine.action.v1.memory.collect.plugin',
-
-        'tracardi.process_engine.action.v1.notification_plugin_action',
         'tracardi.process_engine.action.v1.password_generator_action',
         'tracardi.process_engine.action.v1.flow.start.start_action',
         'tracardi.process_engine.action.v1.flow.property_exists.plugin',
@@ -217,6 +215,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin',
         'tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin',
         'tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin',
+        'tracardi.process_engine.action.v1.connectors.novu.plugin',
 
         # Internal
         'tracardi.process_engine.action.v1.internal.assign_profile_id.plugin',

@@ -1,20 +1,14 @@
 import json
 from json import JSONDecodeError
-from typing import Optional, Union, Tuple
+from typing import Optional
 
 import aiohttp
-
 from tracardi.domain.resources.token import Token
-
 from tracardi.service.tracardi_http_client import HttpClient
-
 from tracardi.service.storage.driver import storage
-
 from tracardi.service.plugin.domain.register import Plugin, Spec, Form, FormGroup, FormField, FormComponent, MetaData, \
     Documentation, PortDoc
-
 from tracardi.domain.named_entity import NamedEntity
-
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.result import Result
@@ -116,20 +110,27 @@ def register() -> Plugin:
                             FormField(
                                 id="template_name",
                                 name="Novu template name",
-                                description="Provide your template name.",
+                                description="Type the template name defined in Novu. This template will be used to send"
+                                            " a message.",
                                 component=FormComponent(type="text", props={"label": "Template name"})
                             ),
                             FormField(
                                 id="subscriber_id",
-                                name="Recipient email address",
-                                description="Provide path to subscriber ID.",
+                                name="Subscriber ID",
+                                description="Type path to subscriber ID. By default we use profile id.",
                                 component=FormComponent(type="dotPath", props={"label": "Subscriber ID"})
-                            ),
+                            )
+                        ]
+                    ),
+                    FormGroup(
+                        name="E-mail configuration",
+                        fields=[
                             FormField(
                                 id="recipient_email",
-                                name="Subscriber ID",
-                                description="Please type a reference path to email address.",
-                                component=FormComponent(type="dotPath", props={"label": "Email address"})
+                                name="Recipient e-mail address",
+                                description="Please type a reference path to e-mail address. By default we set it to "
+                                            "profile@pii.email.",
+                                component=FormComponent(type="dotPath", props={"label": "E-mail address"})
                             )
                         ]
                     )
@@ -137,10 +138,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name="Novu trigger plugin",
+            name="Novu notifications",
             desc="Create and send notification to chosen recipient.",
-            icon="globe",
-            group=["Connectors"],
+            brand="Novu",
+            icon="message",
+            group=["Novu"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
