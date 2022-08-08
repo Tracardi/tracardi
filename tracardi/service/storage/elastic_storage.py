@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import elasticsearch
 
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_result import StorageRecords, StorageRecord, RecordMetadata
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage import index
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -50,13 +50,15 @@ class ElasticStorage:
     async def count(self, query: dict = None) -> bool:
         return await self.storage.count(self.index.get_index_alias(), query)
 
-    async def load(self, id) -> [dict, None]:
+    async def load(self, id) -> [StorageRecord, None]:
         try:
             index = self.index.get_index_alias()
             if not self.index.multi_index:
                 result = await self.storage.get(index, id)
-                output = result['_source']
+
+                output = StorageRecord.build_from_elastic(result)
                 output['id'] = result['_id']
+
             else:
                 query = {
                     "query": {
@@ -65,8 +67,9 @@ class ElasticStorage:
                         }
                     }
                 }
-                result = StorageResult(await self.storage.search(index, query))
-                output = list(result)
+                result = await self.storage.search(index, query)
+                records = StorageRecords(result)
+                output = list(records)
                 if len(output) != 1:
                     return None
                 output = output[0]

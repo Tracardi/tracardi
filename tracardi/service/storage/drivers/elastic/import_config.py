@@ -1,5 +1,5 @@
 from tracardi.domain.import_config import ImportConfig, ImportConfigRecord
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_result import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 from typing import Optional
 
@@ -25,7 +25,7 @@ async def load_all(limit: int = 100, query: str = None):
     if query is None:
         result = await storage_manager("import").load_all(limit=limit)
     else:
-        result = StorageResult(await storage_manager("import").query({
+        result = StorageRecords(await storage_manager("import").query({
             "query": {
                 "wildcard": {
                     "name": f"*{query}*"

@@ -5,7 +5,7 @@ from typing import List, Tuple, Dict
 
 from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_result import StorageRecords
 
 from tracardi.domain.rule import Rule
 
@@ -92,7 +92,7 @@ async def load_flow_rules(flow_id: str) -> List[Rule]:
     return [Rule(**rule) for rule in rules_attached_to_flow]
 
 
-async def load_all(start: int = 0, limit: int = 100) -> StorageResult:
+async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
     return await storage_manager('rule').load_all(start, limit=limit)
 
 

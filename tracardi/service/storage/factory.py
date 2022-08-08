@@ -6,7 +6,7 @@ from tracardi.domain.entity import Entity
 from pydantic import BaseModel
 from tracardi.domain.agg_result import AggResult
 from tracardi.exceptions.exception import TracardiException, StorageException
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_result import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 import tracardi.domain.entity as domain
 
@@ -27,7 +27,7 @@ class BaseStorageCrud:
         service = self._get_storage_service()
         return await service.refresh()
 
-    def _get_storage_service(self):
+    def _get_storage_service(self) -> PersistenceService:
         return storage_manager(self.index)
 
 
@@ -36,23 +36,29 @@ class EntityStorageCrud(BaseStorageCrud):
     async def load(self, domain_class_ref=None):
         service = self._get_storage_service()
         data = await service.load(self.entity.id)
-
         if data:
+
             if domain_class_ref is None:
-                return domain.Entity(**data)
-            return domain_class_ref(**data)
+                entity = domain.Entity(**data)
+            else:
+                entity = domain_class_ref(**data)
+
+            if data.has_metadata() and isinstance(entity, Entity):
+                entity.set_meta_data(data.get_metadata())
+
+            return entity
 
         return None
 
-    async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+    async def load_by(self, field: str, value: str, limit: int = 100) -> StorageRecords:
         service = self._get_storage_service()
         return await service.load_by(field, value, limit)
 
-    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageRecords:
         service = self._get_storage_service()
         return await service.load_by_query_string(query_string, limit)
 
-    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageRecords:
         service = self._get_storage_service()
         return await service.match_by(field, value, limit)
 
@@ -112,7 +118,7 @@ class CollectionCrud:
 
         return await self.storage.upsert(data, replace_id)
 
-    async def load(self, start: int = 0, limit: int = 100) -> StorageResult:
+    async def load(self, start: int = 0, limit: int = 100) -> StorageRecords:
         try:
 
             return await self.storage.load_all(start, limit)

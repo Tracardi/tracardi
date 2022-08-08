@@ -9,7 +9,7 @@ from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
 from typing import Tuple, Optional
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_result import StorageRecords
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.list_default_value import list_value_at_index
 from tracardi.service.singleton import Singleton
@@ -80,7 +80,7 @@ class SqlSearchQueryEngine:
         print(query)
         result = await self.persister.query(query)
         print(result)
-        return StorageResult(result).dict()
+        return StorageRecords(result).dict()
 
     @staticmethod
     def _string_query(query: DatetimeRangePayload, min_date_time, max_date_time, time_field: str,
@@ -388,27 +388,27 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def load_by(self, field: str, value: Union[str, int, float, bool], limit: int = 100) -> StorageResult:
+    async def load_by(self, field: str, value: Union[str, int, float, bool], limit: int = 100) -> StorageRecords:
         try:
-            return StorageResult(await self.storage.load_by(field, value, limit))
+            return StorageRecords(await self.storage.load_by(field, value, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageRecords:
         try:
-            return StorageResult(await self.storage.load_by_query_string(query_string, limit))
+            return StorageRecords(await self.storage.load_by_query_string(query_string, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageRecords:
         try:
-            return StorageResult(await self.storage.match_by(field, value, limit))
+            return StorageRecords(await self.storage.match_by(field, value, limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -416,9 +416,9 @@ class PersistenceService:
             raise StorageException(str(e))
 
     async def load_by_values(self, field_value_pairs: List[tuple],
-                             sort_by: Optional[List[storage.ElasticFiledSort]] = None, limit=1000) -> StorageResult:
+                             sort_by: Optional[List[storage.ElasticFiledSort]] = None, limit=1000) -> StorageRecords:
         try:
-            return StorageResult(await self.storage.load_by_values(field_value_pairs, sort_by, limit=limit))
+            return StorageRecords(await self.storage.load_by_values(field_value_pairs, sort_by, limit=limit))
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -434,7 +434,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def load_all(self, start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None) -> StorageResult:
+    async def load_all(self, start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None) -> StorageRecords:
         try:
             query = {
                 "from": start,
@@ -447,7 +447,7 @@ class PersistenceService:
             if sort is not None:
                 query['sort'] = sort
             result = await self.storage.search(query)
-            return StorageResult(result)
+            return StorageRecords(result)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -485,12 +485,12 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def filter(self, query: dict) -> StorageResult:
+    async def filter(self, query: dict) -> StorageRecords:
         try:
-            return StorageResult(await self.storage.search(query))
+            return StorageRecords(await self.storage.search(query))
         except elasticsearch.exceptions.NotFoundError:
             _logger.warning("No result found for query {}".format(query))
-            return StorageResult()
+            return StorageRecords()
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -536,7 +536,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def query_by_sql(self, query: str, start: int = 0, limit: int = 0) -> StorageResult:
+    async def query_by_sql(self, query: str, start: int = 0, limit: int = 0) -> StorageRecords:
         engine = SqlSearchQueryEngine(self)
         return await engine.search(query, start, limit)
 

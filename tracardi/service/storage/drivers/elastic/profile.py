@@ -35,7 +35,7 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
     return [Profile(**profile) for profile in profiles]
 
 
-async def save_profile(profile: Profile, refresh_after_save=False):
+async def save(profile: Profile, refresh_after_save=False):
 
     if tracardi.cache_profiles is not False:
         cache = ProfileCache()

@@ -1,9 +1,9 @@
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_result import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.task import Task
 
 
-async def load_tasks(query, start: int = 0, limit: int = 100) -> StorageResult:
+async def load_tasks(query, start: int = 0, limit: int = 100) -> StorageRecords:
     query = {
         "from": start,
         "size": limit,
@@ -11,7 +11,7 @@ async def load_tasks(query, start: int = 0, limit: int = 100) -> StorageResult:
         "sort": [{"timestamp": {"order": "desc"}}]
     }
     result = await storage_manager("task").query(query)
-    return StorageResult(result)
+    return StorageRecords(result)
 
 
 async def upsert_task(task: Task):

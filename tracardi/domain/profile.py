@@ -174,7 +174,8 @@ class Profile(Entity):
         return StorageInfo(
             'profile',
             Profile,
-            exclude={"operation": ...}
+            exclude={"operation": ...},
+            multi=True
         )
 
     @staticmethod

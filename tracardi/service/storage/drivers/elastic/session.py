@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.domain.storage_result import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor, storage_manager, StorageForBulk
@@ -51,24 +52,8 @@ async def exist(id: str) -> bool:
     return await storage_manager("session").exists(id)
 
 
-# NOT USED FOR NOW
-async def get_first_session(profile_id: str) -> float:
-    result = await storage_manager("session").query({
-        "query": {
-            "term": {"profile.id": profile_id}
-        },
-        "size": 0,
-        "aggs": {
-            "first_session": {
-                "min": {"field": "metadata.time.insert"}
-            }
-        }
-    })
-    return result["aggregations"]["first_session"]["value"]
-
-
-async def load(id: str) -> Session:
-    return await StorageFor(Entity(id=id)).index("session").load(Session)
+async def load(id: str) -> Optional[Session]:
+    return await StorageFor(Entity(id=id)).index("session").load(Session)  # type: Optional[Session]
 
 
 async def delete(id: str):
@@ -83,7 +68,7 @@ async def flush():
     return await storage_manager('session').flush()
 
 
-async def get_nth_last_session(profile_id: str, n: int):
+async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecord]:
     result = await storage_manager('session').query({
         "query": {
             "term": {"profile.id": profile_id}
@@ -94,7 +79,12 @@ async def get_nth_last_session(profile_id: str, n: int):
         ]
     })
 
-    return result["hits"]["hits"][n - 1]["_source"] if len(result["hits"]["hits"]) >= n else None
+    records = result["hits"]["hits"]  # type: List[dict]
+
+    if len(records) >= n:
+        return StorageRecord.build_from_elastic(records[n - 1])
+
+    return None
 
 
 async def count(query: dict = None):

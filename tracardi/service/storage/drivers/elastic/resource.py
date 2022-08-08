@@ -2,7 +2,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from tracardi.domain.resource import Resource, ResourceRecord
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
 
@@ -28,8 +28,8 @@ async def load_destinations(start=0, limit=100) -> Tuple[List[Resource], int]:
     return data, result.total
 
 
-async def load_record(id: str) -> ResourceRecord:
-    return await StorageFor(Entity(id=id)).index("resource").load(ResourceRecord)
+async def load_record(id: str) -> Optional[ResourceRecord]:
+    return await StorageFor(Entity(id=id)).index("resource").load(ResourceRecord)  # type: Optional[ResourceRecord]
 
 
 async def save_record(resource: Resource) -> BulkInsertResult:
@@ -42,13 +42,13 @@ async def load_by_tag(tag):
 
 
 async def load(id: str) -> Resource:
-    resource_config_record = await load_record(id)  # type: ResourceRecord
-
-    if not resource_config_record.enabled:
-        raise ValueError('Resource id {} disabled.'.format(id))
+    resource_config_record = await load_record(id)  # type: Optional[ResourceRecord]
 
     if resource_config_record is None:
         raise ValueError('Resource id {} does not exist.'.format(id))
+
+    if not resource_config_record.enabled:
+        raise ValueError('Resource id {} disabled.'.format(id))
 
     return resource_config_record.decode()
 

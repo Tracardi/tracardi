@@ -17,7 +17,7 @@ async def flush():
 
 
 async def load(id: str) -> EventSource:
-    return await StorageFor(Entity(id=id)).index("event-source").load(EventSource)
+    return await StorageFor(Entity(id=id)).index("event-source").load(EventSource)  # type: EventSource
 
 
 async def load_all(limit=100) -> Tuple[List[EventSource], int]:

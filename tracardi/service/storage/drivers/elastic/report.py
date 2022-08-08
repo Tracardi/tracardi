@@ -1,7 +1,7 @@
 from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.report import Report, ReportRecord
 from typing import List, Optional
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_result import StorageRecords
 
 
 async def load(id: str) -> Optional[Report]:
@@ -43,13 +43,13 @@ async def search_by_name(name: str) -> List[Report]:
     return [Report.decode(ReportRecord(**record["_source"])) for record in result]
 
 
-async def load_for_grouping(name: Optional[str] = None) -> StorageResult:
+async def load_for_grouping(name: Optional[str] = None) -> StorageRecords:
     query = {
         "query": {
             "wildcard": {"name": f"*{name if name is not None else ''}*"}
         }
     }
     result = await storage_manager("report").query(query)
-    result = StorageResult(result)
+    result = StorageRecords(result)
     result.transform_hits(lambda hit: Report.decode(ReportRecord(**hit)).dict())
     return result

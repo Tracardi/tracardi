@@ -48,7 +48,7 @@ cache = MemoryCache()
 async def _save_profile(profile):
     try:
         if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
-            return await storage.driver.profile.save_profile(profile)
+            return await storage.driver.profile.save(profile)
         else:
             return BulkInsertResult()
 
@@ -439,7 +439,7 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         tracker_payload.session = Session(id=str(uuid4()), metadata=SessionMetadata())
 
     # Load session from storage
-    session = await storage.driver.session.load(tracker_payload.session.id)  # type: Session
+    session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
 
     # Get profile
     profile, session = await tracker_payload.get_profile_and_session(session,
