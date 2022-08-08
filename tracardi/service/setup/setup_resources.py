@@ -238,7 +238,8 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "token": "<your-token>",
                 "api_url": "<your-matomo-url>"
-            }
+            },
+            manual="matomo_resource"
         ),
         ResourceSettings(
             id="civi_crm",
