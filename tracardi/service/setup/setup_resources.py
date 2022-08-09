@@ -166,6 +166,15 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="novo",
+            name="Novo",
+            tags=["token"],
+            config={
+                "token": "<token>"
+            },
+            manual="novo_resource"
+        ),
+        ResourceSettings(
             id="google-cloud-service-account",
             name="Google Cloud service account",
             tags=["gcp-service-account"],
