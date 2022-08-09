@@ -105,7 +105,7 @@ def register() -> Plugin:
                                 id="source",
                                 name="Resource",
                                 description="Select your api key resource containing your key from novu",
-                                component=FormComponent(type="resource", props={"label": "resource", "tag": "novo"})
+                                component=FormComponent(type="resource", props={"label": "resource", "tag": "novu"})
                             ),
                             FormField(
                                 id="template_name",

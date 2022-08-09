@@ -166,13 +166,13 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="novo",
-            name="Novo",
+            id="novu",
+            name="Novu",
             tags=["token"],
             config={
                 "token": "<token>"
             },
-            manual="novo_resource"
+            manual="novu_resource"
         ),
         ResourceSettings(
             id="google-cloud-service-account",
