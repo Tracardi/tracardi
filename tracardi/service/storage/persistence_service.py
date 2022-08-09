@@ -1,15 +1,18 @@
 import logging
 import elasticsearch
+from pydantic import BaseModel
+
 import tracardi.service.storage.elastic_storage as storage
 from typing import List, Union, Dict
 
 from tracardi.config import tracardi
+from tracardi.domain.entity import Entity
 from tracardi.domain.storage.index_mapping import IndexMapping
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
 from typing import Tuple, Optional
-from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.list_default_value import list_value_at_index
 from tracardi.service.singleton import Singleton
@@ -452,23 +455,9 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def upsert(self, data, replace_id: bool = True) -> BulkInsertResult:
-        # todo could take some transitional object like record (data + meta)
+    async def upsert(self, data: Union[StorageRecord, Entity, BaseModel, dict, list], replace_id: bool = True) -> BulkInsertResult:
         try:
-
-            if not isinstance(data, list):
-                if replace_id is True and 'id' in data:
-                    data["_id"] = data['id']
-                payload = [data]
-            else:
-                # Add id
-                for item in data:
-                    if replace_id is True and 'id' in item:
-                        item["_id"] = item['id']
-                payload = data
-
-            return await self.storage.create(payload, source_index=None)  # todo add source index from meta
-
+            return await self.storage.create(data, replace_id=replace_id)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

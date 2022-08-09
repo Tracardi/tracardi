@@ -1,7 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import elasticsearch
+from pydantic import BaseModel
 
+from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage import index
@@ -77,10 +79,56 @@ class ElasticStorage:
         except elasticsearch.exceptions.NotFoundError:
             return None
 
-    async def create(self, payload, source_index=None) -> BulkInsertResult:
-        if source_index is None:
-            source_index = self.index.get_write_index()
-        return await self.storage.insert(source_index, payload)
+    @staticmethod
+    def _get_storage_record(record, replace_id) -> StorageRecord:
+        if isinstance(record, Entity):
+            record = record.to_storage_record()
+
+        elif isinstance(record, BaseModel):
+            record = StorageRecord.build_from_base_model(record)
+
+        elif isinstance(record, dict):
+            record = StorageRecord(**record)
+
+        if replace_id is True and 'id' in record:
+            record["_id"] = record['id']
+
+        return record
+
+    @staticmethod
+    def _get_storage_data(record, replace_id) -> dict:
+        if isinstance(record, BaseModel):
+            record = record.dict()
+
+        if replace_id is True and 'id' in record:
+            record["_id"] = record['id']
+
+        return record
+
+    def _get_storage_index(self, record):
+        if not record.has_metadata():
+            index = self.index.get_write_index()
+        else:
+            meta = record.get_metadata()
+            if meta.index is None:
+                index = self.index.get_write_index()
+            else:
+                index = meta.index
+
+        return index
+
+    async def create(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
+                     replace_id: bool = True) -> BulkInsertResult:
+
+        if isinstance(data, list):
+            records = [self._get_storage_data(row, replace_id=replace_id) for row in data]
+            index = self.index.get_write_index()
+        else:
+            record = self._get_storage_record(data, replace_id=replace_id)
+            index = self._get_storage_index(record)
+            records = [record]
+
+        return await self.storage.insert(index, records)
 
     async def delete(self, id):
         if not self.index.multi_index:

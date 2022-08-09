@@ -9,7 +9,7 @@ async def get_by_id(consent_id):
 
 async def add_consent(id: str, name: str, description: str, revokable: bool, default_value: str, enabled: bool,
                       tags: typing.List[str], required: bool, auto_revoke: str):
-    return await storage_manager("consent-type").upsert(data={
+    return await storage_manager("consent-type").upsert({
         "id": id,
         "name": name,
         "description": description,

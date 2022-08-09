@@ -15,7 +15,7 @@ async def flush():
 
 async def add_user(user: User):
     user.encode_password()
-    return await storage_manager("user").upsert(user.dict())
+    return await storage_manager("user").upsert(user)
 
 
 async def search_by_name(start: int, limit: int, name: str):
@@ -39,7 +39,7 @@ async def search_by_name(start: int, limit: int, name: str):
 
 
 async def update_user(user: User):
-    return await storage_manager("user").upsert(user.dict())
+    return await storage_manager("user").upsert(user)
 
 
 async def delete_user(id: str):

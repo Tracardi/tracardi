@@ -12,7 +12,7 @@ async def load(id: str) -> Optional[Report]:
 
 
 async def upsert(report: Report):
-    return await storage_manager("report").upsert(report.encode().dict())
+    return await storage_manager("report").upsert(report.encode())
 
 
 async def load_all(start: int = 0, limit: int = 100) -> List[Report]:

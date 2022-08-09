@@ -16,12 +16,17 @@ class StorageRecord(dict):
         record.set_metadata(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
         return record
 
+    @staticmethod
+    def build_from_base_model(model: BaseModel) -> 'StorageRecord':
+        return StorageRecord(**model.dict())
+
     def __init__(self, *args, **kwargs):
         super(StorageRecord, self).__init__(*args, **kwargs)
         self._meta = None
 
-    def set_metadata(self, meta: RecordMetadata):
+    def set_metadata(self, meta: RecordMetadata) -> 'StorageRecord':
         self._meta = meta
+        return self
 
     def get_metadata(self) -> RecordMetadata:
         return self._meta

@@ -1,3 +1,4 @@
+from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.exceptions.exception import TracardiException
@@ -13,6 +14,10 @@ async def load_record(flow_id) -> FlowRecord:
 
 async def save_record(flow_record: FlowRecord) -> BulkInsertResult:
     return await StorageFor(flow_record).index().save()
+
+
+async def save(flow: NamedEntity) -> BulkInsertResult:
+    return await storage_manager("flow").upsert(flow)
 
 
 async def load_production_flow(flow_id):

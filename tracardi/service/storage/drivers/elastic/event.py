@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.drivers.elastic.tag import get_tags
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
@@ -164,12 +165,8 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
     return event_result
 
 
-async def load_event_by_type(event_type, limit=1):
+async def load_event_by_type(event_type, limit=1) -> StorageRecords:
     return await StorageFor.crud('event', class_type=Event).load_by('type', event_type, limit=limit)
-
-
-async def load_event_by_profile(profile_id: str, limit: int = 20) -> List[Event]:
-    return await StorageFor.crud('event', class_type=Event).load_by('profile.id', profile_id, limit=limit)
 
 
 async def load_event_by_values(key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,

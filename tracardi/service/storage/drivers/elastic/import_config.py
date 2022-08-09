@@ -14,7 +14,7 @@ async def load(id: str) -> Optional[ImportConfig]:
 
 async def save(batch: ImportConfig):
     batch = batch.encode()
-    return await storage_manager("import").upsert(batch.dict())
+    return await storage_manager("import").upsert(batch)
 
 
 async def delete(id: str):

@@ -14,7 +14,7 @@ async def load(id: str) -> Optional[ValueThresholdRecord]:
 
 
 async def save(record: ValueThresholdRecord):
-    return await storage_manager('value-threshold').upsert(record.dict())
+    return await storage_manager('value-threshold').upsert(record)
 
 
 async def delete(id: str):
