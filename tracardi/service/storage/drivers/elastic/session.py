@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.domain.storage_result import StorageRecord
+from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor, storage_manager, StorageForBulk

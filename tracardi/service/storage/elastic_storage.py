@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import elasticsearch
 
-from tracardi.domain.storage_result import StorageRecords, StorageRecord, RecordMetadata
+from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage import index
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -68,18 +68,19 @@ class ElasticStorage:
                     }
                 }
                 result = await self.storage.search(index, query)
-                records = StorageRecords(result)
-                output = list(records)
-                if len(output) != 1:
+                records = StorageRecords.build_from_elastic(result)
+                if len(records) != 1:
                     return None
-                output = output[0]
+                output = records.first()
 
             return output
         except elasticsearch.exceptions.NotFoundError:
             return None
 
-    async def create(self, payload) -> BulkInsertResult:
-        return await self.storage.insert(self.index.get_write_index(), payload)
+    async def create(self, payload, source_index=None) -> BulkInsertResult:
+        if source_index is None:
+            source_index = self.index.get_write_index()
+        return await self.storage.insert(source_index, payload)
 
     async def delete(self, id):
         if not self.index.multi_index:
@@ -87,8 +88,8 @@ class ElasticStorage:
         else:
             return await self.delete_by("_id", id)
 
-    async def search(self, query):
-        return await self.storage.search(self.index.get_index_alias(), query)
+    async def search(self, query) -> StorageRecords:
+        return StorageRecords.build_from_elastic(await self.storage.search(self.index.get_index_alias(), query))
 
     async def refresh(self, params=None, headers=None):
         return await self.storage.refresh(self.index.get_index_alias(), params, headers)
@@ -96,7 +97,7 @@ class ElasticStorage:
     async def reindex(self, source, destination, wait_for_completion=True):
         return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
 
-    async def load_by_query_string(self, query_string, limit=100):
+    async def load_by_query_string(self, query_string, limit=100) -> StorageRecords:
         query = {
             "size": limit,
             "query": {
@@ -129,7 +130,7 @@ class ElasticStorage:
             }
         return (await self.search(query))["hits"]["total"]["value"]
 
-    async def load_by(self, field, value, limit=100):
+    async def load_by(self, field, value, limit=100) -> StorageRecords:
         query = {
             "size": limit,
             "query": {
@@ -140,7 +141,7 @@ class ElasticStorage:
         }
         return await self.search(query)
 
-    async def match_by(self, field, value, limit=100):
+    async def match_by(self, field, value, limit=100) -> StorageRecords:
         query = {
             "size": limit,
             "query": {
@@ -162,7 +163,7 @@ class ElasticStorage:
         return await self.storage.delete_by_query(self.index.get_index_alias(), query)
 
     async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
-                             limit=1000):
+                             limit=1000) -> StorageRecords:
 
         terms = []
         for field, value in fields_and_values:

@@ -2,7 +2,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.destination import DestinationRecord
 from tracardi.domain.entity import Entity
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager, StorageFor
 
 

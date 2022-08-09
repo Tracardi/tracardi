@@ -9,7 +9,7 @@ from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
 from typing import Tuple, Optional
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.list_default_value import list_value_at_index
 from tracardi.service.singleton import Singleton
@@ -40,7 +40,7 @@ class SqlSearchQueryParser(metaclass=Singleton):
 class SqlSearchQueryEngine:
 
     def __init__(self, persister):
-        self.persister = persister
+        self.persister = persister  # type: PersistenceService
         self.index = persister.storage.index_key
         self.time_fields_map = {
             'event': 'metadata.time.insert',
@@ -61,7 +61,7 @@ class SqlSearchQueryEngine:
 
         return min_date_time, max_date_time, time_zone
 
-    async def search(self, query: str = None, start: int = 0, limit: int = 20):
+    async def search(self, query: str = None, start: int = 0, limit: int = 20) -> StorageRecords:
         query = self.parser.parse(query)
 
         if query is None:
@@ -77,10 +77,9 @@ class SqlSearchQueryEngine:
 
         query['from'] = start
         query['size'] = limit
-        print(query)
+
         result = await self.persister.query(query)
-        print(result)
-        return StorageRecords(result).dict()
+        return StorageRecords.build_from_elastic(result)
 
     @staticmethod
     def _string_query(query: DatetimeRangePayload, min_date_time, max_date_time, time_field: str,
@@ -390,7 +389,7 @@ class PersistenceService:
 
     async def load_by(self, field: str, value: Union[str, int, float, bool], limit: int = 100) -> StorageRecords:
         try:
-            return StorageRecords(await self.storage.load_by(field, value, limit))
+            return await self.storage.load_by(field, value, limit)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -399,7 +398,7 @@ class PersistenceService:
 
     async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageRecords:
         try:
-            return StorageRecords(await self.storage.load_by_query_string(query_string, limit))
+            return await self.storage.load_by_query_string(query_string, limit)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -408,7 +407,7 @@ class PersistenceService:
 
     async def match_by(self, field: str, value: str, limit: int = 100) -> StorageRecords:
         try:
-            return StorageRecords(await self.storage.match_by(field, value, limit))
+            return await self.storage.match_by(field, value, limit)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -418,7 +417,7 @@ class PersistenceService:
     async def load_by_values(self, field_value_pairs: List[tuple],
                              sort_by: Optional[List[storage.ElasticFiledSort]] = None, limit=1000) -> StorageRecords:
         try:
-            return StorageRecords(await self.storage.load_by_values(field_value_pairs, sort_by, limit=limit))
+            return await self.storage.load_by_values(field_value_pairs, sort_by, limit=limit)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -446,8 +445,7 @@ class PersistenceService:
 
             if sort is not None:
                 query['sort'] = sort
-            result = await self.storage.search(query)
-            return StorageRecords(result)
+            return await self.storage.search(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -455,6 +453,7 @@ class PersistenceService:
             raise StorageException(str(e))
 
     async def upsert(self, data, replace_id: bool = True) -> BulkInsertResult:
+        # todo could take some transitional object like record (data + meta)
         try:
 
             if not isinstance(data, list):
@@ -463,12 +462,12 @@ class PersistenceService:
                 payload = [data]
             else:
                 # Add id
-                for d in data:
-                    if replace_id is True and 'id' in d:
-                        d["_id"] = d['id']
+                for item in data:
+                    if replace_id is True and 'id' in item:
+                        item["_id"] = item['id']
                 payload = data
 
-            return await self.storage.create(payload)
+            return await self.storage.create(payload, source_index=None)  # todo add source index from meta
 
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
@@ -487,10 +486,10 @@ class PersistenceService:
 
     async def filter(self, query: dict) -> StorageRecords:
         try:
-            return StorageRecords(await self.storage.search(query))
+            return await self.storage.search(query)
         except elasticsearch.exceptions.NotFoundError:
             _logger.warning("No result found for query {}".format(query))
-            return StorageRecords()
+            return StorageRecords.build_from_elastic()
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -509,7 +508,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def query(self, query):
+    async def query(self, query) -> StorageRecords:
         try:
             return await self.storage.search(query)
         except elasticsearch.exceptions.ElasticsearchException as e:

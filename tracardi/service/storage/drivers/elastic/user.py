@@ -1,4 +1,4 @@
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.sha1_hasher import SHA1Encoder
 from typing import List, Optional
@@ -76,16 +76,14 @@ async def search_by_token(token: str) -> StorageRecords:
     query = {
         "query": {"term": {"token": str(token)}}
     }
-    result = await storage_manager("user").query(query=query)
-    return StorageRecords(result)
+    return await storage_manager("user").query(query=query)
 
 
 async def search_by_role(role: str) -> StorageRecords:
     query = {
         "query": {"term": {"roles": str(role)}}
     }
-    result = await storage_manager("user").query(query=query)
-    return StorageRecords(result)
+    return await storage_manager("user").query(query=query)
 
 
 async def check_if_exists(email: str) -> bool:

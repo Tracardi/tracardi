@@ -6,7 +6,7 @@ from tracardi.domain.entity import Entity
 from pydantic import BaseModel
 from tracardi.domain.agg_result import AggResult
 from tracardi.exceptions.exception import TracardiException, StorageException
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 import tracardi.domain.entity as domain
 
@@ -94,6 +94,8 @@ class StorageCrud(BaseStorageCrud):
         return None
 
     async def save(self) -> BulkInsertResult:
+        # todo make save according to meta data
+        print(self.entity.get_meta_data())
         service = self._get_storage_service()
         return await service.upsert(self.entity.dict(exclude_unset=self.exclude_unset, exclude=self.exclude))
 

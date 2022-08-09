@@ -1,6 +1,6 @@
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.factory import storage_manager
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.index import resources
 
 
@@ -12,7 +12,7 @@ async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
 
 
 async def load_by_query_string(query_string: str, start: int = 0, limit: int = 100) -> StorageRecords:
-    result = await storage_manager('log').query({
+    return await storage_manager('log').query({
         "query": {
             "query_string": {
                 "query": query_string
@@ -24,7 +24,6 @@ async def load_by_query_string(query_string: str, start: int = 0, limit: int = 1
         "from": start,
         "size": limit
     })
-    return StorageRecords(result)
 
 
 async def exists():

@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
-from tracardi.domain.storage_result import RecordMetadata
+from tracardi.domain.storage_record import RecordMetadata
 from tracardi.domain.value_object.storage_info import StorageInfo
 
 

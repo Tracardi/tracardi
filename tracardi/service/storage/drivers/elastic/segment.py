@@ -1,4 +1,4 @@
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 
 

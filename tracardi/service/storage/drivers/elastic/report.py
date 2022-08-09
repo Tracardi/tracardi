@@ -1,7 +1,7 @@
 from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.report import Report, ReportRecord
 from typing import List, Optional
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 
 
 async def load(id: str) -> Optional[Report]:
@@ -50,6 +50,5 @@ async def load_for_grouping(name: Optional[str] = None) -> StorageRecords:
         }
     }
     result = await storage_manager("report").query(query)
-    result = StorageRecords(result)
     result.transform_hits(lambda hit: Report.decode(ReportRecord(**hit)).dict())
     return result

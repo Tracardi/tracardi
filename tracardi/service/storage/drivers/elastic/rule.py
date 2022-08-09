@@ -5,7 +5,7 @@ from typing import List, Tuple, Dict
 
 from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
-from tracardi.domain.storage_result import StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 
 from tracardi.domain.rule import Rule
 

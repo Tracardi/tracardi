@@ -30,16 +30,33 @@ class StorageRecord(dict):
         return self._meta is not None
 
 
-class StorageRecords:
-    def __init__(self, result=None):
-        if result is None:
-            self.total = 0
-            self._hits = []
-            self.chunk = 0
-        else:
-            self.total = result['hits']['total']['value']
-            self._hits = result['hits']['hits']
-            self.chunk = len(self._hits)
+class StorageRecords(dict):
+
+    @staticmethod
+    def build_from_elastic(elastic_records: dict = None) -> 'StorageRecords':
+        if elastic_records is None:
+            return StorageRecords()
+
+        if isinstance(elastic_records, StorageRecords):
+            return elastic_records
+
+        record = StorageRecords(**elastic_records)
+        record.set_data(
+            total=elastic_records['hits']['total']['value'],
+            records=elastic_records['hits']['hits']
+        )
+        return record
+
+    def __init__(self, *args, **kwargs):
+        super(StorageRecords, self).__init__(*args, **kwargs)
+        self.total = 0
+        self._hits = []
+        self.chunk = 0
+
+    def set_data(self, records, total):
+        self.total = total
+        self._hits = records
+        self.chunk = len(self._hits)
 
     def __repr__(self):
         return "hits {}, total: {}".format(self._hits, self.total)
@@ -50,6 +67,13 @@ class StorageRecords:
             row['id'] = hit['_id']
 
             yield row
+
+    def first(self):
+        first_hit = self._hits[0]
+        row = StorageRecord.build_from_elastic(first_hit)
+        row['id'] = first_hit['_id']
+
+        return row
 
     def dict(self):
         return {
