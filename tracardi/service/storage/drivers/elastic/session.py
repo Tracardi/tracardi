@@ -10,7 +10,7 @@ from tracardi.service.storage.factory import StorageFor, storage_manager, Storag
 
 
 async def save_sessions(profiles: List[Session]):
-    return await StorageForBulk(profiles).index('session').save()
+    return await StorageForBulk(profiles).index("session").save()
 
 
 async def update_session_duration(session: Session):

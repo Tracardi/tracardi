@@ -455,7 +455,8 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def upsert(self, data: Union[StorageRecord, Entity, BaseModel, dict, list], replace_id: bool = True) -> BulkInsertResult:
+    async def upsert(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
+                     replace_id: bool = True) -> BulkInsertResult:
         try:
             return await self.storage.create(data, replace_id=replace_id)
         except elasticsearch.exceptions.ElasticsearchException as e:

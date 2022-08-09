@@ -49,7 +49,7 @@ async def save(profile: Profile, refresh_after_save=False):
 
 
 async def save_profiles(profiles: List[Profile]):
-    return await StorageForBulk(profiles).index('profile').save()
+    return await StorageForBulk(profiles).index("profile").save()
 
 
 async def refresh():

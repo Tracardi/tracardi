@@ -153,7 +153,7 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
                 finally:
                     events_to_save.append(event)
 
-        event_result = await StorageForBulk(events_to_save).index('event').save(exclude={"update": ...})
+        event_result = await StorageForBulk(events_to_save).index("event").save(exclude={"update": ...})
         event_result = SaveResult(**event_result.dict())
 
         # Add event types

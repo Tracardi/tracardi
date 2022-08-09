@@ -1,3 +1,4 @@
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.entity import Entity
@@ -15,10 +16,8 @@ async def flush():
     return await storage_manager('resource').flush()
 
 
-async def load_all(start=0, limit=100) -> Tuple[List[Resource], int]:
-    result = await StorageForBulk().index('resource').load(start, limit)
-    data = [ResourceRecord.construct(Resource.__fields_set__, **r).decode() for r in result]
-    return data, result.total
+async def load_all(start=0, limit=100) -> StorageRecords:
+    return await StorageForBulk().index('resource').load(start, limit)
 
 
 async def load_destinations(start=0, limit=100) -> Tuple[List[Resource], int]:
