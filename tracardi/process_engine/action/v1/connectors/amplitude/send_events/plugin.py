@@ -136,7 +136,7 @@ def register() -> Plugin:
             outputs=["response", "error"],
             version="0.6.1",
             author="Risto Kowaczewski",
-            license="MIT",
+            license="Tracardi Pro",
             manual="amplitude_send_event"
         ),
         metadata=MetaData(
