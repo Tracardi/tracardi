@@ -10,7 +10,6 @@ from tracardi.service.storage.factory import StorageFor, storage_manager
 from typing import Union, List, Optional, Dict
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.value_object.save_result import SaveResult
-from tracardi.service.storage.factory import StorageForBulk
 from tracardi.domain.event import Event
 from tracardi.config import tracardi
 
@@ -153,7 +152,7 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
                 finally:
                     events_to_save.append(event)
 
-        event_result = await StorageForBulk(events_to_save).index("event").save(exclude={"update": ...})
+        event_result = await storage_manager("event").upsert(events_to_save, exclude={"update": ...})
         event_result = SaveResult(**event_result.dict())
 
         # Add event types

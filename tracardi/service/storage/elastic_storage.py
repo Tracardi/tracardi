@@ -80,14 +80,15 @@ class ElasticStorage:
             return None
 
     @staticmethod
-    def _get_storage_record(record, replace_id) -> StorageRecord:
+    def _get_storage_record(record, replace_id, exclude=None) -> StorageRecord:
         if isinstance(record, Entity):
-            record = record.to_storage_record()
+            record = record.to_storage_record(exclude=exclude)
 
         elif isinstance(record, BaseModel):
-            record = StorageRecord.build_from_base_model(record)
+            record = StorageRecord.build_from_base_model(record, exclude=exclude)
 
         elif isinstance(record, dict):
+            # todo add exclude if possible
             record = StorageRecord(**record)
 
         if replace_id is True and 'id' in record:
@@ -96,9 +97,9 @@ class ElasticStorage:
         return record
 
     @staticmethod
-    def _get_storage_data(record, replace_id) -> dict:
+    def _get_storage_data(record, replace_id, exclude=None) -> dict:
         if isinstance(record, BaseModel):
-            record = record.dict()
+            record = record.dict(exclude=exclude)
 
         if replace_id is True and 'id' in record:
             record["_id"] = record['id']
@@ -118,13 +119,13 @@ class ElasticStorage:
         return index
 
     async def create(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
-                     replace_id: bool = True) -> BulkInsertResult:
+                     replace_id: bool = True, exclude=None) -> BulkInsertResult:
 
         if isinstance(data, list):
-            records = [self._get_storage_data(row, replace_id=replace_id) for row in data]
+            records = [self._get_storage_data(row, exclude=exclude, replace_id=replace_id) for row in data]
             index = self.index.get_write_index()
         else:
-            record = self._get_storage_record(data, replace_id=replace_id)
+            record = self._get_storage_record(data, exclude=exclude, replace_id=replace_id)
             index = self._get_storage_index(record)
             records = [record]
 

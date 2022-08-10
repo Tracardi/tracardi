@@ -117,7 +117,7 @@ class Profile(Entity):
                     yield event_type, segment_id, msg
 
     async def merge(self, load_profiles_to_merge_callable: Callable, limit: int = 2000,
-                    override_old_data: bool = True) -> Union['Profiles', None]:
+                    override_old_data: bool = True) -> Optional['Profiles']:
 
         """
         This method mutates current profile.

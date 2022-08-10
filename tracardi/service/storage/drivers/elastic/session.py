@@ -6,11 +6,11 @@ from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
-from tracardi.service.storage.factory import StorageFor, storage_manager, StorageForBulk
+from tracardi.service.storage.factory import StorageFor, storage_manager
 
 
 async def save_sessions(profiles: List[Session]):
-    return await StorageForBulk(profiles).index("session").save()
+    return await storage_manager("session").upsert(profiles)
 
 
 async def update_session_duration(session: Session):

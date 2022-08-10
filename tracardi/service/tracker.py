@@ -253,7 +253,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         profiles_to_disable = await merge(profile, override_old_data=True, limit=2000)
         if profiles_to_disable is not None:
             task = asyncio.create_task(
-                StorageForBulk(profiles_to_disable).index("profile").save())
+                storage.driver.profile.save_all(profiles_to_disable)
+            )
             save_tasks.append(task)
     except Exception as e:
         message = 'Profile merging returned an error `{}`'.format(str(e))
@@ -338,7 +339,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         # Save console log
         if console_log:
             encoded_console_log = list(console_log.get_encoded())
-            save_tasks.append(asyncio.create_task(StorageForBulk(encoded_console_log).index("console-log").save()))
+            save_tasks.append(asyncio.create_task(storage.driver.console_log.save_all(encoded_console_log)))
 
     # Send to destination
 
