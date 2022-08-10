@@ -59,15 +59,15 @@ class FullContactAction(ActionRunner):
                     }
 
                     if response.status in [200, 201, 202, 203, 204]:
-                        return Result(port="payload", value=result), Result(port="error", value=None)
+                        return Result(port="payload", value=result)
                     else:
-                        return Result(port="payload", value=None), Result(port="error", value=result)
+                        return Result(port="error", value=result)
 
         except ClientConnectorError as e:
-            return Result(port="payload", value=None), Result(port="error", value=str(e))
+            return Result(port="error", value=str(e))
 
         except asyncio.exceptions.TimeoutError:
-            return Result(port="payload", value=None), Result(port="error", value="FullContact webhook timed out.")
+            return Result(port="error", value="FullContact webhook timed out.")
 
 
 def register() -> Tuple[Plugin, Settings]:
@@ -79,7 +79,7 @@ def register() -> Tuple[Plugin, Settings]:
             inputs=["payload"],
             outputs=['payload', "error"],
             version='0.6.1',
-            license="MIT",
+            license="Tracardi Pro",
             author="Risto Kowaczewski",
             manual="fullcontact_webhook_action"
         ),

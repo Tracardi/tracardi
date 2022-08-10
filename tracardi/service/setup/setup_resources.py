@@ -85,16 +85,6 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="pushover",
-            name="Pushover",
-            tags=["pushover", "message"],
-            config={
-                "token": "<token>",
-                "user": "<user>"
-            },
-            icon="pushover"
-        ),
-        ResourceSettings(
             id="mysql",
             name="MySQL",
             icon="mysql",
@@ -146,15 +136,6 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "uri": "mongodb://127.0.0.1:27017/",
                 "timeout": 5000
-            }
-        ),
-        ResourceSettings(
-            id="trello",
-            name="Trello",
-            tags=["trello"],
-            config={
-                "token": "<trello-api-token>",
-                "api_key": "<trello-api-key>"
             }
         ),
         ResourceSettings(
