@@ -21,10 +21,12 @@ class AsyncProfileTracksSynchronizer:
         self.hash = "profile-blocker"
 
     async def __aenter__(self):
+        max_repeats = 10
         while True:
-            if await self._is_profile_processed():
-                logger.info(f"Waiting for /track/{self.profile.id} to finish")
+            if await self._is_profile_processed() and max_repeats > 0:
+                logger.info(f"Waiting for /track/{self.profile.id} to finish. Repeat {max_repeats}")
                 await asyncio.sleep(self.wait)
+                max_repeats -= 1
             else:
                 await self._set_profile_process_id()
                 return self
@@ -57,10 +59,12 @@ class ProfileTracksSynchronizer:
         self.hash = "profile-blocker"
 
     async def __aenter__(self):
+        max_repeats = 10
         while True:
-            if self._is_profile_processed():
+            if self._is_profile_processed() and max_repeats > 0:
                 logger.info(f"Waiting for /track/{self.profile.id} to finish")
                 await asyncio.sleep(self.wait)
+                max_repeats -= 1
             else:
                 self._set_profile_process_id()
                 return self

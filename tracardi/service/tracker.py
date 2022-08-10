@@ -35,7 +35,6 @@ from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.segmentation import segment
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.factory import StorageForBulk
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 
@@ -441,13 +440,13 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
     # Load session from storage
     session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
-
+    print("session", session)
     # Get profile
     profile, session = await tracker_payload.get_profile_and_session(session,
                                                                      storage.driver.profile.load_merged_profile,
                                                                      profile_less
                                                                      )
-
+    print("m", profile.get_meta_data())
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 
