@@ -21,12 +21,15 @@ class Entity(BaseModel):
     id: str
     _metadata: Optional[RecordMetadata] = PrivateAttr(None)
 
-    def set_meta_data(self, metadata: RecordMetadata) -> 'Entity':
+    def set_meta_data(self, metadata: RecordMetadata = None) -> 'Entity':
         self._metadata = metadata
         return self
 
     def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
+
+    def has_meta_data(self) -> bool:
+        return self._metadata is not None
 
     def to_storage_record(self, exclude=None, exclude_unset: bool = False) -> StorageRecord:
         record = StorageRecord(**self.dict(exclude=exclude, exclude_unset=exclude_unset))

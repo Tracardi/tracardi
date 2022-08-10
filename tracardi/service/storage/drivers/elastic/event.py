@@ -1,12 +1,13 @@
 import logging
 from datetime import datetime, timedelta
 
+from tracardi.domain.entity import Entity
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.drivers.elastic.tag import get_tags
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
-from tracardi.service.storage.factory import StorageFor, storage_manager
+from tracardi.service.storage.factory import StorageFor, storage_manager, StorageForBulk
 from typing import Union, List, Optional, Dict
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.value_object.save_result import SaveResult
@@ -18,8 +19,17 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-async def load(id: str):
+async def load(id: str) -> Optional[StorageRecord]:
     return await storage_manager("event").load(id)
+
+
+async def delete_by_id(id: str) -> dict:
+    event = Entity(id=id)
+    return await StorageFor(event).index("event").delete()
+
+
+async def unique_field_value(query, limit):
+    await StorageForBulk().index('event').uniq_field_value("type", search=query, limit=limit)
 
 
 def _get_name(source_names_idx, id):

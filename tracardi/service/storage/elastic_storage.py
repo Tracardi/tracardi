@@ -52,7 +52,7 @@ class ElasticStorage:
     async def count(self, query: dict = None) -> bool:
         return await self.storage.count(self.index.get_index_alias(), query)
 
-    async def load(self, id) -> [StorageRecord, None]:
+    async def load(self, id) -> Optional[StorageRecord]:
         try:
             index = self.index.get_index_alias()
             if not self.index.multi_index:

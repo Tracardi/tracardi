@@ -8,7 +8,7 @@ from tracardi.config import tracardi
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.domain.resources.token import Token
 from tracardi.service.storage.driver import storage
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.configuration import Configuration

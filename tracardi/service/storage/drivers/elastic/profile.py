@@ -1,14 +1,14 @@
-from typing import List
+from typing import List, Optional
 from tracardi.domain.entity import Entity
 from tracardi.config import elastic, tracardi
 from tracardi.domain.profile import Profile
+from tracardi.domain.storage_record import StorageRecord
 from tracardi.service.storage.factory import StorageFor, storage_manager
 from tracardi.service.storage.profile_cacher import ProfileCache
 
 
-async def load_by_id(id: str) -> Profile:
-    profile = Profile(id=id)
-    return await StorageFor(profile).index().load()
+async def load_by_id(id: str) -> Optional[StorageRecord]:
+    return await storage_manager("profile").load(id)
 
 
 async def load_merged_profile(id: str) -> Profile:

@@ -363,7 +363,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def load(self, id: str):
+    async def load(self, id: str) -> Optional[StorageRecord]:
         try:
             return await self.storage.load(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
