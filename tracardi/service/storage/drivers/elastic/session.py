@@ -62,7 +62,10 @@ async def load_duplicates(id: str):
             "term": {
                 "_id": id
             }
-        }
+        },
+        "sort": [
+            {"metadata.time.insert": "desc"}
+        ]
     })
 
 
