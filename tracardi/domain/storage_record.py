@@ -1,4 +1,4 @@
-from typing import Callable, Iterator
+from typing import Callable, Iterator, List, Union
 
 from pydantic import BaseModel
 
@@ -55,7 +55,7 @@ class StorageRecords(dict):
     def __init__(self, *args, **kwargs):
         super(StorageRecords, self).__init__(*args, **kwargs)
         self.total = 0
-        self._hits = []
+        self._hits = []  # type: List[dict]
         self.chunk = 0
 
     def set_data(self, records, total):
@@ -63,15 +63,26 @@ class StorageRecords(dict):
         self._hits = records
         self.chunk = len(self._hits)
 
+    @staticmethod
+    def _to_record(hit):
+        row = StorageRecord.build_from_elastic(hit)
+        row['id'] = hit['_id']
+
+        return row
+
     def __repr__(self):
         return "hits {}, total: {}".format(self._hits, self.total)
 
     def __iter__(self) -> Iterator[StorageRecord]:
         for hit in self._hits:
-            row = StorageRecord.build_from_elastic(hit)
-            row['id'] = hit['_id']
+            yield self._to_record(hit)
 
-            yield row
+    def __getitem__(self, subscript) -> Union[List[StorageRecord], StorageRecord]:
+        if isinstance(subscript, slice):
+            return [self._to_record(row) for row in self._hits[subscript.start:subscript.stop:subscript.step]]
+        else:
+            hit = self._hits[subscript]
+            return self._to_record(hit)
 
     def first(self):
         first_hit = self._hits[0]

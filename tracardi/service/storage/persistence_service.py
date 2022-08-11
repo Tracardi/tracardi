@@ -431,9 +431,9 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def delete_by(self, field: str, value: str) -> dict:
+    async def delete_by(self, field: str, value: str, index: str = None) -> dict:
         try:
-            return await self.storage.delete_by(field, value)
+            return await self.storage.delete_by(field, value, index)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -470,9 +470,9 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def delete(self, id: str) -> dict:
+    async def delete(self, id: str, index: str = None) -> dict:
         try:
-            return await self.storage.delete(id)
+            return await self.storage.delete(id, index=index)
         except elasticsearch.exceptions.ElasticsearchException as e:
             _logger.error(str(e))
             if len(e.args) == 2:

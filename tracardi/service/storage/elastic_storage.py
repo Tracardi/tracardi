@@ -134,11 +134,15 @@ class ElasticStorage:
 
         return await self.storage.insert(index, records)
 
-    async def delete(self, id):
+    async def delete(self, id, index: str = None):
+        if index is None:
+            index = self.index.get_index_alias()
+
         if not self.index.multi_index:
-            return await self.storage.delete(self.index.get_index_alias(), id)
+            # This function does not work on aliases
+            return await self.storage.delete(index, id)
         else:
-            return await self.delete_by("_id", id)
+            return await self.delete_by("_id", id, index)
 
     async def search(self, query) -> StorageRecords:
         return StorageRecords.build_from_elastic(await self.storage.search(self.index.get_index_alias(), query))
@@ -204,7 +208,7 @@ class ElasticStorage:
         }
         return await self.search(query)
 
-    async def delete_by(self, field, value):
+    async def delete_by(self, field, value, index: str = None):
         query = {
             "query": {
                 "term": {
@@ -212,7 +216,11 @@ class ElasticStorage:
                 }
             }
         }
-        return await self.storage.delete_by_query(self.index.get_index_alias(), query)
+
+        if index is None:
+            index = self.index.get_index_alias()
+
+        return await self.storage.delete_by_query(index, query)
 
     async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
                              limit=1000) -> StorageRecords:

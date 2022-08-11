@@ -6,7 +6,6 @@ from uuid import uuid4
 
 import redis
 from deepdiff import DeepDiff
-from pydantic import ValidationError
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
@@ -35,7 +34,7 @@ from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.segmentation import segment
-from tracardi.service.session.session_corrector import correct_session
+from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
@@ -465,8 +464,6 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         if len(list_of_profile_ids_referenced_by_session) == 1:
             session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
 
-    print("session", session)
-    print("session-metadata", session.get_meta_data() if session else None)
     # Get profile
     profile, session = await tracker_payload.get_profile_and_session(session,
                                                                      storage.driver.profile.load_merged_profile,
