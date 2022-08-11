@@ -455,24 +455,22 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         print("duplicated id")
         logger.error(str(e))
         _session_records = await storage.driver.session.load_duplicates(tracker_payload.session.id)
-        changed_session_ids = {}
+        changed_session_ids = []
         for _session_record in _session_records:
             try:
                 record_profile_id = _session_record['profile']['id']
             except KeyError:
                 # This is corrupted session. Session must have profile id
-                print("deleted corr", _session_record['id'])
                 await storage.driver.session.delete(_session_record['id']),
                 await storage.driver.session.refresh()
                 continue
 
-            print("rec_profile", record_profile_id)
             if record_profile_id not in changed_session_ids:
+                changed_session_ids.append(record_profile_id)
                 try:
                     _session = Session(**_session_record)
                     _session.id = str(uuid4())
 
-                    print("generated session", _session)
                     result = await storage.driver.session.save(_session)
                     if result.saved != 1:
                         raise RuntimeError(f"Could not recreate session {_session_record['id']}")

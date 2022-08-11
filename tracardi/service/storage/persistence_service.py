@@ -358,6 +358,7 @@ class PersistenceService:
         try:
             return await self.storage.exists(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -367,6 +368,7 @@ class PersistenceService:
         try:
             return await self.storage.load(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -385,6 +387,7 @@ class PersistenceService:
         try:
             return IndexMapping(await self.storage.get_mapping(self.storage.index.get_index_alias()))
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -394,6 +397,7 @@ class PersistenceService:
         try:
             return await self.storage.load_by(field, value, limit)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -460,6 +464,7 @@ class PersistenceService:
         try:
             return await self.storage.create(data, replace_id=replace_id, exclude=exclude)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -469,6 +474,7 @@ class PersistenceService:
         try:
             return await self.storage.delete(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -493,6 +499,7 @@ class PersistenceService:
             _logger.warning("No result found for query {}".format(query))
             return StorageAggregateResult()
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -502,6 +509,7 @@ class PersistenceService:
         try:
             return await self.storage.search(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)

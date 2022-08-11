@@ -430,8 +430,9 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
     return result[n]["_source"] if len(result) >= n + 1 else None
 
 
-async def get_event_data_for_session(session_id: str, limit: int = 20):
-    result = await storage_manager("event").query({
+async def get_events_by_session(session_id: str, limit: int = 100):
+
+    query = {
         "query": {
             "term": {
                 "session.id": session_id
@@ -443,13 +444,9 @@ async def get_event_data_for_session(session_id: str, limit: int = 20):
                 "metadata.time.insert": {"order": "desc"}
             }
         ]
-    })
-    return [{
-        "id": doc["_source"]["id"],
-        "insert": doc["_source"]["metadata"]["time"]["insert"],
-        "status": doc["_source"]["metadata"]["status"],
-        "type": doc["_source"]["type"]
-    } for doc in result["hits"]["hits"]], result["hits"]["total"]["value"] > len(result["hits"]["hits"])
+    }
+
+    return await storage_manager("event").query(query)
 
 
 async def aggregate_source_by_type(source_id: str, time_span: str):
@@ -528,7 +525,7 @@ async def get_avg_process_time():
         }
 
 
-async def get_events_by_session_and_profile(profile_id: str,  session_id: str) -> StorageRecords:
+async def get_events_by_session_and_profile(profile_id: str,  session_id: str, limit: int=100) -> StorageRecords:
     query = {
         "query": {
             "bool": {
@@ -537,13 +534,22 @@ async def get_events_by_session_and_profile(profile_id: str,  session_id: str) -
                     {"term": {"session.id": session_id}}
                 ]
             }
-        }
+        },
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ],
+        "size": limit
     }
     return await storage_manager("event").query(query)
 
 
 async def reassign_session(new_session_id: str, old_session_id: str, profile_id: str):
     result = await get_events_by_session_and_profile(profile_id, old_session_id)
-
-    for record in result:
-        print(record)
+    for event_record in result:
+        try:
+            event_record['session']['id'] = new_session_id
+            await storage_manager('event').upsert(event_record)
+        except Exception as e:
+            logger.error(str(e))
