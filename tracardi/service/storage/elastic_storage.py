@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage import index
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import Index
@@ -72,7 +73,7 @@ class ElasticStorage:
                 result = await self.storage.search(index, query)
                 records = StorageRecords.build_from_elastic(result)
                 if len(records) != 1:
-                    return None
+                    raise DuplicatedRecordException(f"Duplicated record {id} in index {index}")
                 output = records.first()
 
             return output
@@ -124,10 +125,12 @@ class ElasticStorage:
         if isinstance(data, list):
             records = [self._get_storage_data(row, exclude=exclude, replace_id=replace_id) for row in data]
             index = self.index.get_write_index()
+            print("list of recrods", index)
         else:
             record = self._get_storage_record(data, exclude=exclude, replace_id=replace_id)
             index = self._get_storage_index(record)
             records = [record]
+            print("record", index)
 
         return await self.storage.insert(index, records)
 

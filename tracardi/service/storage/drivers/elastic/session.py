@@ -56,6 +56,16 @@ async def load(id: str) -> Optional[Session]:
     return await StorageFor(Entity(id=id)).index("session").load(Session)  # type: Optional[Session]
 
 
+async def load_duplicates(id: str):
+    return await storage_manager('session').query({
+        "query": {
+            "term": {
+                "_id": id
+            }
+        }
+    })
+
+
 async def delete(id: str):
     return await storage_manager('session').delete(id)
 

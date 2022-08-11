@@ -38,7 +38,7 @@ class Entity(BaseModel):
         else:
             storage_info = self.storage_info()  # type: Optional[StorageInfo]
             if storage_info and storage_info.multi is True:
-                logger.info(f"Entity {type(self)} converts to index-less storage record.")
+                logger.error(f"Entity {type(self)} converts to index-less storage record.")
         return record
 
     @staticmethod

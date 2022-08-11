@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import redis
 from deepdiff import DeepDiff
+from pydantic import ValidationError
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
@@ -26,10 +27,10 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.event_validator import validate
 from tracardi.domain.event import Event, VALIDATED, ERROR, WARNING, PROCESSED, INVALID
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
-    EventValidationException, TracardiException
+    EventValidationException, TracardiException, DuplicatedRecordException
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -38,7 +39,7 @@ from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 
-logger = logging.getLogger('app.api.track.service.tracker')
+logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = MemoryCache()
@@ -439,14 +440,89 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         tracker_payload.session = Session(id=str(uuid4()), metadata=SessionMetadata())
 
     # Load session from storage
-    session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
+    # There may be a case when we have 2 sessions with the same id.
+
+    try:
+        session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
+    except DuplicatedRecordException as e:
+
+        """
+        This is a recovery procedure in case there are duplicated sessions in the index.
+        It copies the duplicated session data and creates new one with the different id. Old session is
+        removed. If the duplicated session is corrupted it will be removed. 
+        """
+
+        print("duplicated id")
+        logger.error(str(e))
+        _session_records = await storage.driver.session.load_duplicates(tracker_payload.session.id)
+        changed_session_ids = {}
+        for _session_record in _session_records:
+            try:
+                record_profile_id = _session_record['profile']['id']
+            except KeyError:
+                # This is corrupted session. Session must have profile id
+                print("deleted corr", _session_record['id'])
+                await storage.driver.session.delete(_session_record['id']),
+                await storage.driver.session.refresh()
+                continue
+
+            print("rec_profile", record_profile_id)
+            if record_profile_id not in changed_session_ids:
+                try:
+                    _session = Session(**_session_record)
+                    _session.id = str(uuid4())
+
+                    print("generated session", _session)
+                    result = await storage.driver.session.save(_session)
+                    if result.saved != 1:
+                        raise RuntimeError(f"Could not recreate session {_session_record['id']}")
+                    else:
+                        logger.warning(f"Session {_session_record['id']} recreated with new id {_session.id}")
+                    await storage.driver.session.refresh()
+
+                    # todo find all events with old session and the same profile id and change session id to new session
+                    await storage.driver.event.reassign_session(
+                        old_session_id=_session_record['id'],
+                        new_session_id=_session.id,
+                        profile_id=record_profile_id
+                    )
+
+                    # Delete conflicting session
+
+                    await storage.driver.session.delete(_session_record['id']),
+                    await storage.driver.session.refresh()
+                    logger.warning(f"Session {_session_record['id']} deleted. It was recreated as {_session.id}")
+
+                except ValidationError as e:
+                    logger.error(f"Could not recreate session from the data read from index. The following error "
+                                 f"occurred: {str(e)}")
+                except Exception as e:
+                    logger.error(str(e))
+
+        # if there is duplicated session create new random session. As a consequence of this a new profile is created.
+        # todo maybe we should keep the current profile if exists (load and set sesion.profile)
+        # todo moze warto trzymac sessje z konflikami w redisie przez jakiś czas. W te sposób nie ędzie tworzona cały
+        #  czas nowa sessja jak jest konflikt
+        # todo co gdy ktos naumylsnie przesyla caly czas taka sama sesje.
+        session = Session(
+                id=tracker_payload.session.id,
+                metadata=SessionMetadata(
+                    time=SessionTime(
+                        insert=datetime.utcnow()
+                    )
+                )
+            )
     print("session", session)
+    print("session-metadata", session.get_meta_data() if session else None)
     # Get profile
     profile, session = await tracker_payload.get_profile_and_session(session,
                                                                      storage.driver.profile.load_merged_profile,
                                                                      profile_less
                                                                      )
-    print("m", profile.get_meta_data())
+    print("profile", profile)
+    print("profile-meta", profile.get_meta_data() if profile else None)
+    print("new-session", session)
+    print("new-session-metadata", session.get_meta_data() if session else None)
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 

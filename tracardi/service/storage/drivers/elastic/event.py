@@ -526,3 +526,24 @@ async def get_avg_process_time():
             "avg": 0,
             "records": 0
         }
+
+
+async def get_events_by_session_and_profile(profile_id: str,  session_id: str) -> StorageRecords:
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"profile.id": profile_id}},
+                    {"term": {"session.id": session_id}}
+                ]
+            }
+        }
+    }
+    return await storage_manager("event").query(query)
+
+
+async def reassign_session(new_session_id: str, old_session_id: str, profile_id: str):
+    result = await get_events_by_session_and_profile(profile_id, old_session_id)
+
+    for record in result:
+        print(record)
