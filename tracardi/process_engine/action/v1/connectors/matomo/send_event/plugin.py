@@ -103,7 +103,7 @@ class SendEventToMatomoAction(ActionRunner):
             return Result(port="response", value=payload)
 
         except MatomoClientException as e:
-            return Result(port="error", value=str(e))
+            return Result(port="error", value={"message": str(e)})
 
     def make_pv_id(self) -> str:
         md5_hash = hashlib.md5(
