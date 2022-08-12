@@ -32,7 +32,8 @@ def register() -> Plugin:
             outputs=["date"],
             version='0.7.2',
             license="MIT",
-            author="Mateusz Zitaruk"
+            author="Mateusz Zitaruk",
+            manual="weekdays_checker_action"
 
         ),
         metadata=MetaData(
