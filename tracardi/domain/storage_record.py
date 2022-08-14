@@ -102,6 +102,12 @@ class StorageRecords(dict):
             hit = self._hits[subscript]
             return self._to_record(hit)
 
+    def row(self, n):
+        """
+        Return row data the same way as elastic does.
+        """
+        return self._hits[n]
+
     def first(self):
         first_hit = self._hits[0]
         row = StorageRecord.build_from_elastic(first_hit)

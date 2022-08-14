@@ -95,7 +95,7 @@ async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecor
     records = await storage_manager('session').query(query)
 
     if len(records) >= n:
-        return StorageRecord.build_from_elastic(records[n - 1])
+        return StorageRecord.build_from_elastic(records.row(n - 1))
 
     return None
 
