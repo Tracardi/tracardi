@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
+from tracardi.domain.agg_result import AggResult
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
@@ -28,8 +29,8 @@ async def delete_by_id(id: str) -> dict:
     return await StorageFor(event).index("event").delete()
 
 
-async def unique_field_value(query, limit):
-    await StorageForBulk().index('event').uniq_field_value("type", search=query, limit=limit)
+async def unique_field_value(query, limit) -> AggResult:
+    return await StorageForBulk().index('event').uniq_field_value("type", search=query, limit=limit)
 
 
 def _get_name(source_names_idx, id):

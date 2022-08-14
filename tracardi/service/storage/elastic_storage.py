@@ -121,7 +121,7 @@ class ElasticStorage:
 
     async def create(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
                      replace_id: bool = True, exclude=None) -> BulkInsertResult:
-
+        # todo does not read index from storage record.
         if isinstance(data, list):
             records = [self._get_storage_data(row, exclude=exclude, replace_id=replace_id) for row in data]
             index = self.index.get_write_index()

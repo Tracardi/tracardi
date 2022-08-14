@@ -177,6 +177,7 @@ class StorageFor:
                 ))
             return EntityStorageCrud(index, entity=self.instance)
         else:
+            # TODO does not pass index
             return StorageCrud(
                 self.storage_info.index,
                 self.storage_info.domain_class_ref,
