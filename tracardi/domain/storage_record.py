@@ -1,4 +1,4 @@
-from typing import Callable, Iterator, List, Union
+from typing import Callable, Iterator, List, Union, Dict, Tuple
 
 from pydantic import BaseModel
 
@@ -34,15 +34,36 @@ class StorageRecord(dict):
     def has_metadata(self) -> bool:
         return self._meta is not None
 
-class StorageAggregates(dict):
+
+class StorageAggregate(dict):
 
     def __init__(self, *args, **kwargs):
-        super(StorageAggregates, self).__init__(*args, **kwargs)
+        super(StorageAggregate, self).__init__(*args, **kwargs)
         if 'buckets' in kwargs:
             self._buckets = kwargs['buckets']
 
     def buckets(self):
         return self._buckets
+
+
+class StorageAggregates(dict):
+
+    def __iter__(self) -> Iterator[Tuple[str, StorageAggregate]]:
+        for bucket_name, value in self.items():
+            yield bucket_name, StorageAggregate(**value)
+
+    def convert(self, aggregate_key) -> Iterator[Tuple[str, dict]]:
+        for bucket, data in self:
+            records = {}
+            if "buckets" in data:
+                for item in data['buckets']:
+                    records[aggregate_key] = item['doc_count']
+            else:
+                records = {"found": data["doc_count"]}
+
+            if 'sum_other_doc_count' in data:
+                records['other'] = data['sum_other_doc_count']
+            yield bucket, records
 
 
 class StorageRecords(dict):
@@ -76,10 +97,12 @@ class StorageRecords(dict):
         self.chunk = len(self._hits)
         self._aggregations = aggregations
 
-    def aggregations(self, key) -> StorageAggregates:
+    def aggregations(self, key=None) -> Union[StorageAggregate, StorageAggregates]:
+        if key is None:
+            return StorageAggregates(self._aggregations)
         if key not in self._aggregations:
             raise ValueError(f"Aggregation {key} not available.")
-        return StorageAggregates(**self._aggregations[key])
+        return StorageAggregate(**self._aggregations[key])
 
     @staticmethod
     def _to_record(hit):

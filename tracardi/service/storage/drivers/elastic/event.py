@@ -515,8 +515,8 @@ async def get_avg_process_time():
 
     try:
         return {
-            "avg": result['aggregations']['avg_process_time']['value'],
-            "records": result['hits']['total']['value']
+            "avg": result.aggregations('avg_process_time')['value'],
+            "records": result.total
         }
     except KeyError:
         return {
@@ -525,7 +525,7 @@ async def get_avg_process_time():
         }
 
 
-async def get_events_by_session_and_profile(profile_id: str,  session_id: str, limit: int=100) -> StorageRecords:
+async def get_events_by_session_and_profile(profile_id: str,  session_id: str, limit: int = 100) -> StorageRecords:
     query = {
         "query": {
             "bool": {
