@@ -425,9 +425,9 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
         "sort": [
             {"metadata.time.insert": "desc"}
         ]
-    }))["hits"]["hits"]
+    }))
 
-    return result[n]["_source"] if len(result) >= n + 1 else None
+    return result[n] if len(result) >= n + 1 else None
 
 
 async def get_events_by_session(session_id: str, limit: int = 100):

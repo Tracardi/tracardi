@@ -158,7 +158,6 @@ class SqlSearchQueryEngine:
             es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
         else:
             es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
-        # print(es_query)
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:
@@ -270,9 +269,9 @@ class SqlSearchQueryEngine:
             try:
 
                 qs = {
-                    'total': result['hits']['total']['value'],
+                    'total': result.total,
                     'result': list(
-                        __format_count(result['aggregations']['items_over_time']['buckets'], unit, interval, format)),
+                        __format_count(result.aggregations('items_over_time').buckets(), unit, interval, format)),
                     'buckets': ['count']
                 }
 
@@ -328,10 +327,10 @@ class SqlSearchQueryEngine:
 
             try:
 
-                buckets_result, buckets = __format_count_by_bucket(result['aggregations']['by_field']['buckets'], unit,
+                buckets_result, buckets = __format_count_by_bucket(result.aggregations('by_field').buckets(), unit,
                                                                    interval, format)
                 qs = {
-                    'total': result['hits']['total']['value'],
+                    'total': result.total,
                     'result': buckets_result,
                     'buckets': buckets
 

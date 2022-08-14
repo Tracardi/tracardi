@@ -21,4 +21,4 @@ async def load_by_version_and_name(version: str, name: str) -> dict:
         }
     })
 
-    return result["hits"]["hits"][0]["_source"]
+    return result.first()

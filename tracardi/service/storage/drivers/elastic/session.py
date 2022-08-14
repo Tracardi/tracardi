@@ -82,7 +82,7 @@ async def flush():
 
 
 async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecord]:
-    result = await storage_manager('session').query({
+    query = {
         "query": {
             "term": {"profile.id": profile_id}
         },
@@ -90,9 +90,9 @@ async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecor
         "sort": [
             {"metadata.time.insert": "desc"}
         ]
-    })
+    }
 
-    records = result["hits"]["hits"]  # type: List[dict]
+    records = await storage_manager('session').query(query)
 
     if len(records) >= n:
         return StorageRecord.build_from_elastic(records[n - 1])

@@ -34,6 +34,16 @@ class StorageRecord(dict):
     def has_metadata(self) -> bool:
         return self._meta is not None
 
+class StorageAggregates(dict):
+
+    def __init__(self, *args, **kwargs):
+        super(StorageAggregates, self).__init__(*args, **kwargs)
+        if 'buckets' in kwargs:
+            self._buckets = kwargs['buckets']
+
+    def buckets(self):
+        return self._buckets
+
 
 class StorageRecords(dict):
 
@@ -48,7 +58,8 @@ class StorageRecords(dict):
         record = StorageRecords(**elastic_records)
         record.set_data(
             total=elastic_records['hits']['total']['value'],
-            records=elastic_records['hits']['hits']
+            records=elastic_records['hits']['hits'],
+            aggregations=elastic_records['aggregations'] if 'aggregations' in elastic_records else None
         )
         return record
 
@@ -57,11 +68,18 @@ class StorageRecords(dict):
         self.total = 0
         self._hits = []  # type: List[dict]
         self.chunk = 0
+        self._aggregations = None
 
-    def set_data(self, records, total):
+    def set_data(self, records, total, aggregations: dict = None):
         self.total = total
         self._hits = records
         self.chunk = len(self._hits)
+        self._aggregations = aggregations
+
+    def aggregations(self, key) -> StorageAggregates:
+        if key not in self._aggregations:
+            raise ValueError(f"Aggregation {key} not available.")
+        return StorageAggregates(**self._aggregations[key])
 
     @staticmethod
     def _to_record(hit):
@@ -71,7 +89,7 @@ class StorageRecords(dict):
         return row
 
     def __repr__(self):
-        return "hits {}, total: {}".format(self._hits, self.total)
+        return "hits {}, total: {}, aggregations: {}".format(self._hits, self.total, self._aggregations)
 
     def __iter__(self) -> Iterator[StorageRecord]:
         for hit in self._hits:

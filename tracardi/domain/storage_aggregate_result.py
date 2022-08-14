@@ -1,9 +1,11 @@
 from collections import defaultdict
 from typing import Callable, Tuple, Any
 
+from tracardi.domain.storage_record import StorageRecords
+
 
 class StorageAggregateResult:
-    def __init__(self, result=None, aggregate_key='key'):
+    def __init__(self, result: StorageRecords = None, aggregate_key='key'):
         if result is None:
             self.total = 0
             self.aggregations = []
