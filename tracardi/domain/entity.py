@@ -33,6 +33,11 @@ class Entity(BaseModel):
 
     def to_storage_record(self, exclude=None, exclude_unset: bool = False) -> StorageRecord:
         record = StorageRecord(**self.dict(exclude=exclude, exclude_unset=exclude_unset))
+
+        # Storage records must have ES _id
+
+        if 'id' in record:
+            record['_id'] = record['id']
         if self._metadata:
             record.set_meta_data(self._metadata)
         else:
