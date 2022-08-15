@@ -13,12 +13,14 @@ class WeekDaysChecker(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         today = datetime.datetime.today()
-        if date.weekday(today) <= 4:
-            weekdays = {"today": today.strftime("%A"),
-                        "weekend": date.weekday(today) > 4}
-        else:
-            weekdays = {"today": today.strftime("%A"),
-                        "weekend": date.weekday(today) < 4}
+        no_of_day = date.weekday(today) + 1
+        is_weekend = no_of_day > 5
+        weekdays = {
+            "today": today.strftime("%A"),
+            "weekend": is_weekend,
+            "day_number": no_of_day
+        }
+
         return Result(port="date", value=weekdays)
 
 
@@ -39,7 +41,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='If its a weekend',
             desc='This plugin checks current date and flag it if its a weekend or not.',
-            icon='global',
+            icon='calendar',
             group=["Input/Output"],
             documentation=Documentation(
                 inputs={
