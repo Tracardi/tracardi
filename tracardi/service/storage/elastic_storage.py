@@ -1,3 +1,5 @@
+from asyncio import create_task, gather
+from collections import defaultdict
 from typing import List, Optional, Union
 
 import elasticsearch
@@ -72,8 +74,13 @@ class ElasticStorage:
                 }
                 result = await self.storage.search(index, query)
                 records = StorageRecords.build_from_elastic(result)
-                if len(records) != 1:
+
+                if len(records) == 0:
+                    return None
+
+                if len(records) > 1:
                     raise DuplicatedRecordException(f"Duplicated record {id} in index {index}")
+
                 output = records.first()
 
             return output
@@ -82,13 +89,17 @@ class ElasticStorage:
 
     @staticmethod
     def _get_storage_record(record, replace_id, exclude=None) -> StorageRecord:
-        if isinstance(record, Entity):
+
+        if isinstance(record, StorageRecord):
+            return record
+
+        elif isinstance(record, Entity):
             record = record.to_storage_record(exclude=exclude)
 
         elif isinstance(record, BaseModel):
             record = StorageRecord.build_from_base_model(record, exclude=exclude)
 
-        elif isinstance(record, dict):
+        else:
             # todo add exclude if possible
             record = StorageRecord(**record)
 
@@ -97,40 +108,44 @@ class ElasticStorage:
 
         return record
 
-    @staticmethod
-    def _get_storage_data(record, replace_id, exclude=None) -> dict:
-        if isinstance(record, BaseModel):
-            record = record.dict(exclude=exclude)
-
-        if replace_id is True and 'id' in record:
-            record["_id"] = record['id']
-
-        return record
-
     def _get_storage_index(self, record):
-        if not record.has_metadata():
-            index = self.index.get_write_index()
-        else:
-            meta = record.get_metadata()
-            if meta.index is None:
+        if isinstance(record, Entity) or isinstance(record, StorageRecord):
+            if not record.has_meta_data():
                 index = self.index.get_write_index()
             else:
-                index = meta.index
-
+                meta = record.get_meta_data()
+                if meta.index is None:
+                    index = self.index.get_write_index()
+                else:
+                    index = meta.index
+        else:
+            index = self.index.get_write_index()
         return index
 
     async def create(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
-                     replace_id: bool = True, exclude=None) -> BulkInsertResult:
-        # todo does not read index from storage record.
+                     replace_id: bool = True, exclude=None) -> Union[BulkInsertResult, List[BulkInsertResult]]:
+        # print("----------------")
         if isinstance(data, list):
-            records = [self._get_storage_data(row, exclude=exclude, replace_id=replace_id) for row in data]
-            index = self.index.get_write_index()
-            print("list of recrods", index)
+            records_by_index = defaultdict(list)
+            for row in data:
+                index = self._get_storage_index(row)
+                record = self._get_storage_record(row, exclude=exclude, replace_id=replace_id)
+                # print("coming dataS meta", record.get_meta_data())
+                records_by_index[index].append(record)
+
+            if len(records_by_index) != 1:
+                raise ValueError(f"Can not save set of records with mixed target indices. Got the following "
+                                 f"indices {list(records_by_index.keys())}")
+
+            index, records = list(records_by_index.items())[0]
+            # print("recordS", index, records)
         else:
+
             record = self._get_storage_record(data, exclude=exclude, replace_id=replace_id)
             index = self._get_storage_index(record)
             records = [record]
-            print("record", index)
+            # print("coming data meta", data.get_meta_data())
+            # print("record", index, records)
 
         return await self.storage.insert(index, records)
 

@@ -43,8 +43,8 @@ class EntityStorageCrud(BaseStorageCrud):
             else:
                 entity = domain_class_ref(**data)
 
-            if data.has_metadata() and isinstance(entity, Entity):
-                entity.set_meta_data(data.get_metadata())
+            if data.has_meta_data() and isinstance(entity, Entity):
+                entity.set_meta_data(data.get_meta_data())
 
             return entity
 

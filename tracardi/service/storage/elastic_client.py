@@ -91,8 +91,8 @@ class ElasticClient:
         ids = []
         for record in records:
 
-            if '_id' in record:
-                _id = record['_id']
+            if 'id' in record:
+                _id = record['id']
                 del (record['_id'])
             else:
                 _id = str(uuid4())

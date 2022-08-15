@@ -34,7 +34,7 @@ class Entity(BaseModel):
     def to_storage_record(self, exclude=None, exclude_unset: bool = False) -> StorageRecord:
         record = StorageRecord(**self.dict(exclude=exclude, exclude_unset=exclude_unset))
         if self._metadata:
-            record.set_metadata(self._metadata)
+            record.set_meta_data(self._metadata)
         else:
             storage_info = self.storage_info()  # type: Optional[StorageInfo]
             if storage_info and storage_info.multi is True:

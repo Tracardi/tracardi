@@ -36,8 +36,9 @@ async def load_merged_profile(id: str) -> Profile:
 
         # Merge duplicated profiles
         _duplicated_profiles = await load_duplicates(id)  # 1st records is the newest
+        print(_duplicated_profiles)
         valid_profile_record = _duplicated_profiles.first() # type: StorageRecord
-        profile = Profile(**valid_profile_record).set_meta_data(valid_profile_record.get_metadata())
+        profile = Profile(**valid_profile_record).set_meta_data(valid_profile_record.get_meta_data())
 
         if len(_duplicated_profiles) == 1:
             # If 1 then there is no duplication
@@ -45,8 +46,8 @@ async def load_merged_profile(id: str) -> Profile:
 
         # We have duplicated records. Delete all but first profile.
         for _profile_record in _duplicated_profiles[1:]:  # type: StorageRecord
-            if _profile_record.has_metadata():
-                await storage_manager('profile').delete(id, index=_profile_record.get_metadata().index)
+            if _profile_record.has_meta_data():
+                await storage_manager('profile').delete(id, index=_profile_record.get_meta_data().index)
 
         return profile
 

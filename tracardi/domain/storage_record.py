@@ -1,4 +1,4 @@
-from typing import Callable, Iterator, List, Union, Dict, Tuple
+from typing import Callable, Iterator, List, Union, Dict, Tuple, Optional
 
 from pydantic import BaseModel
 
@@ -13,7 +13,7 @@ class StorageRecord(dict):
     @staticmethod
     def build_from_elastic(elastic_record: dict) -> 'StorageRecord':
         record = StorageRecord(**elastic_record['_source'])
-        record.set_metadata(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
+        record.set_meta_data(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
         return record
 
     @staticmethod
@@ -24,14 +24,14 @@ class StorageRecord(dict):
         super(StorageRecord, self).__init__(*args, **kwargs)
         self._meta = None
 
-    def set_metadata(self, meta: RecordMetadata) -> 'StorageRecord':
+    def set_meta_data(self, meta: RecordMetadata) -> 'StorageRecord':
         self._meta = meta
         return self
 
-    def get_metadata(self) -> RecordMetadata:
+    def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._meta
 
-    def has_metadata(self) -> bool:
+    def has_meta_data(self) -> bool:
         return self._meta is not None
 
 
@@ -90,6 +90,7 @@ class StorageRecords(dict):
         self._hits = []  # type: List[dict]
         self.chunk = 0
         self._aggregations = None
+        # self._meta = None
 
     def set_data(self, records, total, aggregations: dict = None):
         self.total = total
