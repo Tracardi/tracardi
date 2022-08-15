@@ -31,10 +31,8 @@ class ElasticEmailBulkMailSender(ActionRunner):
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
-        self.resource = resource
-        self.creds = self.resource.credentials.get_credentials(self, output=Connection)
+        self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
         self._dot_template = DotTemplate()
-        # self.client = ElasticEmail(**self.resource.credentials.get_credentials(self, None))
 
     @staticmethod
     def parse_mapping(mapping):
@@ -57,7 +55,7 @@ class ElasticEmailBulkMailSender(ActionRunner):
         recipient_emails = dot[self.config.message.recipient]
         recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
         configuration = ElasticEmail.Configuration()
-        configuration.api_key['apikey'] = self.creds['api_key']
+        configuration.api_key['apikey'] = self.credentials.api_key
         validate_email(self.config.sender_email)
         valid_recipient_emails = []
         for email in recipient_emails:
@@ -82,9 +80,7 @@ class ElasticEmailBulkMailSender(ActionRunner):
                 charset="utf-8",
             ))
         email_transactional_message_data = EmailMessageData(
-            recipients=EmailRecipient(
-                to=recipient_emails,
-            ),
+            recipients=[EmailRecipient(email) for email in recipient_emails],
             content=EmailContent(
                 body=email_body,
                 _from=self.config.sender_email,

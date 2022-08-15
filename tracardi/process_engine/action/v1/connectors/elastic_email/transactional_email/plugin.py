@@ -33,10 +33,8 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
-        self.resource = resource
-        self.creds = self.resource.credentials.get_credentials(self, output=Connection)
+        self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
         self._dot_template = DotTemplate()
-        # self.client = ElasticEmail(**self.resource.credentials.get_credentials(self, None))
 
     @staticmethod
     def parse_mapping(mapping):
@@ -59,7 +57,7 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
         recipient_emails = dot[self.config.message.recipient]
         recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
         configuration = ElasticEmail.Configuration()
-        configuration.api_key['apikey'] = self.creds.api_key
+        configuration.api_key['apikey'] = self.credentials.api_key
         validate_email(self.config.sender_email)
         valid_recipient_emails = []
         for email in recipient_emails:
@@ -182,7 +180,6 @@ def register() -> Plugin:
             name='Send e-mail Transactional',
             brand='Elastic Email',
             desc='Sends transactional e-mail via Elastic Email based on provided data.',
-            # type='flowNode',
             icon='elastic-email',
             group=["Elastic Email"],
             tags=['mailing'],

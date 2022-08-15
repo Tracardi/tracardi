@@ -218,18 +218,17 @@ def get_resource_types() -> List[ResourceSettings]:
                 package="tracardi.process_engine.destination.mautic_connector.MauticConnector",
                 init={
                     "overwrite_with_blank": False
-                },
-                "form": {}
-            },
-        },
+                }
+            )
+        ),
         ResourceSettings(
             id="elastic-email",
-            "name"="ElasticEmail",
-            "config"={
+            name="ElasticEmail",
+            config={
                 "api_key": "<api-key>",
             },
-            "icon"="elastic-email",
-            "tags"=["elastic-email", "destination"]
+            icon="elastic-email",
+            tags=["elastic-email", "destination"]
         ),
         ResourceSettings(
             id="airtable",
