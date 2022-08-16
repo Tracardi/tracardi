@@ -46,7 +46,7 @@ cache = MemoryCache()
 
 
 async def _save_profile(profile):
-    print("save-profile-metadata", profile.get_meta_data() if profile else None)
+    # print("save-profile-metadata", profile.get_meta_data() if profile else None)
     try:
         if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
             return await storage.driver.profile.save(profile)
@@ -441,7 +441,6 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         tracker_payload.session = Session(id=str(uuid4()), metadata=SessionMetadata())
 
     # Load session from storage
-    print("load_session")
     try:
         session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
     except DuplicatedRecordException as e:
@@ -472,8 +471,8 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         storage.driver.profile.load_merged_profile,
         profile_less
     )
-    print("profile-meta", profile.get_meta_data() if profile else None)
-    print("session-metadata", session.get_meta_data() if session else None)
+    # print("profile-meta", profile.get_meta_data() if profile else None)
+    # print("session-metadata", session.get_meta_data() if session else None)
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 

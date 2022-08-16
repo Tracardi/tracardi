@@ -1,12 +1,22 @@
+import logging
 from datetime import datetime
 from typing import Optional, List
 
+import elasticsearch
+
+from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.factory import StorageFor, storage_manager, StorageCrud
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 async def save_sessions(profiles: List[Session]):
@@ -14,19 +24,29 @@ async def save_sessions(profiles: List[Session]):
 
 
 async def update_session_duration(session: Session):
-    await storage_manager("session").update_document(id=session.id, record={
-        "metadata": {
-            "time": {
-                "update": datetime.utcnow(),
-                "duration": session.metadata.time.duration
+    storage = storage_manager("session")
+    index = storage.storage.get_storage_index(session)
+
+    record = {
+        "doc": {
+            "metadata": {
+                "time": {
+                    "update": datetime.utcnow(),
+                    "duration": session.metadata.time.duration
+                }
             }
-        }
-    }, retry_on_conflict=3)
+        },
+        'doc_as_upsert': True
+    }
+    try:
+        return await storage.update_by_id(id=session.id, record=record, index=index, retry_on_conflict=3)
+    except elasticsearch.exceptions.ConflictError as e:
+        logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
+                       f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
 
 
 async def save_session(session: Session, profile: Optional[Profile], persist_session: bool = True):
     if persist_session:
-
         if isinstance(session, Session):
             if session.operation.new:
                 # Add new profile id to session if it does not exist, or profile id in session is different then

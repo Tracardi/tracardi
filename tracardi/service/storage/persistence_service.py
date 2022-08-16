@@ -21,8 +21,9 @@ from tracardi.domain.time_range_query import DatetimeRangePayload
 from tracardi.exceptions.exception import StorageException
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.filter_transformer import FilterTransformer
+from tracardi.service.storage.elastic_storage import ElasticStorage
 
-_logger = logging.getLogger("PersistenceService")
+_logger = logging.getLogger(__name__)
 _logger.setLevel(tracardi.logging_level)
 _logger.addHandler(log_handler)
 
@@ -350,7 +351,7 @@ class SqlSearchQueryEngine:
 
 class PersistenceService:
 
-    def __init__(self, storage: storage.ElasticStorage):
+    def __init__(self, storage: ElasticStorage):
         self.storage = storage
 
     async def exists(self, id: str) -> bool:
@@ -554,16 +555,9 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def update_document(self, record: dict, id: str, retry_on_conflict=3):
+    async def update_by_id(self, id: str, record: dict, index: str, retry_on_conflict=3):
         try:
-            record = {
-                "doc": record,
-                'doc_as_upsert': True
-            }
-            return await self.storage.update(id, record=record, retry_on_conflict=retry_on_conflict)
-        except elasticsearch.exceptions.ConflictError as e:
-            _logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
-                            f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
+            return await self.storage.update(id, record=record, index=index, retry_on_conflict=retry_on_conflict)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

@@ -79,7 +79,7 @@ class ElasticStorage:
                     return None
 
                 if len(records) > 1:
-                    raise DuplicatedRecordException(f"Duplicated record {id} in index {index}")
+                    raise DuplicatedRecordException(f"Duplicated record {id} in index {index}. Search result: {records}")
 
                 output = records.first()
 
@@ -108,7 +108,7 @@ class ElasticStorage:
 
         return record
 
-    def _get_storage_index(self, record):
+    def get_storage_index(self, record) -> str:
         if isinstance(record, Entity) or isinstance(record, StorageRecord):
             if not record.has_meta_data():
                 index = self.index.get_write_index()
@@ -128,7 +128,7 @@ class ElasticStorage:
         if isinstance(data, list):
             records_by_index = defaultdict(list)
             for row in data:
-                index = self._get_storage_index(row)
+                index = self.get_storage_index(row)
                 record = self._get_storage_record(row, exclude=exclude, replace_id=replace_id)
                 # print("coming dataS meta", record.get_meta_data())
                 records_by_index[index].append(record)
@@ -142,9 +142,9 @@ class ElasticStorage:
         else:
 
             record = self._get_storage_record(data, exclude=exclude, replace_id=replace_id)
-            index = self._get_storage_index(record)
+            index = self.get_storage_index(record)
             records = [record]
-            # print("coming data meta", data.get_meta_data())
+            # print("coming data meta", record.get_meta_data())
             # print("record", index, records)
 
         return await self.storage.insert(index, records)
@@ -274,8 +274,8 @@ class ElasticStorage:
     async def update_by_query(self, query):
         return await self.storage.update_by_query(index=self.index.get_index_alias(), query=query)
 
-    async def update(self, id, record, retry_on_conflict=3):
-        return await self.storage.update(index=self.index.get_write_index(),
+    async def update(self, id, record, index, retry_on_conflict=3):
+        return await self.storage.update(index=index,
                                          record=record,
                                          id=id,
                                          retry_on_conflict=retry_on_conflict)
