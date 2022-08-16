@@ -25,14 +25,5 @@ class ReportManager:
         return self.report.expected_query_params
 
     async def get_report(self, params: dict) -> dict:
-        try:
-            built_query = self.report.get_built_query(**params)
-
-        except QueryBuildingError as e:
-            raise ReportManagerException(str(e))
-
-        try:
-            return await storage_manager(self.report.index).query(built_query)
-
-        except Exception as e:
-            raise ReportManagerException(str(e))
+        built_query = self.report.get_built_query(**params)
+        return await storage_manager(self.report.index).query(built_query)

@@ -23,7 +23,9 @@ class ElasticLogHandler(Handler):
                 "logger": record.name,
                 "file": record.filename,
                 "line": record.lineno,
-                "level": record.levelname
+                "level": record.levelname,
+                "stack_info": record.stack_info,
+                "exc_info": record.exc_info
             }
 
             self.collection.append(record)
