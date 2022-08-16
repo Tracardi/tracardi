@@ -1,4 +1,4 @@
-from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
@@ -17,7 +17,7 @@ class InjectEvent(ActionRunner):
         self.config = validate(kwargs)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        event = await storage_manager("event").load(self.config.event_id)
+        event = await storage.driver.event.load(self.config.event_id)
         if event is None:
             self.console.warning("Event id `{}` does not exist.".format(self.config.event_id))
         return Result(port="payload", value=event)

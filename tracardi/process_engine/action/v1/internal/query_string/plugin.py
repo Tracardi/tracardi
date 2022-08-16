@@ -1,8 +1,8 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.driver import storage
 from .model.config import Config
-from tracardi.service.storage.factory import storage_manager
 from tracardi.service.plugin.domain.result import Result
 from elasticsearch import ElasticsearchException
 from tracardi.service.notation.dot_template import DotTemplate
@@ -25,17 +25,16 @@ class CountRecordsAction(ActionRunner):
 
         try:
 
-            time_span = parse_time(self.config.time_range)
-
-            result = await storage_manager(self.config.index).storage.count_by_query_string(
-                query,
-                f"{time_span}s" if time_span < 0 else ""
+            result = await storage.driver.raw.count_by_query(
+                index=self.config.index,
+                query=query,
+                time_span=parse_time(self.config.time_range)
             )
+
+            return Result(port="result", value={"numberOfRecords": result.total})
 
         except ElasticsearchException as e:
             return Result(port="error", value={"error": str(e)})
-
-        return Result(port="result", value={"numberOfRecords": result})
 
 
 def register() -> Plugin:

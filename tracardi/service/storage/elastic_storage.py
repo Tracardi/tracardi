@@ -179,7 +179,7 @@ class ElasticStorage:
         }
         return await self.search(query)
 
-    async def count_by_query_string(self, query_string: str, time_range: str):
+    async def count_by_query_string(self, query_string: str, time_range: str) -> StorageRecords:
 
         if query_string:
             query = {
@@ -199,7 +199,8 @@ class ElasticStorage:
                     }
                 },
             }
-        return (await self.search(query))["hits"]["total"]["value"]
+
+        return await self.search(query)
 
     async def load_by(self, field, value, limit=100) -> StorageRecords:
         query = {

@@ -1,6 +1,5 @@
 from tracardi.domain.report import Report
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.report import QueryBuildingError
 
 
@@ -32,7 +31,6 @@ class ReportManager:
             raise ReportManagerException(str(e))
 
         try:
-            return await storage_manager(self.report.index).query(built_query)
-
+            return await storage.driver.raw.query(self.report.index, built_query)
         except Exception as e:
             raise ReportManagerException(str(e))
