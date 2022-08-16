@@ -31,6 +31,7 @@ class ReportManager:
             raise ReportManagerException(str(e))
 
         try:
-            return await storage.driver.raw.query(self.report.index, built_query)
+            records = await storage.driver.raw.query(self.report.index, built_query)
+            return records.dict()
         except Exception as e:
             raise ReportManagerException(str(e))
