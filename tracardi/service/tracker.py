@@ -417,10 +417,16 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     return result
 
 
-async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str]):
+async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str],
+                      internal_source=None):
     try:
-        source = await source_cache.validate_source(source_id=tracker_payload.source.id,
-                                                    allowed_bridges=allowed_bridges)
+        if internal_source is not None:
+            if internal_source.id != tracker_payload.source.id:
+                raise ValueError(f"Invalid event source `{tracker_payload.source.id}`")
+            source = internal_source
+        else:
+            source = await source_cache.validate_source(source_id=tracker_payload.source.id,
+                                                        allowed_bridges=allowed_bridges)
     except ValueError as e:
         raise UnauthorizedException(e)
 
@@ -477,13 +483,14 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
 
 async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
-                                      allowed_bridges: List[str]):
+                                      allowed_bridges: List[str], internal_source=None):
     if tracardi.sync_profile_tracks:
         try:
             async with ProfileTracksSynchronizer(tracker_payload.profile, wait=1):
                 return await track_event(tracker_payload, ip=host, profile_less=profile_less,
-                                         allowed_bridges=allowed_bridges)
+                                         allowed_bridges=allowed_bridges, internal_source=internal_source)
         except redis.exceptions.ConnectionError as e:
             raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
     else:
-        return await track_event(tracker_payload, ip=host, profile_less=profile_less, allowed_bridges=allowed_bridges)
+        return await track_event(tracker_payload, ip=host, profile_less=profile_less, allowed_bridges=allowed_bridges,
+                                 internal_source=internal_source)

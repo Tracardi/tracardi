@@ -55,7 +55,8 @@ async def save_session(session: Session, profile: Optional[Profile], persist_ses
                                                and isinstance(profile, Entity)
                                                and session.profile.id != profile.id):
                     # save only profile Entity
-                    session.profile = Entity(id=profile.id)
+                    if profile is not None:
+                        session.profile = Entity(id=profile.id)
                 session_index = StorageFor(session).index()  # type: StorageCrud
                 return await session_index.save()
             else:
