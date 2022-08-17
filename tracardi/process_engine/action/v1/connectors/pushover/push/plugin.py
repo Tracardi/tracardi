@@ -9,6 +9,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_template import DotTemplate
 from .model.pushover_config import PushOverConfiguration, PushOverAuth
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 def validate(config: dict) -> PushOverConfiguration:
@@ -30,7 +31,7 @@ class PushoverAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
 
-            async with aiohttp.ClientSession() as session:
+            async with HttpClient(self.node.on_connection_error_repeat) as client:
 
                 dot = self._get_dot_accessor(payload)
                 template = DotTemplate()
@@ -41,23 +42,25 @@ class PushoverAction(ActionRunner):
                     "message": template.render(self.pushover_config.message, dot)
                 }
 
-                response = await session.post(url='https://api.pushover.net/1/messages.json',
-                                            data=urllib.parse.urlencode(data),
-                                            headers={"Content-type": "application/x-www-form-urlencoded"})
+                async with client.post(
+                    url='https://api.pushover.net/1/messages.json',
+                    data=urllib.parse.urlencode(data),
+                    headers={"Content-type": "application/x-www-form-urlencoded"}
+                ) as response:
 
-                if response.status != 200:
-                    result = await response.json()
-                    self.console.error(f"Could not connect to Pushover API. Error port triggered with the response {result}")
-                    return Result(port="error", value={
-                        "message": "Could not connect to Pushover API.",
+                    if response.status != 200:
+                        result = await response.json()
+                        self.console.error(f"Could not connect to Pushover API. Error port triggered with the response {result}")
+                        return Result(port="error", value={
+                            "message": "Could not connect to Pushover API.",
+                            "status": response.status,
+                            "response": result
+                        })
+
+                    return Result(port="payload", value={
                         "status": response.status,
-                        "response": result
+                        "response": await response.json()
                     })
-
-                return Result(port="payload", value={
-                    "status": response.status,
-                    "response": await response.json()
-                })
 
         except Exception as e:
             return Result(port="error", value={

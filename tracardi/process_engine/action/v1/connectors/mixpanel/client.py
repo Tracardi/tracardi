@@ -1,7 +1,7 @@
-import aiohttp
 import json
 from fastapi import HTTPException
 from base64 import b64encode
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 class MixPanelAPIClient:
@@ -11,6 +11,10 @@ class MixPanelAPIClient:
         self.token = token
         self.username = username
         self.password = password
+        self.retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def send(self, event_type: str, profile_id: str, event_id: str, time: int, **kwargs):
         data = {
@@ -24,10 +28,15 @@ class MixPanelAPIClient:
             }
         }
 
-        async with aiohttp.ClientSession(headers={
-            "Accept": "text/plain", "Content-Type": "application/x-www-form-urlencoded"
-        }) as session:
-            async with session.post(
+        async with HttpClient(
+            self.retries,
+            200,
+            headers={
+                "Accept": "text/plain",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+        ) as client:
+            async with client.post(
                     url=f"https://api{self.server_prefix}.mixpanel.com/track?data={json.dumps(data)}&verbose=1",
             ) as response:
                 if response.status != 200:
@@ -42,12 +51,15 @@ class MixPanelAPIClient:
                  f"to_date={to_date}&" \
                  f'where=properties["$distinct_id"]=="{user_id}"'
 
-        async with aiohttp.ClientSession(headers={
-            "Accept": "application/json",
-            "Authorization": "Basic " + f"{b64encode(bytes(f'{self.username}:{self.password}', '''utf-8'''))}"[2:-1]
-        }) as session:
-
-            async with session.get(
+        async with HttpClient(
+            self.retries,
+            200,
+            headers={
+                "Accept": "application/json",
+                "Authorization": "Basic " + f"{b64encode(bytes(f'{self.username}:{self.password}', '''utf-8'''))}"[2:-1]
+            }
+        ) as client:
+            async with client.get(
                 url=f"https://{self.server_prefix[1:] + '.' if self.server_prefix else ''}mixpanel.com/api/2.0/funnels?"
                     + params
             ) as response:

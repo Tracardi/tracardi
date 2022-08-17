@@ -33,6 +33,7 @@ class TrelloCardMover(ActionRunner):
 
     def __init__(self, client: TrelloClient, config: Config):
         self._client = client
+        self._client.set_retries(self.node.on_connection_error_repeat)
         self.config = config
 
     async def run(self, payload: dict, in_edge=None) -> Result:

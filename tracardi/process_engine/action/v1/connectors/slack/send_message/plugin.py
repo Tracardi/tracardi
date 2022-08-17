@@ -25,6 +25,7 @@ class SlackPoster(ActionRunner):
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
         self._client = SlackClient(credentials.get_credentials(self, Token).token)
+        self._client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

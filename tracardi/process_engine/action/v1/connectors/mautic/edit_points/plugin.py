@@ -27,6 +27,7 @@ class MauticPointsEditor(ActionRunner):
         self.resource = resource
         self.client = MauticClient(**self.resource.credentials.get_credentials(self, None))
         self.actions = {"add": self.client.add_points, "subtract": self.client.subtract_points}
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

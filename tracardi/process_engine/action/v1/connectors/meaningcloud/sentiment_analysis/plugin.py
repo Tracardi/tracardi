@@ -9,6 +9,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 def validate(config: dict) -> Configuration:
@@ -30,14 +31,14 @@ class SentimentAnalysisAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
-        async with aiohttp.ClientSession() as session:
+        async with HttpClient(self.node.on_connection_error_repeat) as client:
             params = {
                 "key": self.credentials.token,
                 "lang": self.config.language,
                 "txt": template.render(self.config.text, dot)
             }
             try:
-                async with session.post('https://api.meaningcloud.com/sentiment-2.1', params=params) as response:
+                async with client.post('https://api.meaningcloud.com/sentiment-2.1', params=params) as response:
                     if response.status != 200:
                         raise ConnectionError("Could not connect to service https://api.meaningcloud.com. "
                                               f"It returned `{response.status}` status.")

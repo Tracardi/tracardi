@@ -28,6 +28,7 @@ class MixPanelSender(ActionRunner):
         self.client = MixPanelAPIClient(
             **credentials.get_credentials(self, MixPanelCredentials).dict()
         )
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

@@ -1,6 +1,5 @@
-import aiohttp
 from aiohttp import ClientTimeout
-
+from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.exceptions.exception import TracardiException
 
 
@@ -9,10 +8,18 @@ class MeaningCloudClient:
     def __init__(self, token: str):
         self._token = token
         self._timeout = 20000
+        self._retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self._retries = retries
 
     async def deep_categorization(self, txt: str, model: str):
-        async with aiohttp.ClientSession(timeout=ClientTimeout(total=30)) as session:
-            async with session.post(
+        async with HttpClient(
+            self._retries,
+            [200, 401],
+            timeout=ClientTimeout(total=30)
+        ) as client:
+            async with client.post(
                 url="https://api.meaningcloud.com/deepcategorization-1.0",
                 data={
                     "key": self._token,
@@ -27,8 +34,11 @@ class MeaningCloudClient:
                 return await response.json()
 
     async def topics_extraction(self, txt: str, lang: str):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with HttpClient(
+                self._retries,
+                [200, 401],
+        ) as client:
+            async with client.post(
                 url="https://api.meaningcloud.com/topics-2.0",
                 data={
                     "key": self._token,
@@ -57,8 +67,11 @@ class MeaningCloudClient:
         if company_type is not None:
             data["filter"] = company_type
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with HttpClient(
+                self._retries,
+                [200, 401],
+        ) as client:
+            async with client.post(
                 url="https://api.meaningcloud.com/reputation-2.0",
                 data=data
             ) as response:
@@ -69,8 +82,11 @@ class MeaningCloudClient:
                 return await response.json()
 
     async def summarize(self, txt: str, lang: str, sentences: int):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with HttpClient(
+                self._retries,
+                [200, 401]
+        ) as client:
+            async with client.post(
                 url="https://api.meaningcloud.com/summarization-1.0",
                 data={
                     "key": self._token,

@@ -24,6 +24,7 @@ class TopicsExtractionPlugin(ActionRunner):
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
         self.client = MeaningCloudClient(credentials.get_credentials(self, Token).token)
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

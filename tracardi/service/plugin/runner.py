@@ -7,6 +7,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
+from tracardi.service.wf.domain.node import Node
 
 
 class ReshapeTemplate(BaseModel):
@@ -35,7 +36,7 @@ class ActionRunner:
     flow = None
     flow_history = None
     console = None  # type: Console
-    node = None
+    node = None  # type: Node
     metrics = None
     memory = None
     execution_graph = None  # GraphInvoker
