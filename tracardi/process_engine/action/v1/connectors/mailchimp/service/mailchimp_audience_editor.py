@@ -11,7 +11,7 @@ class MailChimpAudienceEditor:
         self._retries = retries
 
     async def add_contact(self, list_id: str, email_address: str, subscribed: bool, merge_fields: Dict[str, Any]):
-        async with HttpClient(self._retries, 200, headers={"Content-Type": "application/json"}) as client:
+        async with HttpClient(self._retries, [200, 201, 401], headers={"Content-Type": "application/json"}) as client:
             async with client.post(
                     url=f"https://{self._server}.api.mailchimp.com/3.0/lists/{list_id}/members",
                     data=json.dumps({
@@ -24,7 +24,7 @@ class MailChimpAudienceEditor:
                 return await response.json()
 
     async def update_contact(self, list_id: str, email_address: str, subscribed: bool, merge_fields: Dict[str, Any]):
-        async with HttpClient(self._retries, 200, headers={"Content-Type": "application/json"}) as client:
+        async with HttpClient(self._retries, [200, 201, 401], headers={"Content-Type": "application/json"}) as client:
             async with client.put(
                     url=f"https://{self._server}.api.mailchimp.com/3.0/lists/{list_id}/members/{email_address}",
                     data=json.dumps({
@@ -37,7 +37,7 @@ class MailChimpAudienceEditor:
                 return await response.json()
 
     async def archive_contact(self, list_id: str, email_address: str):
-        async with HttpClient(self._retries, 200, headers={"Content-Type": "application/json"}) as client:
+        async with HttpClient(self._retries, [200, 201, 401], headers={"Content-Type": "application/json"}) as client:
             async with client.delete(
                     url=f"https://{self._server}.api.mailchimp.com/3.0/lists/{list_id}/members/{email_address}",
                     auth=aiohttp.BasicAuth("user", self._key)
@@ -45,7 +45,7 @@ class MailChimpAudienceEditor:
                 return await response.json()
 
     async def delete_contact(self, list_id: str, email_address: str):
-        async with HttpClient(self._retries, 200, headers={"Content-Type": "application/json"}) as client:
+        async with HttpClient(self._retries, [200, 201, 401], headers={"Content-Type": "application/json"}) as client:
             async with client.post(
                     url=f"https://{self._server}.api.mailchimp.com/3.0/lists/{list_id}/members/{email_address}/"
                         f"actions/delete-permanent",
