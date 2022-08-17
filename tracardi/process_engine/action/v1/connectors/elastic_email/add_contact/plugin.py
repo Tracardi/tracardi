@@ -82,6 +82,9 @@ class ElasticEmailContactAdder(ActionRunner):
             del mapping['last_name']
             contact_other['last_name'] = last_name
 
+        if mapping:
+            contact_other['custom_fields'] = mapping
+
         contact_payload = [
             ContactPayload(
                 email=email,
