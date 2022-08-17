@@ -1,5 +1,6 @@
 from typing import Optional
 
+from pydantic import validator
 
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -11,7 +12,13 @@ from tracardi.service.plugin.domain.result import Result
 
 class Config(PluginConfig):
     field: str
-    defined_prefix: str
+    prefix: str
+
+    @validator("prefix")
+    def if_prefix_is_empty(cls, value):
+        if value == "":
+            raise ValueError("Prefix cannot be empty")
+        return value
 
 
 def validate(config: dict) -> Config:
@@ -22,15 +29,13 @@ class StartsWithAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = validate(kwargs)
-        self.field = self.config.field
-        self.defined_prefix = self.config.defined_prefix
+        self.prefix = self.config.prefix
 
     async def run(self, payload: dict, in_edge=None):
-
-        if self.field.startswith(self.defined_prefix) and self.defined_prefix != "":
+        dot = self._get_dot_accessor(payload)
+        if dot[self.config.field].startswith(self.prefix):
             return Result(port="true", value=payload)
         else:
-            self.console.error("Field doesn't starts with defined string.")
             return Result(port="false", value=payload)
 
 
@@ -47,7 +52,7 @@ def register() -> Plugin:
             author="Mateusz Zitaruk",
             init={
                 "field": "payload@field",
-                "defined_prefix": "prefix"
+                "prefix": ""
             },
             manual="starts_with_action",
             form=Form(
@@ -59,16 +64,16 @@ def register() -> Plugin:
                                 id="field",
                                 name="Type string which you want to check.",
                                 component=FormComponent(
-                                    type="text",
+                                    type="dotPath",
                                     props={
-                                        "label": "Plugin field"
+                                        "label": "Payload field"
                                     }
                                 )
                             ),
                             FormField(
-                                id="defined_prefix",
+                                id="prefix",
                                 name="Prefix",
-                                description="Type prefix to check if plugin field starts with.",
+                                description="Type prefix to check if payload field starts with.",
                                 component=FormComponent(
                                     type="text",
                                     props={
@@ -93,7 +98,7 @@ def register() -> Plugin:
                 },
                 outputs={"true": PortDoc(desc="This port returns payload if field contains defined string."),
                          "false":
-                             PortDoc(desc="This port returns error if field doesnt contains defined string")}
+                             PortDoc(desc="This port returns payload if field doesnt contains defined string")}
             )
         )
     )
