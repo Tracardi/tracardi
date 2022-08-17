@@ -76,6 +76,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.flow.start.start_action',
         'tracardi.process_engine.action.v1.flow.property_exists.plugin',
         'tracardi.process_engine.action.v1.end_action',
+
         'tracardi.process_engine.action.v1.raise_error_action',
         'tracardi.process_engine.action.v1.inject_action',
 
@@ -204,6 +205,9 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.influxdb.fetch.plugin',
         'tracardi.process_engine.action.v1.connectors.mixpanel.send.plugin',
         'tracardi.process_engine.action.v1.connectors.mixpanel.fetch_funnel.plugin',
+        'tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin',
+        'tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin',
+        'tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin',
         'tracardi.process_engine.action.v1.connectors.mautic.add_contact.plugin',
         'tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_id.plugin',
         'tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_email.plugin',

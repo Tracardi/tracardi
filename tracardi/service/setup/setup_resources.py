@@ -212,6 +212,15 @@ def get_resource_types() -> List[ResourceSettings]:
             )
         ),
         ResourceSettings(
+            id="elastic-email",
+            name="ElasticEmail",
+            config={
+                "api_key": "<api-key>",
+            },
+            icon="elastic-email",
+            tags=["elastic-email", "destination"]
+        ),
+        ResourceSettings(
             id="airtable",
             name="AirTable",
             icon="airtable",
