@@ -1,6 +1,7 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to help us improve. If any of the section of the template is
+  not applicable, detele it
 title: ''
 labels: ''
 assignees: ''
