@@ -26,25 +26,27 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.event_validator import validate
 from tracardi.domain.event import Event, VALIDATED, ERROR, WARNING, PROCESSED, INVALID
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
-    EventValidationException, TracardiException
+    EventValidationException, TracardiException, DuplicatedRecordException
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.segmentation import segment
+from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 
-logger = logging.getLogger('app.api.track.service.tracker')
+logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = MemoryCache()
 
 
 async def _save_profile(profile):
+    # print("save-profile-metadata", profile.get_meta_data() if profile else None)
     try:
         if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
             return await storage.driver.profile.save(profile)
@@ -439,14 +441,38 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         tracker_payload.session = Session(id=str(uuid4()), metadata=SessionMetadata())
 
     # Load session from storage
-    session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
-    print("session", session)
+    try:
+        session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
+    except DuplicatedRecordException as e:
+
+        # There may be a case when we have 2 sessions with the same id.
+        logger.error(str(e))
+
+        # Try to recover sessions
+        list_of_profile_ids_referenced_by_session = await correct_session(tracker_payload.session.id)
+
+        # If there is duplicated session create new random session. As a consequence of this a new profile is created.
+        session = Session(
+            id=tracker_payload.session.id,
+            metadata=SessionMetadata(
+                time=SessionTime(
+                    insert=datetime.utcnow()
+                )
+            )
+        )
+
+        # If duplicated sessions referenced the same profile then keep it.
+        if len(list_of_profile_ids_referenced_by_session) == 1:
+            session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
+
     # Get profile
-    profile, session = await tracker_payload.get_profile_and_session(session,
-                                                                     storage.driver.profile.load_merged_profile,
-                                                                     profile_less
-                                                                     )
-    print("m", profile.get_meta_data())
+    profile, session = await tracker_payload.get_profile_and_session(
+        session,
+        storage.driver.profile.load_merged_profile,
+        profile_less
+    )
+    # print("profile-meta", profile.get_meta_data() if profile else None)
+    # print("session-metadata", session.get_meta_data() if session else None)
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 

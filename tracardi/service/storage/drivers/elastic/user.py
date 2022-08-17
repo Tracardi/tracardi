@@ -31,8 +31,8 @@ async def search_by_name(start: int, limit: int, name: str):
 
     result = []
 
-    for record in (await storage_manager("user").query(query=query))["hits"]["hits"]:
-        user = User(**record["_source"])
+    for record in (await storage_manager("user").query(query=query)):
+        user = User(**record)
         result.append({**user.dict(exclude={"token"}), "expired": user.is_expired()})
 
     return result
@@ -65,10 +65,10 @@ async def get_by_credentials(email: str, password: str) -> Optional[User]:
                 ]
             }
         }
-    }))["hits"]["hits"]
+    }))
 
     if result:
-        return User(**result[0]["_source"])
+        return User(**result.first())
     return None
 
 

@@ -39,8 +39,7 @@ async def search_by_name(name: str) -> List[Report]:
         }
     }
     result = await storage_manager("report").query(query)
-    result = result["hits"]["hits"]
-    return [Report.decode(ReportRecord(**record["_source"])) for record in result]
+    return [Report.decode(ReportRecord(**record)) for record in result]
 
 
 async def load_for_grouping(name: Optional[str] = None) -> StorageRecords:

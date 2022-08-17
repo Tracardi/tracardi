@@ -43,8 +43,8 @@ class EntityStorageCrud(BaseStorageCrud):
             else:
                 entity = domain_class_ref(**data)
 
-            if data.has_metadata() and isinstance(entity, Entity):
-                entity.set_meta_data(data.get_metadata())
+            if data.has_meta_data() and isinstance(entity, Entity):
+                entity.set_meta_data(data.get_meta_data())
 
             return entity
 
@@ -67,9 +67,9 @@ class EntityStorageCrud(BaseStorageCrud):
         service = self._get_storage_service()
         return await service.load_by_values(key_value_pairs, sort_by, limit=limit)
 
-    async def delete_by(self, field, value) -> dict:
+    async def delete_by(self, field, value, index: str = None) -> dict:
         service = self._get_storage_service()
-        return await service.delete_by(field, value)
+        return await service.delete_by(field, value, index)
 
     async def save(self, data: Union[Entity, dict] = None) -> BulkInsertResult:
         if data is None:
@@ -177,6 +177,7 @@ class StorageFor:
                 ))
             return EntityStorageCrud(index, entity=self.instance)
         else:
+            # TODO does not pass index
             return StorageCrud(
                 self.storage_info.index,
                 self.storage_info.domain_class_ref,

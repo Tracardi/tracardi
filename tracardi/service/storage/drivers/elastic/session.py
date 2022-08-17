@@ -1,12 +1,22 @@
+import logging
 from datetime import datetime
 from typing import Optional, List
 
+import elasticsearch
+
+from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
-from tracardi.service.storage.factory import StorageFor, storage_manager
+from tracardi.exceptions.log_handler import log_handler
+from tracardi.service.storage.factory import StorageFor, storage_manager, StorageCrud
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 async def save_sessions(profiles: List[Session]):
@@ -14,19 +24,29 @@ async def save_sessions(profiles: List[Session]):
 
 
 async def update_session_duration(session: Session):
-    await storage_manager("session").update_document(id=session.id, record={
-        "metadata": {
-            "time": {
-                "update": datetime.utcnow(),
-                "duration": session.metadata.time.duration
+    storage = storage_manager("session")
+    index = storage.storage.get_storage_index(session)
+
+    record = {
+        "doc": {
+            "metadata": {
+                "time": {
+                    "update": datetime.utcnow(),
+                    "duration": session.metadata.time.duration
+                }
             }
-        }
-    }, retry_on_conflict=3)
+        },
+        'doc_as_upsert': True
+    }
+    try:
+        return await storage.update_by_id(id=session.id, record=record, index=index, retry_on_conflict=3)
+    except elasticsearch.exceptions.ConflictError as e:
+        logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
+                       f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
 
 
 async def save_session(session: Session, profile: Optional[Profile], persist_session: bool = True):
     if persist_session:
-
         if isinstance(session, Session):
             if session.operation.new:
                 # Add new profile id to session if it does not exist, or profile id in session is different then
@@ -36,7 +56,8 @@ async def save_session(session: Session, profile: Optional[Profile], persist_ses
                                                and session.profile.id != profile.id):
                     # save only profile Entity
                     session.profile = Entity(id=profile.id)
-                return await StorageFor(session).index().save()
+                session_index = StorageFor(session).index()  # type: StorageCrud
+                return await session_index.save()
             else:
                 # Update session duration
                 await update_session_duration(session)
@@ -56,6 +77,19 @@ async def load(id: str) -> Optional[Session]:
     return await StorageFor(Entity(id=id)).index("session").load(Session)  # type: Optional[Session]
 
 
+async def load_duplicates(id: str):
+    return await storage_manager('session').query({
+        "query": {
+            "term": {
+                "_id": id
+            }
+        },
+        "sort": [
+            {"metadata.time.insert": "desc"}
+        ]
+    })
+
+
 async def delete(id: str):
     return await storage_manager('session').delete(id)
 
@@ -69,7 +103,7 @@ async def flush():
 
 
 async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecord]:
-    result = await storage_manager('session').query({
+    query = {
         "query": {
             "term": {"profile.id": profile_id}
         },
@@ -77,12 +111,12 @@ async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecor
         "sort": [
             {"metadata.time.insert": "desc"}
         ]
-    })
+    }
 
-    records = result["hits"]["hits"]  # type: List[dict]
+    records = await storage_manager('session').query(query)
 
     if len(records) >= n:
-        return StorageRecord.build_from_elastic(records[n - 1])
+        return StorageRecord.build_from_elastic(records.row(n - 1))
 
     return None
 

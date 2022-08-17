@@ -21,8 +21,9 @@ from tracardi.domain.time_range_query import DatetimeRangePayload
 from tracardi.exceptions.exception import StorageException
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.filter_transformer import FilterTransformer
+from tracardi.service.storage.elastic_storage import ElasticStorage
 
-_logger = logging.getLogger("PersistenceService")
+_logger = logging.getLogger(__name__)
 _logger.setLevel(tracardi.logging_level)
 _logger.addHandler(log_handler)
 
@@ -158,7 +159,6 @@ class SqlSearchQueryEngine:
             es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
         else:
             es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
-        # print(es_query)
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:
@@ -270,9 +270,9 @@ class SqlSearchQueryEngine:
             try:
 
                 qs = {
-                    'total': result['hits']['total']['value'],
+                    'total': result.total,
                     'result': list(
-                        __format_count(result['aggregations']['items_over_time']['buckets'], unit, interval, format)),
+                        __format_count(result.aggregations('items_over_time').buckets(), unit, interval, format)),
                     'buckets': ['count']
                 }
 
@@ -328,10 +328,10 @@ class SqlSearchQueryEngine:
 
             try:
 
-                buckets_result, buckets = __format_count_by_bucket(result['aggregations']['by_field']['buckets'], unit,
+                buckets_result, buckets = __format_count_by_bucket(result.aggregations('by_field').buckets(), unit,
                                                                    interval, format)
                 qs = {
-                    'total': result['hits']['total']['value'],
+                    'total': result.total,
                     'result': buckets_result,
                     'buckets': buckets
 
@@ -351,13 +351,14 @@ class SqlSearchQueryEngine:
 
 class PersistenceService:
 
-    def __init__(self, storage: storage.ElasticStorage):
+    def __init__(self, storage: ElasticStorage):
         self.storage = storage
 
     async def exists(self, id: str) -> bool:
         try:
             return await self.storage.exists(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -367,6 +368,7 @@ class PersistenceService:
         try:
             return await self.storage.load(id)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -385,6 +387,7 @@ class PersistenceService:
         try:
             return IndexMapping(await self.storage.get_mapping(self.storage.index.get_index_alias()))
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -394,6 +397,7 @@ class PersistenceService:
         try:
             return await self.storage.load_by(field, value, limit)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -427,9 +431,9 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def delete_by(self, field: str, value: str) -> dict:
+    async def delete_by(self, field: str, value: str, index: str = None) -> dict:
         try:
-            return await self.storage.delete_by(field, value)
+            return await self.storage.delete_by(field, value, index)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
@@ -460,15 +464,17 @@ class PersistenceService:
         try:
             return await self.storage.create(data, replace_id=replace_id, exclude=exclude)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def delete(self, id: str) -> dict:
+    async def delete(self, id: str, index: str = None) -> dict:
         try:
-            return await self.storage.delete(id)
+            return await self.storage.delete(id, index=index)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -493,6 +499,7 @@ class PersistenceService:
             _logger.warning("No result found for query {}".format(query))
             return StorageAggregateResult()
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -502,6 +509,7 @@ class PersistenceService:
         try:
             return await self.storage.search(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
@@ -547,16 +555,9 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def update_document(self, record: dict, id: str, retry_on_conflict=3):
+    async def update_by_id(self, id: str, record: dict, index: str, retry_on_conflict=3):
         try:
-            record = {
-                "doc": record,
-                'doc_as_upsert': True
-            }
-            return await self.storage.update(id, record=record, retry_on_conflict=retry_on_conflict)
-        except elasticsearch.exceptions.ConflictError as e:
-            _logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
-                            f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
+            return await self.storage.update(id, record=record, index=index, retry_on_conflict=retry_on_conflict)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

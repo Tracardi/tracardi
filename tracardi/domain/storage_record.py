@@ -1,4 +1,4 @@
-from typing import Callable, Iterator
+from typing import Callable, Iterator, List, Union, Dict, Tuple, Optional
 
 from pydantic import BaseModel
 
@@ -13,7 +13,7 @@ class StorageRecord(dict):
     @staticmethod
     def build_from_elastic(elastic_record: dict) -> 'StorageRecord':
         record = StorageRecord(**elastic_record['_source'])
-        record.set_metadata(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
+        record.set_meta_data(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
         return record
 
     @staticmethod
@@ -24,15 +24,46 @@ class StorageRecord(dict):
         super(StorageRecord, self).__init__(*args, **kwargs)
         self._meta = None
 
-    def set_metadata(self, meta: RecordMetadata) -> 'StorageRecord':
+    def set_meta_data(self, meta: RecordMetadata) -> 'StorageRecord':
         self._meta = meta
         return self
 
-    def get_metadata(self) -> RecordMetadata:
+    def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._meta
 
-    def has_metadata(self) -> bool:
+    def has_meta_data(self) -> bool:
         return self._meta is not None
+
+
+class StorageAggregate(dict):
+
+    def __init__(self, *args, **kwargs):
+        super(StorageAggregate, self).__init__(*args, **kwargs)
+        if 'buckets' in kwargs:
+            self._buckets = kwargs['buckets']
+
+    def buckets(self):
+        return self._buckets
+
+
+class StorageAggregates(dict):
+
+    def __iter__(self) -> Iterator[Tuple[str, StorageAggregate]]:
+        for bucket_name, value in self.items():
+            yield bucket_name, StorageAggregate(**value)
+
+    def convert(self, aggregate_key) -> Iterator[Tuple[str, dict]]:
+        for bucket, data in self:
+            records = {}
+            if "buckets" in data:
+                for item in data['buckets']:
+                    records[aggregate_key] = item['doc_count']
+            else:
+                records = {"found": data["doc_count"]}
+
+            if 'sum_other_doc_count' in data:
+                records['other'] = data['sum_other_doc_count']
+            yield bucket, records
 
 
 class StorageRecords(dict):
@@ -48,30 +79,58 @@ class StorageRecords(dict):
         record = StorageRecords(**elastic_records)
         record.set_data(
             total=elastic_records['hits']['total']['value'],
-            records=elastic_records['hits']['hits']
+            records=elastic_records['hits']['hits'],
+            aggregations=elastic_records['aggregations'] if 'aggregations' in elastic_records else None
         )
         return record
 
     def __init__(self, *args, **kwargs):
         super(StorageRecords, self).__init__(*args, **kwargs)
         self.total = 0
-        self._hits = []
+        self._hits = []  # type: List[dict]
         self.chunk = 0
+        self._aggregations = None
+        # self._meta = None
 
-    def set_data(self, records, total):
+    def set_data(self, records, total, aggregations: dict = None):
         self.total = total
         self._hits = records
         self.chunk = len(self._hits)
+        self._aggregations = aggregations
+
+    def aggregations(self, key=None) -> Union[StorageAggregate, StorageAggregates]:
+        if key is None:
+            return StorageAggregates(self._aggregations)
+        if key not in self._aggregations:
+            raise ValueError(f"Aggregation {key} not available.")
+        return StorageAggregate(**self._aggregations[key])
+
+    @staticmethod
+    def _to_record(hit):
+        row = StorageRecord.build_from_elastic(hit)
+        row['id'] = hit['_id']
+
+        return row
 
     def __repr__(self):
-        return "hits {}, total: {}".format(self._hits, self.total)
+        return "hits {}, total: {}, aggregations: {}".format(self._hits, self.total, self._aggregations)
 
     def __iter__(self) -> Iterator[StorageRecord]:
         for hit in self._hits:
-            row = StorageRecord.build_from_elastic(hit)
-            row['id'] = hit['_id']
+            yield self._to_record(hit)
 
-            yield row
+    def __getitem__(self, subscript) -> Union[List[StorageRecord], StorageRecord]:
+        if isinstance(subscript, slice):
+            return [self._to_record(row) for row in self._hits[subscript.start:subscript.stop:subscript.step]]
+        else:
+            hit = self._hits[subscript]
+            return self._to_record(hit)
+
+    def row(self, n):
+        """
+        Return row data the same way as elastic does.
+        """
+        return self._hits[n]
 
     def first(self):
         first_hit = self._hits[0]

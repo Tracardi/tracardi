@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
+from tracardi.domain.agg_result import AggResult
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
@@ -28,8 +29,8 @@ async def delete_by_id(id: str) -> dict:
     return await StorageFor(event).index("event").delete()
 
 
-async def unique_field_value(query, limit):
-    await StorageForBulk().index('event').uniq_field_value("type", search=query, limit=limit)
+async def unique_field_value(query, limit) -> AggResult:
+    return await StorageForBulk().index('event').uniq_field_value("type", search=query, limit=limit)
 
 
 def _get_name(source_names_idx, id):
@@ -68,7 +69,7 @@ async def count_events_by_type(profile_id: str, event_type: str, time_span: int)
 
     }
     result = await storage_manager("event").query(query)
-    return result["hits"]["total"]['value']
+    return result.total
 
 
 async def aggregate_event_by_field_within_time(profile_id, field, time_span):
@@ -425,13 +426,14 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
         "sort": [
             {"metadata.time.insert": "desc"}
         ]
-    }))["hits"]["hits"]
+    }))
 
-    return result[n]["_source"] if len(result) >= n + 1 else None
+    return result[n] if len(result) >= n + 1 else None
 
 
-async def get_event_data_for_session(session_id: str, limit: int = 20):
-    result = await storage_manager("event").query({
+async def get_events_by_session(session_id: str, limit: int = 100):
+
+    query = {
         "query": {
             "term": {
                 "session.id": session_id
@@ -443,13 +445,9 @@ async def get_event_data_for_session(session_id: str, limit: int = 20):
                 "metadata.time.insert": {"order": "desc"}
             }
         ]
-    })
-    return [{
-        "id": doc["_source"]["id"],
-        "insert": doc["_source"]["metadata"]["time"]["insert"],
-        "status": doc["_source"]["metadata"]["status"],
-        "type": doc["_source"]["type"]
-    } for doc in result["hits"]["hits"]], result["hits"]["total"]["value"] > len(result["hits"]["hits"])
+    }
+
+    return await storage_manager("event").query(query)
 
 
 async def aggregate_source_by_type(source_id: str, time_span: str):
@@ -518,11 +516,41 @@ async def get_avg_process_time():
 
     try:
         return {
-            "avg": result['aggregations']['avg_process_time']['value'],
-            "records": result['hits']['total']['value']
+            "avg": result.aggregations('avg_process_time')['value'],
+            "records": result.total
         }
     except KeyError:
         return {
             "avg": 0,
             "records": 0
         }
+
+
+async def get_events_by_session_and_profile(profile_id: str,  session_id: str, limit: int = 100) -> StorageRecords:
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"profile.id": profile_id}},
+                    {"term": {"session.id": session_id}}
+                ]
+            }
+        },
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ],
+        "size": limit
+    }
+    return await storage_manager("event").query(query)
+
+
+async def reassign_session(new_session_id: str, old_session_id: str, profile_id: str):
+    result = await get_events_by_session_and_profile(profile_id, old_session_id)
+    for event_record in result:
+        try:
+            event_record['session']['id'] = new_session_id
+            await storage_manager('event').upsert(event_record)
+        except Exception as e:
+            logger.error(str(e))
