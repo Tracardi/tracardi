@@ -24,4 +24,5 @@ class ReportManager:
 
     async def get_report(self, params: dict) -> dict:
         built_query = self.report.get_built_query(**params)
-        return await storage.driver.raw.query(self.report.index, built_query)
+        result = await storage.driver.raw.query(self.report.index, built_query)
+        return result.dict()
