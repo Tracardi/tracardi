@@ -126,6 +126,10 @@ class ElasticStorage:
                      replace_id: bool = True, exclude=None) -> Union[BulkInsertResult, List[BulkInsertResult]]:
         # print("----------------")
         if isinstance(data, list):
+
+            if len(data) == 0:
+                return BulkInsertResult()
+
             records_by_index = defaultdict(list)
             for row in data:
                 index = self.get_storage_index(row)
@@ -133,9 +137,9 @@ class ElasticStorage:
                 # print("coming dataS meta", record.get_meta_data())
                 records_by_index[index].append(record)
 
-            if len(records_by_index) != 1:
+            if len(records_by_index) > 1:
                 raise ValueError(f"Can not save set of records with mixed target indices. Got the following "
-                                 f"indices {list(records_by_index.keys())}")
+                                 f"indices [{list(records_by_index.keys())}]")
 
             index, records = list(records_by_index.items())[0]
             # print("recordS", index, records)

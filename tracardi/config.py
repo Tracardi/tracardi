@@ -26,6 +26,8 @@ class TracardiConfig:
     def __init__(self, env):
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.save_logs = (env['SAVE_LOGS'].lower() == 'yes') if 'SAVE_LOGS' in env else True
+        self.monitor_logs_event_type = env['MONITOR_LOGS_EVENT_TYPE'].lower().replace(" ", "-") \
+            if 'MONITOR_LOGS_EVENT_TYPE' in env else None
         self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks = (
                     env['SYNC_PROFILE_TRACKS'].lower() == 'yes') if 'SYNC_PROFILE_TRACKS' in env else False

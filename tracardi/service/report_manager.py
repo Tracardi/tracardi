@@ -1,6 +1,5 @@
 from tracardi.domain.report import Report
 from tracardi.service.storage.driver import storage
-from tracardi.domain.report import QueryBuildingError
 
 
 class ReportManagerException(Exception):
@@ -24,14 +23,5 @@ class ReportManager:
         return self.report.expected_query_params
 
     async def get_report(self, params: dict) -> dict:
-        try:
-            built_query = self.report.get_built_query(**params)
-
-        except QueryBuildingError as e:
-            raise ReportManagerException(str(e))
-
-        try:
-            records = await storage.driver.raw.query(self.report.index, built_query)
-            return records.dict()
-        except Exception as e:
-            raise ReportManagerException(str(e))
+        built_query = self.report.get_built_query(**params)
+        return await storage.driver.raw.query(self.report.index, built_query)

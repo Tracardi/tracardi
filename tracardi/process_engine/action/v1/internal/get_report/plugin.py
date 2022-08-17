@@ -26,7 +26,7 @@ class Endpoint(PluginEndpoint):
             manager = await ReportManager.build(config.id)
             return {key: f"<{key.replace('_', '-')}>" for key in manager.get_expected_fields()}
 
-        except ReportManagerException as _:
+        except ReportManagerException:
             return {}
 
 

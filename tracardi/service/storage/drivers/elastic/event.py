@@ -155,9 +155,9 @@ async def save_events(events: List[Event], persist_events: bool = True) -> Union
             if event.is_persistent():
                 try:
                     event.tags.values = (tag.lower() for tag in set(
-                            tuple(event.tags.values) + tuple(await get_tags(event.type))
-                        )
+                        tuple(event.tags.values) + tuple(await get_tags(event.type))
                     )
+                                         )
                 except ValueError as e:
                     logger.error(str(e))
                 finally:
@@ -432,7 +432,6 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
 
 
 async def get_events_by_session(session_id: str, limit: int = 100):
-
     query = {
         "query": {
             "term": {
@@ -472,7 +471,7 @@ async def aggregate_source_by_type(source_id: str, time_span: str):
 
     try:
         return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
-                result["aggregations"]["by_type"]["buckets"]]
+                result.aggregations("by_type").buckets()]
     except KeyError:
         return []
 
@@ -496,8 +495,10 @@ async def aggregate_source_by_tags(source_id: str, time_span: str):
     })
 
     try:
-        return [{"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
-                result["aggregations"]["by_tag"]["buckets"]]
+        return [
+            {"name": bucket["key"], "value": bucket["doc_count"]} for bucket in
+            result.aggregations("by_tag").buckets()
+        ]
     except KeyError:
         return []
 
@@ -526,7 +527,7 @@ async def get_avg_process_time():
         }
 
 
-async def get_events_by_session_and_profile(profile_id: str,  session_id: str, limit: int = 100) -> StorageRecords:
+async def get_events_by_session_and_profile(profile_id: str, session_id: str, limit: int = 100) -> StorageRecords:
     query = {
         "query": {
             "bool": {
