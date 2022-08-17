@@ -84,6 +84,7 @@ class ElasticEmailBulkMailSender(ActionRunner):
             content=EmailContent(
                 body=email_body,
                 _from=self.config.sender_email,
+                # todo maybe reply to should be added to the form and configuration?
                 # reply_to="myemail@domain.com",
                 subject=self.config.message.subject,
             ),
@@ -94,8 +95,7 @@ class ElasticEmailBulkMailSender(ActionRunner):
                 api_response = api_instance.emails_post(email_transactional_message_data)
                 return Result(port="response", value=api_response.to_dict())
         except Exception as e:
-            # except ElasticEmail.ApiException as e:
-            return Result(port="error", value={"error": str(e), "msg": ""})
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:
@@ -112,14 +112,14 @@ def register() -> Plugin:
             manual="elastic_email_bulk_action",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
-                "sender_email": None,
+                "sender_email": "",
                 "message": {
-                    "recipient": None,
-                    "content": None,
-                    "subject": None
+                    "recipient": "",
+                    "content": "",
+                    "subject": ""
                 }
             },
             form=Form(
@@ -132,7 +132,7 @@ def register() -> Plugin:
                                 name="Elastic Email resource",
                                 description="Please select your Elastic Email resource, containing your api key",
                                 component=FormComponent(type="resource",
-                                    props={"label": "Resource", "tag": "elastic-email"})
+                                                        props={"label": "Resource", "tag": "elastic-email"})
                             ),
                             FormField(
                                 id="sender_email",
@@ -153,9 +153,9 @@ def register() -> Plugin:
                                 description="Please provide path to e-mail address of a recipient, or "
                                             "the e-mail address itself.",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail",
-                                    "defaultSourceValue": "profile",
-                                    "defaultPathValue": "pii.email"
-                                })
+                                                                               "defaultSourceValue": "profile",
+                                                                               "defaultPathValue": "pii.email"
+                                                                               })
                             ),
                             FormField(
                                 id="message.subject",
@@ -169,7 +169,10 @@ def register() -> Plugin:
                                             "or HTML content. You can use templates in both HTML and text types, "
                                             "something like 'Hello {{profile@pii.name}}!' will result in calling "
                                             "the customer by their name in the message text.",
-                                component=FormComponent(type="contentInput", props={"label": "Message body"})
+                                component=FormComponent(type="contentInput", props={
+                                    "label": "Message body",
+                                    "allowedTypes": ["text/plain", "text/html"]
+                                })
                             )
                         ]
                     )
@@ -177,10 +180,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Send e-mail Bulk',
+            name='Send bulk e-mails',
             brand='Elastic Email',
-            desc='Sends Bulk e-mail via Elastic Email based on provided data.',
-            icon='elastic-email',
+            desc='Sends bulk e-mail via Elastic Email based on provided data.',
+            icon='email',
             group=["Elastic Email"],
             tags=['mailing'],
             documentation=Documentation(
