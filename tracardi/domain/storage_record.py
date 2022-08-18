@@ -57,7 +57,7 @@ class StorageAggregates(dict):
             records = {}
             if "buckets" in data:
                 for item in data['buckets']:
-                    records[aggregate_key] = item['doc_count']
+                    records[item[aggregate_key]] = item['doc_count']
             else:
                 records = {"found": data["doc_count"]}
 
