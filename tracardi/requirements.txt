@@ -12,7 +12,7 @@ tzlocal
 python-multipart
 lark==0.11.3
 dateparser
-dotty-dict==1.3.0
+dotty-dict==1.3.1
 pytz
 device_detector==5.0.1
 pip>=21.2.4

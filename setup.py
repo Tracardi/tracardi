@@ -27,7 +27,7 @@ setup(
         'python-multipart>=0.0.5',
         'lark>=0.11.3',
         'dateparser',
-        'dotty-dict==1.3.0',
+        'dotty-dict==1.3.1',
         'pytz',
         'device_detector==5.0.1',
         'deepdiff>=5.5.0',

@@ -238,6 +238,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.internal.entity.load.plugin',
         'tracardi.process_engine.action.v1.internal.entity.delete.plugin',
         'tracardi.process_engine.action.v1.internal.get_report.plugin',
+        'tracardi.process_engine.action.v1.internal.add_response.plugin',
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',

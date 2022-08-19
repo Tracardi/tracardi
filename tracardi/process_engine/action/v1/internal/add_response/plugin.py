@@ -7,13 +7,21 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.wf.domain.flow import Flow
 
 
 class Configuration(PluginConfig):
-    value: str = ""
+    key: str
+    body: str = ""
     default: bool = True
 
-    @validator("value")
+    @validator("key")
+    def key_may_not_be_empty(cls, value):
+        if not value:
+            raise ValueError("Key may not be empty")
+        return value.replace(" ", "_").lower()
+
+    @validator("body")
     def validate_content(cls, value):
         try:
             if isinstance(value, dict):
@@ -29,14 +37,14 @@ def validate(config: dict) -> Configuration:
 
     # Try parsing JSON just for validation purposes
     try:
-        json.loads(config.value)
+        json.loads(config.body)
     except JSONDecodeError as e:
         raise ValueError(str(e))
 
     return config
 
 
-class ReshapePayloadAction(ActionRunner):
+class CreateResponseAction(ActionRunner):
 
     def __init__(self, **kwargs):
         self.config = Configuration(**kwargs)
@@ -51,8 +59,12 @@ class ReshapePayloadAction(ActionRunner):
             template = DictTraverser(dot, default=None)
         else:
             template = DictTraverser(dot)
-        output = json.loads(self.config.value)
+
+        output = json.loads(self.config.body)
         result = template.reshape(reshape_template=output)
+
+        flow = self.flow  # type: Flow
+        flow.response[self.config.key] = result
 
         return Result(port="payload", value=result)
 
@@ -62,20 +74,27 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='ReshapePayloadAction',
+            className='CreateResponseAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"value": "{}", "default": True},
+            init={"key": "", "body": "{}", "default": True},
             form=Form(groups=[
                 FormGroup(
-                    name="Create payload object",
+                    name="Create response object",
                     fields=[
                         FormField(
-                            id="value",
-                            name="Object to inject",
-                            description="Provide object as JSON to be injected into payload and returned "
+                            id="key",
+                            name="Response key name",
+                            description="Type response key name. This is any non-spaced string that will identify the "
+                                        "response data, e.g. user_name",
+                            component=FormComponent(type="text", props={"label": "Key"})
+                        ),
+                        FormField(
+                            id="body",
+                            name="Response object",
+                            description="Provide object as JSON to be injected into response and returned "
                                         "on output port.",
-                            component=FormComponent(type="json", props={"label": "object"})
+                            component=FormComponent(type="json", props={"label": "Response object"})
                         ),
                         FormField(
                             id="default",
@@ -86,24 +105,23 @@ def register() -> Plugin:
                     ]
                 ),
             ]),
-            manual="reshape_payload_action",
-            version='0.6.0',
+            manual="create_response_action",
+            version='0.7.2',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Create payload',
-            desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
+            name='Create response',
+            desc='Creates new response from provided data. Configuration defines where the data should be copied.',
             icon='json',
             group=["Data processing"],
-            tags=['reshape', 'create', 'payload', 'data'],
+            tags=['reshape', 'create', 'data'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")
                 },
                 outputs={
-                    "payload": PortDoc(desc="This port returns new payload,formed from given payload"
-                                            " according to configuration.")
+                    "payload": PortDoc(desc="This port returns new payload the same as response.")
                 }
             )
         )

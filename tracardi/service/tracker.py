@@ -38,6 +38,7 @@ from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
+from tracardi.service.wf.domain.flow_response import FlowResponses
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -201,14 +202,22 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
 
     ux = []
     post_invoke_events = None
+    flow_responses = FlowResponses([])
     try:
 
         # Invoke rules engine
-        debugger, ran_event_types, console_log, post_invoke_events, invoked_rules = await rules_engine.invoke(
+        rule_invoke_result = await rules_engine.invoke(
             storage.driver.flow.load_production_flow,
             ux,
             tracker_payload
         )
+
+        debugger = rule_invoke_result.debugger
+        ran_event_types = rule_invoke_result.ran_event_types
+        console_log = rule_invoke_result.console_log
+        post_invoke_events = rule_invoke_result.post_invoke_events
+        invoked_rules = rule_invoke_result.invoked_rules
+        flow_responses = FlowResponses(rule_invoke_result.flow_responses)
 
         # Profile and session can change inside workflow
         # Check if it should not be replaced.
@@ -412,7 +421,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Add UX to response
     result['ux'] = ux
 
-    result['response'] = {}
+    result['response'] = flow_responses.merge()
 
     return result
 

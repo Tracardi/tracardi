@@ -1,7 +1,7 @@
 import uuid
 from collections import defaultdict
 from datetime import datetime
-from typing import Optional, List, Union, Callable, Dict
+from typing import Optional, List, Callable, Dict
 
 from pydantic import BaseModel
 from pydantic.utils import deep_update
