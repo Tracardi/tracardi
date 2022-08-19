@@ -1,4 +1,4 @@
-from typing import Callable, Iterator, List, Union, Dict, Tuple, Optional
+from typing import Callable, Iterator, List, Union, Tuple, Optional
 
 from pydantic import BaseModel
 
@@ -33,6 +33,10 @@ class StorageRecord(dict):
 
     def has_meta_data(self) -> bool:
         return self._meta is not None
+
+    def to_entity(self, model):
+        _object = model(**self)
+        return _object.set_meta_data(self.get_meta_data())
 
 
 class StorageAggregate(dict):
@@ -132,7 +136,7 @@ class StorageRecords(dict):
         """
         return self._hits[n]
 
-    def first(self):
+    def first(self) -> StorageRecord:
         first_hit = self._hits[0]
         row = StorageRecord.build_from_elastic(first_hit)
         row['id'] = first_hit['_id']
@@ -150,3 +154,4 @@ class StorageRecords(dict):
 
     def __len__(self):
         return self.chunk
+
