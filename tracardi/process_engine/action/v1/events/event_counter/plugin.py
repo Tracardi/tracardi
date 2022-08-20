@@ -39,37 +39,7 @@ def register() -> Plugin:
             version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
-            manual="event_counter_action",
-            init={
-                "event_type": None,
-                "time_span": "-15m"
-            },
-            form=Form(
-                groups=[
-                    FormGroup(
-                        name="Event counter settings",
-                        description="Event counter reads how many events of defined type were triggered "
-                                    "within defined time.",
-                        fields=[
-                            FormField(
-                                id="event_type",
-                                name="Event type",
-                                description="Select event type you would like to count.",
-                                component=FormComponent(type="eventType", props={
-                                    "label": "Event type"
-                                })
-                            ),
-                            FormField(
-                                id="time_span",
-                                name="Time span",
-                                description="Type time span, e.g. -15minutes.",
-                                component=FormComponent(type="text", props={
-                                    "label": "Time span"
-                                })
-                            ),
-                        ]
-                    )
-                ])
+            manual="event_counter_action"
         ),
         metadata=MetaData(
             name='Event counter',

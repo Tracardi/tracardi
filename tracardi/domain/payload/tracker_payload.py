@@ -90,7 +90,7 @@ class TrackerPayload(BaseModel):
                 )
             )
 
-            logger.info("New session is to be created with id {}".format(session.id))
+            logger.debug("New session is to be created with id {}".format(session.id))
 
             is_new_session = True
 

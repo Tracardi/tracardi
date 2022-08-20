@@ -28,6 +28,7 @@ class MauticContactAdder(ActionRunner):
         self.config = config
         self.resource = resource
         self.client = MauticClient(**self.resource.credentials.get_credentials(self, None))
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     @staticmethod
     def parse_mapping(mapping):

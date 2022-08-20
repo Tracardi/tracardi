@@ -85,16 +85,6 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="pushover",
-            name="Pushover",
-            tags=["pushover", "message"],
-            config={
-                "token": "<token>",
-                "user": "<user>"
-            },
-            icon="pushover"
-        ),
-        ResourceSettings(
             id="mysql",
             name="MySQL",
             icon="mysql",
@@ -149,21 +139,21 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="trello",
-            name="Trello",
-            tags=["trello"],
-            config={
-                "token": "<trello-api-token>",
-                "api_key": "<trello-api-key>"
-            }
-        ),
-        ResourceSettings(
             id="token",
             name="Token",
             tags=["token"],
             config={
                 "token": "<token>"
             }
+        ),
+        ResourceSettings(
+            id="novu",
+            name="Novu",
+            tags=["token"],
+            config={
+                "token": "<token>"
+            },
+            manual="novu_resource"
         ),
         ResourceSettings(
             id="google-cloud-service-account",
@@ -227,8 +217,9 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "api_key": "<api-key>",
             },
-            icon="elastic-email",
-            tags=["elastic-email", "destination"]
+            icon="email",
+            tags=["elastic-email"],
+            manual="elastic_mail_resource"
         ),
         ResourceSettings(
             id="airtable",
@@ -247,7 +238,8 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "token": "<your-token>",
                 "api_url": "<your-matomo-url>"
-            }
+            },
+            manual="matomo_resource"
         ),
         ResourceSettings(
             id="civi_crm",

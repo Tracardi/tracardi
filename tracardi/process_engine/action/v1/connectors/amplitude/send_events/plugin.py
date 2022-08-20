@@ -3,12 +3,13 @@ import json
 from datetime import datetime
 
 import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 from aiohttp import ClientConnectorError
 from tracardi.config import tracardi
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.domain.resources.token import Token
 from tracardi.service.storage.driver import storage
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.configuration import Configuration
@@ -50,7 +51,11 @@ class AmplitudeSendEvent(ActionRunner):
             dot = self._get_dot_accessor(payload)
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with HttpClient(
+                self.node.on_connection_error_repeat,
+                [200, 201, 202, 203],
+                timeout=timeout
+            ) as client:
 
                 platform = self._get_value(dot, self.config.platform)
                 properties = self._get_value(dot, self.config.event_properties)
@@ -103,7 +108,7 @@ class AmplitudeSendEvent(ActionRunner):
 
                 # print(params)
 
-                async with session.post(
+                async with client.post(
                         url=str(self.config.url),
                         headers=headers,
                         data=json.dumps(params)
@@ -115,15 +120,15 @@ class AmplitudeSendEvent(ActionRunner):
                     }
 
                     if response.status in [200, 201, 202, 203]:
-                        return Result(port="response", value=result), Result(port="error", value=None)
+                        return Result(port="response", value=result)
                     else:
-                        return Result(port="response", value=None), Result(port="error", value=result)
+                        return Result(port="error", value=result)
 
         except ClientConnectorError as e:
-            return Result(port="response", value=None), Result(port="error", value=str(e))
+            return Result(port="error", value=str(e))
 
         except asyncio.exceptions.TimeoutError:
-            return Result(port="response", value=None), Result(port="error", value="API timed out.")
+            return Result(port="error", value="API timed out.")
 
 
 def register() -> Plugin:
@@ -134,296 +139,9 @@ def register() -> Plugin:
             className='AmplitudeSendEvent',
             inputs=['payload'],
             outputs=["response", "error"],
-            init={
-                "source": {"id": None},
-
-                "url": "https://api2.amplitude.com/2/httpapi",
-                "timeout": 15,
-
-                "event_type": None,
-                "event_properties": None,
-                "user_properties": None,
-                "groups": None,
-
-                "ip": None,
-                "location_lat": None,
-                "location_lng": None,
-                "language": None,
-                "dma": None,
-                "city": None,
-                "region": None,
-                "country": None,
-
-                "revenueType": None,
-                "productId": None,
-                "revenue": None,
-                "quantity": None,
-                "price": None,
-
-                "carrier": None,
-                "device_model": None,
-                "device_manufacturer": None,
-                "device_brand": None,
-                "os_version": None,
-                "os_name": None,
-                "platform": None,
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Amplitude source",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="Amplitude resource",
-                            description="Please select your Amplitude resource.",
-                            component=FormComponent(type="resource", props={"label": "Resource", "tag": "token"})
-                        ),
-                    ]),
-                FormGroup(
-                    name="Amplitude Api Configuration",
-                    fields=[
-                        FormField(
-                            id="url",
-                            name="API URL",
-                            description="Please type API URL if it is different then default Amplitude URL.",
-                            component=FormComponent(type="text", props={"label": "API URL"})
-                        ),
-                        FormField(
-                            id="timeout",
-                            name="API timeout",
-                            description="Please API timeout.",
-                            component=FormComponent(type="text", props={"label": "API timeout"})
-                        ),
-                    ]),
-                FormGroup(
-                    name="Amplitude Event Configuration",
-                    description="Select what data should be sent to Amplitude. Leave empty if you want to send "
-                                "default data.",
-                    fields=[
-                        FormField(
-                            id="event_type",
-                            name="Event type",
-                            description="Leave empty if the current event type is to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "Reference to event type",
-                                                                           "defaultSourceValue": "event",
-                                                                           "defaultPathValue": "type"
-                                                                           })
-                        ),
-                        FormField(
-                            id="event_properties",
-                            name="Event properties",
-                            description="Leave empty if the current event properties is to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "Reference to event properties",
-                                                                           "defaultSourceValue": "event",
-                                                                           "defaultPathValue": "properties"
-                                                                           })
-                        ),
-                        FormField(
-                            id="user_properties",
-                            name="User Personal Identifiable Information (PII)",
-                            description="Leave empty if the current profile PII is to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "Reference to profile PII",
-                                                                           "defaultSourceValue": "profile",
-                                                                           "defaultPathValue": "pii"
-                                                                           })
-                        ),
-                        FormField(
-                            id="groups",
-                            name="Groups",
-                            description="Group types are only available to Growth and Enterprise customers who have "
-                                        "purchased the Accounts add-on on Amplitude.",
-                            component=FormComponent(type="dotPath", props={"label": "IP Groups"})
-                        ),
-                    ]),
-                FormGroup(
-                    name="Amplitude Location Configuration",
-                    description="Select what data should be sent to Amplitude. Leave empty if you want to send "
-                                "default data.",
-                    fields=[
-                        FormField(
-                            id="ip",
-                            name="IP address",
-                            description="Leave empty if the events ip to be copied.",
-                            component=FormComponent(type="dotPath", props={"label": "IP address",
-                                                                           "defaultSourceValue": "event",
-                                                                           "defaultPathValue": "metadata.ip"
-                                                                           })
-                        ),
-                        FormField(
-                            id="location_lat",
-                            name="Latitude",
-                            description="Leave empty if you want Amplitude to read location from IP.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to latitude",
-                                                                           "defaultSourceValue": "payload"
-                                                                           })
-                        ),
-                        FormField(
-                            id="location_lng",
-                            name="Longitude",
-                            description="Leave empty if you want Amplitude to read location from IP.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to longitude",
-                                                                           "defaultSourceValue": "payload"
-                                                                           })
-                        ),
-                        FormField(
-                            id="language",
-                            name="Language",
-                            description="The language set by the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to Language",
-                                                                           "defaultSourceValue": "payload"
-                                                                           })
-                        ),
-                        FormField(
-                            id="dma",
-                            name="Designated Market Area (DMA)",
-                            description="The current Designated Market Area of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to DMA",
-                                                                           "defaultSourceValue": "payload"
-                                                                           })
-                        ),
-                        FormField(
-                            id="city",
-                            name="City",
-                            description="The current city of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to city",
-                                                                           "defaultSourceValue": "payload"
-                                                                           })
-                        ),
-                        FormField(
-                            id="region",
-                            name="Region",
-                            description="The current region of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to region",
-                                                                           "defaultSourceValue": "payload"
-                                                                           })
-                        ),
-                        FormField(
-                            id="country",
-                            name="Country",
-                            description="The current country of the user.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to country",
-                                                                           "defaultSourceValue": "payload"
-                                                                           })
-                        ),
-                    ]),
-                FormGroup(
-                    name="Amplitude Product Configuration",
-                    description="Select what data should be sent to Amplitude. Leave empty if you want to send "
-                                "default data.",
-                    fields=[
-
-                        FormField(
-                            id="productId",
-                            name="Product ID",
-                            description="An identifier for the item purchased. You must send a price and quantity "
-                                        "or revenue with this field.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to productId",
-                                                                           "defaultSourceValue": "event"
-                                                                           })
-                        ),
-                        FormField(
-                            id="revenue",
-                            name="Revenue",
-                            description="revenue = price * quantity. If you send all 3 fields of price, quantity, and "
-                                        "revenue, then (price * quantity) will be used as the revenue value. You can "
-                                        "use negative values to indicate refunds.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to revenue",
-                                                                           "defaultSourceValue": "event"
-                                                                           })
-                        ),
-                        FormField(
-                            id="revenueType",
-                            name="Revenue type",
-                            description="The type of revenue for the item purchased. You must send a price and "
-                                        "quantity or revenue with this field.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to revenue type",
-                                                                           "defaultSourceValue": "event"})
-                        ),
-                        FormField(
-                            id="quantity",
-                            name="Quantity",
-                            description="The quantity of the item purchased. Defaults to 1 if not specified.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to quantity",
-                                                                           "defaultSourceValue": "event"
-                                                                           })
-                        ),
-                        FormField(
-                            id="price",
-                            name="Price",
-                            description="The price of the item purchased. Required for revenue data if the revenue "
-                                        "field is not sent. You can use negative values to indicate refunds.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to price",
-                                                                           "defaultSourceValue": "event"
-                                                                           })
-                        ),
-                    ]),
-                FormGroup(
-                    name="Amplitude Device Configuration",
-                    description="Select what data should be sent to Amplitude. Leave empty if you want to send "
-                                "default data.",
-                    fields=[
-                        FormField(
-                            id="platform",
-                            name="Platform",
-                            description="Platform of the device.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to platform",
-                                                                           "defaultSourceValue": "session"
-                                                                           })
-                        ),
-                        FormField(
-                            id="os_name",
-                            name="Operation System Name (OS)",
-                            description="The name of the mobile operating system or browser that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to OS",
-                                                                           "defaultSourceValue": "session"
-                                                                           })
-                        ),
-                        FormField(
-                            id="os_version",
-                            name="Operation System Version",
-                            description="The version of the mobile operating system or browser the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to OS version",
-                                                                           "defaultSourceValue": "session"
-                                                                           })
-                        ),
-                        FormField(
-                            id="device_brand",
-                            name="Device Brand",
-                            description="The device brand that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to device brand",
-                                                                           "defaultSourceValue": "session"
-                                                                           })
-                        ),
-                        FormField(
-                            id="device_manufacturer",
-                            name="Device Manufacturer",
-                            description="The device manufacturer that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to device manufacturer",
-                                                                           "defaultSourceValue": "session"
-                                                                           })
-                        ),
-                        FormField(
-                            id="device_model",
-                            name="Device Model",
-                            description="The device model that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to device model",
-                                                                           "defaultSourceValue": "session"
-                                                                           })
-                        ),
-                        FormField(
-                            id="carrier",
-                            name="Carrier",
-                            description="The carrier that the user is using.",
-                            component=FormComponent(type="dotPath", props={"label": "Path to carrier",
-                                                                           "defaultSourceValue": "session"
-                                                                           })
-                        ),
-                    ])
-            ]),
-
             version="0.6.1",
             author="Risto Kowaczewski",
-            license="MIT",
+            license="Tracardi Pro",
             manual="amplitude_send_event"
         ),
         metadata=MetaData(
@@ -433,5 +151,6 @@ def register() -> Plugin:
             icon='amplitude',
             group=["Amplitude"],
             tags=['analytics'],
+            pro=True
         )
     )

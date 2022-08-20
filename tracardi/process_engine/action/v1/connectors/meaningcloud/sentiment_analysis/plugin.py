@@ -9,6 +9,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 def validate(config: dict) -> Configuration:
@@ -30,14 +31,14 @@ class SentimentAnalysisAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         template = DotTemplate()
-        async with aiohttp.ClientSession() as session:
+        async with HttpClient(self.node.on_connection_error_repeat) as client:
             params = {
                 "key": self.credentials.token,
                 "lang": self.config.language,
                 "txt": template.render(self.config.text, dot)
             }
             try:
-                async with session.post('https://api.meaningcloud.com/sentiment-2.1', params=params) as response:
+                async with client.post('https://api.meaningcloud.com/sentiment-2.1', params=params) as response:
                     if response.status != 200:
                         raise ConnectionError("Could not connect to service https://api.meaningcloud.com. "
                                               f"It returned `{response.status}` status.")
@@ -71,57 +72,8 @@ def register() -> Plugin:
             version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="sentiment_analysis_action",
-            init={
-                "source": {
-                    "id": None,
-                    "name": None
-                },
-                "language": "en",
-                "text": None
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Text sentiment resource",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="MeaningCloud resource",
-                            description="Select MeaningCloud resource. Authentication credentials will be used to "
-                                        "connect to MeaningCloud server.",
-                            component=FormComponent(
-                                type="resource",
-                                props={"label": "resource", "tag": "token"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Text sentiment settings",
-                    fields=[
-                        FormField(
-                            id="language",
-                            name="Language",
-                            description="Select language.",
-                            component=FormComponent(type="select", props={
-                                "label": "Language",
-                                "items": {
-                                    "en": "English",
-                                    "sp": "Spanish",
-                                    "fr": "French",
-                                    "it": "Italian",
-                                    "pt": "Portuguese",
-                                    "ct": "Catalan"
-                                }
-                            })
-                        ),
-                        FormField(
-                            id="text",
-                            name="Text",
-                            description="Type text to classify.",
-                            component=FormComponent(type="textarea", props={"rows": 8})
-                        )
-                    ])
-            ]),
+            manual="sentiment_analysis_action"
+
         ),
         metadata=MetaData(
             name='Sentiment analysis',
@@ -129,6 +81,7 @@ def register() -> Plugin:
             desc='It connects to the service that predicts sentiment from a given sentence.',
             icon='paragraph',
             group=["Machine learning"],
+            tags=['ai', 'ml'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -137,6 +90,7 @@ def register() -> Plugin:
                     "result": PortDoc(desc="Returns result."),
                     "error": PortDoc(desc="Gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )

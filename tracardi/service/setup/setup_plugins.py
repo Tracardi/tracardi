@@ -71,8 +71,8 @@ async def add_plugins():
     result = defaultdict(list)
     plugins = [
         'tracardi.process_engine.action.v1.memory.collect.plugin',
-
         'tracardi.process_engine.action.v1.password_generator_action',
+        'tracardi.process_engine.action.v1.weekdays_checker_action',
         'tracardi.process_engine.action.v1.flow.start.start_action',
         'tracardi.process_engine.action.v1.flow.property_exists.plugin',
         'tracardi.process_engine.action.v1.end_action',
@@ -86,6 +86,8 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.decrement_action',
 
         'tracardi.process_engine.action.v1.if_action',
+        'tracardi.process_engine.action.v1.starts_with_action',
+        'tracardi.process_engine.action.v1.ends_with_action',
         'tracardi.process_engine.action.v1.new_visit_action',
         'tracardi.process_engine.action.v1.new_profile_action',
         'tracardi.process_engine.action.v1.template_action',
@@ -220,6 +222,7 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin',
         'tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin',
         'tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin',
+        'tracardi.process_engine.action.v1.connectors.novu.plugin',
 
         # Internal
         'tracardi.process_engine.action.v1.internal.assign_profile_id.plugin',
@@ -234,6 +237,8 @@ async def add_plugins():
         'tracardi.process_engine.action.v1.internal.entity.upsert.plugin',
         'tracardi.process_engine.action.v1.internal.entity.load.plugin',
         'tracardi.process_engine.action.v1.internal.entity.delete.plugin',
+        'tracardi.process_engine.action.v1.internal.get_report.plugin',
+        'tracardi.process_engine.action.v1.internal.add_response.plugin',
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',

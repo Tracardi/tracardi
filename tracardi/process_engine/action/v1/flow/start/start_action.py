@@ -40,8 +40,7 @@ class StartAction(ActionRunner):
                 self.console.warning(str(e))
 
         if event.session is not None:
-            session_entity = Entity(id=event.session.id)
-            session = await StorageFor(session_entity).index('session').load(Session)
+            session = await storage.driver.session.load(event.session.id)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
             profile_entity = Entity(id=event.profile.id)

@@ -32,7 +32,11 @@ class LanguageDetectAction(ActionRunner):
 
     def __init__(self, config: Configuration, credentials: ResourceCredentials):
         self.message = config.message
-        self.client = HttpClient(credentials.get_credentials(self, Token).token, config.timeout)
+        self.client = HttpClient(
+            credentials.get_credentials(self, Token).token,
+            config.timeout,
+            self.node.on_connection_error_repeat
+        )
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -62,43 +66,7 @@ def register() -> Plugin:
             license="MIT",
             author="Patryk Migaj, Risto Kowaczewski",
             manual="lang_detection_action",
-            init={
-                'source': {
-                    'id': None,
-                    'name': None
-                },
-                "message": "Hello world",
-                "timeout": 15,
-            },
-            form=Form(groups=[
-                FormGroup(
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="Token resource",
-                            description="Select resource that have API token.",
-                            component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
-                        ),
-                        FormField(
-                            id="timeout",
-                            name="Service time-out",
-                            description="Type when to time out if service unavailable.",
-                            component=FormComponent(type="text", props={"label": "time-out"})
-                        )
-                    ]
-                ),
-                FormGroup(
-                    fields=[
-                        FormField(
-                            id="message",
-                            name="Text",
-                            description="Type text or path to text to be detected.",
-                            component=FormComponent(type="textarea", props={"label": "template"})
-                        )
-                    ]
-                )
-            ]
-            )
+
         ),
         metadata=MetaData(
             name='Language detection',
@@ -106,6 +74,7 @@ def register() -> Plugin:
             desc='This plugin detect language from given string with meaningcloud API',
             icon='language',
             group=["Machine learning"],
+            tags=['ai', 'ml'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")
@@ -114,6 +83,7 @@ def register() -> Plugin:
                     "response": PortDoc(desc="Returns language detection service response."),
                     "error": PortDoc(desc="Returns error message."),
                 }
-            )
+            ),
+            pro=True
         )
     )

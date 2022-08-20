@@ -48,7 +48,7 @@ class AddEmptyProfileAction(ActionRunner):
 
         self.execution_graph.set_profiles(profile)
 
-        coroutines = [storage.driver.profile.save_profile(profile)]
+        coroutines = [storage.driver.profile.save(profile)]
 
         session = Session(
             id=str(uuid4()),

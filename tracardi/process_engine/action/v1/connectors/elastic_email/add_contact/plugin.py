@@ -1,8 +1,4 @@
 from datetime import datetime
-from multiprocessing.pool import ApplyResult
-
-from asyncio import sleep
-
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -109,7 +105,10 @@ def register() -> Plugin:
                                 id="email",
                                 name="Email address",
                                 description="Please type in the path to the email address for your new contact.",
-                                component=FormComponent(type="dotPath", props={"label": "Email"})
+                                component=FormComponent(type="dotPath", props={"label": "Email",
+                                                                               "defaultSourceValue": "profile",
+                                                                               "defaultPathValue": "pii.email"
+                                                                               })
                             ),
                             FormField(
                                 id="additional_mapping",
@@ -128,7 +127,7 @@ def register() -> Plugin:
             name='Add contact',
             brand='Elastic Email',
             desc='Adds a new contact to Elastic Email based on provided data.',
-            icon='elastic-email',
+            icon='email',
             group=["Elastic Email"],
             tags=['mailing'],
             documentation=Documentation(

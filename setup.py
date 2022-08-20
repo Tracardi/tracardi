@@ -27,7 +27,7 @@ setup(
         'python-multipart>=0.0.5',
         'lark>=0.11.3',
         'dateparser',
-        'dotty-dict==1.3.0',
+        'dotty-dict==1.3.1',
         'pytz',
         'device_detector==5.0.1',
         'deepdiff>=5.5.0',
@@ -61,7 +61,7 @@ setup(
         'random-password-generator==2.2.0',
         'asyncio-mqtt==0.12.1',
         'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker',
-        'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@master#ElasticEmail'
+        'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

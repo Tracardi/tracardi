@@ -26,6 +26,7 @@ class SendEventToMatomoAction(ActionRunner):
     def __init__(self, config: Config, credentials: ResourceCredentials):
         self.config = config
         self.client = MatomoClient(**credentials.get_credentials(self))
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -103,7 +104,7 @@ class SendEventToMatomoAction(ActionRunner):
             return Result(port="response", value=payload)
 
         except MatomoClientException as e:
-            return Result(port="error", value=str(e))
+            return Result(port="error", value={"message": str(e)})
 
     def make_pv_id(self) -> str:
         md5_hash = hashlib.md5(

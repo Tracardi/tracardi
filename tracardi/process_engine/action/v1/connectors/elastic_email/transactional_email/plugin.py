@@ -17,7 +17,7 @@ from ElasticEmail.model.body_content_type import BodyContentType
 from ElasticEmail.model.transactional_recipient import TransactionalRecipient
 from ElasticEmail.model.email_transactional_message_data import EmailTransactionalMessageData
 
-from .model.config import Connection
+from ..bulk_email.model.config import Connection
 
 
 def validate(config: dict) -> Config:
@@ -53,7 +53,7 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        message = self._dot_template.render(self.config.message.content, dot)
+        message = self._dot_template.render(self.config.message.content.content, dot)
         recipient_emails = dot[self.config.message.recipient]
         recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
         configuration = ElasticEmail.Configuration()
@@ -68,13 +68,20 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
                 self.console.warning("Recipient e-mail {} is not valid email. This e-mail was skipped.".format(email))
                 continue
 
-        email_body = [
-            BodyPart(
+        email_body = []
+        if self.config.message.content.type == "text/html":
+            email_body.append(BodyPart(
+                content_type=BodyContentType("HTML"),
+                content=message,
+                charset="utf-8",
+            ))
+        else:
+            email_body.append(BodyPart(
                 content_type=BodyContentType("PlainText"),
                 content=message,
                 charset="utf-8",
-            )
-        ]
+            ))
+
         email_transactional_message_data = EmailTransactionalMessageData(
             recipients=TransactionalRecipient(
                 to=recipient_emails,
@@ -82,9 +89,10 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
             content=EmailContent(
                 body=email_body,
                 _from=self.config.sender_email,
+                # todo maybe reply to should be added to the form and configuration?
                 # reply_to="myemail@domain.com",
                 subject=self.config.message.subject,
-            ),
+            )
         )
         try:
             with ElasticEmail.ApiClient(configuration) as api_client:
@@ -94,7 +102,7 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
                 return Result(port="response", value=api_response.to_dict())
         except Exception as e:
             # except ElasticEmail.ApiException as e:
-            return Result(port="error", value={"error": str(e), "msg": ""})
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:
@@ -111,14 +119,14 @@ def register() -> Plugin:
             manual="elastic_email_transactional_action",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
-                "sender_email": None,
+                "sender_email": "",
                 "message": {
-                    "recipient": None,
-                    "content": None,
-                    "subject": None,
+                    "recipient": "",
+                    "content": "",
+                    "subject": "",
                 }
             },
             form=Form(
@@ -131,7 +139,7 @@ def register() -> Plugin:
                                 name="Elastic Email resource",
                                 description="Please select your Elastic Email resource, containing your api key",
                                 component=FormComponent(type="resource",
-                                    props={"label": "Resource", "tag": "elastic-email"})
+                                                        props={"label": "Resource", "tag": "elastic-email"})
                             ),
                             FormField(
                                 id="sender_email",
@@ -151,7 +159,8 @@ def register() -> Plugin:
                                 name="Message recipient's email",
                                 description="Please provide path to e-mail address of a recipient, or "
                                             "the e-mail address itself.",
-                                component=FormComponent(type="dotPath", props={"label": "E-mail",
+                                component=FormComponent(type="dotPath", props={
+                                    "label": "E-mail",
                                     "defaultSourceValue": "event",
                                     "defaultPathValue": "properties.emailAddress"
                                 })
@@ -168,8 +177,10 @@ def register() -> Plugin:
                                             "or HTML content. You can use templates in both HTML and text types, "
                                             "something like 'Hello {{profile@pii.name}}!' will result in calling "
                                             "the customer by their name in the message text.",
-                                component=FormComponent(type="textarea", props={"label": "Message body"})
-                                # component=FormComponent(type="contentInput", props={"label": "Message body"})
+                                component=FormComponent(type="contentInput", props={
+                                    "label": "Message body",
+                                    "allowedTypes": ["text/plain", "text/html"]
+                                })
                             )
                         ]
                     )
@@ -177,10 +188,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Send e-mail Transactional',
+            name='Send transactional e-mail',
             brand='Elastic Email',
             desc='Sends transactional e-mail via Elastic Email based on provided data.',
-            icon='elastic-email',
+            icon='email',
             group=["Elastic Email"],
             tags=['mailing'],
             documentation=Documentation(

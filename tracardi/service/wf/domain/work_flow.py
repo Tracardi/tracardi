@@ -1,18 +1,14 @@
 from time import time
-from typing import Tuple, List
-
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
+from tracardi.domain.flow_invoke_result import FlowInvokeResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from .debug_info import DebugInfo, FlowDebugInfo
 from .flow import Flow
 from .flow_history import FlowHistory
 from ..utils.dag_error import DagGraphError
 from ..utils.dag_processor import DagProcessor
 from ..utils.flow_graph_converter import FlowGraphConverter
-from tracardi.service.plugin.domain.console import Log
 
 
 class WorkFlow:
@@ -21,8 +17,7 @@ class WorkFlow:
         self.tracker_payload = tracker_payload
         self.flow_history = flow_history
 
-    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug=False) -> Tuple[
-        DebugInfo, List[Log], 'Event', 'Profile', 'Session']:
+    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug=False) -> FlowInvokeResult:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.
@@ -81,6 +76,6 @@ class WorkFlow:
 
             await exec_dag.close()
 
-            return debug_info, log_list, event, profile, session
+            return FlowInvokeResult(debug_info, log_list, flow, event, profile, session)
 
         raise RuntimeError("Workflow has circular reference.")

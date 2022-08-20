@@ -51,7 +51,8 @@ class Session(Entity):
         return StorageInfo(
             'session',
             Session,
-            exclude={"operation": ...}
+            exclude={"operation": ...},
+            multi=True
         )
 
     def get_platform(self):

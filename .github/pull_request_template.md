@@ -1,8 +1,4 @@
-PR Title format: 
-
-    Pull request title with short description (#<issue-id>)
-
-**Please** add a meaningful description for your change here
+Type pull request title with short description (#<issue-id>)
 
 ----
 

@@ -15,7 +15,7 @@ async def delete_by_id(entity_id) -> dict:
     return await StorageFor(entity).index("entity").delete()
 
 
-async def unique_entity_types(bucket_name, buckets_size=500):
+async def unique_entity_types(bucket_name, buckets_size=500) -> StorageAggregateResult:
     async def _aggregate(bucket_name, by, filter_query=None, buckets_size=15) -> StorageAggregateResult:
         aggregate_query = {
             bucket_name: {

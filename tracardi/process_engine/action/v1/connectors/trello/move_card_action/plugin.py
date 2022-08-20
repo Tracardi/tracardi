@@ -33,6 +33,7 @@ class TrelloCardMover(ActionRunner):
 
     def __init__(self, client: TrelloClient, config: Config):
         self._client = client
+        self._client.set_retries(self.node.on_connection_error_repeat)
         self.config = config
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -59,57 +60,7 @@ def register() -> Plugin:
             version='0.6.1',
             license="MIT",
             author="Dawid Kruk",
-            init={
-                "source": {
-                    "name": None,
-                    "id": None
-                },
-                "board_url": None,
-                "list_name1": None,
-                "list_name2": None,
-                "card_name": None
-            },
-            manual="trello/move_trello_card_action",
-            form=Form(
-                groups=[
-                    FormGroup(
-                        name="Plugin configuration",
-                        fields=[
-                            FormField(
-                                id="source",
-                                name="Trello resource",
-                                description="Please select your Trello resource.",
-                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "trello"})
-                            ),
-                            FormField(
-                                id="board_url",
-                                name="URL of Trello board",
-                                description="Please provide the URL of your board.",
-                                component=FormComponent(type="text", props={"label": "Board URL"})
-                            ),
-                            FormField(
-                                id="list_name1",
-                                name="Name of current Trello list",
-                                description="Please provide the name of your Trello list that card is currently on.",
-                                component=FormComponent(type="text", props={"label": "List name"})
-                            ),
-                            FormField(
-                                id="list_name2",
-                                name="Name of target Trello list",
-                                description="Please provide the name of your Trello list that you want to move your "
-                                            "card to.",
-                                component=FormComponent(type="text", props={"label": "List name"})
-                            ),
-                            FormField(
-                                id="card_name",
-                                name="Name of your card",
-                                description="Please provide path to the name of the card that you want to move.",
-                                component=FormComponent(type="dotPath", props={"label": "Card name", "defaultMode": "2"})
-                            )
-                        ]
-                    )
-                ]
-            )
+            manual="trello/move_trello_card_action"
         ),
         metadata=MetaData(
             name='Move Trello card',
@@ -124,6 +75,7 @@ def register() -> Plugin:
                     "response": PortDoc(desc="This port returns a response from Trello API."),
                     "error": PortDoc(desc="This port gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )

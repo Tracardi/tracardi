@@ -6,6 +6,8 @@ from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
+from .value_object.storage_info import StorageInfo
+
 COLLECTED = 'collected'
 VALIDATED = 'validated'
 INVALID = 'invalid'
@@ -71,3 +73,11 @@ class Event(Entity):
     def new(data: dict) -> 'Event':
         data['id'] = str(uuid4())
         return Event(**data)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'event',
+            Event,
+            multi=True
+        )

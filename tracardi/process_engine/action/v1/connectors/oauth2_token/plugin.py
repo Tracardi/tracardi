@@ -6,7 +6,7 @@ from .model.config import Config
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.domain.resources.remote_api_resource import RemoteApiResource
-import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 def validate(config: dict) -> Config:
@@ -28,8 +28,8 @@ class TokenGetter(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with HttpClient(self.node.on_connection_error_repeat) as client:
+            async with client.post(
                     url=self._credentials.url,
                     data={
                         "username": self._credentials.username,

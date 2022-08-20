@@ -1,4 +1,4 @@
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 import typing
 
@@ -9,7 +9,7 @@ async def get_by_id(consent_id):
 
 async def add_consent(id: str, name: str, description: str, revokable: bool, default_value: str, enabled: bool,
                       tags: typing.List[str], required: bool, auto_revoke: str):
-    return await storage_manager("consent-type").upsert(data={
+    return await storage_manager("consent-type").upsert({
         "id": id,
         "name": name,
         "description": description,
@@ -26,11 +26,11 @@ async def delete_by_id(consent_id):
     return await storage_manager("consent-type").delete(consent_id)
 
 
-async def load_all(start: int = 0, limit: int = 10) -> StorageResult:
+async def load_all(start: int = 0, limit: int = 10) -> StorageRecords:
     return await storage_manager("consent-type").load_all(start=start, limit=limit)
 
 
-async def load_all_active(limit: int = 100) -> StorageResult:
+async def load_all_active(limit: int = 100) -> StorageRecords:
     return await storage_manager("consent-type").load_by('enabled', True, limit=limit)
 
 

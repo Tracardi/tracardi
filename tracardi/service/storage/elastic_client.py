@@ -96,6 +96,8 @@ class ElasticClient:
                 del (record['_id'])
             else:
                 _id = str(uuid4())
+                if 'id' in record and _id != record['id']:
+                    record['id'] = _id
 
             ids.append(_id)
             record = {

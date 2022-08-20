@@ -43,42 +43,7 @@ def register() -> Plugin:
             outputs=['payload'],
             version='0.7.0',
             license="Tracardi Pro",
-            author="Risto Kowaczewski",
-            init={
-                "field": None,
-                "time_span": "-15m"
-            },
-            form=Form(
-                groups=[
-                    FormGroup(
-                        name="Event aggregation settings",
-                        description="Event aggregator counts how many events of defined field were triggered "
-                                    "within defined time.",
-                        fields=[
-                            FormField(
-                                id="field",
-                                name="Aggregate by field",
-                                description="Select field you would like to aggregate.",
-                                component=FormComponent(type="autocomplete", props={
-                                    "label": "Field",
-                                    "endpoint": {
-                                        "url": "/storage/mapping/event/metadata",
-                                        "method": "get"
-                                    },
-                                    "onlyValueWithOptions": False
-                                })
-                            ),
-                            FormField(
-                                id="time_span",
-                                name="Time span",
-                                description="Type time span, e.g. -15minutes.",
-                                component=FormComponent(type="text", props={
-                                    "label": "Time span"
-                                })
-                            ),
-                        ]
-                    )
-                ])
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Event aggregator',

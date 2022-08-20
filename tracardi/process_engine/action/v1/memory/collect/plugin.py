@@ -87,7 +87,7 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Payload collector',
-            desc='Collects payloads the the input in the workflow memory object.',
+            desc='Collects input payloads in the workflow memory object.',
             tags=['memory', 'join'],
             icon='array',
             group=["Operations"],

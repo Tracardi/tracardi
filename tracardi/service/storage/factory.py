@@ -1,19 +1,19 @@
 import elasticsearch
-from typing import Union, List, Optional
+from typing import Union, List, Optional, TypeVar
 from tracardi.service.storage.elastic_storage import ElasticStorage, ElasticFiledSort
 from tracardi.service.storage.persistence_service import PersistenceService
 from tracardi.domain.entity import Entity
 from pydantic import BaseModel
 from tracardi.domain.agg_result import AggResult
 from tracardi.exceptions.exception import TracardiException, StorageException
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 import tracardi.domain.entity as domain
 
 
 class BaseStorageCrud:
 
-    def __init__(self, index, entity, exclude=None, exclude_unset=False):
+    def __init__(self, index, entity: Entity, exclude=None, exclude_unset=False):
         self.exclude_unset = exclude_unset
         self.exclude = exclude
         self.index = index
@@ -27,54 +27,68 @@ class BaseStorageCrud:
         service = self._get_storage_service()
         return await service.refresh()
 
-    def _get_storage_service(self):
+    def _get_storage_service(self) -> PersistenceService:
         return storage_manager(self.index)
 
 
 class EntityStorageCrud(BaseStorageCrud):
 
-    async def load(self, domain_class_ref=None):
+    async def load(self, domain_class_ref = None) -> Optional[Entity]:
         service = self._get_storage_service()
         data = await service.load(self.entity.id)
-
         if data:
+
             if domain_class_ref is None:
-                return domain.Entity(**data)
-            return domain_class_ref(**data)
+                entity = domain.Entity(**data)
+            else:
+                entity = domain_class_ref(**data)
+
+            if data.has_meta_data() and isinstance(entity, Entity):
+                entity.set_meta_data(data.get_meta_data())
+
+            return entity
 
         return None
 
-    async def load_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+    async def load_by(self, field: str, value: str, limit: int = 100) -> StorageRecords:
         service = self._get_storage_service()
         return await service.load_by(field, value, limit)
 
-    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageResult:
+    async def load_by_query_string(self, query_string: str, limit: int = 100) -> StorageRecords:
         service = self._get_storage_service()
         return await service.load_by_query_string(query_string, limit)
 
-    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageResult:
+    async def match_by(self, field: str, value: str, limit: int = 100) -> StorageRecords:
         service = self._get_storage_service()
         return await service.match_by(field, value, limit)
 
-    async def load_by_values(self, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None, limit: int = 100):
+    async def load_by_values(self, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
+                             limit: int = 100):
         service = self._get_storage_service()
         return await service.load_by_values(key_value_pairs, sort_by, limit=limit)
 
-    async def delete_by(self, field, value) -> dict:
+    async def delete_by(self, field, value, index: str = None) -> dict:
         service = self._get_storage_service()
-        return await service.delete_by(field, value)
+        return await service.delete_by(field, value, index)
 
-    async def save(self, row=None) -> BulkInsertResult:
-        if row is None:
-            row = {}
-        row['id'] = self.entity.id
+    async def save(self, data: Union[Entity, dict] = None) -> BulkInsertResult:
+        if data is None:
+            data = {}
+
+        if isinstance(data, Entity):
+            data.id = self.entity.id
+            record = data.to_storage_record(exclude_unset=self.exclude_unset, exclude=self.exclude)
+        else:
+            record = data
+            data['id'] = self.entity.id
+
         service = self._get_storage_service()
-        return await service.upsert(row)
+        return await service.upsert(record)
 
 
 class StorageCrud(BaseStorageCrud):
 
-    def __init__(self, index, domain_class_ref, entity, exclude=None, exclude_unset=False):
+    def __init__(self, index, domain_class_ref, entity: Entity, exclude=None, exclude_unset=False):
         super().__init__(index, entity, exclude, exclude_unset)
         self.domain_class_ref = domain_class_ref
 
@@ -89,7 +103,8 @@ class StorageCrud(BaseStorageCrud):
 
     async def save(self) -> BulkInsertResult:
         service = self._get_storage_service()
-        return await service.upsert(self.entity.dict(exclude_unset=self.exclude_unset, exclude=self.exclude))
+        record = self.entity.to_storage_record(exclude_unset=self.exclude_unset, exclude=self.exclude)
+        return await service.upsert(record)
 
 
 class CollectionCrud:
@@ -104,15 +119,15 @@ class CollectionCrud:
             raise TracardiException("CollectionCrud data payload must be list.")
 
         data = []
-        for p in self.payload:
-            if isinstance(p, BaseModel):
-                data.append(p.dict(exclude=exclude))
-            elif isinstance(p, dict):
-                data.append(p)
+        for row in self.payload:
+            if isinstance(row, BaseModel):
+                data.append(row.dict(exclude=exclude))
+            elif isinstance(row, dict):
+                data.append(row)
 
         return await self.storage.upsert(data, replace_id)
 
-    async def load(self, start: int = 0, limit: int = 100) -> StorageResult:
+    async def load(self, start: int = 0, limit: int = 100) -> StorageRecords:
         try:
 
             return await self.storage.load_all(start, limit)
@@ -151,7 +166,7 @@ class StorageFor:
         self.storage_info = instance.storage_info()
 
     @staticmethod
-    def crud(index, class_type):
+    def crud(index, class_type) -> EntityStorageCrud:
         return EntityStorageCrud(index, class_type)
 
     def index(self, index=None) -> Union[EntityStorageCrud, StorageCrud]:
@@ -162,6 +177,7 @@ class StorageFor:
                 ))
             return EntityStorageCrud(index, entity=self.instance)
         else:
+            # TODO does not pass index
             return StorageCrud(
                 self.storage_info.index,
                 self.storage_info.domain_class_ref,

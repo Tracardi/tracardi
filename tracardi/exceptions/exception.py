@@ -52,3 +52,7 @@ class LoginException(TracardiException):
 
 class EventValidationException(TracardiException):
     pass
+
+
+class DuplicatedRecordException(TracardiException):
+    pass
