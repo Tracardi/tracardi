@@ -1,11 +1,6 @@
 from datetime import datetime
 from multiprocessing.pool import ApplyResult
 
-import ElasticEmail
-from ElasticEmail.api import contacts_api
-from ElasticEmail.model.contact_payload import ContactPayload
-from ElasticEmail.model.contact_status import ContactStatus
-from ElasticEmail.model.email_send import EmailSend
 from asyncio import sleep
 
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -16,6 +11,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, Connection
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import Resource
+from ..client import ElasticEmailClient
 
 
 def validate(config: dict) -> Config:
@@ -31,7 +27,9 @@ class ElasticEmailContactAdder(ActionRunner):
 
     def __init__(self, config: Config, resource: Resource):
         self.config = config
-        self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
+        self.resource = resource
+        self.credentials = resource.credentials.get_credentials(self, output=Connection)
+        self.client = ElasticEmailClient(**self.credentials)
 
     @staticmethod
     def parse_mapping(mapping):
@@ -49,67 +47,28 @@ class ElasticEmailContactAdder(ActionRunner):
         return mapping
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-
-        configuration = ElasticEmail.Configuration()
-        configuration.api_key['apikey'] = self.credentials.api_key
-
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
-
-        email = dot[self.config.email]
-
         mapping = traverser.reshape(self.config.additional_mapping)
         mapping = self.parse_mapping(mapping)
 
-        contact_other = {}
-        contact_status = mapping.get('status')
-        if contact_status:
-            del mapping['status']
-
-        contact_other['status'] = ContactStatus(contact_status or "Active")
-        email_list_names = mapping.get('list_names')
-        if email_list_names:
-            email_list_names = email_list_names.split(',')
-            del mapping['list_names']
-
-        first_name = mapping.get('first_name')
-        if first_name:
-            del mapping['first_name']
-            contact_other['first_name'] = first_name
-
-        last_name = mapping.get('last_name')
-        if last_name:
-            del mapping['last_name']
-            contact_other['last_name'] = last_name
-
-        contact_payload = [
-            ContactPayload(
-                email=email,
-                custom_fields=mapping,
-                **contact_other,
-            ),
-        ]
+        contact_data = {"email": dot[self.config.email]}
+        if mapping.get("list_name"):
+            contact_data["listName"] = mapping["list_name"]
+            del mapping["list_names"]
+        if mapping.get("first_name"):
+            contact_data["firstName"] = mapping["first_name"]
+            del mapping["first_name"]
+        if mapping.get("last_name"):
+            contact_data["lastName"] = mapping["last_name"]
+            del mapping["last_name"]
+        if mapping:
+            contact_data["field"] = mapping
         try:
-            with ElasticEmail.ApiClient(configuration) as api_client:
-                api_instance = contacts_api.ContactsApi(api_client)
-
-                if email_list_names:
-                    thread = api_instance.contacts_post(contact_payload, listnames=email_list_names, async_req=True)  # type: ApplyResult
-                else:
-                    thread = api_instance.contacts_post(contact_payload, async_req=True)  # type: ApplyResult
-
-                # Do not block the event loop
-                await sleep(0)
-
-                # Fetch result
-                api_response = thread.get()
-
-                # todo do not know why EmailSend is checked both calls returns list of Contacts
-                if isinstance(api_response, EmailSend):
-                    return Result(port="response", value=api_response.to_dict())
-                else:
-                    return Result(port="response", value={"result": [item.to_dict() for item in api_response]})
-
+            result = await self.client.add_contact(
+                contact_data, field=mapping
+            )
+            return Result(port="response", value=result)
         except Exception as e:
             return Result(port="error", value={"message": str(e)})
 

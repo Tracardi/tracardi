@@ -19,3 +19,4 @@ class Config(PluginConfig):
 
 class Connection(BaseModel):
     api_key: str
+    public_account_id: str
