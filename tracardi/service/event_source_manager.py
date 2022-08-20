@@ -4,8 +4,12 @@ from tracardi.service.storage.driver import storage
 
 def event_source_types():
     standard_inbound_sources = {
+        "imap": {
+            "name": "IMAP Bridge",
+            "tags": ["imap", "inbound"]
+        },
         "mqtt": {
-            "name": "Mqtt Subscriber",
+            "name": "Mqtt Bridge",
             "tags": ["mqtt", "inbound"]
         },
         "rest": {
