@@ -2,6 +2,8 @@ import hashlib
 from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, AnyHttpUrl
 
+from tracardi.domain.named_entity import NamedEntity
+
 
 class FormFieldValidation(BaseModel):
     regex: str
@@ -45,6 +47,12 @@ class NodeEvents(BaseModel):
     on_create: Optional[str]
 
 
+class MicroserviceConfig(BaseModel):
+    resource: NamedEntity
+    service: NamedEntity
+    action: NamedEntity
+
+
 class Spec(BaseModel):
     id: Optional[str]
     className: str
@@ -52,6 +60,7 @@ class Spec(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[dict] = None
+    microservice: Optional[MicroserviceConfig] = None
     skip: bool = False
     block_flow: bool = False
     run_in_background: bool = False

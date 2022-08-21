@@ -2,6 +2,11 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 
 
+def validate(config: dict):
+    # todo remotly validate
+    print(config)
+
+
 class MicroserviceAction(ActionRunner):
 
     def __init__(self, **kwargs):
@@ -21,7 +26,24 @@ def register() -> Plugin:
             outputs=["payload", "error"],
             version='0.7.2',
             license="MIT",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            microservice={
+                "resource": {
+                    "name": "",
+                    "id": ""
+                },
+                "service": {
+                    "name": "",
+                    "id": ""
+                },
+                "action": {
+                    "name": "",
+                    "id": ""
+                }
+            },
+            init={
+
+            }
         ),
         metadata=MetaData(
             name='Microservice',

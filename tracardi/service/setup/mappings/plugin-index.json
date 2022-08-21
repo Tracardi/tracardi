@@ -104,6 +104,11 @@
                 "type": "keyword",
                 "ignore_above": 48
               },
+              "microservice": {
+                "type": "object",
+                "dynamic": "true",
+                "enabled": false
+              },
               "init": {
                 "index": false,
                 "type": "keyword"
