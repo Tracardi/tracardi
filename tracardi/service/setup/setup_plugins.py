@@ -242,7 +242,9 @@ async def add_plugins():
 
         # Metrics
         'tracardi.process_engine.action.v1.metrics.key_counter.plugin',
-        # 'tracardi.process_engine.action.v1.microservice.profile_metrics',
+
+        # Microservice
+        'tracardi.process_engine.action.v1.microservice.plugin',
 
         # Consents
         'tracardi.process_engine.action.v1.consents.add_consent_action.plugin',

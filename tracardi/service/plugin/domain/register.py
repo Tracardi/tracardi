@@ -63,7 +63,7 @@ class Spec(BaseModel):
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.7.2'
+    version: Optional[str] = '0.7.2-dev'
     run_once: Optional[RunOnce] = RunOnce()
     node: Optional[NodeEvents] = None
 
@@ -99,6 +99,7 @@ class MetaData(BaseModel):
     group: Optional[List[str]] = ["General"]
     tags: List[str] = []
     pro: bool = False
+    remote: bool = False
     frontend: bool = False
     emits_event: Optional[Dict[str, str]] = {}
 

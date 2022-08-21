@@ -97,7 +97,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.microservice.profile_metrics',
+            module=__name__,
             className='ProfileMetricsApi',
             inputs=["payload"],
             outputs=['response', 'error', 'payload'],

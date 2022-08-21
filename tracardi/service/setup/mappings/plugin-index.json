@@ -66,9 +66,15 @@
               "pro": {
                 "type": "boolean"
               },
+              "remote": {
+                "type": "boolean"
+              },
               "documentation": {
                 "type": "keyword",
                 "index": false
+              },
+              "frontend": {
+                "type": "boolean"
               },
               "emits_event": {
                 "type": "keyword",
@@ -78,7 +84,7 @@
           },
           "spec": {
             "properties": {
-              "author": {
+              "id": {
                 "type": "keyword",
                 "ignore_above": 64
               },
@@ -86,17 +92,77 @@
                 "type": "keyword",
                 "ignore_above": 32
               },
-              "form": {
+              "module": {
                 "type": "keyword",
-                "index": false
+                "ignore_above": 128
               },
-              "id": {
+              "inputs": {
                 "type": "keyword",
-                "ignore_above": 64
+                "ignore_above": 48
+              },
+              "outputs": {
+                "type": "keyword",
+                "ignore_above": 48
               },
               "init": {
                 "index": false,
                 "type": "keyword"
+              },
+              "skip": {
+                "type": "boolean"
+              },
+              "block_flow": {
+                "type": "boolean",
+                "index": false
+              },
+              "run_in_background": {
+                "type": "boolean",
+                "index": false
+              },
+              "on_error_continue": {
+                "type": "boolean",
+                "index": false
+              },
+              "on_connection_error_repeat": {
+                "type": "integer",
+                "index": false
+              },
+              "append_input_payload": {
+                "type": "boolean",
+                "index": false
+              },
+              "join_input_payload": {
+                "type": "boolean",
+                "index": false
+              },
+              "form": {
+                "type": "keyword",
+                "index": false
+              },
+              "manual": {
+               "type": "keyword",
+                "ignore_above": 64,
+                "index": false
+              },
+              "author": {
+                "type": "keyword",
+                "ignore_above": 64
+              },
+              "license": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "version": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "run_once": {
+                "properties": {
+                  "value": {"type": "keyword", "index": false, "ignore_above": 64},
+                  "ttl": {"type":  "integer", "index": false},
+                  "type": {"type": "keyword", "index": false},
+                  "enabled": {"type": "boolean","index": false}
+                }
               },
               "node": {
                 "properties": {
@@ -111,37 +177,6 @@
                     "index": false
                   }
                 }
-              },
-              "inputs": {
-                "type": "keyword",
-                "ignore_above": 48
-              },
-              "outputs": {
-                "type": "keyword",
-                "ignore_above": 48
-              },
-              "license": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "manual": {
-               "type": "keyword",
-                "ignore_above": 64,
-                "index": false
-              },
-              "module": {
-                "type": "keyword",
-                "ignore_above": 128
-              },
-              "on_error_continue": {
-                "type": "boolean"
-              },
-              "on_error_repeat": {
-                "type": "integer"
-              },
-              "version": {
-                "type": "keyword",
-                "ignore_above": 32
               }
             }
           },
