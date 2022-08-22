@@ -30,13 +30,18 @@ def register() -> Plugin:
             microservice={
                 "resource": {
                     "name": "",
-                    "id": ""
+                    "id": "",
+                    "current": {
+                        "url": "",
+                        "token": "",
+                        "service": {
+                            "name": "",
+                            "id": ""
+                        }
+                    },
                 },
-                "service": {
-                    "name": "",
-                    "id": ""
-                },
-                "action": {
+
+                "plugin": {
                     "name": "",
                     "id": ""
                 }

@@ -5,16 +5,6 @@ from typing import List
 def get_resource_types() -> List[ResourceSettings]:
     return [
         ResourceSettings(
-            id="microservice",
-            name="Microservice",
-            icon="cloud",
-            tags=["microservice"],
-            config={
-                "url": "<url>",
-                "token": "<token>"
-            }
-        ),
-        ResourceSettings(
             id="web-page",
             name="Web page",
             icon="web",

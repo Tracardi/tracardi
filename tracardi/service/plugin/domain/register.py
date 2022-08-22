@@ -3,6 +3,7 @@ from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, AnyHttpUrl
 
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.resources.microservice_resource import MicroserviceResource
 
 
 class FormFieldValidation(BaseModel):
@@ -47,10 +48,13 @@ class NodeEvents(BaseModel):
     on_create: Optional[str]
 
 
+class MicroserviceCurrentResource(NamedEntity):
+    current: MicroserviceResource
+
+
 class MicroserviceConfig(BaseModel):
-    resource: NamedEntity
-    service: NamedEntity
-    action: NamedEntity
+    resource: MicroserviceCurrentResource
+    plugin: NamedEntity
 
 
 class Spec(BaseModel):

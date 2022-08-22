@@ -55,14 +55,15 @@ def register() -> Plugin:
             outputs=['payload', 'error'],
             init={
                 "source": {
-                    "id": None
+                    "id": "",
+                    "name": ""
                 },
                 'message': {
-                    "send_to": None,
-                    "send_from": None,
-                    "reply_to": None,
-                    "title": None,
-                    "message": None
+                    "send_to": "",
+                    "send_from": "",
+                    "reply_to": "",
+                    "title": "",
+                    "message": ""
                 }
             },
             form=Form(groups=[
