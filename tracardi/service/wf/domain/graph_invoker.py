@@ -447,9 +447,15 @@ class GraphInvoker(BaseModel):
 
         metrics = {}
         memory = {}
+
         for node_number, node in enumerate(self.graph):
             # Init object
             try:
+
+                if node.remote is True and not node.is_microservice_configured():
+                    raise RuntimeError("Microservice not configured. This node is a remote mode by remote microservice "
+                                       "is not configured. See 'Remote microservice configuration' in node settings.")
+
                 node.object = await self._get_object(self.debug, node, node.init)
                 node.object.node = node.copy(exclude={"object": ..., "className": ..., "module": ..., "init": ...})
                 node.object.debug = self.debug
@@ -466,10 +472,13 @@ class GraphInvoker(BaseModel):
                 node.object.tracker_payload = tracker_payload
                 node.object.execution_graph = self
 
+                await node.object.post_init()
+
             except Exception as e:
                 msg = "`{}`. This error occurred when initializing node `{}`. ".format(
-                    str(e), node.id) + "Check node configuration or __init__ of `{}.{}`".format(node.module,
-                                                                                                node.className)
+                    str(e), node.id) + "Check node configuration, __init__, or post_init method of `{}.{}`".format(
+                    node.module,
+                    node.className)
 
                 debug_info.flow.add_error(ErrorDebugInfo(
                     msg=msg, line=443, file=__file__

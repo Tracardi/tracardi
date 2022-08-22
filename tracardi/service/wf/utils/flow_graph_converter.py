@@ -34,7 +34,9 @@ class FlowGraphConverter:
                 on_error_continue=node.data.spec.on_error_continue,
                 on_connection_error_repeat=node.data.spec.on_connection_error_repeat,
                 append_input_payload=node.data.spec.append_input_payload,
-                join_input_payload=node.data.spec.join_input_payload
+                join_input_payload=node.data.spec.join_input_payload,
+                remote=node.data.metadata.remote,
+                microservice=node.data.spec.microservice
             )
 
             nodes.append(n)
