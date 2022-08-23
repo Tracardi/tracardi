@@ -1,13 +1,5 @@
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, MicroserviceConfig
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.wf.domain.node import Node
-
-
-def validate(config: dict):
-    # todo remotely validate
-    print(config)
-
-    return config
 
 
 class MicroserviceAction(ActionRunner):
@@ -18,10 +10,10 @@ class MicroserviceAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         # todo remotely run
-
         return None
 
 
+# todo do not need register as this is not registered.
 def register() -> Plugin:
     return Plugin(
         start=False,
