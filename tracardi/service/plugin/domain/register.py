@@ -56,6 +56,9 @@ class MicroserviceConfig(BaseModel):
     resource: MicroserviceCurrentResource
     plugin: NamedEntity
 
+    def has_resource(self) -> bool:
+        return bool(self.resource.id)
+
 
 class Spec(BaseModel):
     id: Optional[str]
@@ -84,8 +87,16 @@ class Spec(BaseModel):
         super().__init__(**data)
         self.id = self.get_id()
 
+    def has_microservice(self):
+        return self.microservice is not None
+
     def get_id(self) -> str:
         action_id = self.module + self.className + self.version
+        # If defined resource for microservice plugin action add that to the id.
+        # You can create one microservice per remote resource.
+        if self.has_microservice() and self.microservice.has_resource():
+            action_id += self.microservice.resource.id
+
         return hashlib.md5(action_id.encode()).hexdigest()
 
 
