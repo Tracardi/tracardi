@@ -10,17 +10,22 @@ from tracardi.service.plugin.domain.result import Result
 
 class Config(PluginConfig):
     field: str
-    prefix: str
+    substring: str
 
-    @validator("prefix")
-    def if_prefix_is_empty(cls, value):
+    @validator("substring")
+    def validate_prefix(cls, value):
         if value == "":
-            raise ValueError("Prefix cannot be empty")
+            raise ValueError("Substring cannot be empty")
         return value
 
 
 def validate(config: dict) -> Config:
     return Config(**config)
+
+
+class WrongFieldTypeError(Exception):
+    """Raised when given field has wrong data type"""
+    pass
 
 
 class ContainsStringAction(ActionRunner):
@@ -30,10 +35,15 @@ class ContainsStringAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         dot = self._get_dot_accessor(payload)
-        if self.config.prefix in dot[self.config.field]:
+        value = dot[self.config.field]
+
+        if not isinstance(value, str) or isinstance(value, list):
+            raise WrongFieldTypeError(f"Given field must be an array or string type. {type(value)} given")
+
+        if self.config.substring in value:
             return Result(port="true", value=payload)
-        else:
-            return Result(port="false", value=payload)
+
+        return Result(port="false", value=payload)
 
 
 def register() -> Plugin:
@@ -49,7 +59,7 @@ def register() -> Plugin:
             author="Mateusz Zitaruk",
             init={
                 "field": "",
-                "prefix": ""
+                "substring": ""
             },
             manual="contains_string_action",
             form=Form(
@@ -69,13 +79,13 @@ def register() -> Plugin:
                                 )
                             ),
                             FormField(
-                                id="prefix",
-                                name="Prefix",
+                                id="substring",
+                                name="Substring",
                                 description="Type prefix to check if data field contains it.",
                                 component=FormComponent(
                                     type="text",
                                     props={
-                                        "label": "Prefix"
+                                        "label": "Substring"
                                     }
                                 )
                             )
@@ -86,7 +96,7 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Contain string',
+            name='Contains string',
             desc='Checks if field contains defined string.',
             icon='question',
             group=["Flow control"],
@@ -94,9 +104,9 @@ def register() -> Plugin:
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
-                outputs={"true": PortDoc(desc="This port returns payload if field contains defined string."),
+                outputs={"true": PortDoc(desc="This port returns payload if field contains defined substring."),
                          "false":
-                             PortDoc(desc="This port returns payload if field doesnt contains defined string")}
+                             PortDoc(desc="This port returns payload if field doesnt contain defined substring")}
             )
         )
     )
