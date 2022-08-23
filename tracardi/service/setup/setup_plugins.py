@@ -87,6 +87,7 @@ async def add_plugins():
 
         'tracardi.process_engine.action.v1.if_action',
         'tracardi.process_engine.action.v1.starts_with_action',
+        'tracardi.process_engine.action.v1.contains_string_action',
         'tracardi.process_engine.action.v1.ends_with_action',
         'tracardi.process_engine.action.v1.new_visit_action',
         'tracardi.process_engine.action.v1.new_profile_action',
