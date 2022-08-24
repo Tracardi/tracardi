@@ -46,9 +46,6 @@ class ActionRunner:
     async def run(self, payload: dict, in_edge=None):
         pass
 
-    async def post_init(self):
-        pass
-
     async def close(self):
         pass
 
