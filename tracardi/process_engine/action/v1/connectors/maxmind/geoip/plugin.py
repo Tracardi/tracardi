@@ -3,7 +3,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.domain.resource import ResourceCredentials, Resource
+from tracardi.domain.resource import Resource
 from .model.maxmind_geolite2_client import GeoIpConfiguration, \
     PluginConfiguration, MaxMindGeoLite2, GeoLiteCredentials
 
@@ -14,15 +14,15 @@ def validate(config: dict) -> PluginConfiguration:
 
 class GeoIPAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'GeoIPAction':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(id=config.source.id)  # type: Resource
-        return GeoIPAction(config, resource.credentials)
+    config: PluginConfiguration
+    client: MaxMindGeoLite2
 
-    def __init__(self, config: PluginConfiguration, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(id=config.source.id)  # type: Resource
+
         geoip2_config = GeoIpConfiguration(
-            webservice=credentials.get_credentials(self, output=GeoLiteCredentials)
+            webservice=resource.credentials.get_credentials(self, output=GeoLiteCredentials)
         )
         self.client = MaxMindGeoLite2(geoip2_config)
         self.config = config

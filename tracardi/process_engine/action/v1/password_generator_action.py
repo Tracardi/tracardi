@@ -29,9 +29,13 @@ def validate(config: dict) -> Config:
 
 
 class PasswordGeneratorAction(ActionRunner):
-    def __init__(self, **kwargs):
+
+    config: Config
+    pgo: PasswordGenerator
+
+    async def set_up(self, init):
         self.pgo = PasswordGenerator()
-        self.config = validate(kwargs)
+        self.config = validate(init)
         self.pgo.minlen = self.config.min_length
         self.pgo.maxlen = self.config.max_length
         self.pgo.minuchars = self.config.uppercase

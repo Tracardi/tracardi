@@ -431,10 +431,7 @@ class GraphInvoker(BaseModel):
                     raise RuntimeError("Microservice not configured. This node is a remote mode by remote microservice "
                                        "is not configured. See 'Remote microservice configuration' in node settings.")
 
-                node.object = await life_cycle.plugin.create_instance(
-                    node,
-                    node.init,
-                    self.debug)
+                node.object = await life_cycle.plugin.create_instance(node)
 
                 node.object = life_cycle.plugin.set_context(
                     node,

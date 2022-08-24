@@ -1,4 +1,6 @@
-from typing import Tuple
+from typing import Tuple, Union
+
+from pydantic import BaseModel
 
 from tracardi.domain.settings import Settings
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -18,15 +20,16 @@ def validate(config: dict) -> Config:
 
 class InfluxFetcher(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'InfluxFetcher':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return InfluxFetcher(config, resource.credentials)
+    client: InfluxDBClient
+    credentials: InfluxCredentials
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = Config(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = credentials.get_credentials(self, InfluxCredentials)
+        self.credentials = resource.credentials.get_credentials(self, InfluxCredentials)
         self.client = InfluxDBClient(self.credentials.url, self.credentials.token)
 
     async def run(self, payload: dict, in_edge=None) -> Result:

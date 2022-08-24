@@ -43,6 +43,9 @@ class ActionRunner:
     ux: list = None
     join = None
 
+    async def set_up(self, init):
+        pass
+
     async def run(self, payload: dict, in_edge=None):
         pass
 

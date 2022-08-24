@@ -23,8 +23,10 @@ def validate(config: dict):
 
 class PostponeEventAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def _postponed_run(self):
         ip = self.event.context['ip'] if 'ip' in self.event.context else 'http://localhost'

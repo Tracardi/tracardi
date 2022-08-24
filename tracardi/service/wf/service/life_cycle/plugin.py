@@ -12,27 +12,15 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.wf.domain.node import Node
 
 
-async def create_instance(node: Node, params: dict, debug: bool) -> ActionRunner:
+async def create_instance(node: Node) -> ActionRunner:
     """
     Creates plugin instance
     """
 
-    async def _build(debug: bool, plugin_class, params: dict):
-        build_method = getattr(plugin_class, "build", None)
-
-        if params:
-            params['__debug__'] = debug
-        else:
-            params = {'__debug__': debug}
-
-        if callable(build_method):
-            return await build_method(**params)
-
-        return plugin_class(**params)
-
     module = importlib.import_module(node.module)
-    node_class = getattr(module, node.className)
-    action = await _build(debug, node_class, params)
+    plugin_class = getattr(module, node.className)
+
+    action = plugin_class()
 
     if not isinstance(action, ActionRunner):
         raise TypeError("Class {}.{} is not of type {}".format(module, node.className, type(ActionRunner)))
@@ -71,5 +59,15 @@ def set_context(node: Node,
 
 
 async def execute(node: Node, params: dict) -> Optional[Result]:
+    # todo __debug__ may be removed because it is in node.
+
+    # set up with configuration
+    if node.init is not None:
+        init = {**node.init, "__debug__": node.debug}
+    else:
+        init = {"__debug__": node.debug}
+
+    await node.object.set_up(init)
+
     # params has payload and in_edge
     return await node.object.run(**params)

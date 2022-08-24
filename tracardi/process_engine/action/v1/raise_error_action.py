@@ -16,8 +16,10 @@ def validate(config: dict) -> ErrorConfiguration:
 
 class RaiseErrorAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: ErrorConfiguration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None):
         raise WorkflowException(self.config.message)
