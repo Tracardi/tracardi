@@ -18,6 +18,12 @@ class Config(PluginConfig):
             raise ValueError("Substring cannot be empty")
         return value
 
+    @validator("field")
+    def validate_field(cls, value):
+        if value == "":
+            raise ValueError("Field cannot be empty")
+        return value
+
 
 def validate(config: dict) -> Config:
     return Config(**config)
@@ -58,8 +64,8 @@ def register() -> Plugin:
             license="MIT",
             author="Mateusz Zitaruk",
             init={
-                "field": "",
-                "substring": ""
+                "field": None,
+                "substring": None
             },
             manual="contains_string_action",
             form=Form(
@@ -69,11 +75,11 @@ def register() -> Plugin:
                         fields=[
                             FormField(
                                 id="field",
-                                name="Type string or reference to string which you want to check.",
+                                name="Type string or path to string that you want to check.",
                                 component=FormComponent(
                                     type="dotPath",
                                     props={
-                                        "label": "Payload field",
+                                        "label": "Path",
                                         "defaultSourceValue": "event"
                                     }
                                 )
