@@ -2,6 +2,7 @@ import asyncio
 from typing import Type
 from uuid import uuid4
 
+from ..domain.result import Result
 from ..runner import ActionRunner
 from ..domain.console import Console
 from tracardi.service.wf.domain.graph_invoker import GraphInvoker
@@ -12,7 +13,7 @@ class PluginTestResult:
         self.event = event
         self.session = session
         self.profile = profile
-        self.output = output
+        self.output: Result = output
         self.console = console
         self.flow = flow
 
@@ -27,11 +28,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
     async def main(plugin, init, payload):
         try:
 
-            build_method = getattr(plugin, "build", None)
-            if build_method and callable(build_method):
-                plugin = await build_method(**init)
-            else:
-                plugin = plugin(**init)
+            plugin = plugin()
 
             console = Console("Test", "test")
 
@@ -44,6 +41,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
             plugin.node = node
             plugin.execution_graph = GraphInvoker(graph=[], start_nodes=[])
 
+            await plugin.set_up(init)
             output = await plugin.run(payload, in_edge=in_edge)
 
             return PluginTestResult(
