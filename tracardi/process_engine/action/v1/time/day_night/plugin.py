@@ -13,8 +13,10 @@ def validate(config: dict):
 
 class DayNightAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -22,9 +24,9 @@ class DayNightAction(ActionRunner):
         longitude = dot[self.config.longitude]
 
         if is_day(longitude, latitude):
-            return Result(value=payload, port="day"), Result(value=None, port="night")
+            return Result(value=payload, port="day")
 
-        return Result(value=None, port="day"), Result(value=payload, port="night")
+        return Result(value=payload, port="night")
 
 
 def register() -> Plugin:

@@ -10,8 +10,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.settings import Settings
 from tracardi.domain.time import Time
 from tracardi.process_engine.action.v1.flow.postpone_event.model.configuration import Configuration
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
-    FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.postpone_call import PostponedCall
 from tracardi.service.tracker import synchronized_event_tracking

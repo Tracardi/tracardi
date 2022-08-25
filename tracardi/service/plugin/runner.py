@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, final
 
 from pydantic import BaseModel
 
@@ -42,6 +42,10 @@ class ActionRunner:
     tracker_payload: TrackerPayload = None
     ux: list = None
     join = None
+
+    @final
+    def __init__(self):
+        pass
 
     async def set_up(self, init):
         pass

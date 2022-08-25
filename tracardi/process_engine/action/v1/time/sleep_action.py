@@ -24,8 +24,10 @@ def validate(config: dict) -> SleepConfiguration:
 
 class SleepAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: SleepConfiguration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         await sleep(float(self.config.wait))

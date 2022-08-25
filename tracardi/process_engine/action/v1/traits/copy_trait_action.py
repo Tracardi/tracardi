@@ -33,8 +33,11 @@ def validate(config: dict):
 
 class CopyTraitAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    mapping: dict
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.mapping = self.config.traits.set
 
     async def run(self, payload: dict, in_edge=None) -> Result:

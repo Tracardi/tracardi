@@ -5,7 +5,6 @@ from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.storage.driver import storage
 from tracardi.domain.consent_type import ConsentType
-from pytimeparse import parse
 
 
 def validate(config: dict) -> Config:
@@ -14,8 +13,10 @@ def validate(config: dict) -> Config:
 
 class RequireConsentsAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = Config(**kwargs)
+    config: Config
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is True:

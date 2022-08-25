@@ -4,8 +4,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.storage.driver import storage
-
-from tracardi.domain.resource import ResourceCredentials
 from .model.configuration import PluginConfiguration
 from .model.rabbit_configuration import RabbitSourceConfiguration
 from .service.queue_publisher import QueuePublisher
@@ -17,14 +15,14 @@ def validate(config: dict) -> PluginConfiguration:
 
 class RabbitPublisherAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'RabbitPublisherAction':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return RabbitPublisherAction(config, resource.credentials)
+    config: PluginConfiguration
+    source: RabbitSourceConfiguration
 
-    def __init__(self, config: PluginConfiguration, credentials: ResourceCredentials):
-        self.source = credentials.get_credentials(self, output=RabbitSourceConfiguration)
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
+        self.source = resource.credentials.get_credentials(self, output=RabbitSourceConfiguration)
         self.config = config
 
     async def run(self, payload: dict, in_edge=None) -> Result:

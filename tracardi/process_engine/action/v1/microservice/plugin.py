@@ -11,8 +11,10 @@ from tracardi.service.wf.domain.node import Node
 
 class MicroserviceAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.init = kwargs
+    init: dict
+
+    async def set_up(self, init):
+        self.init = init
 
     async def run(self, payload: dict, in_edge=None):
         # todo remotely run

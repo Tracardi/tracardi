@@ -12,8 +12,10 @@ def validate(config: dict) -> TimeSpanConfiguration:
 
 class LocalTimeSpanAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: TimeSpanConfiguration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     @staticmethod
     def _validate_timezone(timezone):
@@ -30,9 +32,9 @@ class LocalTimeSpanAction(ActionRunner):
             ))
 
         if self.config.is_in_timespan():
-            return Result(value=payload, port="in"), Result(value=None, port="out")
+            return Result(value=payload, port="in")
 
-        return Result(value=None, port="in"), Result(value=payload, port="out")
+        return Result(value=payload, port="out")
 
 
 def register() -> Plugin:

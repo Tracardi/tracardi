@@ -64,8 +64,10 @@ def validate(config: dict) -> Config:
 
 class QuestionPopupPlugin(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = Config(**kwargs)
+    config: Config
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

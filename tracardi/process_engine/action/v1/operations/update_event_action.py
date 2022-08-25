@@ -4,9 +4,6 @@ from tracardi.service.plugin.runner import ActionRunner
 
 class UpdateEventAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None):
         self.event.update = True
         if self.debug is True:

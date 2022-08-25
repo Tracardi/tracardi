@@ -25,8 +25,10 @@ def validate(config: dict):
 
 class AutoMergePropertiesToProfileAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     def _update(self, source, value) -> dict:
         path = self.config.sub_traits.strip()

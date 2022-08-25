@@ -14,8 +14,10 @@ def validate(config: dict) -> Configuration:
 
 class EventAggregator(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         time_span_in_sec = parse(self.config.time_span.strip("-"))

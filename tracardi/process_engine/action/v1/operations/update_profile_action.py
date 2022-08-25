@@ -4,9 +4,6 @@ from tracardi.service.plugin.runner import ActionRunner
 
 class UpdateProfileAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None):
         self.update_profile()
 

@@ -15,7 +15,7 @@ class PayloadMemoryCollector(ActionRunner):
     config: Config
 
     async def set_up(self, init):
-        self.config = Config(init)
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge: Edge = None) -> Result:
 

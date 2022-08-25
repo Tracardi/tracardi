@@ -1,7 +1,6 @@
 import json
 from json import JSONDecodeError
 
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.domain.resource_config import ResourceConfig
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.storage.driver import storage
@@ -23,14 +22,14 @@ def validate(config: dict) -> PluginConfiguration:
 
 class MongoConnectorAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'MongoConnectorAction':
-        config = PluginConfiguration(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return MongoConnectorAction(config, resource.credentials)
+    config: PluginConfiguration
+    client: MongoClient
 
-    def __init__(self, config: PluginConfiguration, credentials: ResourceCredentials):
-        mongo_config = credentials.get_credentials(self, output=MongoConfiguration)  # type: MongoConfiguration
+    async def set_up(self, init):
+        config = PluginConfiguration(**init)
+        resource = await storage.driver.resource.load(config.source.id)
+
+        mongo_config = resource.credentials.get_credentials(self, output=MongoConfiguration)  # type: MongoConfiguration
         self.client = MongoClient(mongo_config)
         self.config = config
 

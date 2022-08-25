@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import pytz
 from pydantic import BaseModel, validator
@@ -34,8 +35,11 @@ def validate(config: dict) -> TodayConfiguration:
 
 class TodayAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    week_days: List[str]
+    config: TodayConfiguration
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.week_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
     async def run(self, payload: dict, in_edge=None) -> Result:

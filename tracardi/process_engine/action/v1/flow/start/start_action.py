@@ -22,8 +22,10 @@ def validate(config: dict):
 
 class StartAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def _create_full_event(self, event_data) -> Tuple[Event, Optional[Profile], Optional[Session]]:
 

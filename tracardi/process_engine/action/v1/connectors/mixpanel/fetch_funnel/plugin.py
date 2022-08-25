@@ -3,7 +3,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, MixPanelCredentials
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.mixpanel.client import MixPanelAPIClient
 from tracardi.service.plugin.domain.result import Result
 from datetime import datetime
@@ -15,16 +14,16 @@ def validate(config: dict) -> Config:
 
 class MixPanelFunnelFetcher(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'MixPanelFunnelFetcher':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return MixPanelFunnelFetcher(config, resource.credentials)
+    client: MixPanelAPIClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
         self.client = MixPanelAPIClient(
-            **credentials.get_credentials(self, MixPanelCredentials).dict()
+            **resource.credentials.get_credentials(self, MixPanelCredentials).dict()
         )
         self.client.set_retries(self.node.on_connection_error_repeat)
 

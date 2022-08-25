@@ -42,7 +42,6 @@ class InjectAction(ActionRunner):
     config: Configuration
 
     async def set_up(self, init):
-        print(init)
         self.config = Configuration(**init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
