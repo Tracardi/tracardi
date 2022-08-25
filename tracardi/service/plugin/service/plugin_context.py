@@ -4,6 +4,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.wf.domain.node import Node
 
 
 def get_context(plugin: ActionRunner, include: List[str] = None) -> dict:
@@ -28,11 +29,13 @@ def get_context(plugin: ActionRunner, include: List[str] = None) -> dict:
     }
 
 
-def set_context(plugin: ActionRunner, context: dict):
+def set_context(plugin: ActionRunner, context: dict, include: List[str] = None):
     plugin.event = Event(**context['event']) if context['event'] is not None else None
     plugin.session = Session(**context['session']) if context['session'] is not None else None
     plugin.profile = Profile(**context['profile']) if context['profile'] is not None else None
     plugin.metrics = context['metrics']
     plugin.memory = context['memory']
     plugin.ux = context['ux']
-    # Id, debug, node, flow, execution_graph, tracker_payload, and join can not be restored as they are read only
+    # Id, debug, node, flow, execution_graph, tracker_payload, and join should not be restored as they are read only
+    # They can be restored only if on remote server
+    plugin.node = Node(**context['node']) if context['node'] is not None and 'node' in include else None
