@@ -27,8 +27,10 @@ def validate(config: dict):
 
 class DeleteTraitAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: DeleteTraitConfiguration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)

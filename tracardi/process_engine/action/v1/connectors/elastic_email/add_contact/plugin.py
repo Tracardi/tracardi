@@ -15,17 +15,16 @@ def validate(config: dict) -> Config:
 
 
 class ElasticEmailContactAdder(ActionRunner):
-    @staticmethod
-    async def build(**kwargs) -> 'ElasticEmailContactAdder':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return ElasticEmailContactAdder(config, resource)
 
-    def __init__(self, config: Config, resource: Resource):
+    credentials: Connection
+    config: Config
+
+    async def set_up(self, init):
+        config = Config(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.resource = resource
-        self.credentials = resource.credentials.get_credentials(self, output=Connection)
-        self.client = ElasticEmailClient(**self.credentials)
+        self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
 
     @staticmethod
     def parse_mapping(mapping):

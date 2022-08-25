@@ -1,8 +1,11 @@
 import asyncio
 import json
 from datetime import datetime
+from typing import Union
 
 import aiohttp
+from pydantic import BaseModel
+
 from tracardi.service.tracardi_http_client import HttpClient
 from aiohttp import ClientConnectorError
 from tracardi.config import tracardi
@@ -21,15 +24,15 @@ def validate(config: dict) -> Configuration:
 
 class AmplitudeSendEvent(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'AmplitudeSendEvent':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return AmplitudeSendEvent(config, resource.credentials)
+    credentials: Token
+    config: Configuration
 
-    def __init__(self, config, credentials: ResourceCredentials):
-        self.config = config  # type: Configuration
-        self.credentials = credentials.get_credentials(self, output=Token)
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
+        self.config = config
+        self.credentials = resource.credentials.get_credentials(self, output=Token)
 
     @staticmethod
     def _get_value(dot, dot_notation, allow_custom_value=False):

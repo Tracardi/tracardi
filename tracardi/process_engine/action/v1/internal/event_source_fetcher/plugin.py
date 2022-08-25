@@ -6,9 +6,6 @@ from tracardi.service.plugin.domain.result import Result
 
 class EventSourceFetcherAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
         source = await storage.driver.event_source.load(self.event.source.id)
         if source is None:

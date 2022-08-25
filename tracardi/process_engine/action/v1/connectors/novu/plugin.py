@@ -9,7 +9,6 @@ from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.register import Plugin, Spec, Form, FormGroup, FormField, FormComponent, MetaData, \
     Documentation, PortDoc
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
@@ -29,15 +28,15 @@ def validate(config: dict) -> Config:
 
 class NotificationGeneratorAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'NotificationGeneratorAction':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return NotificationGeneratorAction(config, resource.credentials)
+    credentials: Token
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = credentials.get_credentials(self, output=Token)  # type: Token
+        self.credentials = resource.credentials.get_credentials(self, output=Token)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         url = 'https://api.novu.co/v1/events/trigger'

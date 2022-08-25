@@ -50,7 +50,10 @@ class DotAccessor:
             value = dot_notation[len(prefix):]
             try:
                 if isinstance(value, str):
-                    return self.storage[prefix][value]
+                    if value in self.storage[prefix]:
+                        return self.storage[prefix][value]
+                    else:
+                        raise KeyError(f"No key {value}")
                 return value
             except KeyError:
                 raise KeyError("Invalid dot notation. Could not find value for `{}` in {}...".format(value, prefix))

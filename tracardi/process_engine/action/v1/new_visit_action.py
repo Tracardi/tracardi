@@ -5,9 +5,6 @@ from tracardi.service.plugin.domain.result import Result
 
 class NewVisitAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.session is None:

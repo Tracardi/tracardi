@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, final
 
 from pydantic import BaseModel
 
@@ -29,19 +29,26 @@ class JoinSettings(BaseModel):
 class ActionRunner:
     id = None
     debug = True
-    event = None  # type: Event
+    event: Event = None
     session = None
-    profile = None  # type: Profile
-    flow = None
+    profile: Profile = None
+    flow: BaseModel = None  # Flow
     flow_history = None
-    console = None  # type: Console
+    console: Console = None
     node = None
-    metrics = None
-    memory = None
+    metrics: dict = None
+    memory: dict = None
     execution_graph = None  # GraphInvoker
-    tracker_payload = None  # type: TrackerPayload
-    ux = None
+    tracker_payload: TrackerPayload = None
+    ux: list = None
     join = None
+
+    @final
+    def __init__(self):
+        pass
+
+    async def set_up(self, init):
+        pass
 
     async def run(self, payload: dict, in_edge=None):
         pass
@@ -73,3 +80,4 @@ class ActionRunner:
 
     def join_output(self) -> bool:
         return isinstance(self.join, JoinSettings) and self.join.merge is True
+

@@ -2,6 +2,9 @@ import hashlib
 from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, AnyHttpUrl
 
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.resources.microservice_resource import MicroserviceResource
+
 
 class FormFieldValidation(BaseModel):
     regex: str
@@ -45,6 +48,18 @@ class NodeEvents(BaseModel):
     on_create: Optional[str]
 
 
+class MicroserviceCurrentResource(NamedEntity):
+    current: MicroserviceResource
+
+
+class MicroserviceConfig(BaseModel):
+    resource: MicroserviceCurrentResource
+    plugin: NamedEntity
+
+    def has_resource(self) -> bool:
+        return bool(self.resource.id)
+
+
 class Spec(BaseModel):
     id: Optional[str]
     className: str
@@ -52,6 +67,7 @@ class Spec(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[dict] = None
+    microservice: Optional[MicroserviceConfig] = None
     skip: bool = False
     block_flow: bool = False
     run_in_background: bool = False
@@ -63,7 +79,7 @@ class Spec(BaseModel):
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.6.1'
+    version: Optional[str] = '0.7.2-dev'
     run_once: Optional[RunOnce] = RunOnce()
     node: Optional[NodeEvents] = None
 
@@ -71,8 +87,16 @@ class Spec(BaseModel):
         super().__init__(**data)
         self.id = self.get_id()
 
+    def has_microservice(self):
+        return self.microservice is not None
+
     def get_id(self) -> str:
         action_id = self.module + self.className + self.version
+        # If defined resource for microservice plugin action add that to the id.
+        # You can create one microservice per remote resource.
+        if self.has_microservice() and self.microservice.has_resource():
+            action_id += self.microservice.resource.id
+
         return hashlib.md5(action_id.encode()).hexdigest()
 
 
@@ -99,6 +123,7 @@ class MetaData(BaseModel):
     group: Optional[List[str]] = ["General"]
     tags: List[str] = []
     pro: bool = False
+    remote: bool = False
     frontend: bool = False
     emits_event: Optional[Dict[str, str]] = {}
 

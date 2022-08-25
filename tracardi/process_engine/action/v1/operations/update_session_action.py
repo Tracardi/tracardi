@@ -6,9 +6,6 @@ from tracardi.service.plugin.runner import ActionRunner
 
 class UpdateSessionAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None):
         if self.debug is True:
             self.console.warning("Session may not be updated in debug mode.")

@@ -15,14 +15,14 @@ async def validate(config: dict) -> Configuration:
 
 class SmtpDispatcherAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'SmtpDispatcherAction':
-        config = await validate(kwargs)
-        source = await storage.driver.resource.load(config.source.id)  # type: Resource
-        return SmtpDispatcherAction(config, source.credentials)
+    post: PostMan
+    config: Configuration
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        smtp_config = credentials.get_credentials(self, SmtpConfiguration)  # type: SmtpConfiguration
+    async def set_up(self, init):
+        config = await validate(init)
+        source = await storage.driver.resource.load(config.source.id)  # type: Resource
+
+        smtp_config = source.credentials.get_credentials(self, SmtpConfiguration)  # type: SmtpConfiguration
         self.config = config
         self.post = PostMan(smtp_config)
 
@@ -55,14 +55,15 @@ def register() -> Plugin:
             outputs=['payload', 'error'],
             init={
                 "source": {
-                    "id": None
+                    "id": "",
+                    "name": ""
                 },
                 'message': {
-                    "send_to": None,
-                    "send_from": None,
-                    "reply_to": None,
-                    "title": None,
-                    "message": None
+                    "send_to": "",
+                    "send_from": "",
+                    "reply_to": "",
+                    "title": "",
+                    "message": ""
                 }
             },
             form=Form(groups=[

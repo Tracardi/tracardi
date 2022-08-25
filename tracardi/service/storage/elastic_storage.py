@@ -124,7 +124,6 @@ class ElasticStorage:
 
     async def create(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
                      replace_id: bool = True, exclude=None) -> Union[BulkInsertResult, List[BulkInsertResult]]:
-        # print("----------------")
         if isinstance(data, list):
 
             if len(data) == 0:
@@ -134,7 +133,6 @@ class ElasticStorage:
             for row in data:
                 index = self.get_storage_index(row)
                 record = self._get_storage_record(row, exclude=exclude, replace_id=replace_id)
-                # print("coming dataS meta", record.get_meta_data())
                 records_by_index[index].append(record)
 
             if len(records_by_index) > 1:
@@ -142,14 +140,12 @@ class ElasticStorage:
                                  f"indices [{list(records_by_index.keys())}]")
 
             index, records = list(records_by_index.items())[0]
-            # print("recordS", index, records)
+
         else:
 
             record = self._get_storage_record(data, exclude=exclude, replace_id=replace_id)
             index = self.get_storage_index(record)
             records = [record]
-            # print("coming data meta", record.get_meta_data())
-            # print("record", index, records)
 
         return await self.storage.insert(index, records)
 

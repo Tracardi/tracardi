@@ -12,8 +12,11 @@ def validate(config: dict) -> Configuration:
 
 
 class StringValidatorAction(ActionRunner):
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    validator: Validator
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.validator = Validator(self.config)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -21,9 +24,9 @@ class StringValidatorAction(ActionRunner):
         string = dot[self.config.data]
 
         if self.validator.check(string):
-            return Result(port='valid', value=payload), Result(port='invalid', value=None)
+            return Result(port='valid', value=payload)
         else:
-            return Result(port='valid', value=None), Result(port='invalid', value=payload)
+            return Result(port='invalid', value=payload)
 
 
 def register() -> Plugin:

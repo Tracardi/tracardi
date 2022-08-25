@@ -4,13 +4,11 @@ from aiohttp import ClientConnectorError
 from tracardi.domain.resources.token import Token
 from tracardi.service.notation.dot_template import DotTemplate
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
 from tracardi.service.storage.driver import storage
 from .service.http_client import HttpClient
-from tracardi.domain.resource import ResourceCredentials
 
 
 def validate(config: dict):
@@ -19,21 +17,20 @@ def validate(config: dict):
 
 class LanguageDetectAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'LanguageDetectAction':
+    client: HttpClient
+    message: str
+
+    async def set_up(self, init):
 
         # This reads config
-        config = validate(kwargs)
+        config = validate(init)
 
         # This reads resource
         resource = await storage.driver.resource.load(config.source.id)
 
-        return LanguageDetectAction(config, resource.credentials)
-
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
         self.message = config.message
         self.client = HttpClient(
-            credentials.get_credentials(self, Token).token,
+            resource.credentials.get_credentials(self, Token).token,
             config.timeout,
             self.node.on_connection_error_repeat
         )

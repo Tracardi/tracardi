@@ -16,13 +16,15 @@ def validate(config: dict) -> Config:
 
 class MauticSegmentEditor(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'MauticSegmentEditor':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return MauticSegmentEditor(config, resource)
+    actions: dict
+    client: MauticClient
+    resource: Resource
+    config: Config
 
-    def __init__(self, config: Config, resource: Resource):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
         self.resource = resource
         self.client = MauticClient(**self.resource.credentials.get_credentials(self, None))

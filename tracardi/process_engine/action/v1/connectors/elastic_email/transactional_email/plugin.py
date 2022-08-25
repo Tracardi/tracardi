@@ -8,7 +8,6 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import Resource
 import ElasticEmail
 from ElasticEmail.api import emails_api
 from ElasticEmail.model.email_content import EmailContent
@@ -25,15 +24,17 @@ def validate(config: dict) -> Config:
 
 
 class ElasticEmailTransactionalMailSender(ActionRunner):
-    @staticmethod
-    async def build(**kwargs) -> 'ElasticEmailTransactionalMailSender':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return ElasticEmailTransactionalMailSender(config, resource)
 
-    def __init__(self, config: Config, resource: Resource):
+    config: Config
+    credentials: Connection
+    _dot_template: DotTemplate
+
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
+        self.credentials = resource.credentials.get_credentials(self, output=Connection)
         self._dot_template = DotTemplate()
 
     @staticmethod

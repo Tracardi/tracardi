@@ -4,7 +4,6 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.domain.resources.remote_api_resource import RemoteApiResource
 from tracardi.service.tracardi_http_client import HttpClient
 
@@ -15,15 +14,15 @@ def validate(config: dict) -> Config:
 
 class TokenGetter(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'TokenGetter':
-        config = Config(**kwargs)
-        source = await storage.driver.resource.load(config.source.id)
-        return TokenGetter(config, source.credentials)
+    _credentials: RemoteApiResource
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        source = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self._credentials = credentials.get_credentials(self, RemoteApiResource)
+        self._credentials = source.credentials.get_credentials(self, RemoteApiResource)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

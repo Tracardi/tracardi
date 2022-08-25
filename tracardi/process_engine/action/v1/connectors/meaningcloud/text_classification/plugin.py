@@ -1,11 +1,10 @@
+from typing import Dict
+
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.domain.resources.token import Token
-
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
 from tracardi.service.notation.dot_template import DotTemplate
@@ -17,15 +16,15 @@ def validate(config: dict) -> Configuration:
 
 class TextClassificationAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'TextClassificationAction':
-        config = validate(kwargs)
+    models: Dict[str, str]
+    config: Configuration
+    credentials: Token
+
+    async def set_up(self, init):
+        config = validate(init)
         resource = await storage.driver.resource.load(config.source.id)
 
-        return TextClassificationAction(config, resource.credentials)
-
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        self.credentials = credentials.get_credentials(self, Token)  # type: Token
+        self.credentials = resource.credentials.get_credentials(self, Token)  # type: Token
         self.config = config
         self.models = {
             'social': 'SocialMedia',
