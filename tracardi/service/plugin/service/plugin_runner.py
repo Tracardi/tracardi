@@ -2,6 +2,9 @@ import asyncio
 from typing import Type
 from uuid import uuid4
 
+from tracardi.domain.event import Event
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 from ..domain.result import Result
 from ..runner import ActionRunner
 from ..domain.console import Console
@@ -10,9 +13,9 @@ from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 
 class PluginTestResult:
     def __init__(self, output, profile=None, session=None, event=None, console=None, flow=None):
-        self.event = event
-        self.session = session
-        self.profile = profile
+        self.event: Event = event
+        self.session: Session = session
+        self.profile: Profile = profile
         self.output: Result = output
         self.console = console
         self.flow = flow
