@@ -20,7 +20,7 @@ class MicroserviceAction(ActionRunner):
         # todo remotely run
         context = plugin_context.get_context(self, include=['node'])
         node = self.node  # type: Node
-        service_id = node.microservice.resource.current.service.id
+        service_id = node.microservice.service.id
         action_id = node.microservice.plugin.id
         config = {
             "init": self.init,
@@ -31,11 +31,11 @@ class MicroserviceAction(ActionRunner):
             }
         }
         config = json.loads(json.dumps(config, default=str))
-        microservice_url = f"{self.node.microservice.resource.current.url}/plugin/run" \
+        microservice_url = f"{node.microservice.server.credentials['url']}/plugin/run" \
                            f"?service_id={service_id}" \
                            f"&action_id={action_id}"
         async with aiohttp.ClientSession(headers={
-            # todo add authorization
+            'X-Token': node.microservice.server.credentials['token']
         }) as client:
             async with client.post(
                     url=microservice_url,
@@ -58,25 +58,6 @@ def register() -> Plugin:
             version='0.7.2',
             license="MIT",
             author="Risto Kowaczewski",
-            microservice={
-                "resource": {
-                    "name": "",
-                    "id": "",
-                    "current": {
-                        "url": "",
-                        "token": "",
-                        "service": {
-                            "name": "",
-                            "id": ""
-                        }
-                    },
-                },
-
-                "plugin": {
-                    "name": "",
-                    "id": ""
-                }
-            },
             init={
 
             }

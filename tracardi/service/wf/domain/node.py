@@ -65,4 +65,4 @@ class Node(BaseModel):
         return False
 
     def is_microservice_configured(self) -> bool:
-        return self.microservice is not None and self.microservice.resource.id and self.microservice.plugin.id
+        return self.microservice is not None and self.microservice.server.resource.id and self.microservice.plugin.id
