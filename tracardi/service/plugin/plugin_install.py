@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 from collections import defaultdict
-from typing import List
+from typing import Dict
 
 from tracardi.config import tracardi
 from tracardi.domain.settings import Settings
@@ -68,7 +68,7 @@ async def install_plugin(module, install=False, upgrade=False):
         logger.error(f"Module `{module}` was NOT INSTALLED as it raised an error `{str(e)}`.")
 
 
-async def install_plugins(plugins_list: List[str]):
+async def install_plugins(plugins_list: Dict[str, dict]):
     result = defaultdict(list)
     action_index = resources.get_index('action')
     action_index = action_index.get_write_index()
@@ -86,7 +86,7 @@ async def install_plugins(plugins_list: List[str]):
 
         await storage.driver.action.refresh()
 
-        for plugin in plugins_list:
+        for plugin in plugins_list.keys():
             status = await install_plugin(plugin, install=False, upgrade=False)
             if status is not None:
                 result["registered"].append(plugin)

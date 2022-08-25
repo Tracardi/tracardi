@@ -103,7 +103,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.traits.copy_trait_action',
+            module=__name__,
             className='CopyTraitAction',
             inputs=['payload'],
             outputs=["payload"],
