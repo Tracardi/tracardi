@@ -22,16 +22,14 @@ def validate(config: dict) -> Configuration:
 
 class FullContactAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'FullContactAction':
-        config = validate(kwargs)
+    config: Configuration
+    credentials: FullContactSourceConfiguration
+
+    async def set_up(self, init):
+        config = validate(init)
         resource = await storage.driver.resource.load(config.source.id)  # type: Resource
 
-        return FullContactAction(config, resource.credentials)
-
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        self.credentials = credentials.get_credentials(self,
-                                                       output=FullContactSourceConfiguration)  # type: FullContactSourceConfiguration
+        self.credentials = resource.credentials.get_credentials(self, output=FullContactSourceConfiguration)
         self.config = config
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -41,9 +39,9 @@ class FullContactAction(ActionRunner):
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
             async with HttpClient(
-                self.node.on_connection_error_repeat,
-                [200, 201, 202, 203, 204],
-                timeout=timeout
+                    self.node.on_connection_error_repeat,
+                    [200, 201, 202, 203, 204],
+                    timeout=timeout
             ) as client:
 
                 mapper = DictTraverser(dot)

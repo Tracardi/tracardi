@@ -15,7 +15,6 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, Connection
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import Resource
 
 
 def validate(config: dict) -> Config:
@@ -23,13 +22,14 @@ def validate(config: dict) -> Config:
 
 
 class ElasticEmailContactAdder(ActionRunner):
-    @staticmethod
-    async def build(**kwargs) -> 'ElasticEmailContactAdder':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return ElasticEmailContactAdder(config, resource)
 
-    def __init__(self, config: Config, resource: Resource):
+    credentials: Connection
+    config: Config
+
+    async def set_up(self, init):
+        config = Config(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
 

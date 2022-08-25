@@ -13,8 +13,10 @@ def validate(config: dict):
 
 class InjectEvent(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         event = await storage.driver.event.load(self.config.event_id)

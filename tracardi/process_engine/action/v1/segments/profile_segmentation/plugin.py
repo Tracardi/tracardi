@@ -14,8 +14,10 @@ def validate(config: dict):
 
 class ProfileSegmentAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     def _update(self, profile, segment, action):
         action = action.lower()

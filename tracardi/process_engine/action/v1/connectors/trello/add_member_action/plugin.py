@@ -1,11 +1,10 @@
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
-    FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from ..credentials import TrelloCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.trello.trello_client import TrelloClient
+from ..trello_plugin import TrelloPlugin
 
 
 async def validate(config: dict) -> Config:
@@ -19,21 +18,12 @@ async def validate(config: dict) -> Config:
     return plugin_config
 
 
-class TrelloMemberAdder(ActionRunner):
+class TrelloMemberAdder(TrelloPlugin):
+    config: Config
 
-    @staticmethod
-    async def build(**kwargs) -> 'TrelloMemberAdder':
-        config = Config(**kwargs)
-        credentials = TrelloCredentials(
-            **(await storage.driver.resource.load(config.source.id)).credentials.production
-        )
-        client = TrelloClient(credentials.api_key, credentials.token)
-        return TrelloMemberAdder(client, config)
-
-    def __init__(self, client: TrelloClient, config: Config):
-        self._client = client
-        self._client.set_retries(self.node.on_connection_error_repeat)
-        self.config = config
+    async def set_up(self, init):
+        self.config = Config(**init)
+        await self.set_up_trello(self.config)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

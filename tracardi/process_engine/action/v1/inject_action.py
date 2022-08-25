@@ -39,8 +39,10 @@ def validate(config: dict) -> Configuration:
 
 class InjectAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = Configuration(**kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = Configuration(**init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.debug is True:

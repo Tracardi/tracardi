@@ -16,8 +16,11 @@ def validate(config: dict):
 
 class TemplateAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    dot_template: DotTemplate
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.dot_template = DotTemplate()
 
     async def run(self, payload: dict, in_edge=None) -> Result:

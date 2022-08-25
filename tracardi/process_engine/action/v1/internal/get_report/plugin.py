@@ -32,13 +32,13 @@ class Endpoint(PluginEndpoint):
 
 class GetReportAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'GetReportAction':
-        config = Config(**kwargs)
-        manager = await ReportManager.build(config.report_config.report.id)
-        return GetReportAction(config, manager)
+    manager: ReportManager
+    config: Config
 
-    def __init__(self, config: Config, manager: ReportManager):
+    async def set_up(self, init):
+        config = validate(init)
+        manager = await ReportManager.build(config.report_config.report.id)
+
         self.config = config
         self.manager = manager
 

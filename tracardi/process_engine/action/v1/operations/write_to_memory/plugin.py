@@ -13,8 +13,11 @@ def validate(config: dict) -> Config:
 
 class WriteToMemoryAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = Config(**kwargs)
+    client: RedisClient
+    config: Config
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.client = RedisClient()
 
     async def run(self, payload: dict, in_edge=None) -> Result:

@@ -8,9 +8,6 @@ from tracardi.service.plugin.domain.result import Result
 
 class WeekDaysChecker(ActionRunner):
 
-    def __init__(self, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None):
         today = datetime.datetime.today()
         no_of_day = date.weekday(today) + 1

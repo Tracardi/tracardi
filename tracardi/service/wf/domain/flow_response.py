@@ -21,7 +21,6 @@ class FlowResponses:
         self.responses = responses
 
     def merge(self):
-        print(self.responses)
         merged_response = {}
         for response in self.responses:
             if response:

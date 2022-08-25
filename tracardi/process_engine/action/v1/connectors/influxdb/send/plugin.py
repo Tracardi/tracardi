@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime
 from typing import Tuple
 
 from tracardi.domain.settings import Settings
@@ -10,7 +10,6 @@ from .model.config import Config, InfluxCredentials
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.notation.dict_traverser import DictTraverser
 from dateutil.parser import parse, ParserError
 
@@ -21,15 +20,16 @@ def validate(config: dict) -> Config:
 
 class InfluxSender(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'InfluxSender':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return InfluxSender(config, resource.credentials)
+    client: InfluxDBClient
+    credentials: InfluxCredentials
+    config: Config
 
-    def __init__(self, config: Config, client_credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = Config(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = client_credentials.get_credentials(self, InfluxCredentials)
+        self.credentials = resource.credentials.get_credentials(self, InfluxCredentials)
         self.client = InfluxDBClient(self.credentials.url, self.credentials.token)
 
     async def run(self, payload: dict, in_edge=None) -> Result:

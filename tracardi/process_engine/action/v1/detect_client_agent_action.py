@@ -29,8 +29,10 @@ def validate(config: dict) -> AgentConfiguration:
 
 class DetectClientAgentAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: AgentConfiguration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     def detect_device(self, ua):
         try:
