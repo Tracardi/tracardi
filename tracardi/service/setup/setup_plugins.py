@@ -900,6 +900,13 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.contains_string_action": PluginTestTemplate(
+        init={
+            "field": "payload@field",
+            "substring": "contains"
+        }
+    )
+
 }
 
 
