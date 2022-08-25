@@ -9,6 +9,7 @@ from tracardi.domain.settings import Settings
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.module_loader import pip_install, load_callable, import_package
 from tracardi.service.plugin.domain.register import Plugin
+from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplate
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.index import resources
 
@@ -68,7 +69,7 @@ async def install_plugin(module, install=False, upgrade=False):
         logger.error(f"Module `{module}` was NOT INSTALLED as it raised an error `{str(e)}`.")
 
 
-async def install_plugins(plugins_list: Dict[str, dict]):
+async def install_plugins(plugins_list: Dict[str, PluginTestTemplate]):
     result = defaultdict(list)
     action_index = resources.get_index('action')
     action_index = action_index.get_write_index()
