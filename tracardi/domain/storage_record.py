@@ -155,3 +155,6 @@ class StorageRecords(dict):
     def __len__(self):
         return self.chunk
 
+    def __bool__(self):
+        return len(self._hits) != 0
+
