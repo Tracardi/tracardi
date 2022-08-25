@@ -1,7 +1,9 @@
 import json
 from datetime import datetime, date
 from decimal import Decimal
-from tracardi.domain.resource import ResourceCredentials
+
+import asyncpg
+
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
@@ -18,22 +20,20 @@ def validate(config: dict) -> Configuration:
 
 class PostgreSQLConnectorAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'PostgreSQLConnectorAction':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return PostgreSQLConnectorAction(config, resource.credentials)
+    db: asyncpg.connection.Connection
+    timeout: int
+    query: str
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        self.credentials = credentials
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.query = config.query
         self.timeout = config.timeout
-        self.db = None
+        self.db = await resource.credentials.get_credentials(self, Connection).connect()
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
-
-            self.db = await self.credentials.get_credentials(self, Connection).connect()
             result = await self.db.fetch(self.query, timeout=self.timeout)
             result = [self.to_dict(record) for record in result]
             return Result(port="result", value={"result": result})

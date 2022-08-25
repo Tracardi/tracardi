@@ -12,17 +12,20 @@ def validate(config: dict) -> Configuration:
 
 
 class RegexValidatorAction(ActionRunner):
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    validator: Validator
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.validator = Validator(self.config)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         string = dot[self.config.data]
         if self.validator.check(string) is not None:
-            return Result(port='valid', value=payload), Result(port='invalid', value=None)
+            return Result(port='valid', value=payload)
         else:
-            return Result(port='valid', value=None), Result(port='invalid', value=payload)
+            return Result(port='invalid', value=payload)
 
 
 def register() -> Plugin:

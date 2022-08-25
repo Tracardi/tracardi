@@ -16,8 +16,10 @@ def validate(config: dict) -> Configuration:
 
 class HtmlPageFetchAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     @staticmethod
     def _validate_key_value(values, label):

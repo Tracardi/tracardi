@@ -36,7 +36,6 @@ async def load_merged_profile(id: str) -> Profile:
 
         # Merge duplicated profiles
         _duplicated_profiles = await load_duplicates(id)  # 1st records is the newest
-        print(_duplicated_profiles)
         valid_profile_record = _duplicated_profiles.first() # type: StorageRecord
         profile = Profile(**valid_profile_record).set_meta_data(valid_profile_record.get_meta_data())
 

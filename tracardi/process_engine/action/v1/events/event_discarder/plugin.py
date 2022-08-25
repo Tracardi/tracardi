@@ -5,9 +5,6 @@ from tracardi.service.plugin.domain.result import Result
 
 class EventDiscarder(ActionRunner):
 
-    def __init__(self, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
         self.event.config["save"] = False
         return Result(port="payload", value=payload)

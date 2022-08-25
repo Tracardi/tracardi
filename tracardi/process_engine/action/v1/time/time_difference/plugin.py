@@ -15,8 +15,10 @@ def validate(config: dict):
 
 class TimeDiffCalculator(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Config
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     @staticmethod
     def parse_date(date):

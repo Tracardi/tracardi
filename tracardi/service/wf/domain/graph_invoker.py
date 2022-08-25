@@ -1,5 +1,4 @@
 import asyncio
-import importlib
 import inspect
 import json
 from collections import defaultdict
@@ -14,7 +13,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.console import Console, Log, ConsoleStatus
+from tracardi.service.plugin.domain.console import Log, ConsoleStatus
 from tracardi.service.plugin.domain.result import Result, VoidResult, MissingResult
 from traceback import format_exc
 
@@ -24,6 +23,7 @@ from .entity import Entity
 from .error_debug_info import ErrorDebugInfo
 from .input_params import InputParams
 from ..service.excetions import get_traceback
+import tracardi.service.wf.service.life_cycle as life_cycle
 from ..utils.dag_error import DagError, DagExecError
 from .edge import Edge
 from .node import Node
@@ -154,10 +154,10 @@ class GraphInvoker(BaseModel):
                     if not await vtm.pass_threshold(value):
                         coroutine = self._void_return(node)
                     else:
-                        coroutine = node.object.run(**params)
+                        coroutine = life_cycle.plugin.execute(node, params)
 
                 else:
-                    coroutine = node.object.run(**params)
+                    coroutine = life_cycle.plugin.execute(node, params)
             return self._add_to_event_loop(tasks,
                                            coroutine,
                                            port=_port,
@@ -169,8 +169,8 @@ class GraphInvoker(BaseModel):
             method_params = args_spec.args[1:]
             if not set(method_params).intersection(set(params.keys())):
                 raise DagExecError(
-                    "Misconfiguration of node type `{}`. Method `run` expects input parameters `{}`, but received `{}`. "
-                    "TypeError: `{}`".
+                    "Misconfiguration of node type `{}`. Method `run` expects input parameters `{}`, "
+                    "but received `{}`. TypeError: `{}`".
                         format(node.className,
                                ",".join(method_params),
                                ",".join(params.keys()),
@@ -416,60 +416,43 @@ class GraphInvoker(BaseModel):
             task_results.add(edge.id, result_copy)
         return task_results
 
-    @staticmethod
-    async def _get_object(debug: bool, node: Node, params=None) -> ActionRunner:
-        module = importlib.import_module(node.module)
-        task_class = getattr(module, node.className)
-        action = await GraphInvoker._build(debug, task_class, params)
-
-        if not isinstance(action, ActionRunner):
-            raise TypeError("Class {}.{} is not of type {}".format(module, node.className, type(ActionRunner)))
-
-        return action
-
-    @staticmethod
-    async def _build(debug, task_class, params):
-        build_method = getattr(task_class, "build", None)
-
-        if params:
-            params['__debug__'] = debug
-        else:
-            params = {'__debug__': debug}
-
-        if callable(build_method):
-            return await build_method(**params)
-
-        return task_class(**params)
-
     async def init(self, debug_info: DebugInfo, log_list: List[Log], flow, flow_history, event, session, profile,
                    tracker_payload: TrackerPayload,
                    ux: list):
 
         metrics = {}
         memory = {}
+
         for node_number, node in enumerate(self.graph):
             # Init object
             try:
-                node.object = await self._get_object(self.debug, node, node.init)
-                node.object.node = node.copy(exclude={"object": ..., "className": ..., "module": ..., "init": ...})
-                node.object.debug = self.debug
-                node.object.event = event
-                node.object.session = session
-                node.object.profile = profile
-                node.object.flow = flow
-                node.object.flow_history = flow_history
-                node.object.console = Console(node.className, node.module)
-                node.object.id = node.id
-                node.object.metrics = metrics
-                node.object.memory = memory
-                node.object.ux = ux
-                node.object.tracker_payload = tracker_payload
-                node.object.execution_graph = self
+
+                if node.remote is True and not node.is_microservice_configured():
+                    raise RuntimeError("Microservice not configured. This node is a remote mode by remote microservice "
+                                       "is not configured. See 'Remote microservice configuration' in node settings.")
+
+                node.object = await life_cycle.plugin.create_instance(node)
+
+                node.object = life_cycle.plugin.set_context(
+                    node,
+                    event,
+                    session,
+                    profile,
+                    flow,
+                    flow_history,
+                    metrics,
+                    memory,
+                    ux,
+                    tracker_payload,
+                    self,
+                    self.debug
+                )
 
             except Exception as e:
                 msg = "`{}`. This error occurred when initializing node `{}`. ".format(
-                    str(e), node.id) + "Check node configuration or __init__ of `{}.{}`".format(node.module,
-                                                                                                node.className)
+                    str(e), node.id) + "Check node configuration, __init__, or post_init method of `{}.{}`".format(
+                    node.module,
+                    node.className)
 
                 debug_info.flow.add_error(ErrorDebugInfo(
                     msg=msg, line=443, file=__file__

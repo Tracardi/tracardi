@@ -1,10 +1,8 @@
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
-    FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, Token
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.meaningcloud.client import MeaningCloudClient
 
 
@@ -14,15 +12,15 @@ def validate(config: dict) -> Config:
 
 class CorporateReputationPlugin(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'CorporateReputationPlugin':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return CorporateReputationPlugin(config, resource.credentials)
+    client: MeaningCloudClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.client = MeaningCloudClient(credentials.get_credentials(self, Token).token)
+        self.client = MeaningCloudClient(resource.credentials.get_credentials(self, Token).token)
         self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:

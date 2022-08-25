@@ -1,11 +1,8 @@
-import aiohttp
 from tracardi.domain.resources.token import Token
 
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
 from tracardi.service.notation.dot_template import DotTemplate
@@ -18,14 +15,14 @@ def validate(config: dict) -> Configuration:
 
 class SentimentAnalysisAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'SentimentAnalysisAction':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return SentimentAnalysisAction(config, resource.credentials)
+    config: Configuration
+    credentials: Token
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        self.credentials = credentials.get_credentials(self, output=Token)
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
+        self.credentials = resource.credentials.get_credentials(self, output=Token)
         self.config = config
 
     async def run(self, payload: dict, in_edge=None) -> Result:

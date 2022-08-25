@@ -7,7 +7,6 @@ from tracardi.service.storage.driver import storage
 from .model.config import Config
 from tracardi.process_engine.action.v1.connectors.civi_crm.client import CiviCRMClient, CiviCRMClientException, \
     CiviClientCredentials
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dict_traverser import DictTraverser
 
@@ -18,15 +17,15 @@ def validate(config: dict) -> Config:
 
 class AddCiviContactAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'AddCiviContactAction':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return AddCiviContactAction(config, resource.credentials)
+    client: CiviCRMClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = Config(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.client = CiviCRMClient(**credentials.get_credentials(self, CiviClientCredentials).dict())
+        self.client = CiviCRMClient(**resource.credentials.get_credentials(self, CiviClientCredentials).dict())
         self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:

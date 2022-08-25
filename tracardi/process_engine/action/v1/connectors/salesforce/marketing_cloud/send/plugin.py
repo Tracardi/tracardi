@@ -3,7 +3,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.client import MarketingCloudClient, \
     MarketingCloudClientException, MarketingCloudAuthException
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -16,15 +15,15 @@ def validate(config: dict) -> Config:
 
 class DataExtensionSender(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'DataExtensionSender':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return DataExtensionSender(config, resource.credentials)
+    client: MarketingCloudClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.client = MarketingCloudClient(**credentials.get_credentials(self))
+        self.client = MarketingCloudClient(**resource.credentials.get_credentials(self))
         self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:

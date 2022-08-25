@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 from aiohttp import ClientConnectorError
+
 from tracardi.service.notation.dict_traverser import DictTraverser
 from json import JSONDecodeError
 
@@ -10,7 +11,6 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.service.wf.domain.node import Node
 from .model.configuration import RemoteCallConfiguration
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.service.url_constructor import ApiCredentials
 
@@ -21,15 +21,15 @@ def validate(config: dict) -> RemoteCallConfiguration:
 
 class RemoteCallAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'RemoteCallAction':
-        config = RemoteCallConfiguration(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return RemoteCallAction(config, resource.credentials)
+    credentials: ApiCredentials
+    config: RemoteCallConfiguration
 
-    def __init__(self, config: RemoteCallConfiguration, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = RemoteCallConfiguration(**init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = credentials.get_credentials(self, ApiCredentials)  # Type: ApiCredentials
+        self.credentials = resource.credentials.get_credentials(self, ApiCredentials)
 
     @staticmethod
     def _validate_key_value(values, label):

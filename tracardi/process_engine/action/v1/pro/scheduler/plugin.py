@@ -25,18 +25,15 @@ def validate(config: dict) -> Configuration:
 
 class SchedulerPlugin(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'SchedulerPlugin':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        plugin = SchedulerPlugin(config, resource.credentials)
-        return plugin
+    credentials: SchedulerConfig
+    config: Configuration
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = credentials.get_credentials(
-            self,
-            output=SchedulerConfig)  # type: SchedulerConfig
+        self.credentials = resource.credentials.get_credentials(self, output=SchedulerConfig)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:

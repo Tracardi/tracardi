@@ -7,9 +7,6 @@ from tracardi.service.plugin.domain.result import Result
 
 class NewProfileAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is True:
             self.console.warning("Can not check if profile is new in profile less events.")

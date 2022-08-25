@@ -33,8 +33,10 @@ def validate(config: dict) -> MergeProfileConfiguration:
 
 class MergeProfilesAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        config = validate(kwargs)
+    merge_key: List[str]
+
+    async def set_up(self, init):
+        config = validate(init)
         self.merge_key = [key.lower() for key in config.mergeBy]
 
     async def run(self, payload: dict, in_edge=None) -> Result:

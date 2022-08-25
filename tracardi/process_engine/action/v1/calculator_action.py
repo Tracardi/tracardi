@@ -26,8 +26,10 @@ def validate(config: dict):
 
 class CalculatorAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: CalculatorConfig
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         calc_lines = [line.strip() for line in self.config.calc_dsl.split("\n")]
