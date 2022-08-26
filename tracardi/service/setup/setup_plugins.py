@@ -430,7 +430,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.plugin": PluginTestTemplate(
-        init={'email': None, 'list_id': None, 'merge_fields': {}, 'source': {'id': None, 'name': None},
+        init={'email': "email@email.com", 'list_id': "1", 'merge_fields': {}, 'source': {'id': "1", 'name': "test"},
               'subscribed': False, 'update': False},
         resource=None
     ),
