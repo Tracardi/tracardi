@@ -1,19 +1,27 @@
 import json
 
 import aiohttp
+from pydantic import BaseModel
 
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.process_engine.action.v1.connectors.trello.credentials import TrelloCredentials
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, MicroserviceConfig
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.service import plugin_context
 from tracardi.service.wf.domain.node import Node
 
 
-class MicroserviceAction(ActionRunner):
+class MicroserviceCredentials(BaseModel):
+    url: str
+    token: str
 
+
+class MicroserviceAction(ActionRunner):
     init: dict
 
     async def set_up(self, init):
         self.init = init
+        node = self.node  # type: Node
+        print("pl creds", node.microservice.plugin.resource)
 
     async def run(self, payload: dict, in_edge=None):
         # todo remotely run
@@ -31,17 +39,21 @@ class MicroserviceAction(ActionRunner):
             }
         }
         config = json.loads(json.dumps(config, default=str))
-        microservice_url = f"{node.microservice.server.credentials['url']}/plugin/run" \
+
+        microservice_credentials = node.microservice.server.credentials.get_credentials(self, MicroserviceCredentials)
+        microservice_url = f"{microservice_credentials.url}/plugin/run" \
                            f"?service_id={service_id}" \
                            f"&action_id={action_id}"
+
         async with aiohttp.ClientSession(headers={
-            'X-Token': node.microservice.server.credentials['token']
+            'X-Token': microservice_credentials.token
         }) as client:
             async with client.post(
                     url=microservice_url,
                     json=config) as remote_response:
-                print(await remote_response.json())
-
+                result = await remote_response.json()
+                if remote_response.status != 200:
+                    raise ConnectionError(str(result))
         plugin_context.set_context(self, context)
         return None
 

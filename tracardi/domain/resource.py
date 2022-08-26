@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any, List, Union, Type
+from typing import Optional, Any, List, Union, Type, TypeVar
 from pydantic import BaseModel
 
 from .destination import DestinationConfig
@@ -7,12 +7,14 @@ from .entity import Entity
 from .value_object.storage_info import StorageInfo
 from ..service.secrets import encrypt, decrypt
 
+T = TypeVar("T")
+
 
 class ResourceCredentials(BaseModel):
     production: Optional[dict] = {}
     test: Optional[dict] = {}
 
-    def get_credentials(self, plugin, output: Type[BaseModel] = None):
+    def get_credentials(self, plugin, output: Type[T] = None) -> Union[T, dict]:
         """
         Returns configuration of resource depending on the state of the executed workflow: test or production.
         """

@@ -3,7 +3,7 @@ from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, AnyHttpUrl
 
 from tracardi.domain.named_entity import NamedEntity
-
+from tracardi.domain.resource import ResourceCredentials
 
 
 class FormFieldValidation(BaseModel):
@@ -53,7 +53,7 @@ class MicroservicePlugin(NamedEntity):
 
 
 class MicroserviceServer(BaseModel):
-    credentials: Optional[dict]
+    credentials: ResourceCredentials
     resource: NamedEntity  # Selected tracardi resource
 
 
@@ -69,7 +69,7 @@ class MicroserviceConfig(BaseModel):
     def create() -> 'MicroserviceConfig':
         return MicroserviceConfig(
                         server=MicroserviceServer(
-                            credentials={},
+                            credentials=ResourceCredentials(),
                             resource=NamedEntity(
                                 id="",
                                 name=""

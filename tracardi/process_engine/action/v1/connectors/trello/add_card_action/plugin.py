@@ -25,6 +25,7 @@ class TrelloCardAdder(TrelloPlugin):
     config: Config
 
     async def set_up(self, init):
+        # print("pl creds", self.node.microservice.plugin.resource)
         self.config = Config(**init)
         await self.set_up_trello(self.config)
 
