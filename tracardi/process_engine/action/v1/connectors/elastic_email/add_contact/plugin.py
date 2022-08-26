@@ -25,6 +25,7 @@ class ElasticEmailContactAdder(ActionRunner):
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
+        self.client = ElasticEmailClient()
 
     @staticmethod
     def parse_mapping(mapping):

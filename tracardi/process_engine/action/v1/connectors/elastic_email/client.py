@@ -42,29 +42,7 @@ class ElasticEmailClient:
 
                 return await response.json()
 
-    async def add_to_segment(self, id: int, add_to: int):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.post(url=f"{self.api_url}/api/segments/{add_to}/contact/{id}/add") \
-                    as response:
 
-                if response.status == 401:
-                    raise ElasticEmailClientAuthException()
-
-                if response.status != 200:
-                    raise ElasticEmailClientException(await response.text())
-
-    async def remove_from_segment(self, id: int, remove_from: int):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.post(url=f"{self.api_url}/api/segments/{remove_from}/contact/{id}/remove") \
-                    as response:
-
-                if response.status == 401:
-                    raise ElasticEmailClientAuthException()
-
-                if response.status != 200:
-                    raise ElasticEmailClientException(await response.text())
-
-                return await response.json()
 
     @property
     def credentials(self):
