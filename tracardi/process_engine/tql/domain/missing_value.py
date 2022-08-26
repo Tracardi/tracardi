@@ -35,3 +35,6 @@ class MissingValue:
 
     def __mul__(self, other):
         return 0
+
+    def __str__(self):
+        return f"Missing Value ({self.error})"
