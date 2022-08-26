@@ -68,22 +68,22 @@ class MicroserviceConfig(BaseModel):
     @staticmethod
     def create() -> 'MicroserviceConfig':
         return MicroserviceConfig(
-                        server=MicroserviceServer(
-                            credentials=ResourceCredentials(),
-                            resource=NamedEntity(
-                                id="",
-                                name=""
-                            )
-                        ),
-                        service=NamedEntity(
-                            id="",
-                            name=""
-                        ),
-                        plugin=MicroservicePlugin(
-                            id="",
-                            name=""
-                        )
-                    )
+            server=MicroserviceServer(
+                credentials=ResourceCredentials(),
+                resource=NamedEntity(
+                    id="",
+                    name=""
+                )
+            ),
+            service=NamedEntity(
+                id="",
+                name=""
+            ),
+            plugin=MicroservicePlugin(
+                id="",
+                name=""
+            )
+        )
 
 
 class Spec(BaseModel):
