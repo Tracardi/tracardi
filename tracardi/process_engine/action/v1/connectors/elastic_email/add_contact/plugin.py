@@ -6,7 +6,6 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, Connection
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import Resource
 from ..client import ElasticEmailClient
 
 
@@ -16,16 +15,17 @@ def validate(config: dict) -> Config:
 
 class ElasticEmailContactAdder(ActionRunner):
 
-    credentials: Connection
     config: Config
+    credentials: Connection
+    client: ElasticEmailClient
 
     async def set_up(self, init):
-        config = Config(init)
+        config = validate(init)
         resource = await storage.driver.resource.load(config.source.id)
 
-        self.config = config
-        self.credentials = resource.credentials.get_credentials(self, output=Connection)  # type: Connection
-        self.client = ElasticEmailClient()
+        self.config = config    # type: Config
+        self.credentials = resource.credentials.get_credentials(self, output=Connection)    # type: Connection
+        self.client = ElasticEmailClient(**dict(self.credentials))    # type: ElasticEmailClient
 
     @staticmethod
     def parse_mapping(mapping):
@@ -48,21 +48,14 @@ class ElasticEmailContactAdder(ActionRunner):
         mapping = traverser.reshape(self.config.additional_mapping)
         mapping = self.parse_mapping(mapping)
 
-        contact_data = {"email": dot[self.config.email]}
-        if mapping.get("list_name"):
-            contact_data["listName"] = mapping["list_name"]
-            del mapping["list_names"]
-        if mapping.get("first_name"):
-            contact_data["firstName"] = mapping["first_name"]
-            del mapping["first_name"]
-        if mapping.get("last_name"):
-            contact_data["lastName"] = mapping["last_name"]
-            del mapping["last_name"]
-        if mapping:
-            contact_data["field"] = mapping
+        contact_data = {
+            "email": dot[self.config.email],
+            **mapping
+        }
+
         try:
             result = await self.client.add_contact(
-                contact_data, field=mapping
+                contact_data
             )
             return Result(port="response", value=result)
         except Exception as e:

@@ -1,3 +1,6 @@
+import json
+from json import JSONDecodeError
+
 import aiohttp
 
 
@@ -11,38 +14,38 @@ class ElasticEmailClientAuthException(Exception):
 
 class ElasticEmailClient:
 
-    def __init__(self, api_url: str, api_key: int, public_account_id: str):
-        self.api_url = api_url
+    def __init__(self, api_key: int, public_account_id: str):
+        self.api_url = 'https://api.elasticemail.com'
         self.api_key = api_key
         self.public_account_id = public_account_id
 
-    async def add_contact(self, contact_data: dict, field: dict) -> dict:
+    async def add_contact(self, contact_data: dict, ) -> dict:
         params = {
             "publicAccountID": self.public_account_id,
             "consentTracking": 1,
-            "sendActivation": False,
+            "sendActivation": 'false',
             **contact_data,
-            # todo field is a Repeated list of string keys and string values
-            # "field": custom_fields,
-            # **kwargs
         }
 
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    url=f"{self.api_url}/Contact/Add",
+                    url=f"{self.api_url}/v2/Contact/Add",
                     params=params
             ) as response:
+                return await self.handle_response(response)
 
-                if response.status == 401:
-                    raise ElasticEmailClientAuthException()
+    @staticmethod
+    async def handle_response(response):
+        if response.status == 401:
+            raise ElasticEmailClientAuthException()
+        try:
+            content = await response.json(content_type='text/html')
 
-                if response.status not in (200, 201) or "error" in await response.text() or "errors" in \
-                        await response.json():
-                    raise ElasticEmailClientException(await response.text())
-
-                return await response.json()
-
-
+        except JSONDecodeError:
+            content = await response.text()
+        if response.status not in (200, 201) or content.get('success') is False:
+            raise ElasticEmailClientException(content)
+        return content
 
     @property
     def credentials(self):
