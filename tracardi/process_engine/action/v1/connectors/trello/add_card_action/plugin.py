@@ -25,7 +25,6 @@ class TrelloCardAdder(TrelloPlugin):
     config: Config
 
     async def set_up(self, init):
-        # print("pl creds", self.node.microservice.plugin.resource)
         self.config = Config(**init)
         await self.set_up_trello(self.config)
 
@@ -57,7 +56,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='plugins.trello.add_card.plugin',
+            module=__name__,
             className='TrelloCardAdder',
             inputs=["payload"],
             outputs=["response", "error"],

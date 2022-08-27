@@ -55,3 +55,19 @@ class Console:
 
     def __repr__(self):
         return f"Class: {self.class_name}, Errors: {self.errors}, Warnings: {self.warnings}, Infos: {self.infos}"
+
+    def dict(self):
+        return {
+            "infos": self.infos,
+            "errors": self.errors,
+            "warnings": self.warnings
+        }
+
+    def append(self, data):
+        self.infos = data['infos']
+        self.errors = data['errors']
+        self.warnings = data['warnings']
+
+
+
+
