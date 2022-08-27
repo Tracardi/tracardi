@@ -12,10 +12,10 @@ class TrelloClient:
         self.retries = retries
 
     async def get_list_id(self, board_url: str, list_name: str) -> str:
-
+        url = f'https://api.trello.com/1/members/me/boards?key={self.api_key}&token={self.token}'
         async with HttpClient(self.retries) as client:
             async with client.get(
-                    url=f'https://api.trello.com/1/members/me/boards?key={self.api_key}&token={self.token}'
+                    url=url
             ) as response:
                 result = await response.json()
                 if response.status != 200:

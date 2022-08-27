@@ -21,7 +21,7 @@ class MicroserviceAction(ActionRunner):
     async def set_up(self, init):
         self.init = init
         node = self.node  # type: Node
-        print("pl creds", node.microservice.plugin.resource)
+        # print("pl creds", node.microservice.plugin.resource)
 
     async def run(self, payload: dict, in_edge=None):
         # todo remotely run
