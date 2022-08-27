@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 
-import aiohttp
+
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 class ElasticEmailClientException(Exception):
@@ -17,14 +18,21 @@ class ElasticEmailClient:
         self.api_url = 'https://api.elasticemail.com'
         self.api_key = api_key
         self.public_account_id = public_account_id
+        self.retries = 1
 
     async def emails_post(self, contact_data: dict, ) -> dict:
         data = {
             "apikey": self.api_key,
             **contact_data,
         }
-
-        async with aiohttp.ClientSession() as session:
+        async with HttpClient(
+                self.retries,
+                [200, 201, 401],
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+        ) as session:
             async with session.post(
                     url=f"{self.api_url}/v2/Email/Send",
                     data=data
@@ -38,8 +46,14 @@ class ElasticEmailClient:
             "sendActivation": 'false',
             **contact_data,
         }
-
-        async with aiohttp.ClientSession() as session:
+        async with HttpClient(
+                self.retries,
+                [200, 201, 401],
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+        ) as session:
             async with session.get(
                     url=f"{self.api_url}/v2/Contact/Add",
                     params=params
