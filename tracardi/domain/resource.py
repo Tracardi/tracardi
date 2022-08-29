@@ -1,9 +1,12 @@
 from datetime import datetime
 from typing import Optional, Any, List, Union, Type, TypeVar
+from uuid import uuid4
+
 from pydantic import BaseModel
 
 from .destination import DestinationConfig
 from .entity import Entity
+from .pro_service_form_data import ProService
 from .value_object.storage_info import StorageInfo
 from ..service.secrets import encrypt, decrypt
 
@@ -51,6 +54,23 @@ class Resource(Entity):
 
     def is_destination(self):
         return self.destination is not None
+
+    @staticmethod
+    def from_pro_service(pro: ProService) -> 'Resource':
+        return Resource(
+            id=str(uuid4()),
+            type=pro.service.metadata.type,
+            name=pro.service.form.metadata.name,
+            description=pro.service.form.metadata.description,
+            icon=pro.service.metadata.icon,
+            tags=pro.service.form.metadata.tags,
+            groups=[],
+            credentials=ResourceCredentials(
+                test=pro.service.form.data,
+                production=pro.service.form.data
+            ),
+            destination=pro.destination
+        )
 
 
 class ResourceRecord(Entity):

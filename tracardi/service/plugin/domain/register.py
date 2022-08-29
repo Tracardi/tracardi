@@ -32,8 +32,10 @@ class FormGroup(BaseModel):
 
 
 class Form(BaseModel):
+    submit: Optional[str] = None
+    default: Optional[dict] = {}
     title: Optional[str]
-    groups: List[FormGroup]
+    groups: Optional[List[FormGroup]] = []
 
 
 class RunOnce(BaseModel):
