@@ -576,11 +576,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.aws.sqs.plugin": PluginTestTemplate(
-        init=None,
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.meaningcloud.sentiment_analysis.plugin": PluginTestTemplate(
         init=None,
         resource={
@@ -907,6 +902,14 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         }
     )
 
+}
+
+# Plugins only for testing
+test_plugins: Dict[str, PluginTestTemplate] = {
+    "tracardi.process_engine.action.v1.connectors.aws.sqs.plugin": PluginTestTemplate(
+        init=None,
+        resource=None
+    ),
 }
 
 

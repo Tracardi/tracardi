@@ -52,6 +52,7 @@ class ProDestinationPackage(BaseModel):
 class ProService(BaseModel):
     service: ProServicePayload
     destination: Optional[ProDestinationPackage] = None
+    plugin: Optional[dict] = None  # this is Plugin
 
 
 class ProMicroService(ProService):
