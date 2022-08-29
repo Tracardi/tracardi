@@ -53,7 +53,7 @@ class MicroserviceAction(ActionRunner):
                            f"&action_id={action_id}"
 
         async with aiohttp.ClientSession(headers={
-            'X-Token': microservice_credentials.token
+            'Authorization': f"Bearer {microservice_credentials.token}"
         }) as client:
             async with client.post(
                     url=microservice_url,
