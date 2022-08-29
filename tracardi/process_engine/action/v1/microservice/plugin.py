@@ -60,7 +60,8 @@ class MicroserviceAction(ActionRunner):
                     json=config) as remote_response:
                 result = await remote_response.json()
                 if remote_response.status != 200:
-                    raise RuntimeError(str(result))
+                    return Result(port="error", value=str(result))
+
                 microservice_response = MicroserviceResponse(**result)
 
                 self.console.append(microservice_response.console)
