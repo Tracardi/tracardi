@@ -13,12 +13,11 @@ from typing import Union
 from ..domain.field import Field
 from .function_transformer import FunctionTransformer
 from .transformer_namespace import TransformerNamespace
-
+from ..domain.missing_value import MissingValue
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
-
 
 operation_mapper = {
     "between": "between",
@@ -111,16 +110,32 @@ class ExprTransformer(TransformerNamespace):
         self._dot = dot
 
     def expr(self, args):
+        result = args[0]
+
+        if isinstance(result, ValueError):
+            raise result
+
         return args[0]
 
     def and_expr(self, args):
         # return args
         value1, _, value2 = args
+
+        if isinstance(value1, ValueError) or isinstance(value1, MissingValue):
+            return value1
+
+        if value1 is False:
+            return False
+
         return value1 and value2
 
     def or_expr(self, args):
         # return args
         value1, _, value2 = args
+
+        if value1 is True:
+            return True
+
         return value1 or value2
 
     def OP_FIELD(self, args):
@@ -137,6 +152,12 @@ class ExprTransformer(TransformerNamespace):
 
     @staticmethod
     def _compare(operation, value1, value2):
+
+        if isinstance(value1, ValueError) or isinstance(value1, MissingValue):
+            return value1
+        if isinstance(value2, ValueError) or isinstance(value2, MissingValue):
+            return value2
+
         if operation == '==':
             if isinstance(value1, list) and not isinstance(value2, list):
                 return value2 in value1
@@ -206,12 +227,21 @@ class ExprTransformer(TransformerNamespace):
         else:
             values = []
 
+        # Check if any of the parameters is missing
+        for x in values:
+            # If so return missing value
+            if isinstance(x, MissingValue):
+                return x
+
         method = self.__mapping.get((function, len(values)), None)
         if method is None:
             raise ValueError("Unknown operation `{}`".format(function))
 
         func = getattr(self, method) if isinstance(method, str) else method
-        return func(*values)
+        try:
+            return func(*values)
+        except Exception as e:
+            return ValueError(str(e))
 
     def op_field_sig(self, args):
         return args[0]
@@ -232,14 +262,13 @@ class ExprTransformer(TransformerNamespace):
         return args[0].label not in self._dot
 
     def op_empty(self, args):
-        return args[0].label not in self._dot or args[0].value is None \
-               or (
-                       (
-                               isinstance(args[0].value, str)
-                               or isinstance(args[0].value, list)
-                               or isinstance(args[0].value, dict)
-                       ) and len(args[0].value) == 0
-               )
+        return args[0].label not in self._dot or args[0].value is None or (
+                (
+                        isinstance(args[0].value, str)
+                        or isinstance(args[0].value, list)
+                        or isinstance(args[0].value, dict)
+                ) and len(args[0].value) == 0
+        )
 
     def op_not_empty(self, args):
         try:
@@ -295,7 +324,6 @@ class ExprTransformer(TransformerNamespace):
                 )
             )
 
-
     @staticmethod
     def __parse_datetime(value: Union[str, datetime.datetime]) -> datetime.datetime:
         if isinstance(value, datetime.datetime):
@@ -316,6 +344,3 @@ class ExprTransformer(TransformerNamespace):
             return value
         except Exception as _:
             raise ValueError("Could not parse value `{}` as time offset.".format(value))
-
-
-

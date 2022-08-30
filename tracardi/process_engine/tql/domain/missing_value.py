@@ -1,4 +1,4 @@
-class MissingValue:
+class MissingValue(ValueError):
 
     def __init__(self, error):
         self.error = error
