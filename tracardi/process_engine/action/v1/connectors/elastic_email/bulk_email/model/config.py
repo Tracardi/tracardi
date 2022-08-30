@@ -43,6 +43,3 @@ class Config(PluginConfig):
             raise ValueError("Sender e-mail can not be empty.")
         return value
 
-
-class Connection(BaseModel):
-    api_key: str
