@@ -39,6 +39,25 @@ class ElasticEmailClient:
             ) as response:
                 return await self.handle_response(response)
 
+    async def contact_status_change(self, contact_data: dict, ) -> dict:
+        params = {
+            "apikey": self.api_key,
+            **contact_data,
+        }
+        async with HttpClient(
+                self.retries,
+                [200, 201, 401],
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+        ) as session:
+            async with session.post(
+                    url=f"{self.api_url}/Contact/ChangeStatus",
+                    data=params
+            ) as response:
+                return await self.handle_response(response)
+
     async def add_contact(self, contact_data: dict, ) -> dict:
         params = {
             "publicAccountID": self.public_account_id,
@@ -84,10 +103,3 @@ class ElasticEmailClient:
             raise ElasticEmailClientException(content)
         return content
 
-    @property
-    def credentials(self):
-        return {
-            "api_key": self.api_key,
-            "public_account_id": self.public_account_id,
-            "api_url": self.api_url,
-        }
