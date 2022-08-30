@@ -707,6 +707,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.connectors.elastic_email.contact_status_change.plugin": PluginTestTemplate(
+        init={'email': None, 'status': None, 'source': {'id': None, 'name': None}},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin": PluginTestTemplate(
         init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
               'source': {'id': '', 'name': ''}},

@@ -216,6 +216,7 @@ def get_resource_types() -> List[ResourceSettings]:
             name="ElasticEmail",
             config={
                 "api_key": "<api-key>",
+                "public_account_id": "<public-account-id>"
             },
             icon="email",
             tags=["elastic-email"],

@@ -8,15 +8,8 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver import storage
-import ElasticEmail
-from ElasticEmail.api import emails_api
-from ElasticEmail.model.email_content import EmailContent
-from ElasticEmail.model.body_part import BodyPart
-from ElasticEmail.model.body_content_type import BodyContentType
-from ElasticEmail.model.transactional_recipient import TransactionalRecipient
-from ElasticEmail.model.email_transactional_message_data import EmailTransactionalMessageData
-
-from ..bulk_email.model.config import Connection
+from ..add_contact.model.config import Connection
+from ..client import ElasticEmailClient
 
 
 def validate(config: dict) -> Config:
@@ -27,6 +20,7 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
 
     config: Config
     credentials: Connection
+    client: ElasticEmailClient
     _dot_template: DotTemplate
 
     async def set_up(self, init):
@@ -35,6 +29,7 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=Connection)
+        self.client = ElasticEmailClient(**dict(self.credentials))    # type: ElasticEmailClient
         self._dot_template = DotTemplate()
 
     @staticmethod
@@ -57,9 +52,29 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
         message = self._dot_template.render(self.config.message.content.content, dot)
         recipient_emails = dot[self.config.message.recipient]
         recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
-        configuration = ElasticEmail.Configuration()
-        configuration.api_key['apikey'] = self.credentials.api_key
+        valid_recipient_emails = await self.get_valid_to_emails(recipient_emails)
         validate_email(self.config.sender_email)
+        email_params = {
+            "charset": "utf-8",
+            "from": self.config.sender_email,
+            #     "fromName": todo add from name
+            #     "replyTo": todo add replyname
+            "isTransactional": 'true',
+            "subject": self.config.message.subject,
+            "to": ','.join(valid_recipient_emails),
+        }
+        if self.config.message.content.type == "text/html":
+            email_params["bodyHtml"] = message
+        else:
+            email_params["bodyText"] = message
+
+        try:
+            result = await self.client.emails_post(email_params)
+            return Result(port="response", value=result)
+        except Exception as e:
+            return Result(port="error", value={"message": str(e)})
+
+    async def get_valid_to_emails(self, recipient_emails):
         valid_recipient_emails = []
         for email in recipient_emails:
             try:
@@ -68,42 +83,7 @@ class ElasticEmailTransactionalMailSender(ActionRunner):
             except EmailNotValidError:
                 self.console.warning("Recipient e-mail {} is not valid email. This e-mail was skipped.".format(email))
                 continue
-
-        email_body = []
-        if self.config.message.content.type == "text/html":
-            email_body.append(BodyPart(
-                content_type=BodyContentType("HTML"),
-                content=message,
-                charset="utf-8",
-            ))
-        else:
-            email_body.append(BodyPart(
-                content_type=BodyContentType("PlainText"),
-                content=message,
-                charset="utf-8",
-            ))
-
-        email_transactional_message_data = EmailTransactionalMessageData(
-            recipients=TransactionalRecipient(
-                to=recipient_emails,
-            ),
-            content=EmailContent(
-                body=email_body,
-                _from=self.config.sender_email,
-                # todo maybe reply to should be added to the form and configuration?
-                # reply_to="myemail@domain.com",
-                subject=self.config.message.subject,
-            )
-        )
-        try:
-            with ElasticEmail.ApiClient(configuration) as api_client:
-                api_instance = emails_api.EmailsApi(api_client)
-
-                api_response = api_instance.emails_transactional_post(email_transactional_message_data)
-                return Result(port="response", value=api_response.to_dict())
-        except Exception as e:
-            # except ElasticEmail.ApiException as e:
-            return Result(port="error", value={"message": str(e)})
+        return valid_recipient_emails
 
 
 def register() -> Plugin:
