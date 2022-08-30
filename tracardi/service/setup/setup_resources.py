@@ -220,7 +220,7 @@ def get_resource_types() -> List[ResourceSettings]:
             },
             icon="email",
             tags=["elastic-email"],
-            manual="elastic_email_resource"
+            manual="elastic_mail_resource"
         ),
         ResourceSettings(
             id="airtable",
