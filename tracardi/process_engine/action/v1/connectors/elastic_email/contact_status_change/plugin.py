@@ -1,10 +1,9 @@
-from datetime import datetime
-from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from .model.config import Config, Connection
+from .model.config import Config
+from ..add_contact.model.config import Connection
 from tracardi.service.storage.driver import storage
 from ..client import ElasticEmailClient
 
@@ -13,7 +12,7 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class ElasticEmailContactAdder(ActionRunner):
+class ElasticEmailContactStatusChange(ActionRunner):
 
     config: Config
     credentials: Connection
@@ -27,34 +26,15 @@ class ElasticEmailContactAdder(ActionRunner):
         self.credentials = resource.credentials.get_credentials(self, output=Connection)    # type: Connection
         self.client = ElasticEmailClient(**dict(self.credentials))    # type: ElasticEmailClient
 
-    @staticmethod
-    def parse_mapping(mapping):
-        for key, value in mapping.items():
-
-            if isinstance(value, list):
-                if key == "tags":
-                    mapping[key] = ",".join(value)
-
-                else:
-                    mapping[key] = "|".join(value)
-
-            elif isinstance(value, datetime):
-                mapping[key] = str(value)
-        return mapping
-
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        traverser = DictTraverser(dot)
-        mapping = traverser.reshape(self.config.additional_mapping)
-        mapping = self.parse_mapping(mapping)
-
         contact_data = {
             "email": dot[self.config.email],
-            **mapping
+            'status': dot[self.config.status],
         }
 
         try:
-            result = await self.client.add_contact(
+            result = await self.client.contact_status_change(
                 contact_data
             )
             return Result(port="response", value=result)
@@ -67,20 +47,20 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='ElasticEmailContactAdder',
+            className='ElasticEmailContactStatusChange',
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
             license="MIT",
             author="Ben Ullrich",
-            manual="elastic_email_contact_add_action",
+            manual="elastic_email_change_contact_status_action",
             init={
                 "source": {
                     "id": None,
                     "name": None
                 },
                 "email": None,
-                "additional_mapping": {},
+                "status": None,
             },
             form=Form(
                 groups=[
@@ -104,12 +84,14 @@ def register() -> Plugin:
                                                                                })
                             ),
                             FormField(
-                                id="additional_mapping",
-                                name="Additional fields",
-                                description="You can add some more fields to your contact. Just type in the alias of "
-                                            "the field as key, and a path as a value for this field. This is fully "
-                                            "optional. (Example: last_name: profile@pii.last_name",
-                                component=FormComponent(type="keyValueList", props={"label": "Fields"})
+                                id="status",
+                                name="Status",
+                                description="The path to the status as a number or just the number for the new status. "
+                                            "2 is unsubscribe",
+                                component=FormComponent(type="dotPath", props={"label": "Status",
+                                                                               "defaultSourceValue": "profile",
+                                                                               "defaultPathValue": "pii.status"
+                                                                               })
                             ),
                         ]
                     )
@@ -117,9 +99,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Add contact',
+            name='Change Contact Status',
             brand='Elastic Email',
-            desc='Adds a new contact to Elastic Email based on provided data.',
+            desc='Changes the status of a contact on Elastic Email based on provided data.',
             icon='email',
             group=["Elastic Email"],
             tags=['mailing'],

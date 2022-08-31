@@ -27,6 +27,9 @@ expr: and_expr
         | op_empty
         | op_not_empty
         | op_is_not_null
+        | op_contains
+        | op_startswith
+        | op_endswith
 
 op_field_sig: OP_FIELD
         | op_compound_value
@@ -45,6 +48,9 @@ op_exists: OP_FIELD EXISTS_TERMINAL
 op_not_exists: OP_FIELD "NOT"i EXISTS_TERMINAL
 op_empty: op_field_sig EMPTY_TERMINAL
 op_not_empty: op_field_sig "NOT"i EMPTY_TERMINAL
+op_contains: op_field_sig CONTAINS_TERMINAL op_value_sig
+op_startswith: op_field_sig STARTSWITH_TERMINAL op_value_sig
+op_endswith: op_field_sig ENDSWITH_TERMINAL op_value_sig
 
 OP: /(!=|<=|>=|=>|=<|==|>|<)/
 
@@ -67,5 +73,8 @@ AND_TERMINAL: /(\r? \n|\s)+AND(\r? \n|\s)+/i
 OR_TERMINAL: /(\r? \n|\s)+OR(\r? \n|\s)+/i
 EXISTS_TERMINAL: /EXISTS/i
 EMPTY_TERMINAL: /EMPTY/i
+CONTAINS_TERMINAL: /CONTAINS/i
+STARTSWITH_TERMINAL: /STARTS WITH/i
+ENDSWITH_TERMINAL: /ENDS WITH/i
 
 %ignore WS
