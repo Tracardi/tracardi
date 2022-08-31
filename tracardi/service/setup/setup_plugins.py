@@ -19,7 +19,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         init=None,
         resource=None
     ),
-
     "tracardi.process_engine.action.v1.flow.start.start_action": PluginTestTemplate(
         init={'debug': False, 'event_id': None, 'event_type': {'id': '', 'name': ''}, 'event_types': [],
               'profile_less': False, 'properties': '{}', 'session_less': False},
@@ -541,11 +540,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.pushover.push.plugin": PluginTestTemplate(
-        init=None,
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.discord.push.plugin": PluginTestTemplate(
         init={'message': '', 'timeout': 10, 'url': None, 'username': None},
         resource=None
@@ -576,27 +570,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.meaningcloud.sentiment_analysis.plugin": PluginTestTemplate(
-        init=None,
-        resource={
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.meaningcloud.language_detection.plugin": PluginTestTemplate(
-        init=None,
-        resource={
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.meaningcloud.text_classification.plugin": PluginTestTemplate(
-        init=None,
-        resource={
-            "token": "token"
-        }
-    ),
-
     "tracardi.process_engine.action.v1.connectors.oauth2_token.plugin": PluginTestTemplate(
         init={'destination': None, 'source': {'id': '1', 'name': 'Some value'}},
         resource=None
@@ -611,66 +584,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         init={'range': None, 'read': False, 'sheet_name': None, 'source': {'id': '1', 'name': 'Some value'},
               'spreadsheet_id': None, 'values': '[["Name", "John"]]', 'write': False},
         resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.meaningcloud.deep_categorization.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "Test",
-                "id": "1"
-            },
-            "text": "Text",
-            "model": "IAB_2.0-tier3"
-        },
-        resource={
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.meaningcloud.corporate_reputation.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "Test",
-                "id": "1"
-            },
-            "text": "text",
-            "lang": "auto",
-            "focus": "focus",
-            "company_type": "type",
-            "relaxed_typography": False
-        },
-        resource={
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.meaningcloud.topics_extraction.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "test",
-                "id": "1"
-            },
-            "text": "test",
-            "lang": "auto"
-        },
-        resource={
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.meaningcloud.summarization.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "Test",
-                "id": "1"
-            },
-            "text": "text",
-            "lang": "auto",
-            "sentences": "2"
-        },
-        resource={
-            "token": "token"
-        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginTestTemplate(
@@ -721,32 +634,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     "tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin": PluginTestTemplate(
         init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
               'source': {'id': '', 'name': ''}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mautic.add_contact.plugin": PluginTestTemplate(
-        init={'additional_mapping': {}, 'email': None, 'overwrite_with_blank': False,
-              'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_id.plugin": PluginTestTemplate(
-        init={'contact_id': None, 'source': {'id': None, 'name': None}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_email.plugin": PluginTestTemplate(
-        init={'contact_email': None, 'source': {'id': None, 'name': None}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mautic.edit_points.plugin": PluginTestTemplate(
-        init={'action': None, 'contact_id': None, 'points': None, 'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mautic.add_remove_segment.plugin": PluginTestTemplate(
-        init={'action': None, 'contact_id': None, 'segment': None, 'source': {'id': None, 'name': None}},
         resource=None
     ),
 
@@ -878,11 +765,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.pro.scheduler.plugin": PluginTestTemplate(
-        init=None,
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.rabbitmq.publish.plugin": PluginTestTemplate(
         init={'queue': {'auto_declare': True, 'compression': None, 'name': None, 'queue_type': 'direct',
                         'routing_key': None, 'serializer': 'json'}, 'source': {'id': None}},
@@ -905,15 +787,160 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
 # Plugins only for testing
 test_plugins: Dict[str, PluginTestTemplate] = {
+
     "tracardi.process_engine.action.v1.connectors.aws.sqs.plugin": PluginTestTemplate(
         init=None,
-        resource=None
+        resource={
+            "token": "token"
+        }
     ),
-    "tracardi.process_engine.action.v1.connectors.novu.plugin": PluginTestTemplate(
+
+    "tracardi.process_engine.action.v1.pro.scheduler.registry": PluginTestTemplate(
+        init=None,
+        resource={
+            "callback_host": "http://localhost:8686"
+        }
+    ),
+    "tracardi.process_engine.action.v1.connectors.novu.trigger.registry": PluginTestTemplate(
         init={'payload': '{}', 'recipient_email': 'profile@pii.email', 'source': {'id': '', 'name': ''},
               'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
         resource={
             "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.pushover.push.plugin": PluginTestTemplate(
+        init=None,
+        resource={
+            "token": "<token>",
+            "user": "<user>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.meaningcloud.sentiment_analysis.plugin": PluginTestTemplate(
+        init=None,
+        resource={
+            "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.meaningcloud.language_detection.plugin": PluginTestTemplate(
+        init=None,
+        resource={
+            "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.meaningcloud.text_classification.plugin": PluginTestTemplate(
+        init=None,
+        resource={
+            "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.meaningcloud.corporate_reputation.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "name": "Test",
+                "id": "1"
+            },
+            "text": "text",
+            "lang": "auto",
+            "focus": "focus",
+            "company_type": "type",
+            "relaxed_typography": False
+        },
+        resource={
+            "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.meaningcloud.topics_extraction.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "name": "test",
+                "id": "1"
+            },
+            "text": "test",
+            "lang": "auto"
+        },
+        resource={
+            "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.meaningcloud.summarization.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "name": "Test",
+                "id": "1"
+            },
+            "text": "text",
+            "lang": "auto",
+            "sentences": "2"
+        },
+        resource={
+            "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.meaningcloud.deep_categorization.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "name": "Test",
+                "id": "1"
+            },
+            "text": "Text",
+            "model": "IAB_2.0-tier3"
+        },
+        resource={
+            "token": "token"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mautic.add_contact.plugin": PluginTestTemplate(
+        init={'additional_mapping': {}, 'email': None, 'overwrite_with_blank': False,
+              'source': {'id': '1', 'name': 'Some value'}},
+        resource={
+            "public_key": "<client-public-key>",
+            "private_key": "<client-private-key>",
+            "api_url": "<url-of-mautic-instance>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_id.plugin": PluginTestTemplate(
+        init={'contact_id': None, 'source': {'id': None, 'name': None}},
+        resource={
+            "public_key": "<client-public-key>",
+            "private_key": "<client-private-key>",
+            "api_url": "<url-of-mautic-instance>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_email.plugin": PluginTestTemplate(
+        init={'contact_email': None, 'source': {'id': None, 'name': None}},
+        resource={
+            "public_key": "<client-public-key>",
+            "private_key": "<client-private-key>",
+            "api_url": "<url-of-mautic-instance>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mautic.edit_points.plugin": PluginTestTemplate(
+        init={'action': None, 'contact_id': None, 'points': None, 'source': {'id': '1', 'name': 'Some value'}},
+        resource={
+            "public_key": "<client-public-key>",
+            "private_key": "<client-private-key>",
+            "api_url": "<url-of-mautic-instance>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mautic.add_remove_segment.plugin": PluginTestTemplate(
+        init={'action': None, 'contact_id': None, 'segment': None, 'source': {'id': None, 'name': None}},
+        resource={
+            "public_key": "<client-public-key>",
+            "private_key": "<client-private-key>",
+            "api_url": "<url-of-mautic-instance>"
         }
     ),
 }

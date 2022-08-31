@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
 
 
@@ -26,11 +26,23 @@ class ResourceMetadata(BaseModel):
     tags: List[str]
     submit: List[str] = None
 
+    @validator("name")
+    def name_can_not_be_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Name can not be empty")
+        return value
+
 
 class ProServiceFormMetaData(BaseModel):
     name: str
     description: Optional[str] = None
     tags: List[str] = []
+
+    @validator("name")
+    def name_can_not_be_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Name can not be empty")
+        return value
 
 
 class ProServiceFormData(BaseModel):

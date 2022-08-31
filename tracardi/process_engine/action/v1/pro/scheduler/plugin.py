@@ -4,13 +4,11 @@ from datetime import datetime, timedelta
 
 import tracardi.config
 from tracardi.domain.scheduler_config import SchedulerConfig
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.action.v1.pro.scheduler.model.configuration import Configuration
 from tracardi.process_engine.action.v1.pro.scheduler.service.schedule_client import SchedulerClient
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 
 logging.basicConfig(level=logging.ERROR)
@@ -75,24 +73,3 @@ class SchedulerPlugin(ActionRunner):
             })
 
 
-def register() -> Plugin:
-    return Plugin(
-        start=False,
-        spec=Spec(
-            module='tracardi.process_engine.action.v1.pro.scheduler.plugin',
-            className='SchedulerPlugin',
-            inputs=["payload"],
-            outputs=['response', 'error'],
-            version='0.7.1',
-            license="Tracardi Pro License",
-            author="Risto Kowaczewski"
-        ),
-        metadata=MetaData(
-            name='Schedule event',
-            desc='This plugin schedules events',
-            icon='calendar',
-            group=["Time"],
-            tags=["pro", "scheduler", "postpone", "delay", "event"],
-            pro=True,
-        )
-    )
