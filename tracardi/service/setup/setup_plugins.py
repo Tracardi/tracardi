@@ -417,33 +417,8 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin": PluginTestTemplate(
-        init={'message': {'content': None, 'recipient': None, 'subject': None}, 'sender_email': None,
-              'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginTestTemplate(
         init={'index': None, 'query': '{"query":{"match_all":{}}}', 'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.plugin": PluginTestTemplate(
-        init={'email': "email@email.com", 'list_id': "1", 'merge_fields': {}, 'source': {'id': "1", 'name': "test"},
-              'subscribed': False, 'update': False},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audience.plugin": PluginTestTemplate(
-        init={
-            'delete': False,
-            'email': None,
-            'list_id': None,
-            'source': {
-                'id': None,
-                'name': None
-            }
-        },
         resource=None
     ),
 
@@ -942,6 +917,31 @@ test_plugins: Dict[str, PluginTestTemplate] = {
             "private_key": "<client-private-key>",
             "api_url": "<url-of-mautic-instance>"
         }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin": PluginTestTemplate(
+        init={'message': {'content': None, 'recipient': None, 'subject': None}, 'sender_email': None,
+              'source': {'id': '1', 'name': 'Some value'}},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.plugin": PluginTestTemplate(
+        init={'email': "email@email.com", 'list_id': "1", 'merge_fields': {}, 'source': {'id': "1", 'name': "test"},
+              'subscribed': False, 'update': False},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audience.plugin": PluginTestTemplate(
+        init={
+            'delete': False,
+            'email': None,
+            'list_id': None,
+            'source': {
+                'id': None,
+                'name': None
+            }
+        },
+        resource=None
     ),
 }
 
