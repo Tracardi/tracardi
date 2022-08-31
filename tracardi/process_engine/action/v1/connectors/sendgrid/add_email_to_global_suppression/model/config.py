@@ -9,5 +9,5 @@ class Config(PluginConfig):
     email: str
 
 
-class Connection(BaseModel):
-    api_key: str
+class Token(BaseModel):
+    token: str

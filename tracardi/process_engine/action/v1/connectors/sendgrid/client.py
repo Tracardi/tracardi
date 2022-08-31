@@ -1,3 +1,5 @@
+from json import JSONDecodeError
+
 from tracardi.service.tracardi_http_client import HttpClient
 
 
@@ -11,16 +13,18 @@ class SendgridClientAuthException(Exception):
 
 class SendgridClient:
 
-    def __init__(self, api_key: str):
+    def __init__(self, token: str):
+        # self.api_url = 'https://webhook.site/31b3b0d3-1ede-4edf-810b-a13a552fcbbb'
         self.api_url = 'https://api.sendgrid.com'
-        self.api_key = api_key
+        self.api_key = token
         self.retries = 1
 
     def set_retries(self, retries: int) -> None:
         self.retries = retries
 
-    async def add_email_to_suppression(self, email: str, **kwargs) -> dict:
+    async def add_email_to_global_suppression(self, email: str, **kwargs) -> dict:
         data = {
+            # "recipient_emails": f'["{email}"]',
             "recipient_emails": [email, ],
         }
 
@@ -31,14 +35,16 @@ class SendgridClient:
         ) as client:
             async with client.post(
                     url=f"{self.api_url}/v3/asm/suppressions/global",
-                    data=data
+                    json=data
             ) as response:
 
                 if response.status == 401:
                     raise SendgridClientAuthException()
 
-                if response.status not in (200, 201) or "error" in await response.text() or "errors" in \
-                        await response.json():
+                if response.status not in (200, 201):
                     raise SendgridClientException(await response.text())
-
-                return await response.json()
+                try:
+                    content = await response.json(content_type='text/plain')
+                except JSONDecodeError:
+                    content = await response.text()
+                return content
