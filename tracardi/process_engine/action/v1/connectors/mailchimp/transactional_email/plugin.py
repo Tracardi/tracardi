@@ -99,7 +99,7 @@ def register() -> Plugin:
                                 id="source",
                                 name="MailChimp resource",
                                 description="Please provide your MailChimp resource ID. ",
-                                component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
+                                component=FormComponent(type="resource", props={"label": "resource", "tag": "mailchimp"})
                             ),
                             FormField(
                                 id="sender_email",
