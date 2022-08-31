@@ -788,12 +788,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.novu.plugin": PluginTestTemplate(
-        init={'payload': '{}', 'recipient_email': 'profile@pii.email', 'source': {'id': '', 'name': ''},
-              'subscriber_id': 'profile@id', 'template_name': None},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginTestTemplate(
         init={'value': ''},
         resource=None
@@ -914,6 +908,13 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     "tracardi.process_engine.action.v1.connectors.aws.sqs.plugin": PluginTestTemplate(
         init=None,
         resource=None
+    ),
+    "tracardi.process_engine.action.v1.connectors.novu.plugin": PluginTestTemplate(
+        init={'payload': '{}', 'recipient_email': 'profile@pii.email', 'source': {'id': '', 'name': ''},
+              'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
+        resource={
+            "token": "token"
+        }
     ),
 }
 

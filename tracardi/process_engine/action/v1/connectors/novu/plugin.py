@@ -1,7 +1,7 @@
 import json
 from json import JSONDecodeError
 from pprint import pprint
-from typing import Optional, List
+from typing import Optional
 
 import aiohttp
 from tracardi.domain.resources.token import Token
@@ -56,7 +56,7 @@ class Endpoint(PluginEndpoint):
                 }
 
 
-class NotificationGeneratorAction(ActionRunner):
+class NovuTriggerAction(ActionRunner):
     credentials: Token
     config: Config
 
@@ -110,7 +110,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='NotificationGeneratorAction',
+            className='NovuTriggerAction',
             inputs=['payload'],
             outputs=['response', 'error'],
             version="0.7.2",
