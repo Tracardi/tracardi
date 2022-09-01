@@ -25,6 +25,9 @@ class ResourceMetadata(BaseModel):
     icon: str
     tags: List[str]
     submit: List[str] = None
+    requirements: Optional[dict] = {}
+    context: Optional[dict] = {}
+    documentation: Optional[str] = None
 
     @validator("name")
     def name_can_not_be_empty(cls, value):
