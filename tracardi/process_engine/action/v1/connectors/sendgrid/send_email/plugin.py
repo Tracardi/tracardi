@@ -53,16 +53,20 @@ class SendgridEMailSender(ActionRunner):
         recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
         validate_email(self.config.sender_email)
         valid_recipient_emails = await self.get_valid_to_emails(recipient_emails)
-        email_params = {'personalizations': [{}]}
-        email_params['personalizations'][0]['to'] = [{'email': valid_recipient_emails}]
-        email_params['personalizations'][0]['from']['email'] = self.config.sender_email
-        email_params['personalizations'][0]['subject'] = self.config.message.subject
-        email_params['subject'] = self.config.message.subject
-        email_params['from']['email'] = self.config.sender_email
-        email_params["content"] = [{
-            "type": self.config.message.content.type,
-            "value": message
-        }]
+        send_to_personal = {
+            'to': [{'email': valid_recipient_emails[0]}],
+            'from': {'email': self.config.sender_email},
+            'subject': self.config.message.subject,
+        }
+        email_params = {
+            'personalizations': [send_to_personal],
+            'subject': self.config.message.subject,
+            'from': {'email': self.config.sender_email},
+            "content": [{
+                "type": self.config.message.content.type,
+                "value": message
+            }]
+        }
 
         try:
             result = await self.client.emails_post(email_params)
