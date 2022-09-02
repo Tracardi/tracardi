@@ -1,5 +1,5 @@
 import python_weather
-from python_weather.response import Weather
+from python_weather.forecast import Weather
 
 
 class AsyncWeatherClient:
@@ -15,6 +15,6 @@ class AsyncWeatherClient:
 
     async def fetch(self, city) -> Weather:
         client = python_weather.Client(format=self.type)
-        weather = await client.find(city)
+        weather = await client.get(city)
         await client.close()
         return weather

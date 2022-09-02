@@ -176,7 +176,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.operations.reduce_array.plugin": PluginTestTemplate(
-        init={'array': ''},
+        init={'array': 'payload@test'},
         resource=None
     ),
 
