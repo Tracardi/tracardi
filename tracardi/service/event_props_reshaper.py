@@ -4,7 +4,6 @@ from tracardi.domain.event_payload_validator import ReshapeSchema
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.parser import Parser
-from tracardi.process_engine.tql.condition import Condition
 from tracardi.domain.event import RESHAPED
 
 
