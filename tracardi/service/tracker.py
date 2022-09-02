@@ -39,6 +39,7 @@ from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.wf.domain.flow_response import FlowResponses
+from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -121,7 +122,7 @@ def get_profile_id(profile: Profile):
     return profile.id if isinstance(profile, Entity) else None
 
 
-async def validate_events_json_schemas(events, profile: Optional[Profile], session, console_log: ConsoleLog):
+async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
     for event in events:
         dot = DotAccessor(
             profile=profile,
@@ -134,17 +135,19 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
         event_type = dot.event['type']
 
         if event_type not in cache:
-            logger.info(f"Refreshed validation schema for event type {event_type}.")
-            event_payload_validator = await storage.driver.event_management.load_event_type_metadata(
+            logger.info(f"Refreshed validation and reshaping schema for event type {event_type}.")
+            event_type_manager = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
-            cache[event_type] = CacheItem(data=event_payload_validator, ttl=memory_cache.event_validator_ttl)
+            cache[event_type] = CacheItem(data=event_type_manager, ttl=memory_cache.event_validator_ttl)
 
-        validation_data = cache[event_type].data
+        event_type_manager = cache[event_type].data  # type: EventTypeManager
 
-        if validation_data is not None:
+        if event_type_manager is not None:
             try:
-                validate(dot, validator=validation_data)
+                validate(dot, validator=event_type_manager)
                 event.metadata.status = VALIDATED
+                EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
+
             except EventValidationException as e:
                 event.metadata.status = INVALID
                 console_log.append(
@@ -154,6 +157,19 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
                         class_name='EventValidator',
                         module='tracker',
                         type='error',
+                        message=str(e),
+                        traceback=get_traceback(e)
+                    )
+                )
+
+            except EventPropsReshapingError as e:
+                console_log.append(
+                    Console(
+                        profile_id=get_profile_id(profile),
+                        origin='profile',
+                        class_name='EventPropsReshaping',
+                        module='tracker',
+                        type='warning',
                         message=str(e),
                         traceback=get_traceback(e)
                     )
@@ -187,8 +203,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Get events
     events = tracker_payload.get_events(session, profile, has_profile, ip)
 
-    # Validates json schemas of events, throws exception if data is not valid
-    console_log = await validate_events_json_schemas(events, profile, session, console_log)
+    # Validates json schemas of events, throws exception if data is not valid or reshape failed
+    console_log = await validate_and_reshape_events(events, profile, session, console_log)
 
     debugger = None
     segmentation_result = None

@@ -21,12 +21,24 @@ class ValidationSchema(BaseModel):
         return v
 
 
+class ReshapeSchema(BaseModel):
+    condition: Optional[str] = None
+    template: Optional[dict] = None
+
+    @validator("condition", "template")
+    def transform_values_to_none(cls, value):
+        if not value:
+            return None
+        return value
+
+
 class EventTypeManager(BaseModel):
     name: str
     event_type: str
     description: Optional[str] = "No description provided"
     tags: List[str] = []
     validation: ValidationSchema
+    reshaping: Optional[ReshapeSchema] = ReshapeSchema()
 
     def encode(self) -> 'EventPayloadValidatorRecord':
         return EventPayloadValidatorRecord(
@@ -34,21 +46,25 @@ class EventTypeManager(BaseModel):
             id=self.event_type.lower().replace(" ", "-"),
             name=self.name,
             description=self.description,
-            tags=self.tags
+            tags=self.tags,
+            reshaping=b64_encoder(self.reshaping)
         )
 
     @staticmethod
     def decode(record: 'EventPayloadValidatorRecord') -> 'EventTypeManager':
+        print(record)
         return EventTypeManager(
             validation=ValidationSchema(**b64_decoder(record.validation)),
             event_type=record.id,
             name=record.name,
             description=record.description,
-            tags=record.tags
+            tags=record.tags,
+            reshaping=ReshapeSchema(**b64_decoder(record.reshaping))
         )
 
 
 class EventPayloadValidatorRecord(BaseModel):
+    reshaping: str  # Encrypted reshape schema
     validation: str  # Encrypted validation schema
     id: str
     name: str

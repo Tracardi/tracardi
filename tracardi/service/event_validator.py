@@ -6,6 +6,9 @@ from dotty_dict import Dotty
 
 
 def validate(dot: DotAccessor, validator: EventTypeManager) -> None:
+    if validator.validation.enabled is False:
+        return
+
     for key, val_schema in validator.validation.json_schema.items():
         if not DotAccessor.validate(key):
             raise EventValidationException(

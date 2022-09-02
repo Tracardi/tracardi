@@ -28,6 +28,10 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "reshaping": {
+        "type": "keyword",
+        "index": false
       }
     }
   },
