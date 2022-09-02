@@ -17,6 +17,12 @@ class TProMicroserviceResource(BaseModel):
     credentials: Optional[dict] = {}
 
 
+class DocumentationMetadata(BaseModel):
+    file: str
+    path: Optional[str] = None
+    url: Optional[str] = None
+
+
 class ResourceMetadata(BaseModel):
     type: str
     name: str
@@ -27,7 +33,7 @@ class ResourceMetadata(BaseModel):
     submit: List[str] = None
     requirements: Optional[dict] = {}
     context: Optional[dict] = {}
-    documentation: Optional[str] = None
+    documentation: Optional[DocumentationMetadata] = None
 
     @validator("name")
     def name_can_not_be_empty(cls, value):
