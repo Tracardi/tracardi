@@ -734,6 +734,12 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin": PluginTestTemplate(
+        init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
+            'source': {'id': '', 'name': ''}},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.connectors.mautic.add_contact.plugin": PluginTestTemplate(
         init={'additional_mapping': {}, 'email': None, 'overwrite_with_blank': False,
               'source': {'id': '1', 'name': 'Some value'}},
