@@ -1,4 +1,5 @@
 import python_weather
+from aiohttp import ClientSession, ClientTimeout
 from python_weather.forecast import Weather
 
 
@@ -14,7 +15,7 @@ class AsyncWeatherClient:
             self.type = type
 
     async def fetch(self, city) -> Weather:
-        client = python_weather.Client(format=self.type)
+        client = python_weather.Client(format=self.type, session=ClientSession(timeout=ClientTimeout(total=5000.0)))
         weather = await client.get(city)
         await client.close()
         return weather
