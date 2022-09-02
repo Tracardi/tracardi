@@ -52,7 +52,6 @@ class EventTypeManager(BaseModel):
 
     @staticmethod
     def decode(record: 'EventPayloadValidatorRecord') -> 'EventTypeManager':
-        print(record)
         return EventTypeManager(
             validation=ValidationSchema(**b64_decoder(record.validation)),
             event_type=record.id,
