@@ -9,6 +9,7 @@ from deepdiff import DeepDiff
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
+from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
 
 from tracardi.service.console_log import ConsoleLog
@@ -47,7 +48,6 @@ cache = MemoryCache()
 
 
 async def _save_profile(profile):
-    # print("save-profile-metadata", profile.get_meta_data() if profile else None)
     try:
         if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
             return await storage.driver.profile.save(profile)
@@ -457,7 +457,7 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
     # Load session from storage
     try:
-        session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
+        session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # type: Optional[Session]
     except DuplicatedRecordException as e:
 
         # There may be a case when we have 2 sessions with the same id.
@@ -473,6 +473,9 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
                 time=SessionTime(
                     insert=datetime.utcnow()
                 )
+            ),
+            operation=Operation(
+                new=True
             )
         )
 
@@ -486,8 +489,6 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         storage.driver.profile.load_merged_profile,
         profile_less
     )
-    # print("profile-meta", profile.get_meta_data() if profile else None)
-    # print("session-metadata", session.get_meta_data() if session else None)
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 

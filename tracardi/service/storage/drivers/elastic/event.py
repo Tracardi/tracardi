@@ -551,6 +551,7 @@ async def reassign_session(new_session_id: str, old_session_id: str, profile_id:
     result = await get_events_by_session_and_profile(profile_id, old_session_id)
     for event_record in result:
         try:
+            event_record['_id'] = event_record['id']
             event_record['session']['id'] = new_session_id
             await storage_manager('event').upsert(event_record)
         except Exception as e:

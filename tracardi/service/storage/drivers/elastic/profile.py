@@ -37,7 +37,7 @@ async def load_merged_profile(id: str) -> Profile:
         # Merge duplicated profiles
         _duplicated_profiles = await load_duplicates(id)  # 1st records is the newest
         valid_profile_record = _duplicated_profiles.first() # type: StorageRecord
-        profile = Profile(**valid_profile_record).set_meta_data(valid_profile_record.get_meta_data())
+        profile = valid_profile_record.to_entity(Profile)
 
         if len(_duplicated_profiles) == 1:
             # If 1 then there is no duplication
