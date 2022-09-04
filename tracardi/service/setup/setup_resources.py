@@ -146,15 +146,15 @@ def get_resource_types() -> List[ResourceSettings]:
                 "token": "<token>"
             }
         ),
-        # ResourceSettings(
-        #     id="novu",
-        #     name="Novu",
-        #     tags=["token", "novu"],
-        #     config={
-        #         "token": "<token>"
-        #     },
-        #     manual="novu_resource"
-        # ),
+        ResourceSettings(
+            id="novu",
+            name="Novu",
+            tags=["token", "novu"],
+            config={
+                "token": "<token>"
+            },
+            manual="novu_resource"
+        ),
         ResourceSettings(
             id="google-cloud-service-account",
             name="Google Cloud service account",
@@ -194,23 +194,23 @@ def get_resource_types() -> List[ResourceSettings]:
                 "password": "<service-account-password>"
             }
         ),
-        # ResourceSettings(
-        #     id="mautic",
-        #     name="Mautic",
-        #     icon="mautic",
-        #     tags=["mautic", "destination"],
-        #     config={
-        #         "public_key": "<client-public-key>",
-        #         "private_key": "<client-private-key>",
-        #         "api_url": "<url-of-mautic-instance>"
-        #     },
-        #     destination=DestinationData(
-        #         package="tracardi.process_engine.destination.mautic_connector.MauticConnector",
-        #         init={
-        #             "overwrite_with_blank": False
-        #         }
-        #     )
-        # ),
+        ResourceSettings(
+            id="mautic",
+            name="Mautic",
+            icon="mautic",
+            tags=["mautic", "destination"],
+            config={
+                "public_key": "<client-public-key>",
+                "private_key": "<client-private-key>",
+                "api_url": "<url-of-mautic-instance>"
+            },
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.mautic_connector.MauticConnector",
+                init={
+                    "overwrite_with_blank": False
+                }
+            )
+        ),
         ResourceSettings(
             id="elastic-email",
             name="ElasticEmail",

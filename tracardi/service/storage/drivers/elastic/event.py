@@ -216,7 +216,7 @@ async def aggregate_profile_events(profile_id: str, aggregate_query: dict) -> St
     return await storage_manager(index="event").aggregate(query)
 
 
-async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=15) -> StorageAggregateResult:
+async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100) -> StorageAggregateResult:
     aggregate_query = {
         bucket_name: {
             "terms": {
@@ -270,8 +270,8 @@ async def aggregate_event_status() -> List[Dict[str, str]]:
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
-async def aggregate_events_by_source():
-    result = await _aggregate_event(bucket_name='by_source', by="source.id")
+async def aggregate_events_by_source(buckets_size):
+    result = await _aggregate_event(bucket_name='by_source', by="source.id", buckets_size=buckets_size)
 
     if 'by_source' not in result.aggregations:
         return []
