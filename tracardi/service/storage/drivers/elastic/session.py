@@ -75,7 +75,10 @@ async def exist(id: str) -> bool:
 
 
 async def load(id: str) -> Optional[Session]:
-    return await StorageFor(Entity(id=id)).index("session").load(Session)  # type: Optional[Session]
+    session_record = await storage_manager("session").load(id)
+    if session_record is None:
+        return None
+    return Session(**session_record)  # type: Optional[Session]
 
 
 async def load_duplicates(id: str):
