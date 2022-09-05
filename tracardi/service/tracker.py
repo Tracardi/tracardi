@@ -144,8 +144,15 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
 
         if event_type_manager is not None:
             try:
+                # todo: refactor: https://en.wikipedia.org/wiki/Coding_by_exception
+                # todo: Flow control by the exception is an anti-pattern. validate should return True/False.
+                # todo: Exceptions are fine when there is an error in data but the result should be returned if the
+                # todo: validation is disabled for example.
                 validate(dot, validator=event_type_manager)
                 event.metadata.status = VALIDATED
+                # todo: refactor: https://dogsnog.blog/2020/04/23/the-iterate-and-mutate-programming-anti-pattern/
+                # todo: The event was mutated and there is no way to tell it form the code.
+                # todo: reshape should return new event with reshaped data.
                 EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
 
             except EventValidationException as e:
