@@ -30,7 +30,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
-    EventValidationException, TracardiException, DuplicatedRecordException
+    TracardiException, DuplicatedRecordException
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -144,11 +144,13 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
         else:
             event_type_manager = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
-            redis_client.client.setex(
-                f"EVENT-TYPE-MANAGER-{event_type}",
-                value=json.dumps(event_type_manager.dict()),
-                time=15 * 60
-            )
+            if event_type_manager is not None:
+                redis_client.client.setex(
+                    f"EVENT-TYPE-MANAGER-{event_type}",
+                    value=json.dumps(event_type_manager.dict()),
+                    time=15 * 60
+                )
+                logger.info(f"Event type manager for type {event_type} has been re-cached.")
 
         if event_type_manager is not None:
             try:

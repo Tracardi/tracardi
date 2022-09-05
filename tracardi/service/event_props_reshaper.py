@@ -33,4 +33,4 @@ class EventPropsReshaper:
             raise EventPropsReshapingError(f"Could not reshape event properties due to an error: `{str(e)}`")
 
         else:
-            return Event(**self.event.dict(exclude={"properties"}), properties=props)
+            return Event(**self.event.dict(exclude={"properties", "status"}), properties=props, status=RESHAPED)
