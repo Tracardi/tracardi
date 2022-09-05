@@ -154,21 +154,22 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
 
         if event_type_manager is not None:
             try:
-                if validate(dot, validator=event_type_manager):
-                    event.metadata.status = VALIDATED
-                else:
-                    event.metadata.status = INVALID
-                    console_log.append(
-                        Console(
-                            profile_id=get_profile_id(profile),
-                            origin='profile',
-                            class_name='EventValidator',
-                            module='tracker',
-                            type='error',
-                            message="Event is invalid.",
-                            traceback="Event is invalid."
+                if event_type_manager.validation.enabled is True:
+                    if validate(dot, validator=event_type_manager):
+                        event.metadata.status = VALIDATED
+                    else:
+                        event.metadata.status = INVALID
+                        console_log.append(
+                            Console(
+                                profile_id=get_profile_id(profile),
+                                origin='profile',
+                                class_name='EventValidator',
+                                module='tracker',
+                                type='error',
+                                message="Event is invalid.",
+                                traceback="Event is invalid."
+                            )
                         )
-                    )
                 events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
 
             except EventPropsReshapingError as e:
