@@ -173,6 +173,9 @@ def test_should_not_reshape_with_wrong_condition():
 
 
 def test_should_reshape_whole_objects():
+    """
+    Check line 72 in dict_traverser.py
+    """
     profile = Profile(id="1")
     session = Session(
         id='1',
