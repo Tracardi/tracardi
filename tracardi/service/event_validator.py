@@ -5,9 +5,9 @@ from tracardi.exceptions.exception import EventValidationException
 from dotty_dict import Dotty
 
 
-def validate(dot: DotAccessor, validator: EventTypeManager) -> None:
+def validate(dot: DotAccessor, validator: EventTypeManager) -> bool:
     if validator.validation.enabled is False:
-        return
+        return True
 
     for key, val_schema in validator.validation.json_schema.items():
         if not DotAccessor.validate(key):
@@ -17,5 +17,7 @@ def validate(dot: DotAccessor, validator: EventTypeManager) -> None:
         try:
             value = dot[key].to_dict() if isinstance(dot[key], Dotty) else dot[key]
             jsonschema.validate(value, val_schema)
-        except (jsonschema.ValidationError, KeyError) as e:
-            raise EventValidationException("{}: {}".format(key, str(e)))
+        except (jsonschema.ValidationError, KeyError) as _:
+            return False
+
+    return True
