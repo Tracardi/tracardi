@@ -180,16 +180,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.operations.write_to_memory.plugin": PluginTestTemplate(
-        init={'key': 'test-key', 'ttl': 15, 'value': 'test-value'},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.operations.read_from_memory.plugin": PluginTestTemplate(
-        init={'key': 'test-key'},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.calculator_action": PluginTestTemplate(
         init={'calc_dsl': 'a = profile@id + 1'},
         resource=None
@@ -422,84 +412,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.trello.add_card_action.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "test",
-                "id": "1"
-            },
-            "board_url": "http://localhost",
-            "list_name": "test",
-            "card": {
-                "name": "name",
-                "desc": None,
-                "urlSource": None,
-                "coordinates": None,
-                "due": None
-            }
-
-        },
-        resource={
-            "api_key": "api_key",
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.trello.delete_card_action.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "test",
-                "id": "1"
-            },
-            "board_url": "http://localhost",
-            "list_name": "list",
-            "card_name": "card"
-        },
-        resource={
-            "api_key": "api_key",
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.trello.move_card_action.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "test",
-                "id": "1"
-            },
-            "board_url": "http://localhost",
-            "list_name1": "list1",
-            "list_name2": "list2",
-            "card_name": "card"
-        },
-        resource={
-            "api_key": "api_key",
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.trello.add_member_action.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "name": "test",
-                "id": "1"
-            },
-            "board_url": "http://locahost",
-            "card_name": "card",
-            "list_name": "list_name",
-            "member_id": "1"
-        },
-        resource={
-            "api_key": "api_key",
-            "token": "token"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.amplitude.send_events.plugin": PluginTestTemplate(
-        init=None,
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.mongo.query.plugin": PluginTestTemplate(
         init={'collection': None, 'database': None, 'query': '{}', 'source': {'id': None}},
         resource=None
@@ -630,21 +542,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin": PluginTestTemplate(
-        init={'contact_type': 'Individual', 'fields': {}, 'source': {'id': '', 'name': ''}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin": PluginTestTemplate(
-        init={'email': None, 'source': {'id': None, 'name': None}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin": PluginTestTemplate(
-        init={'fields': {}, 'source': {'id': None, 'name': None}},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin": PluginTestTemplate(
         init={'extension_id': None, 'mapping': {}, 'source': {'id': '', 'name': ''}, 'update': False},
         resource=None
@@ -740,12 +637,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.rabbitmq.publish.plugin": PluginTestTemplate(
-        init={'queue': {'auto_declare': True, 'compression': None, 'name': None, 'queue_type': 'direct',
-                        'routing_key': None, 'serializer': 'json'}, 'source': {'id': None}},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.flow.postpone_event.plugin": PluginTestTemplate(
         init=None,
         resource=None
@@ -762,6 +653,49 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
 # Plugins only for testing
 test_plugins: Dict[str, PluginTestTemplate] = {
+
+    "tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin": PluginTestTemplate(
+        init={'email': "some@email.com", 'source': {'id': "", 'name': ""}},
+        resource={
+            "api_key": "<api-key>",
+            "api_url": "<api-url>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin": PluginTestTemplate(
+        init={'fields': {}, 'source': {'id': "", 'name': ""}},
+        resource={
+            "api_key": "<api-key>",
+            "api_url": "<api-url>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.rabbitmq.publish.plugin": PluginTestTemplate(
+        init={'queue': {'auto_declare': True, 'compression': None, 'name': "queue", 'queue_type': 'direct',
+                        'routing_key': None, 'serializer': 'json'}, 'source': {'id': "", "name": ""}},
+        resource={
+                "uri": "amqp://localhost:5672/",
+                "port": "5672",
+                "timeout": "5",
+                "virtual_host": ""
+            }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin": PluginTestTemplate(
+        init={'contact_type': 'Individual', 'fields': {}, 'source': {'id': '', 'name': ''}},
+        resource={
+                "api_key": "<api-key>",
+                "site_key": "<site-key>",
+                "api_url": "<api-url>"
+            }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.amplitude.send_events.plugin": PluginTestTemplate(
+        init=None,
+        resource={
+            "token": "token"
+        }
+    ),
 
     "tracardi.process_engine.action.v1.connectors.aws.sqs.plugin": PluginTestTemplate(
         init=None,
@@ -922,13 +856,17 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     "tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin": PluginTestTemplate(
         init={'message': {'content': None, 'recipient': None, 'subject': None}, 'sender_email': None,
               'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
+        resource={
+            "token": "<token>"
+        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.plugin": PluginTestTemplate(
         init={'email': "email@email.com", 'list_id': "1", 'merge_fields': {}, 'source': {'id': "1", 'name': "test"},
               'subscribed': False, 'update': False},
-        resource=None
+        resource={
+            "token": "<token>"
+        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audience.plugin": PluginTestTemplate(
@@ -941,8 +879,102 @@ test_plugins: Dict[str, PluginTestTemplate] = {
                 'name': None
             }
         },
-        resource=None
+        resource={
+            "token": "<token>"
+        }
     ),
+
+    "tracardi.process_engine.action.v1.operations.write_to_memory.plugin": PluginTestTemplate(
+        init={'key': 'test-key', 'ttl': 15, 'value': 'test-value'},
+        resource={
+            "url": "<url>",
+            "user": "<user>",
+            "password": "<password>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.operations.read_from_memory.plugin": PluginTestTemplate(
+        init={'key': 'test-key'},
+        resource={
+            "url": "<url>",
+            "user": "<user>",
+            "password": "<password>"
+        }
+    ),
+
+    # Moved to microservice
+    # "tracardi.process_engine.action.v1.connectors.trello.add_card_action.plugin": PluginTestTemplate(
+    #     init={
+    #         "source": {
+    #             "name": "test",
+    #             "id": "1"
+    #         },
+    #         "board_url": "http://localhost",
+    #         "list_name": "test",
+    #         "card": {
+    #             "name": "name",
+    #             "desc": None,
+    #             "urlSource": None,
+    #             "coordinates": None,
+    #             "due": None
+    #         }
+    #
+    #     },
+    #     resource={
+    #         "api_key": "api_key",
+    #         "token": "token"
+    #     }
+    # ),
+    #
+    # "tracardi.process_engine.action.v1.connectors.trello.delete_card_action.plugin": PluginTestTemplate(
+    #     init={
+    #         "source": {
+    #             "name": "test",
+    #             "id": "1"
+    #         },
+    #         "board_url": "http://localhost",
+    #         "list_name": "list",
+    #         "card_name": "card"
+    #     },
+    #     resource={
+    #         "api_key": "api_key",
+    #         "token": "token"
+    #     }
+    # ),
+    #
+    # "tracardi.process_engine.action.v1.connectors.trello.move_card_action.plugin": PluginTestTemplate(
+    #     init={
+    #         "source": {
+    #             "name": "test",
+    #             "id": "1"
+    #         },
+    #         "board_url": "http://localhost",
+    #         "list_name1": "list1",
+    #         "list_name2": "list2",
+    #         "card_name": "card"
+    #     },
+    #     resource={
+    #         "api_key": "api_key",
+    #         "token": "token"
+    #     }
+    # ),
+    #
+    # "tracardi.process_engine.action.v1.connectors.trello.add_member_action.plugin": PluginTestTemplate(
+    #     init={
+    #         "source": {
+    #             "name": "test",
+    #             "id": "1"
+    #         },
+    #         "board_url": "http://locahost",
+    #         "card_name": "card",
+    #         "list_name": "list_name",
+    #         "member_id": "1"
+    #     },
+    #     resource={
+    #         "api_key": "api_key",
+    #         "token": "token"
+    #     }
+    # ),
 }
 
 

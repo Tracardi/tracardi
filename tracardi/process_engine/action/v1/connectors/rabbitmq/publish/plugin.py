@@ -51,7 +51,8 @@ def register() -> Plugin:
             manual="rabbit_publisher_action",
             init={
                 "source": {
-                    "id": None
+                    "id": "",
+                    "name": ""
                 },
                 "queue": {
                     "name": None,
