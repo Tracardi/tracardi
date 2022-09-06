@@ -43,11 +43,13 @@ from tracardi.service.wf.domain.flow_response import FlowResponses
 from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
 from tracardi.service.storage.redis_client import RedisClient
 import json
+from tracardi.service.event_manager_cache import EventManagerCache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = MemoryCache()
+event_manager_cache = EventManagerCache()
 
 
 async def _save_profile(profile):
@@ -125,7 +127,7 @@ def get_profile_id(profile: Profile):
 
 
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
-    redis_client = RedisClient()
+
     for index, event in enumerate(events):
         dot = DotAccessor(
             profile=profile,
@@ -137,20 +139,13 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
         )
 
         event_type = dot.event['type']
-        manager_data = redis_client.client.get(f"EVENT-TYPE-MANAGER-{event_type}")  # type: str
-        if manager_data is not None:
-            event_type_manager = EventTypeManager(**json.loads(manager_data))
+        event_type_manager = event_manager_cache.get_item(event_type)
 
-        else:
+        if event_type_manager is None:
             event_type_manager = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
             if event_type_manager is not None:
-                redis_client.client.setex(
-                    f"EVENT-TYPE-MANAGER-{event_type}",
-                    value=json.dumps(event_type_manager.dict()),
-                    time=15 * 60
-                )
-                logger.info(f"Event type manager for type {event_type} has been re-cached.")
+                event_manager_cache.upsert_item(event_type_manager)
 
         if event_type_manager is not None:
             try:

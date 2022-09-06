@@ -19,9 +19,12 @@ class EventPropsReshaper:
         self.dot = dot
 
     def reshape(self, schema: ReshapeSchema) -> Event:
-        if schema.template is None or (schema.condition is not None and ExprTransformer(dot=self.dot).transform(
-                tree=self.parser.parse(schema.condition)
-        ) is False):
+        try:
+            condition = ExprTransformer(dot=self.dot).transform(tree=self.parser.parse(schema.condition))
+        except Exception as _:
+            condition = False
+
+        if schema.template is None or (schema.condition is not None and condition is False):
             return self.event
 
         try:
