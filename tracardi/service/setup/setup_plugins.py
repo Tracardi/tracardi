@@ -729,6 +729,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin": PluginTestTemplate(
+        init={'additional_mapping': {}, 'list_ids': None, 'email': None, 'source': {'id': None, 'name': None}},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin": PluginTestTemplate(
         init={'email': None, 'source': {'id': None, 'name': None}},
         resource=None

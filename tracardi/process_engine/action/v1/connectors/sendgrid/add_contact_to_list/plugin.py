@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from email_validator import validate_email, EmailNotValidError
+
+from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.notation.dot_template import DotTemplate
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -15,7 +17,7 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class SendgridEMailSender(ActionRunner):
+class SendgridContactAdder(ActionRunner):
     config: Config
     credentials: Token
     client: SendgridClient
@@ -48,30 +50,20 @@ class SendgridEMailSender(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        message = self._dot_template.render(self.config.message.content.content, dot)
-        recipient_emails = dot[self.config.message.recipient]
-        recipient_emails = recipient_emails if isinstance(recipient_emails, list) else [recipient_emails]
-        validate_email(self.config.sender_email)
-        valid_recipient_emails = await self.get_valid_to_emails(recipient_emails)
-        send_to_personals = []
-        for email in valid_recipient_emails:
-            send_to_personals.append({
-                'to': [{'email': email}],
-                'from': {'email': self.config.sender_email},
-                'subject': self.config.message.subject,
-            })
-        email_params = {
-            'personalizations': send_to_personals,
-            'subject': self.config.message.subject,
-            'from': {'email': self.config.sender_email},
-            "content": [{
-                "type": self.config.message.content.type,
-                "value": message
-            }]
-        }
+        validate_email(dot[self.config.email])
+        traverser = DictTraverser(dot)
+        mapping = traverser.reshape(self.config.additional_mapping)
+        mapping = self.parse_mapping(mapping)
 
+        email_params = {
+            "contacts": [{
+                "email": dot[self.config.email],
+                **mapping
+            }]}
+        if self.config.list_ids:
+            email_params["list_ids"] = self.config.list_ids.split(',')
         try:
-            result = await self.client.emails_post(email_params)
+            result = await self.client.add_contact_to_list(email_params)
             return Result(port="response", value=result)
         except Exception as e:
             return Result(port="error", value={"message": str(e)})
@@ -93,24 +85,21 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='SendgridEMailSender',
+            className='SendgridContactAdder',
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
             license="MIT",
             author="Ben Ullrich",
-            manual="sendgrid_send_email",
+            manual="sendgrid_add_contact_to_list",
             init={
                 "source": {
                     "id": "",
                     "name": ""
                 },
-                "sender_email": "",
-                "message": {
-                    "recipient": "",
-                    "content": "",
-                    "subject": "",
-                }
+                "email": None,
+                "list_ids": None,
+                "additional_mapping": {},
             },
             form=Form(
                 groups=[
@@ -125,52 +114,35 @@ def register() -> Plugin:
                                     props={"label": "Resource", "tag": "token"})
                             ),
                             FormField(
-                                id="sender_email",
-                                name="Sender e-mail",
-                                description="Please provide e-mail address, that you want to send e-mails from. "
-                                            "It has to end with domain that is correctly registered and verified in "
-                                            "Sendgrid account. For more detail check documentation.",
-                                component=FormComponent(type="text", props={"label": "Sender e-mail"})
-                            ),
-                        ]
-                    ),
-                    FormGroup(
-                        name="Message data",
-                        fields=[
-                            FormField(
-                                id="message.recipient",
-                                name="Message recipient's email",
-                                description="Please provide path to e-mail address of a recipient, or "
-                                            "the e-mail address itself.",
-                                component=FormComponent(type="dotPath", props={"label": "E-mail",
+                                id="email",
+                                name="Email address",
+                                description="Please type in the path to the email address for your new contact.",
+                                component=FormComponent(type="dotPath", props={"label": "Email",
                                     "defaultSourceValue": "profile",
                                     "defaultPathValue": "pii.email"
                                 })
                             ),
                             FormField(
-                                id="message.subject",
-                                name="Message subject",
-                                component=FormComponent(type="text", props={"label": "Subject"})
+                                id="list_ids",
+                                name="List Ids",
+                                description="The list ids you want them added to",
+                                component=FormComponent(type="text", props={"label": "List Ids"})
                             ),
                             FormField(
-                                id="message.content",
-                                name="Message content",
-                                description="This field contains the body of your message. It can be either text "
-                                            "or HTML content. You can use templates in both HTML and text types, "
-                                            "something like 'Hello {{profile@pii.name}}!' will result in calling "
-                                            "the customer by their name in the message text.",
-                                component=FormComponent(type="contentInput", props={
-                                    "label": "Message body",
-                                    "allowedTypes": ["text/plain", "text/html"]
-                                })
-                            )
+                                id="additional_mapping",
+                                name="Additional fields",
+                                description="You can add some more fields to your contact. Just type in the alias of "
+                                            "the field as key, and a path as a value for this field. This is fully "
+                                            "optional. (Example: last_name: profile@pii.last_name",
+                                component=FormComponent(type="keyValueList", props={"label": "Fields"})
+                            ),
                         ]
-                    )
+                    ),
                 ]
             )
         ),
         metadata=MetaData(
-            name='Send E-mail',
+            name='Add Contact to list',
             brand='Sendgrid',
             desc='Sends bulk e-mail via Sendgrid based on provided data.',
             icon='email',
