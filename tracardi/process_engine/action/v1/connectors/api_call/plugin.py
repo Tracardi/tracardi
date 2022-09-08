@@ -70,6 +70,7 @@ class RemoteCallAction(ActionRunner):
                         headers=headers,
                         cookies=cookies,
                         ssl=self.config.ssl_check,
+                        proxy=self.credentials.proxy,
                         **params
                 ) as response:
 
