@@ -6,7 +6,7 @@ Type pull request title with short description (#<issue-id>)
 
  - [ ] Give the same name to the pull request as the name of ticket 
  - [ ] Write a pull request description that is detailed enough to understand what the pull request does, how, and why.
- - [ ] Test your code throughly before PR.
+ - [ ] Test your code thoroughly before PR.
  
 If your pull request is about ~20 lines of code add license information in your code in form of comment. i.e. # License: MIT, Author:  Your name.
 

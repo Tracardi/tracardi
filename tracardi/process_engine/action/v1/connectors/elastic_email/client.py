@@ -14,11 +14,14 @@ class ElasticEmailClientAuthException(Exception):
 
 class ElasticEmailClient:
 
-    def __init__(self, api_key: int, public_account_id: str):
+    def __init__(self, api_key: int, public_account_id: str, retries: int = 1):
         self.api_url = 'https://api.elasticemail.com'
         self.api_key = api_key
         self.public_account_id = public_account_id
-        self.retries = 1
+        self.retries = retries if retries >= 1 else 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def emails_post(self, contact_data: dict, ) -> dict:
         data = {
