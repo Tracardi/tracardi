@@ -9,6 +9,7 @@ from deepdiff import DeepDiff
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
+from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
 
 from tracardi.service.console_log import ConsoleLog
@@ -39,6 +40,7 @@ from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.wf.domain.flow_response import FlowResponses
+from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -47,7 +49,6 @@ cache = MemoryCache()
 
 
 async def _save_profile(profile):
-    # print("save-profile-metadata", profile.get_meta_data() if profile else None)
     try:
         if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
             return await storage.driver.profile.save(profile)
@@ -121,7 +122,7 @@ def get_profile_id(profile: Profile):
     return profile.id if isinstance(profile, Entity) else None
 
 
-async def validate_events_json_schemas(events, profile: Optional[Profile], session, console_log: ConsoleLog):
+async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
     for event in events:
         dot = DotAccessor(
             profile=profile,
@@ -134,17 +135,26 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
         event_type = dot.event['type']
 
         if event_type not in cache:
-            logger.info(f"Refreshed validation schema for event type {event_type}.")
-            event_payload_validator = await storage.driver.event_management.load_event_type_metadata(
+            logger.info(f"Refreshed validation and reshaping schema for event type {event_type}.")
+            event_type_manager = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
-            cache[event_type] = CacheItem(data=event_payload_validator, ttl=memory_cache.event_validator_ttl)
+            cache[event_type] = CacheItem(data=event_type_manager, ttl=memory_cache.event_validator_ttl)
 
-        validation_data = cache[event_type].data
+        event_type_manager = cache[event_type].data  # type: EventTypeManager
 
-        if validation_data is not None:
+        if event_type_manager is not None:
             try:
-                validate(dot, validator=validation_data)
+                # todo: refactor: https://en.wikipedia.org/wiki/Coding_by_exception
+                # todo: Flow control by the exception is an anti-pattern. validate should return True/False.
+                # todo: Exceptions are fine when there is an error in data but the result should be returned if the
+                # todo: validation is disabled for example.
+                validate(dot, validator=event_type_manager)
                 event.metadata.status = VALIDATED
+                # todo: refactor: https://dogsnog.blog/2020/04/23/the-iterate-and-mutate-programming-anti-pattern/
+                # todo: The event was mutated and there is no way to tell it form the code.
+                # todo: reshape should return new event with reshaped data.
+                EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
+
             except EventValidationException as e:
                 event.metadata.status = INVALID
                 console_log.append(
@@ -154,6 +164,19 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
                         class_name='EventValidator',
                         module='tracker',
                         type='error',
+                        message=str(e),
+                        traceback=get_traceback(e)
+                    )
+                )
+
+            except EventPropsReshapingError as e:
+                console_log.append(
+                    Console(
+                        profile_id=get_profile_id(profile),
+                        origin='profile',
+                        class_name='EventPropsReshaping',
+                        module='tracker',
+                        type='warning',
                         message=str(e),
                         traceback=get_traceback(e)
                     )
@@ -187,8 +210,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Get events
     events = tracker_payload.get_events(session, profile, has_profile, ip)
 
-    # Validates json schemas of events, throws exception if data is not valid
-    console_log = await validate_events_json_schemas(events, profile, session, console_log)
+    # Validates json schemas of events, throws exception if data is not valid or reshape failed
+    console_log = await validate_and_reshape_events(events, profile, session, console_log)
 
     debugger = None
     segmentation_result = None
@@ -457,7 +480,7 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
     # Load session from storage
     try:
-        session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
+        session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # type: Optional[Session]
     except DuplicatedRecordException as e:
 
         # There may be a case when we have 2 sessions with the same id.
@@ -473,6 +496,9 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
                 time=SessionTime(
                     insert=datetime.utcnow()
                 )
+            ),
+            operation=Operation(
+                new=True
             )
         )
 
@@ -486,8 +512,6 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         storage.driver.profile.load_merged_profile,
         profile_less
     )
-    # print("profile-meta", profile.get_meta_data() if profile else None)
-    # print("session-metadata", session.get_meta_data() if session else None)
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 
