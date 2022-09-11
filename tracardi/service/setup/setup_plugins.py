@@ -5,6 +5,11 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
+    "tracardi.process_engine.action.v1.google_translator_action": PluginTestTemplate(
+        init={"text_to_translate": "Hello", "source_language": "en"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.memory.collect.plugin": PluginTestTemplate(
         init={'name': 'Test name', 'type': 'list'},
         resource=None
