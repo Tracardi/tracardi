@@ -422,11 +422,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.full_contact.person_enrich.plugin": PluginTestTemplate(
-        init=None,
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin": PluginTestTemplate(
         init=None,
         resource=None
@@ -674,6 +669,13 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
 # Plugins only for testing
 test_plugins: Dict[str, PluginTestTemplate] = {
+
+    "tracardi.process_engine.action.v1.connectors.full_contact.person_enrich.plugin": PluginTestTemplate(
+        init=None,
+        resource={
+            "token": "token"
+        }
+    ),
 
     "tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin": PluginTestTemplate(
         init={'email': "some@email.com", 'source': {'id': "", 'name': ""}},

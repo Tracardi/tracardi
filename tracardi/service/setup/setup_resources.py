@@ -118,6 +118,14 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="full-contact",
+            name="FullContact",
+            tags=["token", "full-contact"],
+            config={
+                "token": "<token>"
+            }
+        ),
+        ResourceSettings(
             id="sendgrid",
             name="SendGrid",
             tags=["token", "sendgrid"],
