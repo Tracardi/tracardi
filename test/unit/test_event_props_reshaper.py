@@ -168,7 +168,7 @@ def test_should_not_reshape_with_false_condition():
 def test_should_not_reshape_with_wrong_condition():
     """
     Condition is validated in ReshapeSchema class. There is no way reshaping runs with wrong condition.
-    Although event is not gonna be reshaped if the condition is somehow invalid.
+    Although event is not going to be reshaped if the condition is somehow invalid.
     """
     with pytest.raises(ValidationError):
         _ = ReshapeSchema(
@@ -241,4 +241,5 @@ def test_should_reshape_whole_objects():
         dot=DotAccessor(profile=profile, event=_event, session=session)
     ).reshape(schema)
 
-    assert event.properties == event.dict()
+    assert event.properties['all']['id'] == event.id
+    assert event.properties['all']['properties'] == props
