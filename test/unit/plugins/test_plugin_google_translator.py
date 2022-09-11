@@ -15,7 +15,7 @@ def test_should_translate_given_text():
     result = run_plugin(GoogleTranslateAction, init, payload)
 
     assert result.output.port == "translation"
-    assert result.output.value == {"translation text": "The truth is my light"}
+    assert result.output.value == {"translation": "The truth is my light"}
 
 
 def test_should_raise_value_error():

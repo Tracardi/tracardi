@@ -18,7 +18,7 @@ class Config(PluginConfig):
     @validator("source_language")
     def check_given_source_language_type(cls, value):
         if not isinstance(value, str) or not value:
-            raise ValueError("Give language source must be a string!")
+            raise ValueError("The language source must be a string!")
         return value
 
 
@@ -38,10 +38,12 @@ class GoogleTranslateAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         text_to_translate = dot[self.config.text_to_translate]
 
-        translation = self.translator.translate(text_to_translate, src=self.config.source_language,
-                                                dest='en')
+        translation = self.translator.translate(
+            text_to_translate,
+            src=self.config.source_language,
+            dest='en')
 
-        return Result(port="translation", value={"translation text": translation.text})
+        return Result(port="translation", value={"translation": translation.text})
 
 
 def register() -> Plugin:
@@ -79,7 +81,7 @@ def register() -> Plugin:
                             FormField(
                                 id="source_language",
                                 name="Language source",
-                                description="Please provide source language of text that you want to translate.",
+                                description="Please select source language of text that you want to translate.",
                                 component=FormComponent(
                                     type="select",
                                     props={
@@ -95,9 +97,9 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name="Google translate",
-            desc="Translate the given text",
+            desc="Translates text",
             icon="google",
-            groups=["Operations"],
+            group=["Operations"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
