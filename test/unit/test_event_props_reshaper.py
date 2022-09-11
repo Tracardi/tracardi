@@ -1,3 +1,5 @@
+import pytest
+
 from tracardi.service.event_props_reshaper import EventPropsReshaper
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.domain.event import Event, EventMetadata, EventSession
@@ -7,6 +9,7 @@ from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.event_metadata import EventTime
 from tracardi.domain.event_payload_validator import ReshapeSchema
 from copy import deepcopy
+from pydantic import ValidationError
 
 
 def test_should_reshape_event_properties():
@@ -33,16 +36,17 @@ def test_should_reshape_event_properties():
         }
     )
 
-    EventPropsReshaper(
-        event=(event := Event(
-            id='1',
-            type='text',
-            metadata=EventMetadata(time=EventTime()),
-            session=EventSession(id='1'),
-            source=Entity(id='1'),
-            properties=deepcopy(props)
-        )),
-        dot=DotAccessor(profile=profile, event=event, session=session)
+    event_to_reshape = Event(
+        id='1',
+        type='text',
+        metadata=EventMetadata(time=EventTime()),
+        session=EventSession(id='1'),
+        source=Entity(id='1'),
+        properties=deepcopy(props)
+    )
+    event = EventPropsReshaper(
+        event=event_to_reshape,
+        dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
     ).reshape(schema)
     assert event.properties == {
         "prop5": props["prop2"],
@@ -62,16 +66,17 @@ def test_should_reshape_event_properties():
             "prop7": "event@properties.does-not-exist"
         }
     )
-    EventPropsReshaper(
-        event=(event := Event(
-            id='1',
-            type='text',
-            metadata=EventMetadata(time=EventTime()),
-            session=EventSession(id='1'),
-            source=Entity(id='1'),
-            properties=deepcopy(props)
-        )),
-        dot=DotAccessor(profile=profile, event=event, session=session)
+    event_to_reshape = Event(
+        id='1',
+        type='text',
+        metadata=EventMetadata(time=EventTime()),
+        session=EventSession(id='1'),
+        source=Entity(id='1'),
+        properties=deepcopy(props)
+    )
+    event = EventPropsReshaper(
+        event=event_to_reshape,
+        dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
     ).reshape(schema)
     assert event.properties == props
 
@@ -100,16 +105,17 @@ def test_should_reshape_without_condition():
         }
     )
 
-    EventPropsReshaper(
-        event=(event := Event(
-            id='1',
-            type='text',
-            metadata=EventMetadata(time=EventTime()),
-            session=EventSession(id='1'),
-            source=Entity(id='1'),
-            properties=deepcopy(props)
-        )),
-        dot=DotAccessor(profile=profile, event=event, session=session)
+    event_to_reshape = Event(
+        id='1',
+        type='text',
+        metadata=EventMetadata(time=EventTime()),
+        session=EventSession(id='1'),
+        source=Entity(id='1'),
+        properties=deepcopy(props)
+    )
+    event = EventPropsReshaper(
+        event=event_to_reshape,
+        dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
     ).reshape(schema)
     assert event.properties == {
         "prop5": props["prop2"],
@@ -144,31 +150,31 @@ def test_should_not_reshape_with_false_condition():
         }
     )
 
-    EventPropsReshaper(
-        event=(event := Event(
-            id='1',
-            type='text',
-            metadata=EventMetadata(time=EventTime()),
-            session=EventSession(id='1'),
-            source=Entity(id='1'),
-            properties=deepcopy(props)
-        )),
-        dot=DotAccessor(profile=profile, event=event, session=session)
+    event_to_reshape = Event(
+        id='1',
+        type='text',
+        metadata=EventMetadata(time=EventTime()),
+        session=EventSession(id='1'),
+        source=Entity(id='1'),
+        properties=deepcopy(props)
+    )
+    event = EventPropsReshaper(
+        event=event_to_reshape,
+        dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
     ).reshape(schema)
     assert event.properties == props
 
 
 def test_should_not_reshape_with_wrong_condition():
     """
-    If there is an error in condition it should be logged but the whole process should not stop.
-    Wrong condition should be evaluated as no reshaping.
+    Condition is validated in ReshapeSchema class. There is no way reshaping runs with wrong condition.
+    Although event is not gonna be reshaped if the condition is somehow invalid.
     """
-
-    profile = Profile(id="1")
-    session = Session(
-        id='1',
-        metadata=SessionMetadata()
-    )
+    with pytest.raises(ValidationError):
+        _ = ReshapeSchema(
+            condition="wrong_condition",
+            template={}
+        )
     props = {
         "prop1": 1,
         "prop2": 2,
@@ -176,32 +182,35 @@ def test_should_not_reshape_with_wrong_condition():
             "prop4": "string"
         }
     }
-    schema = ReshapeSchema(
-        condition="wrong_condition",
-        template={
-            "prop5": "event@properties.prop2",
-            "prop6": {
-                "key": "event@properties.prop3"
-            },
-            "prop7": "event@properties.does-not-exist"
-        }
+    profile = Profile(id="1")
+    session = Session(
+        id='1',
+        metadata=SessionMetadata()
     )
+    schema = ReshapeSchema(
+        template={"key": "profile@id"}
+    )
+    schema.condition = "wrong_condition"
 
-    EventPropsReshaper(
-        event=(event := Event(
+    event_to_reshape = Event(
             id='1',
             type='text',
             metadata=EventMetadata(time=EventTime()),
             session=EventSession(id='1'),
             source=Entity(id='1'),
             properties=deepcopy(props)
-        )),
-        dot=DotAccessor(profile=profile, event=event, session=session)
+    )
+    event = EventPropsReshaper(
+        event=event_to_reshape,
+        dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
     ).reshape(schema)
     assert event.properties == props
 
 
 def test_should_reshape_whole_objects():
+    """
+    Check line 72 in dict_traverser.py
+    """
     profile = Profile(id="1")
     session = Session(
         id='1',
@@ -215,14 +224,13 @@ def test_should_reshape_whole_objects():
         }
     }
     schema = ReshapeSchema(
-        condition="",
         template={
             "all": "event@..."
         }
     )
 
-    EventPropsReshaper(
-        event=(event := Event(
+    event = EventPropsReshaper(
+        event=(_event := Event(
             id='1',
             type='text',
             metadata=EventMetadata(time=EventTime()),
@@ -230,7 +238,7 @@ def test_should_reshape_whole_objects():
             source=Entity(id='1'),
             properties=deepcopy(props)
         )),
-        dot=DotAccessor(profile=profile, event=event, session=session)
+        dot=DotAccessor(profile=profile, event=_event, session=session)
     ).reshape(schema)
 
-    # todo add asserts
+    assert event.properties == event.dict()

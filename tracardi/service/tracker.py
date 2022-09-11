@@ -7,13 +7,13 @@ from uuid import uuid4
 import redis
 from deepdiff import DeepDiff
 
-from tracardi.config import tracardi, memory_cache
+from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
 
 from tracardi.service.console_log import ConsoleLog
-from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
+from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.merging import merge
@@ -30,7 +30,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
-    EventValidationException, TracardiException, DuplicatedRecordException
+    TracardiException, DuplicatedRecordException
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -41,11 +41,15 @@ from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.wf.domain.flow_response import FlowResponses
 from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
+from tracardi.service.storage.redis_client import RedisClient
+import json
+from tracardi.service.event_manager_cache import EventManagerCache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = MemoryCache()
+event_manager_cache = EventManagerCache()
 
 
 async def _save_profile(profile):
@@ -123,7 +127,8 @@ def get_profile_id(profile: Profile):
 
 
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
-    for event in events:
+
+    for index, event in enumerate(events):
         dot = DotAccessor(
             profile=profile,
             session=session,
@@ -132,42 +137,35 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
             flow=None,
             memory=None
         )
-        event_type = dot.event['type']
 
-        if event_type not in cache:
-            logger.info(f"Refreshed validation and reshaping schema for event type {event_type}.")
+        event_type = dot.event['type']
+        event_type_manager = event_manager_cache.get_item(event_type)
+
+        if event_type_manager is None:
             event_type_manager = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
-            cache[event_type] = CacheItem(data=event_type_manager, ttl=memory_cache.event_validator_ttl)
-
-        event_type_manager = cache[event_type].data  # type: EventTypeManager
+            if event_type_manager is not None:
+                event_manager_cache.upsert_item(event_type_manager)
 
         if event_type_manager is not None:
             try:
-                # todo: refactor: https://en.wikipedia.org/wiki/Coding_by_exception
-                # todo: Flow control by the exception is an anti-pattern. validate should return True/False.
-                # todo: Exceptions are fine when there is an error in data but the result should be returned if the
-                # todo: validation is disabled for example.
-                validate(dot, validator=event_type_manager)
-                event.metadata.status = VALIDATED
-                # todo: refactor: https://dogsnog.blog/2020/04/23/the-iterate-and-mutate-programming-anti-pattern/
-                # todo: The event was mutated and there is no way to tell it form the code.
-                # todo: reshape should return new event with reshaped data.
-                EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
-
-            except EventValidationException as e:
-                event.metadata.status = INVALID
-                console_log.append(
-                    Console(
-                        profile_id=get_profile_id(profile),
-                        origin='profile',
-                        class_name='EventValidator',
-                        module='tracker',
-                        type='error',
-                        message=str(e),
-                        traceback=get_traceback(e)
-                    )
-                )
+                if event_type_manager.validation.enabled is True:
+                    if validate(dot, validator=event_type_manager):
+                        event.metadata.status = VALIDATED
+                    else:
+                        event.metadata.status = INVALID
+                        console_log.append(
+                            Console(
+                                profile_id=get_profile_id(profile),
+                                origin='profile',
+                                class_name='EventValidator',
+                                module='tracker',
+                                type='error',
+                                message="Event is invalid.",
+                                traceback="Event is invalid."
+                            )
+                        )
+                events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
 
             except EventPropsReshapingError as e:
                 console_log.append(

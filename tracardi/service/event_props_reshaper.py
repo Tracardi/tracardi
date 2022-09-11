@@ -18,14 +18,17 @@ class EventPropsReshaper:
         self.event = event
         self.dot = dot
 
-    def reshape(self, schema: ReshapeSchema) -> None:
-        if schema.template is None or (schema.condition is not None and ExprTransformer(dot=self.dot).transform(
-                tree=self.parser.parse(schema.condition)
-        ) is False):
-            return
+    def reshape(self, schema: ReshapeSchema) -> Event:
+        try:
+            condition = ExprTransformer(dot=self.dot).transform(tree=self.parser.parse(schema.condition))
+        except Exception as _:
+            condition = False
+
+        if schema.template is None or (schema.condition is not None and condition is False):
+            return self.event
 
         try:
-            self.event.properties = DictTraverser(dot=self.dot, include_none=True, default=None).reshape(
+            props = DictTraverser(dot=self.dot, include_none=True, default=None).reshape(
                 schema.template
             )
 
@@ -33,4 +36,4 @@ class EventPropsReshaper:
             raise EventPropsReshapingError(f"Could not reshape event properties due to an error: `{str(e)}`")
 
         else:
-            self.event.metadata.status = RESHAPED
+            return Event(**self.event.dict(exclude={"properties", "status"}), properties=props, status=RESHAPED)

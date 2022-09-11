@@ -3,6 +3,7 @@ from pydantic import BaseModel, validator
 from typing import Dict, List
 from tracardi.service.secrets import b64_encoder, b64_decoder
 from typing import Optional
+from tracardi.process_engine.tql.condition import Condition
 
 
 class ValidationSchema(BaseModel):
@@ -29,6 +30,16 @@ class ReshapeSchema(BaseModel):
     def transform_values_to_none(cls, value):
         if not value:
             return None
+        return value
+
+    @validator("condition")
+    def check_if_condition_valid(cls, value):
+        if value:
+            try:
+                condition = Condition()
+                condition.parse(value)
+            except Exception as e:
+                raise ValueError("Given condition expression is invalid.")
         return value
 
 
