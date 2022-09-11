@@ -51,7 +51,7 @@ def register() -> Plugin:
             version='0.7.0',
             license="MIT",
             author="Risto Kowaczewski",
-            init={},
+            init=None,
             form=None,
 
         ),

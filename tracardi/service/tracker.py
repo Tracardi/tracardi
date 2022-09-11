@@ -7,12 +7,13 @@ from uuid import uuid4
 import redis
 from deepdiff import DeepDiff
 
-from tracardi.config import tracardi, memory_cache
+from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
+from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
 
 from tracardi.service.console_log import ConsoleLog
-from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
+from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.merging import merge
@@ -29,7 +30,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
-    EventValidationException, TracardiException, DuplicatedRecordException
+    TracardiException, DuplicatedRecordException
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -39,15 +40,19 @@ from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.wf.domain.flow_response import FlowResponses
+from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
+from tracardi.service.storage.redis_client import RedisClient
+import json
+from tracardi.service.event_manager_cache import EventManagerCache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = MemoryCache()
+event_manager_cache = EventManagerCache()
 
 
 async def _save_profile(profile):
-    # print("save-profile-metadata", profile.get_meta_data() if profile else None)
     try:
         if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
             return await storage.driver.profile.save(profile)
@@ -121,8 +126,9 @@ def get_profile_id(profile: Profile):
     return profile.id if isinstance(profile, Entity) else None
 
 
-async def validate_events_json_schemas(events, profile: Optional[Profile], session, console_log: ConsoleLog):
-    for event in events:
+async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
+
+    for index, event in enumerate(events):
         dot = DotAccessor(
             profile=profile,
             session=session,
@@ -131,29 +137,44 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
             flow=None,
             memory=None
         )
+
         event_type = dot.event['type']
+        event_type_manager = event_manager_cache.get_item(event_type)
 
-        if event_type not in cache:
-            logger.info(f"Refreshed validation schema for event type {event_type}.")
-            event_payload_validator = await storage.driver.event_management.load_event_type_metadata(
+        if event_type_manager is None:
+            event_type_manager = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
-            cache[event_type] = CacheItem(data=event_payload_validator, ttl=memory_cache.event_validator_ttl)
+            if event_type_manager is not None:
+                event_manager_cache.upsert_item(event_type_manager)
 
-        validation_data = cache[event_type].data
-
-        if validation_data is not None:
+        if event_type_manager is not None:
             try:
-                validate(dot, validator=validation_data)
-                event.metadata.status = VALIDATED
-            except EventValidationException as e:
-                event.metadata.status = INVALID
+                if event_type_manager.validation.enabled is True:
+                    if validate(dot, validator=event_type_manager):
+                        event.metadata.status = VALIDATED
+                    else:
+                        event.metadata.status = INVALID
+                        console_log.append(
+                            Console(
+                                profile_id=get_profile_id(profile),
+                                origin='profile',
+                                class_name='EventValidator',
+                                module='tracker',
+                                type='error',
+                                message="Event is invalid.",
+                                traceback="Event is invalid."
+                            )
+                        )
+                events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
+
+            except EventPropsReshapingError as e:
                 console_log.append(
                     Console(
                         profile_id=get_profile_id(profile),
                         origin='profile',
-                        class_name='EventValidator',
+                        class_name='EventPropsReshaping',
                         module='tracker',
-                        type='error',
+                        type='warning',
                         message=str(e),
                         traceback=get_traceback(e)
                     )
@@ -187,8 +208,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Get events
     events = tracker_payload.get_events(session, profile, has_profile, ip)
 
-    # Validates json schemas of events, throws exception if data is not valid
-    console_log = await validate_events_json_schemas(events, profile, session, console_log)
+    # Validates json schemas of events, throws exception if data is not valid or reshape failed
+    console_log = await validate_and_reshape_events(events, profile, session, console_log)
 
     debugger = None
     segmentation_result = None
@@ -457,7 +478,7 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
     # Load session from storage
     try:
-        session = await storage.driver.session.load(tracker_payload.session.id)  # type: Optional[Session]
+        session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # type: Optional[Session]
     except DuplicatedRecordException as e:
 
         # There may be a case when we have 2 sessions with the same id.
@@ -473,6 +494,9 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
                 time=SessionTime(
                     insert=datetime.utcnow()
                 )
+            ),
+            operation=Operation(
+                new=True
             )
         )
 
@@ -486,8 +510,6 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         storage.driver.profile.load_merged_profile,
         profile_less
     )
-    # print("profile-meta", profile.get_meta_data() if profile else None)
-    # print("session-metadata", session.get_meta_data() if session else None)
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 

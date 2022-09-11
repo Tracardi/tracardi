@@ -12,20 +12,20 @@ class TrelloClient:
         self.retries = retries
 
     async def get_list_id(self, board_url: str, list_name: str) -> str:
-
+        url = f'https://api.trello.com/1/members/me/boards?key={self.api_key}&token={self.token}'
         async with HttpClient(self.retries) as client:
             async with client.get(
-                    url=f'https://api.trello.com/1/members/me/boards?key={self.api_key}&token={self.token}'
+                    url=url
             ) as response:
                 result = await response.json()
                 if response.status != 200:
-                    raise ConnectionError("Expected response status 200 got {} "
+                    raise ConnectionError("Expected response from Trello with status 200 got {} "
                                           "with message {}".format(response.status,
                                                                    result))
 
                 boards = list(filter(lambda x: x["url"] == board_url, result))
                 if not boards:
-                    raise ValueError("Given board does not exist")
+                    raise ValueError(f"The board URL {board_url} does not exist in Trello.")
 
             async with client.get(
                     url=f'https://api.trello.com/1/boards/{boards.pop()["id"]}/lists?'
@@ -33,13 +33,13 @@ class TrelloClient:
             ) as response:
                 result = await response.json()
                 if response.status != 200:
-                    raise ConnectionError("Expected response status 200 got {} "
+                    raise ConnectionError("Expected response from Trello with status 200 got {} "
                                           "with message {}".format(response.status,
                                                                    result))
 
                 lists = list(filter(lambda x: x["name"] == list_name, result))
                 if not lists:
-                    raise ValueError("Given list does not exist.")
+                    raise ValueError(f"List {list_name} does not exist in Trello.")
                 return lists.pop()["id"]
 
     async def add_card(self, list_id: str, **kwargs) -> dict:

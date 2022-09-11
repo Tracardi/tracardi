@@ -20,6 +20,7 @@ def get_resource_types() -> List[ResourceSettings]:
             icon="cloud",
             config={
                 "url": "<url>",
+                "proxy": "<proxy>",
                 "username": "<username>",
                 "password": "<password>"
             },
@@ -149,7 +150,7 @@ def get_resource_types() -> List[ResourceSettings]:
         ResourceSettings(
             id="novu",
             name="Novu",
-            tags=["token"],
+            tags=["token", "novu"],
             config={
                 "token": "<token>"
             },

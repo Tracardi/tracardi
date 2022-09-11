@@ -1,4 +1,4 @@
-from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.sha1_hasher import SHA1Encoder
 from typing import List, Optional
@@ -46,7 +46,7 @@ async def delete_user(id: str):
     return await storage_manager("user").delete(id)
 
 
-async def get_by_id(id: str):
+async def get_by_id(id: str) -> Optional[StorageRecord]:
     return await storage_manager("user").load(id)
 
 

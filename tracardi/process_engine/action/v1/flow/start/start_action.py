@@ -42,11 +42,11 @@ class StartAction(ActionRunner):
                 self.console.warning(str(e))
 
         if event.session is not None:
-            session = await storage.driver.session.load(event.session.id)
+            session = await storage.driver.session.load_by_id(event.session.id)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
             profile_entity = Entity(id=event.profile.id)
-            profile = await StorageFor(profile_entity).index('profile').load(Profile)
+            profile = await StorageFor(profile_entity).index('profile').load(Profile)  # type: Optional[Profile]
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(

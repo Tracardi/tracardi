@@ -86,7 +86,7 @@ def register() -> Plugin:
                                 id="source",
                                 name="MailChimp resource",
                                 description="Please select your MailChimp resource.",
-                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "token"})
+                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "mailchimp"})
                             ),
                             FormField(
                                 id="list_id",

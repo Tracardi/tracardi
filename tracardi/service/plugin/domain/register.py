@@ -3,7 +3,7 @@ from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, AnyHttpUrl
 
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.resources.microservice_resource import MicroserviceResource
+from tracardi.domain.resource import ResourceCredentials
 
 
 class FormFieldValidation(BaseModel):
@@ -32,8 +32,10 @@ class FormGroup(BaseModel):
 
 
 class Form(BaseModel):
+    submit: Optional[str] = None
+    default: Optional[dict] = {}
     title: Optional[str]
-    groups: List[FormGroup]
+    groups: Optional[List[FormGroup]] = []
 
 
 class RunOnce(BaseModel):
@@ -48,16 +50,42 @@ class NodeEvents(BaseModel):
     on_create: Optional[str]
 
 
-class MicroserviceCurrentResource(NamedEntity):
-    current: MicroserviceResource
+class MicroservicePlugin(NamedEntity):
+    resource: Optional[dict]  # Additional resources needed for microservice plugin
+
+
+class MicroserviceServer(BaseModel):
+    credentials: ResourceCredentials
+    resource: NamedEntity  # Selected tracardi resource
 
 
 class MicroserviceConfig(BaseModel):
-    resource: MicroserviceCurrentResource
-    plugin: NamedEntity
+    server: MicroserviceServer  # Server configuration from premium resources
+    service: NamedEntity
+    plugin: MicroservicePlugin
 
-    def has_resource(self) -> bool:
-        return bool(self.resource.id)
+    def has_server_resource(self) -> bool:
+        return bool(self.server.resource.id)
+
+    @staticmethod
+    def create() -> 'MicroserviceConfig':
+        return MicroserviceConfig(
+            server=MicroserviceServer(
+                credentials=ResourceCredentials(),
+                resource=NamedEntity(
+                    id="",
+                    name=""
+                )
+            ),
+            service=NamedEntity(
+                id="",
+                name=""
+            ),
+            plugin=MicroservicePlugin(
+                id="",
+                name=""
+            )
+        )
 
 
 class Spec(BaseModel):
@@ -67,7 +95,7 @@ class Spec(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[dict] = None
-    microservice: Optional[MicroserviceConfig] = None
+    microservice: Optional[MicroserviceConfig] = MicroserviceConfig.create()
     skip: bool = False
     block_flow: bool = False
     run_in_background: bool = False
@@ -93,9 +121,9 @@ class Spec(BaseModel):
     def get_id(self) -> str:
         action_id = self.module + self.className + self.version
         # If defined resource for microservice plugin action add that to the id.
-        # You can create one microservice per remote resource.
-        if self.has_microservice() and self.microservice.has_resource():
-            action_id += self.microservice.resource.id
+        # You can create one microservice per remote server.
+        if self.has_microservice() and self.microservice.has_server_resource():
+            action_id += self.microservice.server.resource.id
 
         return hashlib.md5(action_id.encode()).hexdigest()
 

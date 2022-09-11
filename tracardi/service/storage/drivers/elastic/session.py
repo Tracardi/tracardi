@@ -29,8 +29,13 @@ async def update_session_duration(session: Session):
 
     record = {
         "doc": {
+            "id": session.id,
+            "profile": {
+                "id": session.profile.id
+            },
             "metadata": {
                 "time": {
+                    "insert": session.metadata.time.insert,
                     "update": datetime.utcnow(),
                     "duration": session.metadata.time.duration
                 }
@@ -39,7 +44,8 @@ async def update_session_duration(session: Session):
         'doc_as_upsert': True
     }
     try:
-        return await storage.update_by_id(id=session.id, record=record, index=index, retry_on_conflict=3)
+        result = await storage.update_by_id(id=session.id, record=record, index=index, retry_on_conflict=3)
+        return result
     except elasticsearch.exceptions.ConflictError as e:
         logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
                        f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
@@ -74,8 +80,13 @@ async def exist(id: str) -> bool:
     return await storage_manager("session").exists(id)
 
 
-async def load(id: str) -> Optional[Session]:
-    return await StorageFor(Entity(id=id)).index("session").load(Session)  # type: Optional[Session]
+async def load_by_id(id: str) -> Optional[Session]:
+    session_record = await storage_manager("session").load(id)
+    if session_record is None:
+        return None
+    session = session_record.to_entity(Session)
+
+    return session
 
 
 async def load_duplicates(id: str):

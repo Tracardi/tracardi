@@ -69,18 +69,6 @@ def register() -> Plugin:
             version='0.7.0',
             license="MIT",
             author="Bart Dobrosielski, Risto Kowaczewski",
-            # init={
-            #     "source": {
-            #         "id": None,
-            #         "name": None
-            #     },
-            #     "message": {"type": "application/json", "content": "{}"},
-            #     "region_name": "us-west-2",
-            #     "queue_url": "",
-            #     "delay_seconds": "0",
-            #     "message_attributes": "{}"
-            # },
-            # form=None,
         ),
         metadata=MetaData(
             name='Simple queue SQS',

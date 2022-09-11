@@ -32,7 +32,7 @@ class WeatherAction(ActionRunner):
             result.temperature = weather.current.temperature
             result.humidity = weather.current.humidity
             result.wind_speed = weather.current.wind_speed
-            result.description = weather.current.sky_text
+            result.description = weather.current.description
 
             return Result(port="weather", value=result.dict())
 

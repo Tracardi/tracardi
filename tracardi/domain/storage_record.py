@@ -1,6 +1,9 @@
-from typing import Callable, Iterator, List, Union, Tuple, Optional
+from typing import Callable, Iterator, List, Union, Tuple, Optional, TypeVar, Type
 
 from pydantic import BaseModel
+
+
+T = TypeVar('T')
 
 
 class RecordMetadata(BaseModel):
@@ -34,7 +37,7 @@ class StorageRecord(dict):
     def has_meta_data(self) -> bool:
         return self._meta is not None
 
-    def to_entity(self, model):
+    def to_entity(self, model: Type[T]) -> T:
         _object = model(**self)
         return _object.set_meta_data(self.get_meta_data())
 

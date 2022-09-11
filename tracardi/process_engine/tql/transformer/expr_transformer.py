@@ -62,6 +62,8 @@ class ExprTransformer(TransformerNamespace):
         return self.__parse_datetime(value)
 
     def _now1(self, timezone):
+        if timezone is None:
+            return datetime.datetime.now()
         return datetime.datetime.now(pytz.timezone(timezone))
 
     def _now_offset1(self, offset):

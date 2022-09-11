@@ -2,6 +2,7 @@ from typing import List, Dict, Union
 
 from dotty_dict import dotty
 from .dot_accessor import DotAccessor
+import datetime
 
 
 class DictTraverser:
@@ -68,5 +69,6 @@ class DictTraverser:
             else:
                 out_dot[f"{path}.{key}"] = value
 
+        # TODO THIS DOES NOT SUPPORT DATETIME
         result = out_dot.to_dict()
         return result['root'] if 'root' in result else {}
