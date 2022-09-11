@@ -29,7 +29,7 @@ class SendgridContactAdder(ActionRunner):
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=Token)
-        self.client = SendgridClient(**dict(self.credentials))  # type: SendgridClient
+        self.client = SendgridClient(**dict(self.credentials))
         self.client.set_retries(self.node.on_connection_error_repeat)
         self._dot_template = DotTemplate()
 
@@ -111,16 +111,16 @@ def register() -> Plugin:
                                 name="Token resource",
                                 description="Please select your Token resource, containing your api key",
                                 component=FormComponent(type="resource",
-                                    props={"label": "Resource", "tag": "token"})
+                                                        props={"label": "Resource", "tag": "sendgrid"})
                             ),
                             FormField(
                                 id="email",
                                 name="Email address",
                                 description="Please type in the path to the email address for your new contact.",
                                 component=FormComponent(type="dotPath", props={"label": "Email",
-                                    "defaultSourceValue": "profile",
-                                    "defaultPathValue": "pii.email"
-                                })
+                                                                               "defaultSourceValue": "profile",
+                                                                               "defaultPathValue": "pii.email"
+                                                                               })
                             ),
                             FormField(
                                 id="list_ids",

@@ -27,7 +27,7 @@ class SendgridEMailSender(ActionRunner):
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=Token)
-        self.client = SendgridClient(**dict(self.credentials))  # type: SendgridClient
+        self.client: SendgridClient = SendgridClient(**dict(self.credentials))
         self.client.set_retries(self.node.on_connection_error_repeat)
         self._dot_template = DotTemplate()
 
@@ -122,7 +122,7 @@ def register() -> Plugin:
                                 name="Token resource",
                                 description="Please select your Token resource, containing your api key",
                                 component=FormComponent(type="resource",
-                                    props={"label": "Resource", "tag": "token"})
+                                                        props={"label": "Resource", "tag": "sendgrid"})
                             ),
                             FormField(
                                 id="sender_email",
@@ -143,9 +143,9 @@ def register() -> Plugin:
                                 description="Please provide path to e-mail address of a recipient, or "
                                             "the e-mail address itself.",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail",
-                                    "defaultSourceValue": "profile",
-                                    "defaultPathValue": "pii.email"
-                                })
+                                                                               "defaultSourceValue": "profile",
+                                                                               "defaultPathValue": "pii.email"
+                                                                               })
                             ),
                             FormField(
                                 id="message.subject",

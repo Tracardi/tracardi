@@ -14,7 +14,6 @@ class SendgridClientAuthException(Exception):
 class SendgridClient:
 
     def __init__(self, token: str):
-        # self.api_url = 'https://webhook.site/31b3b0d3-1ede-4edf-810b-a13a552fcbbb'
         self.api_url = 'https://api.sendgrid.com'
         self.api_key = token
         self.retries = 1
@@ -68,7 +67,6 @@ class SendgridClient:
 
     async def add_email_to_global_suppression(self, email: str, **kwargs) -> dict:
         data = {
-            # "recipient_emails": f'["{email}"]',
             "recipient_emails": [email, ],
         }
 

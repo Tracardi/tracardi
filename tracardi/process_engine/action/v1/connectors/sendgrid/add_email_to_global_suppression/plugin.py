@@ -24,9 +24,8 @@ class SendgridGlobalSuppressionAdder(ActionRunner):
 
         self.config = config
         self.resource = resource
-        self.credentials = self.resource.credentials.get_credentials(self, output=Token)    # type: Token
-        self.client = SendgridClient(**dict(self.credentials))    # type: SendgridClient
-        # self.client = SendgridClient(**self.resource.credentials.get_credentials(self, output=Token))
+        self.credentials = self.resource.credentials.get_credentials(self, output=Token)  # type: Token
+        self.client = SendgridClient(**dict(self.credentials))
         self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -34,7 +33,7 @@ class SendgridGlobalSuppressionAdder(ActionRunner):
         email = dot[self.config.email]
 
         try:
-            result = await self.client.add_email_to_global_suppression(email=email,)
+            result = await self.client.add_email_to_global_suppression(email=email, )
             return Result(port="response", value=result)
 
         except Exception as e:
@@ -55,8 +54,8 @@ def register() -> Plugin:
             manual="sendgrid_add_to_global_suppression",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
                 "email": None,
             },
@@ -70,7 +69,7 @@ def register() -> Plugin:
                                 name="Token resource",
                                 description="Please select your Token resource, containing your api key",
                                 component=FormComponent(type="resource",
-                                    props={"label": "Resource", "tag": "token"})
+                                                        props={"label": "Resource", "tag": "sendgrid"})
                             ),
                             FormField(
                                 id="email",
@@ -88,7 +87,7 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Add contact to global Suppression',
+            name='Suppress contact',
             brand='Sendgrid',
             desc='Adds a contact to Sendgrid global Suppression based on provided data.',
             icon='email',

@@ -118,6 +118,15 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="sendgrid",
+            name="SendGrid",
+            tags=["token", "sendgrid"],
+            config={
+                "token": "<token>"
+            },
+            manual='sendgrid_resource'
+        ),
+        ResourceSettings(
             id="redis",
             name="Redis",
             tags=["redis"],
