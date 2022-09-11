@@ -65,8 +65,8 @@ def register() -> Plugin:
             manual="add_active_campaign_contact_action",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
                 "fields": {}
             },
@@ -75,7 +75,7 @@ def register() -> Plugin:
                     id="source",
                     name="Resource",
                     description="Select your ActiveCampaign resource.",
-                    component=FormComponent(type="resource", props={"tag": "active_campaign"})
+                    component=FormComponent(type="resource", props={"tag": "activecampaign"})
                 ),
                 FormField(
                     id="fields",

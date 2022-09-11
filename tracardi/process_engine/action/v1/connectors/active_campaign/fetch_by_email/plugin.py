@@ -50,8 +50,8 @@ def register() -> Plugin:
             author="Dawid Kruk",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
                 "email": None
             },
@@ -61,7 +61,7 @@ def register() -> Plugin:
                     id="source",
                     name="Resource",
                     description="Select your ActiveCampaign resource.",
-                    component=FormComponent(type="resource", props={"tag": "active_campaign"})
+                    component=FormComponent(type="resource", props={"tag": "activecampaign"})
                 ),
                 FormField(
                     id="email",
