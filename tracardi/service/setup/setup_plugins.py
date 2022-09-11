@@ -529,6 +529,22 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin": PluginTestTemplate(
+        init={'additional_mapping': {}, 'list_ids': None, 'email': None, 'source': {'id': None, 'name': None}},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin": PluginTestTemplate(
+        init={'email': None, 'source': {'id': None, 'name': None}},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin": PluginTestTemplate(
+        init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
+            'source': {'id': '', 'name': ''}},
+        resource=None
+    ),
+    
     "tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin": PluginTestTemplate(
         init={'base_id': None, 'mapping': {}, 'source': {'id': '1', 'name': 'Some value'}, 'table_name': None},
         resource=None
