@@ -1,6 +1,8 @@
 import aiohttp
 import json
 
+from tracardi.service.tracardi_http_client import HttpClient
+
 
 class HubSpotClientException(Exception):
     pass
@@ -20,6 +22,10 @@ class HubSpotClient:
         self.refresh_token = refresh_token
         self.redirect_url = redirect_url
         self.code = code
+        self.retries = 1
+
+    def set_retries(self, retries: int):
+        self.retries = retries
 
     def change_properties_form(self, properties, key):
         prop_keys = list(properties.keys())
@@ -34,8 +40,8 @@ class HubSpotClient:
 
         return properties_array
 
-    async def get_token(self) -> None:
-        async with aiohttp.ClientSession() as session:
+    async def get_token(self):
+        async with HttpClient(self.retries, [200, 401]) as session:
 
             async with session.post(
                     url="https://api.hubapi.com/oauth/v1/token",
@@ -59,7 +65,7 @@ class HubSpotClient:
 
                 return self.refresh_token, self.access_token
 
-    async def update_token(self) -> None:
+    async def update_token(self):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                     url="https://api.hubapi.com/oauth/v1/token",
@@ -145,7 +151,7 @@ class HubSpotClient:
 
                 return await response.json()
 
-    async def get_company(self, company_id: int) -> dict:
+    async def get_company(self, company_id: str) -> dict:
         async with aiohttp.ClientSession(headers={'Content-Type': "application/json",
                                                   "Authorization": f"Bearer {self.access_token}"}) as session:
             async with session.get(url=f"https://api.hubapi.com/companies/v2/companies/{company_id}") as response:

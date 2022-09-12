@@ -16,18 +16,20 @@ def validate(config: dict) -> Config:
 
 class HubSpotContactGetter(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'HubSpotContactGetter':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return HubSpotContactGetter(config, resource)
+    resource: Resource
+    config: Config
+    client: HubSpotClient
 
-    def __init__(self, config: Config, resource: Resource):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
         self.resource = resource
-        self.client = HubSpotClient(**self.resource.credentials.get_credentials(self, None))
+        self.client = HubSpotClient(**resource.credentials.get_credentials(self, None))
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             result = await self.client.get_contact(self.config.contact_id)
             return Result(port="response", value=result)
@@ -49,16 +51,16 @@ class HubSpotContactGetter(ActionRunner):
                 return Result(port="response", value=result)
 
             except HubSpotClientAuthException as e:
-                return Result(port="error", value={"error": str(e), "msg": ""})
+                return Result(port="error", value={"message": str(e), "msg": ""})
 
             except StorageException as e:
-                return Result(port="error", value={"error": "Plugin was unable to update credentials.", "msg": str(e)})
+                return Result(port="error", value={"message": "Plugin was unable to update credentials.", "msg": str(e)})
 
             except HubSpotClientException as e:
-                return Result(port="error", value={"error": "HubSpot API error", "msg": str(e)})
+                return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
 
         except HubSpotClientException as e:
-            return Result(port="error", value={"error": "HubSpot API error", "msg": str(e)})
+            return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
 
 
 def register() -> Plugin:
@@ -69,7 +71,7 @@ def register() -> Plugin:
             className='HubSpotContactGetter',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.2',
+            version='0.7.2',
             license="MIT",
             author="Marcin Gaca",
             manual="get_hubspot_contact_action",
@@ -117,8 +119,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='HubSpot: get contact by Id',
             desc='Gets a contact from HubSpot based on provided contact id.',
-            icon='plugin',
-            group=["Connectors"],
+            icon='hubspot',
+            group=["Hubspot"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

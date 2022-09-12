@@ -19,16 +19,18 @@ def validate(config: dict) -> Config:
 
 class HubSpotCompanyUpdater(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'HubSpotCompanyUpdater':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return HubSpotCompanyUpdater(config, resource)
+    resource: Resource
+    config: Config
+    client: HubSpotClient
 
-    def __init__(self, config: Config, resource: Resource):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
         self.resource = resource
-        self.client = HubSpotClient(**self.resource.credentials.get_credentials(self, None))
+        self.client = HubSpotClient(**resource.credentials.get_credentials(self, None))
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     def parse_mapping(self):
         for key, value in self.config.properties.items():
@@ -43,7 +45,7 @@ class HubSpotCompanyUpdater(ActionRunner):
             elif isinstance(value, datetime):
                 self.config.properties[key] = str(value)
 
-    async def run(self, payload):
+    async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload)
         traverser = DictTraverser(dot)
@@ -79,16 +81,16 @@ class HubSpotCompanyUpdater(ActionRunner):
                 return Result(port="response", value=result)
 
             except HubSpotClientAuthException as e:
-                return Result(port="error", value={"error": str(e), "msg": ""})
+                return Result(port="error", value={"message": str(e), "msg": ""})
 
             except StorageException as e:
-                return Result(port="error", value={"error": "Plugin was unable to update credentials.", "msg": str(e)})
+                return Result(port="error", value={"message": "Plugin was unable to update credentials.", "msg": str(e)})
 
             except HubSpotClientException as e:
-                return Result(port="error", value={"error": "HubSpot API error", "msg": str(e)})
+                return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
 
         except HubSpotClientException as e:
-            return Result(port="error", value={"error": "HubSpot API error", "msg": str(e)})
+            return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
 
 
 def register() -> Plugin:
@@ -99,7 +101,7 @@ def register() -> Plugin:
             className='HubSpotCompanyUpdater',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.2',
+            version='0.7.2',
             license="MIT",
             author="Marcin Gaca",
             manual="add_hubspot_company_action",
@@ -154,8 +156,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='HubSpot: update company',
             desc='Updates a company in Hubspot based on provided data.',
-            icon='plugin',
-            group=["Connectors"],
+            icon='hubspot',
+            group=["Hubspot"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
