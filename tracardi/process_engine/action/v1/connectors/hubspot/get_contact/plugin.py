@@ -117,7 +117,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='HubSpot: get contact by Id',
+            name='Get contact by Id',
+            brand="Hubspot",
             desc='Gets a contact from HubSpot based on provided contact id.',
             icon='hubspot',
             group=["Hubspot"],

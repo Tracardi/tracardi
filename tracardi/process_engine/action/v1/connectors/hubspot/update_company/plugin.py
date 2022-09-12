@@ -154,7 +154,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='HubSpot: update company',
+            name='Update company',
+            brand="Hubspot",
             desc='Updates a company in Hubspot based on provided data.',
             icon='hubspot',
             group=["Hubspot"],

@@ -118,7 +118,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='HubSpot: get company by Id',
+            name='Get company by Id',
+            brand="Hubspot",
             desc='Gets a company from HubSpot based on provided company id.',
             icon='hubspot',
             group=["Hubspot"],

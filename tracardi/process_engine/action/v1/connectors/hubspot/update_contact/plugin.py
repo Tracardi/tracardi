@@ -155,7 +155,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='HubSpot: update contact',
+            name='Update contact',
+            brand="Hubspot",
             desc='Updates a contact to HubSpot based on provided data.',
             icon='hubspot',
             group=["Hubspot"],
