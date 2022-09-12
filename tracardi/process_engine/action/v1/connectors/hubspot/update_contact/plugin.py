@@ -106,11 +106,8 @@ def register() -> Plugin:
             manual="update_hubspot_contact_action",
             init={
                 "source": {
-                    "client_id": None,
-                    "client_secret": None,
-                    "refresh_token": None,
-                    "redirect_uri": None,
-                    "code": None,
+                    "id": "",
+                    "name": ""
                 },
                 "is_token_got": True,
                 "contact_id": None,

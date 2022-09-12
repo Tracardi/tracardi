@@ -78,11 +78,8 @@ def register() -> Plugin:
             manual="get_hubspot_company_action",
             init={
                 "source": {
-                    "client_id": None,
-                    "client_secret": None,
-                    "refresh_token": None,
-                    "redirect_uri": None,
-                    "code": None,
+                    "id": "",
+                    "name": ""
                 },
                 "is_token_got": True,
                 "company_id": None,
