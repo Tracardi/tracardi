@@ -162,8 +162,7 @@ def register() -> Plugin:
             ]),
             version="0.6.1",
             author="Risto Kowaczewski",
-            license="MIT",
-            manual="remote_call_action"
+            license="MIT"
         ),
         metadata=MetaData(
             name='HTML fetcher',

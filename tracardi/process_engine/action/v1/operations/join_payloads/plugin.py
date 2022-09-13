@@ -46,7 +46,7 @@ def register() -> Plugin:
                 "default": True,
                 "type": "dict"
             },
-            manual="memory/join_output_payloads",
+            manual="join_output_payloads",
             form=Form(
                 groups=[
                     FormGroup(
