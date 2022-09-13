@@ -8,6 +8,6 @@ class TrelloCredentials(BaseModel):
     @staticmethod
     def create():
         return TrelloCredentials(
-                    api_key="",
-                    token=""
-                )
+            api_key="",
+            token=""
+        )
