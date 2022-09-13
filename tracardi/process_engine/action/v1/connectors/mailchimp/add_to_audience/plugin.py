@@ -76,7 +76,7 @@ def register() -> Plugin:
                 "subscribed": False,
                 "update": False
             },
-            manual="add_to_mailchimp_audience_action",
+            manual="mailchimp_add_to_audience_action",
             form=Form(
                 groups=[
                     FormGroup(

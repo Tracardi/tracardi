@@ -63,7 +63,7 @@ def register() -> Plugin:
                 "email": None,
                 "delete": False
             },
-            manual="remove_from_mailchimp_audience_action",
+            manual="mailchimp_remove_from_audience_action",
             form=Form(
                 groups=[
                     FormGroup(
