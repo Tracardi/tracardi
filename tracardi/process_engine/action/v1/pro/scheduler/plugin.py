@@ -54,7 +54,7 @@ class SchedulerPlugin(ActionRunner):
                     "time": result.time,
                     "key": result.key,
                     "origin": result.origin,
-                    "server": tracardi.config.tracardi.tracardi_pro_host
+                    "server": tracardi.config.tracardi.tracardi_scheduler_host
                 },
                 "payload": payload
             }
