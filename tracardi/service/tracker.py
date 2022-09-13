@@ -161,8 +161,7 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
                                 class_name='EventValidator',
                                 module='tracker',
                                 type='error',
-                                message="Event is invalid.",
-                                traceback="Event is invalid."
+                                message="Event is invalid."
                             )
                         )
                 events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)

@@ -50,6 +50,14 @@ class TrackerPayload(BaseModel):
                 if isinstance(session, Session):
                     _event.session.start = session.metadata.time.insert
                     _event.session.duration = session.metadata.time.duration
+
+                # add tracker payload properties as event context values
+
+                if isinstance(_event.context, dict):
+                    _event.context.update(self.properties)
+                else:
+                    _event.context = self.properties
+
                 _event.context['ip'] = ip
 
                 event_list.append(_event)
@@ -176,11 +184,6 @@ class TrackerPayload(BaseModel):
             session.context.update(self.context)
         else:
             session.context = self.context
-
-        if isinstance(session.properties, dict):
-            session.properties.update(self.properties)
-        else:
-            session.properties = self.properties
 
         session.operation.new = is_new_session
 
