@@ -27,6 +27,7 @@ class TrackerPayload(BaseModel):
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
+    request: Optional[dict] = {}
     events: List[EventPayload] = []
     options: Optional[dict] = {}
 
@@ -51,14 +52,14 @@ class TrackerPayload(BaseModel):
                     _event.session.start = session.metadata.time.insert
                     _event.session.duration = session.metadata.time.duration
 
-                # add tracker payload properties as event context values
+                # Add tracker payload properties as event request values
 
-                if isinstance(_event.context, dict):
-                    _event.context.update(self.properties)
+                if isinstance(_event.request, dict):
+                    _event.request.update(self.request)
                 else:
-                    _event.context = self.properties
+                    _event.request = self.request
 
-                _event.context['ip'] = ip
+                _event.request['ip'] = ip
 
                 event_list.append(_event)
         return event_list
@@ -184,6 +185,11 @@ class TrackerPayload(BaseModel):
             session.context.update(self.context)
         else:
             session.context = self.context
+
+        if isinstance(session.properties, dict):
+            session.properties.update(self.properties)
+        else:
+            session.properties = self.properties
 
         session.operation.new = is_new_session
 

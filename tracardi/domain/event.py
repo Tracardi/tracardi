@@ -45,6 +45,7 @@ class Event(Entity):
     session: Optional[EventSession] = None
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
+    request: Optional[dict] = {}
     config: Optional[dict] = {}
     tags: Tags = Tags()
     aux: dict = {}
