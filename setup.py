@@ -27,7 +27,7 @@ setup(
         'python-multipart>=0.0.5',
         'lark>=0.11.3',
         'dateparser',
-        'dotty @ git+https://github.com/Tracardi/dotty_dict@master#egg=dotty',
+        'dotty-dict @ git+https://github.com/Tracardi/dotty_dict@master#egg=dotty-dict',
         'pytz',
         'device_detector==5.0.1',
         'deepdiff>=5.5.0',
