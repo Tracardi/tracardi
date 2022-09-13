@@ -69,6 +69,11 @@
           "dynamic": "true",
           "type": "object"
         },
+        "request": {
+          "enabled": false,
+          "dynamic": "true",
+          "type": "object"
+        },
         "source": {
           "properties": {
             "id": {
