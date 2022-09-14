@@ -227,7 +227,8 @@ def get_resource_types() -> List[ResourceSettings]:
                 init={
                     "overwrite_with_blank": False
                 }
-            )
+            ),
+            manual="mautic_resource"
         ),
         ResourceSettings(
             id="elastic-email",
