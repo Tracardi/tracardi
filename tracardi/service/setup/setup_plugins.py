@@ -536,10 +536,10 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin": PluginTestTemplate(
         init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
-            'source': {'id': '', 'name': ''}},
+              'source': {'id': '', 'name': ''}},
         resource=None
     ),
-    
+
     "tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin": PluginTestTemplate(
         init={'base_id': None, 'mapping': {}, 'source': {'id': '1', 'name': 'Some value'}, 'table_name': None},
         resource=None
@@ -663,6 +663,83 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             "field": "payload@field",
             "substring": "contains"
         }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.hubspot.add_company.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "properties": [],
+        },
+        resource={
+            "access_token": "<your-app-access-token>", 
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.hubspot.add_contact.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "properties": [],
+        },
+        resource={
+            "access_token": "<your-app-access-token>", 
+        }
+    ),
+
+
+    "tracardi.process_engine.action.v1.connectors.hubspot.get_company.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "company_id": None,
+        },
+        resource={
+            "access_token": "<your-app-access-token>", 
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.hubspot.get_contact.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "contact_id": None,
+        },
+        resource={
+            "access_token": "<your-app-access-token>", 
+        }
+    ),
+    "tracardi.process_engine.action.v1.connectors.hubspot.update_company.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "company_id": None,
+        },
+        resource={
+            "access_token": "<your-app-access-token>",
+        }
+    ),
+    "tracardi.process_engine.action.v1.connectors.hubspot.update_contact.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "contact_id": None,
+        },
+        resource={
+            "access_token": "<your-app-access-token>",
+        }
     )
 
 }
@@ -697,20 +774,20 @@ test_plugins: Dict[str, PluginTestTemplate] = {
         init={'queue': {'auto_declare': True, 'compression': None, 'name': "queue", 'queue_type': 'direct',
                         'routing_key': None, 'serializer': 'json'}, 'source': {'id': "", "name": ""}},
         resource={
-                "uri": "amqp://localhost:5672/",
-                "port": "5672",
-                "timeout": "5",
-                "virtual_host": ""
-            }
+            "uri": "amqp://localhost:5672/",
+            "port": "5672",
+            "timeout": "5",
+            "virtual_host": ""
+        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin": PluginTestTemplate(
         init={'contact_type': 'Individual', 'fields': {}, 'source': {'id': '', 'name': ''}},
         resource={
-                "api_key": "<api-key>",
-                "site_key": "<site-key>",
-                "api_url": "<api-url>"
-            }
+            "api_key": "<api-key>",
+            "site_key": "<site-key>",
+            "api_url": "<api-url>"
+        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.amplitude.send_events.plugin": PluginTestTemplate(

@@ -36,6 +36,10 @@ class HttpClient:
     async def delete(self, *args, **kwargs):
         yield await self._run_with_retries(self.client.delete, *args, **kwargs)
 
+    @asynccontextmanager
+    async def patch(self, *args, **kwargs):
+        yield await self._run_with_retries(self.client.patch, *args, **kwargs)
+
     async def __aenter__(self) -> 'HttpClient':
         return self
 
