@@ -272,7 +272,8 @@ def get_resource_types() -> List[ResourceSettings]:
             },
             destination=DestinationData(
                 package="tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector"
-            )
+            ),
+            manual="civi_resource"
         ),
         ResourceSettings(
             id="active_campaign",
