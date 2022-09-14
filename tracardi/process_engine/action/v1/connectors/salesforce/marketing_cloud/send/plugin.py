@@ -83,7 +83,7 @@ def register() -> Plugin:
                     id="source",
                     name="Marketing Cloud resource",
                     description="Select your Marketing Cloud resource, containing subdomain and client credentials.",
-                    component=FormComponent(type="resource", props={"tag": "marketing_cloud"})
+                    component=FormComponent(type="resource", props={"tag": "salesforce"})
                 ),
                 FormField(
                     id="extension_id",

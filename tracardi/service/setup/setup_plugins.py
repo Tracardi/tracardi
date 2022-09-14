@@ -422,18 +422,8 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin": PluginTestTemplate(
-        init=None,
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.discord.push.plugin": PluginTestTemplate(
         init={'message': '', 'timeout': 10, 'url': None, 'username': None},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin": PluginTestTemplate(
-        init={'payload': '{}', 'qos': '0', 'retain': False, 'source': {'id': '', 'name': ''}, 'topic': ''},
         resource=None
     ),
 
@@ -485,23 +475,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.mixpanel.send.plugin": PluginTestTemplate(
-        init={'mapping': {}, 'source': {'id': '1', 'name': 'Some value'}},
-        resource={
-            "token": "token",
-            "server_prefix": "EU"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mixpanel.fetch_funnel.plugin": PluginTestTemplate(
-        init={'from_date': None, 'funnel_id': None, 'project_id': None, 'source': {'id': '1', 'name': 'Some value'},
-              'to_date': None},
-        resource={
-            "token": "token",
-            "server_prefix": "EU"
-        }
-    ),
-
     "tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin": PluginTestTemplate(
         init={'additional_mapping': {}, 'email': None, 'source': {'id': None, 'name': None}},
         resource=None
@@ -537,29 +510,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     "tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin": PluginTestTemplate(
         init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
               'source': {'id': '', 'name': ''}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin": PluginTestTemplate(
-        init={'base_id': None, 'mapping': {}, 'source': {'id': '1', 'name': 'Some value'}, 'table_name': None},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.airtable.fetch_records.plugin": PluginTestTemplate(
-        init={'base_id': None, 'formula': None, 'source': {'id': '1', 'name': 'Some value'}, 'table_name': None},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin": PluginTestTemplate(
-        init={'dimensions': {}, 'goal_id': None, 'rck': 'session@context.utm.term',
-              'rcn': 'session@context.utm.campaign', 'revenue': None, 'search_category': None, 'search_keyword': None,
-              'search_results_count': None, 'site_id': None, 'source': {'id': '1', 'name': 'Some value'},
-              'url_ref': 'event@context.page.referer.host'},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin": PluginTestTemplate(
-        init={'extension_id': None, 'mapping': {}, 'source': {'id': '', 'name': ''}, 'update': False},
         resource=None
     ),
 
@@ -665,6 +615,80 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         }
     ),
 
+}
+
+# Plugins only for testing
+test_plugins: Dict[str, PluginTestTemplate] = {
+    "tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin": PluginTestTemplate(
+        init={'extension_id': None, 'mapping': {}, 'source': {'id': '', 'name': ''}, 'update': False},
+        resource={
+            "client_id": "<your-client-id>",
+            "client_secret": "<your-client-secret>",
+            "subdomain": "<your-subdomain>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin": PluginTestTemplate(
+        init={
+            "url": "",
+            "body": "{}",
+            "timeout": 30
+        },
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin": PluginTestTemplate(
+        init={'payload': '{}', 'qos': '0', 'retain': False, 'source': {'id': '', 'name': ''}, 'topic': ''},
+        resource={
+            "url": "<url>",
+            "port": "<port>",
+            "username": "<username>",
+            "password": "<password>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mixpanel.send.plugin": PluginTestTemplate(
+        init={'mapping': {}, 'source': {'id': '1', 'name': 'Some value'}},
+        resource={
+            "token": "token",
+            "server_prefix": "EU"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mixpanel.fetch_funnel.plugin": PluginTestTemplate(
+        init={'from_date': None, 'funnel_id': None, 'project_id': None, 'source': {'id': '1', 'name': 'Some value'},
+              'to_date': None},
+        resource={
+            "token": "token",
+            "server_prefix": "EU"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin": PluginTestTemplate(
+        init={'base_id': None, 'mapping': {}, 'source': {'id': '1', 'name': 'Some value'}, 'table_name': None},
+        resource={
+            "api_key": "<your-api-key>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.airtable.fetch_records.plugin": PluginTestTemplate(
+        init={'base_id': None, 'formula': None, 'source': {'id': '1', 'name': 'Some value'}, 'table_name': None},
+        resource={
+            "api_key": "<your-api-key>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin": PluginTestTemplate(
+        init={'dimensions': {}, 'goal_id': None, 'rck': 'session@context.utm.term',
+              'rcn': 'session@context.utm.campaign', 'revenue': None, 'search_category': None, 'search_keyword': None,
+              'search_results_count': None, 'site_id': None, 'source': {'id': '1', 'name': 'Some value'},
+              'url_ref': 'event@context.page.referer.host'},
+        resource={
+            "token": "<your-token>",
+            "api_url": "<your-matomo-url>"
+        }
+    ),
+
     "tracardi.process_engine.action.v1.connectors.hubspot.add_company.plugin": PluginTestTemplate(
         init={
             "source": {
@@ -674,7 +698,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             "properties": [],
         },
         resource={
-            "access_token": "<your-app-access-token>", 
+            "token": "<your-app-access-token>",
         }
     ),
 
@@ -687,10 +711,9 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             "properties": [],
         },
         resource={
-            "access_token": "<your-app-access-token>", 
+            "token": "<your-app-access-token>",
         }
     ),
-
 
     "tracardi.process_engine.action.v1.connectors.hubspot.get_company.plugin": PluginTestTemplate(
         init={
@@ -701,7 +724,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             "company_id": None,
         },
         resource={
-            "access_token": "<your-app-access-token>", 
+            "token": "<your-app-access-token>",
         }
     ),
 
@@ -714,7 +737,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             "contact_id": None,
         },
         resource={
-            "access_token": "<your-app-access-token>", 
+            "token": "<your-app-access-token>",
         }
     ),
     "tracardi.process_engine.action.v1.connectors.hubspot.update_company.plugin": PluginTestTemplate(
@@ -726,7 +749,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             "company_id": None,
         },
         resource={
-            "access_token": "<your-app-access-token>",
+            "token": "<your-app-access-token>",
         }
     ),
     "tracardi.process_engine.action.v1.connectors.hubspot.update_contact.plugin": PluginTestTemplate(
@@ -738,14 +761,9 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             "contact_id": None,
         },
         resource={
-            "access_token": "<your-app-access-token>",
+            "token": "<your-app-access-token>",
         }
-    )
-
-}
-
-# Plugins only for testing
-test_plugins: Dict[str, PluginTestTemplate] = {
+    ),
 
     "tracardi.process_engine.action.v1.connectors.full_contact.person_enrich.plugin": PluginTestTemplate(
         init=None,

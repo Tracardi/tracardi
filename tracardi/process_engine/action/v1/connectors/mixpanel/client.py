@@ -1,5 +1,4 @@
 import json
-from fastapi import HTTPException
 from base64 import b64encode
 from tracardi.service.tracardi_http_client import HttpClient
 
@@ -40,7 +39,7 @@ class MixPanelAPIClient:
                     url=f"https://api{self.server_prefix}.mixpanel.com/track?data={json.dumps(data)}&verbose=1",
             ) as response:
                 if response.status != 200:
-                    raise HTTPException(status_code=response.status, detail=response.content)
+                    raise ConnectionError(response.content)
 
                 return await response.json()
 
@@ -65,6 +64,6 @@ class MixPanelAPIClient:
             ) as response:
 
                 if response.status != 200:
-                    raise HTTPException(status_code=response.status, detail=response.content)
+                    raise ConnectionError(response.content)
 
                 return await response.json()
