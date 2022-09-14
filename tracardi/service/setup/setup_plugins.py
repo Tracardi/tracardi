@@ -671,16 +671,10 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
                 "id": "",
                 "name": ""
             },
-            "is_token_got": True,
             "properties": [],
         },
         resource={
-            "client_id": "<your-client-id>",
-            "client_secret": "<your-client-secret>",
-            "refresh_token": "<your-refresh-token-optionally>",
-            "access_token": "<your-access-token-optionally>",
-            "redirect_url": "<your-redirect-url-optionally>",
-            "code": "<your-code-optionally-optionally>"
+            "access_token": "<your-app-access-token>", 
         }
     ),
 
@@ -690,37 +684,13 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
                 "id": "",
                 "name": ""
             },
-            "is_token_got": True,
             "properties": [],
         },
         resource={
-            "client_id": "<your-client-id>",
-            "client_secret": "<your-client-secret>",
-            "refresh_token": "<your-refresh-token-optionally>",
-            "access_token": "<your-access-token-optionally>",
-            "redirect_url": "<your-redirect-url-optionally>",
-            "code": "<your-code-optionally-optionally>"
+            "access_token": "<your-app-access-token>", 
         }
     ),
 
-    "tracardi.process_engine.action.v1.connectors.hubspot.add_email.plugin": PluginTestTemplate(
-        init={
-            "source": {
-                "id": "",
-                "name": ""
-            },
-            "is_token_got": True,
-            "properties": [],
-        },
-        resource={
-            "client_id": "<your-client-id>",
-            "client_secret": "<your-client-secret>",
-            "refresh_token": "<your-refresh-token-optionally>",
-            "access_token": "<your-access-token-optionally>",
-            "redirect_url": "<your-redirect-url-optionally>",
-            "code": "<your-code-optionally-optionally>"
-        }
-    ),
 
     "tracardi.process_engine.action.v1.connectors.hubspot.get_company.plugin": PluginTestTemplate(
         init={
@@ -728,16 +698,47 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
                 "id": "",
                 "name": ""
             },
-            "is_token_got": True,
             "company_id": None,
         },
         resource={
-            "client_id": "<your-client-id>",
-            "client_secret": "<your-client-secret>",
-            "refresh_token": "<your-refresh-token-optionally>",
-            "access_token": "<your-access-token-optionally>",
-            "redirect_url": "<your-redirect-url-optionally>",
-            "code": "<your-code-optionally-optionally>"
+            "access_token": "<your-app-access-token>", 
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.hubspot.get_contact.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "contact_id": None,
+        },
+        resource={
+            "access_token": "<your-app-access-token>", 
+        }
+    ),
+    "tracardi.process_engine.action.v1.connectors.hubspot.update_company.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "company_id": None,
+        },
+        resource={
+            "access_token": "<your-app-access-token>",
+        }
+    ),
+    "tracardi.process_engine.action.v1.connectors.hubspot.update_contact.plugin": PluginTestTemplate(
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "contact_id": None,
+        },
+        resource={
+            "access_token": "<your-app-access-token>",
         }
     )
 

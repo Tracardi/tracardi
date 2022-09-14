@@ -7,4 +7,3 @@ class Config(BaseModel):
     source: NamedEntity
     company_id: int
     properties: Dict[str, Any]
-    is_token_got: bool

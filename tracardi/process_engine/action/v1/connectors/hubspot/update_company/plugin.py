@@ -60,35 +60,6 @@ class HubSpotCompanyUpdater(ActionRunner):
             )
             return Result(port="response", value=result)
 
-        except HubSpotClientAuthException:
-            try:
-                if self.config.is_token_got is False:
-                    await self.client.get_token()
-
-                await self.client.update_token()
-
-                result = await self.client.update_company(
-                    self.config.company_id,
-                    self.config.properties
-                )
-
-                if self.debug:
-                    self.resource.credentials.test = self.client.credentials
-                else:
-                    self.resource.credentials.production = self.client.credentials
-                await storage.driver.resource.save_record(self.resource)
-
-                return Result(port="response", value=result)
-
-            except HubSpotClientAuthException as e:
-                return Result(port="error", value={"message": str(e), "msg": ""})
-
-            except StorageException as e:
-                return Result(port="error", value={"message": "Plugin was unable to update credentials.", "msg": str(e)})
-
-            except HubSpotClientException as e:
-                return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
-
         except HubSpotClientException as e:
             return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
 
@@ -103,14 +74,13 @@ def register() -> Plugin:
             outputs=["response", "error"],
             version='0.7.2',
             license="MIT",
-            author="Marcin Gaca",
-            manual="add_hubspot_company_action",
+            author="Marcin Gaca, Risto Kowaczewski, Ben Ullrich",
+            manual="hubspot_add_company_action",
             init={
                 "source": {
                     "id": "",
                     "name": ""
                 },
-                "is_token_got": True,
                 "company_id": None,
                 "properties": [],
             },
@@ -122,14 +92,8 @@ def register() -> Plugin:
                             FormField(
                                 id="source",
                                 name="HubSpot resource",
-                                description="Please select your HubSpot resource, containing your client id, "
-                                            "client secret, and refresh token.",
+                                description="Please select your HubSpot resource, containing your app privatekey/access_token",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "hubspot"})
-                            ),
-                            FormField(
-                                id="is_token_got",
-                                name="Token",
-                                component=FormComponent(type="bool", props={"label": "I've already got a token."}),
                             ),
                             FormField(
                                 id="company_id",

@@ -7,6 +7,5 @@ class Config(BaseModel):
     source: NamedEntity
     contact_id: str
     properties: Dict[str, Any]
-    is_token_got: bool
 
 
