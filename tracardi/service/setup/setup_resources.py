@@ -296,16 +296,12 @@ def get_resource_types() -> List[ResourceSettings]:
         ResourceSettings(
             id="hubspot",
             config={
-                "client_id": "<your-client-id>",
-                "client_secret": "<your-client-secret>",
-                "refresh_token": "<your-refresh-token-optionally>",
-                "access_token": "<your-access-token-optionally>",
-                "redirect_url": "<your-redirect-url-optionally>",
-                "code": "<your-code-optionally-optionally>"
+                "token": "<your-access-token>"
             },
             icon="hubspot",
             tags=["hubspot"],
-            name="HubSpot"
+            name="HubSpot",
+            manual="hubspot_resource"
         )
     ]
 

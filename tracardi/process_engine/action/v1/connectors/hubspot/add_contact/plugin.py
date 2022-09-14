@@ -73,13 +73,13 @@ def register() -> Plugin:
             version='0.7.2',
             license="MIT",
             author="Marcin Gaca, Risto Kowaczewski, Ben Ullrich",
-            manual="hubspot_add_contact_action",
+            manual="hubspot/hubspot_add_contact_action",
             init={
                 "source": {
                     "name": "",
                     "id": "",
                 },
-                "properties": [],
+                "properties": {},
             },
             form=Form(
                 groups=[
@@ -89,7 +89,7 @@ def register() -> Plugin:
                             FormField(
                                 id="source",
                                 name="HubSpot resource",
-                                description="Please select your HubSpot resource, containing your app privatekey/access_token",
+                                description="Please select your HubSpot resource",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "hubspot"})
                             ),
                             FormField(

@@ -14,14 +14,8 @@ class HubSpotClientAuthException(Exception):
 
 class HubSpotClient:
 
-    def __init__(self, client_secret: str, client_id: str, access_token: str, refresh_token: str, redirect_url: str,
-            code: str):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.access_token = access_token
-        self.refresh_token = refresh_token
-        self.redirect_url = redirect_url
-        self.code = code
+    def __init__(self, token: str):
+        self.access_token = token
         self.retries = 1
         self.api_url = 'https://api.hubapi.com'
         self.auth_headers = {'Content-Type': "application/json", "Authorization": f"Bearer {self.access_token}"}
@@ -36,8 +30,6 @@ class HubSpotClient:
                     url=f"{self.api_url}/crm/v3/objects/companies",
                     json=data
             ) as response:
-
-                print(json.dumps(data))
 
                 if response.status == 401:
                     raise HubSpotClientAuthException()

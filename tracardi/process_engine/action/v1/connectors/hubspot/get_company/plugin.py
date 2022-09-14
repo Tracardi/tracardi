@@ -5,9 +5,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import Resource
-from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException, \
-    HubSpotClientAuthException
-from tracardi.exceptions.exception import StorageException
+from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
 
 
 def validate(config: dict) -> Config:
