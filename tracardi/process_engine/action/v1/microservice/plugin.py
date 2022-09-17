@@ -34,7 +34,6 @@ class MicroserviceAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
         node = self.node  # type: Node
         context = plugin_context.get_context(self, include=['node'])
-
         service_id = node.microservice.service.id
         action_id = node.microservice.plugin.id
         config = {
