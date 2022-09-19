@@ -584,38 +584,42 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
 # Plugins only for testing
 test_plugins: Dict[str, PluginTestTemplate] = {
-    "tracardi.process_engine.action.v1.ux.contact_popup.plugin": PluginTestTemplate(
-        init={'api_url': 'http://localhost:8686', 'contact_type': 'email', 'content': None, 'dark_theme': False,
-              'event_type': None, 'horizontal_pos': 'center', 'save_event': True, 'uix_source': 'http://localhost:8686',
-              'vertical_pos': 'bottom'},
-        resource=None
-    ),
-    "tracardi.process_engine.action.v1.ux.snackbar.plugin": PluginTestTemplate(
-        init={'hide_after': 6000, 'message': '', 'position_x': 'center', 'position_y': 'bottom', 'type': 'success',
-              'uix_mf_source': 'http://localhost:8686'},
-        resource=None
-    ),
-    "tracardi.process_engine.action.v1.ux.cta_message.plugin": PluginTestTemplate(
-        init={'border_radius': 2, 'border_shadow': 1, 'cancel_button': '', 'cta_button': '', 'cta_link': '',
-              'hide_after': 6000, 'max_width': 500, 'message': '', 'min_width': 300, 'position_x': 'right',
-              'position_y': 'bottom', 'title': '', 'uix_mf_source': 'http://localhost:8686'},
-        resource=None
-    ),
 
-    "tracardi.process_engine.action.v1.ux.rating_popup.plugin": PluginTestTemplate(
-        init={'api_url': 'http://localhost:8686', 'dark_theme': False, 'event_type': None,
-              'horizontal_position': 'center', 'lifetime': '6', 'message': None, 'save_event': True, 'title': None,
-              'uix_source': 'http://localhost:8686', 'vertical_position': 'bottom'},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.ux.question_popup.plugin": PluginTestTemplate(
-        init={'api_url': 'http://localhost:8686', 'content': None, 'dark_theme': False, 'event_type': None,
-              'horizontal_pos': 'center', 'left_button_text': None, 'popup_lifetime': '6', 'popup_title': None,
-              'right_button_text': None, 'save_event': True, 'uix_source': 'http://localhost:8686',
-              'vertical_pos': 'bottom'},
-        resource=None
-    ),
+    # Microservice
+    # "tracardi.process_engine.action.v1.ux.contact_popup.plugin": PluginTestTemplate(
+    #     init={'api_url': 'http://localhost:8686', 'contact_type': 'email', 'content': None, 'dark_theme': False,
+    #           'event_type': None, 'horizontal_pos': 'center', 'save_event': True, 'uix_source': 'http://localhost:8686',
+    #           'vertical_pos': 'bottom'},
+    #     resource=None
+    # ),
+    #
+    # "tracardi.process_engine.action.v1.ux.snackbar.plugin": PluginTestTemplate(
+    #     init={'hide_after': 6000, 'message': '', 'position_x': 'center', 'position_y': 'bottom', 'type': 'success',
+    #           'uix_mf_source': 'http://localhost:8686'},
+    #     resource=None
+    # ),
+    #
+    # "tracardi.process_engine.action.v1.ux.cta_message.plugin": PluginTestTemplate(
+    #     init={'border_radius': 2, 'border_shadow': 1, 'cancel_button': '', 'cta_button': '', 'cta_link': '',
+    #           'hide_after': 6000, 'max_width': 500, 'message': '', 'min_width': 300, 'position_x': 'right',
+    #           'position_y': 'bottom', 'title': '', 'uix_mf_source': 'http://localhost:8686'},
+    #     resource=None
+    # ),
+    #
+    # "tracardi.process_engine.action.v1.ux.rating_popup.plugin": PluginTestTemplate(
+    #     init={'api_url': 'http://localhost:8686', 'dark_theme': False, 'event_type': None,
+    #           'horizontal_position': 'center', 'lifetime': '6', 'message': None, 'save_event': True, 'title': None,
+    #           'uix_source': 'http://localhost:8686', 'vertical_position': 'bottom'},
+    #     resource=None
+    # ),
+    #
+    # "tracardi.process_engine.action.v1.ux.question_popup.plugin": PluginTestTemplate(
+    #     init={'api_url': 'http://localhost:8686', 'content': None, 'dark_theme': False, 'event_type': None,
+    #           'horizontal_pos': 'center', 'left_button_text': None, 'popup_lifetime': '6', 'popup_title': None,
+    #           'right_button_text': None, 'save_event': True, 'uix_source': 'http://localhost:8686',
+    #           'vertical_pos': 'bottom'},
+    #     resource=None
+    # ),
 
     "tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin": PluginTestTemplate(
         init={'extension_id': None, 'mapping': {}, 'source': {'id': '', 'name': ''}, 'update': False},
