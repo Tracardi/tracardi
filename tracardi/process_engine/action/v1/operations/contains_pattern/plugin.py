@@ -66,29 +66,30 @@ class ContainsPatternAction(ActionRunner):
             raise WrongFieldTypeError(f"Given field must be an array or string type. {type(value)} given")
 
         if self.config.pattern == "all":
-            found_patterns = []
+            found_matched = {}
             for k, v in patterns.items():
-                if re.findall(patterns[k], value):
-                    found_patterns.append(k)
-            return Result(port='true', value={"found": found_patterns})
+                match = re.findall(patterns[k], value)
+                if match:
+                    found_matched[k] = match
+            return Result(port='true', value=found_matched)
 
         elif self.config.pattern == "email":
             if re.match(patterns["email"], value):
-                return Result(port="true", value={"found": "email"})
+                return Result(port="true", value={"email": [value]})
 
         elif self.config.pattern == "url":
             if re.match(patterns["url"], value):
-                return Result(port="true", value={"found": "url"})
+                return Result(port="true", value={"url": [value]})
 
         elif self.config.pattern == "date":
             if re.match(patterns["date"], value):
-                return Result(port="true", value={"found": "date"})
+                return Result(port="true", value={"data": [value]})
 
         elif self.config.pattern == "ip":
             if re.match(patterns["ip"], value):
-                return Result(port="true", value={"found": "ip"})
-        else:
-            return Result(port="false", value={"message": "Didn't find any patterns"})
+                return Result(port="true", value={"ip": [value]})
+
+        return Result(port="false", value={"message": "Didn't find any patterns"})
 
 
 def register() -> Plugin:
