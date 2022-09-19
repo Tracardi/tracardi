@@ -64,7 +64,7 @@ class SendEventToMatomoAction(ActionRunner):
         request_start = perf_data_service.get_performance_value("requestStart")
 
         data = MatomoPayload(
-            cip=self.event.context.get("ip", None),
+            cip=self.event.request.get("ip", None),
             idsite=self.config.site_id,
             action_name=self.event.type,
             url=self.event.context.get("page", {"url": None}).get("url", None),

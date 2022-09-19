@@ -45,7 +45,8 @@ class SchedulerPlugin(ActionRunner):
                 session_id=self.session.id if self.session is not None else None,
                 event_type=self.config.event_type,
                 properties=json.loads(self.config.properties),
-                context=self.event.context
+                context=self.event.context,
+                request=self.event.request
             )
 
             response = {

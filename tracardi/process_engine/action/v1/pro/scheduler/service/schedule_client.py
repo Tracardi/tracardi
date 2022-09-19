@@ -38,7 +38,9 @@ class SchedulerClient(object):
     def _to_struct(value: dict):
         return ParseDict(value, Struct(), )
 
-    async def schedule(self, schedule_at, callback_host, source_id, profile_id, session_id, event_type, properties, context):
+    async def schedule(self, schedule_at, callback_host, source_id, profile_id, session_id, event_type, properties,
+                       context, request):
+
         message = pb2.Payload(
             time=schedule_at,
             callback_host=callback_host,
@@ -47,8 +49,10 @@ class SchedulerClient(object):
             session_id=session_id,
             event_type=event_type,
             properties=self._to_struct(properties),
-            context=self._to_struct(context)
+            context=self._to_struct(context),
+            request=self._to_struct(request)
         )
+
         return self.stub.schedule_job(message, metadata=[('token', await get_tpro_token())])
 
 
@@ -64,6 +68,7 @@ if __name__ == '__main__':
         event_type="aws7",
         properties={"a": 1,
                     "b": str(datetime.utcnow())},
-        context={"c": 3}
+        context={"c": 3},
+        request={"request": 1}
     )
     print(f'{result}')

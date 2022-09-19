@@ -30,6 +30,7 @@ class SchedulerJob(Entity):
             session=self.event.session,
             profile=self.event.profile,
             context=self.event.context,
+            request=self.event.request,
             events=[EventPayload(type=self.event.type, properties=self.event.properties, options=options)]
         )
 

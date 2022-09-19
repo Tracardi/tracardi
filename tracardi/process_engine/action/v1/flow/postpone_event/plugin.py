@@ -28,7 +28,7 @@ class PostponeEventAction(ActionRunner):
         self.config = validate(init)
 
     async def _postponed_run(self):
-        ip = self.event.context['ip'] if 'ip' in self.event.context else 'http://localhost'
+        ip = self.event.request['ip'] if 'ip' in self.event.request else '127.0.0.1'
         tracker_payload = TrackerPayload(
             source=Entity(id=self.event.source.id),
             session=Entity(id=self.session.id),
