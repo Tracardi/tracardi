@@ -7,7 +7,6 @@ from tracardi.process_engine.action.v1.connectors.mixpanel.client import MixPane
 from tracardi.service.plugin.domain.result import Result
 from datetime import datetime
 from tracardi.service.notation.dict_traverser import DictTraverser
-from fastapi import HTTPException
 
 
 def validate(config: dict) -> Config:
@@ -52,7 +51,7 @@ class MixPanelSender(ActionRunner):
                 return Result(port="error", value=payload)
             return Result(port="success", value=payload)
 
-        except HTTPException as e:
+        except Exception as e:
             self.console.error(str(e))
             return Result(port="error", value=payload)
 

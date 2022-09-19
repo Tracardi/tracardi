@@ -39,7 +39,7 @@ def register() -> Plugin:
             name='If its a weekend',
             desc='This plugin checks current date and flag it if its a weekend or not.',
             icon='calendar',
-            group=["Input/Output"],
+            group=["Time"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

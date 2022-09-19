@@ -207,9 +207,7 @@ def get_resource_types() -> List[ResourceSettings]:
             icon="mixpanel",
             config={
                 "token": "<your-project-token>",
-                "server_prefix": "US | EU",
-                "username": "<service-account-username>",
-                "password": "<service-account-password>"
+                "server_prefix": "US | EU"
             }
         ),
         ResourceSettings(
@@ -227,7 +225,8 @@ def get_resource_types() -> List[ResourceSettings]:
                 init={
                     "overwrite_with_blank": False
                 }
-            )
+            ),
+            manual="mautic_resource"
         ),
         ResourceSettings(
             id="elastic-email",
@@ -272,7 +271,8 @@ def get_resource_types() -> List[ResourceSettings]:
             },
             destination=DestinationData(
                 package="tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector"
-            )
+            ),
+            manual="civi_resource"
         ),
         ResourceSettings(
             id="active_campaign",
@@ -284,9 +284,9 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="marketing_cloud",
+            id="salesforce",
             name="Salesforce Marketing Cloud",
-            tags=["marketing_cloud"],
+            tags=["salesforce"],
             config={
                 "client_id": "<your-client-id>",
                 "client_secret": "<your-client-secret>",

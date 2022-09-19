@@ -96,7 +96,7 @@ def register() -> Plugin:
             desc='Gets OAuth2 token from given endpoint, using given username and password.',
             type='flowNode',
             icon='plugin',
-            group=["Connectors"],
+            group=["Operations"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

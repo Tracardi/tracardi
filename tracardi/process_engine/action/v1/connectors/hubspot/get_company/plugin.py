@@ -33,7 +33,7 @@ class HubSpotCompanyGetter(ActionRunner):
             return Result(port="response", value=result)
 
         except HubSpotClientException as e:
-            return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:
@@ -63,7 +63,7 @@ def register() -> Plugin:
                             FormField(
                                 id="source",
                                 name="HubSpot resource",
-                                description="Please select your HubSpot resource, containing your app privatekey/access_token",
+                                description="Please select your HubSpot resource.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "hubspot"})
                             ),
                             FormField(

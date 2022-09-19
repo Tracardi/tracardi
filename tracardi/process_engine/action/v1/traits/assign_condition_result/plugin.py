@@ -74,7 +74,7 @@ def register() -> Plugin:
             name='Resolve conditions into profile fields',
             desc='This plugin resolves a set of conditions and assigns it to the profile fields.',
             icon='if',
-            group=["Data processing"],
+            group=["Flow control"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

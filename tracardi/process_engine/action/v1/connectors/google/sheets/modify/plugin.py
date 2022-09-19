@@ -174,6 +174,6 @@ def register() -> Plugin:
             name='Google Spreadsheet',
             desc='This plugin connects Tracardi to Google Sheets.',
             icon='google',
-            group=["Connectors"]
+            group=["Google"]
         )
     )

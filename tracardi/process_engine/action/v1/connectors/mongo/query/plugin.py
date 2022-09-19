@@ -152,7 +152,7 @@ def register() -> Plugin:
             name='Mongo connector',
             desc='Connects to mongodb and reads data.',
             icon='mongo',
-            group=["Connectors"],
+            group=["Databases"],
             tags=['database', 'nosql']
         )
     )

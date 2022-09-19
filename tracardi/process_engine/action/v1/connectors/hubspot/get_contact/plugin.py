@@ -5,9 +5,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver import storage
 from tracardi.domain.resource import Resource
-from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException, \
-    HubSpotClientAuthException
-from tracardi.exceptions.exception import StorageException
+from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
 
 
 def validate(config: dict) -> Config:
@@ -35,7 +33,7 @@ class HubSpotContactGetter(ActionRunner):
             return Result(port="response", value=result)
 
         except HubSpotClientException as e:
-            return Result(port="error", value={"message": "HubSpot API error", "msg": str(e)})
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:
@@ -65,7 +63,7 @@ def register() -> Plugin:
                             FormField(
                                 id="source",
                                 name="HubSpot resource",
-                                description="Please select your HubSpot resource, containing your app privatekey/access_token",
+                                description="Please select your HubSpot resource.",
                                 component=FormComponent(type="resource", props={"label": "Resource", "tag": "hubspot"})
                             ),
                             FormField(
