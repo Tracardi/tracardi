@@ -1,4 +1,5 @@
 from pydantic import validator
+from enum import Enum
 import re
 
 from tracardi.process_engine.action.v1.operations.contains_pattern.patterns import patterns
@@ -9,19 +10,30 @@ from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.result import Result
 
 
+class Pattern(str, Enum):
+    ip = "ip"
+    url = "url"
+    date = "date"
+    email = "email"
+    all = "all"
+
+
 class Config(PluginConfig):
     field: str
-    pattern: str
+    pattern: Pattern
+
+    class PatternConfig:
+        use_enum_values = True
 
     @validator("field")
-    def validate_prefix(cls, value):
-        if value == "":
+    def validate_field(cls, value):
+        if not value:
             raise ValueError("Field cannot be empty")
         return value
 
     @validator("pattern")
-    def validate_field(cls, value):
-        if value == "":
+    def validate_pattern(cls, value):
+        if not value:
             raise ValueError("Pattern cannot be empty")
         return value
 
@@ -50,34 +62,33 @@ class ContainsPatternAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         value = dot[self.config.field]
 
-        if not isinstance(value, str) or isinstance(value, list):
+        if not isinstance(value, str):
             raise WrongFieldTypeError(f"Given field must be an array or string type. {type(value)} given")
 
-
-        founded_patterns = []
         if self.config.pattern == "all":
+            found_patterns = []
             for k, v in patterns.items():
                 if re.findall(patterns[k], value):
-                    founded_patterns.append(k)
-            return Result(port='true', value={"found": founded_patterns})
+                    found_patterns.append(k)
+            return Result(port='true', value={"found": found_patterns})
 
-        if self.config.pattern == "email":
+        elif self.config.pattern == "email":
             if re.match(patterns["email"], value):
                 return Result(port="true", value={"found": "email"})
 
-        if self.config.pattern == "url":
+        elif self.config.pattern == "url":
             if re.match(patterns["url"], value):
                 return Result(port="true", value={"found": "url"})
 
-        if self.config.pattern == "date":
+        elif self.config.pattern == "date":
             if re.match(patterns["date"], value):
                 return Result(port="true", value={"found": "date"})
 
-        if self.config.pattern == "ip":
+        elif self.config.pattern == "ip":
             if re.match(patterns["ip"], value):
                 return Result(port="true", value={"found": "ip"})
-
-        return Result(port="false", value="Didn't find any patterns")
+        else:
+            return Result(port="false", value={"message": "Didn't find any patterns"})
 
 
 def register() -> Plugin:
@@ -144,9 +155,9 @@ def register() -> Plugin:
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
-                outputs={"true": PortDoc(desc="This port returns payload if field contains defined pattern."),
+                outputs={"true": PortDoc(desc="This port returns new object if field contains defined pattern."),
                          "false":
-                             PortDoc(desc="This port returns payload if field doesnt contain defined pattern.")}
+                             PortDoc(desc="This port returns payload if field doesn't contain defined pattern.")}
             )
         )
     )
