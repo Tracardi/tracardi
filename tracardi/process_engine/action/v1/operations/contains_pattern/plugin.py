@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from pydantic import validator
 from enum import Enum
 import re
@@ -66,12 +68,13 @@ class ContainsPatternAction(ActionRunner):
             raise WrongFieldTypeError(f"Given field must be an array or string type. {type(value)} given")
 
         if self.config.pattern == "all":
-            found_matched = {}
+            found_matched = defaultdict(list)
             for k, v in patterns.items():
-                match = re.findall(patterns[k], value)
-                if match:
-                    found_matched[k] = match
-            return Result(port='true', value=found_matched)
+                matched = re.finditer(patterns[k], value)
+                for match in matched:
+                    found_matched[k].append(match.group(0))
+            if found_matched:
+                return Result(port='true', value=found_matched)
 
         elif self.config.pattern == "email":
             if re.match(patterns["email"], value):
@@ -83,7 +86,7 @@ class ContainsPatternAction(ActionRunner):
 
         elif self.config.pattern == "date":
             if re.match(patterns["date"], value):
-                return Result(port="true", value={"data": [value]})
+                return Result(port="true", value={"date": [value]})
 
         elif self.config.pattern == "ip":
             if re.match(patterns["ip"], value):

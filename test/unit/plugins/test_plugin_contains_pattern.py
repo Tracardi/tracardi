@@ -5,6 +5,30 @@ from tracardi.process_engine.action.v1.operations.contains_pattern.plugin import
 from tracardi.service.plugin.service.plugin_runner import run_plugin
 
 
+def test_should_not_return_anything_if_no_match():
+    init = {
+        "field": "ala ma kota",
+        "pattern": "email"
+    }
+
+    payload = {"field": "test@test.com"}
+
+    result = run_plugin(ContainsPatternAction, init, payload)
+
+    assert result.output.port == "false"
+
+    init = {
+        "field": "ala ma kota",
+        "pattern": "all"
+    }
+
+    payload = {"field": "test@test.com"}
+
+    result = run_plugin(ContainsPatternAction, init, payload)
+
+    assert result.output.port == "false"
+
+
 def test_should_return_email():
     init = {
         "field": "payload@field",
@@ -15,7 +39,7 @@ def test_should_return_email():
 
     result = run_plugin(ContainsPatternAction, init, payload)
     assert result.output.port == "true"
-    assert result.output.value == {"found": "email"}
+    assert result.output.value == {"email": ["test@test.com"]}
 
 
 def test_should_return_ip():
@@ -28,7 +52,7 @@ def test_should_return_ip():
 
     result = run_plugin(ContainsPatternAction, init, payload)
     assert result.output.port == "true"
-    assert result.output.value == {"found": "ip"}
+    assert result.output.value == {"ip": ["192.168.0.1"]}
 
 
 def test_should_return_date():
@@ -41,7 +65,7 @@ def test_should_return_date():
 
     result = run_plugin(ContainsPatternAction, init, payload)
     assert result.output.port == "true"
-    assert result.output.value == {"found": "date"}
+    assert result.output.value == {"date": ["15-03-2022"]}
 
 
 def test_should_return_url():
@@ -54,7 +78,7 @@ def test_should_return_url():
 
     result = run_plugin(ContainsPatternAction, init, payload)
     assert result.output.port == "true"
-    assert result.output.value == {"found": "url"}
+    assert result.output.value == {"url": ["https://www.test.com"]}
 
 
 def test_should_return_all_patterns():
@@ -63,11 +87,14 @@ def test_should_return_all_patterns():
         "pattern": "all"
     }
 
-    payload = {"field": "https://www.test.com, 192.168.0.1, 20-10-2016, test@test.com"}
+    payload = {"field": "https://www.test.com, 192.168.0.1, 20-10-2016, 20-10-2017, test@test.com"}
 
     result = run_plugin(ContainsPatternAction, init, payload)
     assert result.output.port == "true"
-    assert result.output.value == {"found": ['email', 'ip', 'url', 'date']}
+    assert result.output.value == {"email": ['test@test.com'],
+                                   "ip": ["192.168.0.1"],
+                                   "date": ["20-10-2016", "20-10-2017"],
+                                   "url": ["https://www.test.com"]}
 
 
 def test_should_check_empty_pattern_field_validation():
