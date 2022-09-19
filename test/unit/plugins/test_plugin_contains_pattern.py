@@ -1,6 +1,7 @@
 import pytest
+from pydantic import ValidationError
 
-from tracardi.process_engine.action.v1.operations.contains_pattern.plugin import ContainsPatternAction, WrongFieldTypeError, Config
+from tracardi.process_engine.action.v1.operations.contains_pattern.plugin import ContainsPatternAction, Config
 from tracardi.service.plugin.service.plugin_runner import run_plugin
 
 
@@ -82,5 +83,5 @@ def test_field_data_type_exception():
 
     payload = {"field": 1}
 
-    with pytest.raises(WrongFieldTypeError):
+    with pytest.raises(ValidationError):
         run_plugin(ContainsPatternAction, init, payload)
