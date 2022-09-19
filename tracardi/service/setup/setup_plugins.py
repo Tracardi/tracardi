@@ -340,11 +340,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.ux.generic.plugin": PluginTestTemplate(
-        init={'props': {}, 'uix_source': None},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.html.fetch.plugin": PluginTestTemplate(
         init={'body': '', 'cookies': {}, 'headers': {}, 'method': 'get', 'ssl_check': True, 'timeout': 30, 'url': None},
         resource=None
@@ -394,11 +389,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin": PluginTestTemplate(
         init={'ip': 'event@metadata.ip', 'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.mysql.query.plugin": PluginTestTemplate(
-        init={'data': [], 'query': 'SELECT 1', 'source': {'id': '', 'name': ''}, 'timeout': 10, 'type': 'select'},
         resource=None
     ),
 
@@ -586,6 +576,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 test_plugins: Dict[str, PluginTestTemplate] = {
 
     # Microservice
+    # "tracardi.process_engine.action.v1.ux.generic.plugin": PluginTestTemplate(
+    #     init={'props': {}, 'uix_source': None},
+    #     resource=None
+    # ),
+    #
     # "tracardi.process_engine.action.v1.ux.contact_popup.plugin": PluginTestTemplate(
     #     init={'api_url': 'http://localhost:8686', 'contact_type': 'email', 'content': None, 'dark_theme': False,
     #           'event_type': None, 'horizontal_pos': 'center', 'save_event': True, 'uix_source': 'http://localhost:8686',
@@ -620,6 +615,17 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #           'vertical_pos': 'bottom'},
     #     resource=None
     # ),
+
+    "tracardi.process_engine.action.v1.connectors.mysql.query.plugin": PluginTestTemplate(
+        init={'data': [], 'query': 'SELECT 1', 'source': {'id': '', 'name': ''}, 'timeout': 10, 'type': 'select'},
+        resource={
+              "host": "localhost",
+              "port": 3306,
+              "user": "<username>",
+              "password": "",
+              "database": "<database>"
+            }
+    ),
 
     "tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin": PluginTestTemplate(
         init={'extension_id': None, 'mapping': {}, 'source': {'id': '', 'name': ''}, 'update': False},
