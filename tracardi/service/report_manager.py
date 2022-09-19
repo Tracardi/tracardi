@@ -25,4 +25,9 @@ class ReportManager:
     async def get_report(self, params: dict) -> dict:
         built_query = self.report.get_built_query(**params)
         result = await storage.driver.raw.query(self.report.index, built_query)
-        return result.dict()
+        aggregations = result.aggregations()
+        result = result.dict()
+        if aggregations is not None:
+            result["aggregations"] = aggregations
+
+        return result
