@@ -84,7 +84,7 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Show custom widget',
+            name='Custom widget',
             desc='Shows custom ReactJS widget.',
             icon='react',
             group=["UIX Widgets"],
