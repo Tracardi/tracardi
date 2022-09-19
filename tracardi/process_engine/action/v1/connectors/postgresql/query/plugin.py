@@ -76,10 +76,10 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
-                "query": None,
+                "query": "",
                 "timeout": 20
             },
             form=Form(groups=[
@@ -125,7 +125,7 @@ def register() -> Plugin:
             name='PostgreSQL connector',
             desc='Connects to postgreSQL and reads data.',
             icon='postgres',
-            group=["Connectors"],
+            group=["Databases"],
             tags=['database', 'sql'],
             documentation=Documentation(
                 inputs={

@@ -96,10 +96,10 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name="Google translate",
+            name="Google Translate",
             desc="Translates text",
             icon="google",
-            group=["Operations"],
+            group=["Google"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

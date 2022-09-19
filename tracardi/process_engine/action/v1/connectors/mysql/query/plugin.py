@@ -192,7 +192,7 @@ def register() -> Plugin:
             name='MySQL connector',
             desc='Connects to mysql and reads data.',
             icon='mysql',
-            group=["Connectors"],
+            group=["Databases"],
             tags=['database', 'sql'],
             documentation=Documentation(
                 inputs={

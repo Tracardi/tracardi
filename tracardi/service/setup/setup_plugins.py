@@ -5,7 +5,7 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
-    "tracardi.process_engine.action.v1.google_translator_action": PluginTestTemplate(
+    "tracardi.process_engine.action.v1.connectors.google.translate.plugin": PluginTestTemplate(
         init={"text_to_translate": "Hello", "source_language": "en"},
         resource=None
     ),
@@ -377,11 +377,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.mongo.query.plugin": PluginTestTemplate(
-        init={'collection': None, 'database': None, 'query': '{}', 'source': {'id': None}},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.discord.push.plugin": PluginTestTemplate(
         init={'message': '', 'timeout': 10, 'url': None, 'username': None},
         resource=None
@@ -389,11 +384,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin": PluginTestTemplate(
         init={'ip': 'event@metadata.ip', 'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.postgresql.query.plugin": PluginTestTemplate(
-        init={'query': None, 'source': {'id': '1', 'name': 'Some value'}, 'timeout': 20},
         resource=None
     ),
 
@@ -616,15 +606,28 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #     resource=None
     # ),
 
+    "tracardi.process_engine.action.v1.connectors.postgresql.query.plugin": PluginTestTemplate(
+        init={'query': None, 'source': {'id': '1', 'name': 'Some value'}, 'timeout': 20},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mongo.query.plugin": PluginTestTemplate(
+        init={'collection': None, 'database': None, 'query': '{}', 'source': {'id': "", "name": ""}},
+        resource={
+            "uri": "mongodb://127.0.0.1:27017/",
+            "timeout": 5000
+        }
+    ),
+
     "tracardi.process_engine.action.v1.connectors.mysql.query.plugin": PluginTestTemplate(
         init={'data': [], 'query': 'SELECT 1', 'source': {'id': '', 'name': ''}, 'timeout': 10, 'type': 'select'},
         resource={
-              "host": "localhost",
-              "port": 3306,
-              "user": "<username>",
-              "password": "",
-              "database": "<database>"
-            }
+            "host": "localhost",
+            "port": 3306,
+            "user": "<username>",
+            "password": "",
+            "database": "<database>"
+        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin": PluginTestTemplate(

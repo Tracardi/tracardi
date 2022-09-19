@@ -128,7 +128,7 @@ def register() -> Plugin:
             name='Query Elasticsearch',
             desc='Gets data from given Elasticsearch resource',
             icon='elasticsearch',
-            group=["Connectors"],
+            group=["Databases"],
             tags=['database', 'nosql'],
             documentation=Documentation(
                 inputs={
