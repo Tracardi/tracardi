@@ -13,6 +13,7 @@ class User(BaseModel):
     roles: List[str]
     disabled: bool = False
     token: Optional[str] = None
+    preference: Optional[dict] = {}
     expiration_timestamp: Optional[int] = None
 
     def encode_password(self):
