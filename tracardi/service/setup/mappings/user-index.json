@@ -34,6 +34,11 @@
       },
       "expiration_timestamp": {
         "type": "long"
+      },
+      "preference": {
+        "dynamic": "true",
+          "type": "object",
+          "enabled": false
       }
     }
   },
