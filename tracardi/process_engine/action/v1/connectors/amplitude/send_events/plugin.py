@@ -76,7 +76,7 @@ class AmplitudeSendEvent(ActionRunner):
                     "event_properties": self.event.properties if not isinstance(properties, dict) else properties,
                     "user_properties": self.profile.pii.dict() if not isinstance(pii, dict) else pii,
                     "groups": self._get_value(dot, self.config.groups),
-                    "ip": self.event.metadata.ip if ip is None else ip,
+                    "ip": self.event.request['ip'] if 'ip' in self.event.request else ip,
                     "location_lat": self._get_value(dot, self.config.location_lat),
                     "location_lng": self._get_value(dot, self.config.location_lng),
                     "revenueType": self._get_value(dot, self.config.revenueType),

@@ -388,7 +388,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin": PluginTestTemplate(
-        init={'ip': 'event@metadata.ip', 'source': {'id': '1', 'name': 'Some value'}},
+        init={'ip': 'event@request.ip', 'source': {'id': '1', 'name': 'Some value'}},
         resource=None
     ),
 

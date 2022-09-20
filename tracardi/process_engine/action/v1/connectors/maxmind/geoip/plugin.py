@@ -69,7 +69,7 @@ def register() -> Plugin:
                     "id": None,
                     "name": None,
                 },
-                "ip": "event@metadata.ip"
+                "ip": "event@request.ip"
             },
             form=Form(groups=[
                 FormGroup(
