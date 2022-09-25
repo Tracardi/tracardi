@@ -6,7 +6,7 @@
 
 ## Pull Request Process
 * Ensure any install or build dependencies are removed before the end of the layer when doing a build.
-* YOu may send your pull requests to the master branch where we do development.
+* You may send your pull requests to the master branch where we do development.
 * Associate each Pull Request with the required issue number.
 * Please provide relevant steps to use your codebase adding few extra lines of comments or commands to run would be helpful for others to follow along.
 
