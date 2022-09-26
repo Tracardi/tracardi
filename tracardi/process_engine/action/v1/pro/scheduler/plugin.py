@@ -36,7 +36,8 @@ class SchedulerPlugin(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             client = SchedulerClient(tracardi.config.tracardi.tracardi_scheduler_host)
-            schedule_at = str(datetime.utcnow() + timedelta(seconds=self.config.postpone))
+            schedule_at = datetime.utcnow() + timedelta(seconds=self.config.postpone)
+            schedule_at = f'{str(schedule_at)}+00:00'
             result = await client.schedule(
                 schedule_at=schedule_at,
                 callback_host=self.credentials.callback_host,
