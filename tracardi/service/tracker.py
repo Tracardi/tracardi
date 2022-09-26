@@ -2,7 +2,6 @@ import asyncio
 import logging
 from datetime import datetime
 from typing import List, Optional
-from uuid import uuid4
 
 import redis
 from deepdiff import DeepDiff
@@ -41,8 +40,6 @@ from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.wf.domain.flow_response import FlowResponses
 from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
-from tracardi.service.storage.redis_client import RedisClient
-import json
 from tracardi.service.event_manager_cache import EventManagerCache
 
 logger = logging.getLogger(__name__)
@@ -66,7 +63,19 @@ async def _save_profile(profile):
 async def _save_session(tracker_payload, session, profile):
     try:
         persist_session = tracker_payload.is_on('saveSession', default=True)
-        return await storage.driver.session.save_session(session, profile, persist_session)
+        result = await storage.driver.session.save_session(session, profile, persist_session)
+        if session.operation.new:
+
+            """
+            Until the session is saved and it is usually within 1s the system can create many profiles for 1 session. 
+            System checks if the session exists by loading it from ES. If it is a new session then is does not exist 
+            and must be saved before it can be read. So there is a 1s when system thinks that the session does not exist.
+
+            If session is new we will refresh the session in ES.
+            """
+
+            await storage.driver.session.refresh()
+        return result
     except StorageException as e:
         raise FieldTypeConflictException("Could not save session. Error: {}".format(str(e)), rows=e.details)
 
@@ -301,25 +310,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             )
         )
 
-    # Must be the last operation
-    # try:
-    #     if isinstance(profile, Profile) and profile.operation.needs_update():
-    #         save_tasks.append(asyncio.create_task(storage.driver.profile.save_profile(profile)))
-    # except Exception as e:
-    #     message = "Profile update returned an error: `{}`".format(str(e))
-    #     console_log.append(
-    #         Console(
-    #             profile_id=get_profile_id(profile),
-    #             origin='profile',
-    #             class_name='tracker',
-    #             module='tracker',
-    #             type='error',
-    #             message=message,
-    #             traceback=get_traceback(e)
-    #         )
-    #     )
-    #     logger.error(message)
-
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
             if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
@@ -459,25 +449,14 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
     except ValueError as e:
         raise UnauthorizedException(e)
 
-    if source.transitional is True:
-        tracker_payload.options.update({
-            "saveSession": False,
-            "saveEvents": False
-        })
-
-    if source.returns_profile is False:
-        tracker_payload.options.update({
-            "profile": False
-        })
-
-    # Get session
-    if tracker_payload.session is None or tracker_payload.session.id is None:
-        # Generate random
-        tracker_payload.session = Session(id=str(uuid4()), metadata=SessionMetadata())
+    tracker_payload.set_transitional(source)
+    tracker_payload.set_return_profile(source)
+    tracker_payload.force_there_is_a_session()
 
     # Load session from storage
     try:
         session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # type: Optional[Session]
+
     except DuplicatedRecordException as e:
 
         # There may be a case when we have 2 sessions with the same id.

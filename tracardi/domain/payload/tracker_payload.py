@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 from typing import Optional, List, Tuple, Any
+from uuid import uuid4
+
 from pydantic import BaseModel
 from tracardi.config import tracardi
 
@@ -8,6 +10,7 @@ from tracardi.domain.event import Event, COLLECTED
 
 from ..entity import Entity
 from ..event_metadata import EventPayloadMetadata
+from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
 from ..session import Session, SessionMetadata, SessionTime
@@ -63,6 +66,25 @@ class TrackerPayload(BaseModel):
 
                 event_list.append(_event)
         return event_list
+
+    def set_return_profile(self, source: EventSource):
+        if source.returns_profile is False:
+            self.options.update({
+                "profile": False
+            })
+
+    def set_transitional(self, source: EventSource):
+        if source.transitional is True:
+            self.options.update({
+                "saveSession": False,
+                "saveEvents": False
+            })
+
+    def force_there_is_a_session(self):
+        # Get session
+        if self.session is None or self.session.id is None:
+            # Generate random
+            self.session = Session(id=str(uuid4()), metadata=SessionMetadata())
 
     def return_profile(self):
         return self.options and "profile" in self.options and self.options['profile'] is True
