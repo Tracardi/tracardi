@@ -87,7 +87,7 @@ docker run -p 6379:6379 redis
 Now pull and run Tracardi backend.
 
 ```
-docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 -e REDIS_HOST=redis://<your-laptop-ip>:6379 tracardi/tracardi-api:0.7.1
+docker run -p 8686:80 -e ELASTIC_HOST=http://<your-laptop-ip>:9200 -e REDIS_HOST=redis://<your-laptop-ip>:6379 tracardi/tracardi-api:0.7.2
 ```
 
 You can remove `-e REDIS_HOST=redis://<your-laptop-ip>:6379` if you did not start redis. Without redis some system features are 
@@ -108,7 +108,7 @@ For more trouble shooting solutions go to [http://docs.tracardi.com/trouble/](ht
 If you have an elasticsearch instance and you would like to connect to it via HTTPS this is the command you may find useful. 
 
 ```
-docker run -p 8686:80 -e ELASTIC_HOST=https://user:password@<your-laptop-ip>:9200 -e ELASTIC_VERIFY_CERTS=no -e REDIS_HOST=redis://<your-laptop-ip>:6379 tracardi/tracardi-api:0.7.1
+docker run -p 8686:80 -e ELASTIC_HOST=https://user:password@<your-laptop-ip>:9200 -e ELASTIC_VERIFY_CERTS=no -e REDIS_HOST=redis://<your-laptop-ip>:6379 tracardi/tracardi-api:0.7.2
 ```
 
 ### Open Tracardi GUI
@@ -116,7 +116,7 @@ docker run -p 8686:80 -e ELASTIC_HOST=https://user:password@<your-laptop-ip>:920
 Now pull and run Tracardi Graphical User Interface.
 
 ```
-docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui:0.7.1
+docker run -p 8787:80 -e API_URL=//127.0.0.1:8686 tracardi/tracardi-gui:0.7.2
 ```
 
 ## Need help ?
