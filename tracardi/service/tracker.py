@@ -65,7 +65,6 @@ async def _save_session(tracker_payload, session, profile):
         persist_session = tracker_payload.is_on('saveSession', default=True)
         result = await storage.driver.session.save_session(session, profile, persist_session)
         if session.operation.new:
-
             """
             Until the session is saved and it is usually within 1s the system can create many profiles for 1 session. 
             System checks if the session exists by loading it from ES. If it is a new session then is does not exist 
@@ -136,7 +135,6 @@ def get_profile_id(profile: Profile):
 
 
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
-
     for index, event in enumerate(events):
         dot = DotAccessor(
             profile=profile,
@@ -495,7 +493,8 @@ async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str
                                       allowed_bridges: List[str], internal_source=None):
     if tracardi.sync_profile_tracks:
         try:
-            async with ProfileTracksSynchronizer(tracker_payload.profile, wait=1):
+            async with ProfileTracksSynchronizer(tracker_payload.profile, wait=tracardi.sync_profile_tracks_wait,
+                                                 max_repeats=tracardi.sync_profile_tracks_max_repeats):
                 return await track_event(tracker_payload, ip=host, profile_less=profile_less,
                                          allowed_bridges=allowed_bridges, internal_source=internal_source)
         except redis.exceptions.ConnectionError as e:

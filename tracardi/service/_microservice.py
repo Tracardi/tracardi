@@ -21,7 +21,7 @@
 #             if len(self.url) > 0 and self.url[-1] == '/':
 #                 token_endpoint = 'token'
 #             else:
-#                 token_endpoint = '/token'
+#                 token_endpoint = '/user/token'
 #             async with session.request(
 #                     method="POST",
 #                     url=f"{self.url}{token_endpoint}",

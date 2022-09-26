@@ -254,7 +254,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.events.event_counter.plugin": PluginTestTemplate(
         init={
-            "event_type": "page-view",
+            "event_type": {'id': '1', 'name': 'Some value'},
             "time_span": "-15m"
         },
         resource=None
@@ -262,7 +262,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.events.event_aggregator.plugin": PluginTestTemplate(
         init={
-            "field": 'event@type',
+            "field": {'id': '1', 'name': 'Some value'},
             "time_span": "-15m"
         },
         resource=None
@@ -299,7 +299,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.strings.string_splitter.plugin": PluginTestTemplate(
-        init={'delimiter': '.', 'string': None},
+        init={'delimiter': '.', 'string': "test.test"},
         resource=None
     ),
 
@@ -309,7 +309,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.strings.regex_replace.plugin": PluginTestTemplate(
-        init={'find_regex': None, 'replace_with': None, 'string': None},
+        init={'find_regex': "abc", 'replace_with': "123", 'string': "abc"},
         resource=None
     ),
 
@@ -324,17 +324,17 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.time.day_night.plugin": PluginTestTemplate(
-        init={'latitude': None, 'longitude': None},
+        init={'latitude': 1.2, 'longitude': 2.1},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.time.local_time_span.plugin": PluginTestTemplate(
-        init={'end': None, 'start': None, 'timezone': 'session@context.time.tz'},
+        init={'end': "10:10:10", 'start': "12:10:10", 'timezone': 'session@context.time.tz'},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.time.time_difference.plugin": PluginTestTemplate(
-        init={'now': 'now', 'reference_date': None},
+        init={'now': 'now', 'reference_date': "12:10:10"},
         resource=None
     ),
 
@@ -357,7 +357,8 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.smtp_call.plugin": PluginTestTemplate(
-        init={'message': {'message': '', 'reply_to': '', 'send_from': '', 'send_to': '', 'title': ''},
+        init={'message': {'message': 'message', 'reply_to': 'mail@mail.co', 'send_from': 'mail@mail.co',
+                          'send_to': 'mail@mail.co', 'title': 'title'},
               'source': {'id': '', 'name': ''}},
         resource=None
     ),
@@ -368,22 +369,22 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.converters.data_to_json.plugin": PluginTestTemplate(
-        init={'to_json': None},
+        init={'to_json': "{}"},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.converters.json_to_data.plugin": PluginTestTemplate(
-        init={'to_data': None},
+        init={'to_data': "{}"},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginTestTemplate(
-        init={'index': None, 'query': '{"query":{"match_all":{}}}', 'source': {'id': '1', 'name': 'Some value'}},
+        init={'index': "index", 'query': '{"query":{"match_all":{}}}', 'source': {'id': '1', 'name': 'Some value'}},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.discord.push.plugin": PluginTestTemplate(
-        init={'message': '', 'timeout': 10, 'url': None, 'username': None},
+        init={'message': 'message', 'timeout': 10, 'url': None, 'username': None},
         resource=None
     ),
 
@@ -403,18 +404,18 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.slack.send_message.plugin": PluginTestTemplate(
-        init={'channel': None, 'message': None, 'source': {'id': '1', 'name': 'Some value'}},
+        init={'channel': "xxx", 'message': "xxx", 'source': {'id': '1', 'name': 'Some value'}},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.google.sheets.modify.plugin": PluginTestTemplate(
-        init={'range': None, 'read': False, 'sheet_name': None, 'source': {'id': '1', 'name': 'Some value'},
-              'spreadsheet_id': None, 'values': '[["Name", "John"]]', 'write': False},
+        init={'range': "A1:A2", 'read': False, 'sheet_name': "sheet", 'source': {'id': '1', 'name': 'Some value'},
+              'spreadsheet_id': "1", 'values': '[["Name", "John"]]', 'write': False},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginTestTemplate(
-        init={'bucket': None, 'fields': {}, 'measurement': None, 'organization': None,
+        init={'bucket': "bucket", 'fields': {}, 'measurement': "measurement", 'organization': "measurement",
               'source': {'id': '1', 'name': 'Some value'}, 'tags': {}, 'time': None},
         resource=None
     ),
@@ -426,41 +427,50 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin": PluginTestTemplate(
-        init={'additional_mapping': {}, 'email': None, 'source': {'id': None, 'name': None}},
+        init={'additional_mapping': {}, 'email': None, 'source': {'id': "1", 'name': "1"}},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.elastic_email.contact_status_change.plugin": PluginTestTemplate(
-        init={'email': None, 'status': None, 'source': {'id': None, 'name': None}},
+        init={'email': "test@rest.co", 'status': "status", 'source': {'id': "1", 'name': "1"}},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin": PluginTestTemplate(
-        init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
-              'source': {'id': '', 'name': ''}},
+        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
+              'sender_email': 'test@rest.co',
+              'source': {'id': '1', 'name': '1'}},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin": PluginTestTemplate(
-        init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
-              'source': {'id': '', 'name': ''}},
+        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
+              'sender_email': 'test@rest.co',
+              'source': {'id': '1', 'name': '1'}},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin": PluginTestTemplate(
-        init={'additional_mapping': {}, 'list_ids': None, 'email': None, 'source': {'id': None, 'name': None}},
-        resource=None
+        init={'additional_mapping': {}, 'list_ids': "a,b", 'email': 'test@rest.co', 'source': {'id': '1', 'name': '1'}},
+        resource={
+            "token": "<token>"
+        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin": PluginTestTemplate(
-        init={'email': None, 'source': {'id': None, 'name': None}},
-        resource=None
+        init={'email': 'test@rest.co', 'source': {'id': '1', 'name': '1'}},
+        resource={
+            "token": "<token>"
+        }
     ),
 
     "tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin": PluginTestTemplate(
-        init={'message': {'content': '', 'recipient': '', 'subject': ''}, 'sender_email': '',
-              'source': {'id': '', 'name': ''}},
-        resource=None
+        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
+              'sender_email': 'test@rest.co',
+              'source': {'id': '1', 'name': '1'}},
+        resource={
+            "token": "<token>"
+        }
     ),
 
     "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginTestTemplate(
@@ -474,12 +484,12 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.internal.inject_event.plugin": PluginTestTemplate(
-        init={'event_id': None},
+        init={'event_id': "abc"},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.internal.inject_profile.plugin": PluginTestTemplate(
-        init={'query': ''},
+        init={'query': '{}'},
         resource=None
     ),
 
@@ -509,17 +519,17 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.internal.entity.upsert.plugin": PluginTestTemplate(
-        init={'id': None, 'properties': '{}', 'reference_profile': True, 'traits': '{}', 'type': ''},
+        init={'id': "1", 'properties': '{}', 'reference_profile': True, 'traits': '{}', 'type': 'type'},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.internal.entity.load.plugin": PluginTestTemplate(
-        init={'id': None, 'reference_profile': True, 'type': {'id': '', 'name': ''}},
+        init={'id': "1", 'reference_profile': True, 'type': {'id': 'type', 'name': 'type'}},
         resource=None
     ),
 
     "tracardi.process_engine.action.v1.internal.entity.delete.plugin": PluginTestTemplate(
-        init={'id': '', 'reference_profile': True, 'type': {'id': '', 'name': ''}},
+        init={'id': '1', 'reference_profile': True, 'type': {'id': 'type', 'name': 'type'}},
         resource=None
     ),
 
@@ -861,21 +871,44 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.meaningcloud.sentiment_analysis.plugin": PluginTestTemplate(
-        init=None,
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "language": "en",
+            "text": "text"
+        },
         resource={
             "token": "token"
         }
     ),
 
     "tracardi.process_engine.action.v1.connectors.meaningcloud.language_detection.plugin": PluginTestTemplate(
-        init=None,
+        init={
+            'source': {
+                'id': "",
+                'name': ""
+            },
+            "message": "Hello world",
+            "timeout": 15,
+        },
         resource={
             "token": "token"
         }
     ),
 
     "tracardi.process_engine.action.v1.connectors.meaningcloud.text_classification.plugin": PluginTestTemplate(
-        init=None,
+        init={
+            "source": {
+                "id": "",
+                "name": ""
+            },
+            "language": "en",
+            "model": "social",
+            "title": "title",
+            "text": "text"
+        },
         resource={
             "token": "token"
         }

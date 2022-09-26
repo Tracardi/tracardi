@@ -1,6 +1,6 @@
 import pytest
 
-from tracardi.process_engine.action.v1.google_translator_action import GoogleTranslateAction
+from tracardi.process_engine.action.v1.connectors.google.translate.plugin import GoogleTranslateAction
 from tracardi.service.plugin.service.plugin_runner import run_plugin
 
 
