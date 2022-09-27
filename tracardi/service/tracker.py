@@ -173,7 +173,7 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
                                 message="Event is invalid."
                             )
                         )
-                if event.metadata.status == VALIDATED:
+                if event.metadata.status != INVALID:
                     events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
 
             except EventPropsReshapingError as e:
