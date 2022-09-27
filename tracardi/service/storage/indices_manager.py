@@ -10,6 +10,7 @@ async def get_indices_status():
     es = ElasticClient.instance()
     for key, index in resources.resources.items():  # type: str, Index
 
+        # checks for indices that are not aliased (not related to current version)
         if not index.aliased:
             _index = index.get_index_alias()
             if not await es.exists_index(_index):
@@ -17,6 +18,7 @@ async def get_indices_status():
             else:
                 yield "existing_index", _index
 
+        # checks for indices that are not multi indices - not profile, session, event, etc.
         elif not index.multi_index:
             _index = index.get_aliased_data_index()
             if not await es.exists_index(_index):
@@ -30,6 +32,7 @@ async def get_indices_status():
             else:
                 yield "existing_alias", _alias
 
+        # checks for multi indices
         else:
             _template = index.get_prefixed_template_name()
             if not await es.exists_index_template(_template):

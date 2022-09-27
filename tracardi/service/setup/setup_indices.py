@@ -106,11 +106,21 @@ async def create_indices():
             if index.aliased is False:
                 target_index = index.get_index_alias()
 
+            # Handles case when index exists
             if not await es.exists_index(target_index):
 
-                # Creates index and alias in one shot.
-
                 mapping = map['template'] if index.multi_index else map
+                exists_index_with_alias_name = await es.exists_index(alias_index)
+
+                # some app (for example a bridge) made Tracardi write to alias before creating indices
+                if exists_index_with_alias_name:
+                    logger.info(f"There exists index with name {alias_index}, which should be its alias name. "
+                                f"Data is going to be re-indexed and new index will be created.")
+
+                    if "aliases" in map:
+                        del map["aliases"]
+
+                # Creates index and alias in one shot if alias not popped from mapping variable
                 result = await es.create_index(target_index, mapping)
 
                 if not acknowledged(result):
@@ -122,6 +132,21 @@ async def create_indices():
 
                 logger.info(f"{alias_index} - CREATED New index `{target_index}` with alias `{alias_index}`. "
                             f"Mapping from `{map_file}` was used.")
+
+                # reindex and remove old index
+                if exists_index_with_alias_name:
+                    try:
+                        result = await es.reindex(source=alias_index, destination=target_index, wait_for_completion=True)
+                        if result.get("total") < 1:
+                            raise ValueError(str(result))
+
+                    except Exception as e:
+                        logger.error(f"Could not reindex data from {alias_index} to {target_index} due to an error: {str(e)}")
+
+                    result = await es.remove_index(alias_index)
+                    if not acknowledged(result):
+                        logger.error(f"Could not delete old index with name {alias_index}. "
+                                     f"FATAL ERROR is expected during further installation.")
 
                 output['indices'].append(target_index)
 
