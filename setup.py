@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi',
-    version='0.7.2-dev',
+    version='0.7.3-dev',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",

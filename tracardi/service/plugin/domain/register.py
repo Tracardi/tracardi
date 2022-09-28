@@ -107,7 +107,7 @@ class Spec(BaseModel):
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.7.2-dev'
+    version: Optional[str] = '0.7.3-dev'
     run_once: Optional[RunOnce] = RunOnce()
     node: Optional[NodeEvents] = None
 
