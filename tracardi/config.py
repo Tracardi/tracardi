@@ -79,7 +79,7 @@ class ElasticConfig:
         self.http_auth_username = env['ELASTIC_HTTP_AUTH_USERNAME'] if 'ELASTIC_HTTP_AUTH_USERNAME' in env else None
         self.http_auth_password = env['ELASTIC_HTTP_AUTH_PASSWORD'] if 'ELASTIC_HTTP_AUTH_PASSWORD' in env else None
         self.scheme = env['ELASTIC_SCHEME'] if 'ELASTIC_SCHEME' in env else 'http'
-        self.cafile = env['ELASTIC_CAFILE'] if 'ELASTIC_CAFILE' in env else None
+        self.ca_file = env['ELASTIC_CA_FILE'] if 'ELASTIC_CA_FILE' in env else None
         self.api_key_id = env['ELASTIC_API_KEY_ID'] if 'ELASTIC_API_KEY_ID' in env else None
         self.api_key = env['ELASTIC_API_KEY'] if 'ELASTIC_API_KEY' in env else None
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None
