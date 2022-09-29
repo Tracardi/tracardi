@@ -1,6 +1,6 @@
 import asyncio
 import aiohttp
-from aiohttp import ClientConnectorError
+from aiohttp import ClientConnectorError, ContentTypeError
 
 from tracardi.service.notation.dict_traverser import DictTraverser
 from json import JSONDecodeError
@@ -75,10 +75,13 @@ class RemoteCallAction(ActionRunner):
                 ) as response:
 
                     try:
-                        content = await response.json()
+                        content = await response.json(content_type=None)
 
                     except JSONDecodeError:
                         content = await response.text()
+
+                    except ContentTypeError:
+                        content = await response.json(content_type='text/html')
 
                     result = {
                         "status": response.status,
