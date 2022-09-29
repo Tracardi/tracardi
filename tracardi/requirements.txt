@@ -40,8 +40,9 @@ google-api-python-client == 2.33.0
 google_auth_oauthlib == 0.4.6
 python_weather==0.4.1
 influxdb-client
-grpcio
-grpcio-tools
+grpcio==1.48.2
+grpcio-tools==1.48.2
+protobuf==3.20.2
 certifi
 celery==5.2.6
 random-password-generator==2.2.0
