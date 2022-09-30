@@ -24,7 +24,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.event_validator import validate
-from tracardi.domain.event import Event, VALIDATED, ERROR, WARNING, PROCESSED, INVALID
+from tracardi.domain.event import Event, PROCESSED
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
@@ -101,10 +101,10 @@ async def _save_events(tracker_payload, console_log, events):
             if event.id in log_event_journal:
                 log = log_event_journal[event.id]
                 if log.is_error():
-                    event.metadata.status = ERROR
+                    event.metadata.error = True
                     continue
                 elif log.is_warning():
-                    event.metadata.status = WARNING
+                    event.metadata.warning = True
                     continue
                 else:
                     event.metadata.status = PROCESSED
@@ -118,8 +118,8 @@ async def _save_events(tracker_payload, console_log, events):
 async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
 
-    if all(event.metadata.status == INVALID for event in events):
-        # Do not save profile and remove it from session if all events are invalid
+    # Do not save profile and remove it from session if all events are invalid
+    if all(not event.metadata.valid for event in events):
         profile = None
         session.profile = None
         for event in events:
@@ -166,10 +166,8 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
         if event_type_manager is not None:
             try:
                 if event_type_manager.validation.enabled is True:
-                    if validate(dot, validator=event_type_manager) is True:
-                        event.metadata.status = VALIDATED
-                    else:
-                        event.metadata.status = INVALID
+                    if validate(dot, validator=event_type_manager) is False:
+                        event.metadata.valid = False
                         console_log.append(
                             Console(
                                 profile_id=get_profile_id(profile),
@@ -180,8 +178,10 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
                                 message="Event is invalid."
                             )
                         )
-                if event.metadata.status != INVALID:
-                    events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
+                if event.metadata.valid:
+                    events[index] = EventPropsReshaper(dot=dot, event=event).reshape(
+                        schema=event_type_manager.reshaping
+                    )
 
             except EventPropsReshapingError as e:
                 console_log.append(

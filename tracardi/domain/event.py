@@ -9,12 +9,7 @@ from typing import Tuple
 from .value_object.storage_info import StorageInfo
 
 COLLECTED = 'collected'
-VALIDATED = 'validated'
-INVALID = 'invalid'
-RESHAPED = 'reshaped'
 PROCESSED = 'processed'
-WARNING = 'warning'
-ERROR = 'error'
 
 
 class Tags(BaseModel):

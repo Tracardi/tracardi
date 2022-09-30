@@ -1,12 +1,11 @@
 import asyncio
 import logging
-import traceback
 from asyncio import Task
 from collections import defaultdict
 from time import time
 from typing import Dict, List, Tuple, Optional
 from pydantic import ValidationError
-from tracardi.domain.event import Event, INVALID
+from tracardi.domain.event import Event
 
 from tracardi.service.wf.domain.debug_info import DebugInfo
 from tracardi.service.wf.domain.error_debug_info import ErrorDebugInfo
@@ -59,7 +58,7 @@ class RulesEngine:
         for rules, event in self.events_rules:
 
             # skip invalid events
-            if event.metadata.status == INVALID:
+            if not event.metadata.valid:
                 continue
 
             if len(rules) == 0:

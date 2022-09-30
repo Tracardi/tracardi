@@ -4,7 +4,6 @@ from tracardi.domain.event_payload_validator import ReshapeSchema
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.parser import Parser
-from tracardi.domain.event import RESHAPED
 
 
 class EventPropsReshapingError(Exception):
@@ -21,7 +20,7 @@ class EventPropsReshaper:
     def reshape(self, schema: ReshapeSchema) -> Event:
         try:
             condition = ExprTransformer(dot=self.dot).transform(tree=self.parser.parse(schema.condition))
-        except Exception as _:
+        except Exception:
             condition = False
 
         if schema.template is None or (schema.condition is not None and condition is False):
@@ -36,4 +35,4 @@ class EventPropsReshaper:
             raise EventPropsReshapingError(f"Could not reshape event properties due to an error: `{str(e)}`")
 
         else:
-            return Event(**self.event.dict(exclude={"properties", "status"}), properties=props, status=RESHAPED)
+            return Event(**self.event.dict(exclude={"properties"}), properties=props)
