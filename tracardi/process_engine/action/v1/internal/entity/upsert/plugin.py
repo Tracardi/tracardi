@@ -3,7 +3,6 @@ from datetime import datetime
 
 from tracardi.domain.entity import Entity, NullableEntity
 from tracardi.domain.entity_record import EntityRecord
-from tracardi.domain.profile import Profile
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Configuration
@@ -11,6 +10,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
+from ..entity_plugin_service import convert_entity_id, get_referenced_profile
 
 
 def validate(config: dict):
@@ -29,20 +29,22 @@ class EntityUpsertAction(ActionRunner):
 
             properties = json.loads(self.config.properties)
             traits = json.loads(self.config.traits)
-            traverser = DictTraverser(dot)
+            traverser = DictTraverser(dot, default=None)
             traits = traverser.reshape(traits)
             properties = traverser.reshape(properties)
+
+            entity_id = dot[self.config.id]
+            entity_id = convert_entity_id(self.config, entity_id, self.profile)
 
             if self.profile is None and self.config.reference_profile is True:
                 self.console.warning("This is profile-less event. Entity will be saved without the profile reference.")
 
+            referenced_profile = get_referenced_profile(self.config, self.profile)
             record = EntityRecord(
                 timestamp=datetime.utcnow(),
-                id=dot[self.config.id],
+                id=entity_id,
                 type=self.config.type,
-                profile=Entity(id=self.profile.id) \
-                    if isinstance(self.profile, Profile) and self.config.reference_profile is True \
-                    else NullableEntity(id=None),
+                profile=Entity(id=referenced_profile) if referenced_profile else NullableEntity(id=None),
                 properties=properties,
                 traits=traits
             )

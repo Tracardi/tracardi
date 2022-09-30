@@ -1,5 +1,4 @@
 from typing import Optional
-
 from pydantic import BaseModel, validator
 
 
@@ -21,3 +20,5 @@ class Configuration(BaseModel):
         if value.strip() == "":
             raise ValueError("This field can not be empty")
         return value.strip()
+
+

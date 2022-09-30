@@ -1,5 +1,8 @@
+from typing import List
+
 from tracardi.domain.entity_record import EntityRecord
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor, storage_manager
@@ -8,6 +11,10 @@ from tracardi.service.storage.factory import StorageFor, storage_manager
 async def load_by_id(entity_id) -> EntityRecord:
     entity = Entity(id=entity_id)
     return await StorageFor(entity).index("entity").load(EntityRecord)  # type: EntityRecord
+
+
+async def load_by_values(field_value_pairs: List[tuple]) -> StorageRecords:
+    return await storage_manager('entity').load_by_values(field_value_pairs)
 
 
 async def delete_by_id(entity_id) -> dict:
