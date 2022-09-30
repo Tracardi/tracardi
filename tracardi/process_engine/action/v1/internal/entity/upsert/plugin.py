@@ -4,6 +4,7 @@ from datetime import datetime
 from tracardi.domain.entity import Entity, NullableEntity
 from tracardi.domain.entity_record import EntityRecord
 from tracardi.domain.profile import Profile
+from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Configuration
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, FormGroup, Form, \
@@ -23,20 +24,29 @@ class EntityUpsertAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
+
     async def run(self, payload: dict, in_edge=None):
         try:
+            dot = self._get_dot_accessor(payload)
+
+            properties = json.loads(self.config.properties)
+            traits = json.loads(self.config.traits)
+            traverser = DictTraverser(dot)
+            traits = traverser.reshape(traits)
+            properties = traverser.reshape(properties)
+
             if self.profile is None and self.config.reference_profile is True:
                 self.console.warning("This is profile-less event. Entity will be saved without the profile reference.")
 
             record = EntityRecord(
                 timestamp=datetime.utcnow(),
-                id=self.config.id,
+                id=dot[self.config.id],
                 type=self.config.type,
                 profile=Entity(id=self.profile.id) \
                     if isinstance(self.profile, Profile) and self.config.reference_profile is True \
                     else NullableEntity(id=None),
-                properties=json.loads(self.config.properties),
-                traits=json.loads(self.config.traits)
+                properties=properties,
+                traits=traits
             )
 
             result = await storage.driver.entity.upsert(record)
