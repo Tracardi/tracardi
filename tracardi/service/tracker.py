@@ -117,6 +117,15 @@ async def _save_events(tracker_payload, console_log, events):
 
 async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
+
+    if all(event.metadata.status == INVALID for event in events):
+        # Do not save profile and remove it from session if all events are invalid
+        profile = None
+        session.profile = None
+        for event in events:
+            event.profile = None
+            event.metadata.profile_less = True
+
     results = await asyncio.gather(
         _save_profile(profile),
         _save_session(tracker_payload, session, profile),
@@ -157,7 +166,7 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
         if event_type_manager is not None:
             try:
                 if event_type_manager.validation.enabled is True:
-                    if validate(dot, validator=event_type_manager):
+                    if validate(dot, validator=event_type_manager) is True:
                         event.metadata.status = VALIDATED
                     else:
                         event.metadata.status = INVALID
@@ -171,7 +180,8 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
                                 message="Event is invalid."
                             )
                         )
-                events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
+                if event.metadata.status != INVALID:
+                    events[index] = EventPropsReshaper(dot=dot, event=event).reshape(schema=event_type_manager.reshaping)
 
             except EventPropsReshapingError as e:
                 console_log.append(
@@ -214,12 +224,16 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Get events
     events = tracker_payload.get_events(session, profile, has_profile, ip)
 
-    # Validates json schemas of events, throws exception if data is not valid or reshape failed
+    # Validates json schemas of events and reshapes properties, sets statuses:
+    # VALIDATED
+    # INVALID
+    # RESHAPED
     console_log = await validate_and_reshape_events(events, profile, session, console_log)
 
     debugger = None
     segmentation_result = None
 
+    # Skips INVALID events in invoke method
     rules_engine = RulesEngine(
         session,
         profile,
