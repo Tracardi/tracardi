@@ -66,7 +66,6 @@ async def count_events_by_type(profile_id: str, event_type: str, time_span: int)
                 ]
             }
         }
-
     }
     result = await storage_manager("event").query(query)
     return result.total
