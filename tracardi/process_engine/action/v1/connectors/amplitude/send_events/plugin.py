@@ -1,15 +1,10 @@
 import asyncio
 import json
 from datetime import datetime
-from typing import Union
-
 import aiohttp
-from pydantic import BaseModel
-
 from tracardi.service.tracardi_http_client import HttpClient
 from aiohttp import ClientConnectorError
 from tracardi.config import tracardi
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.domain.resources.token import Token
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData

@@ -249,6 +249,15 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="amplitude",
+            name="Amplitude",
+            icon="amplitude",
+            tags=["amplitude"],
+            config={
+                "api_key": "<your-api-key>"
+            }
+        ),
+        ResourceSettings(
             id="matomo",
             name="Matomo",
             tags=["matomo"],
