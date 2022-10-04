@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from pydantic import BaseModel
 
 from tracardi.service.sha1_hasher import SHA1Encoder
@@ -31,3 +31,9 @@ class User(BaseModel):
     def is_admin(self):
         return "admin" in self.roles
 
+    def set_preference(self, key: str, value: Any):
+        self.preference[key] = value
+
+    def delete_preference(self, key: str):
+        if key in self.preference:
+            del self.preference[key]
