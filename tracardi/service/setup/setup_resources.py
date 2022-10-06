@@ -300,7 +300,8 @@ def get_resource_types() -> List[ResourceSettings]:
                 "client_id": "<your-client-id>",
                 "client_secret": "<your-client-secret>",
                 "subdomain": "<your-subdomain>"
-            }
+            },
+            manual="salesforce_resource"
         ),
         ResourceSettings(
             id="hubspot",
