@@ -72,7 +72,7 @@ def register() -> Plugin:
                                 name="Elastic Email resource",
                                 description="Please select your Elastic Email resource, containing your api key",
                                 component=FormComponent(type="resource",
-                                    props={"label": "Resource", "tag": "elastic-email"})
+                                    props={"label": "Resource", "tag": "elasticemail"})
                             ),
                             FormField(
                                 id="email",
