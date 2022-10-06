@@ -414,18 +414,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginTestTemplate(
-        init={'bucket': "bucket", 'fields': {}, 'measurement': "measurement", 'organization': "measurement",
-              'source': {'id': '1', 'name': 'Some value'}, 'tags': {}, 'time': None},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.influxdb.fetch.plugin": PluginTestTemplate(
-        init={'aggregation': None, 'bucket': None, 'filters': {}, 'organization': None,
-              'source': {'id': '1', 'name': 'Some value'}, 'start': '-15m', 'stop': '0m'},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginTestTemplate(
         init={'value': ''},
         resource=None
@@ -573,6 +561,24 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #           'vertical_pos': 'bottom'},
     #     resource=None
     # ),
+
+    "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginTestTemplate(
+        init={'bucket': "bucket", 'fields': {}, 'measurement': "measurement", 'organization': "measurement",
+              'source': {'id': '1', 'name': 'Some value'}, 'tags': {}, 'time': None},
+        resource={
+            "url": "http://localhost:8086",
+            "token": "<token>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.influxdb.fetch.plugin": PluginTestTemplate(
+        init={'aggregation': None, 'bucket': None, 'filters': {}, 'organization': None,
+              'source': {'id': '1', 'name': 'Some value'}, 'start': '-15m', 'stop': '0m'},
+        resource={
+            "url": "http://localhost:8086",
+            "token": "<token>"
+        }
+    ),
 
     "tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin": PluginTestTemplate(
         init={'additional_mapping': {}, 'email': None, 'source': {'id': "1", 'name': "1"}},

@@ -1,7 +1,4 @@
 from datetime import datetime
-from typing import Tuple
-
-from tracardi.domain.settings import Settings
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -83,7 +80,7 @@ class InfluxSender(ActionRunner):
             return Result(port="error", value=payload)
 
 
-def register() -> Tuple[Plugin, Settings]:
+def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
@@ -116,7 +113,7 @@ def register() -> Tuple[Plugin, Settings]:
                                 id="source",
                                 name="InfluxDB resource",
                                 description="Please select InfluxDB resource.",
-                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "influx"})
+                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "influxdb"})
                             ),
                             FormField(
                                 id="organization",
@@ -184,4 +181,4 @@ def register() -> Tuple[Plugin, Settings]:
                 }
             )
         )
-    ), Settings(hidden=True)
+    )

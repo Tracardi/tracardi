@@ -193,11 +193,11 @@ def get_resource_types() -> List[ResourceSettings]:
         ResourceSettings(
             id="influxdb",
             name="InfluxDB",
-            tags=["influx"],
-            icon="influx",
+            tags=["influxdb"],
+            icon="influxdb",
             config={
                 "url": "http://localhost:8086",
-                "token": "<API-token>"
+                "token": "<token>"
             }
         ),
         ResourceSettings(
