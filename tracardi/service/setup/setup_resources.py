@@ -229,14 +229,14 @@ def get_resource_types() -> List[ResourceSettings]:
             manual="mautic_resource"
         ),
         ResourceSettings(
-            id="elastic-email",
+            id="elasticemail",
             name="ElasticEmail",
             config={
                 "api_key": "<api-key>",
                 "public_account_id": "<public-account-id>"
             },
             icon="email",
-            tags=["elastic-email"],
+            tags=["elasticemail"],
             manual="elastic_email_resource"
         ),
         ResourceSettings(
