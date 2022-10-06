@@ -426,53 +426,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin": PluginTestTemplate(
-        init={'additional_mapping': {}, 'email': None, 'source': {'id': "1", 'name': "1"}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.elastic_email.contact_status_change.plugin": PluginTestTemplate(
-        init={'email': "test@rest.co", 'status': "status", 'source': {'id': "1", 'name': "1"}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin": PluginTestTemplate(
-        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
-              'sender_email': 'test@rest.co',
-              'source': {'id': '1', 'name': '1'}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin": PluginTestTemplate(
-        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
-              'sender_email': 'test@rest.co',
-              'source': {'id': '1', 'name': '1'}},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin": PluginTestTemplate(
-        init={'additional_mapping': {}, 'list_ids': "a,b", 'email': 'test@rest.co', 'source': {'id': '1', 'name': '1'}},
-        resource={
-            "token": "<token>"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin": PluginTestTemplate(
-        init={'email': 'test@rest.co', 'source': {'id': '1', 'name': '1'}},
-        resource={
-            "token": "<token>"
-        }
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin": PluginTestTemplate(
-        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
-              'sender_email': 'test@rest.co',
-              'source': {'id': '1', 'name': '1'}},
-        resource={
-            "token": "<token>"
-        }
-    ),
-
     "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginTestTemplate(
         init={'value': ''},
         resource=None
@@ -620,6 +573,65 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #           'vertical_pos': 'bottom'},
     #     resource=None
     # ),
+
+    "tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin": PluginTestTemplate(
+        init={'additional_mapping': {}, 'email': None, 'source': {'id': "1", 'name': "1"}},
+        resource={
+            "api_key": "<api-key>",
+            "public_account_id": "<public-account-id>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.elastic_email.contact_status_change.plugin": PluginTestTemplate(
+        init={'email': "test@rest.co", 'status': "status", 'source': {'id': "1", 'name': "1"}},
+        resource={
+            "api_key": "<api-key>",
+            "public_account_id": "<public-account-id>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin": PluginTestTemplate(
+        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
+              'sender_email': 'test@rest.co',
+              'source': {'id': '1', 'name': '1'}},
+        resource={
+            "api_key": "<api-key>",
+            "public_account_id": "<public-account-id>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin": PluginTestTemplate(
+        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
+              'sender_email': 'test@rest.co',
+              'source': {'id': '1', 'name': '1'}},
+        resource={
+            "api_key": "<api-key>",
+            "public_account_id": "<public-account-id>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin": PluginTestTemplate(
+        init={'additional_mapping': {}, 'list_ids': "a,b", 'email': 'test@rest.co', 'source': {'id': '1', 'name': '1'}},
+        resource={
+            "token": "<token>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin": PluginTestTemplate(
+        init={'email': 'test@rest.co', 'source': {'id': '1', 'name': '1'}},
+        resource={
+            "token": "<token>"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin": PluginTestTemplate(
+        init={'message': {'content': 'content', 'recipient': 'test@rest.co', 'subject': 'subject'},
+              'sender_email': 'test@rest.co',
+              'source': {'id': '1', 'name': '1'}},
+        resource={
+            "token": "<token>"
+        }
+    ),
 
     "tracardi.process_engine.action.v1.connectors.postgresql.query.plugin": PluginTestTemplate(
         init={'query': None, 'source': {'id': '1', 'name': 'Some value'}, 'timeout': 20},
