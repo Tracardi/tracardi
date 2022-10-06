@@ -74,7 +74,7 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 
 #### Redis
 
-If you use features as destinations, import, or synchronized events then you will need a redis instance as well. 
+You will need a redis instance as well. 
 
 Start it with:
 
