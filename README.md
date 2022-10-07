@@ -9,7 +9,23 @@
    <br/>
   </p>
   
-[![contributors](https://opencollective.com/tracardi-cdp/tiers/badge.svg)](https://opencollective.com/tracardi-cdp)  [![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://join.slack.com/t/tracardi/shared_invite/zt-1bpf35skl-8Fr5FX5a6cji7tX18JNNDA)
+ <p align="center">
+  <a href="https://github.com/Tracardi/tracardi/">
+    <img alt="GitHub Repository Stars Count" src="https://img.shields.io/github/stars/Tracardi/tracardi?style=social" />
+  </a>
+    <a href="https://twitter.com/tracardi">
+        <img alt="Follow Us on Twitter" src="https://img.shields.io/twitter/follow/tracardi?style=social" />
+    </a>
+    <a href="https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q">
+        <img alt="Subscribe on our Youtube Channel" src="https://img.shields.io/youtube/channel/subscribers/UC0atjYqW43MdqNiSJBvN__Q?style=social" />
+    </a>
+    <a href="https://opencollective.com/tracardi-cdp">
+        <img alt="Subscribe on our Youtube Channel" src="https://opencollective.com/tracardi-cdp/tiers/badge.svg" />
+    </a>
+    <a href="https://join.slack.com/t/tracardi/shared_invite/zt-1bpf35skl-8Fr5FX5a6cji7tX18JNNDA">
+        <img alt="Subscribe on our Youtube Channel" src="https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social" />
+    </a>
+</p>
 
 # Open-source Customer Engagement and Data Platform
 
