@@ -61,8 +61,9 @@ There are other types of installation. All are described in detail in our [docum
 
 <table align="center">
 <tr>
-<td>Join our community</td>
-<td>Visit YouTube Channel</td>
+<td align="center">Join our community</td>
+<td align="center">Visit YouTube Channel</td>
+<td align="center">Tweet with us</td>
 </tr>
 <tr>
 <td  align="center"><a href="https://join.slack.com/t/tracardi/shared_invite/zt-10y7w0o9y-PmCBnK9qywchmd1~KIER2Q">
@@ -70,6 +71,9 @@ There are other types of installation. All are described in detail in our [docum
 </a></td>
 <td  align="center"><a href="https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q">
     <img src="https://user-images.githubusercontent.com/16271564/194526771-ab525c4f-b1fa-4d85-8834-340a40c8828b.png" width="120px"/> 
+</a></td>
+ <td  align="center"><a href="https://www.twitter.com/tracardi">
+    <img src="https://user-images.githubusercontent.com/16271564/194528790-83d1bdbb-0446-4147-a572-4dc12cc0a70f.png" width="120px"/> 
 </a></td>
 <tr>
 </table>
