@@ -59,11 +59,16 @@ If you want to see Tracardi in action subscribe to our [:tv: Youtube channel](ht
 
 ## 👇 Installation and getting started
 
-The easiest way to run TRACARDI is to run it as a :whale: docker container. 
+The easiest way to run TRACARDI is to run it as a :whale: docker container. Please install docker and docker-compose on your local machine 
+then clone [tracardi/tracardi-api](https://github.com/Tracardi/tracardi-api.git)
 
-Install docker and docker-compose on your local machine, go to TRACARDI folder, and run one line command:
-
+```bash
+git clone https://github.com/Tracardi/tracardi-api.git
 ```
+
+Go to TRACARDI folder, and run one line command:
+
+```bash
 docker-compose up
 ```
 
