@@ -53,29 +53,26 @@ docker-compose up
 
 Visit http://127.0.0.1:8787 and complete installation in Tracardi GUI. 
 
-## Other types of installation
+## 👇 Other types of installation
 
 There are other types of installation. All are described in detail in our [documentation](http://docs.tracardi.com/installation/). 
 
 ## 👇 Need help ?
 
-<p align="center" style="display: flex">
-<br />
-<table>
+<table align="center">
 <tr>
 <td>Join our community</td>
 <td>Visit YouTube Channel</td>
 </tr>
 <tr>
-<td><a href="https://join.slack.com/t/tracardi/shared_invite/zt-10y7w0o9y-PmCBnK9qywchmd1~KIER2Q">
+<td  align="center"><a href="https://join.slack.com/t/tracardi/shared_invite/zt-10y7w0o9y-PmCBnK9qywchmd1~KIER2Q">
     <img src="https://user-images.githubusercontent.com/16271564/151843970-5e869807-4ccf-46ab-98f5-6a65aea790f8.png" width="120px"/> 
 </a></td>
-<td><a href="https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q">
-    <img src="https://user-images.githubusercontent.com/16271564/194525179-f6ad792e-9e47-4e65-ab0b-c1797060beca.png" width="120px"/> 
+<td  align="center"><a href="https://www.youtube.com/channel/UC0atjYqW43MdqNiSJBvN__Q">
+    <img src="https://user-images.githubusercontent.com/16271564/194526771-ab525c4f-b1fa-4d85-8834-340a40c8828b.png" width="120px"/> 
 </a></td>
 <tr>
 </table>
-</p>
 
 ## 👇 Documentation
 
@@ -85,7 +82,7 @@ There are other types of installation. All are described in detail in our [docum
 
 ## 👇 Call for contributors
 
-We are looking for contributors. Would you like to help with Tracardi development fork Tracardi or contact us at 
+We are looking for contributors. Would you like to help with TRACARDI development fork TRACARDI or contact us at 
 tracardi.cdp@gmail.com or any social platform.
 
 ## 👇 Support us
@@ -95,8 +92,7 @@ If you would like to support us please follow us on:
 * [Facebook](https://bit.ly/3uPwP5a) 
 * [Twitter](https://bit.ly/3uVJwLJ), tag us and leave your comments. 
 * Subscribe to our [Youtube channel](https://bit.ly/3pbdbPR) to see development process and new upcoming features.
-
-Spread the news about TRACARDI so anyone interested get to know TRACARDI.
+* ⭐️ TRACARDI - it really matters and puts a smile on our faces.
 
 We appreciate any help that helps make TRACARDI popular. 
 
@@ -112,7 +108,7 @@ Support us via referral programs. If you buy service from the following link to 
 
 ## 👇 License
 
-Tracardi is available under MIT with Common Clause license.
+TRACARDI is available under MIT with Common Clause license.
 
 ## 👇 Recent activities
 
