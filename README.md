@@ -3,9 +3,9 @@
   <p align="center">
    <br/>
     <a href="https://docs.tracardi.com" rel="dofollow"><strong>Explore Tracardi Documentation</strong></a> ·
-    <a href="https://opencollective.com/tracardi-cdp">Support the project</a> ·
+    <a href="https://opencollective.com/tracardi-cdp">⭐️ Support the project</a> ·
     <a href="https://join.slack.com/t/tracardi/shared_invite/zt-1bpf35skl-8Fr5FX5a6cji7tX18JNNDA">👨‍💻 Join community</a> ·
-    <a href="https://bit.ly/3pbdbPR">⭐️ Watch tutorials on YOUTUBE</a>
+    <a href="https://bit.ly/3pbdbPR">:tv: Watch tutorials on YOUTUBE</a>
    <br/>
   </p>
   
@@ -39,11 +39,11 @@ Use TRACARDI for:
  * **Automation** - TRACARDI is a great framework for creating
    marketing automation apps. You can send your data to other systems easily
 
-If you want to see Tracardi in action subscribe to our [Youtube channel](https://bit.ly/3pbdbPR).
+If you want to see Tracardi in action subscribe to our [:tv: Youtube channel](https://bit.ly/3pbdbPR).
 
 ## 👇 Installation and getting started
 
-The easiest way to run TRACARDI is to run it as a docker container. 
+The easiest way to run TRACARDI is to run it as a :whale: docker container. 
 
 Install docker and docker-compose on your local machine, go to TRACARDI folder, and run one line command:
 
@@ -86,8 +86,9 @@ There are other types of installation. All are described in detail in our [docum
 
 ## 👇 Call for contributors
 
-We are looking for contributors. Would you like to help with TRACARDI development fork TRACARDI or contact us at 
-tracardi.cdp@gmail.com or any social platform.
+Have you found a bug :bug: ? Or maybe you have a nice feature :sparkles: to contribute ? The
+[CONTRIBUTING guide](https://github.com/Tracardi/tracardi/blob/master/CONTRIBUTING.md) will help you get your
+development environment ready in minutes.
 
 ## 👇 Support us
 
