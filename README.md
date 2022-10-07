@@ -34,7 +34,7 @@ wants to start using user data for automated customer engagement. Tracardi is in
 
 ## ⭐️ Screenshots
 
-![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)
+[![flow-1](https://user-images.githubusercontent.com/16271564/145562599-a188de6e-639b-479a-b263-863e9133df53.png)](https://www.youtube.com/watch?v=p_FOh7K828o)
 
 ## ✨ Features
 
