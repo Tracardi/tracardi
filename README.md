@@ -76,9 +76,9 @@ There are other types of installation. All are described in detail in our [docum
 
 ## 👇 Documentation
 
-* System documentationis is available at: [http://docs.tracardi.com](http://docs.tracardi.com).
-* Api documentation is always availabe after installation at http://127.0.0.1:8686/docs.
-* Tracardi has also build in documentation into the system.
+* System documentation is available at: [http://docs.tracardi.com](http://docs.tracardi.com).
+* Api documentation is always available after installation at http://127.0.0.1:8686/docs.
+* Tracardi has also build-in documentation into the system.
 
 ## 👇 Call for contributors
 
@@ -92,7 +92,7 @@ If you would like to support us please follow us on:
 * [Facebook](https://bit.ly/3uPwP5a) 
 * [Twitter](https://bit.ly/3uVJwLJ), tag us and leave your comments. 
 * Subscribe to our [Youtube channel](https://bit.ly/3pbdbPR) to see development process and new upcoming features.
-* ⭐️ TRACARDI - it really matters and puts a smile on our faces.
+* ⭐️ Start TRACARDI GitHub project - it really matters and puts a smile on our faces.
 
 We appreciate any help that helps make TRACARDI popular. 
 
