@@ -66,7 +66,7 @@ then clone [tracardi/tracardi-api](https://github.com/Tracardi/tracardi-api.git)
 git clone https://github.com/Tracardi/tracardi-api.git
 ```
 
-Go to TRACARDI folder, and run one line command:
+Go to TRACARDI API folder, and run one line command:
 
 ```bash
 docker-compose up
