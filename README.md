@@ -111,6 +111,11 @@ Have you found a bug :bug: ? Or maybe you have a nice feature :sparkles: to cont
 [CONTRIBUTING guide](https://github.com/Tracardi/tracardi/blob/master/CONTRIBUTING.md) will help you get your
 development environment ready in minutes.
 
+All contributors willing to start coding TRACARDI plugins are urged to read the beginners tutorial:
+
+* [How to code simple plugin in Tracardi](http://docs.tracardi.com/plugins/tutorial/part1/)
+* [Configuring the plugin in Tracardi](http://docs.tracardi.com/plugins/tutorial/part2/)
+
 ## 👇 Support us
 
 If you would like to support us please follow us on:
