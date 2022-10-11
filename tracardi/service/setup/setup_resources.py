@@ -118,6 +118,14 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="sms77",
+            name="Sms77",
+            tags=["api_key", "sms77"],
+            config={
+                "api_key": "<api_key>"
+            }
+        ),
+        ResourceSettings(
             id="full-contact",
             name="FullContact",
             tags=["token", "full-contact"],
