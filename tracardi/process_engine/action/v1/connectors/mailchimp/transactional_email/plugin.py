@@ -6,7 +6,6 @@ from tracardi.service.mailchimp_sender import MailChimpTransactionalSender
 from tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.model.config import Config, Token
 from tracardi.service.notation.dot_template import DotTemplate
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from email_validator import validate_email, EmailNotValidError
 
 
@@ -15,21 +14,18 @@ def validate(config: dict):
 
 
 class TransactionalMailSender(ActionRunner):
+    _dot_template: DotTemplate
+    _client: MailChimpTransactionalSender
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
-        self.config = config
-        self._client = MailChimpTransactionalSender(credentials.get_credentials(self, output=Token).token)
-        self._dot_template = DotTemplate()
+    async def set_up(self, init):
 
-    @staticmethod
-    async def build(**kwargs) -> 'TransactionalMailSender':
-
-        config = validate(kwargs)
+        config = validate(init)
         resource = await storage.driver.resource.load(config.source.id)
-        return TransactionalMailSender(
-            config,
-            resource.credentials
-        )
+
+        self.config = config
+        self._client = MailChimpTransactionalSender(resource.credentials.get_credentials(self, output=Token).token)
+        self._dot_template = DotTemplate()
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -103,7 +99,7 @@ def register() -> Plugin:
                                 id="source",
                                 name="MailChimp resource",
                                 description="Please provide your MailChimp resource ID. ",
-                                component=FormComponent(type="resource", props={"label": "resource", "tag": "token"})
+                                component=FormComponent(type="resource", props={"label": "resource", "tag": "mailchimp"})
                             ),
                             FormField(
                                 id="sender_email",

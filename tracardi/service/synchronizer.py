@@ -21,10 +21,12 @@ class AsyncProfileTracksSynchronizer:
         self.hash = "profile-blocker"
 
     async def __aenter__(self):
+        max_repeats = 10
         while True:
-            if await self._is_profile_processed():
-                logger.info(f"Waiting for /track/{self.profile.id} to finish")
+            if await self._is_profile_processed() and max_repeats > 0:
+                logger.info(f"Waiting for /track/{self.profile.id} to finish. Repeat {max_repeats}")
                 await asyncio.sleep(self.wait)
+                max_repeats -= 1
             else:
                 await self._set_profile_process_id()
                 return self
@@ -50,17 +52,19 @@ class AsyncProfileTracksSynchronizer:
 
 
 class ProfileTracksSynchronizer:
-    def __init__(self, profile: Optional[Entity], wait=0.1):
+    def __init__(self, profile: Optional[Entity], wait=0.1, max_repeats=20):
         self.wait = wait
         self.profile = profile
         self.redis = RedisClient()
         self.hash = "profile-blocker"
+        self.max_repeats = max_repeats
 
     async def __aenter__(self):
         while True:
-            if self._is_profile_processed():
-                logger.info(f"Waiting for /track/{self.profile.id} to finish")
+            if self._is_profile_processed() and self.max_repeats > 0:
+                logger.info(f"Waiting for /track/{self.profile.id} to finish. Left repeats {self.max_repeats}")
                 await asyncio.sleep(self.wait)
+                self.max_repeats -= 1
             else:
                 self._set_profile_process_id()
                 return self

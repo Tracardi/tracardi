@@ -12,8 +12,10 @@ def validate(config: dict) -> Config:
 
 class JoinPayloads(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = Config(**kwargs)
+    config: Config
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.join = JoinSettings(
             merge=True,
             reshape={  # Reshape definition for payload output port
@@ -44,7 +46,7 @@ def register() -> Plugin:
                 "default": True,
                 "type": "dict"
             },
-            manual="memory/join_output_payloads",
+            manual="join_output_payloads",
             form=Form(
                 groups=[
                     FormGroup(

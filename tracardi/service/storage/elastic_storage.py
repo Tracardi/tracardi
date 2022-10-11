@@ -1,9 +1,14 @@
-from typing import List, Optional
+from asyncio import create_task, gather
+from collections import defaultdict
+from typing import List, Optional, Union
 
 import elasticsearch
+from pydantic import BaseModel
 
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.entity import Entity
+from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage import index
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import Index
@@ -50,13 +55,15 @@ class ElasticStorage:
     async def count(self, query: dict = None) -> bool:
         return await self.storage.count(self.index.get_index_alias(), query)
 
-    async def load(self, id) -> [dict, None]:
+    async def load(self, id) -> Optional[StorageRecord]:
         try:
             index = self.index.get_index_alias()
             if not self.index.multi_index:
                 result = await self.storage.get(index, id)
-                output = result['_source']
+
+                output = StorageRecord.build_from_elastic(result)
                 output['id'] = result['_id']
+
             else:
                 query = {
                     "query": {
@@ -65,27 +72,95 @@ class ElasticStorage:
                         }
                     }
                 }
-                result = StorageResult(await self.storage.search(index, query))
-                output = list(result)
-                if len(output) != 1:
+                result = await self.storage.search(index, query)
+                records = StorageRecords.build_from_elastic(result)
+
+                if len(records) == 0:
                     return None
-                output = output[0]
+
+                if len(records) > 1:
+                    raise DuplicatedRecordException(f"Duplicated record {id} in index {index}. Search result: {records}")
+
+                output = records.first()
 
             return output
         except elasticsearch.exceptions.NotFoundError:
             return None
 
-    async def create(self, payload) -> BulkInsertResult:
-        return await self.storage.insert(self.index.get_write_index(), payload)
+    @staticmethod
+    def _get_storage_record(record, replace_id, exclude=None) -> StorageRecord:
 
-    async def delete(self, id):
-        if not self.index.multi_index:
-            return await self.storage.delete(self.index.get_index_alias(), id)
+        if isinstance(record, StorageRecord):
+            return record
+
+        elif isinstance(record, Entity):
+            record = record.to_storage_record(exclude=exclude)
+
+        elif isinstance(record, BaseModel):
+            record = StorageRecord.build_from_base_model(record, exclude=exclude)
+
         else:
-            return await self.delete_by("_id", id)
+            # todo add exclude if possible
+            record = StorageRecord(**record)
 
-    async def search(self, query):
-        return await self.storage.search(self.index.get_index_alias(), query)
+        if replace_id is True and 'id' in record:
+            record["_id"] = record['id']
+
+        return record
+
+    def get_storage_index(self, record) -> str:
+        if isinstance(record, Entity) or isinstance(record, StorageRecord):
+            if not record.has_meta_data():
+                index = self.index.get_write_index()
+            else:
+                meta = record.get_meta_data()
+                if meta.index is None:
+                    index = self.index.get_write_index()
+                else:
+                    index = meta.index
+        else:
+            index = self.index.get_write_index()
+        return index
+
+    async def create(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
+                     replace_id: bool = True, exclude=None) -> Union[BulkInsertResult, List[BulkInsertResult]]:
+        if isinstance(data, list):
+
+            if len(data) == 0:
+                return BulkInsertResult()
+
+            records_by_index = defaultdict(list)
+            for row in data:
+                index = self.get_storage_index(row)
+                record = self._get_storage_record(row, exclude=exclude, replace_id=replace_id)
+                records_by_index[index].append(record)
+
+            if len(records_by_index) > 1:
+                raise ValueError(f"Can not save set of records with mixed target indices. Got the following "
+                                 f"indices [{list(records_by_index.keys())}]")
+
+            index, records = list(records_by_index.items())[0]
+
+        else:
+
+            record = self._get_storage_record(data, exclude=exclude, replace_id=replace_id)
+            index = self.get_storage_index(record)
+            records = [record]
+
+        return await self.storage.insert(index, records)
+
+    async def delete(self, id, index: str = None):
+        if index is None:
+            index = self.index.get_index_alias()
+
+        if not self.index.multi_index:
+            # This function does not work on aliases
+            return await self.storage.delete(index, id)
+        else:
+            return await self.delete_by("_id", id, index)
+
+    async def search(self, query) -> StorageRecords:
+        return StorageRecords.build_from_elastic(await self.storage.search(self.index.get_index_alias(), query))
 
     async def refresh(self, params=None, headers=None):
         return await self.storage.refresh(self.index.get_index_alias(), params, headers)
@@ -93,7 +168,7 @@ class ElasticStorage:
     async def reindex(self, source, destination, wait_for_completion=True):
         return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
 
-    async def load_by_query_string(self, query_string, limit=100):
+    async def load_by_query_string(self, query_string, limit=100) -> StorageRecords:
         query = {
             "size": limit,
             "query": {
@@ -104,7 +179,7 @@ class ElasticStorage:
         }
         return await self.search(query)
 
-    async def count_by_query_string(self, query_string: str, time_range: str):
+    async def count_by_query_string(self, query_string: str, time_range: str) -> StorageRecords:
 
         if query_string:
             query = {
@@ -124,9 +199,10 @@ class ElasticStorage:
                     }
                 },
             }
-        return (await self.search(query))["hits"]["total"]["value"]
 
-    async def load_by(self, field, value, limit=100):
+        return await self.search(query)
+
+    async def load_by(self, field, value, limit=100) -> StorageRecords:
         query = {
             "size": limit,
             "query": {
@@ -137,7 +213,7 @@ class ElasticStorage:
         }
         return await self.search(query)
 
-    async def match_by(self, field, value, limit=100):
+    async def match_by(self, field, value, limit=100) -> StorageRecords:
         query = {
             "size": limit,
             "query": {
@@ -148,7 +224,7 @@ class ElasticStorage:
         }
         return await self.search(query)
 
-    async def delete_by(self, field, value):
+    async def delete_by(self, field, value, index: str = None):
         query = {
             "query": {
                 "term": {
@@ -156,10 +232,14 @@ class ElasticStorage:
                 }
             }
         }
-        return await self.storage.delete_by_query(self.index.get_index_alias(), query)
+
+        if index is None:
+            index = self.index.get_index_alias()
+
+        return await self.storage.delete_by_query(index, query)
 
     async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
-                             limit=1000):
+                             limit=1000) -> StorageRecords:
 
         terms = []
         for field, value in fields_and_values:
@@ -195,8 +275,8 @@ class ElasticStorage:
     async def update_by_query(self, query):
         return await self.storage.update_by_query(index=self.index.get_index_alias(), query=query)
 
-    async def update(self, id, record, retry_on_conflict=3):
-        return await self.storage.update(index=self.index.get_write_index(),
+    async def update(self, id, record, index, retry_on_conflict=3):
+        return await self.storage.update(index=index,
                                          record=record,
                                          id=id,
                                          retry_on_conflict=retry_on_conflict)

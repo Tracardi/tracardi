@@ -5,7 +5,7 @@ from .value_object.storage_info import StorageInfo
 from typing import Optional, List, Any
 from pydantic import BaseModel
 from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
-from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents
+from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents, MicroserviceConfig
 
 from ..config import tracardi
 from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
@@ -130,12 +130,13 @@ class SpecRecord(BaseModel):
     inputs: Optional[List[str]] = []
     outputs: Optional[List[str]] = []
     init: Optional[str] = ""
+    microservice: Optional[MicroserviceConfig] = None
     node: Optional[NodeEvents] = None
     form: Optional[str] = ""
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.6.2'
+    version: Optional[str] = '0.7.3-dev'
 
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':
@@ -146,6 +147,7 @@ class SpecRecord(BaseModel):
             inputs=spec.inputs,
             outputs=spec.outputs,
             init=encrypt(spec.init),
+            microservice=spec.microservice,
             node=spec.node,
             form=b64_encoder(spec.form),
             manual=spec.manual,
@@ -162,6 +164,7 @@ class SpecRecord(BaseModel):
             inputs=self.inputs,
             outputs=self.outputs,
             init=decrypt(self.init),
+            microservice=self.microservice,
             node=self.node,
             form=b64_decoder(self.form),
             manual=self.manual,
@@ -184,6 +187,7 @@ class MetaDataRecord(BaseModel):
     group: Optional[List[str]] = ["General"]
     tags: List[str] = []
     pro: bool = False
+    remote: bool = False
     frontend: bool = False
     emits_event: Optional[str] = ""
 
@@ -202,6 +206,7 @@ class MetaDataRecord(BaseModel):
             group=metadata.group,
             tags=metadata.tags,
             pro=metadata.pro,
+            remote=metadata.remote,
             frontend=metadata.frontend,
             emits_event=b64_encoder(metadata.emits_event)
         )
@@ -220,6 +225,7 @@ class MetaDataRecord(BaseModel):
             group=self.group,
             tags=self.tags,
             pro=self.pro,
+            remote=self.remote,
             frontend=self.frontend,
             emits_event=b64_decoder(self.emits_event)
         )

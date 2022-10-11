@@ -5,7 +5,6 @@ from tracardi.process_engine.action.v1.connectors.active_campaign.client import 
     ActiveCampaignClientException
 from .model.config import Config
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.domain.result import Result
 
 
@@ -15,15 +14,16 @@ def validate(config: dict) -> Config:
 
 class FetchActiveCampaignProfileByEmailAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'FetchActiveCampaignProfileByEmailAction':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return FetchActiveCampaignProfileByEmailAction(config, resource.credentials)
+    client: ActiveCampaignClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = Config(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.client = ActiveCampaignClient(**credentials.get_credentials(self))
+        self.client = ActiveCampaignClient(**resource.credentials.get_credentials(self))
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -50,8 +50,8 @@ def register() -> Plugin:
             author="Dawid Kruk",
             init={
                 "source": {
-                    "id": None,
-                    "name": None
+                    "id": "",
+                    "name": ""
                 },
                 "email": None
             },
@@ -61,7 +61,7 @@ def register() -> Plugin:
                     id="source",
                     name="Resource",
                     description="Select your ActiveCampaign resource.",
-                    component=FormComponent(type="resource", props={"tag": "active_campaign"})
+                    component=FormComponent(type="resource", props={"tag": "activecampaign"})
                 ),
                 FormField(
                     id="email",

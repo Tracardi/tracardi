@@ -38,8 +38,10 @@ def validate(config: dict) -> Configuration:
 
 class ReshapePayloadAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = Configuration(**kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = Configuration(**init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if not isinstance(payload, dict):
@@ -61,7 +63,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.traits.reshape_payload_action',
+            module=__name__,
             className='ReshapePayloadAction',
             inputs=["payload"],
             outputs=['payload'],
@@ -94,7 +96,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Create payload',
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
-            icon='transform',
+            icon='json',
             group=["Data processing"],
             tags=['reshape', 'create', 'payload', 'data'],
             documentation=Documentation(

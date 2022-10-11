@@ -1,4 +1,3 @@
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.domain.resources.mqtt_resource import MqttResourceCredentials
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, FormGroup, Form, \
     FormField, FormComponent
@@ -15,17 +14,15 @@ def validate(config: dict):
 
 
 class MqttPublishAction(ActionRunner):
+    credentials: MqttResourceCredentials
+    config: Configuration
 
-    @staticmethod
-    async def build(**kwargs) -> 'MqttPublishAction':
-        configuration = validate(kwargs)
+    async def set_up(self, init):
+        configuration = validate(init)
         resource = await storage.driver.resource.load(configuration.source.id)
-        return MqttPublishAction(configuration, resource.credentials)
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        self.config = config
-        self.credentials = credentials.get_credentials(self,
-                                                       output=MqttResourceCredentials)  # type: MqttResourceCredentials
+        self.config = configuration
+        self.credentials = resource.credentials.get_credentials(self, output=MqttResourceCredentials)
 
     async def run(self, payload: dict, in_edge=None):
         try:

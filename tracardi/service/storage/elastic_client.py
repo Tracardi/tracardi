@@ -96,6 +96,8 @@ class ElasticClient:
                 del (record['_id'])
             else:
                 _id = str(uuid4())
+                if 'id' in record and _id != record['id']:
+                    record['id'] = _id
 
             ids.append(_id)
             record = {
@@ -214,8 +216,8 @@ class ElasticClient:
         if elastic_config.maxsize:
             kwargs['maxsize'] = elastic_config.maxsize
 
-        if elastic_config.cafile:
-            context = create_default_context(cafile=elastic_config.cafile)
+        if elastic_config.ca_file:
+            context = create_default_context(cafile=elastic_config.ca_file)
             kwargs['ssl_context'] = context
 
         if elastic_config.http_auth_password and elastic_config.http_auth_username:

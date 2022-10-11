@@ -111,7 +111,9 @@ async def load_tags(limit: int = 100, query_string: str = ""):
                 }
             }
         }
-        return [record["_source"] for record in (await storage_manager("event-tags").query(query))["hits"]["hits"]]
+
+        result = await storage_manager("event-tags").query(query)
+        return result
 
 
 async def delete(event_type: str):

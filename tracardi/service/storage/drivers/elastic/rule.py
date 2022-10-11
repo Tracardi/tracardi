@@ -5,14 +5,15 @@ from typing import List, Tuple, Dict
 
 from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
-from tracardi.domain.storage_result import StorageResult
+from tracardi.domain.storage_record import StorageRecords
 
 from tracardi.domain.rule import Rule
 
 from tracardi.domain.event import Event
+from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.factory import storage_manager, StorageFor
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -92,8 +93,20 @@ async def load_flow_rules(flow_id: str) -> List[Rule]:
     return [Rule(**rule) for rule in rules_attached_to_flow]
 
 
-async def load_all(start: int = 0, limit: int = 100) -> StorageResult:
+async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
     return await storage_manager('rule').load_all(start, limit=limit)
+
+
+async def load_by_id(id) -> Rule:
+    return await StorageFor(Entity(id=id)).index("rule").load(Rule)
+
+
+async def delete_by_id(id) -> dict:
+    return await StorageFor(Entity(id=id)).index("rule").delete()
+
+
+async def save(rule: Rule) -> BulkInsertResult:
+    return await StorageFor(rule).index().save()
 
 
 async def refresh():

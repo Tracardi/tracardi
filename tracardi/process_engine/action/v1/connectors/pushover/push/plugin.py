@@ -1,14 +1,11 @@
 import urllib.parse
-import aiohttp
-
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
-    Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dot_template import DotTemplate
 from .model.pushover_config import PushOverConfiguration, PushOverAuth
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 def validate(config: dict) -> PushOverConfiguration:
@@ -17,20 +14,20 @@ def validate(config: dict) -> PushOverConfiguration:
 
 class PushoverAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'PushoverAction':
-        config = validate(kwargs)
-        source = await storage.driver.resource.load(config.source.id)
-        return PushoverAction(config, source.credentials)
+    credentials: PushOverAuth
+    pushover_config: PushOverConfiguration
 
-    def __init__(self, config: PushOverConfiguration, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        source = await storage.driver.resource.load(config.source.id)
+
         self.pushover_config = config
-        self.credentials = credentials.get_credentials(self, output=PushOverAuth)  # type: PushOverAuth
+        self.credentials = source.credentials.get_credentials(self, output=PushOverAuth)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
 
-            async with aiohttp.ClientSession() as session:
+            async with HttpClient(self.node.on_connection_error_repeat) as client:
 
                 dot = self._get_dot_accessor(payload)
                 template = DotTemplate()
@@ -41,23 +38,26 @@ class PushoverAction(ActionRunner):
                     "message": template.render(self.pushover_config.message, dot)
                 }
 
-                response = await session.post(url='https://api.pushover.net/1/messages.json',
-                                            data=urllib.parse.urlencode(data),
-                                            headers={"Content-type": "application/x-www-form-urlencoded"})
+                async with client.post(
+                    url='https://api.pushover.net/1/messages.json',
+                    data=urllib.parse.urlencode(data),
+                    headers={"Content-type": "application/x-www-form-urlencoded"}
+                ) as response:
 
-                if response.status != 200:
-                    result = await response.json()
-                    self.console.error(f"Could not connect to Pushover API. Error port triggered with the response {result}")
-                    return Result(port="error", value={
-                        "message": "Could not connect to Pushover API.",
+                    if response.status != 200:
+                        result = await response.json()
+                        self.console.error(f"Could not connect to Pushover API. Error port triggered with the "
+                                           f"response {result}")
+                        return Result(port="error", value={
+                            "message": "Could not connect to Pushover API.",
+                            "status": response.status,
+                            "response": result
+                        })
+
+                    return Result(port="payload", value={
                         "status": response.status,
-                        "response": result
+                        "response": await response.json()
                     })
-
-                return Result(port="payload", value={
-                    "status": response.status,
-                    "response": await response.json()
-                })
 
         except Exception as e:
             return Result(port="error", value={
@@ -78,44 +78,7 @@ def register() -> Plugin:
             version='0.7.1',
             license="MIT",
             author="Bartosz Dobrosielski, Risto Kowaczewski",
-            manual="send_pushover_msg_action",
-            init={
-                "source": None,
-                "message": ""
-            },
-            form=Form(groups=[
-                FormGroup(
-                    name="Pushover source",
-                    fields=[
-                        FormField(
-                            id="source",
-                            name="Pushover authentication",
-                            description="Select pushover resource",
-                            component=FormComponent(
-                                type="resource",
-                                props={"label": "resource", "tag": "pushover"}
-                            )
-                        )
-                    ]
-                ),
-                FormGroup(
-                    name="Pushover message",
-                    fields=[
-                        FormField(
-                            id="message",
-                            name="Message",
-                            description="Type message. Message can be in form of message template.",
-                            component=FormComponent(
-                                type="textarea",
-                                props={
-                                    "label": "Message template"
-                                })
-                        )
-                    ]
-
-                ),
-            ]),
-
+            manual="send_pushover_msg_action"
         ),
         metadata=MetaData(
             name='Pushover push',
@@ -131,6 +94,7 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port returns a response from Pushover API."),
                     "error": PortDoc(desc="This port gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )

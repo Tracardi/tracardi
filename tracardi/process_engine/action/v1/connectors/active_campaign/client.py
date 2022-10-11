@@ -1,4 +1,4 @@
-import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 class ActiveCampaignClientException(Exception):
@@ -10,20 +10,28 @@ class ActiveCampaignClient:
     def __init__(self, api_key: str, api_url: str):
         self.api_key = api_key
         self.api_url = api_url
+        self.retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def send_contact(self, data: dict):
         data = {key: data[key] for key in data if data[key] is not None}
         data["fieldValues"] = [{"field": key, "value": data[key]} for key in data if key.isnumeric()]
 
-        async with aiohttp.ClientSession(headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "api-token": self.api_key
-        }) as session:
+        async with HttpClient(
+            self.retries,
+            [200, 201, 401],
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "api-token": self.api_key
+            }
+        ) as client:
 
             if "email" in data:
 
-                async with session.post(
+                async with client.post(
                     url=f"{self.api_url}/api/3/contacts",
                     json={"contact": data}
                 ) as response:
@@ -31,7 +39,7 @@ class ActiveCampaignClient:
                     if response.status != 201:
                         if (await response.json())['errors'][0]["code"] == "duplicate":
                             contact = (await self.get_contact_by_email(data["email"]))
-                            async with session.put(
+                            async with client.put(
                                 url=f"{self.api_url}/api/3/contacts/{contact['contact']['id']}",
                                 json={"contact": {key: data[key] for key in data if key != "email"}}
                             ) as put_response:
@@ -47,7 +55,7 @@ class ActiveCampaignClient:
                     return await response.json()
 
             elif "id" in data:
-                async with session.put(
+                async with client.put(
                         url=f"{self.api_url}/api/3/contacts/{data['id']}",
                         json={"contact": {key: data[key] for key in data}}
                 ) as put_response:
@@ -61,12 +69,16 @@ class ActiveCampaignClient:
                 raise ActiveCampaignClientException("One of: id, email parameters has to be provided.")
 
     async def get_custom_fields(self):
-        async with aiohttp.ClientSession(headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "api-token": self.api_key
-        }) as session:
-            async with session.get(f"{self.api_url}/api/3/fields") as response:
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "api-token": self.api_key
+                }
+        ) as client:
+            async with client.get(f"{self.api_url}/api/3/fields") as response:
 
                 if response.status != 200:
                     raise ActiveCampaignClientException(await response.text())
@@ -74,12 +86,16 @@ class ActiveCampaignClient:
                 return [{"name": field["title"], "id": field["id"]} for field in (await response.json())["fields"]]
 
     async def get_contact_by_email(self, email: str):
-        async with aiohttp.ClientSession(headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "api-token": self.api_key
-        }) as session:
-            async with session.get(f"{self.api_url}/api/3/contacts?email={email}") as response:
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "api-token": self.api_key
+                }
+        ) as client:
+            async with client.get(f"{self.api_url}/api/3/contacts?email={email}") as response:
 
                 if response.status != 200:
                     raise ActiveCampaignClientException(await response.text())
@@ -88,7 +104,7 @@ class ActiveCampaignClient:
 
                 try:
                     contact_id = response[0]["id"]
-                    async with session.get(f"{self.api_url}/api/3/contacts/{contact_id}") as get_response:
+                    async with client.get(f"{self.api_url}/api/3/contacts/{contact_id}") as get_response:
 
                         if get_response.status != 200:
                             raise ActiveCampaignClientException(await response.text())

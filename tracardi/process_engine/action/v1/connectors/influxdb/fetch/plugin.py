@@ -1,12 +1,8 @@
-from typing import Tuple
-
-from tracardi.domain.settings import Settings
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
 from .model.config import Config, InfluxCredentials
-from tracardi.domain.resource import ResourceCredentials
 from influxdb_client import InfluxDBClient
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -18,15 +14,16 @@ def validate(config: dict) -> Config:
 
 class InfluxFetcher(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'InfluxFetcher':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return InfluxFetcher(config, resource.credentials)
+    client: InfluxDBClient
+    credentials: InfluxCredentials
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = Config(**init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = credentials.get_credentials(self, InfluxCredentials)
+        self.credentials = resource.credentials.get_credentials(self, InfluxCredentials)
         self.client = InfluxDBClient(self.credentials.url, self.credentials.token)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -62,7 +59,7 @@ class InfluxFetcher(ActionRunner):
             return Result(port="error", value={"error": str(e)})
 
 
-def register() -> Tuple[Plugin, Settings]:
+def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
@@ -96,7 +93,7 @@ def register() -> Tuple[Plugin, Settings]:
                                 id="source",
                                 name="InfluxDB resource",
                                 description="Please select InfluxDB resource.",
-                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "influx"})
+                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "influxdb"})
                             ),
                             FormField(
                                 id="organization",
@@ -160,4 +157,4 @@ def register() -> Tuple[Plugin, Settings]:
                 }
             )
         )
-    ), Settings(hidden=True)
+    )

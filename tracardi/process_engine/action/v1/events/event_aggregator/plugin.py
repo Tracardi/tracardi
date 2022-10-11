@@ -1,7 +1,6 @@
-from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from pytimeparse import parse
@@ -14,8 +13,10 @@ def validate(config: dict) -> Configuration:
 
 class EventAggregator(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         time_span_in_sec = parse(self.config.time_span.strip("-"))
@@ -43,42 +44,7 @@ def register() -> Plugin:
             outputs=['payload'],
             version='0.7.0',
             license="Tracardi Pro",
-            author="Risto Kowaczewski",
-            init={
-                "field": None,
-                "time_span": "-15m"
-            },
-            form=Form(
-                groups=[
-                    FormGroup(
-                        name="Event aggregation settings",
-                        description="Event aggregator counts how many events of defined field were triggered "
-                                    "within defined time.",
-                        fields=[
-                            FormField(
-                                id="field",
-                                name="Aggregate by field",
-                                description="Select field you would like to aggregate.",
-                                component=FormComponent(type="autocomplete", props={
-                                    "label": "Field",
-                                    "endpoint": {
-                                        "url": "/storage/mapping/event/metadata",
-                                        "method": "get"
-                                    },
-                                    "onlyValueWithOptions": False
-                                })
-                            ),
-                            FormField(
-                                id="time_span",
-                                name="Time span",
-                                description="Type time span, e.g. -15minutes.",
-                                component=FormComponent(type="text", props={
-                                    "label": "Time span"
-                                })
-                            ),
-                        ]
-                    )
-                ])
+            author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Event aggregator',

@@ -10,6 +10,7 @@ from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.tracardi_http_client import HttpClient
 
 from .model.configuration import Configuration
 from .model.full_contact_source_configuration import FullContactSourceConfiguration
@@ -21,16 +22,14 @@ def validate(config: dict) -> Configuration:
 
 class FullContactAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'FullContactAction':
-        config = validate(kwargs)
+    config: Configuration
+    credentials: FullContactSourceConfiguration
+
+    async def set_up(self, init):
+        config = validate(init)
         resource = await storage.driver.resource.load(config.source.id)  # type: Resource
 
-        return FullContactAction(config, resource.credentials)
-
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
-        self.credentials = credentials.get_credentials(self,
-                                                       output=FullContactSourceConfiguration)  # type: FullContactSourceConfiguration
+        self.credentials = resource.credentials.get_credentials(self, output=FullContactSourceConfiguration)
         self.config = config
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -39,12 +38,16 @@ class FullContactAction(ActionRunner):
         try:
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with HttpClient(
+                    self.node.on_connection_error_repeat,
+                    [200, 201, 202, 203, 204],
+                    timeout=timeout
+            ) as client:
 
                 mapper = DictTraverser(dot)
                 payload = mapper.reshape(reshape_template=self.config.pii.dict())
 
-                async with session.request(
+                async with client.request(
                         method="POST",
                         headers={
                             "Content-type": "application/json",
@@ -59,15 +62,15 @@ class FullContactAction(ActionRunner):
                     }
 
                     if response.status in [200, 201, 202, 203, 204]:
-                        return Result(port="payload", value=result), Result(port="error", value=None)
+                        return Result(port="payload", value=result)
                     else:
-                        return Result(port="payload", value=None), Result(port="error", value=result)
+                        return Result(port="error", value=result)
 
         except ClientConnectorError as e:
-            return Result(port="payload", value=None), Result(port="error", value=str(e))
+            return Result(port="error", value=str(e))
 
         except asyncio.exceptions.TimeoutError:
-            return Result(port="payload", value=None), Result(port="error", value="FullContact webhook timed out.")
+            return Result(port="error", value="FullContact webhook timed out.")
 
 
 def register() -> Tuple[Plugin, Settings]:
@@ -79,7 +82,7 @@ def register() -> Tuple[Plugin, Settings]:
             inputs=["payload"],
             outputs=['payload', "error"],
             version='0.6.1',
-            license="MIT",
+            license="Tracardi Pro",
             author="Risto Kowaczewski",
             manual="fullcontact_webhook_action"
         ),

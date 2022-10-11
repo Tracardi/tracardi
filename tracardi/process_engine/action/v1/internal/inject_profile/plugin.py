@@ -15,18 +15,20 @@ def validate(config: dict):
 
 class InjectProfile(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         result = await storage.driver.raw.index("profile").query_by_sql(self.config.query, start=0, limit=2)
 
-        if result['total'] != 1:
+        if result.total != 1:
             self.console.error("The profile query returned {} profiles. "
                                "Do not know which one to inject.".format(result['total']))
             return Result(port="error", value=payload)
 
-        profile = Profile(**result['result'][0])
+        profile = Profile(**result.first())
 
         self.event.profile = profile
         self.event.metadata.profile_less = False

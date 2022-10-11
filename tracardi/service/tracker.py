@@ -2,17 +2,17 @@ import asyncio
 import logging
 from datetime import datetime
 from typing import List, Optional
-from uuid import uuid4
 
 import redis
 from deepdiff import DeepDiff
 
-from tracardi.config import tracardi, memory_cache
+from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
+from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
 
 from tracardi.service.console_log import ConsoleLog
-from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
+from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.merging import merge
@@ -24,31 +24,35 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.event_validator import validate
-from tracardi.domain.event import Event, VALIDATED, ERROR, WARNING, PROCESSED, INVALID
+from tracardi.domain.event import Event, PROCESSED
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
-    EventValidationException, TracardiException
+    TracardiException, DuplicatedRecordException
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.segmentation import segment
+from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.factory import StorageForBulk
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
+from tracardi.service.wf.domain.flow_response import FlowResponses
+from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
+from tracardi.service.event_manager_cache import EventManagerCache
 
-logger = logging.getLogger('app.api.track.service.tracker')
+logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = MemoryCache()
+event_manager_cache = EventManagerCache()
 
 
 async def _save_profile(profile):
     try:
         if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
-            return await storage.driver.profile.save_profile(profile)
+            return await storage.driver.profile.save(profile)
         else:
             return BulkInsertResult()
 
@@ -59,7 +63,18 @@ async def _save_profile(profile):
 async def _save_session(tracker_payload, session, profile):
     try:
         persist_session = tracker_payload.is_on('saveSession', default=True)
-        return await storage.driver.session.save_session(session, profile, persist_session)
+        result = await storage.driver.session.save_session(session, profile, persist_session)
+        if session.operation.new:
+            """
+            Until the session is saved and it is usually within 1s the system can create many profiles for 1 session. 
+            System checks if the session exists by loading it from ES. If it is a new session then is does not exist 
+            and must be saved before it can be read. So there is a 1s when system thinks that the session does not exist.
+
+            If session is new we will refresh the session in ES.
+            """
+
+            await storage.driver.session.refresh()
+        return result
     except StorageException as e:
         raise FieldTypeConflictException("Could not save session. Error: {}".format(str(e)), rows=e.details)
 
@@ -86,10 +101,10 @@ async def _save_events(tracker_payload, console_log, events):
             if event.id in log_event_journal:
                 log = log_event_journal[event.id]
                 if log.is_error():
-                    event.metadata.status = ERROR
+                    event.metadata.error = True
                     continue
                 elif log.is_warning():
-                    event.metadata.status = WARNING
+                    event.metadata.warning = True
                     continue
                 else:
                     event.metadata.status = PROCESSED
@@ -102,6 +117,15 @@ async def _save_events(tracker_payload, console_log, events):
 
 async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
+
+    # Do not save profile and remove it from session if all events are invalid
+    if all(not event.metadata.valid for event in events):
+        profile = None
+        session.profile = None
+        for event in events:
+            event.profile = None
+            event.metadata.profile_less = True
+
     results = await asyncio.gather(
         _save_profile(profile),
         _save_session(tracker_payload, session, profile),
@@ -119,8 +143,8 @@ def get_profile_id(profile: Profile):
     return profile.id if isinstance(profile, Entity) else None
 
 
-async def validate_events_json_schemas(events, profile: Optional[Profile], session, console_log: ConsoleLog):
-    for event in events:
+async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
+    for index, event in enumerate(events):
         dot = DotAccessor(
             profile=profile,
             session=session,
@@ -129,29 +153,44 @@ async def validate_events_json_schemas(events, profile: Optional[Profile], sessi
             flow=None,
             memory=None
         )
+
         event_type = dot.event['type']
+        event_type_manager = event_manager_cache.get_item(event_type)
 
-        if event_type not in cache:
-            logger.info(f"Refreshed validation schema for event type {event_type}.")
-            event_payload_validator = await storage.driver.event_management.load_event_type_metadata(
+        if event_type_manager is None:
+            event_type_manager = await storage.driver.event_management.load_event_type_metadata(
                 dot.event['type'])  # type: EventTypeManager
-            cache[event_type] = CacheItem(data=event_payload_validator, ttl=memory_cache.event_validator_ttl)
+            if event_type_manager is not None:
+                event_manager_cache.upsert_item(event_type_manager)
 
-        validation_data = cache[event_type].data
-
-        if validation_data is not None:
+        if event_type_manager is not None:
             try:
-                validate(dot, validator=validation_data)
-                event.metadata.status = VALIDATED
-            except EventValidationException as e:
-                event.metadata.status = INVALID
+                if event_type_manager.validation.enabled is True:
+                    if validate(dot, validator=event_type_manager) is False:
+                        event.metadata.valid = False
+                        console_log.append(
+                            Console(
+                                profile_id=get_profile_id(profile),
+                                origin='profile',
+                                class_name='EventValidator',
+                                module='tracker',
+                                type='error',
+                                message="Event is invalid."
+                            )
+                        )
+                if event.metadata.valid:
+                    events[index] = EventPropsReshaper(dot=dot, event=event).reshape(
+                        schema=event_type_manager.reshaping
+                    )
+
+            except EventPropsReshapingError as e:
                 console_log.append(
                     Console(
                         profile_id=get_profile_id(profile),
                         origin='profile',
-                        class_name='EventValidator',
+                        class_name='EventPropsReshaping',
                         module='tracker',
-                        type='error',
+                        type='warning',
                         message=str(e),
                         traceback=get_traceback(e)
                     )
@@ -185,12 +224,16 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Get events
     events = tracker_payload.get_events(session, profile, has_profile, ip)
 
-    # Validates json schemas of events, throws exception if data is not valid
-    console_log = await validate_events_json_schemas(events, profile, session, console_log)
+    # Validates json schemas of events and reshapes properties, sets statuses:
+    # VALIDATED
+    # INVALID
+    # RESHAPED
+    console_log = await validate_and_reshape_events(events, profile, session, console_log)
 
     debugger = None
     segmentation_result = None
 
+    # Skips INVALID events in invoke method
     rules_engine = RulesEngine(
         session,
         profile,
@@ -200,14 +243,22 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
 
     ux = []
     post_invoke_events = None
+    flow_responses = FlowResponses([])
     try:
 
         # Invoke rules engine
-        debugger, ran_event_types, console_log, post_invoke_events, invoked_rules = await rules_engine.invoke(
+        rule_invoke_result = await rules_engine.invoke(
             storage.driver.flow.load_production_flow,
             ux,
             tracker_payload
         )
+
+        debugger = rule_invoke_result.debugger
+        ran_event_types = rule_invoke_result.ran_event_types
+        console_log = rule_invoke_result.console_log
+        post_invoke_events = rule_invoke_result.post_invoke_events
+        invoked_rules = rule_invoke_result.invoked_rules
+        flow_responses = FlowResponses(rule_invoke_result.flow_responses)
 
         # Profile and session can change inside workflow
         # Check if it should not be replaced.
@@ -253,7 +304,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         profiles_to_disable = await merge(profile, override_old_data=True, limit=2000)
         if profiles_to_disable is not None:
             task = asyncio.create_task(
-                StorageForBulk(profiles_to_disable).index('profile').save())
+                storage.driver.profile.save_all(profiles_to_disable)
+            )
             save_tasks.append(task)
     except Exception as e:
         message = 'Profile merging returned an error `{}`'.format(str(e))
@@ -269,25 +321,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                 traceback=get_traceback(e)
             )
         )
-
-    # Must be the last operation
-    # try:
-    #     if isinstance(profile, Profile) and profile.operation.needs_update():
-    #         save_tasks.append(asyncio.create_task(storage.driver.profile.save_profile(profile)))
-    # except Exception as e:
-    #     message = "Profile update returned an error: `{}`".format(str(e))
-    #     console_log.append(
-    #         Console(
-    #             profile_id=get_profile_id(profile),
-    #             origin='profile',
-    #             class_name='tracker',
-    #             module='tracker',
-    #             type='error',
-    #             message=message,
-    #             traceback=get_traceback(e)
-    #         )
-    #     )
-    #     logger.error(message)
 
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
@@ -338,7 +371,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         # Save console log
         if console_log:
             encoded_console_log = list(console_log.get_encoded())
-            save_tasks.append(asyncio.create_task(StorageForBulk(encoded_console_log).index('console-log').save()))
+            save_tasks.append(asyncio.create_task(storage.driver.console_log.save_all(encoded_console_log)))
 
     # Send to destination
 
@@ -410,54 +443,76 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Add UX to response
     result['ux'] = ux
 
-    result['response'] = {}
+    result['response'] = flow_responses.merge()
 
     return result
 
 
-async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str]):
+async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str],
+                      internal_source=None):
     try:
-        source = await source_cache.validate_source(source_id=tracker_payload.source.id,
-                                                    allowed_bridges=allowed_bridges)
+        if internal_source is not None:
+            if internal_source.id != tracker_payload.source.id:
+                raise ValueError(f"Invalid event source `{tracker_payload.source.id}`")
+            source = internal_source
+        else:
+            source = await source_cache.validate_source(source_id=tracker_payload.source.id,
+                                                        allowed_bridges=allowed_bridges)
     except ValueError as e:
         raise UnauthorizedException(e)
 
-    if source.transitional is True:
-        tracker_payload.options.update({
-            "saveSession": False,
-            "saveEvents": False
-        })
-
-    if source.returns_profile is False:
-        tracker_payload.options.update({
-            "profile": False
-        })
-
-    # Get session
-    if tracker_payload.session is None or tracker_payload.session.id is None:
-        # Generate random
-        tracker_payload.session = Session(id=str(uuid4()), metadata=SessionMetadata())
+    tracker_payload.set_transitional(source)
+    tracker_payload.set_return_profile(source)
+    tracker_payload.force_there_is_a_session()
 
     # Load session from storage
-    session = await storage.driver.session.load(tracker_payload.session.id)  # type: Session
+    try:
+        session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # type: Optional[Session]
+
+    except DuplicatedRecordException as e:
+
+        # There may be a case when we have 2 sessions with the same id.
+        logger.error(str(e))
+
+        # Try to recover sessions
+        list_of_profile_ids_referenced_by_session = await correct_session(tracker_payload.session.id)
+
+        # If there is duplicated session create new random session. As a consequence of this a new profile is created.
+        session = Session(
+            id=tracker_payload.session.id,
+            metadata=SessionMetadata(
+                time=SessionTime(
+                    insert=datetime.utcnow()
+                )
+            ),
+            operation=Operation(
+                new=True
+            )
+        )
+
+        # If duplicated sessions referenced the same profile then keep it.
+        if len(list_of_profile_ids_referenced_by_session) == 1:
+            session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
 
     # Get profile
-    profile, session = await tracker_payload.get_profile_and_session(session,
-                                                                     storage.driver.profile.load_merged_profile,
-                                                                     profile_less
-                                                                     )
-
+    profile, session = await tracker_payload.get_profile_and_session(
+        session,
+        storage.driver.profile.load_merged_profile,
+        profile_less
+    )
     return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
 
 
 async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
-                                      allowed_bridges: List[str]):
+                                      allowed_bridges: List[str], internal_source=None):
     if tracardi.sync_profile_tracks:
         try:
-            async with ProfileTracksSynchronizer(tracker_payload.profile, wait=1):
+            async with ProfileTracksSynchronizer(tracker_payload.profile, wait=tracardi.sync_profile_tracks_wait,
+                                                 max_repeats=tracardi.sync_profile_tracks_max_repeats):
                 return await track_event(tracker_payload, ip=host, profile_less=profile_less,
-                                         allowed_bridges=allowed_bridges)
+                                         allowed_bridges=allowed_bridges, internal_source=internal_source)
         except redis.exceptions.ConnectionError as e:
             raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
     else:
-        return await track_event(tracker_payload, ip=host, profile_less=profile_less, allowed_bridges=allowed_bridges)
+        return await track_event(tracker_payload, ip=host, profile_less=profile_less, allowed_bridges=allowed_bridges,
+                                 internal_source=internal_source)

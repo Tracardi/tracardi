@@ -1,3 +1,4 @@
+from tracardi.domain.storage_record import StorageRecord
 from tracardi.service.storage.factory import storage_manager
 
 
@@ -9,7 +10,7 @@ def save(version: dict):
     return storage_manager('version').upsert(version, replace_id=True)
 
 
-async def load_by_version_and_name(version: str, name: str) -> dict:
+async def load_by_version_and_name(version: str, name: str) -> StorageRecord:
     result = await storage_manager('version').query({
         "query": {
             "bool": {
@@ -21,4 +22,4 @@ async def load_by_version_and_name(version: str, name: str) -> dict:
         }
     })
 
-    return result["hits"]["hits"][0]["_source"]
+    return result.first()

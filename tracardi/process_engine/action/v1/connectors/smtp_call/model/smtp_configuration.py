@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator
 from typing import Optional
-from tracardi.domain.entity import Entity
+from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -33,5 +33,5 @@ class Message(BaseModel):
 
 
 class Configuration(PluginConfig):
-    source: Entity
+    source: NamedEntity
     message: Message

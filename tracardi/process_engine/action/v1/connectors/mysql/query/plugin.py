@@ -1,8 +1,8 @@
 import json
+from typing import Any
+
 import aiomysql
 from datetime import datetime, date
-
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -19,17 +19,18 @@ def validate(config: dict) -> Configuration:
 
 class MysqlConnectorAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'MysqlConnectorAction':
+    connection: Connection
+    config: Configuration
+    pool: Any
 
-        configuration = validate(kwargs)
+    async def set_up(self, init):
+
+        configuration = validate(init)
         resource = await storage.driver.resource.load(configuration.source.id)
-        return MysqlConnectorAction(configuration, resource.credentials)
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
         self.pool = None
-        self.config = config
-        self.connection = credentials.get_credentials(self, output=Connection)
+        self.config = configuration
+        self.connection = resource.credentials.get_credentials(self, output=Connection)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
@@ -191,7 +192,7 @@ def register() -> Plugin:
             name='MySQL connector',
             desc='Connects to mysql and reads data.',
             icon='mysql',
-            group=["Connectors"],
+            group=["Databases"],
             tags=['database', 'sql'],
             documentation=Documentation(
                 inputs={

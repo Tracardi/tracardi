@@ -1,11 +1,9 @@
 from tracardi.exceptions.exception import TracardiException
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
-    FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, Token
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.meaningcloud.client import MeaningCloudClient
 
 
@@ -15,15 +13,16 @@ def validate(config: dict) -> Config:
 
 class SummarizationPlugin(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'SummarizationPlugin':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return SummarizationPlugin(config, resource.credentials)
+    client: MeaningCloudClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.client = MeaningCloudClient(credentials.get_credentials(self, Token).token)
+        self.client = MeaningCloudClient(resource.credentials.get_credentials(self, Token).token)
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -49,53 +48,7 @@ def register() -> Plugin:
             version='0.6.2',
             license="MIT",
             author="Dawid Kruk",
-            manual="summarization_action",
-            init={
-                "source": {
-                    "name": None,
-                    "id": None
-                },
-                "text": None,
-                "lang": "auto",
-                "sentences": None
-            },
-            form=Form(
-                groups=[
-                    FormGroup(
-                        name="Plugin configuration",
-                        fields=[
-                            FormField(
-                                id="source",
-                                name="MeaningCloud resource",
-                                description="Please select your MeaningCloud resource that contains your API token.",
-                                component=FormComponent(type="resource", props={"label": "Resource"})
-                            ),
-                            FormField(
-                                id="text",
-                                name="Path to text",
-                                description="Please type in the path to the text that you want to analyze.",
-                                component=FormComponent(type="dotPath", props={"label": "Text"})
-                            ),
-                            FormField(
-                                id="lang",
-                                name="Path to language",
-                                description="Please type in the path to the language of given text. You can provide "
-                                            "the language itself as well. Language should be in form of its "
-                                            "MeaningCloud code (for example 'en' for English). You can also leave it on"
-                                            " auto mode, so the language gets detected automatically.",
-                                component=FormComponent(type="dotPath", props={"label": "Language"})
-                            ),
-                            FormField(
-                                id="sentences",
-                                name="Number of sentences",
-                                description="Please type in the number of sentences for the text to be shortened to. "
-                                            "This field does not support dotted notation.",
-                                component=FormComponent(type="text", props={"label": "Sentences"})
-                            )
-                        ]
-                    )
-                ]
-            )
+            manual="summarization_action"
         ),
         metadata=MetaData(
             name='Summarize text',
@@ -103,6 +56,7 @@ def register() -> Plugin:
             desc='Summarizes given text using MeaningCloud\'s summarization API.',
             icon='ai',
             group=["Machine learning"],
+            tags=['ai', 'ml'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -111,6 +65,7 @@ def register() -> Plugin:
                     "response": PortDoc(desc="This port returns a response from MeaningCloud."),
                     "error": PortDoc(desc="This port gets triggered if an error occurs.")
                 }
-            )
+            ),
+            pro=True
         )
     )

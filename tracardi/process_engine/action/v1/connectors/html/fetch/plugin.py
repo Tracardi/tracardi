@@ -7,6 +7,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.configuration import Configuration
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 def validate(config: dict) -> Configuration:
@@ -15,8 +16,10 @@ def validate(config: dict) -> Configuration:
 
 class HtmlPageFetchAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     @staticmethod
     def _validate_key_value(values, label):
@@ -42,11 +45,15 @@ class HtmlPageFetchAction(ActionRunner):
             # headers['ContentType'] =
 
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with HttpClient(
+                self.node.on_connection_error_repeat,
+                [200, 201, 202, 203],
+                timeout=timeout
+            ) as client:
 
                 params = self.config.get_params(dot)
 
-                async with session.request(
+                async with client.request(
                         method=self.config.method,
                         url=str(self.config.url),
                         headers=headers,
@@ -155,8 +162,7 @@ def register() -> Plugin:
             ]),
             version="0.6.1",
             author="Risto Kowaczewski",
-            license="MIT",
-            manual="remote_call_action"
+            license="MIT"
         ),
         metadata=MetaData(
             name='HTML fetcher',

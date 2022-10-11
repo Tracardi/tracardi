@@ -1,5 +1,6 @@
 import aiohttp
 from typing import Optional, Dict, Any
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 class MarketingCloudAuthException(Exception):
@@ -17,10 +18,14 @@ class MarketingCloudClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.token = token
+        self.retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def get_token(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with HttpClient() as client:
+            async with client.post(
                     url=f"https://{self.subdomain}.auth.marketingcloudapis.com/v2/token",
                     data={
                         "grant_type": "client_credentials",
@@ -35,8 +40,12 @@ class MarketingCloudClient:
                 self.token = (await response.json())["access_token"]
 
     async def add_record(self, mapping: Dict[str, Any], extension_id: str, update: bool):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            method = session.put if update else session.post
+        async with HttpClient(
+            self.retries,
+            [202, 401],
+            headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            method = client.put if update else client.post
             async with method(
                     url=f"https://{self.subdomain}.rest.marketingcloudapis.com/data/v1/async/dataextensions/"
                         f"{extension_id}/rows",

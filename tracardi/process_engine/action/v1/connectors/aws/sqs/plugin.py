@@ -1,6 +1,5 @@
 import json
 
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
@@ -16,15 +15,15 @@ def validate(config: dict):
 
 class AwsSqsAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'AwsSqsAction':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return AwsSqsAction(config, resource.credentials)
+    credentials: AwsIamAuth
+    aws_config: AwsSqsConfiguration
 
-    def __init__(self, config: AwsSqsConfiguration, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.aws_config = config
-        self.credentials = credentials.get_credentials(self, output=AwsIamAuth)  # type: AwsIamAuth
+        self.credentials = resource.credentials.get_credentials(self, output=AwsIamAuth)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
@@ -70,18 +69,6 @@ def register() -> Plugin:
             version='0.7.0',
             license="MIT",
             author="Bart Dobrosielski, Risto Kowaczewski",
-            # init={
-            #     "source": {
-            #         "id": None,
-            #         "name": None
-            #     },
-            #     "message": {"type": "application/json", "content": "{}"},
-            #     "region_name": "us-west-2",
-            #     "queue_url": "",
-            #     "delay_seconds": "0",
-            #     "message_attributes": "{}"
-            # },
-            # form=None,
         ),
         metadata=MetaData(
             name='Simple queue SQS',

@@ -22,8 +22,10 @@ def validate(config: dict):
 
 class StartAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def _create_full_event(self, event_data) -> Tuple[Event, Optional[Profile], Optional[Session]]:
 
@@ -40,12 +42,11 @@ class StartAction(ActionRunner):
                 self.console.warning(str(e))
 
         if event.session is not None:
-            session_entity = Entity(id=event.session.id)
-            session = await StorageFor(session_entity).index('session').load(Session)
+            session = await storage.driver.session.load_by_id(event.session.id)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
             profile_entity = Entity(id=event.profile.id)
-            profile = await StorageFor(profile_entity).index('profile').load(Profile)
+            profile = await StorageFor(profile_entity).index('profile').load(Profile)  # type: Optional[Profile]
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(

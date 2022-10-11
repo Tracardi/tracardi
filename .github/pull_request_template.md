@@ -1,8 +1,4 @@
-PR Title format: 
-
-    Pull request title with short description (#<issue-id>)
-
-**Please** add a meaningful description for your change here
+Type pull request title with short description (#<issue-id>)
 
 ----
 
@@ -18,4 +14,4 @@ To make clear that you license your contribution under the MIT you have to ackno
 
  - [ ] I hereby declare this contribution to be licenced under the [MIT license](https://opensource.org/licenses/MIT)
 
-PRs without ticked MIT license will bot be accepted - Sorry. 
+PRs without ticked MIT license will not be accepted - Sorry. 

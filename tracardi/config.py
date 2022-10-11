@@ -1,10 +1,9 @@
-import hashlib
 import logging
 import os
 
 from tracardi.domain.version import Version
 
-VERSION = '0.7.2-dev'
+VERSION = '0.7.3-dev'
 NAME = os.environ.get('INSTANCE_PREFIX', None)
 
 
@@ -26,18 +25,26 @@ class TracardiConfig:
     def __init__(self, env):
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.save_logs = (env['SAVE_LOGS'].lower() == 'yes') if 'SAVE_LOGS' in env else True
+        self.monitor_logs_event_type = env['MONITOR_LOGS_EVENT_TYPE'].lower().replace(" ", "-") \
+            if 'MONITOR_LOGS_EVENT_TYPE' in env else None
         self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks = (
-                    env['SYNC_PROFILE_TRACKS'].lower() == 'yes') if 'SYNC_PROFILE_TRACKS' in env else False
+                env['SYNC_PROFILE_TRACKS'].lower() == 'yes') if 'SYNC_PROFILE_TRACKS' in env else False
+        self.sync_profile_tracks_max_repeats = int(
+            env['SYNC_PROFILE_TRACKS_MAX_REPEATS']) if 'SYNC_PROFILE_TRACKS_MAX_REPEATS' in env else 10
+        self.sync_profile_tracks_wait = int(
+            env['SYNC_PROFILE_TRACKS_WAIT']) if 'SYNC_PROFILE_TRACKS_WAIT' in env else 1
         self.postpone_destination_sync = int(
             env['POSTPONE_DESTINATION_SYNC']) if 'POSTPONE_DESTINATION_SYNC' in env else 0
         self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
         self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
         self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
-        self.tracardi_scheduler_host = env['TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
+        self.tracardi_pro_port = int(env['TRACARDI_PRO_PORT']) if 'TRACARDI_PRO_PORT' in env else 40000
+        self.tracardi_scheduler_host = env[
+            'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
-        self.tokens_in_redis = (env["TOKENS_IN_REDIS"].lower() == "yes") if "TOKENS_IN_REDIS" in env else False
+        self.tokens_in_redis = (env["TOKENS_IN_REDIS"].lower() == "yes") if "TOKENS_IN_REDIS" in env else True
 
 
 class MemoryCacheConfig:
@@ -71,7 +78,7 @@ class ElasticConfig:
         self.http_auth_username = env['ELASTIC_HTTP_AUTH_USERNAME'] if 'ELASTIC_HTTP_AUTH_USERNAME' in env else None
         self.http_auth_password = env['ELASTIC_HTTP_AUTH_PASSWORD'] if 'ELASTIC_HTTP_AUTH_PASSWORD' in env else None
         self.scheme = env['ELASTIC_SCHEME'] if 'ELASTIC_SCHEME' in env else 'http'
-        self.cafile = env['ELASTIC_CAFILE'] if 'ELASTIC_CAFILE' in env else None
+        self.ca_file = env['ELASTIC_CA_FILE'] if 'ELASTIC_CA_FILE' in env else None
         self.api_key_id = env['ELASTIC_API_KEY_ID'] if 'ELASTIC_API_KEY_ID' in env else None
         self.api_key = env['ELASTIC_API_KEY'] if 'ELASTIC_API_KEY' in env else None
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None

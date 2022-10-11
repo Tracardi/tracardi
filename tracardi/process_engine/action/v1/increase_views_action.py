@@ -7,9 +7,6 @@ from tracardi.domain.profile_stats import ProfileStats
 
 class IncreaseViewsAction(ActionRunner):
 
-    def __init__(self, *args, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.event.metadata.profile_less is True:

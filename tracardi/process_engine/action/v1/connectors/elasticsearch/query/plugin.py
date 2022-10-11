@@ -5,10 +5,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.storage.elastic_client import ElasticClient
 from .model.config import Config
 from elasticsearch import ElasticsearchException
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
@@ -34,16 +34,15 @@ class Endpoint(PluginEndpoint):
 
 class ElasticSearchFetcher(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'ElasticSearchFetcher':
-        config = Config(**kwargs)
-        credentials = await storage.driver.resource.load(config.source.id)
-        return ElasticSearchFetcher(config, credentials.credentials)
+    _client: ElasticClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = Config(**init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        credentials = credentials.get_credentials(self, ElasticCredentials)  # type: ElasticCredentials
-
+        credentials = resource.credentials.get_credentials(self, ElasticCredentials)
         self._client = credentials.get_client()
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -129,7 +128,7 @@ def register() -> Plugin:
             name='Query Elasticsearch',
             desc='Gets data from given Elasticsearch resource',
             icon='elasticsearch',
-            group=["Connectors"],
+            group=["Databases"],
             tags=['database', 'nosql'],
             documentation=Documentation(
                 inputs={

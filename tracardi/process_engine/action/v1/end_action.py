@@ -4,9 +4,6 @@ from tracardi.service.plugin.runner import ActionRunner
 
 class EndAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None):
         return None
 

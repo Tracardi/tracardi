@@ -12,8 +12,11 @@ def validate(config: dict) -> PluginConfiguration:
 
 class WeatherAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    client: AsyncWeatherClient
+    config: PluginConfiguration
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.client = AsyncWeatherClient(self.config.system.upper())
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -29,7 +32,7 @@ class WeatherAction(ActionRunner):
             result.temperature = weather.current.temperature
             result.humidity = weather.current.humidity
             result.wind_speed = weather.current.wind_speed
-            result.description = weather.current.sky_text
+            result.description = weather.current.description
 
             return Result(port="weather", value=result.dict())
 

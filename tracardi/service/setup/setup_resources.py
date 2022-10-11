@@ -20,6 +20,7 @@ def get_resource_types() -> List[ResourceSettings]:
             icon="cloud",
             config={
                 "url": "<url>",
+                "proxy": "<proxy>",
                 "username": "<username>",
                 "password": "<password>"
             },
@@ -85,16 +86,6 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="pushover",
-            name="Pushover",
-            tags=["pushover", "message"],
-            config={
-                "token": "<token>",
-                "user": "<user>"
-            },
-            icon="pushover"
-        ),
-        ResourceSettings(
             id="mysql",
             name="MySQL",
             icon="mysql",
@@ -114,7 +105,7 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "url": "<url>",
                 "port": "<port>",
-                 "username": "<username>",
+                "username": "<username>",
                 "password": "<password>"
             }
         ),
@@ -125,6 +116,23 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "token": "<token>"
             }
+        ),
+        ResourceSettings(
+            id="full-contact",
+            name="FullContact",
+            tags=["token", "full-contact"],
+            config={
+                "token": "<token>"
+            }
+        ),
+        ResourceSettings(
+            id="sendgrid",
+            name="SendGrid",
+            tags=["token", "sendgrid"],
+            config={
+                "token": "<token>"
+            },
+            manual='sendgrid_resource'
         ),
         ResourceSettings(
             id="redis",
@@ -149,21 +157,21 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="trello",
-            name="Trello",
-            tags=["trello"],
-            config={
-                "token": "<trello-api-token>",
-                "api_key": "<trello-api-key>"
-            }
-        ),
-        ResourceSettings(
             id="token",
             name="Token",
             tags=["token"],
             config={
                 "token": "<token>"
             }
+        ),
+        ResourceSettings(
+            id="novu",
+            name="Novu",
+            tags=["token", "novu"],
+            config={
+                "token": "<token>"
+            },
+            manual="novu_resource"
         ),
         ResourceSettings(
             id="google-cloud-service-account",
@@ -185,11 +193,11 @@ def get_resource_types() -> List[ResourceSettings]:
         ResourceSettings(
             id="influxdb",
             name="InfluxDB",
-            tags=["influx"],
-            icon="influx",
+            tags=["influxdb"],
+            icon="influxdb",
             config={
                 "url": "http://localhost:8086",
-                "token": "<API-token>"
+                "token": "<token>"
             }
         ),
         ResourceSettings(
@@ -199,9 +207,7 @@ def get_resource_types() -> List[ResourceSettings]:
             icon="mixpanel",
             config={
                 "token": "<your-project-token>",
-                "server_prefix": "US | EU",
-                "username": "<service-account-username>",
-                "password": "<service-account-password>"
+                "server_prefix": "US | EU"
             }
         ),
         ResourceSettings(
@@ -219,13 +225,34 @@ def get_resource_types() -> List[ResourceSettings]:
                 init={
                     "overwrite_with_blank": False
                 }
-            )
+            ),
+            manual="mautic_resource"
+        ),
+        ResourceSettings(
+            id="elasticemail",
+            name="ElasticEmail",
+            config={
+                "api_key": "<api-key>",
+                "public_account_id": "<public-account-id>"
+            },
+            icon="email",
+            tags=["elasticemail"],
+            manual="elastic_email_resource"
         ),
         ResourceSettings(
             id="airtable",
             name="AirTable",
             icon="airtable",
             tags=["airtable"],
+            config={
+                "api_key": "<your-api-key>"
+            }
+        ),
+        ResourceSettings(
+            id="amplitude",
+            name="Amplitude",
+            icon="amplitude",
+            tags=["amplitude"],
             config={
                 "api_key": "<your-api-key>"
             }
@@ -238,7 +265,8 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "token": "<your-token>",
                 "api_url": "<your-matomo-url>"
-            }
+            },
+            manual="matomo_resource"
         ),
         ResourceSettings(
             id="civi_crm",
@@ -252,7 +280,8 @@ def get_resource_types() -> List[ResourceSettings]:
             },
             destination=DestinationData(
                 package="tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector"
-            )
+            ),
+            manual="civi_resource"
         ),
         ResourceSettings(
             id="active_campaign",
@@ -264,14 +293,25 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
-            id="marketing_cloud",
+            id="salesforce",
             name="Salesforce Marketing Cloud",
-            tags=["marketing_cloud"],
+            tags=["salesforce"],
             config={
                 "client_id": "<your-client-id>",
                 "client_secret": "<your-client-secret>",
                 "subdomain": "<your-subdomain>"
-            }
+            },
+            manual="salesforce_resource"
+        ),
+        ResourceSettings(
+            id="hubspot",
+            config={
+                "token": "<your-access-token>"
+            },
+            icon="hubspot",
+            tags=["hubspot"],
+            name="HubSpot",
+            manual="hubspot_resource"
         )
     ]
 

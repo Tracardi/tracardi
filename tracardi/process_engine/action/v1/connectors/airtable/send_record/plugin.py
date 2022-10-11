@@ -15,18 +15,16 @@ def validate(config: dict) -> Config:
 
 class SendToAirtableAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'SendToAirtableAction':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return SendToAirtableAction(
-            config=config,
-            credentials=resource.credentials
-        )
+    client: AirtableClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = Config(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.client = AirtableClient(token=credentials.get_credentials(self, APIKey).api_key)
+        self.client = AirtableClient(token=resource.credentials.get_credentials(self, APIKey).api_key)
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

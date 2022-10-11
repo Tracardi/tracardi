@@ -1,14 +1,17 @@
+from tracardi.domain.storage_record import StorageRecords
+
+
 class AggResult:
-    def __init__(self, agg_key, result=None, return_counts=True):
+    def __init__(self, agg_key, result: StorageRecords = None, return_counts=True):
         self.return_counts = return_counts
         self._hits = []
         if result is None:
             self.total = 0
         else:
-            self.total = result['hits']['total']['value']
+            self.total = result.total
             if self.total > 0:
                 try:
-                    self._hits = result['aggregations'][agg_key]['buckets']
+                    self._hits = result.aggregations(agg_key).buckets()
                 except KeyError:
                     self._hits = []
 

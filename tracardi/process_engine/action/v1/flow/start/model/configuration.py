@@ -24,3 +24,15 @@ class Configuration(PluginConfig):
 
     def get_allowed_event_types(self) -> List[str]:
         return [event.id for event in self.event_types]
+
+    @validator("event_id")
+    def remove_whitespaces_from_event_id(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+        return value
+
+    @validator("event_type")
+    def remove_whitespaces_from_event_type_id(cls, value):
+        if isinstance(value, NamedEntity):
+            value.id = value.id.strip()
+        return value

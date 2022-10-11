@@ -136,7 +136,8 @@ class Resource:
             "import": Index(multi_index=False, index="tracardi-import", mapping="mappings/import-index.json"),
             "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
             "version": Index(multi_index=False, index="tracardi-version", mapping="mappings/version-index.json",
-                             aliased=False)
+                             aliased=False),
+            "report": Index(multi_index=False, index="tracardi-report", mapping="mappings/report-index.json")
         }
 
     def list_aliases(self) -> set:

@@ -1,4 +1,4 @@
-import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 import json
 
 
@@ -6,13 +6,21 @@ class SlackClient:
 
     def __init__(self, token: str):
         self._token = token
+        self.retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def send_to_channel_as_bot(self, channel: str, message: str):
-        async with aiohttp.ClientSession(headers={
-            "Authorization": f"Bearer {self._token}",
-            "Content-type": "application/json; charset=utf-8"
-        }) as session:
-            async with session.post(
+        async with HttpClient(
+            self.retries,
+            200,
+            headers={
+                "Authorization": f"Bearer {self._token}",
+                "Content-type": "application/json; charset=utf-8"
+            }
+        ) as client:
+            async with client.post(
                 url="https://slack.com/api/chat.postMessage",
                 data=json.dumps({
                     "channel": channel,

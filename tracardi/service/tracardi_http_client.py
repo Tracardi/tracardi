@@ -1,11 +1,11 @@
 import aiohttp
-from typing import Union, Tuple, Callable
+from typing import Union, Tuple, Callable, List
 from contextlib import asynccontextmanager
 
 
 class HttpClient:
 
-    def __init__(self, retries: int = 1, accept_status: Union[int, Tuple[int]] = 200, *args, **kwargs):
+    def __init__(self, retries: int = 1, accept_status: Union[int, Tuple[int], List[int]] = 200, *args, **kwargs):
         self.client = aiohttp.ClientSession(*args, **kwargs)
         self.retries = retries if retries >= 1 else 1
         self.accept_status = tuple([accept_status]) if isinstance(accept_status, int) else accept_status
@@ -35,6 +35,10 @@ class HttpClient:
     @asynccontextmanager
     async def delete(self, *args, **kwargs):
         yield await self._run_with_retries(self.client.delete, *args, **kwargs)
+
+    @asynccontextmanager
+    async def patch(self, *args, **kwargs):
+        yield await self._run_with_retries(self.client.patch, *args, **kwargs)
 
     async def __aenter__(self) -> 'HttpClient':
         return self

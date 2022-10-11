@@ -3,12 +3,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, MixPanelCredentials
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.process_engine.action.v1.connectors.mixpanel.client import MixPanelAPIClient
 from tracardi.service.plugin.domain.result import Result
 from datetime import datetime
 from tracardi.service.notation.dict_traverser import DictTraverser
-from fastapi import HTTPException
 
 
 def validate(config: dict) -> Config:
@@ -17,17 +15,18 @@ def validate(config: dict) -> Config:
 
 class MixPanelSender(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'MixPanelSender':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return MixPanelSender(config, resource.credentials)
+    client: MixPanelAPIClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
         self.client = MixPanelAPIClient(
-            **credentials.get_credentials(self, MixPanelCredentials).dict()
+            **resource.credentials.get_credentials(self, MixPanelCredentials).dict()
         )
+        self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -52,7 +51,7 @@ class MixPanelSender(ActionRunner):
                 return Result(port="error", value=payload)
             return Result(port="success", value=payload)
 
-        except HTTPException as e:
+        except Exception as e:
             self.console.error(str(e))
             return Result(port="error", value=payload)
 

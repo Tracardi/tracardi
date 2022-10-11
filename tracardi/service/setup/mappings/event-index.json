@@ -48,6 +48,15 @@
             "profile_less": {
               "type": "boolean"
             },
+            "valid": {
+              "type": "boolean"
+            },
+            "warning": {
+              "type": "boolean"
+            },
+            "error": {
+              "type": "boolean"
+            },
             "instance": {
               "properties": {
                 "id": {
@@ -65,6 +74,11 @@
           "null_value": "NULL"
         },
         "properties": {
+          "enabled": false,
+          "dynamic": "true",
+          "type": "object"
+        },
+        "request": {
           "enabled": false,
           "dynamic": "true",
           "type": "object"

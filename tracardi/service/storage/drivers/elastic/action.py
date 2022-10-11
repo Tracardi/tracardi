@@ -1,5 +1,6 @@
 from tracardi.domain.settings import Settings
-from tracardi.service.storage.factory import storage_manager
+from tracardi.domain.storage_record import StorageRecords
+from tracardi.service.storage.factory import storage_manager, StorageForBulk
 from tracardi.service.plugin.domain.register import Plugin
 
 from tracardi.domain.record.flow_action_plugin_record import FlowActionPluginRecord
@@ -9,7 +10,6 @@ from tracardi.service.storage.factory import StorageFor
 
 
 async def save_plugin(plugin_data: Plugin, settings=None):
-
     if settings is None:
         settings = Settings()
 
@@ -20,6 +20,10 @@ async def save_plugin(plugin_data: Plugin, settings=None):
 
 async def load_by_id(id: str):
     return await storage_manager('action').load(id)
+
+
+async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
+    return await StorageForBulk().index('action').load(start, limit)
 
 
 async def refresh():

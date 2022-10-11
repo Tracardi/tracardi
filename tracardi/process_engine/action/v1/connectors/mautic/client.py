@@ -1,4 +1,4 @@
-import aiohttp
+from tracardi.service.tracardi_http_client import HttpClient
 
 
 class MauticClientException(Exception):
@@ -16,10 +16,14 @@ class MauticClient:
         self.public_key = public_key
         self.private_key = private_key
         self.token = token
+        self.retries = 1
+
+    def set_retries(self, retries: int) -> None:
+        self.retries = retries
 
     async def update_token(self) -> None:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
+        async with HttpClient(self.retries, [200, 401]) as client:
+            async with client.post(
                     url=f"{self.api_url}/oauth/v2/token",
                     data={
                         "client_id": self.public_key,
@@ -44,8 +48,12 @@ class MauticClient:
         if overwrite_with_blank is True:
             data["overwriteWithBlank"] = True
 
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.post(
+        async with HttpClient(
+            self.retries,
+            [200, 201, 401],
+            headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            async with client.post(
                     url=f"{self.api_url}/api/contacts/new",
                     data=data
             ) as response:
@@ -60,8 +68,12 @@ class MauticClient:
                 return await response.json()
 
     async def fetch_contact_by_id(self, id: str):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.get(url=f"{self.api_url}/api/contacts/{id}") as response:
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            async with client.get(url=f"{self.api_url}/api/contacts/{id}") as response:
 
                 if response.status == 401:
                     raise MauticClientAuthException()
@@ -73,8 +85,12 @@ class MauticClient:
                 return await response.json()
 
     async def fetch_contact_by_email(self, email: str):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.get(url=f"{self.api_url}/api/contacts?search=email:{email}") as response:
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            async with client.get(url=f"{self.api_url}/api/contacts?search=email:{email}") as response:
 
                 if response.status == 401:
                     raise MauticClientAuthException()
@@ -91,8 +107,12 @@ class MauticClient:
                     raise MauticClientException(f"Unable to find contact with given email address: {email}")
 
     async def add_points(self, id: int, amount: int):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.post(url=f"{self.api_url}/api/contacts/{id}/points/plus/{amount}") as response:
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            async with client.post(url=f"{self.api_url}/api/contacts/{id}/points/plus/{amount}") as response:
 
                 if response.status == 401:
                     raise MauticClientAuthException()
@@ -103,8 +123,12 @@ class MauticClient:
                 return await response.json()
 
     async def subtract_points(self, id: int, amount: int):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.post(url=f"{self.api_url}/api/contacts/{id}/points/minus/{amount}") as response:
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            async with client.post(url=f"{self.api_url}/api/contacts/{id}/points/minus/{amount}") as response:
 
                 if response.status == 401:
                     raise MauticClientAuthException()
@@ -115,8 +139,12 @@ class MauticClient:
                 return await response.json()
 
     async def add_to_segment(self, id: int, add_to: int):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.post(url=f"{self.api_url}/api/segments/{add_to}/contact/{id}/add") \
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            async with client.post(url=f"{self.api_url}/api/segments/{add_to}/contact/{id}/add") \
                     as response:
 
                 if response.status == 401:
@@ -126,8 +154,12 @@ class MauticClient:
                     raise MauticClientException(await response.text())
 
     async def remove_from_segment(self, id: int, remove_from: int):
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {self.token}"}) as session:
-            async with session.post(url=f"{self.api_url}/api/segments/{remove_from}/contact/{id}/remove") \
+        async with HttpClient(
+                self.retries,
+                [200, 401],
+                headers={"Authorization": f"Bearer {self.token}"}
+        ) as client:
+            async with client.post(url=f"{self.api_url}/api/segments/{remove_from}/contact/{id}/remove") \
                     as response:
 
                 if response.status == 401:

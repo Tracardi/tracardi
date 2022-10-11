@@ -5,7 +5,7 @@ from tracardi.domain.event_payload_validator import EventPayloadValidatorRecord,
 
 
 async def add_event_type_metadata(schema: EventTypeManager):
-    schema = schema.encode().dict()
+    schema = schema.encode()
     return await storage_manager("event-management").upsert(schema)
 
 

@@ -33,8 +33,11 @@ def validate(config: dict):
 
 class CopyTraitAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    mapping: dict
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
         self.mapping = self.config.traits.set
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -100,7 +103,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.traits.copy_trait_action',
+            module=__name__,
             className='CopyTraitAction',
             inputs=['payload'],
             outputs=["payload"],

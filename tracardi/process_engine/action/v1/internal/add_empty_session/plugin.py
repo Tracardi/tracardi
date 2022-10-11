@@ -11,9 +11,6 @@ from tracardi.service.storage.driver import storage
 
 class AddEmptySessionAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         if self.debug is True:
@@ -54,7 +51,7 @@ def register() -> Plugin:
             version='0.7.0',
             license="MIT",
             author="Risto Kowaczewski",
-            init={},
+            init=None,
             form=None,
 
         ),

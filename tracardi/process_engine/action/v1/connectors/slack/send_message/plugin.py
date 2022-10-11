@@ -4,7 +4,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi.process_engine.action.v1.connectors.slack.slack_client import SlackClient
 from tracardi.service.notation.dot_template import DotTemplate
@@ -16,15 +15,16 @@ def validate(config: dict) -> Config:
 
 class SlackPoster(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'SlackPoster':
-        config = Config(**kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return SlackPoster(config, resource.credentials)
+    _client: SlackClient
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self._client = SlackClient(credentials.get_credentials(self, Token).token)
+        self._client = SlackClient(resource.credentials.get_credentials(self, Token).token)
+        self._client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)

@@ -4,13 +4,11 @@ from datetime import datetime, timedelta
 
 import tracardi.config
 from tracardi.domain.scheduler_config import SchedulerConfig
-from tracardi.domain.resource import ResourceCredentials
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.action.v1.pro.scheduler.model.configuration import Configuration
 from tracardi.process_engine.action.v1.pro.scheduler.service.schedule_client import SchedulerClient
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 
 logging.basicConfig(level=logging.ERROR)
@@ -25,23 +23,21 @@ def validate(config: dict) -> Configuration:
 
 class SchedulerPlugin(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'SchedulerPlugin':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        plugin = SchedulerPlugin(config, resource.credentials)
-        return plugin
+    credentials: SchedulerConfig
+    config: Configuration
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.credentials = credentials.get_credentials(
-            self,
-            output=SchedulerConfig)  # type: SchedulerConfig
+        self.credentials = resource.credentials.get_credentials(self, output=SchedulerConfig)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             client = SchedulerClient(tracardi.config.tracardi.tracardi_scheduler_host)
-            schedule_at = str(datetime.utcnow() + timedelta(seconds=self.config.postpone))
+            schedule_at = datetime.utcnow() + timedelta(seconds=self.config.postpone)
+            schedule_at = f'{str(schedule_at)}+00:00'
             result = await client.schedule(
                 schedule_at=schedule_at,
                 callback_host=self.credentials.callback_host,
@@ -50,7 +46,8 @@ class SchedulerPlugin(ActionRunner):
                 session_id=self.session.id if self.session is not None else None,
                 event_type=self.config.event_type,
                 properties=json.loads(self.config.properties),
-                context=self.event.context
+                context=self.event.context,
+                request=self.event.request
             )
 
             response = {
@@ -59,7 +56,7 @@ class SchedulerPlugin(ActionRunner):
                     "time": result.time,
                     "key": result.key,
                     "origin": result.origin,
-                    "server": tracardi.config.tracardi.tracardi_pro_host
+                    "server": tracardi.config.tracardi.tracardi_scheduler_host
                 },
                 "payload": payload
             }
@@ -78,24 +75,3 @@ class SchedulerPlugin(ActionRunner):
             })
 
 
-def register() -> Plugin:
-    return Plugin(
-        start=False,
-        spec=Spec(
-            module='tracardi.process_engine.action.v1.pro.scheduler.plugin',
-            className='SchedulerPlugin',
-            inputs=["payload"],
-            outputs=['response', 'error'],
-            version='0.7.1',
-            license="Tracardi Pro License",
-            author="Risto Kowaczewski"
-        ),
-        metadata=MetaData(
-            name='Schedule event',
-            desc='This plugin schedules events',
-            icon='calendar',
-            group=["Time"],
-            tags=["pro", "scheduler", "postpone", "delay", "event"],
-            pro=True,
-        )
-    )

@@ -29,6 +29,9 @@ class EventMetadata(BaseModel):
     processed_by: EventProcessors = EventProcessors()
     profile_less: bool = False
     debug: bool = False
+    valid: bool = True
+    error: bool = False
+    warning: bool = False
     instance: Optional[Entity] = None
 
 

@@ -5,7 +5,6 @@ from tracardi.service.plugin.domain.result import Result
 from .model.config import Config, Token
 from tracardi.process_engine.action.v1.connectors.mailchimp.service.mailchimp_audience_editor import MailChimpAudienceEditor
 from tracardi.service.storage.driver import storage
-from tracardi.domain.resource import ResourceCredentials
 
 
 def validate(config: dict):
@@ -14,15 +13,18 @@ def validate(config: dict):
 
 class MailChimpAudienceRemover(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'MailChimpAudienceRemover':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return MailChimpAudienceRemover(config, resource.credentials)
+    _client: MailChimpAudienceEditor
+    config: Config
 
-    def __init__(self, config: Config, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self._client = MailChimpAudienceEditor(credentials.get_credentials(self, Token).token)
+        self._client = MailChimpAudienceEditor(
+            resource.credentials.get_credentials(self, Token).token,
+            self.node.on_connection_error_repeat
+        )
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -61,7 +63,7 @@ def register() -> Plugin:
                 "email": None,
                 "delete": False
             },
-            manual="remove_from_mailchimp_audience_action",
+            manual="mailchimp_remove_from_audience_action",
             form=Form(
                 groups=[
                     FormGroup(
@@ -71,7 +73,7 @@ def register() -> Plugin:
                                 id="source",
                                 name="MailChimp resource",
                                 description="Please select your MailChimp resource.",
-                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "token"})
+                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "mailchimp"})
                             ),
                             FormField(
                                 id="list_id",

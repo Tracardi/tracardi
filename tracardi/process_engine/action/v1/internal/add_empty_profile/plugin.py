@@ -18,9 +18,6 @@ from tracardi.service.storage.driver import storage
 
 class AddEmptyProfileAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         now = datetime.utcnow()
@@ -48,7 +45,7 @@ class AddEmptyProfileAction(ActionRunner):
 
         self.execution_graph.set_profiles(profile)
 
-        coroutines = [storage.driver.profile.save_profile(profile)]
+        coroutines = [storage.driver.profile.save(profile)]
 
         session = Session(
             id=str(uuid4()),
@@ -89,7 +86,7 @@ def register() -> Plugin:
             version='0.7.0',
             license="MIT",
             author="Risto Kowaczewski",
-            init={},
+            init=None,
             form=None,
 
         ),

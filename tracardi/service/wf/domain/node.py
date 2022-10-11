@@ -5,7 +5,7 @@ import tracardi.service.wf
 
 from .port_to_port_edges import PortToPortEdges
 from ..service.node_indexer import index_nodes
-from tracardi.service.plugin.domain.register import RunOnce, NodeEvents
+from tracardi.service.plugin.domain.register import RunOnce, NodeEvents, MicroserviceConfig
 from tracardi.service.plugin.runner import ActionRunner
 
 
@@ -34,6 +34,8 @@ class Node(BaseModel):
     append_input_payload: bool = False
     join_input_payload: bool = False
     object: Optional[ActionRunner] = None
+    microservice: Optional[MicroserviceConfig] = None
+    remote: bool = False
     graph: Graph = Graph()
 
     class Config:
@@ -61,3 +63,6 @@ class Node(BaseModel):
             if node.data.spec.className == class_name:
                 return True
         return False
+
+    def is_microservice_configured(self) -> bool:
+        return self.microservice is not None and self.microservice.server.resource.id and self.microservice.plugin.id

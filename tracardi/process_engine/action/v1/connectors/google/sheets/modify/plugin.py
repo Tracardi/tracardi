@@ -1,7 +1,9 @@
 import json
+from typing import Union
 
 from aiohttp import ClientConnectorError
 from googleapiclient.errors import HttpError
+from pydantic import BaseModel
 
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.runner import ActionRunner
@@ -20,15 +22,15 @@ def validate(config: dict):
 
 class GoogleSheetsIntegratorAction(ActionRunner):
 
-    @staticmethod
-    async def build(**kwargs) -> 'GoogleSheetsIntegratorAction':
-        config = validate(kwargs)
-        resource = await storage.driver.resource.load(config.source.id)
-        return GoogleSheetsIntegratorAction(config, resource.credentials)
+    service_account_credentials: Union[BaseModel, dict, None]
+    config: Configuration
 
-    def __init__(self, config: Configuration, credentials: ResourceCredentials):
+    async def set_up(self, init):
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
         self.config = config
-        self.service_account_credentials = credentials.get_credentials(self)
+        self.service_account_credentials = resource.credentials.get_credentials(self)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
@@ -172,6 +174,6 @@ def register() -> Plugin:
             name='Google Spreadsheet',
             desc='This plugin connects Tracardi to Google Sheets.',
             icon='google',
-            group=["Connectors"]
+            group=["Google"]
         )
     )

@@ -1,12 +1,11 @@
 import asyncio
 import logging
-import traceback
 from asyncio import Task
 from collections import defaultdict
 from time import time
 from typing import Dict, List, Tuple, Optional
 from pydantic import ValidationError
-from tracardi.domain.event import Event, INVALID
+from tracardi.domain.event import Event
 
 from tracardi.service.wf.domain.debug_info import DebugInfo
 from tracardi.service.wf.domain.error_debug_info import ErrorDebugInfo
@@ -18,8 +17,10 @@ from .debugger import Debugger
 from ..config import tracardi
 from ..domain.console import Console
 from ..domain.entity import Entity
+from ..domain.flow_invoke_result import FlowInvokeResult
 from ..domain.payload.tracker_payload import TrackerPayload
 from ..domain.profile import Profile
+from ..domain.rule_invoke_result import RuleInvokeResult
 from ..domain.session import Session
 from ..domain.rule import Rule
 from ..exceptions.exception_service import get_traceback
@@ -47,7 +48,7 @@ class RulesEngine:
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload) -> Tuple[Debugger, list, list, dict, Dict[str, list]]:
+    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload) -> RuleInvokeResult:
 
         source_id = tracker_payload.source.id
         flow_task_store = defaultdict(list)
@@ -57,11 +58,12 @@ class RulesEngine:
         for rules, event in self.events_rules:
 
             # skip invalid events
-            if event.metadata.status == INVALID:
+            if not event.metadata.valid:
                 continue
 
             if len(rules) == 0:
-                logger.debug(f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")
+                logger.debug(
+                    f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")
 
             for rule in rules:
 
@@ -126,7 +128,8 @@ class RulesEngine:
 
                         # Flows are run concurrently
 
-                        flow_task = asyncio.create_task(workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
+                        flow_task = asyncio.create_task(
+                            workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
                     else:
@@ -142,16 +145,26 @@ class RulesEngine:
                     # concurrently running flows on the same profile may override profile data.
                     # Preliminary tests showed no issues but on heavy load we do not know if
                     # the test is still valid and every thing is ok. Solution is to remove create_task.
-                    flow_task = asyncio.create_task(workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
+                    flow_task = asyncio.create_task(
+                        workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
         # Run flows and report async
 
         post_invoke_events = {}
+        flow_responses = []
         for event_type, tasks in flow_task_store.items():
-            for flow_id, event_id, rule_name, task in tasks:
+            for flow_id, event_id, rule_name, task in tasks:  # type: str, str, str, Task
                 try:
-                    debug_info, log_list, post_invoke_event, self.profile, self.session = await task  # type: DebugInfo, List[Log], Event, Profile, Session
+                    flow_invoke_result = await task  # type: FlowInvokeResult
+
+                    self.profile = flow_invoke_result.profile
+                    self.session = flow_invoke_result.session
+                    debug_info = flow_invoke_result.debug_info
+                    log_list = flow_invoke_result.log_list
+                    post_invoke_event = flow_invoke_result.event
+
+                    flow_responses.append(flow_invoke_result.flow.response)
                     post_invoke_events[post_invoke_event.id] = post_invoke_event
 
                     # Store logs in one console log
@@ -196,17 +209,14 @@ class RulesEngine:
 
         ran_event_types = list(flow_task_store.keys())
 
-        return debugger, \
-               ran_event_types, \
-               self.console_log, \
-               post_invoke_events, \
-               invoked_rules
+        return RuleInvokeResult(debugger, ran_event_types, self.console_log, post_invoke_events, invoked_rules,
+                                flow_responses)
 
     @staticmethod
     def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
         disabled_profiles = []
 
-        for profile in profiles:   # type: Profile
+        for profile in profiles:  # type: Profile
             profile.active = False
             profile.metadata.merged_with = merge_with
             disabled_profiles.append(profile)

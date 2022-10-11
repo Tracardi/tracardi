@@ -10,8 +10,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.settings import Settings
 from tracardi.domain.time import Time
 from tracardi.process_engine.action.v1.flow.postpone_event.model.configuration import Configuration
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
-    FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.postpone_call import PostponedCall
 from tracardi.service.tracker import synchronized_event_tracking
@@ -23,11 +22,13 @@ def validate(config: dict):
 
 class PostponeEventAction(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    config: Configuration
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def _postponed_run(self):
-        ip = self.event.context['ip'] if 'ip' in self.event.context else 'http://localhost'
+        ip = self.event.request['ip'] if 'ip' in self.event.request else '127.0.0.1'
         tracker_payload = TrackerPayload(
             source=Entity(id=self.event.source.id),
             session=Entity(id=self.session.id),

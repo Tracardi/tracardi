@@ -6,12 +6,10 @@ from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
+from .value_object.storage_info import StorageInfo
+
 COLLECTED = 'collected'
-VALIDATED = 'validated'
-INVALID = 'invalid'
 PROCESSED = 'processed'
-WARNING = 'warning'
-ERROR = 'error'
 
 
 class Tags(BaseModel):
@@ -42,6 +40,7 @@ class Event(Entity):
     session: Optional[EventSession] = None
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
+    request: Optional[dict] = {}
     config: Optional[dict] = {}
     tags: Tags = Tags()
     aux: dict = {}
@@ -71,3 +70,11 @@ class Event(Entity):
     def new(data: dict) -> 'Event':
         data['id'] = str(uuid4())
         return Event(**data)
+
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'event',
+            Event,
+            multi=True
+        )

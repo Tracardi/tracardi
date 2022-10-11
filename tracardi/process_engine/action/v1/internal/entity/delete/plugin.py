@@ -1,10 +1,11 @@
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
-from .model.config import Configuration
+from ..configuration import Configuration
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
+from ..entity_plugin_service import convert_entity_id
 
 
 def validate(config: dict):
@@ -27,17 +28,23 @@ class Endpoint(PluginEndpoint):
 
 
 class EntityDeleteAction(ActionRunner):
+    config: Configuration
 
-    def __init__(self, **kwargs):
-        self.config = validate(kwargs)
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None):
-
         try:
+
+            if self.profile is None and self.config.reference_profile is True:
+                raise ValueError(
+                    "This is profile-less event. Entity could not be deleted without the profile reference. "
+                    "You marked `Delete entity only if belongs to current profile`, this can be done without profile.")
+
             dot = self._get_dot_accessor(payload)
             entity_id = dot[self.config.id]
+            entity_id = convert_entity_id(self.config, entity_id, self.profile)
 
-            # todo load by self.config.type, and self.profile.id
             result = await storage.driver.entity.delete_by_id(entity_id)
 
             return Result(port="result", value={

@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 
 class ApiCredentials(BaseModel):
     url: str
+    proxy: Optional[str] = None
     password: Optional[str] = None
     username: Optional[str] = None
 

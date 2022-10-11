@@ -13,8 +13,10 @@ def validate(config: dict) -> Config:
 
 class AssignConditionResultPlugin(ActionRunner):
 
-    def __init__(self, **kwargs):
-        self.config = Config(**kwargs)
+    config: Config
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         condition = Condition()
@@ -72,7 +74,7 @@ def register() -> Plugin:
             name='Resolve conditions into profile fields',
             desc='This plugin resolves a set of conditions and assigns it to the profile fields.',
             icon='if',
-            group=["Data processing"],
+            group=["Flow control"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
