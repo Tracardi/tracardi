@@ -17,8 +17,12 @@ class JoinAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        string = dot[self.config.string]
-        result = self.config.delimiter.join(string)
+        data_to_join = dot[self.config.string]
+
+        if not isinstance(data_to_join, list):
+            raise ValueError('Referenced data must be an array')
+
+        result = self.config.delimiter.join(data_to_join)
         return Result(port="payload", value={"result": result})
 
 
