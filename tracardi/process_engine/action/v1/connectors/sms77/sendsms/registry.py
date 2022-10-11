@@ -19,7 +19,7 @@ def register() -> Plugin:
                     "name": ""
                 },
                 "message": "",
-                "recipient": "",
+                "recipient": "profile@pii.telephone",
                 "sender": ""
             },
             manual="sms77_plugin",
@@ -31,7 +31,7 @@ def register() -> Plugin:
                             FormField(
                                 id="resource",
                                 name="Resource",
-                                description="Select your SMS77 resource",
+                                description="Select your SMS77 resource.",
                                 component=FormComponent(type="resource", props={"label": "SMS77 Resource", "tag": "sms77"})
                             ),
                             FormField(
@@ -45,13 +45,14 @@ def register() -> Plugin:
                             FormField(
                                 id="sender",
                                 name="Sender",
-                                description="Type sender or leave it blank",
+                                description="Type sender or leave it blank if you would like to use default sender. "
+                                            "Custom sender name can be found in Sms77 system.",
                                 component=FormComponent(type="dotPath", props={"label": "Sender"})
                             ),
                             FormField(
                                 id="recipient",
                                 name="Recipient",
-                                description="Type or reference SMS recipient",
+                                description="Type or reference SMS recipient phone number.",
                                 component=FormComponent(type="dotPath", props={"label": "Recipient"})
                             )
                         ]
