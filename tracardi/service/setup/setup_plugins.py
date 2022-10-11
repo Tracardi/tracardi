@@ -304,7 +304,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.strings.string_join.plugin": PluginTestTemplate(
-        init={'delimiter': '', 'strings': ["a", "b", "c"]},
+        init={'delimiter': '', 'string': ["a", "b", "c"]},
         resource=None
     ),
 
