@@ -414,6 +414,16 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.connectors.twitter.tweet.plugin": PluginTestTemplate(
+        init={'source': {'id': '', 'name': ''}, 'tweet': ''},
+        resource={
+            'consumer_key': '<user_consumer_key',
+            'consumer_secret': '<user_consumer_secret>',
+            'access_token': '<user_access_token>',
+            'access_token_secret': '<user_access_token_secret>'
+        }
+    ),
+
     "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginTestTemplate(
         init={'value': ''},
         resource=None
