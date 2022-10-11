@@ -3,6 +3,7 @@ from aiohttp import ContentTypeError
 from json import JSONDecodeError
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.resources.api_key import ApiKey
+from tracardi.service.notation.dot_template import DotTemplate
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -36,8 +37,10 @@ class Sms77SendSmsAction(ActionRunner):
         url = 'https://gateway.sms77.io/api/sms'
         dot = self._get_dot_accessor(payload)
         timeout = aiohttp.ClientTimeout(total=15)
+        template = DotTemplate()
+        message = template.render(self.config.message, dot)
         params = {
-            "text": self.config.message,
+            "text": message,
             "to": dot[self.config.recipient],
             "from": dot[self.config.sender],
             "debug": 1 if self.debug else 0
