@@ -34,7 +34,7 @@ def register() -> Plugin:
             className='JoinAction',
             inputs=["payload"],
             outputs=["payload"],
-            version='0.7.2',
+            version='0.7.3',
             license="MIT",
             author="Yusuke Kohatsu",
             manual="string_join_action",
@@ -64,10 +64,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name="Join string list",
             desc='It joins each element in the list by given delimiter.',
-            type='flowNode',
-            width=300,
-            height=100,
-            icon='join',
+            icon='uppercase',
             group=["Data processing"],
             documentation=Documentation(
                 inputs={
