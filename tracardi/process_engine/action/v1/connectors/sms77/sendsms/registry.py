@@ -22,7 +22,7 @@ def register() -> Plugin:
                 "recipient": "profile@pii.telephone",
                 "sender": ""
             },
-            manual="sms77_plugin",
+            manual="sms77/sms77_send_sms_plugin",
             form=Form(
                 groups=[
                     FormGroup(
@@ -64,7 +64,7 @@ def register() -> Plugin:
             name="Send SMS",
             desc="Send SMS via Sms77 gateway.",
             brand="Sms77",
-            icon="message",
+            icon="sms",
             group=["Sms77"],
             documentation=Documentation(
                 inputs={
