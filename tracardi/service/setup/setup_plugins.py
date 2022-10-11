@@ -303,6 +303,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.strings.string_join.plugin": PluginTestTemplate(
+        init={'delimiter': '', 'strings': ["a", "b", "c"]},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.strings.url_parser.plugin": PluginTestTemplate(
         init={'url': 'session@context.page.url'},
         resource=None
