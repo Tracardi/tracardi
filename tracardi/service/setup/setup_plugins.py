@@ -5,17 +5,6 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
-    "tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry": PluginTestTemplate(
-        init={
-                "text": "",
-                "recipient": "",
-                "sender": ""
-            },
-        resource={
-            "api_key": "api_key"
-        }
-    ),
-
     "tracardi.process_engine.action.v1.operations.contains_pattern.plugin": PluginTestTemplate(
         init={"field": "payload@field", "pattern": "all"},
         resource=None
@@ -572,6 +561,21 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #           'vertical_pos': 'bottom'},
     #     resource=None
     # ),
+
+    "tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry": PluginTestTemplate(
+        init={
+            "resource": {
+                "id": "",
+                "name": ""
+            },
+            "text": "",
+            "recipient": "",
+            "sender": ""
+        },
+        resource={
+            "api_key": "api_key"
+        }
+    ),
 
     "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginTestTemplate(
         init={'bucket': "bucket", 'fields': {}, 'measurement': "measurement", 'organization': "measurement",
