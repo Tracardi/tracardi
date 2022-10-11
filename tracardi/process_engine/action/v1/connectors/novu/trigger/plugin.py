@@ -1,6 +1,5 @@
 import json
 from json import JSONDecodeError
-from pprint import pprint
 from typing import Optional
 
 import aiohttp
@@ -45,7 +44,6 @@ class Endpoint(PluginEndpoint):
                     ssl=True
             ) as response:
                 content = await response.json()
-                pprint(content)
                 result = [{"id": item['triggers'][0]['identifier'], "name": item['name']} for item in content['data'] if
                           item['active'] is True]
                 return {

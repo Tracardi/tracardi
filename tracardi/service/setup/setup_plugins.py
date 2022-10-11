@@ -567,6 +567,21 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #     resource=None
     # ),
 
+    "tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry": PluginTestTemplate(
+        init={
+            "resource": {
+                "id": "",
+                "name": ""
+            },
+            "text": "",
+            "recipient": "",
+            "sender": ""
+        },
+        resource={
+            "api_key": "api_key"
+        }
+    ),
+
     "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginTestTemplate(
         init={'bucket': "bucket", 'fields': {}, 'measurement': "measurement", 'organization': "measurement",
               'source': {'id': '1', 'name': 'Some value'}, 'tags': {}, 'time': None},
