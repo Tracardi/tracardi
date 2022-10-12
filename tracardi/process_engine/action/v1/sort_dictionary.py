@@ -64,17 +64,17 @@ def register() -> Plugin:
             author="Sameer Kavthekar",
             init={
                 "data": "",
-                "direction": ""
+                "direction": "asc"
             },
             manual="sorted_dict_action",
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Dictionary Sort plugin configuration",
+                        name="Dictionary sorting configuration",
                         fields=[
                             FormField(
                                 id="data",
-                                name="data",
+                                name="Data to be sorted",
                                 description="The referenced dictionary that has to be sorted",
                                 component=FormComponent(
                                     type="dotPath",
@@ -86,12 +86,12 @@ def register() -> Plugin:
                             ),
                             FormField(
                                 id="direction",
-                                name="direction",
-                                description="The order in which the dictionary is sorted",
+                                name="Sorting direction",
+                                description="The order in which the dictionary is to be sorted",
                                 component=FormComponent(
                                     type="select",
                                     props={
-                                        "label": "direction",
+                                        "label": "Direction",
                                         "items": {
                                             "asc": "Ascending",
                                             "desc": "Descending"
@@ -106,15 +106,15 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Sort Referenced Dictionary',
+            name='Sort dictionary',
             desc='Sorts the referenced dictionary and returns it as a list of tuples of key and value.',
-            icon='question',
+            icon='plugin',
             group=["Input/Output"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
-                outputs={"payload": PortDoc(desc="This port returns the ordered list of tuples as key and value")}
+                outputs={"payload": PortDoc(desc="This port returns the ordered list of tuples with keys and values")}
             )
         )
     )
