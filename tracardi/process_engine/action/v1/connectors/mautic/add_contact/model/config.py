@@ -11,7 +11,7 @@ class Config(PluginConfig):
     overwrite_with_blank: bool
 
     @validator("email")
-    def validate_ip_active_owner(cls, value):
+    def validate_email_exists(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
