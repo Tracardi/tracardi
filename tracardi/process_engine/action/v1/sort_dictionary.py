@@ -21,8 +21,7 @@ class Config(PluginConfig):
     def if_order_has_valid_value(cls, value):
         if value == "asc" or value == "desc":
             return value
-        raise ValueError("Direction has invalid value")
-
+        raise ValueError("Direction has invalid value. Possible values are: \"asc\" or \"desc\".")
 
     @validator("data")
     def if_data_is_empty(cls, value):
@@ -49,7 +48,7 @@ class SortedDictAction(ActionRunner):
         is_desc = self.config.direction == "desc"
         for i in sorted(dictionary_to_sort, key=dictionary_to_sort.get, reverse=is_desc):
             sorted_tuple_list.append(tuple([i, dictionary_to_sort[i]]))
-        return Result(port="payload", value=sorted_tuple_list)
+        return Result(port="payload", value={"result": sorted_tuple_list})
 
 
 def register() -> Plugin:
