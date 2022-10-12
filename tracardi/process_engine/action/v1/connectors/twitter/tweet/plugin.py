@@ -24,7 +24,6 @@ class TwitterTweetAction(ActionRunner):
         self.credentials = resource.credentials.get_credentials(self, output=TwitterResourceCredentials)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        dot = self._get_dot_accessor(payload)
 
         authorization = tweepy.OAuthHandler(
             self.credentials.consumer_key,
@@ -37,7 +36,7 @@ class TwitterTweetAction(ActionRunner):
         )
 
         tweet_api = tweepy.API(authorization)
-        tweet = dot[self.config.tweet]
+        tweet = self.config.tweet
 
         try:
             tweet_api.update_status(tweet)
@@ -79,7 +78,7 @@ def register() -> Plugin:
                                 'label': 'resource',
                                 'tag': 'twitter'
                             }
-                            )
+                                                    )
                         ),
                         FormField(
                             id='tweet',
