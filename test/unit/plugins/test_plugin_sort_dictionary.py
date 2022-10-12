@@ -10,4 +10,4 @@ def test_sort_dictionary_plugin():
     )
 
     result = run_plugin(SortedDictAction, init, properties)
-    assert result.output.value == {[["first", 1], ["second", 2], ["third", 3], ["fifth", 5]]}
+    assert result.output.value == {"result": [["first", 1], ["second", 2], ["third", 3], ["fifth", 5]]}
