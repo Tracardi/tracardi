@@ -105,6 +105,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.sort_dictionary": PluginTestTemplate(
+        init=None,
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.misc.uuid4.plugin": PluginTestTemplate(
         init=None,
         resource=None
