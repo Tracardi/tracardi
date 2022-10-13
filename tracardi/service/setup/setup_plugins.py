@@ -105,6 +105,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.sort_dictionary": PluginTestTemplate(
+        init=None,
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.misc.uuid4.plugin": PluginTestTemplate(
         init=None,
         resource=None
@@ -300,6 +305,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.strings.string_splitter.plugin": PluginTestTemplate(
         init={'delimiter': '.', 'string': "test.test"},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.strings.string_join.plugin": PluginTestTemplate(
+        init={'delimiter': '', 'string': ["a", "b", "c"]},
         resource=None
     ),
 
