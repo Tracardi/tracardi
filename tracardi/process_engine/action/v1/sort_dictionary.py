@@ -75,7 +75,7 @@ def register() -> Plugin:
                             FormField(
                                 id="data",
                                 name="Data to be sorted",
-                                description="The referenced dictionary that has to be sorted",
+                                description="The dictionary that has to be sorted",
                                 component=FormComponent(
                                     type="dotPath",
                                     props={
