@@ -46,7 +46,7 @@ async def delete_user(id: str):
     return await storage_manager("user").delete(id)
 
 
-async def get_by_id(id: str) -> Optional[StorageRecord]:
+async def load_by_id(id: str) -> Optional[StorageRecord]:
     return await storage_manager("user").load(id)
 
 
