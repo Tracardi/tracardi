@@ -29,8 +29,8 @@ class TwitterTweetAction(ActionRunner):
         template = DotTemplate()
 
         authorization = tweepy.OAuthHandler(
-            self.credentials.consumer_key,
-            self.credentials.consumer_secret
+            self.credentials.api_key,
+            self.credentials.api_secret
         )
 
         authorization.set_access_token(
@@ -88,7 +88,7 @@ def register() -> Plugin:
                             name='Tweet',
                             description='Please enter the content of your tweet.',
                             component=FormComponent(
-                                type='text',
+                                type='textarea',
                                 props={
                                     'label': 'Tweet'
                                 }
@@ -100,7 +100,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Twitter tweet',
+            name='Send tweet',
+            brand='Twitter',
             desc='Create and send tweet to your twitter wall.',
             icon='twitter',
             group=['Connectors'],
@@ -109,7 +110,7 @@ def register() -> Plugin:
                     'payload': PortDoc(desc='This port takes payload object.')
                 },
                 outputs={
-                    'response': PortDoc(desc='This port returns response status.'),
+                    'response': PortDoc(desc='This port returns payload if response form the Twitter was correct.'),
                     'error': PortDoc(desc='This port returns error object.')
                 }
             )

@@ -427,10 +427,10 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     "tracardi.process_engine.action.v1.connectors.twitter.tweet.plugin": PluginTestTemplate(
         init={'source': {'id': '', 'name': ''}, 'tweet': ''},
         resource={
-            'consumer_key': '<user_consumer_key',
-            'consumer_secret': '<user_consumer_secret>',
-            'access_token': '<user_access_token>',
-            'access_token_secret': '<user_access_token_secret>'
+            'api_key': '<api_key',
+            'api_secret': '<api_secret>',
+            'access_token': '<access_token>',
+            'access_token_secret': '<access_token_secret>'
         }
     ),
 

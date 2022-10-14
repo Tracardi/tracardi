@@ -63,7 +63,8 @@ setup(
         'asyncio-mqtt==0.12.1',
         'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker',
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
-        'googletrans==3.1.0a0'
+        'googletrans==3.1.0a0',
+        'tweepy==4.10.1'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

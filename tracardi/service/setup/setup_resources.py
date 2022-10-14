@@ -176,9 +176,10 @@ def get_resource_types() -> List[ResourceSettings]:
             id="twitter",
             name="Twitter",
             tags=["twitter"],
+            icon='twitter',
             config={
-                "consumer_key": "<consumer_key>",
-                "consumer_secret": "<consumer_secret_key>",
+                "api_key": "<api_key>",
+                "api_secret": "<api_secret_key>",
                 "access_token": "<access_token>",
                 "access_token_secret": "<access_token_secret>"
             },
