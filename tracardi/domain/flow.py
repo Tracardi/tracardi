@@ -28,6 +28,7 @@ class FlowSchema(BaseModel):
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
     lock: bool = False
+    type: str = 'collect'
     wf_schema: FlowSchema = FlowSchema()
 
     def arrange_nodes(self):
@@ -81,6 +82,16 @@ class Flow(GraphFlow):
             projects=self.projects,
             lock=self.lock
         )
+
+    @staticmethod
+    def from_workflow_record(record: 'FlowRecord', output) -> 'Flow':
+        if output == 'draft':
+            decrypted = decrypt(record.draft)
+        else:
+            decrypted = decrypt(record.production)
+        flow = Flow(**decrypted)
+        flow.type = record.type
+        return flow
 
     @staticmethod
     def new(id: str = None) -> 'Flow':
@@ -262,7 +273,7 @@ class FlowRecord(NamedEntity):
     draft: Optional[str] = ''
     production: Optional[str] = ''
     backup: Optional[str] = ''
-    lock: bool = False,
+    lock: bool = False
     type: str = 'collect'
 
     # Persistence
@@ -275,12 +286,10 @@ class FlowRecord(NamedEntity):
         )
 
     def get_production_workflow(self) -> 'Flow':
-        decrypted = decrypt(self.production)
-        return Flow(**decrypted)
+        return Flow.from_workflow_record(self, output='production')
 
     def get_draft_workflow(self) -> 'Flow':
-        decrypted = decrypt(self.draft)
-        return Flow(**decrypted)
+        return Flow.from_workflow_record(self, output='draft')
 
     def get_empty_workflow(self, id) -> 'Flow':
         return Flow.build(id=id, name=self.name, description=self.description,
