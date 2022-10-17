@@ -168,6 +168,9 @@ class ElasticStorage:
     async def reindex(self, source, destination, wait_for_completion=True):
         return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
 
+    def scan(self, query:dict = None):
+        return self.storage.scan(self.index.get_index_alias(), query)
+
     async def load_by_query_string(self, query_string, limit=100) -> StorageRecords:
         query = {
             "size": limit,

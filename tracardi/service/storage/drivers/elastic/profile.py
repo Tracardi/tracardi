@@ -85,6 +85,10 @@ async def delete(id: str):
     return await storage_manager('profile').delete(id)
 
 
+def scan(query: dict = None):
+    return storage_manager('profile').scan(query)
+
+
 async def count(query: dict = None):
     return await storage_manager('profile').count(query)
 
