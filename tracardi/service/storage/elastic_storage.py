@@ -1,6 +1,6 @@
 from asyncio import create_task, gather
 from collections import defaultdict
-from typing import List, Optional, Union
+from typing import List, Optional, Union, AsyncGenerator, Any
 
 import elasticsearch
 from pydantic import BaseModel
@@ -168,8 +168,9 @@ class ElasticStorage:
     async def reindex(self, source, destination, wait_for_completion=True):
         return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
 
-    def scan(self, query:dict = None):
-        return self.storage.scan(self.index.get_index_alias(), query)
+    async def scan(self, query: dict = None) -> AsyncGenerator[StorageRecord, Any]:
+        async for row in self.storage.scan(self.index.get_index_alias(), query):
+            yield StorageRecord.build_from_elastic(row)
 
     async def load_by_query_string(self, query_string, limit=100) -> StorageRecords:
         query = {
