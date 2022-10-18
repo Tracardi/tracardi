@@ -4,6 +4,7 @@ import logging
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.postpone_cache_multi_threaded import PostponeCache, InstanceCache
+from tracardi.service.singleton import Singleton
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -13,7 +14,23 @@ global_schedule_flag = PostponeCache("schedule-flag")
 global_postpone_flag = PostponeCache("postpone-flag")
 instance_cache = InstanceCache("exec-instance-cache")
 
-scheduled_locally = False
+
+class LockPool(metaclass=Singleton):
+
+    def __init__(self):
+        self.pool = set()
+
+    def schedule(self, id: str):
+        self.pool.add(id)
+
+    def unschedule(self, id: str):
+        self.pool.discard(id)
+
+    def is_scheduled(self, id: str) -> bool:
+        return id in self.pool
+
+    def __len__(self):
+        return len(self.pool)
 
 
 class PostponedCall:
@@ -27,21 +44,20 @@ class PostponedCall:
         self.args = args
         self.wait = 60
         self.instance_id = instance_id
+        self.lock_pool = LockPool()
 
     def _schedule_for_later(self, loop):
 
-        # We must keep info about the loop.call_later being called in scheduled_locally variable, as if the instance
+        # We must keep info about the loop.call_later being called in lock_pool variable, as if the instance
         # dies (loop.call_later is cancelled) and there is a global flag that loop.call_later is running but locally it
         # is not. So we must recreate it.
-
-        global scheduled_locally
+        logger.info(f'Profile {self.profile_id} scheduled to send to destination in {self.wait}s. Lock pool size: {len(self.lock_pool)}')
         loop.call_later(self.wait, self._execute, loop)
-        scheduled_locally = True
+        self.lock_pool.schedule(self.profile_id)
 
     def _run_scheduled(self):
-        global scheduled_locally
         asyncio.ensure_future(self.callable_coroutine(*self.args))
-        scheduled_locally = False
+        self.lock_pool.unschedule(self.profile_id)
 
     def _execute(self, loop):
         global_instance = self.instance_cache.get_instance(self.profile_id, None)
@@ -76,7 +92,7 @@ class PostponedCall:
         # set current instance
         self.instance_cache.set_instance(self.profile_id, self.instance_id)
 
-        if not scheduled_locally or force_recreate:
+        if not self.lock_pool.is_scheduled(self.profile_id) or force_recreate:
             # if there is no schedule local. Schedule for the first time.
             self._schedule_for_later(loop)
 
