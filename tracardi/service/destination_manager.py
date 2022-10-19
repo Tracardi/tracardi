@@ -45,6 +45,10 @@ class DestinationManager:
         template = DictTraverser(self.dot, default=None)
 
         async for destination in self._load_destinations():  # type: Destination
+
+            if not destination.enabled:
+                continue
+
             module, class_name = self._get_class_and_module(destination.destination.package)
             module = import_package(module)
             destination_class = load_callable(module, class_name)
