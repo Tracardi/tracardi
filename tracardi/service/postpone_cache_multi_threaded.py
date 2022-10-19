@@ -48,20 +48,19 @@ class InstanceCache:
     def get_instance(self, profile_id, instance_id) -> Optional[str]:
 
         if not self.exists(profile_id):
-            logger.info(f"Create instance {profile_id} = {instance_id}")
+            logger.info(f"Create instance {instance_id} for profile {profile_id}")
             self.redis.client.hset(self.hash, profile_id, instance_id)
             return None
 
         value_bson = self.redis.client.hget(self.hash, profile_id)
         value = value_bson.decode('utf-8')
-        logger.info(f"Got instance {value} from {profile_id}")
 
         return value
 
     def set_instance(self, profile_id, instance_id):
-        logger.info(f"Set instance {instance_id} for profile {profile_id}")
+        logger.info(f"Destination sync for profile {profile_id} is going to be sent from worker instance {instance_id}")
         self.redis.client.hset(self.hash, profile_id, instance_id)
 
     def reset(self, profile_id):
-        logger.debug(f"Clean instance {profile_id}")
+        logger.debug(f"Clean profile worker instance {profile_id}")
         self.redis.client.hdel(self.hash, profile_id)

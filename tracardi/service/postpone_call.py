@@ -51,7 +51,7 @@ class PostponedCall:
         # We must keep info about the loop.call_later being called in lock_pool variable, as if the instance
         # dies (loop.call_later is cancelled) and there is a global flag that loop.call_later is running but locally it
         # is not. So we must recreate it.
-        logger.info(f'Profile {self.profile_id} scheduled to send to destination in {self.wait}s. Lock pool size: {len(self.lock_pool)}')
+
         loop.call_later(self.wait, self._execute, loop)
         self.lock_pool.schedule(self.profile_id)
 
@@ -63,12 +63,13 @@ class PostponedCall:
         global_instance = self.instance_cache.get_instance(self.profile_id, None)
         if global_instance != self.instance_id:
             logger.info(
-                f"Instance: {self.instance_id}. Execution discarded. Execution passed to {global_instance}")
+                f"Execution DISCARDED. Execution passed from worker instance {self.instance_id} to instance {global_instance}")
             return
 
         try:
             # should the execution be postponed. If there was no second call then postpone is None.
             if self.global_postpone_flag.get(self.profile_id) is False:
+                logger.info(f"Profile {self.profile_id} destination sync RUNS from instance {self.instance_id}.")
                 # it is not postponed - run it now
                 self._run_scheduled()
 
@@ -81,7 +82,7 @@ class PostponedCall:
                 # postpone call. Postpone flag is true
                 self._schedule_for_later(loop)
                 logger.info(
-                    f"Instance: {self.instance_id}. Execution postponed for {self.wait}s for profile {self.profile_id}")
+                    f"Execution on worker instance {self.instance_id} POSTPONED for {self.wait}s for profile {self.profile_id}")
                 # delete postpone flag. It can be set again if there is another call.
                 self.global_postpone_flag.reset(self.profile_id)
 
