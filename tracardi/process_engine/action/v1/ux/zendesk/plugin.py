@@ -7,13 +7,12 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Config(PluginConfig):
-    api_url: str
-    license: str
+    script_url: str
 
-    @validator("license")
+    @validator("script_url")
     def validate_file_path(cls, value):
         if value == "":
-            raise ValueError("License can not be empty.")
+            raise ValueError("Script URL can not be empty.")
         return value
 
 
@@ -21,7 +20,7 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class LivechatWidgetPlugin(ActionRunner):
+class ZendeskWidgetPlugin(ActionRunner):
 
     config: Config
 
@@ -31,7 +30,7 @@ class LivechatWidgetPlugin(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         self.ux.append({
             "tag": "script",
-            "props": {"src": f'{self.config.api_url}/livechat/{self.config.license}'}
+            "props": {"src": self.config.script_url, "id": "ze-snippet"}
         })
         return Result(port="payload", value=payload)
 
@@ -41,32 +40,28 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='LivechatWidgetPlugin',
-            brand="livechat",
+            className='ZendeskWidgetPlugin',
+            brand="Zendesk",
             inputs=["payload"],
             outputs=["payload"],
             version='0.7.3',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="livechat_widget_action",
+            manual="zendesk_widget_action",
             init={
-                "api_url": "http://localhost:8686",
-                "license": ""
+                "script_url": "https://static.zdassets.com/ekr/snippet.js?key=<your-key>",
             },
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Livechat widget configuration",
+                        name="Zendesk widget configuration",
                         fields=[
                             FormField(
-                                id="api_url",
-                                name="Your Tracardi API URL",
-                                component=FormComponent(type="text", props={"label": "Tracardi API URL"})
-                            ),
-                            FormField(
-                                id="license",
-                                name="Your LiveChat license number",
-                                component=FormComponent(type="text", props={"label": "Livechat License"})
+                                id="script_url",
+                                name="Zendesk script URL",
+                                description="The URL is displayed when you open an account in Zendesk. "
+                                            "Please see the zendesk.com documentation for more details.",
+                                component=FormComponent(type="text", props={"label": "Script URL"})
                             )
                         ]
                     )
@@ -74,9 +69,9 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='LiveChat widget',
-            desc='Shows LiveChat widget on the webpage.',
-            icon='livechat',
+            name='Zendesk widget',
+            desc='Shows Zendesk widget on the webpage.',
+            icon='zendesk',
             tags=['messaging', 'chat'],
             group=["UIX Widgets"],
             documentation=Documentation(

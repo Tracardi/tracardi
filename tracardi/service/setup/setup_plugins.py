@@ -5,8 +5,13 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
+    "tracardi.process_engine.action.v1.ux.zendesk.plugin": PluginTestTemplate(
+        init={"script_url": "some-url"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.ux.livechat.plugin": PluginTestTemplate(
-        init={"license": "some-number"},
+        init={"license": "some-number", "api_url": "http://localhost:8686"},
         resource=None
     ),
 
