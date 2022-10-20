@@ -26,6 +26,7 @@ import tracardi.service.storage.drivers.elastic.version
 import tracardi.service.storage.drivers.elastic.snapshot
 import tracardi.service.storage.drivers.elastic.entity
 import tracardi.service.storage.drivers.elastic.report
+import tracardi.service.storage.drivers.elastic.live_segment
 
 
 class ElasticDriver:
@@ -65,6 +66,10 @@ class ElasticDriver:
     @property
     def segment(self):
         return tracardi.service.storage.drivers.elastic.segment
+
+    @property
+    def live_segment(self):
+        return tracardi.service.storage.drivers.elastic.live_segment
 
     @property
     def debug_info(self):
