@@ -7,6 +7,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Config(PluginConfig):
+    api_url: str
     license: str
 
     @validator("license")
@@ -30,7 +31,7 @@ class LivechatWidgetPlugin(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         self.ux.append({
             "tag": "script",
-            "props": {"src": f'http://localhost:8686/livechat/{self.config.license}'}
+            "props": {"src": f'{self.config.api_url}/livechat/{self.config.license}'}
         })
         return Result(port="payload", value=payload)
 
@@ -49,6 +50,7 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             manual="livechat_widget_action",
             init={
+                "api_url": "http://localhost:8686",
                 "license": ""
             },
             form=Form(
@@ -57,9 +59,14 @@ def register() -> Plugin:
                         name="Livechat widget configuration",
                         fields=[
                             FormField(
+                                id="api_url",
+                                name="Your Tracardi API URL",
+                                component=FormComponent(type="text", props={"label": "Tracardi API URL"})
+                            ),
+                            FormField(
                                 id="license",
                                 name="Your LiveChat license number",
-                                component=FormComponent(type="text", props={"label": "License"})
+                                component=FormComponent(type="text", props={"label": "Livechat License"})
                             )
                         ]
                     )
