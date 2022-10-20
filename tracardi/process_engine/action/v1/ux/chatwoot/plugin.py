@@ -54,7 +54,7 @@ def register() -> Plugin:
             version='0.7.3',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="livechat_widget_action",
+            manual="chatwoot_widget_action",
             init={
                 "api_url": "http://localhost:8686",
                 "license": ""
