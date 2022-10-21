@@ -27,12 +27,14 @@ async def update_session_duration(session: Session):
     storage = storage_manager("session")
     index = storage.storage.get_storage_index(session)
 
+    print(session)
+
     record = {
         "doc": {
             "id": session.id,
             "profile": {
                 "id": session.profile.id
-            },
+            } if session.profile else None,
             "metadata": {
                 "time": {
                     "insert": session.metadata.time.insert,

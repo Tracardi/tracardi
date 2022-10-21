@@ -163,6 +163,10 @@ class TrackerPayload(BaseModel):
                             "Merged profile loaded with date {} UTC and id {}".format(profile.metadata.time.insert,
                                                                                       profile.id))
 
+                # Now we have profile and we should assign it to session
+
+                session.profile = Entity(id=profile.id)
+
         else:
 
             logger.info("Session exists with id {}".format(session.id))

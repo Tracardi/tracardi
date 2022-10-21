@@ -118,14 +118,6 @@ async def _save_events(tracker_payload, console_log, events):
 async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
 
-    # Do not save profile and remove it from session if all events are invalid
-    if all(not event.metadata.valid for event in events):
-        profile = None
-        session.profile = None
-        for event in events:
-            event.profile = None
-            event.metadata.profile_less = True
-
     results = await asyncio.gather(
         _save_profile(profile),
         _save_session(tracker_payload, session, profile),
@@ -144,6 +136,9 @@ def get_profile_id(profile: Profile):
 
 
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
+
+    # There may be many event is tracker_payload
+
     for index, event in enumerate(events):
         dot = DotAccessor(
             profile=profile,
@@ -224,10 +219,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     # Get events
     events = tracker_payload.get_events(session, profile, has_profile, ip)
 
-    # Validates json schemas of events and reshapes properties, sets statuses:
-    # VALIDATED
-    # INVALID
-    # RESHAPED
+    # Validates json schemas of events and reshapes properties
+    # todo bad design - events gets mutated
     console_log = await validate_and_reshape_events(events, profile, session, console_log)
 
     debugger = None
@@ -321,6 +314,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                 traceback=get_traceback(e)
             )
         )
+
+    print(session.profile)
 
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
