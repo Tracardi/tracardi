@@ -1,6 +1,10 @@
 ![github_banner](https://user-images.githubusercontent.com/16271564/148845983-7c9e85c1-465f-44ed-b1e9-7112908d2e83.png)
 
   <p align="center">
+   Customer data and engagement suite, an open-source alternative to Segment, RudderStack, etc.
+  </p>
+
+  <p align="center">
    <br/>
     <a href="https://docs.tracardi.com" rel="dofollow"><strong>Explore Tracardi Documentation</strong></a> ·
     <a href="https://opencollective.com/tracardi-cdp">⭐️ Support the project</a> ·
