@@ -74,7 +74,7 @@ class ConsentUx(ActionRunner):
                 "data-position": self.config.position,
                 "data-expand-height": self.config.expand_height,
                 "data-profile": self.profile.id,
-                "data-session": self.session.id,
+                "data-session": self.session.id if self.session else None,
                 "data-source": self.event.source.id
             }})
             self.ux.append({"tag": "script", "props": {"src": f"{self.config.uix_source}/uix/consent/index.js"}})

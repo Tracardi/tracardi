@@ -115,6 +115,8 @@ class Resource:
             "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json"),
             "rule": Index(multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json"),
             "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json"),
+            "live-segment": Index(multi_index=False, index="tracardi-live-segment",
+                                  mapping="mappings/live-segment-index.json"),
 
             "debug-info": Index(multi_index=False, index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json"),

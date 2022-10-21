@@ -41,7 +41,9 @@ def register() -> Plugin:
                                 component=FormComponent(type="autocomplete", props={
                                     "label": "Template name",
                                     "endpoint": {
-                                        "url": Endpoint.url(__name__, "get_templates"),
+                                        "url": Endpoint.url(
+                                            'tracardi.process_engine.action.v1.connectors.novu.trigger.plugin',
+                                            'get_templates'),
                                         "method": "post"
                                     },
                                 })
