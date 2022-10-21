@@ -18,7 +18,7 @@ class SearchingAlgorithm(str, Enum):
 class Configuration(PluginConfig):
     first_string: str
     second_string: str
-    searching_algorithm: SearchingAlgorithm
+    algorithm: SearchingAlgorithm
 
     class SearchAlgorithmConfig:
         use_enum_values = True
@@ -29,7 +29,7 @@ class Configuration(PluginConfig):
             raise ValueError("Field cannot be empty")
         return value
 
-    @validator("searching_algorithm")
+    @validator("algorithm")
     def validate_algo(cls, value):
         if not value:
             raise ValueError("You have to choose one of searching algorithms")

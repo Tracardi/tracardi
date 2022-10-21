@@ -17,10 +17,10 @@ class SearchStringSimilarityAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         first_string = dot[self.config.first_string]
         second_string = dot[self.config.second_string]
-        searching_algorithm = self.config.searching_algorithm
+        algorithm = self.config.algorithm
 
         return Result(port='payload', value={
-            "similarity": search_similarity(searching_algorithm, first_string, second_string)
+            "similarity": search_similarity(algorithm, first_string, second_string)
         })
 
 
@@ -38,7 +38,7 @@ def register() -> Plugin:
             init={
                 "first_string": "",
                 "second_string": "",
-                "searching_algorithm": ""
+                "algorithm": "Levenshtein"
             },
             manual="string_similarity_action",
             form=Form(
@@ -71,13 +71,13 @@ def register() -> Plugin:
                                 )
                             ),
                             FormField(
-                                id="searching_algorithm",
-                                name="Searching algorithm",
+                                id="algorithm",
+                                name="Comparison algorithm",
                                 description="Choose algorithm which you want use to compare strings.",
                                 component=FormComponent(
                                     type="select",
                                     props={
-                                        "label": "Searching algorithms",
+                                        "label": "Comparison algorithms",
                                         "items": {
                                             "levenshtein": "Levenshtein",
                                             "normalized_levenshtein": "Normalized Levenshtein",
