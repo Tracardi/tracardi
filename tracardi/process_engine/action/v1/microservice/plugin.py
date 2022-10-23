@@ -97,7 +97,7 @@ def register() -> Plugin:
             name='Microservice',
             desc='Runs remote microservice plugin.',
             icon='cloud',
-            group=["Operations"],
+            group=["Microservices"],
             remote=True,
             documentation=Documentation(
                 inputs={

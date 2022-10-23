@@ -64,11 +64,9 @@ def register() -> Plugin:
         metadata=MetaData(
             name='String splitter',
             desc='It splits string into list of strings by defined delimiter.',
-            type='flowNode',
-            width=300,
-            height=100,
             icon='splitter',
             group=["Data processing"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

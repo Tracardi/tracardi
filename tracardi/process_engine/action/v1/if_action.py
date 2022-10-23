@@ -78,7 +78,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='If',
             desc='This a conditional action that conditionally runs a branch of workflow.',
-            keywords=['condition'],
+            tags=['condition'],
+            purpose=['collection', 'segmentation'],
             type="condNode",
             icon='if',
             group=['Flow control'],

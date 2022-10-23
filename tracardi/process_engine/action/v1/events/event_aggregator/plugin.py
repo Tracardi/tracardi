@@ -50,7 +50,8 @@ def register() -> Plugin:
             name='Event aggregator',
             desc='This plugin aggregates and counts events by defined field within defined time.',
             icon='event',
-            group=["Stats"],
+            group=["Events"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

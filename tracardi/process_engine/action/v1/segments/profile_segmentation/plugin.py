@@ -135,11 +135,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Add/Remove segment',
             desc='This plugin will add/remove segment from the profile.',
-            type='flowNode',
-            width=300,
-            height=100,
             icon='group-person',
-            group=["Data processing"],
+            group=["Segmentation"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

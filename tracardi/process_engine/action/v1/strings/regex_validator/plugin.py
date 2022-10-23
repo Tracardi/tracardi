@@ -67,11 +67,10 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Regex validator',
             desc='Validates data with regex pattern',
-            type='flowNode',
-            width=300,
-            height=100,
             icon='regex',
+            tags=['condition'],
             group=["Regex", "Validators"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

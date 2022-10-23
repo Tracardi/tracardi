@@ -106,6 +106,7 @@ def register() -> Plugin:
             desc='Increments given field in payload, returns payload.',
             icon='plus',
             group=["Stats"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

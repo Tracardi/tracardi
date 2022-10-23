@@ -79,6 +79,9 @@
               "emits_event": {
                 "type": "keyword",
                 "index": false
+              },
+              "purpose": {
+                "type": "keyword"
               }
             }
           },

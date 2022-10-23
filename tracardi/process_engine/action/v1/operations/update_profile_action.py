@@ -25,6 +25,7 @@ def register() -> Plugin:
             desc='Updates profile in storage.',
             icon='store',
             group=["Operations"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any payload object.")

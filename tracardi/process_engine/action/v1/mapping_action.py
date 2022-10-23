@@ -101,7 +101,9 @@ def register() -> Plugin:
             name='Value mapping',
             desc='It returns matching value from the set of data.',
             icon='map-properties',
+            keywords=['switch', 'matching'],
             group=["Data processing"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

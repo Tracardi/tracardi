@@ -28,7 +28,7 @@ class FlowSchema(BaseModel):
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
     lock: bool = False
-    type: str = 'collect'
+    type: str = 'collection'
     wf_schema: FlowSchema = FlowSchema()
 
     def arrange_nodes(self):
@@ -201,6 +201,7 @@ class MetaDataRecord(BaseModel):
     remote: bool = False
     frontend: bool = False
     emits_event: Optional[str] = ""
+    purpose: List[str] = ['collection']
 
     @staticmethod
     def encode(metadata: MetaData) -> 'MetaDataRecord':
@@ -219,7 +220,8 @@ class MetaDataRecord(BaseModel):
             pro=metadata.pro,
             remote=metadata.remote,
             frontend=metadata.frontend,
-            emits_event=b64_encoder(metadata.emits_event)
+            emits_event=b64_encoder(metadata.emits_event),
+            purpose=metadata.purpose
         )
 
     def decode(self) -> MetaData:
@@ -238,7 +240,8 @@ class MetaDataRecord(BaseModel):
             pro=self.pro,
             remote=self.remote,
             frontend=self.frontend,
-            emits_event=b64_decoder(self.emits_event)
+            emits_event=b64_decoder(self.emits_event),
+            purpose=self.purpose
         )
 
 

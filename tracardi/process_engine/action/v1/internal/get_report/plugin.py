@@ -101,6 +101,7 @@ def register() -> Plugin:
             desc='Loads given report\'s results into payload.',
             icon='report',
             group=["Input/Output"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

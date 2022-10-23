@@ -78,6 +78,7 @@ def register() -> Plugin:
             desc='Logs message to flow log.',
             icon='error',
             group=["Error reporting"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

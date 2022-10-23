@@ -46,7 +46,8 @@ def register() -> Plugin:
             name='Event counter',
             desc='This plugin reads how many events of defined type were triggered within defined time.',
             icon='event',
-            group=["Stats"],
+            group=["Events"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

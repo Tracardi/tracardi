@@ -85,11 +85,9 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Regex match',
             desc='This plugin use regex matching and returns matched data.',
-            type='flowNode',
-            width=300,
-            height=100,
             icon='regex',
             group=["Regex"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

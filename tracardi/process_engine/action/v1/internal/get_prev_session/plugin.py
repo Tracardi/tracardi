@@ -68,7 +68,8 @@ def register() -> Plugin:
             desc='Loads previous sessions for current profile, according to config, and injects it into '
                  'payload.',
             icon='previous',
-            group=["Input/Output"],
+            group=["Sessions"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

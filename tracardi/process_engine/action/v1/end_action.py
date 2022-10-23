@@ -26,7 +26,8 @@ def register() -> Plugin:
             desc='Ends workflow.',
             type="startNode",
             icon='stop',
-            group=["Input/Output"],
+            group=["Flow"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

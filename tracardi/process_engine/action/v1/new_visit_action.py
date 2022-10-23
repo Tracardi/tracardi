@@ -33,9 +33,10 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Is it a new visit',
             desc='If new visit then it returns true on TRUE output, otherwise returns false on FALSE port.',
-            keywords=['condition'],
+            tags=['condition'],
             icon='question',
             group=["Flow control"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON like object.")

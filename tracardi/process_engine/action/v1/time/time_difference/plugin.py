@@ -100,6 +100,7 @@ def register() -> Plugin:
             type='flowNode',
             icon='time',
             group=["Time"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port payload object.")

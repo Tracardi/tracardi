@@ -30,7 +30,9 @@ def register() -> Plugin:
             name='Get event source',
             desc='This plugin reads the source that the event came from.',
             icon='inbound',
+            keywords=['input'],
             group=["Input/Output"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

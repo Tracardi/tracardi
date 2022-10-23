@@ -67,6 +67,7 @@ def register() -> Plugin:
             desc='This plugin returns type and length (if it exists) of the given field.',
             icon='plugin',
             group=["Operations"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

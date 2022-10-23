@@ -95,6 +95,7 @@ def register() -> Plugin:
             desc='Counts event, profile, or session records.Records can be filtered by query sting.',
             icon='plugin',
             group=["Stats"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

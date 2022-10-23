@@ -32,3 +32,15 @@ async def refresh():
 
 async def flush():
     return await storage_manager('action').flush()
+
+
+async def filter(purpose: str, limit: int = 500):
+    query = {
+        "size": limit,
+        "query": {
+            "term": {
+                "plugin.metadata.purpose": purpose
+            }
+        }
+    }
+    return await storage_manager("action").query(query)

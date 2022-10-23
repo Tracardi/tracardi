@@ -33,7 +33,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Is it a new profile',
             desc='If new profile then it returns true on TRUE output, otherwise returns false on FALSE port.',
-            keywords=['condition'],
+            tags=['condition'],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON like object.")

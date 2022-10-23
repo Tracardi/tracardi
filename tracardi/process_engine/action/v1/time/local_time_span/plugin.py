@@ -91,6 +91,7 @@ def register() -> Plugin:
             desc='Checks if the current time is within defined time span.',
             icon='profiler',
             group=["Time"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

@@ -258,7 +258,8 @@ def register() -> Plugin:
             icon='start',
             width=200,
             height=200,
-            group=["Input/Output"],
+            group=["Flow"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={},
                 outputs={

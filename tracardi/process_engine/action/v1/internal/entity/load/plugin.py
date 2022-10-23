@@ -119,6 +119,7 @@ def register() -> Plugin:
             desc='Loads entity by its id.',
             icon='entity',
             group=["Input/Output"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

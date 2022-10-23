@@ -58,12 +58,10 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='String properties',
-            desc='This plug-in is to make a string transformations like: lowercase remove spaces split and other',
-            type='flowNode',
-            width=200,
-            height=100,
+            desc='Makes a string transformations like: lowercase remove spaces split and other',
             icon='uppercase',
             group=["Data processing"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

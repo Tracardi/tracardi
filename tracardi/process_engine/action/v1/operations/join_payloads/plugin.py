@@ -87,6 +87,7 @@ def register() -> Plugin:
             type="startNode",
             icon='flow',
             group=["Operations"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

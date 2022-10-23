@@ -92,6 +92,8 @@ def register() -> Plugin:
             desc='Checks if string starts with defined prefix.',
             icon='question',
             group=["Flow control"],
+            tags=['string'],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

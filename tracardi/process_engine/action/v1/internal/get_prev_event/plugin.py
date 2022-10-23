@@ -91,7 +91,8 @@ def register() -> Plugin:
             desc='Injects the previous event for current profile into payload, according to the event type '
                  'and offset value.',
             icon='previous',
-            group=["Input/Output"],
+            group=["Events"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

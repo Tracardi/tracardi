@@ -58,7 +58,8 @@ def register() -> Plugin:
             name='Inject event into payload',
             desc='This node will inject event of given id into payload',
             icon='json',
-            group=["Operations"],
+            keywords=['load'],
+            group=["Events"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

@@ -75,6 +75,7 @@ def register() -> Plugin:
             desc='This plugin resolves a set of conditions and assigns it to the profile fields.',
             icon='if',
             group=["Flow control"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

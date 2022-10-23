@@ -26,7 +26,7 @@ def register() -> Plugin:
             name='Discard Event',
             desc='Discards current event - Current event will not be saved if this action is used.',
             icon='error',
-            group=["Flow control"],
+            group=["Events"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

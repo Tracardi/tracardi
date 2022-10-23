@@ -121,6 +121,7 @@ def register() -> Plugin:
             desc='Returns information about current time, month, day, etc. It will consists of day of the week, date and current time.',
             icon='today',
             group=["Time"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

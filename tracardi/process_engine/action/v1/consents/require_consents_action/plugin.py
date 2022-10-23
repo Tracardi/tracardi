@@ -114,6 +114,7 @@ def register() -> Plugin:
             desc='Checks if defined consents are granted by current profile.',
             icon='consent',
             group=["Consents"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

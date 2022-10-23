@@ -93,6 +93,7 @@ def register() -> Plugin:
             desc='Validates data such as: email, url, ipv4, date, time,int,float, phone number, ean code',
             icon='ok',
             group=["Validators"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON like object.")

@@ -104,6 +104,7 @@ def register() -> Plugin:
             desc='Decrement profile stats.counters value. Returns payload',
             icon='minus',
             group=["Stats"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

@@ -67,7 +67,9 @@ def register() -> Plugin:
             name='Resolve conditions',
             desc='That plugin creates an object with results from resolved condition set.',
             icon='if',
+            tags=['condition'],
             group=["Flow control"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

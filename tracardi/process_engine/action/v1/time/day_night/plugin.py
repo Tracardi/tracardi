@@ -66,11 +66,12 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Day/Night',
             desc='Splits workflow whether it is day or night in a given latitude and longitude.',
-            type='flowNode',
+            tags=['condition'],
             width=200,
             height=100,
             icon='dark-light',
             group=["Time"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")

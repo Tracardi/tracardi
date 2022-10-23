@@ -108,6 +108,8 @@ def register() -> Plugin:
             desc='Checks if field contains defined string.',
             icon='question',
             group=["Flow control"],
+            tags=['string'],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

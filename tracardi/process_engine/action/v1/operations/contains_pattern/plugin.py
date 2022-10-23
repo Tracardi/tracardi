@@ -155,6 +155,7 @@ def register() -> Plugin:
             desc='Checks if field contains defined pattern.',
             icon='question',
             group=["Flow control"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

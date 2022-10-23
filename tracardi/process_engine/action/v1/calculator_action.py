@@ -95,6 +95,7 @@ def register() -> Plugin:
             keywords=['math'],
             icon='calculator',
             group=["Data processing"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

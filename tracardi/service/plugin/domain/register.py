@@ -154,6 +154,7 @@ class MetaData(BaseModel):
     remote: bool = False
     frontend: bool = False
     emits_event: Optional[Dict[str, str]] = {}
+    purpose: List[str] = ['collection']
 
 
 class Plugin(BaseModel):

@@ -93,6 +93,7 @@ def register() -> Plugin:
             tags=['memory', 'join'],
             icon='array',
             group=["Operations"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

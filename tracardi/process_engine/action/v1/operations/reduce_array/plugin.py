@@ -72,6 +72,7 @@ def register() -> Plugin:
             desc='Reduces given array.',
             icon='array',
             group=["Operations"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

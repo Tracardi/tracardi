@@ -58,7 +58,9 @@ def register() -> Plugin:
             name='Data exists',
             desc='Checks if the data property exists and is not null.',
             icon='exists',
-            group=["Operations"],
+            group=["Flow control"],
+            tags=['condition'],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any payload object.")
