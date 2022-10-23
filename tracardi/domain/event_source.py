@@ -15,6 +15,7 @@ class EventSource(Entity):
     groups: Union[List[str], str] = []
     returns_profile: Optional[bool] = False
     permanent_profile_id: Optional[bool] = False
+    requires_consent: Optional[bool] = False
     manual: Optional[str] = None
     locked: bool = False
 

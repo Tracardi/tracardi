@@ -59,6 +59,9 @@
       "permanent_profile_id": {
         "type": "boolean"
       },
+      "requires_consent": {
+        "type": "boolean"
+      },
       "manual": {
         "type": "keyword",
         "index": false

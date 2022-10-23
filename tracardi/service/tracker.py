@@ -235,6 +235,12 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     )
 
     ux = []
+
+    # if source.requires_consent is True:
+    #     ux.append({
+    #
+    #     })
+
     post_invoke_events = None
     flow_responses = FlowResponses([])
     try:
