@@ -185,11 +185,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.operations.segment_profile_action": PluginTestTemplate(
-        init=None,
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.operations.update_profile_action": PluginTestTemplate(
         init=None,
         resource=None
@@ -388,8 +383,18 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.segments.profile_segmentation.plugin": PluginTestTemplate(
+    "tracardi.process_engine.action.v1.segmentation.force.plugin": PluginTestTemplate(
+        init=None,
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.segmentation.conditional.plugin": PluginTestTemplate(
         init={'condition': '', 'false_action': 'remove', 'false_segment': '', 'true_action': 'add', 'true_segment': ''},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.segmentation.add.plugin": PluginTestTemplate(
+        init={'segemnt': 'abc'},
         resource=None
     ),
 

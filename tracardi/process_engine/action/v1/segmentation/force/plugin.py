@@ -23,7 +23,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.operations.segment_profile_action',
+            module=__name__,
             className='SegmentProfileAction',
             inputs=["payload"],
             outputs=["payload"],
@@ -36,7 +36,7 @@ def register() -> Plugin:
             desc='Segment profile when flow ends.This action forces segmentation on profile after flow ends. See '
                  'documentation for more information.',
             icon='segment',
-            group=["Operations"],
+            group=["Segmentation"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

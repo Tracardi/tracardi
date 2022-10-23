@@ -1,5 +1,5 @@
 from tracardi.service.plugin.service.plugin_runner import run_plugin
-from tracardi.process_engine.action.v1.segments.profile_segmentation.plugin import ProfileSegmentAction
+from tracardi.process_engine.action.v1.segmentation.profile_segmentation.plugin import ProfileSegmentAction
 from tracardi.domain.profile import Profile
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity

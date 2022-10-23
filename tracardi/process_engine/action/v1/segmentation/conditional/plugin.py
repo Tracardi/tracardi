@@ -54,7 +54,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.segments.profile_segmentation.plugin',
+            module=__name__,
             className='ProfileSegmentAction',
             inputs=["payload"],
             outputs=['true', "false", "error"],
@@ -133,10 +133,11 @@ def register() -> Plugin:
             ]),
         ),
         metadata=MetaData(
-            name='Add/Remove segment',
+            name='Conditional segmentation',
             desc='This plugin will add/remove segment from the profile.',
-            icon='group-person',
+            icon='segment',
             group=["Segmentation"],
+            tags=['condition'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="Reads payload object.")
