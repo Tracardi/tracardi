@@ -51,7 +51,7 @@ setup(
         'aiobotocore~=1.4.2',
         'google-api-python-client == 2.33.0',
         'google_auth_oauthlib == 0.4.6',
-        'python_weather',
+        'python_weather==0.4.1',
         'geopy',
         'influxdb-client',
         'grpcio==1.48.2',
