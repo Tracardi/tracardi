@@ -39,7 +39,7 @@ setup(
         'mailchimp-transactional',
         'email-validator==1.3.0',
         'lxml==4.9.1',
-        'beautifulsoup==44.11.1',
+        'beautifulsoup==4.11.1',
         'names==0.3.0',
         'motor~=2.5.0',
         'aiodns',
