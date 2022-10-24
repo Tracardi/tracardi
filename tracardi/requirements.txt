@@ -39,7 +39,7 @@ aiobotocore~=1.4.2
 google-api-python-client == 2.33.0
 google_auth_oauthlib == 0.4.6
 python_weather==0.4.1
-influxdb-client
+influxdb-client==1.33.0
 grpcio==1.48.2
 grpcio-tools==1.48.2
 protobuf==3.20.2
