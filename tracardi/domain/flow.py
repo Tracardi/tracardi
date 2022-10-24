@@ -28,7 +28,7 @@ class FlowSchema(BaseModel):
 class Flow(GraphFlow):
     projects: Optional[List[str]] = ["General"]
     lock: bool = False
-    type: str = 'collection'
+    type: str
     wf_schema: FlowSchema = FlowSchema()
 
     def arrange_nodes(self):
@@ -277,7 +277,7 @@ class FlowRecord(NamedEntity):
     production: Optional[str] = ''
     backup: Optional[str] = ''
     lock: bool = False
-    type: str = 'collection'
+    type: str
 
     # Persistence
 

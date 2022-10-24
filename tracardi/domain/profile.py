@@ -30,7 +30,7 @@ class Profile(Entity):
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()
     pii: PII = PII()
-    segments: Optional[list] = List[str]
+    segments: Optional[List[str]] = []
     interests: Optional[dict] = {}
     consents: Optional[Dict[str, ConsentRevoke]] = {}
     active: bool = True

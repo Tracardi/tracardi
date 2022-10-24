@@ -21,7 +21,7 @@
       },
       "type": {
         "type": "keyword",
-        "null_value": "collect"
+        "null_value": "collection"
       },
       "projects": {
         "type": "keyword"

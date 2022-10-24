@@ -36,8 +36,20 @@ async def load_draft_flow(flow_id):
     return flow_record.get_draft_workflow()
 
 
-async def load_all(start:int = 0, limit: int = 100):
+async def load_all(start: int = 0, limit: int = 100):
     return await StorageForBulk().index('flow').load(start=start, limit=limit)
+
+
+async def filter(type: str, limit: int = 100):
+    query = {
+        "size": limit,
+        "query": {
+            "term": {
+                "type": type
+            }
+        }
+    }
+    return await storage_manager('flow').query(query)
 
 
 async def refresh():
