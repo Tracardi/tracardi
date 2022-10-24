@@ -34,7 +34,7 @@ setup(
         'pytimeparse',
         'barcodenumber',
         'astral==2.2',
-        'jsonschema',
+        'jsonschema==4.3.3',
         'python-dateutil==2.8.2',
         'mailchimp-transactional',
         'email-validator==1.3.0',
