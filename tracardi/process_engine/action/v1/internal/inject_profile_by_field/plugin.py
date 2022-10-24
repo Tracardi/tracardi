@@ -56,14 +56,15 @@ def register() -> Plugin:
                 "field": "pii.email",
                 "value": "event@properties.email"
             },
+            manual='profile_inject_action',
             form=Form(groups=[
                 FormGroup(
                     name="Select profile",
                     fields=[
                         FormField(
                             id="field",
-                            name="Field",
-                            description="Select the field by which you would like to identify the profile.",
+                            name="Profile field",
+                            description="Select the PII profile field by which will be used to identify the profile.",
                             component=FormComponent(type="select", props={"label": "Field", "items": {
                                 "pii.email": "E-mail",
                                 "pii.telephone": "Phone",
