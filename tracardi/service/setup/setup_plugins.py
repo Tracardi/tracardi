@@ -488,8 +488,8 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.internal.inject_profile.plugin": PluginTestTemplate(
-        init={'query': '{}'},
+    "tracardi.process_engine.action.v1.internal.inject_profile_by_field.plugin": PluginTestTemplate(
+        init={'field': "pii.email", 'value': 'test@test.com'},
         resource=None
     ),
 
