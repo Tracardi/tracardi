@@ -22,7 +22,7 @@ def validate(config: dict):
     return Configuration(**config)
 
 
-class AddSegmentAction(ActionRunner):
+class DeleteSegmentAction(ActionRunner):
     config: Configuration
 
     async def set_up(self, init):
@@ -32,12 +32,13 @@ class AddSegmentAction(ActionRunner):
         if isinstance(self.profile, Profile):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
-            if self.config.segment not in self.profile.segments:
+            if self.config.segment in self.profile.segments:
                 if not self.debug:
                     profile.operation.update = True
                 else:
                     self.console.warning("Profile is not updated in debug mode.")
-                profile.segments.append(self.config.segment)
+                profile.segments = list(set(profile.segments))
+                profile.segments.remove(self.config.segment)
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:
@@ -53,7 +54,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='AddSegmentAction',
+            className='DeleteSegmentAction',
             inputs=["payload"],
             outputs=["payload"],
             version="0.7.3",
@@ -61,11 +62,11 @@ def register() -> Plugin:
             init={
                 "segment": ""
             },
-            manual="segment_add_action"
+            manual="segment_delete_action"
         ),
         metadata=MetaData(
-            name='Add segment',
-            desc='Adds segment to profile.',
+            name='Delete segment',
+            desc='Deletes segment from profile.',
             icon='segment',
             group=["Segmentation"],
             purpose=['collection', 'segmentation'],

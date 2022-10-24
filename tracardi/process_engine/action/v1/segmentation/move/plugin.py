@@ -9,10 +9,17 @@ from tracardi.service.plugin.domain.result import Result
 
 
 class Configuration(PluginConfig):
-    segment: str
+    from_segment: str
+    to_segment: str
 
-    @validator("segment")
-    def is_not_empty(cls, value):
+    @validator("from_segment")
+    def is_not_empty_from(cls, value):
+        if value == "":
+            raise ValueError("Segment cannot be empty")
+        return value
+
+    @validator("to_segment")
+    def is_not_empty_to(cls, value):
         if value == "":
             raise ValueError("Segment cannot be empty")
         return value
@@ -22,7 +29,7 @@ def validate(config: dict):
     return Configuration(**config)
 
 
-class AddSegmentAction(ActionRunner):
+class MoveSegmentAction(ActionRunner):
     config: Configuration
 
     async def set_up(self, init):
@@ -32,12 +39,13 @@ class AddSegmentAction(ActionRunner):
         if isinstance(self.profile, Profile):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
-            if self.config.segment not in self.profile.segments:
-                if not self.debug:
-                    profile.operation.update = True
-                else:
-                    self.console.warning("Profile is not updated in debug mode.")
-                profile.segments.append(self.config.segment)
+            profile.segments = list(set(profile.segments))
+            profile.segments.remove(self.config.from_segment)
+            profile.segments.append(self.config.to_segment)
+            if not self.debug:
+                profile.operation.update = True
+            else:
+                self.console.warning("Profile is not updated in debug mode.")
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:
@@ -53,19 +61,20 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='AddSegmentAction',
+            className='MoveSegmentAction',
             inputs=["payload"],
             outputs=["payload"],
             version="0.7.3",
             author="Risto Kowaczewski",
             init={
-                "segment": ""
+                "from_segment": "",
+                "to_segment": ""
             },
-            manual="segment_add_action"
+            manual="move_add_action"
         ),
         metadata=MetaData(
-            name='Add segment',
-            desc='Adds segment to profile.',
+            name='Move segment',
+            desc='Moves profile from one segment to other segment.',
             icon='segment',
             group=["Segmentation"],
             purpose=['collection', 'segmentation'],

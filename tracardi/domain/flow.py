@@ -277,7 +277,7 @@ class FlowRecord(NamedEntity):
     production: Optional[str] = ''
     backup: Optional[str] = ''
     lock: bool = False
-    type: str = 'collect'
+    type: str = 'collection'
 
     # Persistence
 

@@ -30,13 +30,16 @@ class Profile(Entity):
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()
     pii: PII = PII()
-    segments: Optional[list] = []
+    segments: Optional[list] = List[str]
     interests: Optional[dict] = {}
     consents: Optional[Dict[str, ConsentRevoke]] = {}
     active: bool = True
 
-    def replace(self, profile):
+    def replace(self, profile: 'Profile'):
         if isinstance(profile, Profile):
+            # Make segments unique
+            profile.segments = list(set(profile.segments))
+
             self.id = profile.id
             self.metadata = profile.metadata
             self.operation = profile.operation
@@ -232,14 +235,12 @@ class Profiles(List[Profile]):
 
             if isinstance(profile.segments, list):
                 segments += profile.segments
+                segments = list(set(segments))
 
             consents.update(profile.consents)
 
             for interest, count in profile.interests.items():
                 interests[interest] += profile.interests[interest]
-
-            # make uniq
-            segments = list(set(segments))
 
         # Set id to merged id or current profile id.
         id = current_profile.metadata.merged_with if current_profile.metadata.merged_with is not None else current_profile.id

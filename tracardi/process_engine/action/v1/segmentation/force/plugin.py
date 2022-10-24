@@ -39,10 +39,10 @@ def register() -> Plugin:
             group=["Segmentation"],
             documentation=Documentation(
                 inputs={
-                    "payload": PortDoc(desc="This port takes any JSON-like object.")
+                    "payload": PortDoc(desc="This port takes any payload.")
                 },
                 outputs={
-                    "payload": PortDoc(desc="This port returns exactly same payload as given one.")
+                    "payload": PortDoc(desc="This port returns input payload.")
                 }
             )
         )

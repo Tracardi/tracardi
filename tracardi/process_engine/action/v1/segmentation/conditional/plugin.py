@@ -19,16 +19,17 @@ class ProfileSegmentAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    def _update(self, profile, segment, action):
+    def _update(self, profile: Profile, segment, action):
         action = action.lower()
         if action == 'add':
             if segment not in profile.segments:
                 profile.segments.append(segment)
-            self.profile.replace(profile)
         elif action == 'remove':
             if segment in profile.segments:
+                profile.segments = list(set(profile.segments))
                 profile.segments.remove(segment)
-            self.profile.replace(profile)
+
+        self.profile.replace(profile)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is False:
