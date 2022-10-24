@@ -104,3 +104,15 @@ async def load_duplicates(id: str):
             {"metadata.time.insert": "desc"}
         ]
     })
+
+
+async def load_by_field(field: str, value: str, start: int, limit: 2):
+    return await storage_manager('profile').query({
+        "from": start,
+        "size": limit,
+        "query": {
+            "term": {
+                field: value
+            }
+        }
+    })

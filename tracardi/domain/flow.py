@@ -4,7 +4,7 @@ from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
 from typing import Optional, List, Any
 from pydantic import BaseModel
-from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, Edge, Position, Node, EdgeBundle
+from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, EdgeBundle
 from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents, MicroserviceConfig
 
 from ..config import tracardi
@@ -70,7 +70,8 @@ class Flow(GraphFlow):
             projects=self.projects,
             draft=production,
             production=production,
-            lock=self.lock
+            lock=self.lock,
+            type=self.type
         )
 
     def get_empty_workflow_record(self) -> 'FlowRecord':
@@ -80,7 +81,8 @@ class Flow(GraphFlow):
             description=self.description,
             name=self.name,
             projects=self.projects,
-            lock=self.lock
+            lock=self.lock,
+            type='collection'
         )
 
     @staticmethod
@@ -99,7 +101,8 @@ class Flow(GraphFlow):
             id=str(uuid.uuid4()) if id is None else id,
             name="Empty",
             wf_schema=FlowSchema(version=str(tracardi.version)),
-            flowGraph=FlowGraphData(nodes=[], edges=[])
+            flowGraph=FlowGraphData(nodes=[], edges=[]),
+            type='collection'
         )
 
     @staticmethod
@@ -117,7 +120,8 @@ class Flow(GraphFlow):
             flowGraph=FlowGraphData(
                 nodes=[],
                 edges=[]
-            )
+            ),
+            type='collection'
         )
 
     def __add__(self, edge_bundle: EdgeBundle):
