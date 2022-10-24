@@ -17,7 +17,7 @@ setup(
     install_requires=[
         'pip>=21.2.4',
         'pydantic',
-        'aiohttp==3.8.3',
+        'aiohttp',
         'aiohttp[speedups]',
         'redis',
         'aioredis==2.0.0',
