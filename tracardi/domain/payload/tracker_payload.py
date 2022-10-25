@@ -141,12 +141,12 @@ class TrackerPayload(BaseModel):
 
                 else:
 
-                    # Id exists load profile from storage
+                    # ID exists, load profile from storage
                     profile = await load_merged_profile(id=self.profile.id)  # type: Profile
 
                     if profile is None:
                         # Profile id delivered but profile does not exist in storage.
-                        # Id was forged
+                        # ID was forged
 
                         profile = Profile.new()
 
@@ -196,7 +196,7 @@ class TrackerPayload(BaseModel):
 
                 # Although we tried to load profile it still does not exist.
                 if profile is None:
-                    # Id exists but profile not exist in storage.
+                    # ID exists but profile not exist in storage.
 
                     profile = Profile.new()
 

@@ -28,7 +28,7 @@ class Config(PluginConfig):
     @validator("uix_source")
     def validate_uix_source(cls, value):
         if value is None or len(value) == 0:
-            raise ValueError("This field canot be empty.")
+            raise ValueError("This field cannot be empty.")
         return value
 
     @validator("message")

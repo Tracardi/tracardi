@@ -83,7 +83,7 @@ class Profile(Entity):
         # todo cache segments for 30 sec
         flat_profile = DotAccessor(
             profile=self
-            # it has access only to profile. Other data is irrelevant 'coz we check only profile.
+            # it has access only to profile. Other data is irrelevant because we check only profile.
         )
 
         for event_type in event_types:  # type: str

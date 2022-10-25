@@ -86,7 +86,7 @@ async def create_indices():
                         raise ConnectionError(f"Can NOT DELETE template {template_name}.")
                     logger.info(f"{alias_index} - DELETED template {template_name}.")
 
-                # Multi indices need templates. Index will be create automatically on first insert
+                # Multi indices need templates. Index will be created automatically on first insert
                 result = await es.put_index_template(template_name, map)
 
                 if not acknowledged(result):

@@ -158,7 +158,7 @@ class FlowGraphData(BaseModel):
             distance_map[start_at_id] = curr_distance
 
         #  (edge.target not in path) equivalent to (edge.target is not a parent/grandparent/... of curr node) so
-        #  we're avoiding cycles here, also considering the case when the node is it's own parent and child
+        #  we're avoiding cycles here, also considering the case when the node is its own parent and child
         children = [edge.target for edge in self.get_nodes_out_edges(start_at_id) if edge.target not in path]
 
         for child in children:
