@@ -338,6 +338,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.strings.string_similarity.plugin": PluginTestTemplate(
+        init={'first_string': "", 'second_string': "", 'algorithm': ""},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.time.sleep_action": PluginTestTemplate(
         init={'wait': 1},
         resource=None

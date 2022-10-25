@@ -64,7 +64,8 @@ setup(
         'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker',
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
         'googletrans==3.1.0a0',
-        'tweepy==4.10.1'
+        'tweepy==4.10.1',
+        'strsimpy==0.2.1'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
