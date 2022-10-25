@@ -9,6 +9,7 @@ Version 0.7.3-dev
 * Twitter plugin
 * SMS77 plugin
 * Zendesk chat plugin
+* Intercom plugin
 * Chatwoot chat plugin
 * Plugin that sorts dictionary
 * Join array of strings into string plugin
@@ -18,6 +19,7 @@ Version 0.7.3-dev
 * Command CONTAINS, STARTS_WTH and ENDS_WITH to IF plugin
 * SMTP Mail bride
 * MQTT bridge
+* "Load profile by ..." plugin
 * Live segmentation server
 * Adds missing documentation for:
   * ActiveCampaign resource
@@ -28,9 +30,14 @@ Version 0.7.3-dev
   * Zapier resource
   * InfluxDB resource
 * Adds missing documentation for some plugins
+* New menu and data layout
 
 ## Errors
 
 * Problem with connecting nodes in graph 
 * Missing session timeline
 * Solves problem with missing destinations
+
+## Misc
+
+* Upgrade to python 3.9
