@@ -29,6 +29,6 @@ async def load_by_query_string(query_string: str, start: int = 0, limit: int = 1
 async def exists():
     es = ElasticClient.instance()
     index = resources.get_index("log")
-    # Check for template as index will be created with first insert. So there may not be index but everything is ok
+    # Check for template as index will be created with first insert. So there may not be an index but everything is ok
     # because template exists.
     return await es.exists_index_template(name=index.get_prefixed_template_name())

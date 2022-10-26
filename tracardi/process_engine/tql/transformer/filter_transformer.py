@@ -114,11 +114,11 @@ class FilterTransformer(TransformerNamespace):
         return args
 
     def op_between(self, args):
-        elsatic_field, _, values = args  # type: ElasticFieldCondition, str, list
+        elastic_field, _, values = args  # type: ElasticFieldCondition, str, list
         value1, value2 = values
         return {
             "range": {
-                elsatic_field.field: {
+                elastic_field.field: {
                     "gte": value1,
                     "lte": value2
                 }

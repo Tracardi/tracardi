@@ -215,7 +215,7 @@ class GraphInvoker(BaseModel):
         if node.start:
 
             # This is first node in graph.
-            # During debugging debug nodes are removed.
+            # During debugging, debug nodes are removed.
 
             _port = "payload"
             _payload = {}
@@ -300,7 +300,7 @@ class GraphInvoker(BaseModel):
 
             input_edge_id = edge.id if edge is not None else None
 
-            # Get previous session and profile. Session or profile can be override so we need to be sure when the
+            # Get previous session and profile. Session or profile can be overridden, so we need to be sure when the
             # reference has changed
 
             _current_profile_reference = node.object.profile

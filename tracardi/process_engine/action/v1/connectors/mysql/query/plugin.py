@@ -162,8 +162,8 @@ def register() -> Plugin:
                             id="data",
                             name="Data for SQL statement",
                             description="Type data for prepared SQL statement. Data must be a list "
-                                        "of values or paths to values. It will replace %s placeholders in SQL statment. "
-                                        "It will replace placeholders one by one so order matters.",
+                                        "of values or paths to values. It will replace %s placeholders in SQL "
+                                        "statement. It will replace placeholders one by one so order matters.",
                             component=FormComponent(
                                 type="listOfDotPaths",
                                 props={"label": "List of data", "allowDuplicates": True})

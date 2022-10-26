@@ -9,7 +9,7 @@ class Validator:
         self.validation_rules = self._get_regex()
 
     def _get_regex(self):
-        """Get a actual regex with dict from validation_type."""
+        """Get an actual regex with dict from validation_type."""
         return {
             'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
             'url': r'^https?:\/\/\w+(\.\w+)*(:[0-9]+)?(\/.*)?$',

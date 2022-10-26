@@ -70,7 +70,7 @@ class MicroserviceAction(ActionRunner):
                 result = Result(**microservice_response.result)
 
                 if result.port not in allowed_ports:
-                    raise NotImplementedError(f"Plugin {node.microservice.plugin.name} not implemented correcly. "
+                    raise NotImplementedError(f"Plugin {node.microservice.plugin.name} not implemented correctly. "
                                               f"It must return result either on port response or error, returned data "
                                               f"on port {result.port}")
 
