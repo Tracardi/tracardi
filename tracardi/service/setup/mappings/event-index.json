@@ -74,9 +74,7 @@
           "null_value": "NULL"
         },
         "properties": {
-          "enabled": false,
-          "dynamic": "true",
-          "type": "object"
+          "type": "flattened"
         },
         "request": {
           "enabled": false,

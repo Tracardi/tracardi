@@ -27,9 +27,7 @@
         "type": "keyword"
       },
       "properties": {
-        "type": "object",
-        "dynamic": "true",
-        "enabled": false
+        "type": "flattened"
       },
       "traits": {
         "type": "object",
