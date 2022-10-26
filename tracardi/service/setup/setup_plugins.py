@@ -5,8 +5,13 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
+    "tracardi.process_engine.action.v1.ux.intercom.plugin": PluginTestTemplate(
+        init={"app_id": "some-number", "api_url": "http://localhost:8686"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.ux.chatwoot.plugin": PluginTestTemplate(
-        init={"token": "some-number", "api_url": "http://localhost:8686"},
+        init={"app_id": "some-number", "api_url": "http://localhost:8686"},
         resource=None
     ),
 
@@ -330,6 +335,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.strings.regex_replace.plugin": PluginTestTemplate(
         init={'find_regex': "abc", 'replace_with': "123", 'string': "abc"},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.strings.string_similarity.plugin": PluginTestTemplate(
+        init={'first_string': "", 'second_string': "", 'algorithm': ""},
         resource=None
     ),
 
