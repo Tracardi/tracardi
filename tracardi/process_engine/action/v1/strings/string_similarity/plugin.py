@@ -38,7 +38,7 @@ def register() -> Plugin:
             init={
                 "first_string": "",
                 "second_string": "",
-                "algorithm": "Levenshtein"
+                "algorithm": "normalized_levenshtein"
             },
             manual="string_similarity_action",
             form=Form(
@@ -100,7 +100,7 @@ def register() -> Plugin:
             name="String similarity",
             desc="Compare both strings according to chosen algorithm.",
             icon="question",
-            group=["Flow control"],
+            group=["String"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

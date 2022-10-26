@@ -65,7 +65,7 @@ def register() -> Plugin:
             name='String splitter',
             desc='It splits string into list of strings by defined delimiter.',
             icon='splitter',
-            group=["Data processing"],
+            group=["String"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={

@@ -65,7 +65,7 @@ def register() -> Plugin:
             name="Join string list",
             desc='It joins each element in the list by given delimiter.',
             icon='uppercase',
-            group=["Data processing"],
+            group=["String"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

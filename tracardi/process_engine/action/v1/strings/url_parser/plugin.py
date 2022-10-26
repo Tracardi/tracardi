@@ -80,7 +80,7 @@ def register() -> Plugin:
             width=300,
             height=100,
             icon='url',
-            group=["Data processing"],
+            group=["Parsers"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

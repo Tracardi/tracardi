@@ -11,6 +11,7 @@ class SearchingAlgorithm(str, Enum):
     damerau_levenshtein = "damerau_levenshtein"
     optimal_string_alignment = "optimal_string_alignment"
     jaro_winkler = "jaro_winkler"
+    damerau = 'damerau'
     longest_common_subsequence = "longest_common_subsequence"
     metric_longest_common_subsequence = "metric_longest_common_subsequence"
 

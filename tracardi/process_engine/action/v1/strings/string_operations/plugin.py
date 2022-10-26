@@ -60,7 +60,7 @@ def register() -> Plugin:
             name='String properties',
             desc='Makes a string transformations like: lowercase remove spaces split and other',
             icon='uppercase',
-            group=["Data processing"],
+            group=["String"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={

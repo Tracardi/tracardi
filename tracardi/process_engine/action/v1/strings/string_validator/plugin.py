@@ -92,7 +92,7 @@ def register() -> Plugin:
             name='Data validator',
             desc='Validates data such as: email, url, ipv4, date, time,int,float, phone number, ean code',
             icon='ok',
-            group=["Validators"],
+            group=["String"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
