@@ -14,6 +14,7 @@ Version 0.7.3-dev
 * Plugin that sorts dictionary
 * Join array of strings into string plugin
 * String similarity plugin
+* Whois plugin
 * New resource details page
 * New event source details page
 * Command CONTAINS, STARTS_WTH and ENDS_WITH to IF plugin

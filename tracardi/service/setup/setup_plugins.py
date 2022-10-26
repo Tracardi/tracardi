@@ -5,6 +5,11 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
+    "tracardi.process_engine.action.v1.connectors.whois.plugin": PluginTestTemplate(
+        init={"domain": "some.com"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.ux.intercom.plugin": PluginTestTemplate(
         init={"app_id": "some-number", "api_url": "http://localhost:8686"},
         resource=None
