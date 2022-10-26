@@ -72,7 +72,7 @@ def register() -> Plugin:
                 },
                 outputs={
                     "success": PortDoc(desc="This port returns payload if data was successfully read from memory."),
-                    "error": PortDoc(desc="This port returns some error detail if there was an error while readin data"
+                    "error": PortDoc(desc="This port returns some error detail if there was an error while reading data"
                                           " from memory.")
                 }
             )

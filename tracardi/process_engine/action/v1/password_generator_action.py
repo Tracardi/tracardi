@@ -109,7 +109,7 @@ def register() -> Plugin:
                             FormField(
                                 id="lowercase",
                                 name="Lowercase characters",
-                                description="Please provide numer of lowercase characters.",
+                                description="Please provide number of lowercase characters.",
                                 component=FormComponent(
                                     type="text",
                                     props={

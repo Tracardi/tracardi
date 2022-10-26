@@ -49,7 +49,7 @@ class PostponedCall:
     def _schedule_for_later(self, loop):
 
         # We must keep info about the loop.call_later being called in lock_pool variable, as if the instance
-        # dies (loop.call_later is cancelled) and there is a global flag that loop.call_later is running but locally it
+        # dies (loop.call_later is cancelled) and there is a global flag that loop.call_later is running, but locally it
         # is not. So we must recreate it.
 
         loop.call_later(self.wait, self._execute, loop)
