@@ -74,7 +74,7 @@ class Flow(GraphFlow):
             type=self.type
         )
 
-    def get_empty_workflow_record(self) -> 'FlowRecord':
+    def get_empty_workflow_record(self, type: str) -> 'FlowRecord':
 
         return FlowRecord(
             id=self.id,
@@ -82,7 +82,7 @@ class Flow(GraphFlow):
             name=self.name,
             projects=self.projects,
             lock=self.lock,
-            type='collection'
+            type=type
         )
 
     @staticmethod
@@ -106,7 +106,7 @@ class Flow(GraphFlow):
         )
 
     @staticmethod
-    def build(name: str, description: str = None, id=None, lock=False, projects=None) -> 'Flow':
+    def build(name: str, description: str = None, id=None, lock=False, projects=None, type='collection') -> 'Flow':
         if projects is None:
             projects = ["General"]
 
@@ -121,7 +121,7 @@ class Flow(GraphFlow):
                 nodes=[],
                 edges=[]
             ),
-            type='collection'
+            type=type
         )
 
     def __add__(self, edge_bundle: EdgeBundle):

@@ -72,7 +72,7 @@ def register() -> Plugin:
                             FormField(
                                 id="license",
                                 name="Your LiveChat license number",
-                                component=FormComponent(type="text", props={"label": "Livechat License"})
+                                component=FormComponent(type="password", props={"label": "Livechat License"})
                             )
                         ]
                     )
