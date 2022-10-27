@@ -595,8 +595,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             'target_encoding': '',
         },
         resource=None,
-    ),
-
+    )
 }
 
 # Plugins only for testing
