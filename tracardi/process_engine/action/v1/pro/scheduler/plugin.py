@@ -7,6 +7,7 @@ from tracardi.domain.scheduler_config import SchedulerConfig
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.action.v1.pro.scheduler.model.configuration import Configuration
 from tracardi.process_engine.action.v1.pro.scheduler.service.schedule_client import SchedulerClient
+from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
@@ -38,6 +39,12 @@ class SchedulerPlugin(ActionRunner):
             client = SchedulerClient(tracardi.config.tracardi.tracardi_scheduler_host)
             schedule_at = datetime.utcnow() + timedelta(seconds=self.config.postpone)
             schedule_at = f'{str(schedule_at)}+00:00'
+
+            properties = json.loads(self.config.properties)
+            dot = self._get_dot_accessor(payload)
+            reshaper = DictTraverser(dot)
+            properties = reshaper.reshape(properties)
+
             result = await client.schedule(
                 schedule_at=schedule_at,
                 callback_host=self.credentials.callback_host,
@@ -45,7 +52,7 @@ class SchedulerPlugin(ActionRunner):
                 profile_id=self.profile.id if self.profile is not None else None,
                 session_id=self.session.id if self.session is not None else None,
                 event_type=self.config.event_type,
-                properties=json.loads(self.config.properties),
+                properties=properties,
                 context=self.event.context,
                 request=self.event.request
             )
