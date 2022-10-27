@@ -1,4 +1,4 @@
-git+https://github.com/Tracardi/worker.git@master
+git+https://github.com/Tracardi/worker.git@0.7.2
 git+https://github.com/elasticemail/elasticemail-python.git@4.0.20
 
 pydantic
