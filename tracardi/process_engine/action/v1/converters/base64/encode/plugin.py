@@ -39,7 +39,7 @@ def register() -> Plugin:
             className=Base64EncodeAction.__name__,
             inputs=['payload'],
             outputs=['payload'],
-            version='0.1',
+            version='0.7.3',
             license='MIT',
             author='knittl',
             manual='base64_encode',
@@ -77,6 +77,7 @@ def register() -> Plugin:
             name='Encode Base64',
             desc='Encodes input text to base64',
             group=['Converters'],
+            icon='password',
             tags=['base64'],
             documentation=Documentation(
                 inputs={

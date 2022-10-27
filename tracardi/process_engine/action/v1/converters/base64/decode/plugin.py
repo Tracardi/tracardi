@@ -40,7 +40,7 @@ def register() -> Plugin:
             className=Base64DecodeAction.__name__,
             inputs=['payload'],
             outputs=['payload'],
-            version='0.1',
+            version='0.7.3',
             license='MIT',
             author='knittl',
             manual='base64_decode',
@@ -78,6 +78,7 @@ def register() -> Plugin:
             name='Decode Base64',
             desc='Decodes a base64-encoded input to plain text',
             group=['Converters'],
+            icon='uppercase',
             tags=['base64'],
             documentation=Documentation(
                 inputs={
