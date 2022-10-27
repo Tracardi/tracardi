@@ -1,5 +1,6 @@
 from base64 import b64decode
 
+from tracardi.process_engine.action.v1.converters.base64.utils.text_encodings import common_encodings
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
@@ -45,7 +46,7 @@ def register() -> Plugin:
             manual='base64_decode',
             init={
                 'source': '',
-                'target_encoding': 'utf-8'
+                'target_encoding': 'utf_8'
             },
             form=Form(groups=[
                 FormGroup(
@@ -60,9 +61,15 @@ def register() -> Plugin:
                             id='target_encoding',
                             name='Target Encoding',
                             description='Output text encoding. Will be used to convert output bytes to text after '
-                                        'base64-decoding it. Set to "utf-8" if unsure.',
-                            component=FormComponent(type='text', props={'label': 'encoding'})
-                        )
+                                        'base64-decoding it. If unsure, choose "UTF-8". If the required encoding is '
+                                        'not listed, it must be configured in the raw JSON config (all standard Python '
+                                        'text encoding keys are supported)',
+                            component=FormComponent(type='select', props={
+                                'label': 'encoding',
+                                'items': common_encodings,
+                                'initValue': 'utf_8'
+                            }),
+                        ),
                     ]
                 ),
             ]),
