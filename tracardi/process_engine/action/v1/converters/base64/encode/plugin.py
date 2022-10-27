@@ -1,5 +1,6 @@
 from base64 import b64encode
 
+from tracardi.process_engine.action.v1.converters.base64.utils.text_encodings import common_encodings
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Documentation, Form, FormComponent, FormField, FormGroup, \
     MetaData, Plugin, PortDoc, Spec
@@ -44,7 +45,7 @@ def register() -> Plugin:
             manual='base64_encode',
             init={
                 'source': '',
-                'source_encoding': 'utf-8',
+                'source_encoding': 'utf_8',
             },
             form=Form(groups=[
                 FormGroup(
@@ -59,8 +60,14 @@ def register() -> Plugin:
                             id='source_encoding',
                             name='Source Encoding',
                             description='Input text encoding. Will be used to convert input text to bytes before '
-                                        'base64-encoding it. Set to "utf-8" if unsure.',
-                            component=FormComponent(type='text', props={'label': 'encoding'}),
+                                        'base64-encoding it. If unsure, choose "UTF-8". If the required encoding is '
+                                        'not listed, it must be configured in the raw JSON config (all standard Python '
+                                        'text encoding keys are supported)',
+                            component=FormComponent(type='select', props={
+                                'label': 'encoding',
+                                'items': common_encodings,
+                                'initValue': 'utf_8'
+                            }),
                         ),
                     ],
                 ),

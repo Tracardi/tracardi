@@ -37,3 +37,17 @@ def test_encodes_default_to_base64():
 
     assert result.output.port == 'payload'
     assert result.output.value == {'base64': 'MQ=='}
+
+
+def test_uses_source_encoding():
+    init = {
+        'source': 'payload@text',
+        'source_encoding': 'utf-32-be',
+    }
+    payload = {
+        'text': 'hi',
+    }
+    result = run_plugin(Base64EncodeAction, init, payload)
+
+    assert result.output.port == 'payload'
+    assert result.output.value == {'base64': 'AAAAaAAAAGk='}

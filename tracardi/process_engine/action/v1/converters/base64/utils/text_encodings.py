@@ -1,0 +1,15 @@
+common_encodings = {
+    'utf_8': 'UTF-8',
+    'utf_16_be': 'UTF-16 (Big endian)',
+    'utf_16_le': 'UTF-16 (Little endian)',
+    'utf_32_be': 'UTF-32 (Big endian)',
+    'utf_32_le': 'UTF-32 (Little endian)',
+    'ascii': 'ASCII',
+    'big5': 'Big-5 (Traditional Chinese)',
+    'euc_jp': 'EUC_JP (Japanese)',
+    'euc_kr': 'EUC_KR (Korean)',
+    'gbk': 'GBK (Unified Chinese)',
+    'hz': 'HZ (Simplified Chinese)',
+    'iso8859-15': 'ISO 8859-15 (Western Europe)',
+    'windows-1250': 'Windows-1250 (Central and Eastern Europe)',
+}
