@@ -404,6 +404,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.segmentation.has.plugin": PluginTestTemplate(
+        init={"segment": "abc"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.segmentation.conditional.plugin": PluginTestTemplate(
         init={'condition': '', 'false_action': 'remove', 'false_segment': '', 'true_action': 'add', 'true_segment': ''},
         resource=None
