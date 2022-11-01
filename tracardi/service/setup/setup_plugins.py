@@ -200,6 +200,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.operations.discard_profile_update_action": PluginTestTemplate(
+        init=None,
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.operations.update_event_action": PluginTestTemplate(
         init=None,
         resource=None

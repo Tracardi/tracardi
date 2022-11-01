@@ -74,6 +74,18 @@ class ActionRunner:
         else:
             self.console.warning("Profile update skipped. It will not be updated when debugging.")
 
+    def discard_profile_update(self):
+        if self.debug is not True:
+            if isinstance(self.profile, Profile):
+                self.profile.operation.update = False
+            else:
+                if self.event.metadata.profile_less is True:
+                    self.console.warning("Can not update profile when processing profile less events.")
+                else:
+                    self.console.error("Can not update profile. Profile is empty.")
+        else:
+            self.console.warning("Profile update skipped. It will not be updated when debugging.")
+
     def set_tracker_option(self, key, value):
         if isinstance(self.tracker_payload, TrackerPayload):
             self.tracker_payload.options[key] = value
