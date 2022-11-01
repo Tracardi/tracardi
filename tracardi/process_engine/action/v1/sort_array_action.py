@@ -1,13 +1,9 @@
 from pydantic import validator
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.domain.event import Event
-from tracardi.domain.session import Session
-from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.process_engine.tql.equation import MathEquation
 
 
 class SortConfig(PluginConfig):
@@ -31,7 +27,7 @@ def validate(config: dict):
     return SortConfig(**config)
 
 
-class SortAction(ActionRunner):
+class SortArrayAction(ActionRunner):
     config: SortConfig
 
     async def set_up(self, init):
@@ -40,9 +36,20 @@ class SortAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         reverse = True if self.config.direction == "desc" else False
         dot = self._get_dot_accessor(payload)
-        data = dot[self.config.data]
-        array = sorted(data, reverse=reverse)
-        return Result(port="sorted_array", value=array)
+        try:
+            data = dot[self.config.data]
+        except KeyError as e:
+            return Result(port="error", value={
+                "message": str(e)
+            })
+
+        if isinstance(data, list):
+            array = sorted(data, reverse=reverse)
+            return Result(port="sorted_array", value=array)
+
+        return Result(port="error", value={
+            "message": f"Referenced {self.config.data} is not an array."
+        })
 
 
 def register() -> Plugin:
@@ -51,25 +58,25 @@ def register() -> Plugin:
         debug=False,
         spec=Spec(
             module=__name__,
-            className=SortAction.__name__,
+            className=SortArrayAction.__name__,
             inputs=["payload"],
-            outputs=["sorted_array"],
-            manual="sort_action",
+            outputs=["sorted_array", "error"],
+            manual="sort_array_action",
             init={
                 "data": "",
                 "direction": "asc",
             },
-            version='0.0.0.1',
+            version='0.7.3',
             license="MIT",
             author="Tanay PrabhuDesai",
             form=Form(
                 groups=[
                     FormGroup(
-                        name="Sort plugin configuration",
+                        name="Sort array plugin configuration",
                         fields=[
                             FormField(
                                 id="data",
-                                name="Type dotted path from the payload that you want to sort",
+                                name="Type dotted path from the data that you want to sort",
                                 component=FormComponent(
                                     type="dotPath",
                                     props={
@@ -80,7 +87,7 @@ def register() -> Plugin:
                             ),
                             FormField(
                                 id="direction",
-                                name="Direction of the sorting that you want to be done",
+                                name="Direction of the sorting.",
                                 component=FormComponent(
                                     type="select",
                                     props={
@@ -99,10 +106,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='SortAction',
-            desc='Plugin that sorts (ascending, descending) a referenced array in plugin config',
-            keywords=['sort'],
-            group=["Flow Control"],
+            name='Sort list',
+            desc='Plugin that sorts (ascending, descending) a referenced array/list.',
+            keywords=['sort', 'array'],
+            icon='sort',
+            group=["Operations"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object")

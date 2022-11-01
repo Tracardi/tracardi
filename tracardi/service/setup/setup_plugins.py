@@ -606,7 +606,12 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             'target_encoding': '',
         },
         resource=None,
-    )
+    ),
+
+    "tracardi.process_engine.action.v1.sort_array_action": PluginTestTemplate(
+        init={"data": "event@properties.list_of_something", "direction": "asc"},
+        resource=None
+    ),
 }
 
 # Plugins only for testing
@@ -1191,11 +1196,6 @@ test_plugins: Dict[str, PluginTestTemplate] = {
             "user": "<user>",
             "password": "<password>"
         }
-    ),
-
-    "tracardi.process_engine.action.v1.sort_action": PluginTestTemplate(
-        init={"data": "event@properties.list_of_something", "direction": "asc"},
-        resource=None
     ),
 
     # Moved to microservice
