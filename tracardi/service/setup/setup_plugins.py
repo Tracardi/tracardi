@@ -220,6 +220,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+
     "tracardi.process_engine.action.v1.mapping_action": PluginTestTemplate(
         init={'case_sensitive': False, 'mapping': {'a': 'profile@id'}, 'value': 'x'},
         resource=None
@@ -1180,6 +1181,11 @@ test_plugins: Dict[str, PluginTestTemplate] = {
             "user": "<user>",
             "password": "<password>"
         }
+    ),
+
+    "tracardi.process_engine.action.v1.sort_action": PluginTestTemplate(
+        init={"data": "event@properties.list_of_something", "direction": "asc"},
+        resource=None
     ),
 
     # Moved to microservice
