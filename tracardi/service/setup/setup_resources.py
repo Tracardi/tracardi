@@ -342,7 +342,18 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=["hubspot"],
             name="HubSpot",
             manual="hubspot_resource"
-        )
+        ),
+        ResourceSettings(
+            id='github',
+            config={
+                'api_url': 'https://api.github.com/',
+                'personal_access_token': '<your-access-token>',
+            },
+            icon='github',
+            tags=['github'],
+            name='GitHub',
+            manual='github_resource',
+        ),
     ]
 
 
