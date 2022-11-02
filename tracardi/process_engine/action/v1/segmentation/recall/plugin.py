@@ -47,6 +47,7 @@ def register() -> Plugin:
             outputs=["result", "error"],
             version="0.7.3",
             author="Risto Kowaczewski",
+            license="Tracardi Pro License",
             init={
                 "memory_key": "profile.segments"
             },
@@ -82,6 +83,7 @@ def register() -> Plugin:
                     "result": PortDoc(desc="This port returns memorized segments."),
                     "error": PortDoc(desc="This port returns error message if segments could no tbe found.")
                 }
-            )
+            ),
+            pro=True
         )
     )

@@ -53,8 +53,8 @@ def register() -> Plugin:
                             id="source",
                             name="Inbound traffic",
                             description="Please select open inbound event source through which scheduler will send "
-                                        "the event. If you do not know which one to choose the save option is "
-                                        "@current-source.",
+                                        "the event. If you do not know which one to choose than the save option is "
+                                        "@current-source. It will use the current event inbound traffic source.",
                             component=FormComponent(type="autocomplete", props={
                                 "label": "Event source",
                                 "endpoint": {

@@ -53,6 +53,7 @@ def register() -> Plugin:
             outputs=["payload"],
             version="0.7.3",
             author="Risto Kowaczewski",
+            license="Tracardi Pro License",
             init={
                 "memory_key": "profile.segments"
             },
@@ -87,6 +88,7 @@ def register() -> Plugin:
                 outputs={
                     "payload": PortDoc(desc="This port returns input payload.")
                 }
-            )
+            ),
+            pro=True
         )
     )
