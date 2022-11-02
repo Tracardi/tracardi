@@ -454,11 +454,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginTestTemplate(
-        init={'index': "index", 'query': '{"query":{"match_all":{}}}', 'source': {'id': '1', 'name': 'Some value'}},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.connectors.discord.push.plugin": PluginTestTemplate(
         init={'message': 'message', 'timeout': 10, 'url': None, 'username': None},
         resource=None
@@ -667,6 +662,11 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #           'vertical_pos': 'bottom'},
     #     resource=None
     # ),
+
+    "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginTestTemplate(
+        init={'index': "index", 'query': '{"query":{"match_all":{}}}', 'source': {'id': '1', 'name': 'Some value'}},
+        resource=None
+    ),
 
     "tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry": PluginTestTemplate(
         init={
