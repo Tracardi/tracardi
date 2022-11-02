@@ -10,12 +10,12 @@ from tracardi.service.plugin.domain.result import Result
 
 
 class Configuration(PluginConfig):
-    segment: str
+    memory_key: str
 
-    @validator("segment")
+    @validator("memory_key")
     def is_not_empty(cls, value):
         if value == "":
-            raise ValueError("Segment cannot be empty")
+            raise ValueError("Segment memory key cannot be empty")
         return value
 
 
@@ -23,7 +23,7 @@ def validate(config: dict):
     return Configuration(**config)
 
 
-class HasSegmentAction(ActionRunner):
+class MemorizeSegmentAction(ActionRunner):
     config: Configuration
 
     async def set_up(self, init):
@@ -32,14 +32,15 @@ class HasSegmentAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         if not isinstance(self.profile, Profile):
             if self.event.metadata.profile_less is True:
-                self.console.warning("Can not check segment of profile when there is no profile (profileless event.")
+                self.console.warning("Can not memorize segment of profile when there is no profile (profileless event.")
             else:
-                self.console.error("Can not check segment profile. Profile is empty.")
+                self.console.error("Can not memorize segment profile. Profile is empty.")
         else:
-            if self.config.segment in self.profile.segments:
-                return Result(port="True", value=payload)
+            dot_notation = f"memory@{self.config.memory_key}"
+            dot = self._get_dot_accessor(payload)
+            dot[dot_notation] = self.profile.segments
 
-        return Result(value=payload, port="False")
+        return Result(value=payload, port="payload")
 
 
 def register() -> Plugin:
@@ -47,31 +48,35 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className=HasSegmentAction.__name__,
+            className=MemorizeSegmentAction.__name__,
             inputs=["payload"],
-            outputs=["True", "False"],
+            outputs=["payload"],
             version="0.7.3",
             author="Risto Kowaczewski",
             init={
-                "segment": ""
+                "memory_key": "profile.segments"
             },
             form=Form(groups=[
                 FormGroup(
                     name="Segment",
                     fields=[
                         FormField(
-                            id="segment",
-                            name="Profile segment to check",
-                            component=FormComponent(type="text", props={"label": "segment"})
+                            id="memory_key",
+                            name="Memory key",
+                            description="You can memorize segments may times and on different stages of a workflow. "
+                                        "To read/recall the proper segment you should define a key (this is like a pointer) "
+                                        "that you will use to read the memorized profile segments. Default is: "
+                                        "profile.segments, but you can use like profile.segments.stage1, etc.",
+                            component=FormComponent(type="text", props={"label": "memory_key"})
                         )
                     ]
                 )]
             ),
-            manual="has_segment_action"
+            # manual="memorize_segment_action"
         ),
         metadata=MetaData(
-            name='Has segment',
-            desc='Checks if profile is in defined segment.',
+            name='Memorize segment',
+            desc='Memorize profile segments in workflow memory.',
             icon='segment',
             group=["Segmentation"],
             purpose=['collection', 'segmentation'],

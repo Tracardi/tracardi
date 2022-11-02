@@ -78,6 +78,7 @@ def register() -> Plugin:
             desc='Returns a random value from list given in configuration.',
             icon='shuffle',
             group=["Data processing"],
+            purpose=['segmentation', 'collection'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

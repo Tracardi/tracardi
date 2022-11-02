@@ -70,7 +70,8 @@ def register() -> Plugin:
             desc='Returns a part of referenced data as payload.',
             icon='property',
             group=["Data processing"],
-            tags=['traits', 'profile', 'memory', 'reference', 'data'],
+            purpose=['collection', 'segmentation'],
+            tags=['traits', 'profile', 'memory', 'reference', 'data', 'cut'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

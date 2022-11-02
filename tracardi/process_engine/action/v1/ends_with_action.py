@@ -90,8 +90,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Ends with',
             desc='Checks if string ends with defined prefix.',
-            icon='question',
-            group=["Flow control"],
+            icon='exists',
+            group=["String"],
             tags=['string'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

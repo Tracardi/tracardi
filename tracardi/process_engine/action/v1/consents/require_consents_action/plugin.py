@@ -89,7 +89,8 @@ def register() -> Plugin:
                             FormField(
                                 id="consent_ids",
                                 name="IDs of required consents",
-                                description="Provide a list of IDs of consents that are required.",
+                                description="Provide a list of IDs of consents that are required. "
+                                            "Press enter to add more the one consent.",
                                 component=FormComponent(type="consentTypes")
                             ),
                             FormField(
@@ -114,6 +115,8 @@ def register() -> Plugin:
             desc='Checks if defined consents are granted by current profile.',
             icon='consent',
             group=["Consents"],
+            type="condNode",
+            tags=['condition'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={

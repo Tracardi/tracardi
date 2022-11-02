@@ -424,6 +424,16 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.segmentation.memorize.plugin": PluginTestTemplate(
+        init={'memory_key': 'abc'},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.segmentation.recall.plugin": PluginTestTemplate(
+        init={'memory_key': 'abc'},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.segmentation.delete.plugin": PluginTestTemplate(
         init={'segment': 'abc'},
         resource=None

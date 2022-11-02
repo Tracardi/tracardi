@@ -20,6 +20,7 @@ Version 0.7.3-dev
 * Command CONTAINS, STARTS_WTH and ENDS_WITH to IF plugin
 * SMTP Mail bride
 * MQTT bridge
+* Added plugins regarding segmentation (has segment, memorize segment, recall segment, etc.)
 * "Load profile by ..." plugin
 * Live segmentation server
 * Adds missing documentation for:

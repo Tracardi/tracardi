@@ -153,8 +153,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Contains pattern',
             desc='Checks if field contains defined pattern.',
-            icon='question',
-            group=["Flow control"],
+            icon='exists',
+            group=["String"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={

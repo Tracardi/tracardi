@@ -34,6 +34,7 @@ def register() -> Plugin:
             name='Is it a new profile',
             desc='If new profile then it returns true on TRUE output, otherwise returns false on FALSE port.',
             tags=['condition'],
+            type="condNode",
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
@@ -44,7 +45,7 @@ def register() -> Plugin:
                     "false": PortDoc(desc="This port returns payload if the defined condition is NOT met.")
                 }
             ),
-            icon='question',
+            icon='exists',
             group=["Flow control"]
         )
     )

@@ -90,8 +90,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Starts with',
             desc='Checks if string starts with defined prefix.',
-            icon='question',
-            group=["Flow control"],
+            icon='exists',
+            group=["String"],
             tags=['string'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
