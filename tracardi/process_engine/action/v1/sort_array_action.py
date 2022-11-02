@@ -45,7 +45,7 @@ class SortArrayAction(ActionRunner):
 
         if isinstance(data, list):
             array = sorted(data, reverse=reverse)
-            return Result(port="sorted_array", value=array)
+            return Result(port="result", value=array)
 
         return Result(port="error", value={
             "message": f"Referenced {self.config.data} is not an array."
@@ -60,7 +60,7 @@ def register() -> Plugin:
             module=__name__,
             className=SortArrayAction.__name__,
             inputs=["payload"],
-            outputs=["sorted_array", "error"],
+            outputs=["result", "error"],
             manual="sort_array_action",
             init={
                 "data": "",
@@ -76,7 +76,7 @@ def register() -> Plugin:
                         fields=[
                             FormField(
                                 id="data",
-                                name="Type dotted path from the data that you want to sort",
+                                name="Reference the data that you want to sort",
                                 component=FormComponent(
                                     type="dotPath",
                                     props={
@@ -116,7 +116,7 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object")
                 },
                 outputs={
-                    "sorted_array": PortDoc(desc="Returns the sorted array")
+                    "result": PortDoc(desc="Returns the sorted list/array")
                 }
             ),
         )

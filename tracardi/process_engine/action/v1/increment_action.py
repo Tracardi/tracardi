@@ -66,7 +66,7 @@ def register() -> Plugin:
             className='IncrementAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"field": "", "increment": 1},
+            init={"field": "profile@stats.counters", "increment": 1},
             form=Form(groups=[
                 FormGroup(
                     fields=[
@@ -75,7 +75,8 @@ def register() -> Plugin:
                             name="Path to field",
                             description="Provide path to field that should be incremented. "
                                         "E.g. profile@stats.counters.boughtProducts",
-                            component=FormComponent(type="dotPath", props={"label": "Field path"})
+                            component=FormComponent(type="dotPath", props={"label": "Field path",
+                                                                           "defaultSourceValue": "profile"})
                         )
                     ]
                 ),
