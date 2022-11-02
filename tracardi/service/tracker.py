@@ -209,6 +209,12 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             profile.metadata.time.visit.set_visits_times()
             profile.metadata.time.visit.count += 1
             profile.operation.update = True
+            # Set time zone form session
+            if session.context:
+                try:
+                    profile.metadata.time.visit.tz = session.context['time']['tz']
+                except KeyError:
+                    pass
 
     if profile_less is True and profile is not None:
         logger.warning("Something is wrong - profile less events should not have profile attached.")
