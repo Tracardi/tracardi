@@ -15,21 +15,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.ux.chatwoot.plugin": PluginTestTemplate(
-        init={"app_id": "some-number", "api_url": "http://localhost:8686"},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.ux.zendesk.plugin": PluginTestTemplate(
-        init={"script_url": "some-url"},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.ux.livechat.plugin": PluginTestTemplate(
-        init={"license": "some-number", "api_url": "http://localhost:8686"},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.operations.contains_pattern.plugin": PluginTestTemplate(
         init={"field": "payload@field", "pattern": "all"},
         resource=None
