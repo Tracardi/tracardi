@@ -21,14 +21,13 @@ class MysqlConnectorAction(ActionRunner):
 
     connection: Connection
     config: Configuration
-    pool: Any
+    pool: Any = None
 
     async def set_up(self, init):
 
         configuration = validate(init)
         resource = await storage.driver.resource.load(configuration.source.id)
 
-        self.pool = None
         self.config = configuration
         self.connection = resource.credentials.get_credentials(self, output=Connection)
 
@@ -69,12 +68,9 @@ class MysqlConnectorAction(ActionRunner):
             return Result(port="error", value={"payload": payload, "error": str(e)})
 
     async def close(self):
-        try:
-            if self.pool:
-                self.pool.close()
-                await self.pool.wait_closed()
-        except AttributeError:
-            pass
+        if self.pool:
+            self.pool.close()
+            await self.pool.wait_closed()
 
     async def on_error(self, *args, **kwargs):
         await self.close()
