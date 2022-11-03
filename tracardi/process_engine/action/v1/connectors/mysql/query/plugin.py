@@ -34,12 +34,12 @@ class MysqlConnectorAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
-            self.pool = await self.connection.connect(self.config.timeout)
-
             # Prepare statement data
             template = DictTraverser(self._get_dot_accessor(payload))
             data = template.reshape(self.config.data)
             self.console.log("Executing query: {} with data: {}".format(self.config.query, data))
+
+            self.pool = await self.connection.connect(self.config.timeout)
 
             async with self.pool.acquire() as conn:
                 async with conn.cursor(aiomysql.DictCursor) as cursor:
