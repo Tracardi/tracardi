@@ -69,11 +69,14 @@ class MysqlConnectorAction(ActionRunner):
             return Result(port="error", value={"payload": payload, "error": str(e)})
 
     async def close(self):
-        if self.pool:
-            self.pool.close()
-            await self.pool.wait_closed()
+        try:
+            if self.pool:
+                self.pool.close()
+                await self.pool.wait_closed()
+        except AttributeError:
+            pass
 
-    async def on_error(self, **kwargs):
+    async def on_error(self, *args, **kwargs):
         await self.close()
 
     @staticmethod
@@ -96,7 +99,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='MysqlConnectorAction',
+            className=MysqlConnectorAction.__name__,
             inputs=["payload"],
             outputs=["result", "error"],
             version='0.6.1',
