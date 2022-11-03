@@ -6,15 +6,13 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(PluginConfig):
-    api_url: str
-    app_id: str
+intercom_snippet = """window.intercomSettings = { app_id: '###APP_ID###' };
+(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/' + '###APP_ID###';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s, x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
+"""
 
-    @validator("api_url")
-    def validate_api_url(cls, value):
-        if value is None:
-            raise ValueError("Api URL can not be empty.")
-        return value
+
+class Config(PluginConfig):
+    app_id: str
 
     @validator("app_id")
     def validate_file_path(cls, value):
@@ -34,9 +32,12 @@ class IntercomWidgetPlugin(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+        content = intercom_snippet.replace("###APP_ID###", self.config.app_id),
+
         self.ux.append({
             "tag": "script",
-            "props": {"src": f'{self.config.api_url}/intercom/{self.config.app_id}'}
+            "type": "text/javascript",
+            "content": content
         })
 
         return Result(port="payload", value=payload)
@@ -47,16 +48,15 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='IntercomWidgetPlugin',
+            className=IntercomWidgetPlugin.__name__,
             brand="intercom",
             inputs=["payload"],
             outputs=["payload"],
             version='0.7.3',
             license="MIT",
-            author="Mateusz Zitaruk",
+            author="Mateusz Zitaruk, Risto Kowaczewski",
             manual="intercom_widget_action",
             init={
-                "api_url": "http://localhost:8686",
                 "app_id": ""
             },
             form=Form(
@@ -65,14 +65,9 @@ def register() -> Plugin:
                         name="Intercom widget configuration",
                         fields=[
                             FormField(
-                                id="api_url",
-                                name="Your Tracardi API URL",
-                                component=FormComponent(type="text", props={"label": "Tracardi API URL"})
-                            ),
-                            FormField(
                                 id="app_id",
                                 name="Your Intercom application ID",
-                                component=FormComponent(type="text", props={"label": "Application ID"})
+                                component=FormComponent(type="password", props={"label": "Application ID"})
                             )
                         ]
                     )

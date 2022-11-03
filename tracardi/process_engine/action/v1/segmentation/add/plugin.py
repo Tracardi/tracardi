@@ -46,7 +46,6 @@ class AddSegmentAction(ActionRunner):
                     if isinstance(self.config.segment, list):
                         converter = DictTraverser(dot, include_none=False)
                         segments = converter.reshape(self.config.segment)
-                        print(segments)
                         profile.segments += segments
 
                     elif isinstance(self.config.segment, str):

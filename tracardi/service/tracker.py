@@ -327,8 +327,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             )
         )
 
-    print(session.profile)
-
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
             if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():

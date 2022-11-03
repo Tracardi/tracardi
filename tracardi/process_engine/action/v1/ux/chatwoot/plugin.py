@@ -6,15 +6,26 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
-class Config(PluginConfig):
-    api_url: str
-    token: str
+chatwoot_js = """
+  (function(d,t) {
+        var BASE_URL="https://app.chatwoot.com";
+        var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=BASE_URL+"/packs/js/sdk.js";
+        g.defer = true;
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload=function(){
+          window.chatwootSDK.run({
+            websiteToken: '###TOKEN###',
+            baseUrl: BASE_URL
+          })
+        }
+      })(document,"script");
+"""
 
-    @validator("api_url")
-    def validate_api_url(cls, value):
-        if value == "":
-            raise ValueError("Api URL can not be empty.")
-        return value
+
+class Config(PluginConfig):
+    token: str
 
     @validator("token")
     def validate_file_path(cls, value):
@@ -35,9 +46,13 @@ class ChatwootWidgetPlugin(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+
+        content = chatwoot_js.replace("###TOKEN###", self.config.token),
+
         self.ux.append({
             "tag": "script",
-            "props": {"src": f'{self.config.api_url}/chatwoot/{self.config.token}'}
+            "type": "text/javascript",
+            "content": content
         })
         return Result(port="payload", value=payload)
 
@@ -47,7 +62,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='ChatwootWidgetPlugin',
+            className=ChatwootWidgetPlugin.__name__,
             brand="Chatwoot",
             inputs=["payload"],
             outputs=["payload"],
@@ -56,7 +71,6 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             manual="chatwoot_widget_action",
             init={
-                "api_url": "http://localhost:8686",
                 "license": ""
             },
             form=Form(
@@ -65,15 +79,10 @@ def register() -> Plugin:
                         name="Livechat widget configuration",
                         fields=[
                             FormField(
-                                id="api_url",
-                                name="Your Tracardi API URL",
-                                component=FormComponent(type="text", props={"label": "Tracardi API URL"})
-                            ),
-                            FormField(
                                 id="token",
                                 name="Your Chatwoot token",
                                 description="If you do not know you token please login to chatwoot.com and go to settings/inboxes adn look for the javascript .",
-                                component=FormComponent(type="text", props={"label": "Chatwoot token"})
+                                component=FormComponent(type="password", props={"label": "Chatwoot token"})
                             )
                         ]
                     )
