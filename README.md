@@ -42,23 +42,35 @@ wants to start using user data for automated customer engagement. Tracardi is in
 
 ## ✨ Features
 
-Use TRACARDI for:
+What TRACARDI can do for you:
 
- * **Customer Data Integration** - You can ingest, aggregate and store customer data
-   from multiple sources in real time at any scale and speed due to elastic search backend.
+ * **Reuse your current infrastructure**
+   Tracardi doesn’t require the complex integration or dedicated infrastructure. It runs on top of cloud managed services; reusing your existing   
+   infrastructure and spinning up new resources when needed.
+
+ * **Collect Customer Data** - You can collect, ingest, aggregate and store customer data
+   from multiple sources in real time.
    
- * **Customer Data Modelling** -  You can manage data. Define rules that will model data delivered
-   from your page and copy it into user profile. You can segment customers into custom segments.
+ * **Model Customer Data** -  You can model data. Define rules that will model data delivered
+   from your page and copy it into user profile. 
    
- * **User Experience Personalization** - You can personalize user experience with
-   real-time customer segmentation and targeting.
+ * **Personalize User Experience** - You can personalize user experience with
+   real-time frontend apps injected into your existing webpage, customized messages, marketing segmentation, in-time messaging.
    
- * **Profile Unification** - You can merge customer data from various sources to
+ * **Unify Profiles** - You can merge customer data from various sources to
    single profile. Auto de-duplicate customer records. Blend customers in one account.
    
- * **Automation** - TRACARDI is a great framework for creating
-   marketing automation apps. You can send your data to other systems easily
-
+ * **Integrate your internal systems** - Tracardi is a centralized communication and orchestration hub that can integrate different parts of your IT parts.
+   
+ * **Scale you e-commerce easily** - Tracardi is a headless, API first platform. Build with modern tools and designed as a decentralized system that can
+   handle your needs.
+  
+ * **Use Social Engagement** - Use Tracardi bridges to connect your e-commerce platform to the existing social media networks. Reward your clients for 
+   sharing your products or commenting on the content that helps you sell.
+ 
+ * **Stay open to all the tools available on the Internet** - Tracardi is open source. Do not limit your business to the closed set of tools. 
+   If there is any tool that will help you sell Tracardi will help you connect it with your business.
+   
 If you want to see Tracardi in action subscribe to our [:tv: Youtube channel](https://bit.ly/3pbdbPR).
 
 ## 👇 Installation and getting started
