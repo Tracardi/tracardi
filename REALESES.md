@@ -33,6 +33,7 @@ Version 0.7.3-dev
   * InfluxDB resource
 * Adds missing documentation for some plugins
 * New menu and data layout
+* Better debugging. More information on logs. Plugins now have their error log.
 
 ## Errors
 

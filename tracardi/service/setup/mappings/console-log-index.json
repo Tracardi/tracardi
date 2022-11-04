@@ -19,6 +19,9 @@
       "flow_id": {
         "type": "keyword"
       },
+      "node_id": {
+        "type": "keyword"
+      },
       "origin": {
         "type": "keyword"
       },

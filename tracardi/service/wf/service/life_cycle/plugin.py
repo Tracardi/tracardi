@@ -47,7 +47,7 @@ def set_context(node: Node,
     node.object.profile = profile
     node.object.flow = flow
     node.object.flow_history = flow_history
-    node.object.console = Console(node.className, node.module)
+    node.object.console = Console(node.className, node.module, flow.id, profile.id, node.id)
     node.object.id = node.id
     node.object.metrics = metrics
     node.object.memory = memory

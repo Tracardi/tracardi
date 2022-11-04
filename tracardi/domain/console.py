@@ -9,13 +9,15 @@ class Metadata(BaseModel):
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self.timestamp = datetime.utcnow()
+        if not self.timestamp:
+            self.timestamp = datetime.utcnow()
 
 
 class ConsoleRecord(BaseModel):
     metadata: Metadata = Metadata()
     event_id: str = None
     flow_id: str = None
+    node_id: Optional[str] = None
     profile_id: str = None
     origin: str
     class_name: str
@@ -27,8 +29,9 @@ class ConsoleRecord(BaseModel):
 
 class Console(BaseModel):
     metadata: Metadata = Metadata()
-    event_id: str = None
+    event_id: Optional[str] = None
     flow_id: Optional[str] = None
+    node_id: Optional[str] = None
     profile_id: Optional[str] = None
     origin: str
     class_name: str

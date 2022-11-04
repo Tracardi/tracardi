@@ -470,7 +470,8 @@ class GraphInvoker(BaseModel):
                     module=node.module,
                     class_name=node.className,
                     type='error',
-                    message=msg
+                    message=msg,
+                    node_id=node.id
                 ))
                 node.object = DagExecError(
                     msg,
@@ -617,6 +618,7 @@ class GraphInvoker(BaseModel):
                         for input_edge_id, _ in input_edges.edges.items():  # type: str, InputEdge
                             log_list.append(
                                 Log(
+                                    node_id=None,
                                     module=node.object.console.module,
                                     class_name=node.object.console.class_name,
                                     type='info',
@@ -627,6 +629,7 @@ class GraphInvoker(BaseModel):
             except (DagError, DagExecError) as e:
 
                 error_log = Log(
+                    node_id=node.id,
                     module=__name__,
                     class_name='GraphInvoker',
                     type='error',

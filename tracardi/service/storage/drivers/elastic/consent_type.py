@@ -31,7 +31,7 @@ async def load_all(start: int = 0, limit: int = 10) -> StorageRecords:
 
 
 async def load_all_active(limit: int = 100) -> StorageRecords:
-    return await storage_manager("consent-type").load_by('enabled', True, limit=limit)
+    return await storage_manager("consent-type").load_by('enabled', True, limit=limit, sort=None)
 
 
 async def refresh():
