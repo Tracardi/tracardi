@@ -27,10 +27,11 @@ class Rule(NamedEntity):
         return value
 
     def __init__(self, **data: Any):
-        data['metadata'] = Metadata(
-            time=Time(
-                insert=datetime.utcnow()
-            ))
+        if 'metadata' not in data:
+            data['metadata'] = Metadata(
+                time=Time(
+                    insert=datetime.utcnow()
+                ))
         super().__init__(**data)
 
     @staticmethod

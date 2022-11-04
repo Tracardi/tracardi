@@ -174,7 +174,6 @@ class RulesEngine:
 
                     # Store logs in one console log
                     for log in log_list:  # type: Log
-                        print(log.profile_id)
                         console = Console(
                             origin="node",
                             event_id=event_id,
