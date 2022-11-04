@@ -30,6 +30,7 @@ from .node import Node
 from .tasks_results import ActionsResults
 from ...notation.dict_traverser import DictTraverser
 from ...notation.dot_accessor import DotAccessor
+from ...utils.getters import get_entity_id
 from ...value_threshold_manager import ValueThresholdManager
 
 
@@ -629,6 +630,7 @@ class GraphInvoker(BaseModel):
             except (DagError, DagExecError) as e:
 
                 error_log = Log(
+                    profile_id=get_entity_id(profile),
                     node_id=node.id,
                     module=__name__,
                     class_name='GraphInvoker',

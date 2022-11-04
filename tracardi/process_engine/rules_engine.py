@@ -82,6 +82,7 @@ class RulesEngine:
                         event_id=event.id,
                         flow_id=None,
                         node_id=None,
+                        profile_id=None,
                         module=__name__,
                         class_name='RulesEngine',
                         type="error",
@@ -173,6 +174,7 @@ class RulesEngine:
 
                     # Store logs in one console log
                     for log in log_list:  # type: Log
+                        print(log.profile_id)
                         console = Console(
                             origin="node",
                             event_id=event_id,
