@@ -72,13 +72,6 @@ async def get_by_credentials(email: str, password: str) -> Optional[User]:
     return None
 
 
-async def search_by_token(token: str) -> StorageRecords:
-    query = {
-        "query": {"term": {"token": str(token)}}
-    }
-    return await storage_manager("user").query(query=query)
-
-
 async def search_by_role(role: str) -> StorageRecords:
     query = {
         "query": {"term": {"roles": str(role)}}

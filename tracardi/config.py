@@ -44,7 +44,6 @@ class TracardiConfig:
             'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
-        self.tokens_in_redis = (env["TOKENS_IN_REDIS"].lower() == "yes") if "TOKENS_IN_REDIS" in env else True
 
 
 class MemoryCacheConfig:
