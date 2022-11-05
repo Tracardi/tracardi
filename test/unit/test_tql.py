@@ -38,7 +38,7 @@ event = Event(id="event-id",
               profile=profile,
               session=session,
               )
-flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.g.0"))
+flow = Flow(id="flow-id", name="flow", wf_schema=FlowSchema(version="0.g.0"), type="collection")
 dot = DotAccessor(profile, session, payload, event, flow)
 
 parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
