@@ -77,7 +77,7 @@ def register() -> Plugin:
                             name="Object to inject",
                             description="Provide object as JSON to be injected into payload and returned "
                                         "on output port.",
-                            component=FormComponent(type="json", props={"label": "object"})
+                            component=FormComponent(type="json", props={"label": "object", "autocomplete": True})
                         ),
                         FormField(
                             id="default",
@@ -98,7 +98,8 @@ def register() -> Plugin:
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
             icon='json',
             group=["Data processing"],
-            tags=['reshape', 'create', 'payload', 'data'],
+            tags=['reshape', 'create', 'payload', 'data', 'make'],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

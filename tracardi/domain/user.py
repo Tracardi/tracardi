@@ -12,7 +12,6 @@ class User(BaseModel):
     email: str
     roles: List[str]
     disabled: bool = False
-    token: Optional[str] = None
     preference: Optional[dict] = {}
     expiration_timestamp: Optional[int] = None
 

@@ -63,7 +63,7 @@ def register() -> Plugin:
             version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="geo_ip_locator",
+            manual="geo/geo_ip_locator",
             init={
                 "source": {
                     "id": None,

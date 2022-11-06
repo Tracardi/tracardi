@@ -106,8 +106,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Contains string',
             desc='Checks if field contains defined string.',
-            icon='question',
-            group=["Flow control"],
+            icon='exists',
+            group=["String"],
             tags=['string'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

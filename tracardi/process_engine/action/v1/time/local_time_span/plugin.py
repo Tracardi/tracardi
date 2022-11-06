@@ -91,6 +91,8 @@ def register() -> Plugin:
             desc='Checks if the current time is within defined time span.',
             icon='profiler',
             group=["Time"],
+            tags=['condition'],
+            type="condNode",
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={

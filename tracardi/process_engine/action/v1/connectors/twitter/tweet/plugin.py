@@ -57,7 +57,7 @@ def register() -> Plugin:
             className='TwitterTweetAction',
             inputs=['payload'],
             outputs=['response', 'error'],
-            verions='0.7.3',
+            verion='0.7.3',
             license='MIT',
             author='Mateusz Zitaruk',
             manual='twitter_tweet_action',

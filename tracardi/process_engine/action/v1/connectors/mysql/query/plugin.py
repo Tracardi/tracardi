@@ -21,25 +21,24 @@ class MysqlConnectorAction(ActionRunner):
 
     connection: Connection
     config: Configuration
-    pool: Any
+    pool: Any = None
 
     async def set_up(self, init):
 
         configuration = validate(init)
         resource = await storage.driver.resource.load(configuration.source.id)
 
-        self.pool = None
         self.config = configuration
         self.connection = resource.credentials.get_credentials(self, output=Connection)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
-            self.pool = await self.connection.connect(self.config.timeout)
-
             # Prepare statement data
             template = DictTraverser(self._get_dot_accessor(payload))
             data = template.reshape(self.config.data)
             self.console.log("Executing query: {} with data: {}".format(self.config.query, data))
+
+            self.pool = await self.connection.connect(self.config.timeout)
 
             async with self.pool.acquire() as conn:
                 async with conn.cursor(aiomysql.DictCursor) as cursor:
@@ -73,7 +72,7 @@ class MysqlConnectorAction(ActionRunner):
             self.pool.close()
             await self.pool.wait_closed()
 
-    async def on_error(self, **kwargs):
+    async def on_error(self, *args, **kwargs):
         await self.close()
 
     @staticmethod

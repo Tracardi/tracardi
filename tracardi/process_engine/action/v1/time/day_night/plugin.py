@@ -67,9 +67,8 @@ def register() -> Plugin:
             name='Day/Night',
             desc='Splits workflow whether it is day or night in a given latitude and longitude.',
             tags=['condition'],
-            width=200,
-            height=100,
             icon='dark-light',
+            type="condNode",
             group=["Time"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

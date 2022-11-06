@@ -33,7 +33,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
 
             plugin = plugin()
 
-            console = Console("Test", "test")
+            console = Console("Test", "test", "abc")
 
             plugin.id = str(uuid4())
             plugin.profile = profile

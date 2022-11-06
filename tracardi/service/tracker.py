@@ -37,6 +37,7 @@ from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
+from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
 from tracardi.service.event_validation_schema_cache import EventValidationSchemaCache
@@ -69,7 +70,8 @@ async def _save_session(tracker_payload, session, profile):
             """
             Until the session is saved and it is usually within 1s the system can create many profiles for 1 session. 
             System checks if the session exists by loading it from ES. If it is a new session then is does not exist 
-            and must be saved before it can be read. So there is a 1s when system thinks that the session does not exist.
+            and must be saved before it can be read. So there is a 1s when system thinks that the session does not 
+            exist.
 
             If session is new we will refresh the session in ES.
             """
@@ -132,10 +134,6 @@ async def _persist(console_log: ConsoleLog, session: Session, events: List[Event
     )
 
 
-def get_profile_id(profile: Profile):
-    return profile.id if isinstance(profile, Entity) else None
-
-
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
 
     # There may be many event is tracker_payload
@@ -186,7 +184,8 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
             except EventPropsReshapingError as e:
                 console_log.append(
                     Console(
-                        profile_id=get_profile_id(profile),
+                        event_id=event.id,
+                        profile_id=get_entity_id(profile),
                         origin='profile',
                         class_name='EventPropsReshaper',
                         module='tracker',
@@ -216,6 +215,12 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             profile.metadata.time.visit.set_visits_times()
             profile.metadata.time.visit.count += 1
             profile.operation.update = True
+            # Set time zone form session
+            if session.context:
+                try:
+                    profile.metadata.time.visit.tz = session.context['time']['tz']
+                except KeyError:
+                    pass
 
     if profile_less is True and profile is not None:
         logger.warning("Something is wrong - profile less events should not have profile attached.")
@@ -292,10 +297,13 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
         console_log.append(
             Console(
-                profile_id=get_profile_id(profile),
+                flow_id=None,
+                node_id=None,
+                event_id=None,
+                profile_id=get_entity_id(profile),
                 origin='profile',
-                class_name='RulesEngine',
-                module='tracker',
+                class_name='invoke_track_process',
+                module=__name__,
                 type='error',
                 message=message,
                 traceback=get_traceback(e)
@@ -317,17 +325,18 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         logger.error(message)
         console_log.append(
             Console(
-                profile_id=get_profile_id(profile),
+                flow_id=None,
+                node_id=None,
+                event_id=None,
+                profile_id=get_entity_id(profile),
                 origin='profile',
-                class_name='merge',
-                module='app.api.track.service',
+                class_name='invoke_track_process',
+                module=__name__,
                 type='error',
                 message=message,
                 traceback=get_traceback(e)
             )
         )
-
-    print(session.profile)
 
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
@@ -346,10 +355,13 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         logger.error(message)
         console_log.append(
             Console(
-                profile_id=get_profile_id(profile),
+                flow_id=None,
+                node_id=None,
+                event_id=None,
+                profile_id=get_entity_id(profile),
                 origin='profile',
-                class_name='tracker',
-                module='tracker',
+                class_name='invoke_track_process',
+                module=__name__,
                 type='error',
                 message=message,
                 traceback=get_traceback(e)
@@ -402,10 +414,13 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                 except Exception as e:
                     # todo - this appends error to the same profile - it rather should be en event error
                     console_log.append(Console(
-                        profile_id=get_profile_id(profile),
+                        flow_id=None,
+                        node_id=None,
+                        event_id=None,
+                        profile_id=get_entity_id(profile),
                         origin='destination',
                         class_name='DestinationManager',
-                        module='tracker',
+                        module=__name__,
                         type='error',
                         message=str(e),
                         traceback=get_traceback(e)

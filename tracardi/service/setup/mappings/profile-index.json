@@ -36,6 +36,9 @@
                     },
                     "count": {
                       "type": "integer"
+                    },
+                    "tz": {
+                      "type": "keyword"
                     }
                   }
                 }

@@ -190,9 +190,9 @@ def register() -> Plugin:
                         FormField(
                             id="event_types",
                             name="Accept only the following event types",
-                            description="This node will tart the workflow only if the following event types are consumed. "
-                                        "If left empty the node will trigger regardless the event type. All event types "
-                                        "will be accepted.",
+                            description="This node will start the workflow only if the defined below event-types are consumed. "
+                                        "If left empty the node will trigger regardless of the event-type and all the events "
+                                        "will be accepted. To add none-existing event-type, type its name and press ENTER.",
                             component=FormComponent(type="eventTypes", props={"label": "Event types"})
                         ),
                         FormField(

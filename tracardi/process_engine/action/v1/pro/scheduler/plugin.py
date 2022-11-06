@@ -29,7 +29,7 @@ class SchedulerPlugin(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await storage.driver.resource.load(config.resource.id)
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=SchedulerConfig)
@@ -45,10 +45,15 @@ class SchedulerPlugin(ActionRunner):
             reshaper = DictTraverser(dot)
             properties = reshaper.reshape(properties)
 
+            if self.config.source.id == '@current-source':
+                event_source_id = self.event.source.id
+            else:
+                event_source_id = self.config.source.id
+
             result = await client.schedule(
                 schedule_at=schedule_at,
                 callback_host=self.credentials.callback_host,
-                source_id=self.event.source.id,
+                source_id=event_source_id,
                 profile_id=self.profile.id if self.profile is not None else None,
                 session_id=self.session.id if self.session is not None else None,
                 event_type=self.config.event_type,

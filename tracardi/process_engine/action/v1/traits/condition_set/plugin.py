@@ -66,7 +66,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Resolve conditions',
             desc='That plugin creates an object with results from resolved condition set.',
-            icon='if',
+            icon='question',
             tags=['condition'],
             group=["Flow control"],
             purpose=['collection', 'segmentation'],

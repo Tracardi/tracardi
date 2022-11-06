@@ -34,7 +34,8 @@ def register() -> Plugin:
             name='Is it a new visit',
             desc='If new visit then it returns true on TRUE output, otherwise returns false on FALSE port.',
             tags=['condition'],
-            icon='question',
+            icon='exists',
+            type="condNode",
             group=["Flow control"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

@@ -139,8 +139,9 @@ def register() -> Plugin:
             name='Copy data',
             desc='Copy event property to profile trait. This plugin copies event properties to defined destination.',
             icon='copy',
-            tags=['profile', 'event', 'traits', 'memory', 'reference', 'data', "read"],
+            tags=['profile', 'event', 'traits', 'memory', 'reference', 'data', "read", 'copy', 'properties'],
             group=["Data processing"],
+            purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

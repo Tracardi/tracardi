@@ -19,3 +19,6 @@ class FlowInvokeResult:
         self.profile = profile
         self.session = session
         self.flow = flow
+
+    def __repr__(self):
+        return f"FlowInvokeResult(\n\tprofile=({self.profile})\n\tsession=({self.session})\n\tevent=({self.event}))"

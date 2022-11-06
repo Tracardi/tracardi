@@ -1,6 +1,9 @@
+from typing import List, Union
+
 from pydantic import validator
 
 from tracardi.domain.profile import Profile
+from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.config import PluginConfig
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
@@ -9,11 +12,11 @@ from tracardi.service.plugin.domain.result import Result
 
 
 class Configuration(PluginConfig):
-    segment: str
+    segment: Union[str, List[str]]
 
     @validator("segment")
     def is_not_empty(cls, value):
-        if value == "":
+        if not value:
             raise ValueError("Segment cannot be empty")
         return value
 
@@ -37,7 +40,23 @@ class AddSegmentAction(ActionRunner):
                     profile.operation.update = True
                 else:
                     self.console.warning("Profile is not updated in debug mode.")
-                profile.segments.append(self.config.segment)
+
+                try:
+                    dot = self._get_dot_accessor(payload)
+                    if isinstance(self.config.segment, list):
+                        converter = DictTraverser(dot, include_none=False)
+                        segments = converter.reshape(self.config.segment)
+                        profile.segments += segments
+
+                    elif isinstance(self.config.segment, str):
+                        profile.segments.append(dot[self.config.segment])
+
+                    else:
+                        return Result(value={"message": "Not acceptable segmentation type. "
+                                                        "Allowed type: string or list of strings"}, port="error")
+                except KeyError as e:
+                    return Result(value={"message": str(e)}, port="error")
+
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:
@@ -55,7 +74,7 @@ def register() -> Plugin:
             module=__name__,
             className='AddSegmentAction',
             inputs=["payload"],
-            outputs=["payload"],
+            outputs=["payload", "error"],
             version="0.7.3",
             author="Risto Kowaczewski",
             init={

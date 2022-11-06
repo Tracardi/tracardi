@@ -33,7 +33,7 @@ def test_plugin_hash_traits():
         event=event,
         session=session,
         profile=None,
-        flow=Flow(id="1", name="flow1", lock=False)
+        flow=Flow(id="1", name="flow1", lock=False, type="collection")
     )
     assert result.profile is None
     assert result.flow.id == "1"

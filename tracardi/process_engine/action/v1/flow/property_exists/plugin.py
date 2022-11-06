@@ -58,6 +58,7 @@ def register() -> Plugin:
             name='Data exists',
             desc='Checks if the data property exists and is not null.',
             icon='exists',
+            type="condNode",
             group=["Flow control"],
             tags=['condition'],
             purpose=['collection', 'segmentation'],

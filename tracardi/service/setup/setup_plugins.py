@@ -15,21 +15,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
-    "tracardi.process_engine.action.v1.ux.chatwoot.plugin": PluginTestTemplate(
-        init={"app_id": "some-number", "api_url": "http://localhost:8686"},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.ux.zendesk.plugin": PluginTestTemplate(
-        init={"script_url": "some-url"},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.ux.livechat.plugin": PluginTestTemplate(
-        init={"license": "some-number", "api_url": "http://localhost:8686"},
-        resource=None
-    ),
-
     "tracardi.process_engine.action.v1.operations.contains_pattern.plugin": PluginTestTemplate(
         init={"field": "payload@field", "pattern": "all"},
         resource=None
@@ -200,6 +185,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.operations.discard_profile_update_action": PluginTestTemplate(
+        init=None,
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.operations.update_event_action": PluginTestTemplate(
         init=None,
         resource=None
@@ -219,6 +209,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         init={'calc_dsl': 'a = profile@id + 1'},
         resource=None
     ),
+
 
     "tracardi.process_engine.action.v1.mapping_action": PluginTestTemplate(
         init={'case_sensitive': False, 'mapping': {'a': 'profile@id'}, 'value': 'x'},
@@ -403,6 +394,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.segmentation.has.plugin": PluginTestTemplate(
+        init={"segment": "abc"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.segmentation.conditional.plugin": PluginTestTemplate(
         init={'condition': '', 'false_action': 'remove', 'false_segment': '', 'true_action': 'add', 'true_segment': ''},
         resource=None
@@ -410,6 +406,16 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.segmentation.add.plugin": PluginTestTemplate(
         init={'segment': 'abc'},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.segmentation.memorize.plugin": PluginTestTemplate(
+        init={'memory_key': 'abc'},
+        resource=None
+    ),
+
+    "tracardi.process_engine.action.v1.segmentation.recall.plugin": PluginTestTemplate(
+        init={'memory_key': 'abc'},
         resource=None
     ),
 
@@ -430,11 +436,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.converters.json_to_data.plugin": PluginTestTemplate(
         init={'to_data': "{}"},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginTestTemplate(
-        init={'index': "index", 'query': '{"query":{"match_all":{}}}', 'source': {'id': '1', 'name': 'Some value'}},
         resource=None
     ),
 
@@ -595,7 +596,12 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             'target_encoding': '',
         },
         resource=None,
-    )
+    ),
+
+    "tracardi.process_engine.action.v1.sort_array_action": PluginTestTemplate(
+        init={"data": "event@properties.list_of_something", "direction": "asc"},
+        resource=None
+    ),
 }
 
 # Plugins only for testing
@@ -641,6 +647,11 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     #           'vertical_pos': 'bottom'},
     #     resource=None
     # ),
+
+    "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginTestTemplate(
+        init={'index': "index", 'query': '{"query":{"match_all":{}}}', 'source': {'id': '1', 'name': 'Some value'}},
+        resource=None
+    ),
 
     "tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry": PluginTestTemplate(
         init={

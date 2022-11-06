@@ -73,7 +73,7 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Resolve conditions into profile fields',
             desc='This plugin resolves a set of conditions and assigns it to the profile fields.',
-            icon='if',
+            icon='question',
             group=["Flow control"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

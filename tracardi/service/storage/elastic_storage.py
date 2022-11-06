@@ -1,6 +1,6 @@
 from asyncio import create_task, gather
 from collections import defaultdict
-from typing import List, Optional, Union, AsyncGenerator, Any
+from typing import List, Optional, Union, AsyncGenerator, Any, Dict
 
 import elasticsearch
 from pydantic import BaseModel
@@ -206,7 +206,7 @@ class ElasticStorage:
 
         return await self.search(query)
 
-    async def load_by(self, field, value, limit=100) -> StorageRecords:
+    async def load_by(self, field, value, limit=100, sort: List[Dict[str, Dict]] = None) -> StorageRecords:
         query = {
             "size": limit,
             "query": {
@@ -215,6 +215,8 @@ class ElasticStorage:
                 }
             }
         }
+        if sort:
+            query['sort'] = sort
         return await self.search(query)
 
     async def match_by(self, field, value, limit=100) -> StorageRecords:

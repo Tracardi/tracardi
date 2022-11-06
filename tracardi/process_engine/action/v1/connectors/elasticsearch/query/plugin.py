@@ -75,7 +75,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='ElasticSearchFetcher',
+            className=ElasticSearchFetcher.__name__,
             inputs=["payload"],
             outputs=["result", "error"],
             version='0.6.0.1',
@@ -99,7 +99,8 @@ def register() -> Plugin:
                                 id="source",
                                 name="Elasticsearch resource",
                                 description="Please select your Elasticsearch resource.",
-                                component=FormComponent(type="resource", props={"label": "Resource", "tag": "elastic"})
+                                component=FormComponent(type="resource", props={"label": "Resource",
+                                                                                "tag": "elasticsearch"})
                             ),
                             FormField(
                                 id="index",

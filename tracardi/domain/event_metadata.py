@@ -17,7 +17,7 @@ class EventTime(BaseModel):
     process_time: float = None
 
     def __init__(self, **data: Any):
-        if 'insert' not in data:
+        if 'insert' not in data or data['insert'] is None:
             data['insert'] = datetime.utcnow()
         super().__init__(**data)
 

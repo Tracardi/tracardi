@@ -4,6 +4,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Configuration(PluginConfig):
+    resource: NamedEntity
     source: NamedEntity
     event_type: str
     properties: str = "{}"

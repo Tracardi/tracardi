@@ -16,6 +16,7 @@ class ProfileVisit(BaseModel):
     last: Optional[datetime] = None
     current: Optional[datetime] = None
     count: int = 0
+    tz: Optional[str] = None
 
     def had_previous_visit(self):
         return self.current is not None
@@ -23,9 +24,7 @@ class ProfileVisit(BaseModel):
     def set_visits_times(self):
         if self.had_previous_visit():
             self.last = self.current
-            self.current = datetime.utcnow()
-        else:
-            self.current = datetime.utcnow()
+        self.current = datetime.utcnow()
 
 
 class ProfileTime(Time):

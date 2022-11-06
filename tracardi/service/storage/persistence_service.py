@@ -403,9 +403,10 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def load_by(self, field: str, value: Union[str, int, float, bool], limit: int = 100) -> StorageRecords:
+    async def load_by(self, field: str, value: Union[str, int, float, bool], limit: int = 100,
+                      sort: List[Dict[str, Dict]] = None) -> StorageRecords:
         try:
-            return await self.storage.load_by(field, value, limit)
+            return await self.storage.load_by(field, value, limit, sort)
         except elasticsearch.exceptions.ElasticsearchException as e:
             _logger.error(str(e))
             if len(e.args) == 2:

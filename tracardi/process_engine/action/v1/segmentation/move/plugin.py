@@ -40,8 +40,10 @@ class MoveSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             profile.segments = list(set(profile.segments))
-            profile.segments.remove(self.config.from_segment)
-            profile.segments.append(self.config.to_segment)
+            if self.config.from_segment in profile.segments:
+                profile.segments.remove(self.config.from_segment)
+            if self.config.to_segment not in profile.segments:
+                profile.segments.append(self.config.to_segment)
             if not self.debug:
                 profile.operation.update = True
             else:
@@ -61,7 +63,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='MoveSegmentAction',
+            className=MoveSegmentAction.__name__,
             inputs=["payload"],
             outputs=["payload"],
             version="0.7.3",

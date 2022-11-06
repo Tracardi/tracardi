@@ -70,6 +70,9 @@ class RulesEngine:
                 # this is main roles loop
                 if 'name' in rule:
                     invoked_rules[event.type].append(rule['name'])
+                    rule_name = rule['name']
+                else:
+                    rule_name = 'Unknown'
 
                 try:
                     rule = Rule(**rule)
@@ -78,10 +81,12 @@ class RulesEngine:
                         origin="rule",
                         event_id=event.id,
                         flow_id=None,
+                        node_id=None,
+                        profile_id=None,
                         module=__name__,
                         class_name='RulesEngine',
                         type="error",
-                        message="Rule validation error: ".format(str(e)),
+                        message=f"Rule '{rule_name}' validation error: {str(e)}",
                         traceback=get_traceback(e)
                     )
                     self.console_log.append(console)
@@ -173,6 +178,8 @@ class RulesEngine:
                             origin="node",
                             event_id=event_id,
                             flow_id=flow_id,
+                            profile_id=log.profile_id,
+                            node_id=log.node_id,
                             module=log.module,
                             class_name=log.class_name,
                             type=log.type,
@@ -186,6 +193,7 @@ class RulesEngine:
                     console = Console(
                         origin="workflow",
                         event_id=event_id,
+                        node_id=None,  # We do not know node id here as WF did not start
                         flow_id=flow_id,
                         module='tracardi.process_engine.rules_engine',
                         class_name="RulesEngine",

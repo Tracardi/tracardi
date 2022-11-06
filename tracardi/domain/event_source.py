@@ -20,7 +20,8 @@ class EventSource(Entity):
     locked: bool = False
 
     def __init__(self, **data: Any):
-        data['timestamp'] = datetime.utcnow()
+        if 'timestamp' not in data:
+            data['timestamp'] = datetime.utcnow()
         super().__init__(**data)
 
     # Persistence

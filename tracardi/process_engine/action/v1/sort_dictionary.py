@@ -10,6 +10,7 @@ from tracardi.service.plugin.runner import ActionRunner
 class Config(PluginConfig):
     direction: str
     data: str
+    sort_by: str
 
     @validator("direction")
     def if_order_is_empty(cls, value):
@@ -22,6 +23,12 @@ class Config(PluginConfig):
         if value == "asc" or value == "desc":
             return value
         raise ValueError("Direction has invalid value. Possible values are: \"asc\" or \"desc\".")
+
+    @validator("sort_by")
+    def if_sprt_by_has_valid_value(cls, value):
+        if value == "key" or value == "value":
+            return value
+        raise ValueError("Direction has invalid value.")
 
     @validator("data")
     def if_data_is_empty(cls, value):
@@ -42,13 +49,27 @@ class SortedDictAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         dot = self._get_dot_accessor(payload)
-        dictionary_to_sort = dot[self.config.data]
+        try:
+            dictionary_to_sort = dot[self.config.data]
+        except KeyError as e:
+            return Result(port="error", value={
+                "message": str(e)
+            })
 
-        sorted_tuple_list = []
-        is_desc = self.config.direction == "desc"
-        for i in sorted(dictionary_to_sort, key=dictionary_to_sort.get, reverse=is_desc):
-            sorted_tuple_list.append(tuple([i, dictionary_to_sort[i]]))
-        return Result(port="payload", value={"result": sorted_tuple_list})
+        if isinstance(dictionary_to_sort, dict):
+            is_desc = self.config.direction == "desc"
+            if self.config.sort_by == 'key':
+                pos = 0
+            else:
+                pos = 1
+
+            sorted_tuple_list = sorted(dictionary_to_sort.items(), key=lambda x: x[pos], reverse=is_desc)
+
+            return Result(port="result", value={"result": sorted_tuple_list})
+
+        return Result(port="error", value={
+            "message": f"Referenced {self.config.data} is not a dictionary."
+        })
 
 
 def register() -> Plugin:
@@ -58,13 +79,14 @@ def register() -> Plugin:
             module=__name__,
             className='SortedDictAction',
             inputs=["payload"],
-            outputs=["payload"],
+            outputs=["result", "error"],
             version='0.7.3',
             license="MIT",
             author="Sameer Kavthekar",
             init={
                 "data": "",
-                "direction": "asc"
+                "direction": "asc",
+                "sort_by": "key"
             },
             manual="sorted_dict_action",
             form=Form(
@@ -98,6 +120,21 @@ def register() -> Plugin:
                                         }
                                     }
                                 )
+                            ),
+                            FormField(
+                                id="sort_by",
+                                name="Sort by",
+                                description="Select the dictionary sort type: key or value",
+                                component=FormComponent(
+                                    type="select",
+                                    props={
+                                        "label": "Sort by",
+                                        "items": {
+                                            "key": "Key",
+                                            "value": "Value"
+                                        }
+                                    }
+                                )
                             )
                         ]
                     )
@@ -108,8 +145,8 @@ def register() -> Plugin:
         metadata=MetaData(
             name='Sort dictionary',
             desc='Sorts the referenced dictionary and returns it as a list of tuples of key and value.',
-            icon='plugin',
-            group=["Input/Output"],
+            icon='sort',
+            group=["Operations"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

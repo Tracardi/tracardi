@@ -28,6 +28,7 @@ import tracardi.service.storage.drivers.elastic.report
 import tracardi.service.storage.drivers.elastic.live_segment
 import tracardi.service.storage.drivers.elastic.event_reshaping
 import tracardi.service.storage.drivers.elastic.event_validation
+import tracardi.service.storage.drivers.elastic.system
 
 
 class ElasticDriver:
@@ -39,6 +40,10 @@ class ElasticDriver:
     @property
     def pro(self):
         return tracardi.service.storage.drivers.elastic.pro
+
+    @property
+    def system(self):
+        return tracardi.service.storage.drivers.elastic.system
 
     @property
     def raw(self):
