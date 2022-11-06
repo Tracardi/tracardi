@@ -20,8 +20,9 @@
         "type": "keyword"
       },
       "validation": {
-        "index": false,
-        "type": "keyword"
+        "type": "object",
+        "dynamic": "true",
+        "enabled": false
       },
       "tags": {
         "type": "keyword"

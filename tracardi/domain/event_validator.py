@@ -3,7 +3,6 @@ from typing import Optional, List
 from pydantic import BaseModel, validator
 import jsonschema
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.secrets import b64_encoder, b64_decoder
 
 
 class ValidationSchema(BaseModel):
@@ -34,36 +33,9 @@ class ValidationSchema(BaseModel):
             return None
 
 
-class EventValidatorRecord(NamedEntity):
-    event_type: str
-    description: Optional[str] = "No description provided"
-    tags: List[str] = []
-    validation: str
-
-
 class EventValidator(NamedEntity):
     event_type: str
     description: Optional[str] = "No description provided"
     tags: List[str] = []
     validation: ValidationSchema
 
-    def encode(self) -> EventValidatorRecord:
-        return EventValidatorRecord(
-            id=self.id,
-            name=self.name,
-            event_type=self.event_type,
-            description=self.description,
-            tags=self.tags,
-            validation=b64_encoder(self.validation.dict())
-        )
-
-    @staticmethod
-    def decode(record: EventValidatorRecord) -> 'EventValidator':
-        return EventValidator(
-            id=record.id,
-            name=record.name,
-            event_type=record.event_type,
-            description=record.description,
-            tags=record.tags,
-            validation=ValidationSchema(**b64_decoder(record.validation))
-        )
