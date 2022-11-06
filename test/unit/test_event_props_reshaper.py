@@ -7,11 +7,12 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.event_metadata import EventTime
-from tracardi.domain.event_payload_validator import ReshapeSchema
+from tracardi.domain.event_reshaping_schema import ReshapeSchema
 from copy import deepcopy
 from pydantic import ValidationError
 
 
+#  TODO CHANGE TESTS
 def test_should_reshape_event_properties():
     profile = Profile(id="1")
     session = Session(

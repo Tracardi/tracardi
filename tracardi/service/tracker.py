@@ -18,12 +18,11 @@ from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.merging import merge
 from tracardi.service.notation.dot_accessor import DotAccessor
 
-from tracardi.domain.event_payload_validator import EventTypeManager
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.service.event_validator import validate
+from tracardi.service.event_validator import validate_with_multiple_schemas
 from tracardi.domain.event import Event, PROCESSED
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
@@ -40,13 +39,15 @@ from tracardi.service.storage.helpers.source_cacher import source_cache
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.wf.domain.flow_response import FlowResponses
 from tracardi.service.event_props_reshaper import EventPropsReshaper, EventPropsReshapingError
-from tracardi.service.event_manager_cache import EventManagerCache
+from tracardi.service.event_validation_schema_cache import EventValidationSchemaCache
+from tracardi.service.event_reshape_schema_cache import EventReshapeSchemaCache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = MemoryCache()
-event_manager_cache = EventManagerCache()
+reshape_schema_cache = EventReshapeSchemaCache()
+validation_schema_cache = EventValidationSchemaCache()
 
 
 async def _save_profile(profile):
@@ -138,8 +139,8 @@ def get_profile_id(profile: Profile):
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog):
 
     # There may be many event is tracker_payload
-
-    for index, event in enumerate(events):
+    result = []
+    for event in events:
         dot = DotAccessor(
             profile=profile,
             session=session,
@@ -150,40 +151,44 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
         )
 
         event_type = dot.event['type']
-        event_type_manager = event_manager_cache.get_item(event_type)
+        expected_validation_schema_count = await storage.driver.event_validation.count_by_type(event_type)
+        expected_reshape_schema_count = await storage.driver.event_reshaping.count_by_type(event_type)
 
-        if event_type_manager is None:
-            event_type_manager = await storage.driver.event_management.load_event_type_metadata(
-                dot.event['type'])  # type: EventTypeManager
-            if event_type_manager is not None:
-                event_manager_cache.upsert_item(event_type_manager)
+        validation_schemas = validation_schema_cache.get_items(event_type)
+        if len(validation_schemas) != expected_validation_schema_count:
+            validation_schemas = await storage.driver.event_validation.load_by_event_type(event_type)
+            for validation_schema in validation_schemas:
+                validation_schema_cache.upsert_item(validation_schema)
 
-        if event_type_manager is not None:
-            try:
-                if event_type_manager.validation.enabled is True:
-                    if validate(dot, validator=event_type_manager) is False:
-                        event.metadata.valid = False
-                        console_log.append(
-                            Console(
-                                profile_id=get_profile_id(profile),
-                                origin='profile',
-                                class_name='EventValidator',
-                                module='tracker',
-                                type='error',
-                                message="Event is invalid."
-                            )
-                        )
-                if event.metadata.valid:
-                    events[index] = EventPropsReshaper(dot=dot, event=event).reshape(
-                        schema=event_type_manager.reshaping
+        reshape_schemas = reshape_schema_cache.get_items(event_type)
+        if len(reshape_schemas) != expected_reshape_schema_count:
+            reshape_schemas = await storage.driver.event_reshaping.load_by_event_type(event_type)
+            for reshape_schema in reshape_schemas:
+                reshape_schema_cache.upsert_item(reshape_schema)
+
+        if validation_schemas:
+            if validate_with_multiple_schemas(dot, validation_schemas) is False:
+                event.metadata.valid = False
+                console_log.append(
+                    Console(
+                        profile_id=get_profile_id(profile),
+                        origin='profile',
+                        class_name='EventValidator',
+                        module='tracker',
+                        type='error',
+                        message="Event is invalid."
                     )
+                )
 
+        if reshape_schemas and event.metadata.valid:
+            try:
+                event = EventPropsReshaper(dot=dot, event=event).reshape(schemas=reshape_schemas)
             except EventPropsReshapingError as e:
                 console_log.append(
                     Console(
                         profile_id=get_profile_id(profile),
                         origin='profile',
-                        class_name='EventPropsReshaping',
+                        class_name='EventPropsReshaper',
                         module='tracker',
                         type='warning',
                         message=str(e),
@@ -191,7 +196,9 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
                     )
                 )
 
-    return console_log
+        result.append(event)
+
+    return result, console_log
 
 
 async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_less: bool, profile=None, session=None,
@@ -220,8 +227,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     events = tracker_payload.get_events(session, profile, has_profile, ip)
 
     # Validates json schemas of events and reshapes properties
-    # todo bad design - events gets mutated
-    console_log = await validate_and_reshape_events(events, profile, session, console_log)
+    events, console_log = await validate_and_reshape_events(events, profile, session, console_log)
 
     debugger = None
     segmentation_result = None

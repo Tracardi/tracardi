@@ -6,7 +6,7 @@ from pydantic import validator
 from typing import Dict, Union
 from tracardi.service.event_validator import validate as validate_with_schema
 from tracardi.exceptions.exception import EventValidationException
-from tracardi.domain.event_payload_validator import EventTypeManager, ValidationSchema
+from tracardi.domain.event_validator import EventValidator, ValidationSchema
 import jsonschema
 import json
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -44,10 +44,11 @@ class SchemaValidator(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        payload_validator = EventTypeManager(
+        payload_validator = EventValidator(
             validation=ValidationSchema(json_schema=self.config.validation_schema, enabled=True),
             event_type="no-type",
             name="validation",
+            id="1",
             tags=[]
         )
 

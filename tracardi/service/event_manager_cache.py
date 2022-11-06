@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
-
+# TODO COPY FEATURE FOR RESHAPING AND VALIDATION
 class EventManagerCache(metaclass=Singleton):
 
     def __init__(self):

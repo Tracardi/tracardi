@@ -1,13 +1,17 @@
 from tracardi.service.notation.dot_accessor import DotAccessor
 import jsonschema
-from tracardi.domain.event_payload_validator import EventTypeManager
+from tracardi.domain.event_validator import EventValidator
 from tracardi.exceptions.exception import EventValidationException
 from dotty_dict import Dotty
+from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
+from tracardi.process_engine.tql.parser import Parser
+from typing import List
 
 
-def validate(dot: DotAccessor, validator: EventTypeManager) -> bool:
-    if validator.validation.enabled is False:
-        return True
+parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
+
+
+def validate(dot: DotAccessor, validator: EventValidator) -> bool:
 
     for key, val_schema in validator.validation.json_schema.items():
         if not DotAccessor.validate(key):
@@ -21,3 +25,20 @@ def validate(dot: DotAccessor, validator: EventTypeManager) -> bool:
             return False
 
     return True
+
+
+def validate_with_multiple_schemas(dot: DotAccessor, validators: List[EventValidator]) -> bool:
+    validators_to_use = []
+    for validator in validators:
+        if validator.validation.condition:
+            try:
+                condition = ExprTransformer(dot=dot).transform(tree=parser.parse(validator.validation.condition))
+            except Exception:
+                condition = False
+        else:
+            condition = True
+
+        if condition:
+            validators_to_use.append(validator)
+
+    return all(validate(dot, validator) for validator in validators_to_use)

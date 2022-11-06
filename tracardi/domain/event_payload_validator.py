@@ -1,6 +1,6 @@
 import jsonschema
 from pydantic import BaseModel, validator
-from typing import Dict, List
+from typing import List
 from tracardi.service.secrets import b64_encoder, b64_decoder
 from typing import Optional
 from tracardi.process_engine.tql.condition import Condition

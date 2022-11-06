@@ -127,8 +127,10 @@ class Resource:
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",
                                   mapping="mappings/consent-type.json"),
 
-            "event-management": Index(multi_index=False, index="tracardi-event-management",
-                                       mapping="mappings/event-management-index.json"),
+            "event-reshaping": Index(multi_index=False, index="tracardi-event-reshaping",
+                                      mapping="mappings/event-reshaping-index.json"),
+            "event-validation": Index(multi_index=False, index="tracardi-event-validation",
+                                      mapping="mappings/event-validator-index.json"),
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
                                      mapping="mappings/value-threshold-index.json"),
             "destination": Index(multi_index=False, index='tracardi-destination',

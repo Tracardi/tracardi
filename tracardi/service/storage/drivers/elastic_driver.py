@@ -15,7 +15,6 @@ import tracardi.service.storage.drivers.elastic.raw
 import tracardi.service.storage.drivers.elastic.tag
 import tracardi.service.storage.drivers.elastic.consent_type
 import tracardi.service.storage.drivers.elastic.user
-import tracardi.service.storage.drivers.elastic.event_management
 import tracardi.service.storage.drivers.elastic.event_source
 import tracardi.service.storage.drivers.elastic.pro
 import tracardi.service.storage.drivers.elastic.value_threshold
@@ -27,6 +26,8 @@ import tracardi.service.storage.drivers.elastic.snapshot
 import tracardi.service.storage.drivers.elastic.entity
 import tracardi.service.storage.drivers.elastic.report
 import tracardi.service.storage.drivers.elastic.live_segment
+import tracardi.service.storage.drivers.elastic.event_reshaping
+import tracardi.service.storage.drivers.elastic.event_validation
 
 
 class ElasticDriver:
@@ -116,10 +117,6 @@ class ElasticDriver:
         return tracardi.service.storage.drivers.elastic.user
 
     @property
-    def event_management(self):
-        return tracardi.service.storage.drivers.elastic.event_management
-
-    @property
     def destination(self):
         return tracardi.service.storage.drivers.elastic.destination
 
@@ -146,3 +143,11 @@ class ElasticDriver:
     @property
     def report(self):
         return tracardi.service.storage.drivers.elastic.report
+
+    @property
+    def event_reshaping(self):
+        return tracardi.service.storage.drivers.elastic.event_reshaping
+
+    @property
+    def event_validation(self):
+        return tracardi.service.storage.drivers.elastic.event_validation
