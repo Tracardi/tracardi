@@ -1,8 +1,9 @@
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager
-from tracardi.domain.event_reshaping_schema import EventReshapingSchema, EventReshapingSchemaRecord
+from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor, StorageForBulk
-from typing import Optional, Tuple, List
+from typing import Optional
 
 
 async def refresh():
@@ -14,35 +15,29 @@ async def flush():
 
 
 async def upsert(data: EventReshapingSchema):
-    return await storage_manager('event-reshaping').upsert(data.encode(), replace_id=True)
+    return await storage_manager('event-reshaping').upsert(data, replace_id=True)
 
 
 async def load(id: str) -> Optional[EventReshapingSchema]:
-    result: EventReshapingSchemaRecord = await StorageFor(Entity(id=id)).index("event-reshaping").load(
-        EventReshapingSchemaRecord
+    result: EventReshapingSchema = await StorageFor(Entity(id=id)).index("event-reshaping").load(
+        EventReshapingSchema
     )
-    if not result:
-        return None
-    return EventReshapingSchema.decode(result)
+    return result
 
 
-async def load_all(limit=100) -> Tuple[List[EventReshapingSchema], int]:
-    result = await StorageForBulk().index('event-reshaping').load(limit=limit)
-    data = [EventReshapingSchema.decode(EventReshapingSchemaRecord(**r)) for r in result]
-    return data, result.total
+async def load_all(limit=100) -> StorageRecords:
+    return await StorageForBulk().index('event-reshaping').load(limit=limit)
 
 
 async def load_by_tag(tag):
-    result = await StorageFor.crud('event-reshaping', class_type=EventReshapingSchemaRecord).load_by('tags', tag)
-    return [EventReshapingSchema.decode(EventReshapingSchemaRecord(**record)) for record in result]
+    return await StorageFor.crud('event-reshaping', class_type=EventReshapingSchema).load_by('tags', tag)
 
 
-async def load_by_event_type(event_type: str) -> List[EventReshapingSchema]:
-    result = await StorageFor.crud('event-reshaping', class_type=EventReshapingSchemaRecord).load_by(
+async def load_by_event_type(event_type: str) -> StorageRecords:
+    return await StorageFor.crud('event-reshaping', class_type=EventReshapingSchema).load_by(
         'event_type',
         event_type
     )
-    return [EventReshapingSchema.decode(EventReshapingSchemaRecord(**record)) for record in result]
 
 
 async def delete(id: str):

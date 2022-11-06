@@ -20,8 +20,7 @@
         "type": "keyword"
       },
       "reshaping": {
-        "index": false,
-        "type": "keyword"
+        "type": "flattened"
       },
       "tags": {
         "type": "keyword"
