@@ -1,4 +1,7 @@
+from tracardi.domain.console import Console
 from tracardi.domain.event import Event
+from tracardi.exceptions.exception_service import get_traceback
+from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver import storage
 from tracardi.service.notation.dot_accessor import DotAccessor
 import jsonschema
@@ -9,10 +12,12 @@ from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransfo
 from tracardi.process_engine.tql.parser import Parser
 from typing import List
 
+from tracardi.service.utils.getters import get_entity_id
+
 parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
 
 
-def validate(dot: DotAccessor, validator: EventValidator) -> bool:
+def validate(dot: DotAccessor, validator: EventValidator, console_log: ConsoleLog) -> bool:
     for key, val_schema in validator.validation.json_schema.items():
         if not DotAccessor.validate(key):
             raise EventValidationException(
@@ -21,13 +26,39 @@ def validate(dot: DotAccessor, validator: EventValidator) -> bool:
         try:
             value = dot[key].to_dict() if isinstance(dot[key], Dotty) else dot[key]
             jsonschema.validate(value, val_schema)
-        except (jsonschema.ValidationError, KeyError) as _:
+        except jsonschema.ValidationError as e:
+            console_log.append(
+                Console(
+                    event_id=dot.event.id,
+                    profile_id=get_entity_id(dot.profile),
+                    origin='tracker',
+                    class_name='tracker',
+                    module=__name__,
+                    type='warning',
+                    message=f"Validation error: {str(e)}",
+                    traceback=get_traceback(e)
+                )
+            )
+            return False
+        except KeyError as e:
+            console_log.append(
+                Console(
+                    event_id=dot.event.id,
+                    profile_id=get_entity_id(dot.profile),
+                    origin='tracker',
+                    class_name='tracker',
+                    module=__name__,
+                    type='error',
+                    message=str(e),
+                    traceback=get_traceback(e)
+                )
+            )
             return False
 
     return True
 
 
-def validate_with_multiple_schemas(dot: DotAccessor, validators: List[EventValidator]) -> bool:
+def validate_with_multiple_schemas(dot: DotAccessor, validators: List[EventValidator], console_log: ConsoleLog) -> bool:
     validators_to_use = []
     for validator in validators:
         if validator.validation.condition:
@@ -41,13 +72,17 @@ def validate_with_multiple_schemas(dot: DotAccessor, validators: List[EventValid
         if condition:
             validators_to_use.append(validator)
 
-    return all(validate(dot, validator) for validator in validators_to_use)
+    return all(validate(dot, validator, console_log) for validator in validators_to_use)
 
 
-async def validate_event(event: Event, dot: DotAccessor) -> Event:
+async def validate_event(event: Event, dot: DotAccessor, console_log: ConsoleLog) -> Event:
     validation_schemas = await storage.driver.event_validation.load_by_event_type(event.type)
 
     if validation_schemas:
-        if validate_with_multiple_schemas(dot, validation_schemas) is False:
+        if validate_with_multiple_schemas(
+                dot,
+                validation_schemas.to_domain_objects(EventValidator),
+                console_log
+        ) is False:
             event.metadata.valid = False
     return event

@@ -1,4 +1,5 @@
 import re
+from pprint import pprint
 
 from dotty_dict import dotty
 from pydantic import BaseModel
@@ -53,10 +54,11 @@ class DotAccessor:
                     if value in self.storage[prefix]:
                         return self.storage[prefix][value]
                     else:
-                        raise KeyError(f"No key {value}")
+                        raise KeyError(f"No key {value} in {prefix}")
                 return value
-            except KeyError:
-                raise KeyError("Invalid dot notation. Could not find value for `{}` in {}...".format(value, prefix))
+            except KeyError as e:
+                raise KeyError("Invalid dot notation. Could not find value for `{}` "
+                               "in `{}`. Error: {}".format(value, prefix, str(e)))
             except TypeError as e:
                 raise KeyError("Invalid dot notation. You are trying to access {} "
                                "when it its value is not a dictionary `{}`.".format(value, str(e)))
@@ -79,6 +81,26 @@ class DotAccessor:
             'flow@': self.flow,
             'memory@': self.memory,
         }
+
+    def set_storage(self, name, data):
+
+        if name == 'profile':
+            self.profile = data
+        elif name == 'event':
+            self.event = data
+        elif name == 'session':
+            self.session = data
+        elif name == 'flow':
+            self.flow = data
+        elif name == 'payload':
+            self.payload = data
+        elif name == 'memory':
+            self.memory = data
+
+        storage = f"{name}@"
+        if storage not in self.storage.keys():
+            raise ValueError("Unknown storage")
+        self.storage[storage] = self._convert(data, name)
 
     @staticmethod
     def source(key):

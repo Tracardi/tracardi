@@ -143,9 +143,11 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
     processed_events = []
     for event in events:
 
-        dot.event = event
+        dot.set_storage("event", event)
 
-        event = await validate_event(event, dot)
+        # mutates console_log
+        event = await validate_event(event, dot, console_log)
+
         try:
             event = await reshape_event(event, dot)
         except Exception as e:
