@@ -117,7 +117,8 @@ class Resource:
             "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json"),
             "live-segment": Index(multi_index=False, index="tracardi-live-segment",
                                   mapping="mappings/live-segment-index.json"),
-
+            "event-management": Index(multi_index=False, index="tracardi-event-management",
+                                      mapping="mappings/event-management-index.json"),
             "debug-info": Index(multi_index=False, index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json"),
             "api-instance": Index(multi_index=False, index="tracardi-api-instance",
