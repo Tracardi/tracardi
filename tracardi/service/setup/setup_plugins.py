@@ -5,6 +5,13 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
+    "tracardi.process_engine.action.v1.connectors.google.analytics.registry": PluginTestTemplate(
+        init={'source': {'id': '', 'name': ''}, 'category': '', 'action': '', 'label': '', 'value': ''},
+        resource={
+            "ga_tracking_id": "ga_tracking_id"
+        }
+    ),
+
     "tracardi.process_engine.action.v1.connectors.whois.plugin": PluginTestTemplate(
         init={"domain": "some.com"},
         resource=None

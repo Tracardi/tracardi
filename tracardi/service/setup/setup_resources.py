@@ -195,6 +195,15 @@ def get_resource_types() -> List[ResourceSettings]:
             manual="novu_resource"
         ),
         ResourceSettings(
+            id="google_id",
+            name="Google Analytics Tracking ID",
+            tags=["google"],
+            config={
+                "google_analytics_id": "<google_analytics_id>"
+            },
+            manual="google_analytics_tracker_resource"
+        ),
+        ResourceSettings(
             id="google-cloud-service-account",
             name="Google Cloud service account",
             tags=["gcp-service-account"],
