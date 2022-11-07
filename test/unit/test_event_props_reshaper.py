@@ -1,18 +1,19 @@
 import pytest
-
-from tracardi.service.event_props_reshaper import EventPropsReshaper
+from uuid import uuid4
+from lark import UnexpectedEOF
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.domain.event import Event, EventMetadata, EventSession
 from tracardi.domain.entity import Entity
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.event_metadata import EventTime
-from tracardi.domain.event_reshaping_schema import ReshapeSchema
+from tracardi.domain.event_reshaping_schema import ReshapeSchema, EventReshapingSchema
 from copy import deepcopy
 from pydantic import ValidationError
 
+from tracardi.service.tracker_event_props_reshaper import EventPropsReshaper
 
-#  TODO CHANGE TESTS
+
 def test_should_reshape_event_properties():
     profile = Profile(id="1")
     session = Session(
@@ -26,16 +27,26 @@ def test_should_reshape_event_properties():
             "prop4": "string"
         }
     }
+
     schema = ReshapeSchema(
         condition="event@properties.prop1 == 1",
-        template={
+        reshape_schema={
             "prop5": "event@properties.prop2",
             "prop6": {
-                "key": "event@properties.prop3"
+                "key": ["event@properties.prop3"]
             },
-            "prop7": "event@properties.does-not-exist"
+            "prop7": ["event@properties.does-not-exist"]
         }
     )
+
+    schemas = [
+        EventReshapingSchema(
+            id=str(uuid4()),
+            name="test",
+            event_type='text',
+            reshaping=schema
+        )
+    ]
 
     event_to_reshape = Event(
         id='1',
@@ -45,21 +56,23 @@ def test_should_reshape_event_properties():
         source=Entity(id='1'),
         properties=deepcopy(props)
     )
+
     event = EventPropsReshaper(
         event=event_to_reshape,
         dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
-    ).reshape(schema)
+    ).reshape(schemas)
+
     assert event.properties == {
         "prop5": props["prop2"],
         "prop6": {
-            "key": props["prop3"]
+            "key": [props["prop3"]]
         },
-        "prop7": None
+        "prop7": [None]
     }
 
     schema = ReshapeSchema(
         condition="event@properties.prop1 == 2",
-        template={
+        reshape_schema={
             "prop5": "event@properties.prop2",
             "prop6": {
                 "key": "event@properties.prop3"
@@ -75,10 +88,20 @@ def test_should_reshape_event_properties():
         source=Entity(id='1'),
         properties=deepcopy(props)
     )
+
+    schemas = [
+        EventReshapingSchema(
+            id=str(uuid4()),
+            name="test",
+            event_type='text',
+            reshaping=schema
+        )
+    ]
+
     event = EventPropsReshaper(
         event=event_to_reshape,
         dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
-    ).reshape(schema)
+    ).reshape(schemas)
     assert event.properties == props
 
 
@@ -97,7 +120,7 @@ def test_should_reshape_without_condition():
     }
     schema = ReshapeSchema(
         condition="",
-        template={
+        reshape_schema={
             "prop5": "event@properties.prop2",
             "prop6": {
                 "key": "event@properties.prop3"
@@ -117,7 +140,14 @@ def test_should_reshape_without_condition():
     event = EventPropsReshaper(
         event=event_to_reshape,
         dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
-    ).reshape(schema)
+    ).reshape([
+        EventReshapingSchema(
+            id=str(uuid4()),
+            name="test",
+            event_type='text',
+            reshaping=schema
+        )
+    ])
     assert event.properties == {
         "prop5": props["prop2"],
         "prop6": {
@@ -142,7 +172,7 @@ def test_should_not_reshape_with_false_condition():
     }
     schema = ReshapeSchema(
         condition="event@properties.prop1 == 100",
-        template={
+        reshape_schema={
             "prop5": "event@properties.prop2",
             "prop6": {
                 "key": "event@properties.prop3"
@@ -162,7 +192,14 @@ def test_should_not_reshape_with_false_condition():
     event = EventPropsReshaper(
         event=event_to_reshape,
         dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
-    ).reshape(schema)
+    ).reshape([
+        EventReshapingSchema(
+            id=str(uuid4()),
+            name="test",
+            event_type='text',
+            reshaping=schema
+        )
+    ])
     assert event.properties == props
 
 
@@ -174,7 +211,7 @@ def test_should_not_reshape_with_wrong_condition():
     with pytest.raises(ValidationError):
         _ = ReshapeSchema(
             condition="wrong_condition",
-            template={}
+            reshape_schema={}
         )
     props = {
         "prop1": 1,
@@ -189,23 +226,31 @@ def test_should_not_reshape_with_wrong_condition():
         metadata=SessionMetadata()
     )
     schema = ReshapeSchema(
-        template={"key": "profile@id"}
+        reshape_schema={"key": "profile@id"}
     )
     schema.condition = "wrong_condition"
 
     event_to_reshape = Event(
-            id='1',
-            type='text',
-            metadata=EventMetadata(time=EventTime()),
-            session=EventSession(id='1'),
-            source=Entity(id='1'),
-            properties=deepcopy(props)
+        id='1',
+        type='text',
+        metadata=EventMetadata(time=EventTime()),
+        session=EventSession(id='1'),
+        source=Entity(id='1'),
+        properties=deepcopy(props)
     )
-    event = EventPropsReshaper(
-        event=event_to_reshape,
-        dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
-    ).reshape(schema)
-    assert event.properties == props
+
+    with pytest.raises(UnexpectedEOF):
+        EventPropsReshaper(
+            event=event_to_reshape,
+            dot=DotAccessor(profile=profile, event=event_to_reshape, session=session)
+        ).reshape([
+            EventReshapingSchema(
+                id=str(uuid4()),
+                name="test",
+                event_type='text',
+                reshaping=schema
+            )
+        ])
 
 
 def test_should_reshape_whole_objects():
@@ -225,7 +270,7 @@ def test_should_reshape_whole_objects():
         }
     }
     schema = ReshapeSchema(
-        template={
+        reshape_schema={
             "all": "event@..."
         }
     )
@@ -240,7 +285,123 @@ def test_should_reshape_whole_objects():
             properties=deepcopy(props)
         )),
         dot=DotAccessor(profile=profile, event=_event, session=session)
-    ).reshape(schema)
+    ).reshape([
+        EventReshapingSchema(
+            id=str(uuid4()),
+            name="test",
+            event_type='text',
+            reshaping=schema
+        )
+    ])
 
     assert event.properties['all']['id'] == event.id
     assert event.properties['all']['properties'] == props
+
+
+def test_should_not_reshape_multiple_type_events():
+    """
+    If more than two reshapes evaluate to true - fail
+    """
+    profile = Profile(id="1")
+    session = Session(
+        id='1',
+        metadata=SessionMetadata()
+    )
+
+    with pytest.raises(Exception):
+        EventPropsReshaper(
+            event=(_event := Event(
+                id='1',
+                type='text',
+                metadata=EventMetadata(time=EventTime()),
+                session=EventSession(id='1'),
+                source=Entity(id='1'),
+                properties={
+                    "prop1": 1,
+                    "prop2": 2,
+                    "prop3": {
+                        "prop4": "string"
+                    }
+                }
+            )),
+            dot=DotAccessor(profile=profile, event=_event, session=session)
+        ).reshape([
+            EventReshapingSchema(
+                id=str(uuid4()),
+                name="test",
+                event_type='text',
+                reshaping=ReshapeSchema(
+                    condition="profile@id exists",
+                    reshape_schema={
+                        "all": "event@..."
+                    }
+                )
+            ),
+            EventReshapingSchema(
+                id=str(uuid4()),
+                name="test",
+                event_type='text',
+                reshaping=ReshapeSchema(
+                    condition="profile@id exists",
+                    reshape_schema={
+                        "all": "profile@id exists"
+                    }
+                )
+            )
+        ])
+
+
+def test_should_not_fail_if_only_one_reshape_evaluates_to_true():
+    """
+    If we have multiple reshapes but only one evaluates to true do not fail.
+    """
+    profile = Profile(id="1")
+    session = Session(
+        id='1',
+        metadata=SessionMetadata()
+    )
+
+    reshape = {
+        "all": "2"
+    }
+
+    event = EventPropsReshaper(
+        event=(_event := Event(
+            id='1',
+            type='text',
+            metadata=EventMetadata(time=EventTime()),
+            session=EventSession(id='1'),
+            source=Entity(id='1'),
+            properties={
+                "prop1": 1,
+                "prop2": 2,
+                "prop3": {
+                    "prop4": "string"
+                }
+            }
+        )),
+        dot=DotAccessor(profile=profile, event=_event, session=session)
+    ).reshape([
+        EventReshapingSchema(
+            id=str(uuid4()),
+            name="test",
+            event_type='text',
+            reshaping=ReshapeSchema(
+                condition="profile@id exists",
+                reshape_schema=reshape
+            )
+        ),
+        EventReshapingSchema(
+            id=str(uuid4()),
+            name="test",
+            event_type='text',
+            reshaping=ReshapeSchema(
+                condition="profile@id not exists",
+                reshape_schema={
+                    "all": "1"
+                }
+            )
+        )
+    ])
+
+    assert event.properties == reshape
