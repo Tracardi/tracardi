@@ -4,7 +4,7 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from pydantic import validator
 from typing import Dict, Union
-from tracardi.service.event_validator import validate as validate_with_schema
+from tracardi.service.tracker_event_validator import validate as validate_with_schema
 from tracardi.exceptions.exception import EventValidationException
 from tracardi.domain.event_validator import EventValidator, ValidationSchema
 import jsonschema

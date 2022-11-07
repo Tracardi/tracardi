@@ -130,6 +130,7 @@ async def _persist(console_log: ConsoleLog, session: Session, events: List[Event
 
 
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog) -> Tuple[List[Event], ConsoleLog]:
+
     dot = DotAccessor(
         profile=profile,
         session=session,
@@ -138,6 +139,7 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
         flow=None,
         memory=None
     )
+
     processed_events = []
     for event in events:
 
@@ -211,11 +213,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     )
 
     ux = []
-
-    # if source.requires_consent is True:
-    #     ux.append({
-    #
-    #     })
 
     post_invoke_events = None
     flow_responses = FlowResponses([])
