@@ -155,6 +155,9 @@ class StorageRecords(dict):
     def transform_hits(self, func: Callable) -> None:
         self._hits = [{**hit, "_source": func(hit["_source"])} for hit in self._hits]
 
+    def to_domain_objects(self, domain_object: Type[T]) -> List[T]:
+        return [domain_object(**hit) for hit in self]
+
     def __len__(self):
         return self.chunk
 
