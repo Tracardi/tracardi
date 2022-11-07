@@ -34,13 +34,15 @@ Version 0.7.3-dev
 * Adds missing documentation for some plugins
 * New menu and data layout
 * Better debugging. More information on logs. Plugins now have their error log.
+* Better time zone handling
 
 ## Errors
 
 * Problem with connecting nodes in graph 
 * Missing session timeline
 * Solves problem with missing destinations
-
+* Fixed issues with dates
+* 
 ## Misc
 
 * Upgrade to python 3.9
