@@ -19,19 +19,8 @@
       "description": {
         "type": "keyword"
       },
-      "validation": {
-        "index": false,
-        "type": "keyword"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
       "tags": {
         "type": "keyword"
-      },
-      "reshaping": {
-        "type": "keyword",
-        "index": false
       }
     }
   },
