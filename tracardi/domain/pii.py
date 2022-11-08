@@ -12,7 +12,7 @@ class PII(BaseModel):
     """
 
     name: Optional[Any] = None
-    last_name: Optional[Any] = None
+    surname: Optional[Any] = None
     birth_date: Optional[Any] = None
     marital_status: Optional[str] = None
     email: Optional[Any] = None

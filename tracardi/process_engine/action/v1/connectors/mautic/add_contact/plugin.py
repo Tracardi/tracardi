@@ -138,7 +138,7 @@ def register() -> Plugin:
                                 name="Additional fields",
                                 description="You can add some more fields to your contact. Just type in the alias of "
                                             "the field as key, and a path as a value for this field. This is fully "
-                                            "optional. (Example: lastname: profile@pii.last_name",
+                                            "optional. (Example: surname: profile@pii.surname",
                                 component=FormComponent(type="keyValueList", props={"label": "Fields"})
                             ),
                             FormField(
