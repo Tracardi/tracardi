@@ -34,9 +34,8 @@ async def load_by_tag(tag):
 
 
 async def load_by_event_type(event_type: str) -> StorageRecords:
-    return await StorageFor.crud('event-validation', class_type=EventValidator).load_by(
-        'event_type',
-        event_type
+    return await StorageFor.crud('event-validation', class_type=EventValidator).load_by_values(
+        [('event_type', event_type), ('enabled', True)]
     )
 
 
