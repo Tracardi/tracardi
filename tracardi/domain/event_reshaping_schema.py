@@ -26,3 +26,4 @@ class EventReshapingSchema(NamedEntity):
     description: Optional[str] = "No description provided"
     tags: List[str] = []
     reshaping: ReshapeSchema
+    enabled: bool = False

@@ -29,6 +29,9 @@
       },
       "event_type": {
         "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
       }
     }
   },

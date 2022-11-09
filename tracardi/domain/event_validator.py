@@ -38,4 +38,4 @@ class EventValidator(NamedEntity):
     description: Optional[str] = "No description provided"
     tags: List[str] = []
     validation: ValidationSchema
-
+    enabled: bool = False
