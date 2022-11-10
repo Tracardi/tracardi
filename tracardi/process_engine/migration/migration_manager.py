@@ -22,7 +22,7 @@ class MigrationManager:
     available_migrations = {
         ("0.7.0", "0.7.1"): "070_to_071",
         ("0.7.1", "0.7.2"): "071_to_072",
-        ("0.7.2", "0.7.3"): "071_to_072",
+        ("0.7.2", "0.7.3-dev"): "072_to_073",
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
@@ -107,6 +107,8 @@ class MigrationManager:
             return run_migration_job.delay(given_schemas, elastic, task_index_name)
 
         task_index = resources.get_index("task").get_write_index()
+
+        # Run in executor
 
         executor = ThreadPoolExecutor(
             max_workers=1,
