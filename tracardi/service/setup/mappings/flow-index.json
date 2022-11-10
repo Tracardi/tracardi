@@ -40,6 +40,16 @@
       },
       "lock": {
         "type": "boolean"
+      },
+      "debug": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "logging_level": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
