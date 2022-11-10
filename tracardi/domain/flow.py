@@ -87,13 +87,16 @@ class Flow(GraphFlow):
 
     @staticmethod
     def from_workflow_record(record: 'FlowRecord', output) -> 'Flow':
+
         if output == 'draft':
             decrypted = decrypt(record.draft)
         else:
             decrypted = decrypt(record.production)
-        flow = Flow(**decrypted)
-        flow.type = record.type
-        return flow
+
+        if 'type' not in decrypted:
+            decrypted['type'] = record.type
+
+        return Flow(**decrypted)
 
     @staticmethod
     def new(id: str = None) -> 'Flow':

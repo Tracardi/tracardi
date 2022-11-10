@@ -66,7 +66,7 @@
       "from_index": "tracardi-event-management",
       "to_index": "tracardi-event-management",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.remove(\"reshaping\");\nrow.remove(\"enabled\");\nrow.remove(\"validation\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.event_type=row.id;\nrow.remove(\"reshaping\");\nrow.remove(\"enabled\");\nrow.remove(\"validation\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
