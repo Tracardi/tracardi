@@ -1,6 +1,4 @@
 from json import JSONDecodeError
-import aiohttp
-import json
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.domain.resources.google_analytics_id import GoogleAnalyticsCredentials
@@ -32,7 +30,7 @@ class GoogleAnalyticsEventTrackerAction(ActionRunner):
         params = {
             "v": "1",
             "tid": self.credentials.google_analytics_id,
-            "cid": self.profile.id,
+            "cid": self.profile.id if self.profile else 'unknown',
             "t": "event",
             "ec": dot[self.config.category],
             "ea": dot[self.config.action],

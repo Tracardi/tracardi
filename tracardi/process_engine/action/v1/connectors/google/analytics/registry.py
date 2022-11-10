@@ -28,8 +28,8 @@ def register() -> Plugin:
                         fields=[
                             FormField(
                                 id='source',
-                                name='Google Analytics Tracking ID',
-                                description='Select Google Analytics resource. Credentials from selected resource '
+                                name='Google Universal Analytics Tracking ID',
+                                description='Select Google Universal Analytics resource. Credentials from selected resource '
                                             'will be used to authorize your account.',
                                 component=FormComponent(type='resource', props={
                                     'label': 'resource',
@@ -77,8 +77,8 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name='Google analytics event tracker',
-            desc='Send your customized event to Google Analytics event tracker',
+            name='Google UA events',
+            desc='Send your customized event to Google Universal Analytics event tracker',
             brand='Google',
             icon='google',
             group=['Google'],
