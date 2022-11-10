@@ -95,6 +95,14 @@
             }
           }
         },
+        "flags": {
+          "type": "object",
+          "dynamic": "true",
+          "enabled": false
+        },
+        "collections": {
+          "type": "nested"
+        },
         "segments": {
           "type": "keyword",
           "ignore_above": 64
