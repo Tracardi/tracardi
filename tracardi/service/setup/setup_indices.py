@@ -108,6 +108,14 @@ async def create_indices():
 
             if not await es.exists_index(target_index):
 
+                # There is no index but the alias may exist
+                exists_index_with_alias_name = await es.exists_index(alias_index)
+                if exists_index_with_alias_name:
+                    message = f"Could not create index `{target_index}` and alias `{alias_index}`. " \
+                              f"There is an index name with the same name as the alias."
+                    logger.error(message)
+                    raise ConnectionError(message)
+
                 # Creates index and alias in one shot.
 
                 mapping = map['template'] if index.multi_index else map
