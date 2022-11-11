@@ -1213,7 +1213,8 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin": PluginTestTemplate(
-        init={'message': {'content': {'content': "None", 'type': 'text/html'}, 'recipient': "None", 'subject': "None"}, 'sender_email': "None",
+        init={'message': {'content': {'content': "None", 'type': 'text/html'}, 'recipient': "test@test.com", 'subject': "None"},
+              'sender_email': "test@test.com",
               'source': {'id': '1', 'name': 'Some value'}},
         resource={
             "token": "<token>"
