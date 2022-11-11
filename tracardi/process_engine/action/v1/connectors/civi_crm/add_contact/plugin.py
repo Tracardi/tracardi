@@ -21,7 +21,7 @@ class AddCiviContactAction(ActionRunner):
     config: Config
 
     async def set_up(self, init):
-        config = Config(init)
+        config = Config(**init)
         resource = await storage.driver.resource.load(config.source.id)
 
         self.config = config

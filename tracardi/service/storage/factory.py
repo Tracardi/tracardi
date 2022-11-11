@@ -36,6 +36,7 @@ class EntityStorageCrud(BaseStorageCrud):
     async def load(self, domain_class_ref = None) -> Optional[Entity]:
         service = self._get_storage_service()
         data = await service.load(self.entity.id)
+        print(data)
         if data:
 
             if domain_class_ref is None:

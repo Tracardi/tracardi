@@ -10,7 +10,7 @@ class Content(BaseModel):
     @validator("type")
     def validate_type(cls, value):
         if value not in ("text/plain", "text/html"):
-            raise ValueError("Message content type must be either HTML or plain text.")
+            raise ValueError("Message content type must be either text/html or text/plain.")
         return value
 
 
