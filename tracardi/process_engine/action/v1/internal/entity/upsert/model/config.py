@@ -6,6 +6,7 @@ class Configuration(BaseModel):
     id: str
     type: str
     reference_profile: bool = True
+    merge_entity_with: str = ""
     properties: Optional[str] = "{}"
     traits: Optional[str] = "{}"
 

@@ -11,14 +11,9 @@ def get_referenced_profile(config: EntityConfigProtocol, profile: Profile) -> Op
         else None
 
 
-def convert_entity_id(config: EntityConfigProtocol, id: str, profile: Profile) -> str:
-    referenced_profile = get_referenced_profile(config, profile)
-
+def convert_entity_id(config: EntityConfigProtocol, id: str) -> str:
     event_type = config.type.id if isinstance(config.type, NamedEntity) else config.type
-
-    if referenced_profile:
-        entity_id = "{}-{}-{}".format(event_type, id, referenced_profile)
-    else:
-        entity_id = "{}-{}".format(event_type, id)
+    event_type = event_type.replace(" ", "-").strip()
+    entity_id = "{}:{}".format(event_type, id)
 
     return entity_id

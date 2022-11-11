@@ -43,14 +43,14 @@ class EntityLoadAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
 
             entity_id = dot[self.config.id]
-            entity_id = convert_entity_id(self.config, entity_id, self.profile)
+            entity_id = convert_entity_id(self.config, entity_id)
 
             result = await storage.driver.entity.load_by_id(entity_id)
 
             if result is None:
                 return Result(port="missing", value=payload)
 
-            return Result(port="result", value=result.dict())
+            return Result(port="result", value={"entity": result.dict()})
         except Exception as e:
             return Result(port="error", value={
                 "message": str(e)
@@ -65,7 +65,7 @@ def register() -> Plugin:
             className='EntityLoadAction',
             inputs=["payload"],
             outputs=["result", "missing", "error"],
-            version='0.7.2',
+            version='0.7.3',
             license="MIT",
             author="Risto Kowaczewski",
             init={
