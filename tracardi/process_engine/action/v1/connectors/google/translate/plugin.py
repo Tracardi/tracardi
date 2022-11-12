@@ -53,6 +53,7 @@ def register() -> Plugin:
             module=__name__,
             className="GoogleTranslateAction",
             inputs=["payload"],
+            outputs=['translation'],
             version="0.7.2",
             license="MIT",
             author="Mateusz Zitaruk",
