@@ -5,6 +5,15 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
+    "tracardi.process_engine.action.v1.internal.limiter.plugin": PluginTestTemplate(
+        init={
+              "keys": [],
+              "limit": 10,
+              "ttl": 60
+            },
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.connectors.google.analytics.registry": PluginTestTemplate(
         init={'source': {'id': 'id', 'name': 'name'}, 'category': 'category', 'action': 'action', 'label': 'label',
               'value': 'value'},
