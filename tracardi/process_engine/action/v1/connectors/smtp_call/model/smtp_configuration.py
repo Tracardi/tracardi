@@ -1,5 +1,7 @@
 from pydantic import BaseModel, validator
 from typing import Optional
+
+from tracardi.domain.content import Content
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -17,7 +19,7 @@ class Message(BaseModel):
     send_from: str
     title: str
     reply_to: Optional[str] = None
-    message: str
+    message: Content
 
     @validator("title")
     def title_must_not_be_empty(cls, value):
@@ -27,11 +29,11 @@ class Message(BaseModel):
 
     @validator("message")
     def message_must_not_be_empty(cls, value):
-        if len(value) < 1:
+        if len(value.content) < 1:
             raise ValueError("Message can not be empty.")
         return value
 
 
 class Configuration(PluginConfig):
-    source: NamedEntity
-    message: Message
+    resource: NamedEntity
+    mail: Message

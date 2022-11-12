@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from bs4 import BeautifulSoup
 
 from ..model.smtp_configuration import SmtpConfiguration, Message
+from email.utils import make_msgid
 
 
 class PostMan:
@@ -23,27 +24,28 @@ class PostMan:
         return session
 
     @staticmethod
-    def _prepare_message(message: Message) -> MIMEMultipart:
+    def _prepare_message(mail: Message) -> MIMEMultipart:
 
         """Create and configure message container """
         message_container = MIMEMultipart('alternative')
-        message_container['From'] = message.send_from
-        message_container['To'] = message.send_to
-        message_container['Subject'] = message.title
-        message_container.add_header('reply-to', message.reply_to)
+        message_container['From'] = mail.send_from
+        message_container['To'] = mail.send_to
+        message_container['Subject'] = mail.title
+        message_container['Message-ID'] = make_msgid()
+        message_container['Content-type'] = mail.message.type
+        message_container.add_header('reply-to', mail.reply_to)
 
-        """Cleaning self.message from HTML tags using bs4 """
-        clear_message = BeautifulSoup(message.message, "lxml").text
-
-        """Creating two parts of message one with HTML tags one without"""
-        part1 = MIMEText(clear_message, 'plain')
-        part2 = MIMEText(message.message, 'html')
-        message_container.attach(part1)
-        message_container.attach(part2)
+        if mail.message.type == 'text/html':
+            message_container.attach(MIMEText(mail.message.content, 'html'))
+        else:
+            """Cleaning message.content from HTML tags using bs4 """
+            body_message = BeautifulSoup(mail.message.content, "lxml").text
+            message_container.attach(MIMEText(body_message, 'plain'))
 
         return message_container
 
     def send(self, message: Message):
         session = self._connect()
-        session.sendmail(message.send_from, message.send_to, self._prepare_message(message).as_string())
+        body = self._prepare_message(message).as_string()
+        session.sendmail(message.send_from, message.send_to, body)
         session.quit()
