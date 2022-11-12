@@ -14,11 +14,18 @@ from googletrans import Translator
 class Config(PluginConfig):
     text_to_translate: str
     source_language: str
+    destination_language: str
 
     @validator("source_language")
     def check_given_source_language_type(cls, value):
         if not isinstance(value, str) or not value:
-            raise ValueError("The language source must be a string!")
+            raise ValueError("The language must be a string!")
+        return value
+
+    @validator("destination_language")
+    def check_given_dest_language_type(cls, value):
+        if not isinstance(value, str) or not value:
+            raise ValueError("The language must be a string!")
         return value
 
 
@@ -41,7 +48,7 @@ class GoogleTranslateAction(ActionRunner):
         translation = self.translator.translate(
             text_to_translate,
             src=self.config.source_language,
-            dest='en')
+            dest=self.config.destination_language)
 
         return Result(port="translation", value={"translation": translation.text})
 
@@ -68,6 +75,18 @@ def register() -> Plugin:
                         name="Google translator configurator",
                         fields=[
                             FormField(
+                                id="source_language",
+                                name="Language source",
+                                description="Please select source language.",
+                                component=FormComponent(
+                                    type="select",
+                                    props={
+                                        "label": "From language",
+                                        "items": googletrans.LANGUAGES
+                                    }
+                                )
+                            ),
+                            FormField(
                                 id="text_to_translate",
                                 name="Text to translate",
                                 description="Please provide path to text that you want to translate.",
@@ -80,17 +99,17 @@ def register() -> Plugin:
                                 )
                             ),
                             FormField(
-                                id="source_language",
-                                name="Language source",
-                                description="Please select source language of text that you want to translate.",
+                                id="destination_language",
+                                name="Destination source",
+                                description="Please select destination language you would like to translate to.",
                                 component=FormComponent(
                                     type="select",
                                     props={
-                                        "label": "Source language",
+                                        "label": "To language",
                                         "items": googletrans.LANGUAGES
                                     }
                                 )
-                            )
+                            ),
                         ]
                     )
                 ]
