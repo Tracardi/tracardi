@@ -97,6 +97,7 @@ def register() -> Plugin:
                     "pass": PortDoc(desc="Returns input payload if execution not throttled."),
                     "block": PortDoc(desc="Returns input payload if execution throttled.")
                 }
-            )
+            ),
+            pro=True
         )
     )

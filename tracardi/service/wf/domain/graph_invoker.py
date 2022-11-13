@@ -124,7 +124,8 @@ class GraphInvoker(BaseModel):
                 if node.run_once.enabled is True:
 
                     if node.object.profile is None:
-                        node.object.console.log("Conditional stop is global and assigned to node {}".format(node.id))
+                        node.object.console.log("Conditional stop is not connected with a profile (profiless event) and "
+                                                "assigned to only to node {}{}".format(node.name, node.id))
 
                     profile_id = node.object.profile.id if node.object.profile is not None else None
 
@@ -154,8 +155,11 @@ class GraphInvoker(BaseModel):
                         raise ValueError("Unknown type {} for conditional workflow stop.".format(node.run_once.type))
                     if not await vtm.pass_threshold(value):
                         coroutine = self._void_return(node)
+                        node.object.console.log(f"Node `{node.name}` stopped; Conditional value `{value}` have not changed.")
                     else:
                         coroutine = life_cycle.plugin.execute(node, params)
+                        node.object.console.log(
+                            f"Node `{node.name}` executed; Conditional value `{value}` have changed.")
 
                 else:
                     coroutine = life_cycle.plugin.execute(node, params)
