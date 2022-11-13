@@ -10,6 +10,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.settings import Settings
 from tracardi.domain.time import Time
 from tracardi.process_engine.action.v1.flow.postpone_event.model.configuration import Configuration
+from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.postpone_call import PostponedCall
@@ -27,35 +28,42 @@ class PostponeEventAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    async def _postponed_run(self):
-        ip = self.event.request['ip'] if 'ip' in self.event.request else '127.0.0.1'
-        tracker_payload = TrackerPayload(
-            source=Entity(id=self.event.source.id),
-            session=Entity(id=self.session.id),
-            profile=Entity(id=self.profile.id),
-            context={},
-            properties={},
-            events=[
-                EventPayload(
-                    type=self.config.event_type,
-                    properties=json.loads(self.config.event_properties),
-                    context=self.event.context
-                )
-            ],
-            metadata=EventPayloadMetadata(
-                time=Time(),
-                ip=ip
-            )
-        )
-        await synchronized_event_tracking(tracker_payload, host="http://localhost", profile_less=False,
-                                          allowed_bridges=['rest'])
-
     async def run(self, payload: dict, in_edge=None):
         if self.profile is None:
-            raise ValueError("Profile less events can not be delayed.")
+            self.console.error("PostponeEventAction: Profile less events can not be delayed.")
+            return None
+
+        dot = self._get_dot_accessor(payload)
+        converter = DictTraverser(dot)
+        event_properties = converter.reshape(json.loads(self.config.event_properties))
+
+        async def _postponed_run():
+            ip = self.event.request['ip'] if 'ip' in self.event.request else '127.0.0.1'
+
+            tracker_payload = TrackerPayload(
+                source=Entity(id=self.event.source.id),
+                session=Entity(id=self.session.id),
+                profile=Entity(id=self.profile.id),
+                context={},
+                properties={},
+                events=[
+                    EventPayload(
+                        type=self.config.event_type,
+                        properties=event_properties,
+                        context=self.event.context
+                    )
+                ],
+                metadata=EventPayloadMetadata(
+                    time=Time(),
+                    ip=ip
+                )
+            )
+            await synchronized_event_tracking(tracker_payload, host="http://localhost", profile_less=False,
+                                              allowed_bridges=['rest'])
+
         postponed_call = PostponedCall(
             self.profile.id,
-            self._postponed_run,
+            _postponed_run,
             ApiInstance().id
         )
         postponed_call.wait = self.config.delay
