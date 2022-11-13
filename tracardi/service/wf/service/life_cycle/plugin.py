@@ -9,6 +9,7 @@ from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.console import Console
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.node import Node
 
 
@@ -47,7 +48,7 @@ def set_context(node: Node,
     node.object.profile = profile
     node.object.flow = flow
     node.object.flow_history = flow_history
-    node.object.console = Console(node.className, node.module, flow.id, profile.id, node.id)
+    node.object.console = Console(node.className, node.module, get_entity_id(flow), get_entity_id(profile), node.id)
     node.object.id = node.id
     node.object.metrics = metrics
     node.object.memory = memory

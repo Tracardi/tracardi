@@ -452,12 +452,12 @@ class GraphInvoker(BaseModel):
 
             except Exception as e:
                 msg = "`{}`. This error occurred when initializing node `{}`. ".format(
-                    str(e), node.id) + "Check node configuration, __init__, or post_init method of `{}.{}`".format(
+                    str(e), node.name) + "Check node configuration, __init__, or post_init method of `{}.{}`".format(
                     node.module,
                     node.className)
 
                 debug_info.flow.add_error(ErrorDebugInfo(
-                    msg=msg, line=443, file=__file__
+                    msg=msg, line=460, file=__file__
                 ))
                 debug_info.add_node_info(DebugNodeInfo(
                     id=node.id,
@@ -468,11 +468,13 @@ class GraphInvoker(BaseModel):
                     profiler=Profiler(startTime=0, endTime=0, runTime=0)
                 ))
                 log_list.append(Log(
-                    module=node.module,
-                    class_name=node.className,
+                    module=__name__,
+                    class_name=GraphInvoker.__name__,
                     type='error',
                     message=msg,
-                    node_id=node.id
+                    node_id=node.id,
+                    profile_id=get_entity_id(profile),
+                    flow_id=get_entity_id(flow)
                 ))
                 node.object = DagExecError(
                     msg,

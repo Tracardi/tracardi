@@ -2,6 +2,7 @@ from typing import List, Optional, Iterator, Dict
 from pydantic import BaseModel
 
 import tracardi.service.wf
+from tracardi.domain.entity import Entity
 
 from .port_to_port_edges import PortToPortEdges
 from ..service.node_indexer import index_nodes
@@ -14,8 +15,7 @@ class Graph(BaseModel):
     out_edges: PortToPortEdges = PortToPortEdges()
 
 
-class Node(BaseModel):
-    id: str
+class Node(Entity):
     name: str = None
     start: Optional[bool] = False
     debug: bool = False
