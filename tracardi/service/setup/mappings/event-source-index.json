@@ -16,6 +16,9 @@
       "timestamp": {
         "type": "date"
       },
+      "update": {
+        "type": "date"
+      },
       "type": {
         "type": "keyword"
       },

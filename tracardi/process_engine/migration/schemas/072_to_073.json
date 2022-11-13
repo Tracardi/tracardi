@@ -198,7 +198,7 @@
       "from_index": "tracardi-source",
       "to_index": "tracardi-source",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.requires_consent = false;\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.requires_consent = false;\nrow.update = ctx._source.timestamp;\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
