@@ -508,8 +508,7 @@ class GraphInvoker(BaseModel):
         return event.metadata.debug is True or self.debug is True
 
     async def run(self, payload, event: Event, profile: Profile, session: Session, debug_info: DebugInfo,
-                  log_list: List[Log]) -> Tuple[
-        DebugInfo, List[Log], Profile, Session]:
+                  log_list: List[Log]) -> Tuple[DebugInfo, List[Log], Profile, Session]:
 
         actions_results = ActionsResults()
         flow_start_time = debug_info.timestamp
