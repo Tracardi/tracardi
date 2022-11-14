@@ -5,6 +5,11 @@ from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplat
 
 installed_plugins: Dict[str, PluginTestTemplate] = {
 
+    "tracardi.process_engine.action.v1.time.last_profile_visit.plugin": PluginTestTemplate(
+        init=None,
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.internal.limiter.plugin": PluginTestTemplate(
         init={
               "keys": [],
