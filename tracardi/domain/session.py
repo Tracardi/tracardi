@@ -15,15 +15,20 @@ class SessionTime(BaseModel):
     duration: float = 0
 
     def __init__(self, **data: Any):
-        if 'insert' not in data:
-            data['insert'] = datetime.utcnow()
 
-        now_timestamp = datetime.timestamp(datetime.utcnow())
-        data['timestamp'] = now_timestamp
+        now = datetime.utcnow()
+        now_timestamp = datetime.timestamp(now)
+
+        if 'insert' not in data:
+            data['insert'] = now
+
+        if 'timestamp' not in data:
+            data['timestamp'] = now_timestamp
+
+        if 'duration' not in data:
+            data['duration'] = now_timestamp - datetime.timestamp(self.insert)
 
         super().__init__(**data)
-
-        self.duration = now_timestamp - datetime.timestamp(self.insert)
 
 
 class SessionMetadata(BaseModel):

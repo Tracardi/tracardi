@@ -10,7 +10,7 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class FindPreviousSessionAction(ActionRunner):
+class PreviousSessionAction(ActionRunner):
 
     config: Config
 
@@ -36,7 +36,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='FindPreviousSessionAction',
+            className=PreviousSessionAction.__name__,
             inputs=["payload"],
             outputs=["found", "not_found"],
             version='0.6.2',
@@ -69,6 +69,7 @@ def register() -> Plugin:
                  'payload.',
             icon='previous',
             group=["Sessions"],
+            keywords=['last'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
