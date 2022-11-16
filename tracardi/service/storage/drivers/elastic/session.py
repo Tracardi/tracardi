@@ -24,6 +24,9 @@ async def save_sessions(profiles: List[Session]):
 
 
 async def update_session_duration(session: Session):
+
+    session.metadata.time.update_duration()
+
     storage = storage_manager("session")
     index = storage.storage.get_storage_index(session)
 

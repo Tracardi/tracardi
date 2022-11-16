@@ -222,4 +222,7 @@ class TrackerPayload(BaseModel):
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
 
+        # Update existing session duration, First session gets 0, second is updated.
+        session.metadata.time.update_duration()
+
         return profile, session

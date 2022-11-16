@@ -17,18 +17,22 @@ class SessionTime(BaseModel):
     def __init__(self, **data: Any):
 
         now = datetime.utcnow()
-        now_timestamp = datetime.timestamp(now)
 
         if 'insert' not in data:
             data['insert'] = now
 
         if 'timestamp' not in data:
-            data['timestamp'] = now_timestamp
+            data['timestamp'] = datetime.timestamp(now)
 
         if 'duration' not in data:
-            data['duration'] = now_timestamp - datetime.timestamp(self.insert)
+            data['duration'] = 0
 
         super().__init__(**data)
+
+    def update_duration(self):
+        now = datetime.utcnow()
+        now_timestamp = datetime.timestamp(now)
+        self.duration = now_timestamp - datetime.timestamp(self.insert)
 
 
 class SessionMetadata(BaseModel):
