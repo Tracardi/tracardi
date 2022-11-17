@@ -67,6 +67,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.flow.start_segmentation.plugin": PluginTestTemplate(
+        init={'profile_id': "id"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.flow.property_exists.plugin": PluginTestTemplate(
         init={'property': 'event@context.page.url'},
         resource=None

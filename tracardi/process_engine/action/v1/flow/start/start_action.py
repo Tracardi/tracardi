@@ -137,7 +137,7 @@ class StartAction(ActionRunner):
                     if self.profile is not None and profile is not None:
                         self.profile.replace(profile)
 
-                return Result(port="payload", value=self.event.dict())
+                return Result(port="payload", value={})
 
             except ValueError as e:
                 self.console.warning(str(e))
@@ -154,7 +154,7 @@ class StartAction(ActionRunner):
         if len(allowed_event_types) > 0 and self.event.type not in self.config.get_allowed_event_types():
             return None
 
-        return Result(port="payload", value=self.event.dict())
+        return Result(port="payload", value={})
 
     async def run(self, *args, **kwargs) -> Optional[Result]:
         if self.debug is True:
@@ -255,11 +255,11 @@ def register() -> Plugin:
             desc='Starts workflow and returns event data on payload port.',
             keywords=['start node'],
             type="startNode",
-            icon='start',
+            icon='event',
             width=200,
             height=200,
             group=["Flow"],
-            purpose=['collection', 'segmentation'],
+            purpose=['collection'],
             documentation=Documentation(
                 inputs={},
                 outputs={
