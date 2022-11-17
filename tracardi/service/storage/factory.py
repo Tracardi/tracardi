@@ -173,7 +173,7 @@ class StorageFor:
     def index(self, index=None) -> Union[EntityStorageCrud, StorageCrud]:
         if self.storage_info is None:
             if index is None:
-                raise ValueError("When loading entity of type `{}` you must provide index of that entity.".format(
+                raise ValueError("When indexing entity of type `{}` you must provide index of that entity.".format(
                     type(self.instance)
                 ))
             return EntityStorageCrud(index, entity=self.instance)

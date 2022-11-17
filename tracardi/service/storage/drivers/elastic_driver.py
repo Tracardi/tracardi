@@ -29,6 +29,7 @@ import tracardi.service.storage.drivers.elastic.event_reshaping
 import tracardi.service.storage.drivers.elastic.event_validation
 import tracardi.service.storage.drivers.elastic.system
 import tracardi.service.storage.drivers.elastic.event_management
+import tracardi.service.storage.drivers.elastic.event_redirect
 
 
 class ElasticDriver:
@@ -92,6 +93,10 @@ class ElasticDriver:
     @property
     def event_source(self):
         return tracardi.service.storage.drivers.elastic.event_source
+
+    @property
+    def event_redirect(self):
+        return tracardi.service.storage.drivers.elastic.event_redirect
 
     @property
     def action(self):

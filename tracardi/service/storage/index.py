@@ -112,6 +112,8 @@ class Resource:
             "resource": Index(multi_index=False, index="tracardi-resource", mapping="mappings/resource-index.json"),
             "event-source": Index(multi_index=False, index="tracardi-source",
                                   mapping="mappings/event-source-index.json"),
+            "event-redirect": Index(multi_index=False, index="tracardi-event-redirect",
+                                    mapping="mappings/event-redirect-index.json"),
             "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json"),
             "rule": Index(multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json"),
             "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json"),
@@ -129,7 +131,7 @@ class Resource:
                                   mapping="mappings/consent-type.json"),
 
             "event-reshaping": Index(multi_index=False, index="tracardi-event-reshaping",
-                                      mapping="mappings/event-reshaping-index.json"),
+                                     mapping="mappings/event-reshaping-index.json"),
             "event-validation": Index(multi_index=False, index="tracardi-event-validation",
                                       mapping="mappings/event-validator-index.json"),
             "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
