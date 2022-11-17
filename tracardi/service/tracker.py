@@ -436,6 +436,16 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
 
 async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str],
                       internal_source=None):
+
+    # Trim ids - spaces are frequent issues
+
+    if tracker_payload.source:
+        tracker_payload.source.id = tracker_payload.source.id.strip()
+    if tracker_payload.session:
+        tracker_payload.session.id = tracker_payload.session.id.strip()
+    if tracker_payload.profile:
+        tracker_payload.profile.id = tracker_payload.profile.id.strip()
+
     try:
         if internal_source is not None:
             if internal_source.id != tracker_payload.source.id:
