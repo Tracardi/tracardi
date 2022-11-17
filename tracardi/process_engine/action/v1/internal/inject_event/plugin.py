@@ -58,7 +58,7 @@ def register() -> Plugin:
             name='Inject event into payload',
             desc='This node will inject event of given id into payload',
             icon='json',
-            keywords=['load'],
+            keywords=['load', 'new', 'add'],
             group=["Events"],
             documentation=Documentation(
                 inputs={

@@ -117,7 +117,7 @@ def register() -> Plugin:
             desc='Creates new response from provided data. Configuration defines where the data should be copied.',
             icon='json',
             group=["Data processing"],
-            tags=['reshape', 'create', 'data'],
+            tags=['reshape', 'create', 'data', 'new'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any JSON-like object.")

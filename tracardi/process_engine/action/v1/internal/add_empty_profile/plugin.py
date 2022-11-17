@@ -91,9 +91,10 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Add empty profile',
+            name='Create empty profile',
             desc='Ads new profile to the event. Empty profile gets created with random id.',
             icon='profile',
+            keywords=['new', 'create', 'add'],
             group=["Operations"],
             documentation=Documentation(
                 inputs={

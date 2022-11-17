@@ -56,10 +56,11 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Add empty session',
+            name='Create empty session',
             desc='Ads new session to the event. Empty session gets created with random id.',
             icon='session',
             group=["Operations"],
+            keywords=['new', 'add', 'create'],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
