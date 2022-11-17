@@ -17,6 +17,7 @@ async def flush():
 
 
 async def load_by_id(id: str) -> EventRedirect:
+    # TODO add caching
     return await StorageFor(Entity(id=id)).index("event-redirect").load(EventRedirect)  # type: EventRedirect
 
 
@@ -31,4 +32,5 @@ async def delete_by_id(id: str):
 
 
 async def save(event_redirect: EventRedirect) -> BulkInsertResult:
+    # TODO add caching
     return await StorageFor(event_redirect).index().save()
