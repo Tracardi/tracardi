@@ -3,7 +3,7 @@ import os
 
 from tracardi.domain.version import Version
 
-VERSION = '0.7.3-dev'
+VERSION = '0.7.4-dev'
 NAME = os.environ.get('INSTANCE_PREFIX', None)
 
 
