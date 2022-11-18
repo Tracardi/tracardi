@@ -22,7 +22,7 @@ class MigrationManager:
     available_migrations = {
         ("0.7.0", "0.7.1"): "070_to_071",
         ("0.7.1", "0.7.2"): "071_to_072",
-        ("0.7.2", "0.7.3-dev"): "072_to_073",
+        ("0.7.2", "0.7.3"): "072_to_073",
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
