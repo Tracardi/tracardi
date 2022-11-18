@@ -104,7 +104,7 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=["mqtt", "queue"],
             config={
                 "url": "<url>",
-                "port": "<port>",
+                "port": 1883,
                 "username": "<username>",
                 "password": "<password>"
             }
