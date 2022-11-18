@@ -41,6 +41,10 @@
       "lock": {
         "type": "boolean"
       },
+      "deployed": {
+        "type": "boolean",
+        "null_value": false
+      },
       "debug": {
         "properties": {
           "enabled": {
