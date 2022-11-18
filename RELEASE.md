@@ -3,7 +3,7 @@
 This is a description of a source release process. This tutorial is meant to be for core developers oly.
 
 1. Branch the code with release version e.g. 0.7.3
-2. Find all occurrences in (tracardi, tracardi-api, worker) of old version e.g 0.7.3-dev and replace it with release version 0.7.3. There may be places in
+2. Find all occurrences in (tracardi, tracardi-api, worker, tracardi-pro) of old version e.g 0.7.3-dev and replace it with release version 0.7.3. There may be places in
    documentation where the change should not be done. Remember to make a change to requirements.txt
 3. Commit the code to the branch (0.7.3)
 4. Checkout the master branch
