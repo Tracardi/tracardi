@@ -6,9 +6,11 @@ from tracardi.service.valiadator import validate_email
 class Credentials(BaseModel):
     username: str
     password: str
+    hash: str
+    needs_admin: bool
 
-    def not_empty(self) -> bool:
-        return self.password != "" and self.username != ""
+    def empty(self) -> bool:
+        return self.password == "" or self.username == ""
 
     def username_as_email(self) -> bool:
         return validate_email(self.username)

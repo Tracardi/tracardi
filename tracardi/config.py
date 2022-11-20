@@ -23,6 +23,7 @@ def _get_logging_level(level: str) -> int:
 
 class TracardiConfig:
     def __init__(self, env):
+        self.env = env
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.save_logs = (env['SAVE_LOGS'].lower() == 'yes') if 'SAVE_LOGS' in env else True
         self.monitor_logs_event_type = env['MONITOR_LOGS_EVENT_TYPE'].lower().replace(" ", "-") \
@@ -44,6 +45,11 @@ class TracardiConfig:
             'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
+        self.installation_hash = env.get('INSTALLATION_HASH', '')
+        self._unset_secrets()
+
+    def _unset_secrets(self):
+        self.env['INSTALLATION_HASH'] = ""
 
 
 class MemoryCacheConfig:
