@@ -56,27 +56,13 @@ class MemoryCacheConfig:
 class ElasticConfig:
 
     def __init__(self, env):
-
-        if 'ELASTIC_HOSTING' in env and not isinstance(env['ELASTIC_HOSTING'], str):
-            raise ValueError("Env ELASTIC_HOSTING must be sting")
-
-        if 'ELASTIC_HOST' in env and not isinstance(env['ELASTIC_HOST'], str):
-            raise ValueError("Env ELASTIC_HOST must be sting")
-
-        if 'ELASTIC_HOST' in env and isinstance(env['ELASTIC_HOST'], str) and env['ELASTIC_HOST'].isnumeric():
-            raise ValueError("Env ELASTIC_HOST must be sting")
-
-        self.host = env['ELASTIC_HOST'] if 'ELASTIC_HOST' in env else '127.0.0.1:9200'
-        self.host = self.host.split(",")
+        self.env = env
         self.replicas = env['ELASTIC_INDEX_REPLICAS'] if 'ELASTIC_INDEX_REPLICAS' in env else "1"
         self.shards = env['ELASTIC_INDEX_SHARDS'] if 'ELASTIC_INDEX_SHARDS' in env else "5"
         self.sniff_on_start = env['ELASTIC_SNIFF_ON_START'] if 'ELASTIC_SNIFF_ON_START' in env else None
         self.sniff_on_connection_fail = env[
             'ELASTIC_SNIFF_ON_CONNECTION_FAIL'] if 'ELASTIC_SNIFF_ON_CONNECTION_FAIL' in env else None
         self.sniffer_timeout = env['ELASTIC_SNIFFER_TIMEOUT'] if 'ELASTIC_SNIFFER_TIMEOUT' in env else None
-        self.http_auth_username = env['ELASTIC_HTTP_AUTH_USERNAME'] if 'ELASTIC_HTTP_AUTH_USERNAME' in env else None
-        self.http_auth_password = env['ELASTIC_HTTP_AUTH_PASSWORD'] if 'ELASTIC_HTTP_AUTH_PASSWORD' in env else None
-        self.scheme = env['ELASTIC_SCHEME'] if 'ELASTIC_SCHEME' in env else 'http'
         self.ca_file = env['ELASTIC_CA_FILE'] if 'ELASTIC_CA_FILE' in env else None
         self.api_key_id = env['ELASTIC_API_KEY_ID'] if 'ELASTIC_API_KEY_ID' in env else None
         self.api_key = env['ELASTIC_API_KEY'] if 'ELASTIC_API_KEY' in env else None
@@ -89,13 +75,41 @@ class ElasticConfig:
             if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
         self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env \
             else logging.WARNING
+        self.host = self.get_host()
+        self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
+        self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
+        self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
+
+        self._unset_credentials()
+
+    def get_host(self):
+        hosts = self.env.get('ELASTIC_HOST', 'http://localhost:9200')
+
+        if not isinstance(hosts, str) or hosts.isnumeric():
+            raise ValueError("Env ELASTIC_HOST must be sting")
+
+        if not hosts:
+            raise ValueError("ELASTIC_HOST environment variable not set.")
+        return hosts.split(",")
+
+    def _unset_credentials(self):
+        self.env['ELASTIC_HOST'] = ""
+        if 'ELASTIC_HTTP_AUTH_USERNAME' in self.env:
+            del self.env['ELASTIC_HTTP_AUTH_USERNAME']
+        if 'ELASTIC_HTTP_AUTH_PASSWORD' in self.env:
+            del self.env['ELASTIC_HTTP_AUTH_PASSWORD']
+
+    def has(self, prop):
+        return "Set" if getattr(self, prop, None) else "Unset"
 
 
 class RedisConfig:
 
     def __init__(self, env):
+        self.env = env
         self.redis_host = env['REDIS_HOST'] if 'REDIS_HOST' in env else 'redis://localhost:6379'
-        self.redis_password = env['REDIS_PASSWORD'] if 'REDIS_PASSWORD' in env else None
+        self.redis_password = env.get('REDIS_PASSWORD', None)
+        self._unset_credentials()
 
     def get_redis_with_password(self):
         if not self.redis_host.startswith('redis://'):
@@ -103,6 +117,12 @@ class RedisConfig:
         if self.redis_password:
             return f"redis://:{self.redis_password}@{self.redis_host[8:]}"
         return self.redis_host
+
+    def _unset_credentials(self):
+        if 'REDIS_HOST' in self.env:
+            del self.env['REDIS_HOST']
+        if 'REDIS_PASSWORD' in self.env:
+            del self.env['REDIS_PASSWORD']
 
 
 redis_config = RedisConfig(os.environ)
