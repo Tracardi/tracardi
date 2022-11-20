@@ -12,10 +12,10 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.internal.limiter.plugin": PluginTestTemplate(
         init={
-              "keys": [],
-              "limit": 10,
-              "ttl": 60
-            },
+            "keys": [],
+            "limit": 10,
+            "ttl": 60
+        },
         resource=None
     ),
 
@@ -24,6 +24,14 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
               'value': 'value'},
         resource={
             "google_analytics_id": "google_analytics_id"
+        }
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.google.analytics_v4.registry": PluginTestTemplate(
+        init={'source': {'id': 'id', 'name': 'name'}, 'name': 'event_name', 'params': {'param_name': 'param_value'}},
+        resource={
+            "api_key": "api_key",
+            "measurement_id": "measurement_id"
         }
     ),
 
@@ -1232,7 +1240,8 @@ test_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin": PluginTestTemplate(
-        init={'message': {'content': {'content': "None", 'type': 'text/html'}, 'recipient': "test@test.com", 'subject': "None"},
+        init={'message': {'content': {'content': "None", 'type': 'text/html'}, 'recipient': "test@test.com",
+                          'subject': "None"},
               'sender_email': "test@test.com",
               'source': {'id': '1', 'name': 'Some value'}},
         resource={
