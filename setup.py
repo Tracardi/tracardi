@@ -65,7 +65,9 @@ setup(
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
         'googletrans==3.1.0a0',
         'tweepy==4.10.1',
-        'strsimpy==0.2.1'
+        'strsimpy==0.2.1',
+        'python-whois==0.8.0',
+        'PyYAML==6.0'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

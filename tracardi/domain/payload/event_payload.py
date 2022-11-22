@@ -8,6 +8,7 @@ from ..entity import Entity
 from ..event import Event, EventSession
 from ..event_metadata import EventPayloadMetadata, EventMetadata
 from ..session import Session, SessionContext
+from ...service.utils.getters import get_entity
 
 
 class EventPayload(BaseModel):
@@ -26,7 +27,7 @@ class EventPayload(BaseModel):
         return Event(id=str(uuid4()),
                      metadata=meta,
                      session=self._get_event_session(session),
-                     profile=profile,  # profile can be None when profile_less event.
+                     profile=get_entity(profile),  # profile can be None when profile_less event.
                      type=self.type,
                      properties=self.properties,
                      source=source,  # Entity

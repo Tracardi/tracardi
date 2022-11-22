@@ -1,7 +1,10 @@
 import logging
 import os
 
+import yaml
+
 from tracardi.domain.version import Version
+from tracardi.domain.yaml_config import YamlConfig
 
 VERSION = '0.7.4-dev'
 NAME = os.environ.get('INSTANCE_PREFIX', None)
@@ -45,11 +48,21 @@ class TracardiConfig:
             'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
-        self.installation_hash = env.get('INSTALLATION_HASH', '')
+        self.installation_token = env.get('INSTALLATION_TOKEN', '')
+        self._config = None
         self._unset_secrets()
 
+    @property
+    def config(self) -> YamlConfig:
+        if not self._config:
+            config = self.env.get('CONFIG', 'config.yaml')
+            with open(config, "r") as stream:
+                config = yaml.safe_load(stream)
+                self._config = YamlConfig(**config)
+        return self._config
+
     def _unset_secrets(self):
-        self.env['INSTALLATION_HASH'] = ""
+        self.env['INSTALLATION_TOKEN'] = ""
 
 
 class MemoryCacheConfig:

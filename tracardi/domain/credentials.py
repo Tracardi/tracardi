@@ -6,7 +6,7 @@ from tracardi.service.valiadator import validate_email
 class Credentials(BaseModel):
     username: str
     password: str
-    hash: str
+    token: str
     needs_admin: bool
 
     def empty(self) -> bool:
