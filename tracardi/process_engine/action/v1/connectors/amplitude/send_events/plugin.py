@@ -90,7 +90,7 @@ class AmplitudeSendEvent(ActionRunner):
                     "device_brand": self._get_value(dot, self.config.device_brand),
                     "os_version": self._get_value(dot, self.config.os_version),
                     "os_name": self._get_value(dot, self.config.os_name),
-                    "platform": self.session.get_platform() if platform is None else platform,
+                    "platform": self.session.context.get_platform() if platform is None else platform,
                 }
 
                 params = {

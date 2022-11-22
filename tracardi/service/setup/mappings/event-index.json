@@ -98,6 +98,9 @@
             },
             "duration": {
               "type": "float"
+            },
+            "tz": {
+              "type": "keyword"
             }
           }
         },

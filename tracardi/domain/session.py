@@ -39,12 +39,40 @@ class SessionMetadata(BaseModel):
     time: SessionTime = SessionTime()
 
 
+class SessionContext(dict):
+
+    def get_time_zone(self) -> str:
+        try:
+            return self['time']['tz']
+        except KeyError:
+            return 'utc'
+
+    def get_platform(self):
+        try:
+            return self['browser']['local']['device']['platform']
+        except KeyError:
+            return None
+
+    def get_browser_name(self):
+        try:
+            return self['browser']['local']['browser']['name']
+        except KeyError:
+            return None
+
+
 class Session(Entity):
     metadata: SessionMetadata
     operation: Operation = Operation()
     profile: Optional[Entity] = None
-    context: Optional[dict] = {}
+    context: Optional[SessionContext] = {}
     properties: Optional[dict] = {}
+
+    def __init__(self, **data: Any):
+
+        if 'context' in data and not isinstance(data['context'], SessionContext):
+            data['context'] = SessionContext(data['context'])
+
+        super().__init__(**data)
 
     def replace(self, session):
         if isinstance(session, Session):
@@ -63,15 +91,3 @@ class Session(Entity):
             exclude={"operation": ...},
             multi=True
         )
-
-    def get_platform(self):
-        try:
-            return self.context['browser']['local']['device']['platform']
-        except KeyError:
-            return None
-
-    def get_browser_name(self):
-        try:
-            return self.context['browser']['local']['browser']['name']
-        except KeyError:
-            return None
