@@ -196,10 +196,21 @@ def get_resource_types() -> List[ResourceSettings]:
         ),
         ResourceSettings(
             id="google_id",
-            name="Google Analytics Tracking ID",
+            name="Google Universal Analytics Tracking ID",
             tags=["google"],
             config={
                 "google_analytics_id": "<google_analytics_id>"
+            },
+            manual="google_analytics_tracker_resource"
+        ),
+
+        ResourceSettings(
+            id="google_v4_id",
+            name="Google Analytics 4",
+            tags=["google"],
+            config={
+                "api_key": "<api_key>",
+                "measurement_id": "<measurement_id>"
             },
             manual="google_analytics_tracker_resource"
         ),
