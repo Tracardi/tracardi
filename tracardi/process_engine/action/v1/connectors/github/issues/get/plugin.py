@@ -30,10 +30,11 @@ class GitHubGetIssueAction(ActionRunner):
 
         client = GitHubClient(self.credentials, self.config, self.console)
         response = await client.get_issue(issue_id)
-        return Result(
-            port='payload',
-            value=response,
-        )
+
+        if response['status'] in [200, 201, 202, 203, 204]:
+            return Result(port="response", value=response)
+        else:
+            return Result(port="error", value=response)
 
 
 def register() -> Plugin:
@@ -43,8 +44,8 @@ def register() -> Plugin:
             module=__name__,
             className=GitHubGetIssueAction.__name__,
             inputs=['payload'],
-            outputs=['payload'],
-            version='0.1',
+            outputs=['payload', 'error'],
+            version='0.7.4',
             license='MIT',
             author='knittl',
             init={
@@ -73,6 +74,7 @@ def register() -> Plugin:
             desc='Get single GitHub issue details',
             group=['GitHub'],
             tags=['github'],
+            icon='github',
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes the payload object.")

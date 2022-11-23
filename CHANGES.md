@@ -4,6 +4,8 @@ Version 0.7.4-dev
 ## Features
 
 * Event redirect bridge (collector)
+* Google analytics 4 plugin
+* Github plugins
 * Upgrade to node v18.12.1
 
 Version 0.7.3

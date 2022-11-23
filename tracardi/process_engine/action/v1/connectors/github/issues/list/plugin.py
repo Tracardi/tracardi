@@ -4,7 +4,7 @@ from tracardi.process_engine.action.v1.connectors.github.forms.GitHubFormFields 
 from tracardi.process_engine.action.v1.connectors.github.github_client import GitHubClient
 from tracardi.process_engine.action.v1.connectors.github.model.config import GitHubBaseConfiguration, \
     init_github_base_configuration
-from tracardi.service.plugin.domain.register import Plugin, Spec, Form, MetaData, FormComponent, FormField, FormGroup, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, Form, MetaData, FormGroup, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
@@ -27,10 +27,11 @@ class GitHubListIssuesAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
         client = GitHubClient(self.credentials, self.config, self.console)
         response = await client.list_issues()
-        return Result(
-            port='payload',
-            value=response,
-        )
+
+        if response['status'] in [200, 201, 202, 203, 204]:
+            return Result(port="response", value=response)
+        else:
+            return Result(port="error", value=response)
 
 
 def register() -> Plugin:
@@ -40,8 +41,8 @@ def register() -> Plugin:
             module=__name__,
             className=GitHubListIssuesAction.__name__,
             inputs=['payload'],
-            outputs=['payload'],
-            version='0.1',
+            outputs=['payload', 'error'],
+            version='0.7.4',
             license='MIT',
             author='knittl',
             init={
@@ -63,6 +64,7 @@ def register() -> Plugin:
             desc='Lists GitHub issues',
             group=['GitHub'],
             tags=['github'],
+            icon='github',
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes the payload object.")
