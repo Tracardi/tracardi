@@ -659,6 +659,40 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         init={"data": "event@properties.list_of_something", "direction": "asc"},
         resource=None
     ),
+
+    "tracardi.process_engine.action.v1.connectors.github.issues.list.plugin": PluginTestTemplate(
+        init={
+            'resource': {
+                'id': '',
+                'name': '',
+            },
+            'timeout': 10,
+            'owner': '<org-or-user>',
+            'repo': '<repo>',
+        },
+        resource={
+            'api_url': 'https://api.github.com',
+            'personal_access_token': '<your-PAT-here>',
+        },
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.github.issues.get.plugin": PluginTestTemplate(
+        init={
+            'resource': {
+                'id': '',
+                'name': '',
+            },
+            'timeout': 10,
+            'owner': '<org-or-user>',
+            'repo': '<repo>',
+            'issue_id': '1',
+        },
+        resource={
+            'api_url': 'https://api.github.com',
+            'personal_access_token': '<your-PAT-here>',
+        },
+    ),
+
 }
 
 # Plugins only for testing
