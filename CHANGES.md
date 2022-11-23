@@ -3,7 +3,8 @@ Version 0.7.4-dev
 
 ## Features
 
-* ___
+* Event redirect bridge (collector)
+* Upgrade to node v18.12.1
 
 Version 0.7.3
 ----------------------------------------------------------
