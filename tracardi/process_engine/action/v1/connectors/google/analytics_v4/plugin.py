@@ -29,16 +29,29 @@ class GoogleAnalyticsV4EventTrackerAction(ActionRunner):
         url = f'https://www.google-analytics.com/mp/collect?measurement_id={self.credentials.measurement_id}' \
               f'&api_secret={self.credentials.api_key}'
 
+        try:
+            params = json.loads(self.config.params)
+        except JSONDecodeError as e:
+            return Result(port="error", value={
+                "message": f"Could not read json. Error: {str(e)}"
+            })
+
+        if not isinstance(params, dict):
+            return Result(port="error", value={
+                "message": f"Params must be a dictionary of key value pairs, expected: dict, got: {type(params)}"
+            })
+
         data = {
             "client_id": self.profile.id if self.profile.id else "unknown",
             "events": [{
                 "name": dot[self.config.name],
-                "params": dot[self.config.params]
+                "params": params
             }]
         }
+
         async with HttpClient(self.node.on_connection_error_repeat) as client:
             body = json.dumps(data, separators=(',', ':'))
-            print(body)
+
             async with client.post(
                     url=url,
                     data=body,
@@ -52,7 +65,10 @@ class GoogleAnalyticsV4EventTrackerAction(ActionRunner):
                 "status": response.status,
                 "content": content
             }
-            if response.status in [200, 201, 202, 203]:
+
+            if response.status in [200, 201, 202, 203, 204]:
                 return Result(port="response", value=result)
             else:
-                return Result(port="error", value=result)
+                return Result(port="error", value={
+                    "message": f"Response error {content}"
+                })

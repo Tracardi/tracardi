@@ -201,7 +201,7 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "google_analytics_id": "<google_analytics_id>"
             },
-            manual="google_analytics_tracker_resource"
+            manual="ua3_tracker_resource"
         ),
 
         ResourceSettings(
@@ -212,7 +212,7 @@ def get_resource_types() -> List[ResourceSettings]:
                 "api_key": "<api_key>",
                 "measurement_id": "<measurement_id>"
             },
-            manual="google_analytics_tracker_resource"
+            manual="ga4_tracker_resource"
         ),
         ResourceSettings(
             id="google-cloud-service-account",
