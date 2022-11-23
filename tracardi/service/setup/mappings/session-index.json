@@ -46,13 +46,10 @@
           }
         },
         "context": {
-          "dynamic": "true",
-          "type": "object"
+          "type": "flattened"
         },
         "properties": {
-          "dynamic": "true",
-          "type": "object",
-          "enabled": false
+          "type": "flattened"
         }
       }
     },
