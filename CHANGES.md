@@ -3,7 +3,7 @@ Version 0.7.4-dev
 
 ## Features
 
-* ___
+* Event redirect bridge (colelctor)
 
 Version 0.7.3
 ----------------------------------------------------------
