@@ -1,6 +1,5 @@
-from typing import Tuple, List
-
 from tracardi.domain.event_redirect import EventRedirect
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.entity import Entity
@@ -21,10 +20,8 @@ async def load_by_id(id: str) -> EventRedirect:
     return await StorageFor(Entity(id=id)).index("event-redirect").load(EventRedirect)  # type: EventRedirect
 
 
-async def load_all(limit=100) -> Tuple[List[EventRedirect], int]:
-    result = await StorageForBulk().index('event-redirect').load(limit=limit)
-    data = [EventRedirect(**r) for r in result]
-    return data, result.total
+async def load_all(start=0, limit=100) -> StorageRecords:
+    return await StorageForBulk().index('event-redirect').load(start, limit=limit)
 
 
 async def delete_by_id(id: str):

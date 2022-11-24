@@ -13,6 +13,12 @@
       "id": {
         "type": "keyword"
       },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
       "url": {
         "type": "keyword"
       },
@@ -23,6 +29,9 @@
         "dynamic": "true",
         "type": "object",
         "enabled": false
+      },
+      "tags": {
+        "type": "keyword"
       }
     }
   },
