@@ -1,11 +1,12 @@
 from typing import Optional
 
-from pydantic import AnyHttpUrl
+
+from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class DiscordWebHookConfiguration(PluginConfig):
-    url: AnyHttpUrl
+    source: NamedEntity
     timeout: int = 10
     message: str
     username: Optional[str] = None

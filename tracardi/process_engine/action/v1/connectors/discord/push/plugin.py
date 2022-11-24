@@ -5,8 +5,9 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.service.storage.driver import storage
 from tracardi.service.tracardi_http_client import HttpClient
-
+from tracardi.domain.resources.discord_resource import DiscordCredentials
 from .model.configuration import DiscordWebHookConfiguration
 
 
@@ -15,11 +16,15 @@ def validate(config: dict) -> DiscordWebHookConfiguration:
 
 
 class DiscordWebHookAction(ActionRunner):
-
+    credentials: DiscordCredentials
     config: DiscordWebHookConfiguration
 
     async def set_up(self, init):
-        self.config = validate(init)
+        config = validate(init)
+        resource = await storage.driver.resource.load(config.source.id)
+
+        self.config = config
+        self.credentials = resource.credentials.get_credentials(self, output=DiscordCredentials)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -44,7 +49,7 @@ class DiscordWebHookAction(ActionRunner):
 
                 async with client.request(
                         method="POST",
-                        url=str(self.config.url),
+                        url=str(self.credentials.url),
                         **params
                 ) as response:
                     # todo add headers and cookies
@@ -73,7 +78,7 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["response", "error"],
             init={
-                "url": None,
+                "source": {'id': '', 'name': ''},
                 "timeout": 10,
                 "message": "",
                 "username": None
@@ -84,11 +89,13 @@ def register() -> Plugin:
                     description="This action will require a webhook URL. See documentation how to obtain it.",
                     fields=[
                         FormField(
-                            id="url",
-                            name="Discord webhook URL",
-                            description="Paste here a webhook for a given channel.",
-                            component=FormComponent(type="text", props={
-                                "label": "Webhook URL"
+                            id="source",
+                            name="Discord resource",
+                            description="Select discord resource. Credentials from selected resource "
+                                        "will be used as your webhook URL.",
+                            component=FormComponent(type="resource", props={
+                                "label": "resource",
+                                "tag": "discord"
                             })
                         ),
                         FormField(
