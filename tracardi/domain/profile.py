@@ -1,4 +1,6 @@
+import asyncio
 import uuid
+from collections import defaultdict
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple, Any
 from pydantic import BaseModel
@@ -17,6 +19,7 @@ from .segment import Segment
 from ..process_engine.tql.condition import Condition
 
 from tracardi.service.merger import merge as dict_merge
+from ..service.storage.driver import storage
 
 
 class ConsentRevoke(BaseModel):
@@ -152,12 +155,58 @@ class ProfileMerger:
         self.current_profile = profile
 
     @staticmethod
+    async def invoke_merge_profile(profile: Optional[Profile],
+                                   merge_by: List[Tuple[str, str]],
+                                   override_old_data: bool = True,
+                                   limit: int = 2000):
+        if len(merge_by) > 0:
+            # Load all profiles that match merging criteria
+            similar_profiles = await storage.driver.profile.load_profiles_to_merge(
+                merge_by,
+                limit=limit
+            )
+
+            merger = ProfileMerger(profile)
+
+            # Merge
+            merged_profile, duplicate_profiles = await merger.merge(
+                similar_profiles,
+                override_old_data=override_old_data)
+
+            if merged_profile:
+
+                # Replace current profile with merged profile
+                profile.replace(merged_profile)
+
+                # Update profile after merge
+                profile.operation.update = True
+
+                # Save - mark duplicated profiles
+
+                # Separate profile to indices
+                profile_by_index = defaultdict(list)
+                for profile in duplicate_profiles:
+                    profile_by_index[profile.get_meta_data().index].append(profile)
+
+                save_tasks = []
+                for _, profile_bulk in profile_by_index.items():
+                    task = asyncio.create_task(
+                        storage.driver.profile.save_all(profile_bulk)
+                    )
+                    save_tasks.append(task)
+
+                # TODO Save - move events
+
+                return save_tasks
+        return None
+
+    @staticmethod
     def _get_merge_key_values(profile: Profile) -> List[tuple]:
         converter = DotNotationConverter(profile)
         return [converter.get_profile_file_value_pair(key) for key in profile.operation.merge]
 
     @staticmethod
-    def get_merging_keys_and_values(profile: Profile):
+    def get_merging_keys_and_values(profile: Profile) -> List[Tuple[str, str]]:
         merge_key_values = ProfileMerger._get_merge_key_values(profile)
 
         # Add keyword
@@ -330,3 +379,6 @@ class ProfileMerger:
                                                                   merge_with=self.current_profile.id)
 
         return merged_profile, disabled_profiles
+
+    def move_events(self):
+        pass
