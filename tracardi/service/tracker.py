@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections import defaultdict
 from datetime import datetime
 from typing import List, Optional, Tuple
 
@@ -309,10 +310,17 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         # Merge
         profiles_to_disable = await invoke_merge_profile(profile, override_old_data=True, limit=2000)
         if profiles_to_disable is not None:
-            task = asyncio.create_task(
-                storage.driver.profile.save_all(profiles_to_disable)
-            )
-            save_tasks.append(task)
+
+            # Separate profile to indices
+            profile_by_index = defaultdict(list)
+            for profile in profiles_to_disable:
+                profile_by_index[profile.get_meta_data().index].append(profile)
+
+            for _, profile_bulk in profile_by_index.items():
+                task = asyncio.create_task(
+                    storage.driver.profile.save_all(profile_bulk)
+                )
+                save_tasks.append(task)
     except Exception as e:
         message = 'Profile merging returned an error `{}`'.format(str(e))
         logger.error(message)

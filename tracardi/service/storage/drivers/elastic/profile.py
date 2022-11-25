@@ -52,7 +52,7 @@ async def load_merged_profile(id: str) -> Profile:
 
 async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:
     profiles = await storage_manager('profile').load_by_values(merge_key_values, limit=limit)
-    return [Profile(**profile) for profile in profiles]
+    return [profile.to_entity(Profile) for profile in profiles]
 
 
 async def save(profile: Profile, refresh_after_save=False):
