@@ -1,10 +1,8 @@
 import uuid
-from collections import defaultdict
 from datetime import datetime
-from typing import Optional, List, Callable, Dict
-
+from typing import Optional, List, Dict, Tuple, Any
 from pydantic import BaseModel
-from pydantic.utils import deep_update
+from pydantic.utils import deep_update, KeyType
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import ProfileMetadata
@@ -15,9 +13,10 @@ from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
-from ..service.merger import merge
 from .segment import Segment
 from ..process_engine.tql.condition import Condition
+
+from tracardi.service.merger import merge as dict_merge
 
 
 class ConsentRevoke(BaseModel):
@@ -119,51 +118,6 @@ class Profile(Entity):
 
                     yield event_type, segment_id, msg
 
-    async def merge(self, load_profiles_to_merge_callable: Callable, limit: int = 2000,
-                    override_old_data: bool = True) -> Optional['Profiles']:
-
-        """
-        This method mutates current profile.
-        Merges profiles on keys set in profile.operation.merge. Loads profiles from database and
-        combines its data into current profile. Returns Profiles object with profiles to be disables.
-        It does not disable profiles or saves merged profile.
-        """
-
-        merge_key_values = self._get_merging_keys_and_values()
-
-        # Are there any non-empty values in current profile
-
-        if len(merge_key_values) > 0:
-
-            # Load all profiles that match merging criteria
-            existing_profiles = await load_profiles_to_merge_callable(
-                merge_key_values,
-                limit=limit)
-
-            # Filter only profiles that are not current profile and where not merged
-            profiles_to_merge = [p for p in existing_profiles if p.id != self.id and p.active is True]
-
-            # Are there any profiles to merge?
-            if len(profiles_to_merge) > 0:
-                # Add current profile to existing ones and get merged profile
-                merged_profile = Profiles.merge(profiles_to_merge, current_profile=self,
-                                                override_old_data=override_old_data)
-
-                # Replace current profile with merged profile
-                self.replace(merged_profile)
-
-                # Update profile after merge
-                self.operation.update = True
-
-                # Deactivate all other profiles except merged one
-
-                profiles_to_disable = [p for p in existing_profiles if p.id != self.id]
-                disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable, merge_with=self.id)
-
-                return Profiles(disabled_profiles)
-
-        return None
-
     def increase_visits(self, value=1):
         self.stats.visits += value
         self.operation.update = True
@@ -192,14 +146,57 @@ class Profile(Entity):
         )
 
 
-class Profiles(List[Profile]):
+class ProfileMerger:
+
+    def __init__(self, profile: Profile):
+        self.current_profile = profile
 
     @staticmethod
-    def merge(existing_profiles: List[Profile], current_profile: Profile, override_old_data=True) -> Profile:
+    def _get_merge_key_values(profile: Profile) -> List[tuple]:
+        converter = DotNotationConverter(profile)
+        return [converter.get_profile_file_value_pair(key) for key in profile.operation.merge]
 
-        all_profiles = existing_profiles + [current_profile]
+    @staticmethod
+    def get_merging_keys_and_values(profile: Profile):
+        merge_key_values = ProfileMerger._get_merge_key_values(profile)
+
+        # Add keyword
+        merge_key_values = [(field, value) for field, value in merge_key_values if value is not None]
+
+        return merge_key_values
+
+    @staticmethod
+    def _mark_profiles_as_merged(profiles: List[Profile], merge_with: str) -> List[Profile]:
+        disabled_profiles = []
+
+        for profile in profiles:
+            profile.active = False
+            profile.metadata.merged_with = merge_with
+            disabled_profiles.append(profile)
+
+        return disabled_profiles
+
+    @staticmethod
+    def _deep_update(mapping: Dict[KeyType, Any], *updating_mappings: Dict[KeyType, Any]) -> Dict[KeyType, Any]:
+        updated_mapping = mapping.copy()
+        for updating_mapping in updating_mappings:
+            for k, v in updating_mapping.items():
+                if k in updated_mapping and isinstance(updated_mapping[k], dict) and isinstance(v, dict):
+                    updated_mapping[k] = deep_update(updated_mapping[k], v)
+                elif v is not None:
+                    updated_mapping[k] = v
+        return updated_mapping
+
+    def _get_merged_profile(self,
+                            similar_profiles: List[Profile],
+                            override_old_data=True) -> Profile:
+
+        all_profiles = similar_profiles + [self.current_profile]
+
+        # Merge traits and piis
 
         if override_old_data is False:
+
             """
                 Marge do not loose data. Conflicts are resoled to list of values.
                 E.g. Name="bill" + Name="Wiliam"  = Name=['bill','wiliam']
@@ -207,18 +204,30 @@ class Profiles(List[Profile]):
 
             traits = [profile.traits.dict() for profile in all_profiles]
             piis = [profile.pii.dict() for profile in all_profiles]
-            traits = merge({}, traits)
-            piis = merge({}, piis)
+            traits = dict_merge({}, traits)
+            piis = dict_merge({}, piis)
+
         else:
+
             """
                 Marge overrides data. Conflicts are resoled to single value. Latest wins.
                 E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
             """
 
-            current_profile_dict = current_profile.dict()
+            current_profile_dict = self.current_profile.dict()
+            i = 0
             for profile in all_profiles:
-                current_profile_dict['traits'] = deep_update(current_profile_dict['traits'], profile.traits.dict())
-                current_profile_dict['pii'] = deep_update(current_profile_dict['pii'], profile.pii.dict())
+                i += 1
+                if i == 5:
+                    profile.pii.name = "risto"
+                    profile.traits.private['a'] =1
+
+                if i == 8:
+                    profile.traits.private = {}
+
+                current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'], profile.traits.dict())
+                current_profile_dict['pii'] = self._deep_update(current_profile_dict['pii'], profile.pii.dict())
+                print(current_profile_dict['traits'])
             traits = current_profile_dict['traits']
             piis = current_profile_dict['pii']
 
@@ -226,26 +235,56 @@ class Profiles(List[Profile]):
 
         consents = {}
         segments = []
-        interests = defaultdict(int)
+        interests = {}
         stats = ProfileStats()
+        time = ProfileTime(**self.current_profile.metadata.time.dict())
+
         for profile in all_profiles:  # Type: Profile
+
+            # Time
+
+            time.visit.count += profile.metadata.time.visit.count
+
+            if isinstance(time.visit.current, datetime) and isinstance(profile.metadata.time.visit.current, datetime):
+                if time.visit.current < profile.metadata.time.visit.current:
+                    time.visit.current = profile.metadata.time.visit.current
+
+            if isinstance(time.visit.last, datetime) and isinstance(profile.metadata.time.visit.last, datetime):
+                if time.visit.last < profile.metadata.time.visit.last:
+                    time.visit.last = profile.metadata.time.visit.last
+
+            # Stats
 
             stats.visits += profile.stats.visits
             stats.views += profile.stats.views
+
+            for key, value in profile.stats.counters.items():
+                if key not in stats.counters:
+                    stats.counters[key] = 0
+                stats.counters[key] += value
+
+            # Segments
 
             if isinstance(profile.segments, list):
                 segments += profile.segments
                 segments = list(set(segments))
 
+            # Consents
+
             consents.update(profile.consents)
 
+            # Interests
+
             for interest, count in profile.interests.items():
+                if interest not in interests:
+                    interests[interest] = 0
                 interests[interest] += profile.interests[interest]
 
         # Set id to merged id or current profile id.
-        id = current_profile.metadata.merged_with if current_profile.metadata.merged_with is not None else current_profile.id
+        id = self.current_profile.metadata.merged_with if self.current_profile.metadata.merged_with is not None else self.current_profile.id
 
-        return Profile(
+        profile = Profile(
+            metadata=ProfileMetadata(time=time),
             id=id,
             stats=stats,
             traits=traits,
@@ -255,3 +294,39 @@ class Profiles(List[Profile]):
             interests=dict(interests),
             active=True
         )
+
+        return profile
+
+    async def merge(self,
+                    similar_profiles: List[Profile],
+                    override_old_data: bool = True) -> Tuple[Optional[Profile], List[Profile]]:
+        """
+        Merges profiles on keys set in profile.operation.merge. Loads profiles from database and
+        combines its data into current profile. Returns Profiles object with profiles to be disables.
+        It does not disable profiles or saves merged profile.
+        """
+
+        merged_profile = None
+        disabled_profiles = []
+
+        if len(similar_profiles) > 0:
+
+            # Filter only profiles that are not current profile and where not merged
+            profiles_to_merge = [p for p in similar_profiles if p.id != self.current_profile.id and p.active is True]
+
+            # Are there any profiles to merge?
+            if len(profiles_to_merge) > 0:
+
+                # Add current profile to existing ones and get merged profile
+
+                merged_profile = self._get_merged_profile(
+                    profiles_to_merge,
+                    override_old_data=override_old_data)
+
+                # Deactivate all other profiles except merged one
+
+                profiles_to_disable = [p for p in similar_profiles if p.id != self.current_profile.id]
+                disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable,
+                                                                  merge_with=self.current_profile.id)
+
+        return merged_profile, disabled_profiles
