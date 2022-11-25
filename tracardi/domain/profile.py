@@ -215,19 +215,19 @@ class ProfileMerger:
             """
 
             current_profile_dict = self.current_profile.dict()
-            i = 0
+            # i = 0
             for profile in all_profiles:
-                i += 1
-                if i == 5:
-                    profile.pii.name = "risto"
-                    profile.traits.private['a'] =1
-
-                if i == 8:
-                    profile.traits.private = {}
+                # i += 1
+                # if i == 5:
+                #     profile.pii.name = "risto"
+                #     profile.traits.private['a'] =1
+                #
+                # if i == 8:
+                #     profile.traits.private = {}
 
                 current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'], profile.traits.dict())
                 current_profile_dict['pii'] = self._deep_update(current_profile_dict['pii'], profile.pii.dict())
-                print(current_profile_dict['traits'])
+
             traits = current_profile_dict['traits']
             piis = current_profile_dict['pii']
 
