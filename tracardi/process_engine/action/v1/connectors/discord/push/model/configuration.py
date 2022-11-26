@@ -6,7 +6,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class DiscordWebHookConfiguration(PluginConfig):
-    source: NamedEntity
+    resource: NamedEntity
     timeout: int = 10
     message: str
     username: Optional[str] = None

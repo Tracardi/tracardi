@@ -78,10 +78,10 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["response", "error"],
             init={
-                "source": {'id': '', 'name': ''},
+                "resource": {'id': '', 'name': ''},
                 "timeout": 10,
                 "message": "",
-                "username": None
+                "username": ""
             },
             form=Form(groups=[
                 FormGroup(
@@ -89,7 +89,7 @@ def register() -> Plugin:
                     description="This action will require a webhook URL. See documentation how to obtain it.",
                     fields=[
                         FormField(
-                            id="source",
+                            id="resource",
                             name="Discord resource",
                             description="Select discord resource. Credentials from selected resource "
                                         "will be used as your webhook URL.",

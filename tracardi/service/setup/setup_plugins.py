@@ -483,7 +483,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.discord.push.plugin": PluginTestTemplate(
-        init={'source': {'id': 'id', 'name': 'name'}, 'message': 'message', 'timeout': 10, 'username': "test"},
+        init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'message', 'timeout': 10, 'username': "test"},
         resource={
             "url": "webhook_url"
         }
