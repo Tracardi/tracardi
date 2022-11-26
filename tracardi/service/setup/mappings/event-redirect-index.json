@@ -22,6 +22,16 @@
       "url": {
         "type": "keyword"
       },
+       "source": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "text"
+          }
+        }
+      },
       "event_type": {
         "type": "keyword"
       },

@@ -90,8 +90,7 @@
               "type": "keyword"
             },
             "other": {
-              "dynamic": "true",
-              "type": "object"
+              "type": "flattened"
             }
           }
         },

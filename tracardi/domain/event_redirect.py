@@ -8,6 +8,7 @@ from tracardi.domain.value_object.storage_info import StorageInfo
 
 
 class EventRedirect(NamedEntity):
+    source: NamedEntity
     description: Optional[str] = ""
     url: AnyHttpUrl
     props: Optional[dict] = {}
@@ -18,6 +19,12 @@ class EventRedirect(NamedEntity):
         if 'id' not in data:
             data['id'] = str(uuid4())
         super().__init__(**data)
+
+    @validator("source")
+    def source_is_not_empty(cls, value):
+        if not value.id.strip():
+            raise ValueError("Source cannot be empty")
+        return value
 
     @validator("name")
     def name_is_not_empty(cls, value):

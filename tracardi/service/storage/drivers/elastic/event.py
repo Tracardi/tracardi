@@ -396,6 +396,21 @@ async def update_tags(event_type: str, tags: List[str]):
     return await storage_manager(index="event").update_by_query(query=query)
 
 
+async def update_profile_ids(profile_id: str, merged_profile_id):
+    query = {
+        "script": {
+            "source": f"ctx._source.profile.id = {merged_profile_id}",
+            "lang": "painless"
+        },
+        "query": {
+            "term": {
+                {"profile.id": profile_id}
+            }
+        }
+    }
+    return await storage_manager(index="event").update_by_query(query=query)
+
+
 async def aggregate_timespan_events(time_from: datetime, time_to: datetime,
                                     aggregate_query: dict) -> StorageAggregateResult:
     query = {

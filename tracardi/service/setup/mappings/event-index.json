@@ -113,9 +113,7 @@
           }
         },
         "aux": {
-          "dynamic": "true",
-          "type": "object",
-          "enabled": false
+          "type": "flattened"
         },
         "config": {
           "dynamic": "true",
@@ -123,9 +121,7 @@
           "enabled": false
         },
         "context": {
-          "dynamic": "true",
-          "type": "object",
-          "enabled": false
+          "type": "flattened"
         },
         "traits": {
           "dynamic": "true",

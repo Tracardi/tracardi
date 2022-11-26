@@ -1,7 +1,6 @@
 from typing import List, Optional
-from tracardi.domain.entity import Entity
 from tracardi.config import elastic, tracardi
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage.factory import StorageFor, storage_manager
@@ -13,7 +12,6 @@ async def load_by_id(id: str) -> Optional[StorageRecord]:
 
 
 async def load_merged_profile(id: str) -> Profile:
-
     """
     Loads current profile. If profile was merged then it loads merged profile.
     """
@@ -36,7 +34,7 @@ async def load_merged_profile(id: str) -> Profile:
 
         # Merge duplicated profiles
         _duplicated_profiles = await load_duplicates(id)  # 1st records is the newest
-        valid_profile_record = _duplicated_profiles.first() # type: StorageRecord
+        valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
         profile = valid_profile_record.to_entity(Profile)
 
         if len(_duplicated_profiles) == 1:
@@ -53,11 +51,10 @@ async def load_merged_profile(id: str) -> Profile:
 
 async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:
     profiles = await storage_manager('profile').load_by_values(merge_key_values, limit=limit)
-    return [Profile(**profile) for profile in profiles]
+    return [profile.to_entity(Profile) for profile in profiles]
 
 
 async def save(profile: Profile, refresh_after_save=False):
-
     # todo check if needed
     if tracardi.cache_profiles is not False:
         cache = ProfileCache()
@@ -89,6 +86,10 @@ def scan(query: dict = None):
     return storage_manager('profile').scan(query)
 
 
+def query(query: dict = None):
+    return storage_manager('profile').query(query)
+
+
 async def count(query: dict = None):
     return await storage_manager('profile').count(query)
 
@@ -106,7 +107,7 @@ async def load_duplicates(id: str):
     })
 
 
-async def load_by_field(field: str, value: str, start: int, limit: 2):
+async def load_by_field(field: str, value: str, start: int = 0, limit: int = 100):
     return await storage_manager('profile').query({
         "from": start,
         "size": limit,
@@ -116,3 +117,21 @@ async def load_by_field(field: str, value: str, start: int, limit: 2):
             }
         }
     })
+
+
+async def aggregate_by_field(bucket, aggr_field: str, query: dict = None):
+    _query = {
+        "size": 0,
+        "aggs": {
+            bucket: {
+                "terms": {
+                    "field": aggr_field
+                }
+            }
+        }
+    }
+
+    if query:
+        _query['query'] = query
+
+    return await storage_manager('profile').query(_query)

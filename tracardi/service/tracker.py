@@ -15,7 +15,6 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.destination_manager import DestinationManager
-from tracardi.service.merging import merge
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -31,6 +30,7 @@ from tracardi.exceptions.exception import UnauthorizedException, StorageExceptio
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
@@ -129,8 +129,8 @@ async def _persist(console_log: ConsoleLog, session: Session, events: List[Event
     )
 
 
-async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog) -> Tuple[List[Event], ConsoleLog]:
-
+async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog) -> Tuple[
+    List[Event], ConsoleLog]:
     dot = DotAccessor(
         profile=profile,
         session=session,
@@ -278,12 +278,20 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     save_tasks = []
     try:
         # Merge
-        profiles_to_disable = await merge(profile, override_old_data=True, limit=2000)
-        if profiles_to_disable is not None:
-            task = asyncio.create_task(
-                storage.driver.profile.save_all(profiles_to_disable)
-            )
-            save_tasks.append(task)
+        if profile is not None:  # Profile can be None if profile_less event is processed
+            if profile.operation.needs_merging():
+                merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
+                result = await ProfileMerger.invoke_merge_profile(
+                    profile,
+                    merge_by=merge_key_values,
+                    override_old_data=True,
+                    limit=1000)
+
+                if result is not None:
+                    merged_profile, save_tasks = result
+                    # Replace profile with merged_profile
+                    profile = merged_profile
+
     except Exception as e:
         message = 'Profile merging returned an error `{}`'.format(str(e))
         logger.error(message)
@@ -436,7 +444,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
 
 async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str],
                       internal_source=None):
-
     # Trim ids - spaces are frequent issues
 
     if tracker_payload.source:
