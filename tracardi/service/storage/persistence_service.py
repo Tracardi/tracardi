@@ -481,7 +481,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def delete(self, id: str, index: str = None) -> dict:
+    async def delete(self, id: str, index: str) -> dict:
         try:
             return await self.storage.delete(id, index=index)
         except elasticsearch.exceptions.ElasticsearchException as e:

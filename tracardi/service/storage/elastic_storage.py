@@ -149,9 +149,9 @@ class ElasticStorage:
 
         return await self.storage.insert(index, records)
 
-    async def delete(self, id, index: str = None):
+    async def delete(self, id, index: str):
         if index is None:
-            index = self.index.get_index_alias()
+            raise ValueError("Index can  not be None")
 
         if not self.index.multi_index:
             # This function does not work on aliases
@@ -241,7 +241,7 @@ class ElasticStorage:
 
         if index is None:
             index = self.index.get_index_alias()
-
+        print(index, query)
         return await self.storage.delete_by_query(index, query)
 
     async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,

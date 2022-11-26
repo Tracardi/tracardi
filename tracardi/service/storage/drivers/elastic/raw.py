@@ -28,6 +28,22 @@ async def query(index: str, query: dict) -> StorageRecords:
     return await storage_manager(index).query(query)
 
 
+async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id):
+    query = {
+        "script": {
+            "source": f"ctx._source.profile.id = '{merged_profile_id}'",
+            "lang": "painless"
+        },
+        "query": {
+            "term": {
+                "profile.id": old_profile_id
+            }
+        }
+    }
+
+    return await storage_manager(index=index).update_by_query(query=query)
+
+
 async def count_by_query(index: str, query: str, time_span: int) -> StorageRecords:
     result = await storage_manager(index).storage.count_by_query_string(
         query,

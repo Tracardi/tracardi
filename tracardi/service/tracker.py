@@ -275,20 +275,18 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         )
         logger.error(message)
 
-    save_tasks = []
     try:
         # Merge
         if profile is not None:  # Profile can be None if profile_less event is processed
             if profile.operation.needs_merging():
                 merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
-                result = await ProfileMerger.invoke_merge_profile(
+                merged_profile = await ProfileMerger.invoke_merge_profile(
                     profile,
                     merge_by=merge_key_values,
                     override_old_data=True,
                     limit=1000)
 
-                if result is not None:
-                    merged_profile, save_tasks = result
+                if merged_profile is not None:
                     # Replace profile with merged_profile
                     profile = merged_profile
 
@@ -310,6 +308,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             )
         )
 
+    save_tasks = []
     try:
         if tracardi.track_debug or tracker_payload.is_on('debugger', default=False):
             if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():

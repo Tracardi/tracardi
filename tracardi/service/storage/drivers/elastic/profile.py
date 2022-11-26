@@ -78,8 +78,8 @@ async def flush():
     return await storage_manager('profile').flush()
 
 
-async def delete(id: str):
-    return await storage_manager('profile').delete(id)
+async def delete(id: str, index: str):
+    return await storage_manager('profile').delete(id, index)
 
 
 def scan(query: dict = None):
@@ -119,13 +119,16 @@ async def load_by_field(field: str, value: str, start: int = 0, limit: int = 100
     })
 
 
-async def aggregate_by_field(bucket, aggr_field: str, query: dict = None):
+async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket_size: int = 100,
+                             min_docs_count: int = 1):
     _query = {
         "size": 0,
         "aggs": {
             bucket: {
                 "terms": {
-                    "field": aggr_field
+                    "field": aggr_field,
+                    "size": bucket_size,
+                    "min_doc_count": min_docs_count
                 }
             }
         }
