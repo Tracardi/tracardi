@@ -22,7 +22,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.domain.event import Event, PROCESSED
-from tracardi.domain.profile import Profile, ProfileMerger
+from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
 from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
@@ -30,6 +30,7 @@ from tracardi.exceptions.exception import UnauthorizedException, StorageExceptio
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
@@ -280,11 +281,16 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         if profile is not None:  # Profile can be None if profile_less event is processed
             if profile.operation.needs_merging():
                 merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
-                save_tasks = await ProfileMerger.invoke_merge_profile(
+                result = await ProfileMerger.invoke_merge_profile(
                     profile,
                     merge_by=merge_key_values,
                     override_old_data=True,
-                    limit=2000)
+                    limit=1000)
+
+                if result is not None:
+                    merged_profile, save_tasks = result
+                    # Replace profile with merged_profile
+                    profile = merged_profile
 
     except Exception as e:
         message = 'Profile merging returned an error `{}`'.format(str(e))

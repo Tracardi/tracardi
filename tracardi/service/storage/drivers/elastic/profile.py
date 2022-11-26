@@ -1,7 +1,6 @@
 from typing import List, Optional
-from tracardi.domain.entity import Entity
 from tracardi.config import elastic, tracardi
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage.factory import StorageFor, storage_manager
@@ -120,9 +119,9 @@ async def load_by_field(field: str, value: str, start: int = 0, limit: int = 100
     })
 
 
-async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, start: int = 0, limit: int = 100):
+async def aggregate_by_field(bucket, aggr_field: str, query: dict = None):
     _query = {
-        "size": 5,
+        "size": 0,
         "aggs": {
             bucket: {
                 "terms": {
