@@ -1,9 +1,8 @@
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 from tracardi.domain.destination import DestinationRecord
-from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords
-from tracardi.service.storage.factory import storage_manager, StorageFor
+from tracardi.service.storage.factory import storage_manager
 
 
 async def load_all(start=0, limit=100, sort=None) -> StorageRecords:
@@ -11,11 +10,11 @@ async def load_all(start=0, limit=100, sort=None) -> StorageRecords:
 
 
 async def load(id: str) -> DestinationRecord:
-    return await StorageFor(Entity(id=id)).index("destination").load(DestinationRecord)
+    return DestinationRecord.create(await storage_manager("destination").load(id))
 
 
 async def save(destination: DestinationRecord) -> BulkInsertResult:
-    return await StorageFor(destination).index().save()
+    return await storage_manager("destination").upsert(destination)
 
 
 async def delete(id: str):

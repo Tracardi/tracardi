@@ -11,7 +11,7 @@ from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.entity import Entity
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.factory import StorageFor, storage_manager, StorageCrud
+from tracardi.service.storage.factory import storage_manager
 
 
 logger = logging.getLogger(__name__)
@@ -66,8 +66,7 @@ async def save_session(session: Session, profile: Optional[Profile], persist_ses
                     # save only profile Entity
                     if profile is not None:
                         session.profile = Entity(id=profile.id)
-                session_index = StorageFor(session).index()  # type: StorageCrud
-                return await session_index.save()
+                return await storage_manager('session').upsert(session)
             else:
                 # Update session duration
                 await update_session_duration(session)
@@ -76,7 +75,7 @@ async def save_session(session: Session, profile: Optional[Profile], persist_ses
 
 
 async def save(session: Session):
-    return await StorageFor(session).index().save()
+    return await storage_manager('session').upsert(session)
 
 
 async def exist(id: str) -> bool:
@@ -105,7 +104,7 @@ async def load_duplicates(id: str):
     })
 
 
-async def delete(id: str, index: str):
+async def delete_by_id(id: str, index: str):
     sm = storage_manager('session')
     return await sm.delete(id, index)
 

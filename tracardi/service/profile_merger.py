@@ -30,7 +30,7 @@ class ProfileMerger:
         # Todo maybe some bulk delete
         for _, dup_profile_bulk in profile_by_index.items():
             for dup_profile in dup_profile_bulk:
-                await storage.driver.profile.delete(dup_profile.id, dup_profile.get_meta_data().index)
+                await storage.driver.profile.delete_by_id(dup_profile.id, dup_profile.get_meta_data().index)
 
     @staticmethod
     async def _save_mark_duplicates_as_inactive_profiles(duplicate_profiles: List[Profile]):

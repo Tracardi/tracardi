@@ -45,7 +45,7 @@ class EntityLoadAction(ActionRunner):
             entity_id = dot[self.config.id]
             entity_id = convert_entity_id(self.config, entity_id)
 
-            result = await storage.driver.entity.load_by_id(entity_id)
+            result = await storage.driver.entity.load(entity_id)
 
             if result is None:
                 return Result(port="missing", value=payload)

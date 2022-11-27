@@ -1,9 +1,7 @@
 from typing import Optional
-
-from tracardi.domain.entity import Entity
 from tracardi.domain.live_segment import LiveSegment
 from tracardi.domain.storage_record import StorageRecords
-from tracardi.service.storage.factory import storage_manager, StorageForBulk, StorageFor
+from tracardi.service.storage.factory import storage_manager
 
 
 async def load_segments(event_type, limit=500) -> StorageRecords:
@@ -12,7 +10,7 @@ async def load_segments(event_type, limit=500) -> StorageRecords:
 
 
 async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
-    return await StorageForBulk().index('live-segment').load(start, limit)
+    return await storage_manager('live-segment').load_all(start, limit)
 
 
 async def refresh():
@@ -33,5 +31,4 @@ async def delete_by_id(id):
 
 
 async def load_by_id(id) -> Optional[LiveSegment]:
-    entity = Entity(id=id)
-    return await StorageFor(entity).index('live-segment').load(LiveSegment)
+    return LiveSegment.create(await storage_manager('live-segment').load(id))

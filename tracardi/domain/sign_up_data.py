@@ -1,13 +1,11 @@
-from pydantic import BaseModel
+from tracardi.domain.entity import NullableEntity
 
 
-class SignUpRecord(BaseModel):
-    id: str = None
+class SignUpRecord(NullableEntity):
     token: str = None
 
 
-class SignUpData(BaseModel):
-    id: str = None
+class SignUpData(NullableEntity):
     username: str
     password: str
     type: str

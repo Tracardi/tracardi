@@ -1,5 +1,5 @@
 from tracardi.domain.storage_record import StorageRecords
-from tracardi.service.storage.factory import storage_manager, StorageForBulk
+from tracardi.service.storage.factory import storage_manager
 
 
 async def load_by_id(id: str):
@@ -17,7 +17,7 @@ async def load_segments(event_type, limit=500) -> StorageRecords:
 
 
 async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
-    return await StorageForBulk().index('segment').load(start, limit)
+    return await storage_manager('segment').load_all(start, limit)
 
 
 async def refresh():

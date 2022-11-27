@@ -64,7 +64,7 @@ class EntityStorageCrud(BaseStorageCrud):
         return await service.match_by(field, value, limit)
 
     async def load_by_values(self, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
-                             limit: int = 100):
+                             limit: int = 100) -> StorageRecords:
         service = self._get_storage_service()
         return await service.load_by_values(key_value_pairs, sort_by, limit=limit)
 

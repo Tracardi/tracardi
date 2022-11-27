@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from asyncio import Task
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
@@ -13,7 +13,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.factory import storage_manager, StorageFor
+from tracardi.service.storage.factory import storage_manager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -97,8 +97,8 @@ async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
     return await storage_manager('rule').load_all(start, limit=limit)
 
 
-async def load_by_id(id) -> Rule:
-    return await StorageFor(Entity(id=id)).index("rule").load(Rule)
+async def load_by_id(id) -> Optional[Rule]:
+    return Rule.create(await storage_manager("rule").load(id))
 
 
 async def delete_by_id(id) -> dict:
@@ -107,7 +107,7 @@ async def delete_by_id(id) -> dict:
 
 
 async def save(rule: Rule) -> BulkInsertResult:
-    return await StorageFor(rule).index().save()
+    return await storage_manager('rule').upsert(rule)
 
 
 async def refresh():

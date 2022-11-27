@@ -40,7 +40,7 @@ class ValueThresholdManager:
         return None
 
     async def delete(self):
-        result = await storage.driver.value_threshold.delete(self.id)
+        result = await storage.driver.value_threshold.delete_by_id(self.id)
         await storage.driver.value_threshold.refresh()
         return result
 

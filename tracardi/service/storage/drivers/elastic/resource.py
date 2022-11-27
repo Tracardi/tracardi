@@ -1,9 +1,8 @@
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.storage.factory import StorageFor
 from typing import List, Tuple, Optional
 from tracardi.domain.resource import Resource, ResourceRecord
-from tracardi.service.storage.factory import storage_manager, StorageForBulk
+from tracardi.service.storage.factory import storage_manager
 
 
 async def refresh():
@@ -15,11 +14,11 @@ async def flush():
 
 
 async def load_all(start=0, limit=100) -> StorageRecords:
-    return await StorageForBulk().index('resource').load(start, limit)
+    return await storage_manager('resource').load_all(start, limit)
 
 
 async def load_destinations(start=0, limit=100) -> Tuple[List[Resource], int]:
-    result = await StorageForBulk().index('resource').load(start, limit)
+    result = await storage_manager('resource').load_all(start, limit)
     data = [ResourceRecord.construct(Resource.__fields_set__, **r).decode() for r in result if
             'destination' in r and r['destination'] is not None]
     return data, result.total
@@ -35,11 +34,11 @@ async def save(data):
 
 async def save_record(resource: Resource) -> BulkInsertResult:
     resource_record = ResourceRecord.encode(resource)
-    return await StorageFor(resource_record).index().save()
+    return await storage_manager('resource').upsert(resource_record)
 
 
 async def load_by_tag(tag):
-    return await StorageFor.crud('resource', class_type=Resource).load_by('tags', tag)
+    return await storage_manager('resource').load_by('tags', tag)
 
 
 async def load_by_id(id: str) -> Optional[StorageRecord]:

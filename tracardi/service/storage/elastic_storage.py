@@ -153,7 +153,7 @@ class ElasticStorage:
         if index is None:
             raise ValueError("Index can  not be None")
 
-        if not self.index.multi_index:
+        if not self.index.multi_index:  # Single
             # This function does not work on aliases
             return await self.storage.delete(index, id)
         else:
@@ -241,7 +241,7 @@ class ElasticStorage:
 
         if index is None:
             index = self.index.get_index_alias()
-        print(index, query)
+
         return await self.storage.delete_by_query(index, query)
 
     async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,

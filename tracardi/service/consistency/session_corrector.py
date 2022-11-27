@@ -30,7 +30,7 @@ async def correct_session(session_id) -> List[str]:
             _session_profile_id = _session_record['profile']['id']
         except KeyError:
             # This is corrupted session. Session must have profile id
-            await storage.driver.session.delete(_session_record['id'], index=_session_record.get_meta_data().index),
+            await storage.driver.session.delete_by_id(_session_record['id'], index=_session_record.get_meta_data().index),
             await storage.driver.session.refresh()
             continue
 
@@ -62,7 +62,7 @@ async def correct_session(session_id) -> List[str]:
 
                 # Delete conflicting session from all indices
 
-                await storage.driver.session.delete(_session_record['id'], _session_record.get_meta_data().index),
+                await storage.driver.session.delete_by_id(_session_record['id'], _session_record.get_meta_data().index),
                 await storage.driver.session.refresh()
                 logger.warning(f"Session {_session_record['id']} deleted. It was recreated as {_session.id}")
 

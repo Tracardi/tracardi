@@ -15,11 +15,20 @@ logger.addHandler(log_handler)
 T = TypeVar("T")
 
 
-class NullableEntity(BaseModel):
+class Creatable(BaseModel):
+
+    @classmethod
+    def create(cls: Type[T], record: Optional[StorageRecord]) -> Optional[T]:
+        if not record:
+            return None
+        return cls(**record)
+
+
+class NullableEntity(Creatable):
     id: Optional[str] = None
 
 
-class Entity(BaseModel):
+class Entity(Creatable):
     id: str
     _metadata: Optional[RecordMetadata] = PrivateAttr(None)
 
@@ -55,9 +64,3 @@ class Entity(BaseModel):
     @staticmethod
     def storage_info() -> Optional[StorageInfo]:
         return None
-
-    @classmethod
-    def create(cls: Type[T], record: Optional[StorageRecord]) -> Optional[T]:
-        if not record:
-            return None
-        return cls(**record)

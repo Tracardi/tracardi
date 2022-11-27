@@ -4,6 +4,10 @@ from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.index import resources
 
 
+async def save(data):
+    return await storage_manager('log').upsert(data)
+
+
 async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
     return await storage_manager('log').load_all(
         start,

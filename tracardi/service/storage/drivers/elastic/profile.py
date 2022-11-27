@@ -1,9 +1,8 @@
-from typing import List, Optional
 from tracardi.config import elastic, tracardi
 from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.service.storage.factory import StorageFor, storage_manager
+from tracardi.service.storage.factory import storage_manager
 from tracardi.service.storage.profile_cacher import ProfileCache
 
 
@@ -22,8 +21,7 @@ async def load_merged_profile(id: str) -> Profile:
             return profile_cache.get_profile(id)
     try:
 
-        entity = Entity(id=id)
-        profile = await StorageFor(entity).index('profile').load(Profile)  # type: Profile
+        profile = Profile.create(await storage_manager('profile').load(id))
         if profile is not None and profile.metadata.merged_with is not None:
             # Has merged profile
             profile = await load_merged_profile(profile.metadata.merged_with)
@@ -61,7 +59,7 @@ async def save(profile: Profile, refresh_after_save=False):
         cache = ProfileCache()
         cache.save_profile(profile)
 
-    result = await StorageFor(profile).index().save()
+    result = await storage_manager('profile').upsert(profile)
     if refresh_after_save or elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
     return result
@@ -79,7 +77,7 @@ async def flush():
     return await storage_manager('profile').flush()
 
 
-async def delete(id: str, index: str):
+async def delete_by_id(id: str, index: str):
     sm = storage_manager('profile')
     return await sm.delete(id, index)
 

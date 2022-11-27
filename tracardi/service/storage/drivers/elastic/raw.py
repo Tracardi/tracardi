@@ -16,12 +16,8 @@ def entity(entity: Entity) -> StorageCrud:
     return StorageFor(entity).index()
 
 
-def collection(index, dataset: List) -> CollectionCrud:
-    return StorageForBulk(dataset).index(index)
-
-
-def load(id: str, index, output):
-    return StorageFor(Entity(id=id)).index(index).load(output)
+# def collection(index, dataset: List) -> CollectionCrud:
+#     return StorageForBulk(dataset).index(index)
 
 
 async def query(index: str, query: dict) -> StorageRecords:

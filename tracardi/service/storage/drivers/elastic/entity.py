@@ -1,16 +1,14 @@
-from typing import List
+from typing import List, Optional
 
 from tracardi.domain.entity_record import EntityRecord
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.domain.entity import Entity
-from tracardi.service.storage.factory import StorageFor, storage_manager
+from tracardi.service.storage.factory import storage_manager
 
 
-async def load_by_id(entity_id) -> EntityRecord:
-    entity = Entity(id=entity_id)
-    return await StorageFor(entity).index("entity").load(EntityRecord)  # type: EntityRecord
+async def load(entity_id) -> Optional[EntityRecord]:
+    return EntityRecord.create(await storage_manager("entity").load(entity_id))
 
 
 async def load_by_values(field_value_pairs: List[tuple]) -> StorageRecords:
@@ -50,7 +48,7 @@ async def unique_entity_types(bucket_name, buckets_size=500) -> StorageAggregate
 
 
 async def upsert(entity: EntityRecord) -> BulkInsertResult:
-    return await StorageFor(entity).index().save()
+    return await storage_manager('entity').upsert(entity)
 
 
 async def refresh():
