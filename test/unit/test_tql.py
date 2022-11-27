@@ -50,6 +50,9 @@ def test_tql_between():
 
 
 def test_tql_equal():
+    tree = parser.parse("payload@a.b == payload@a.c")  # 1 == [1, 2, 3, "4"]
+    assert ExprTransformer(dot=dot).transform(tree)
+
     tree = parser.parse("payload@a.e == \"test\"")
     assert ExprTransformer(dot=dot).transform(tree)
 

@@ -161,8 +161,14 @@ class ExprTransformer(TransformerNamespace):
             return value2
 
         if operation == '==':
-            if isinstance(value1, list) and not isinstance(value2, list):
-                return value2 in value1
+            if isinstance(value1, Field):
+                value1 = value1.value
+            if isinstance(value2, Field):
+                value1 = value2.value
+
+            if not isinstance(value1, list) and isinstance(value2, list):
+                return value1 in value2
+
             return value1 == value2
         elif operation == '!=':
             return value1 != value2
