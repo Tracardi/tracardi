@@ -1,19 +1,16 @@
-from typing import List
-
-from tracardi.domain.entity import Entity
 from tracardi.domain.storage.index_mapping import IndexMapping
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.elastic_client import ElasticClient
-from tracardi.service.storage.factory import storage_manager, StorageFor, StorageCrud, StorageForBulk, CollectionCrud
+from tracardi.service.storage.factory import storage_manager
 from tracardi.service.storage.persistence_service import PersistenceService
 
 
 def index(idx) -> PersistenceService:
     return storage_manager(idx)
 
-
-def entity(entity: Entity) -> StorageCrud:
-    return StorageFor(entity).index()
+#
+# def entity(entity: Entity) -> StorageCrud:
+#     return StorageFor(entity).index()
 
 
 # def collection(index, dataset: List) -> CollectionCrud:
