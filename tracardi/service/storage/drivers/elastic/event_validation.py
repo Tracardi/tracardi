@@ -1,3 +1,4 @@
+from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.event_validator import EventValidator
@@ -12,7 +13,7 @@ async def flush():
     return await storage_manager('event-validation').flush()
 
 
-async def upsert(validator: EventValidator):
+async def upsert(validator: Entity):
     return await storage_manager("event-validation").upsert(validator, replace_id=True)
 
 
