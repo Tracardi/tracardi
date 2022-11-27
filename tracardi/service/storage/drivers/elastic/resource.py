@@ -1,7 +1,5 @@
-from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-
-from tracardi.domain.entity import Entity
 from tracardi.service.storage.factory import StorageFor
 from typing import List, Tuple, Optional
 from tracardi.domain.resource import Resource, ResourceRecord
@@ -28,7 +26,11 @@ async def load_destinations(start=0, limit=100) -> Tuple[List[Resource], int]:
 
 
 async def load_record(id: str) -> Optional[ResourceRecord]:
-    return await StorageFor(Entity(id=id)).index("resource").load(ResourceRecord)  # type: Optional[ResourceRecord]
+    return ResourceRecord.create(await storage_manager("resource").load(id))
+
+
+async def save(data):
+    return await storage_manager("resource").upsert(data)
 
 
 async def save_record(resource: Resource) -> BulkInsertResult:
@@ -38,6 +40,10 @@ async def save_record(resource: Resource) -> BulkInsertResult:
 
 async def load_by_tag(tag):
     return await StorageFor.crud('resource', class_type=Resource).load_by('tags', tag)
+
+
+async def load_by_id(id: str) -> Optional[StorageRecord]:
+    return await storage_manager("resource").load(id)
 
 
 async def load(id: str) -> Resource:
@@ -53,4 +59,5 @@ async def load(id: str) -> Resource:
 
 
 async def delete(id: str):
-    return await StorageFor(Entity(id=id)).index("resource").delete()
+    sm = storage_manager("resource")
+    return await sm.delete(id, index=sm.get_single_storage_index())

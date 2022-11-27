@@ -25,8 +25,9 @@ async def load(id: str) -> Optional[StorageRecord]:
 
 
 async def delete_by_id(id: str) -> dict:
-    event = Entity(id=id)
-    return await StorageFor(event).index("event").delete()
+    sm = storage_manager("event")
+    # Delete in all indices
+    return await sm.delete(id, index=sm.get_multi_storage_alias())
 
 
 async def unique_field_value(query, limit) -> AggResult:

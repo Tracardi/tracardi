@@ -10,7 +10,8 @@ async def add_event_type_metadata(event_type_metadata: EventTypeMetadata):
 
 
 async def del_event_type_metadata(event_type: str):
-    return await storage_manager("event-management").delete(event_type)
+    sm = storage_manager("event-management")
+    return await sm.delete(event_type, index=sm.get_single_storage_index())
 
 
 async def get_event_type_metadata(event_type: str):

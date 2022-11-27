@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, TypeVar, Type
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
@@ -11,6 +11,8 @@ from tracardi.exceptions.log_handler import log_handler
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+
+T = TypeVar("T")
 
 
 class NullableEntity(BaseModel):
@@ -53,3 +55,9 @@ class Entity(BaseModel):
     @staticmethod
     def storage_info() -> Optional[StorageInfo]:
         return None
+
+    @classmethod
+    def create(cls: Type[T], record: Optional[StorageRecord]) -> Optional[T]:
+        if not record:
+            return None
+        return cls(**record)

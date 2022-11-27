@@ -58,3 +58,12 @@ async def refresh():
 
 async def flush():
     return await storage_manager('flow').flush()
+
+
+async def delete_by_id(id: str):
+    sm = storage_manager("flow")
+    return await sm.delete(id, index=sm.get_single_storage_index())
+
+
+async def load_by_id(id: str):
+    return await storage_manager("flow").load(id)

@@ -149,7 +149,7 @@ class ElasticStorage:
 
         return await self.storage.insert(index, records)
 
-    async def delete(self, id, index: str):
+    async def delete(self, id: str, index: str):
         if index is None:
             raise ValueError("Index can  not be None")
 

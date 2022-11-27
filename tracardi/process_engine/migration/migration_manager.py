@@ -106,7 +106,7 @@ class MigrationManager:
         def add_to_celery(given_schemas: List, elastic: str, task_index_name: str):
             return run_migration_job.delay(given_schemas, elastic, task_index_name)
 
-        task_index = resources.get_index("task").get_write_index()
+        task_index = resources.get_index_constant("task").get_write_index()
 
         # Run in executor
 

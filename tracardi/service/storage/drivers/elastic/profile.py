@@ -44,7 +44,8 @@ async def load_merged_profile(id: str) -> Profile:
         # We have duplicated records. Delete all but first profile.
         for _profile_record in _duplicated_profiles[1:]:  # type: StorageRecord
             if _profile_record.has_meta_data():
-                await storage_manager('profile').delete(id, index=_profile_record.get_meta_data().index)
+                sm = storage_manager('profile')
+                await sm.delete(id, index=_profile_record.get_meta_data().index)
 
         return profile
 
@@ -79,7 +80,8 @@ async def flush():
 
 
 async def delete(id: str, index: str):
-    return await storage_manager('profile').delete(id, index)
+    sm = storage_manager('profile')
+    return await sm.delete(id, index)
 
 
 def scan(query: dict = None):

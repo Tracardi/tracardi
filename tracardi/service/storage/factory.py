@@ -19,9 +19,9 @@ class BaseStorageCrud:
         self.index = index
         self.entity = entity
 
-    async def delete(self) -> dict:
-        service = self._get_storage_service()
-        return await service.delete(self.entity.id)
+    # async def delete(self, index: str) -> dict:
+    #     service = self._get_storage_service()
+    #     return await service.delete(self.entity.id, index)
 
     async def refresh(self) -> dict:
         service = self._get_storage_service()

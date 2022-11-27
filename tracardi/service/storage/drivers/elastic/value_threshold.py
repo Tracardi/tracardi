@@ -18,7 +18,8 @@ async def save(record: ValueThresholdRecord):
 
 
 async def delete(id: str):
-    return await storage_manager('value-threshold').delete(id)
+    sm = storage_manager('value-threshold')
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def refresh():

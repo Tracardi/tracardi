@@ -23,7 +23,8 @@ async def add_consent(id: str, name: str, description: str, revokable: bool, def
 
 
 async def delete_by_id(consent_id):
-    return await storage_manager("consent-type").delete(consent_id)
+    sm = storage_manager("consent-type")
+    return await sm.delete(consent_id, index=sm.get_single_storage_index())
 
 
 async def load_all(start: int = 0, limit: int = 10) -> StorageRecords:
@@ -50,3 +51,7 @@ async def load_by_tag(tag: str, start: int = 0, limit: int = 10):
         "from": start,
         "size": limit
     })
+
+
+async def query(query: dict):
+    return await storage_manager('consent-type').query(query)

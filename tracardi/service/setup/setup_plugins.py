@@ -28,7 +28,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.google.analytics_v4.registry": PluginTestTemplate(
-        init={'source': {'id': 'id', 'name': 'name'}, 'name': 'event_name', 'params': {'param_name': 'param_value'}},
+        init={'source': {'id': 'id', 'name': 'name'}, 'name': 'event_name', 'params': "payload@id"},
         resource={
             "api_key": "api_key",
             "measurement_id": "measurement_id"
@@ -51,7 +51,7 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.google.translate.plugin": PluginTestTemplate(
-        init={"text_to_translate": "Hello", "source_language": "en"},
+        init={"text_to_translate": "Hello", "source_language": "en", "destination_language": "en"},
         resource=None
     ),
 
@@ -420,9 +420,15 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.smtp_call.plugin": PluginTestTemplate(
-        init={'message': {'message': 'message', 'reply_to': 'mail@mail.co', 'send_from': 'mail@mail.co',
-                          'send_to': 'mail@mail.co', 'title': 'title'},
-              'source': {'id': '', 'name': ''}},
+        init={
+            'mail': {
+                'message': {'content': 'ss', 'type': 'text/html'},
+                'reply_to': 'mail@mail.co',
+                'send_from': 'mail@mail.co',
+                'send_to': 'mail@mail.co',
+                'title': 'title'
+            },
+            'resource': {'id': '', 'name': ''}},
         resource={
             "smtp": "a",
             "port": 1,
@@ -667,8 +673,8 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
                 'name': '',
             },
             'timeout': 10,
-            'owner': '<org-or-user>',
-            'repo': '<repo>',
+            'owner': 'tracardi',
+            'repo': 'tracardi',
         },
         resource={
             'api_url': 'https://api.github.com',
@@ -683,8 +689,8 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
                 'name': '',
             },
             'timeout': 10,
-            'owner': '<org-or-user>',
-            'repo': '<repo>',
+            'owner': 'tracardi',
+            'repo': 'tracardi',
             'issue_id': '1',
         },
         resource={

@@ -40,7 +40,8 @@ async def load_by_event_type(event_type: str) -> StorageRecords:
 
 
 async def delete(id: str):
-    return await StorageFor(Entity(id=id)).index("event-reshaping").delete()
+    sm = storage_manager("event-reshaping")
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def count_by_type(event_type: str) -> int:

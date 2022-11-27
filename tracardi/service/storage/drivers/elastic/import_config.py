@@ -18,7 +18,8 @@ async def save(batch: ImportConfig):
 
 
 async def delete(id: str):
-    return await storage_manager("import").delete(id)
+    sm = storage_manager("import")
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def load_all(limit: int = 100, query: str = None):

@@ -19,7 +19,8 @@ async def upsert_task(task: Task) -> BulkInsertResult:
 
 
 async def delete_task(id: str) -> dict:
-    return await storage_manager("task").delete(id)
+    sm = storage_manager("task")
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def refresh():

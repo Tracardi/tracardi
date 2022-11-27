@@ -9,6 +9,10 @@ from tracardi.domain.flow_action_plugin import FlowActionPlugin
 from tracardi.service.storage.factory import StorageFor
 
 
+async def save(data):
+    return await storage_manager("action").upsert(data)
+
+
 async def save_plugin(plugin_data: Plugin, settings=None):
     if settings is None:
         settings = Settings()
@@ -44,3 +48,8 @@ async def filter(purpose: str, limit: int = 500):
         }
     }
     return await storage_manager("action").query(query)
+
+
+async def delete_by_id(id: str):
+    sm = storage_manager("action")
+    return await sm.delete(id, index=sm.get_single_storage_index())

@@ -17,9 +17,9 @@ async def load_by_values(field_value_pairs: List[tuple]) -> StorageRecords:
     return await storage_manager('entity').load_by_values(field_value_pairs)
 
 
-async def delete_by_id(entity_id) -> dict:
-    entity = Entity(id=entity_id)
-    return await StorageFor(entity).index("entity").delete()
+async def delete_by_id(entity_id: str) -> dict:
+    sm = storage_manager("entity")
+    return await sm.delete(entity_id, index=sm.get_single_storage_index())
 
 
 async def unique_entity_types(bucket_name, buckets_size=500) -> StorageAggregateResult:

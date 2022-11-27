@@ -25,7 +25,8 @@ async def load_all(start=0, limit=100) -> StorageRecords:
 
 
 async def delete_by_id(id: str):
-    return await StorageFor(Entity(id=id)).index("event-redirect").delete()
+    sm = storage_manager('event-redirect')
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def save(event_redirect: EventRedirect) -> BulkInsertResult:

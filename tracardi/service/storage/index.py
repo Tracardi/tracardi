@@ -22,7 +22,11 @@ class Index:
 
         return os.path.join(f"{_local_dir}/../setup", mapping_file)
 
-    def _index(self):
+    def get_prefixed_index(self) -> str:
+        """
+        Gets real prefixed - index
+        :return: str
+        """
         if self.aliased:
             return self.prefix + self.index
         return self.index
@@ -35,20 +39,20 @@ class Index:
         json_map = json_map.replace("%%SHARDS%%", elastic.shards)
         return json_map
 
-    def get_index_alias(self):
-        return self._index()
+    def get_index_alias(self) -> str:
+        return self.get_prefixed_index()
 
     def get_write_index(self):
 
         # Single index writes to alias
 
         if self.multi_index is False:
-            return self._index()
+            return self.get_prefixed_index()
 
         # Multi index must write to month index
 
         date = datetime.now()
-        return f"{tracardi.version.get_version_prefix()}.{self._index()}-{date.year}-{date.month}"
+        return f"{tracardi.version.get_version_prefix()}.{self.get_prefixed_index()}-{date.year}-{date.month}"
 
     def get_version_write_index(self) -> str:
         if self.multi_index:
@@ -67,12 +71,12 @@ class Index:
         version_prefix = tracardi.version.get_version_prefix()
 
         if self.multi_index is False:
-            return f"{version_prefix}.{self._index()}"
+            return f"{version_prefix}.{self.get_prefixed_index()}"
 
         # Multi index must write to month index
 
         date = datetime.now()
-        return f"{version_prefix}.{self._index()}-{date.year}-{date.month}"
+        return f"{version_prefix}.{self.get_prefixed_index()}-{date.year}-{date.month}"
 
     def get_template_pattern(self):
 
@@ -83,12 +87,32 @@ class Index:
         version_prefix = tracardi.version.get_version_prefix()
 
         if self.multi_index is False:
-            raise ValueError(f"Index {self._index()} is not multi index.")
+            raise ValueError(f"Index {self.get_prefixed_index()} is not multi index.")
 
-        return f"{version_prefix}.{self._index()}-*-*"
+        return f"{version_prefix}.{self.get_prefixed_index()}-*-*"
 
     def get_prefixed_template_name(self):
         return "template.{}.{}".format(tracardi.version.name, self.index)
+
+    def get_single_storage_index(self) -> str:
+        if self.multi_index:  # not single
+            raise AssertionError("Can not use single index on multi index storage. "
+                                 "Use get_current_multi_storage_index or get_multi_storage_alias instead.")
+        return self.get_prefixed_index()
+
+    def get_current_multi_storage_index(self) -> str:
+        if not self.multi_index:  # single
+            raise AssertionError("Can not use multi index on single index storage. "
+                                 "Use get_single_storage_index instead.")
+        date = datetime.now()
+        return f"{tracardi.version.get_version_prefix()}.{self.get_prefixed_index()}-{date.year}-{date.month}"
+
+    def get_multi_storage_alias(self) -> str:
+        if not self.multi_index:  # single
+            raise AssertionError("Can not use multi index alias on single index storage. "
+                                 "Use get_single_storage_index instead.")
+        date = datetime.now()
+        return f"{tracardi.version.get_version_prefix()}.{self.get_prefixed_index()}-{date.year}-{date.month}"
 
 
 class Resource:
@@ -150,7 +174,7 @@ class Resource:
     def list_aliases(self) -> set:
         return {index.get_index_alias() for name, index in self.resources.items()}
 
-    def get_index(self, name) -> Index:
+    def get_index_constant(self, name) -> Index:
         if name in self.resources:
             return self.resources[name]
         raise ValueError(f"Index `{name}` does not exists.")

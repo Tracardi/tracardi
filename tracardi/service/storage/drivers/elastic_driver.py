@@ -111,7 +111,7 @@ class ElasticDriver:
         return tracardi.service.storage.drivers.elastic.task
 
     @property
-    def api_instance(self):
+    def api_instance(self) -> tracardi.service.storage.drivers.elastic.api_instance:
         return tracardi.service.storage.drivers.elastic.api_instance
 
     @property
@@ -123,23 +123,23 @@ class ElasticDriver:
         return tracardi.service.storage.drivers.elastic.consent_type
 
     @property
-    def user(self):
+    def user(self) -> tracardi.service.storage.drivers.elastic.user:
         return tracardi.service.storage.drivers.elastic.user
 
     @property
-    def destination(self):
+    def destination(self) -> tracardi.service.storage.drivers.elastic.destination:
         return tracardi.service.storage.drivers.elastic.destination
 
     @property
-    def user_log(self):
+    def user_log(self) -> tracardi.service.storage.drivers.elastic.user_log:
         return tracardi.service.storage.drivers.elastic.user_log
 
     @property
-    def import_config(self):
+    def import_config(self) -> tracardi.service.storage.drivers.elastic.import_config:
         return tracardi.service.storage.drivers.elastic.import_config
 
     @property
-    def version(self):
+    def version(self) -> tracardi.service.storage.drivers.elastic.version:
         return tracardi.service.storage.drivers.elastic.version
 
     @property

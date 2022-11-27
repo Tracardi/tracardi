@@ -12,7 +12,6 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 import json
 from json import JSONDecodeError
-from tracardi.service.storage.factory import StorageFor
 from tracardi.domain.entity import Entity
 
 
@@ -45,8 +44,7 @@ class StartAction(ActionRunner):
             session = await storage.driver.session.load_by_id(event.session.id)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
-            profile_entity = Entity(id=event.profile.id)
-            profile = await StorageFor(profile_entity).index('profile').load(Profile)  # type: Optional[Profile]
+            profile = Profile.create(await storage.driver.profile.load_by_id(event.profile.id))
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(

@@ -31,7 +31,8 @@ async def load_by_tag(tag):
 
 
 async def delete(id: str):
-    return await StorageFor(Entity(id=id)).index("event-source").delete()
+    sm = storage_manager('event-source')
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def save(event_source: EventSource) -> BulkInsertResult:

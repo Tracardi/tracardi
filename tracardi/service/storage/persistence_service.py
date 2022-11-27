@@ -354,6 +354,15 @@ class PersistenceService:
     def __init__(self, storage: ElasticStorage):
         self.storage = storage
 
+    def get_single_storage_index(self) -> str:
+        return self.storage.index.get_single_storage_index()
+
+    def get_current_multi_storage_index(self) -> str:
+        return self.storage.index.get_current_multi_storage_index()
+
+    def get_multi_storage_alias(self) -> str:
+        return self.storage.index.get_multi_storage_alias()
+
     async def exists(self, id: str) -> bool:
         try:
             return await self.storage.exists(id)

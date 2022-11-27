@@ -102,7 +102,8 @@ async def load_by_id(id) -> Rule:
 
 
 async def delete_by_id(id) -> dict:
-    return await StorageFor(Entity(id=id)).index("rule").delete()
+    sm = storage_manager('rule')
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def save(rule: Rule) -> BulkInsertResult:

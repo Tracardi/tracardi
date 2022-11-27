@@ -28,7 +28,8 @@ async def save(data: dict):
 
 
 async def delete_by_id(id):
-    return await storage_manager('live-segment').delete(id)
+    sm = storage_manager('live-segment')
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def load_by_id(id) -> Optional[LiveSegment]:

@@ -71,7 +71,7 @@ async def install_plugin(module, install=False, upgrade=False):
 
 async def install_plugins(plugins_list: Dict[str, PluginTestTemplate]):
     result = defaultdict(list)
-    action_index = resources.get_index('action')
+    action_index = resources.get_index_constant('action')
     action_index = action_index.get_write_index()
     tries = 0
     while True:

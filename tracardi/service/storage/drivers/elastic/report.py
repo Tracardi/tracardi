@@ -21,7 +21,8 @@ async def load_all(start: int = 0, limit: int = 100) -> List[Report]:
 
 
 async def delete(id: str):
-    return await storage_manager("report").delete(id)
+    sm = storage_manager("report")
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def refresh():

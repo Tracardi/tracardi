@@ -2,6 +2,15 @@ from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
 
 
+async def load_by_id(id: str):
+    return await storage_manager("segment").load(id)
+
+
+async def delete_by_id(id: str):
+    sm = storage_manager('segment')
+    return await sm.delete(id, index=sm.get_single_storage_index())
+
+
 async def load_segments(event_type, limit=500) -> StorageRecords:
     return await storage_manager(index="segment"). \
         load_by_query_string("(NOT _exists_:eventType) OR eventType: \"{}\"".format(event_type, limit))

@@ -7,7 +7,8 @@ from tracardi.service.plugin.service.plugin_runner import run_plugin
 def test_should_translate_given_text():
     init = {
         "text_to_translate": "veritas lux mea",
-        "source_language": "la"
+        "source_language": "la",
+        "destination_language": "en"
     }
 
     payload = None

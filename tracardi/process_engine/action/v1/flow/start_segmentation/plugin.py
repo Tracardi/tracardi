@@ -5,12 +5,12 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.driver import storage
 from .model.configuration import Configuration
 from typing import Optional
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata
-from tracardi.service.storage.factory import StorageFor
 from tracardi.domain.entity import Entity
 
 
@@ -47,8 +47,7 @@ class StartSegmentationAction(ActionRunner):
                 self.console.error(msg)
                 return None
 
-            profile_entity = Entity(id=self.config.profile_id)
-            profile = await StorageFor(profile_entity).index('profile').load(Profile)  # type: Optional[Profile]
+            profile = Profile.create(await storage.driver.profile.load_by_id(self.config.profile_id))
 
             if profile is None:
                 msg = "Loaded profile is empty. Can not run segmentation without profile. "

@@ -23,10 +23,14 @@ async def remove_dead_instances():
 
 async def exists():
     es = ElasticClient.instance()
-    index = resources.get_index("api-instance")
+    index = resources.get_index_constant("api-instance")
     index = index.get_write_index()
     return await es.exists_index(index)
 
 
 async def refresh():
     return await storage_manager('api-instance').refresh()
+
+
+async def save(data):
+    return await storage_manager('api-instance').upsert(data)

@@ -105,8 +105,9 @@ async def load_duplicates(id: str):
     })
 
 
-async def delete(id: str):
-    return await storage_manager('session').delete(id)
+async def delete(id: str, index: str):
+    sm = storage_manager('session')
+    return await sm.delete(id, index)
 
 
 async def refresh():

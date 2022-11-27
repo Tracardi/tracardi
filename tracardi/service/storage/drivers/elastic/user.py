@@ -43,7 +43,8 @@ async def update_user(user: User):
 
 
 async def delete_user(id: str):
-    return await storage_manager("user").delete(id)
+    sm = storage_manager("user")
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def load_by_id(id: str) -> Optional[StorageRecord]:

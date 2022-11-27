@@ -19,7 +19,8 @@ async def save(destination: DestinationRecord) -> BulkInsertResult:
 
 
 async def delete(id: str):
-    return await StorageFor(Entity(id=id)).index("destination").delete()
+    sm = storage_manager('destination')
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def refresh():
