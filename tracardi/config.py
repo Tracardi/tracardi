@@ -6,7 +6,7 @@ import yaml
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 
-VERSION = '0.7.4-dev'
+VERSION = '0.7.3'
 NAME = os.environ.get('INSTANCE_PREFIX', None)
 
 

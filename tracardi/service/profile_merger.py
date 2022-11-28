@@ -1,18 +1,27 @@
 import asyncio
+import logging
 from asyncio import Task
 from collections import defaultdict
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple, Any
 from pydantic.utils import deep_update, KeyType
 
+from ..config import tracardi
 from ..domain.metadata import ProfileMetadata
 from ..domain.profile import Profile
 from ..domain.profile_stats import ProfileStats
 from ..domain.time import ProfileTime
+from ..exceptions.log_handler import log_handler
 from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merger import merge as dict_merge
 from ..service.storage.driver import storage
+
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 class ProfileMerger:
@@ -57,6 +66,7 @@ class ProfileMerger:
                                    limit: int = 2000) -> Optional[Profile]:
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
+            logger.info("Loading profiles to merge")
             similar_profiles = await storage.driver.profile.load_profiles_to_merge(
                 merge_by,
                 limit=limit
