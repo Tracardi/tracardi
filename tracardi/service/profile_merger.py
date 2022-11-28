@@ -72,6 +72,10 @@ class ProfileMerger:
                 limit=limit
             )
 
+            if len(similar_profiles) == 0:
+                logger.info("No similar profiles to merge")
+                return None
+
             merger = ProfileMerger(profile)
 
             # Merge
@@ -93,6 +97,9 @@ class ProfileMerger:
                 profile.operation.update = True
 
                 return profile
+
+            else:
+                logger.info("No need to merge")
 
         return None
 
