@@ -7,6 +7,7 @@ from .entity import Entity
 from .metadata import ProfileMetadata
 from .pii import PII
 from .profile_traits import ProfileTraits
+from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
@@ -36,6 +37,12 @@ class Profile(Entity):
             "profile": self.dict(),
             "storage": self.get_meta_data().dict()
         }
+
+    @staticmethod
+    def deserialize(serialized_profile: dict) -> 'Profile':
+        profile = Profile(**serialized_profile['profile'])
+        profile.set_meta_data(RecordMetadata(**serialized_profile['storage']))
+        return profile
 
     def replace(self, profile: 'Profile'):
         if isinstance(profile, Profile):
