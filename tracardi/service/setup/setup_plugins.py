@@ -45,6 +45,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.operations.merge_data.plugin": PluginTestTemplate(
+        init={"source": {"source": "{}"}, "data": {"data": "{}"}, "connection": "merge"},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.operations.contains_pattern.plugin": PluginTestTemplate(
         init={"field": "payload@field", "pattern": "all"},
         resource=None
