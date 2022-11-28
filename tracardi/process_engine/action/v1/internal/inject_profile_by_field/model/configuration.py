@@ -8,13 +8,15 @@ class Configuration(PluginConfig):
 
     @validator("field")
     def field_can_not_be_empty(cls, value):
+        value = value.strip()
         if value not in ['pii.email', 'pii.telephone', 'pii.twitter']:
             raise ValueError("Value is incorrect")
 
-        return value
+        return value.strip()
 
     @validator("value")
     def value_can_not_be_empty(cls, value):
+        value = value.strip()
         if len(value) == 0:
             raise ValueError("Field can not be empty")
 

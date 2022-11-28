@@ -7,6 +7,7 @@ class Configuration(PluginConfig):
 
     @validator("event_id")
     def event_id_can_not_be_empty(cls, value):
+        value = value.strip()
         if len(value) == 0:
             raise ValueError("Event id can not be empty")
 
