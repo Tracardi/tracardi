@@ -41,6 +41,12 @@ class StorageRecord(dict):
         _object = model(**self)
         return _object.set_meta_data(self.get_meta_data())
 
+    def serialize(self):
+        return {
+            "profile": self,
+            "storage": self.get_meta_data().dict()
+        }
+
 
 class StorageAggregate(dict):
 

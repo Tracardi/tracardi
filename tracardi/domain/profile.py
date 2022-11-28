@@ -31,6 +31,12 @@ class Profile(Entity):
     consents: Optional[Dict[str, ConsentRevoke]] = {}
     active: bool = True
 
+    def serialize(self):
+        return {
+            "profile": self.dict(),
+            "storage": self.get_meta_data().dict()
+        }
+
     def replace(self, profile: 'Profile'):
         if isinstance(profile, Profile):
             # Make segments unique
