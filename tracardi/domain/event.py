@@ -35,6 +35,7 @@ class Event(Entity):
     metadata: EventMetadata
     type: str
     properties: Optional[dict] = {}
+    traits: Optional[dict] = {}
     update: bool = False
 
     source: Entity
@@ -52,6 +53,7 @@ class Event(Entity):
             self.metadata = event.metadata
             self.type = event.type
             self.properties = event.properties
+            self.traits = event.traits
             # do not replace those - read only
             # self.source = event.source
             # self.session = event.session
