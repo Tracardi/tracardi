@@ -1,3 +1,4 @@
+import asyncio
 from time import time
 from typing import Any
 
@@ -24,6 +25,9 @@ class MemoryCache:
     def __init__(self):
         self.memory_buffer = {}
 
+    def __len__(self):
+        return len(self.memory_buffer)
+
     def __contains__(self, key: str):
         if key in self.memory_buffer:
             if self.memory_buffer[key].expired():
@@ -44,3 +48,17 @@ class MemoryCache:
         if not isinstance(value, CacheItem):
             raise ValueError("MemoryCache item must be CacheItem type.")
         self.memory_buffer[key] = value
+
+    @staticmethod
+    async def cache(cache: 'MemoryCache', key, load_callable, awaitable, *args):
+        if key not in cache:
+            result = load_callable(*args)
+            if awaitable:
+                result = await result
+
+            if result is None:
+                return None
+
+            cache[key] = CacheItem(data=result, ttl=5)
+
+        return cache[key].data

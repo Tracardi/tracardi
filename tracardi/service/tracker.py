@@ -469,8 +469,17 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
     # Load session from storage
     try:
-        session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # type: Optional[Session]
+        if tracardi.cache_session > 0:
+            session = await MemoryCache.cache(
+                cache,
+                tracker_payload.session.id,
+                storage.driver.session.load_by_id,
+                True,
+                tracker_payload.session.id
+            )
 
+        else:
+            session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # 80 req/s
     except DuplicatedRecordException as e:
 
         # There may be a case when we have 2 sessions with the same id.

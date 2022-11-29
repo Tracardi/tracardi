@@ -86,7 +86,7 @@ async def load_by_id(id: str) -> Optional[Session]:
     session_record = await storage_manager("session").load(id)
     if session_record is None:
         return None
-    session = session_record.to_entity(Session)
+    session = session_record.to_entity(Session)  # 10rq/s
 
     return session
 

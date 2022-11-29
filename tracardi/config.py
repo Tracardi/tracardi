@@ -6,7 +6,7 @@ import yaml
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 
-VERSION = '0.7.3'
+VERSION = '0.7.4-dev'
 NAME = os.environ.get('INSTANCE_PREFIX', None)
 
 
@@ -49,6 +49,7 @@ class TracardiConfig:
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
         self.installation_token = env.get('INSTALLATION_TOKEN', '')
+        self.cache_session = int(env['CACHE_SESSION']) if 'CACHE_SESSION' in env else 0
         self._config = None
         self._unset_secrets()
 
