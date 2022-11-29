@@ -6,13 +6,13 @@ from typing import List, Optional, Tuple
 import redis
 from deepdiff import DeepDiff
 
-from tracardi.config import tracardi
+from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
 from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
+from tracardi.service.cache_manager import CacheManager
 
 from tracardi.service.console_log import ConsoleLog
-from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -34,7 +34,7 @@ from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.helpers.source_cacher import source_cache
+from tracardi.service.storage.helpers.source_cacher import validate_source
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.tracker_event_reshaper import reshape_event
 from tracardi.service.tracker_event_validator import validate_event
@@ -44,7 +44,7 @@ from tracardi.service.wf.domain.flow_response import FlowResponses
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
-cache = MemoryCache()
+cache = CacheManager()
 
 
 async def _save_profile(profile):
@@ -366,7 +366,6 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
         collect_result = await _persist(console_log, session, events, tracker_payload, profile)
         # save_tasks.append(asyncio.create_task(_persist(console_log, session, events, tracker_payload, profile)))
 
-
         # Save console log
         if console_log:
             encoded_console_log = list(console_log.get_encoded())
@@ -467,8 +466,9 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
                 raise ValueError(f"Invalid event source `{tracker_payload.source.id}`")
             source = internal_source
         else:
-            source = await source_cache.validate_source(source_id=tracker_payload.source.id,
-                                                        allowed_bridges=allowed_bridges)
+            source = await validate_source(source_id=tracker_payload.source.id,
+                                           allowed_bridges=allowed_bridges)
+            print(source)
     except ValueError as e:
         raise UnauthorizedException(e)
 
@@ -478,18 +478,10 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
 
     # Load session from storage
     try:
-        if tracardi.cache_session > 0:
-            session = await MemoryCache.cache(
-                cache,
-                tracker_payload.session.id,
-                tracardi.cache_session,
-                storage.driver.session.load_by_id,
-                True,
-                tracker_payload.session.id
-            )
-
-        else:
-            session = await storage.driver.session.load_by_id(tracker_payload.session.id)  # 80 req/s
+        session = await cache.session(
+            session_id=tracker_payload.session.id,
+            ttl=memory_cache.session_cache_ttl
+        )
     except DuplicatedRecordException as e:
 
         # There may be a case when we have 2 sessions with the same id.

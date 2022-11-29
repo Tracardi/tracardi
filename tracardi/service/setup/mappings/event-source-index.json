@@ -50,6 +50,16 @@
         "type": "keyword",
         "index": false
       },
+      "config": {
+        "type": "object",
+        "dynamic": "true",
+        "enabled": false
+      },
+      "form": {
+        "type": "object",
+        "dynamic": "true",
+        "enabled": false
+      },
       "configurable": {
         "type": "boolean"
       },

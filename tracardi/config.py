@@ -49,8 +49,6 @@ class TracardiConfig:
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
         self.installation_token = env.get('INSTALLATION_TOKEN', '')
-        self.cache_session = int(env['CACHE_SESSION']) if 'CACHE_SESSION' in env else 0
-        self.cache_event_validation = int(env['CACHE_EVENT_VALIDATION']) if 'CACHE_EVENT_VALIDATION' in env else 0
         self._config = None
         self._unset_secrets()
 
@@ -69,9 +67,9 @@ class TracardiConfig:
 
 class MemoryCacheConfig:
     def __init__(self, env):
-        self.source_ttl = int(env['SOURCE_TTL']) if 'SOURCE_TTL' in env else 60
-        self.tags_ttl = int(env['TAGS_TTL']) if 'TAGS_TTL' in env else 60
-        self.event_validator_ttl = int(env['EVENT_VALIDATOR_TTL']) if 'EVENT_VALIDATOR_TTL' in env else 180
+        self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 0
+        self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 0
+        self.event_validation_cache_ttl = int(env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 0
 
 
 class ElasticConfig:
