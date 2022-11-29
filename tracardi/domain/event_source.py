@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional, Union, List, Any
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.domain.entity import Entity
+from tracardi.service.plugin.domain.register import Form
 
 
 class EventSource(Entity):
@@ -19,6 +20,8 @@ class EventSource(Entity):
     manual: Optional[str] = None
     locked: bool = False
     synchronize_profiles: bool = True
+    config: dict = {}
+    form: Optional[Form] = None
 
     def __init__(self, **data: Any):
         if 'timestamp' not in data:

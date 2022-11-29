@@ -459,6 +459,7 @@ async def track_event(tracker_payload: TrackerPayload,
                       profile_less: bool,
                       allowed_bridges: List[str],
                       internal_source=None):
+
     # Trim ids - spaces are frequent issues
 
     if tracker_payload.source:
@@ -467,6 +468,8 @@ async def track_event(tracker_payload: TrackerPayload,
         tracker_payload.session.id = tracker_payload.session.id.strip()
     if tracker_payload.profile:
         tracker_payload.profile.id = tracker_payload.profile.id.strip()
+
+    # Validate event source
 
     try:
         if internal_source is not None:
@@ -478,6 +481,8 @@ async def track_event(tracker_payload: TrackerPayload,
                                            allowed_bridges=allowed_bridges)
     except ValueError as e:
         raise UnauthorizedException(e)
+
+    # Synchronize profiles
 
     try:
         if source.synchronize_profiles:
@@ -546,7 +551,7 @@ async def invoke_track_process_step_1(tracker_payload: TrackerPayload, source: E
     return await invoke_track_process_step_2(tracker_payload, source, profile_less, profile, session, ip)
 
 
-# Todo remove 2023-04-01
+# Todo remove 2023-04-01 - obsolete
 async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
                                       allowed_bridges: List[str], internal_source=None):
     return await track_event(tracker_payload,
