@@ -14,7 +14,7 @@ from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.postpone_call import PostponedCall
-from tracardi.service.tracker import synchronized_event_tracking
+from tracardi.service.tracker import track_event
 
 
 def validate(config: dict):
@@ -58,8 +58,10 @@ class PostponeEventAction(ActionRunner):
                     ip=ip
                 )
             )
-            await synchronized_event_tracking(tracker_payload, host="http://localhost", profile_less=False,
-                                              allowed_bridges=['rest'])
+            await track_event(tracker_payload,
+                              ip="http://localhost",
+                              profile_less=False,
+                              allowed_bridges=['rest'])
 
         postponed_call = PostponedCall(
             self.profile.id,

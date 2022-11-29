@@ -8,6 +8,7 @@ from deepdiff import DeepDiff
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
+from tracardi.domain.event_source import EventSource
 from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
 from tracardi.service.cache_manager import CacheManager
@@ -169,8 +170,12 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
     return processed_events, console_log
 
 
-async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_less: bool, profile=None, session=None,
-                               ip='0.0.0.0'):
+async def invoke_track_process_step_2(tracker_payload: TrackerPayload,
+                                      source: EventSource,
+                                      profile_less: bool,
+                                      profile=None,
+                                      session=None,
+                                      ip='0.0.0.0'):
     console_log = ConsoleLog()
     profile_copy = None
 
@@ -273,7 +278,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                     event_id=None,
                     profile_id=get_entity_id(profile),
                     origin='profile',
-                    class_name='invoke_track_process',
+                    class_name='invoke_track_process_step_2',
                     module=__name__,
                     type='error',
                     message=message,
@@ -307,7 +312,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                     event_id=None,
                     profile_id=get_entity_id(profile),
                     origin='profile',
-                    class_name='invoke_track_process',
+                    class_name='invoke_track_process_step_2',
                     module=__name__,
                     type='error',
                     message=message,
@@ -338,7 +343,7 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
                 event_id=None,
                 profile_id=get_entity_id(profile),
                 origin='profile',
-                class_name='invoke_track_process',
+                class_name='invoke_track_process_step_2',
                 module=__name__,
                 type='error',
                 message=message,
@@ -449,7 +454,10 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     return result
 
 
-async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bool, allowed_bridges: List[str],
+async def track_event(tracker_payload: TrackerPayload,
+                      ip: str,
+                      profile_less: bool,
+                      allowed_bridges: List[str],
                       internal_source=None):
     # Trim ids - spaces are frequent issues
 
@@ -468,9 +476,31 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         else:
             source = await validate_source(source_id=tracker_payload.source.id,
                                            allowed_bridges=allowed_bridges)
-            print(source)
     except ValueError as e:
         raise UnauthorizedException(e)
+
+    try:
+        if source.synchronize_profiles:
+            async with ProfileTracksSynchronizer(tracker_payload.profile,
+                                                 wait=tracardi.sync_profile_tracks_wait,
+                                                 max_repeats=tracardi.sync_profile_tracks_max_repeats):
+                return await invoke_track_process_step_1(
+                    tracker_payload,
+                    source,
+                    ip=ip,
+                    profile_less=profile_less)
+        else:
+            return await invoke_track_process_step_1(
+                tracker_payload,
+                source,
+                ip=ip,
+                profile_less=profile_less)
+
+    except redis.exceptions.ConnectionError as e:
+        raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
+
+
+async def invoke_track_process_step_1(tracker_payload: TrackerPayload, source: EventSource, ip: str, profile_less: bool):
 
     tracker_payload.set_transitional(source)
     tracker_payload.set_return_profile(source)
@@ -513,19 +543,14 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
         storage.driver.profile.load_merged_profile,
         profile_less
     )
-    return await invoke_track_process(tracker_payload, source, profile_less, profile, session, ip)
+    return await invoke_track_process_step_2(tracker_payload, source, profile_less, profile, session, ip)
 
 
+# Todo remove 2023-04-01
 async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
                                       allowed_bridges: List[str], internal_source=None):
-    if tracardi.sync_profile_tracks:
-        try:
-            async with ProfileTracksSynchronizer(tracker_payload.profile, wait=tracardi.sync_profile_tracks_wait,
-                                                 max_repeats=tracardi.sync_profile_tracks_max_repeats):
-                return await track_event(tracker_payload, ip=host, profile_less=profile_less,
-                                         allowed_bridges=allowed_bridges, internal_source=internal_source)
-        except redis.exceptions.ConnectionError as e:
-            raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
-    else:
-        return await track_event(tracker_payload, ip=host, profile_less=profile_less, allowed_bridges=allowed_bridges,
-                                 internal_source=internal_source)
+    return await track_event(tracker_payload,
+                             ip=host,
+                             profile_less=profile_less,
+                             allowed_bridges=allowed_bridges,
+                             internal_source=internal_source)

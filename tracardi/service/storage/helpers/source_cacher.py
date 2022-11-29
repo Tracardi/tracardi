@@ -11,7 +11,7 @@ logger.addHandler(log_handler)
 cache = CacheManager()
 
 
-async def validate_source(source_id: str, allowed_bridges: list) -> Optional[EventSource]:
+async def validate_source(source_id: str, allowed_bridges: list) -> EventSource:
     source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
 
     if source is None:

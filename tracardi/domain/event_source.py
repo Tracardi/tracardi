@@ -18,6 +18,7 @@ class EventSource(Entity):
     requires_consent: Optional[bool] = False
     manual: Optional[str] = None
     locked: bool = False
+    synchronize_profiles: bool = True
 
     def __init__(self, **data: Any):
         if 'timestamp' not in data:
