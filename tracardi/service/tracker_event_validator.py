@@ -1,5 +1,7 @@
+from tracardi.config import tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.event import Event
+from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver import storage
@@ -15,6 +17,7 @@ from typing import List
 from tracardi.service.utils.getters import get_entity_id
 
 parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
+cache = MemoryCache()
 
 
 def validate(dot: DotAccessor, validator: EventValidator, console_log: ConsoleLog) -> bool:
@@ -76,7 +79,16 @@ def validate_with_multiple_schemas(dot: DotAccessor, validators: List[EventValid
 
 
 async def validate_event(event: Event, dot: DotAccessor, console_log: ConsoleLog) -> Event:
-    validation_schemas = await storage.driver.event_validation.load_by_event_type(event.type)
+    if tracardi.cache_event_validation > 0:
+        validation_schemas = await MemoryCache.cache(
+            cache,
+            event.type,
+            tracardi.cache_event_validation,
+            storage.driver.event_validation.load_by_event_type,
+            True,
+            event.type)
+    else:
+        validation_schemas = await storage.driver.event_validation.load_by_event_type(event.type)
 
     if validation_schemas:
         if validate_with_multiple_schemas(

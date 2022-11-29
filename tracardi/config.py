@@ -50,6 +50,7 @@ class TracardiConfig:
         self.version = Version(version=VERSION, name=NAME)
         self.installation_token = env.get('INSTALLATION_TOKEN', '')
         self.cache_session = int(env['CACHE_SESSION']) if 'CACHE_SESSION' in env else 0
+        self.cache_event_validation = int(env['CACHE_EVENT_VALIDATION']) if 'CACHE_EVENT_VALIDATION' in env else 0
         self._config = None
         self._unset_secrets()
 

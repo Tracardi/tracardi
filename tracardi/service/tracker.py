@@ -206,107 +206,114 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
     debugger = None
     segmentation_result = None
 
-    # Skips INVALID events in invoke method
-    rules_engine = RulesEngine(
-        session,
-        profile,
-        events_rules=await storage.driver.rule.load_rules(tracker_payload.source, events),
-        console_log=console_log
-    )
+    # Routing rules are subject to caching
+    event_rules = await storage.driver.rule.load_rules(tracker_payload.source, events)
 
     ux = []
-
     post_invoke_events = None
     flow_responses = FlowResponses([])
-    try:
 
-        # Invoke rules engine
-        rule_invoke_result = await rules_engine.invoke(
-            storage.driver.flow.load_production_flow,
-            ux,
-            tracker_payload
+    #  If no event_rules for delivered event then no need to run rule invoke
+    #  and no need for profile merging
+    if event_rules is not None:
+
+        # Skips INVALID events in invoke method
+        rules_engine = RulesEngine(
+            session,
+            profile,
+            events_rules=event_rules,
+            console_log=console_log
         )
 
-        debugger = rule_invoke_result.debugger
-        ran_event_types = rule_invoke_result.ran_event_types
-        console_log = rule_invoke_result.console_log
-        post_invoke_events = rule_invoke_result.post_invoke_events
-        invoked_rules = rule_invoke_result.invoked_rules
-        flow_responses = FlowResponses(rule_invoke_result.flow_responses)
+        try:
 
-        # Profile and session can change inside workflow
-        # Check if it should not be replaced.
-
-        if profile is not rules_engine.profile:
-            profile = rules_engine.profile
-
-        if session is not rules_engine.session:
-            session = rules_engine.session
-
-        # Append invoked rules to event metadata
-
-        for event in events:
-            if event.type in invoked_rules:
-                event.metadata.processed_by.rules = invoked_rules[event.type]
-
-        # Segment only if there is profile
-
-        if isinstance(profile, Profile):
-            # Segment
-            segmentation_result = await segment(profile,
-                                                ran_event_types,
-                                                storage.driver.segment.load_segments)
-
-    except Exception as e:
-        message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
-        console_log.append(
-            Console(
-                flow_id=None,
-                node_id=None,
-                event_id=None,
-                profile_id=get_entity_id(profile),
-                origin='profile',
-                class_name='invoke_track_process',
-                module=__name__,
-                type='error',
-                message=message,
-                traceback=get_traceback(e)
+            # Invoke rules engine
+            rule_invoke_result = await rules_engine.invoke(
+                storage.driver.flow.load_production_flow,
+                ux,
+                tracker_payload
             )
-        )
-        logger.error(message)
 
-    try:
-        # Merge
-        if profile is not None:  # Profile can be None if profile_less event is processed
-            if profile.operation.needs_merging():
-                merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
-                merged_profile = await ProfileMerger.invoke_merge_profile(
-                    profile,
-                    merge_by=merge_key_values,
-                    override_old_data=True,
-                    limit=1000)
+            debugger = rule_invoke_result.debugger
+            ran_event_types = rule_invoke_result.ran_event_types
+            console_log = rule_invoke_result.console_log
+            post_invoke_events = rule_invoke_result.post_invoke_events
+            invoked_rules = rule_invoke_result.invoked_rules
+            flow_responses = FlowResponses(rule_invoke_result.flow_responses)
 
-                if merged_profile is not None:
-                    # Replace profile with merged_profile
-                    profile = merged_profile
+            # Profile and session can change inside workflow
+            # Check if it should not be replaced.
 
-    except Exception as e:
-        message = 'Profile merging returned an error `{}`'.format(str(e))
-        logger.error(message)
-        console_log.append(
-            Console(
-                flow_id=None,
-                node_id=None,
-                event_id=None,
-                profile_id=get_entity_id(profile),
-                origin='profile',
-                class_name='invoke_track_process',
-                module=__name__,
-                type='error',
-                message=message,
-                traceback=get_traceback(e)
+            if profile is not rules_engine.profile:
+                profile = rules_engine.profile
+
+            if session is not rules_engine.session:
+                session = rules_engine.session
+
+            # Append invoked rules to event metadata
+
+            for event in events:
+                if event.type in invoked_rules:
+                    event.metadata.processed_by.rules = invoked_rules[event.type]
+
+            # Segment only if there is profile
+
+            if isinstance(profile, Profile):
+                # Segment
+                segmentation_result = await segment(profile,
+                                                    ran_event_types,
+                                                    storage.driver.segment.load_segments)
+
+        except Exception as e:
+            message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
+            console_log.append(
+                Console(
+                    flow_id=None,
+                    node_id=None,
+                    event_id=None,
+                    profile_id=get_entity_id(profile),
+                    origin='profile',
+                    class_name='invoke_track_process',
+                    module=__name__,
+                    type='error',
+                    message=message,
+                    traceback=get_traceback(e)
+                )
             )
-        )
+            logger.error(message)
+
+        # Profile merge
+        try:
+            if profile is not None:  # Profile can be None if profile_less event is processed
+                if profile.operation.needs_merging():
+                    merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
+                    merged_profile = await ProfileMerger.invoke_merge_profile(
+                        profile,
+                        merge_by=merge_key_values,
+                        override_old_data=True,
+                        limit=1000)
+
+                    if merged_profile is not None:
+                        # Replace profile with merged_profile
+                        profile = merged_profile
+
+        except Exception as e:
+            message = 'Profile merging returned an error `{}`'.format(str(e))
+            logger.error(message)
+            console_log.append(
+                Console(
+                    flow_id=None,
+                    node_id=None,
+                    event_id=None,
+                    profile_id=get_entity_id(profile),
+                    origin='profile',
+                    class_name='invoke_track_process',
+                    module=__name__,
+                    type='error',
+                    message=message,
+                    traceback=get_traceback(e)
+                )
+            )
 
     save_tasks = []
     try:
@@ -357,6 +364,8 @@ async def invoke_track_process(tracker_payload: TrackerPayload, source, profile_
             events = synced_events
 
         collect_result = await _persist(console_log, session, events, tracker_payload, profile)
+        # save_tasks.append(asyncio.create_task(_persist(console_log, session, events, tracker_payload, profile)))
+
 
         # Save console log
         if console_log:
@@ -473,6 +482,7 @@ async def track_event(tracker_payload: TrackerPayload, ip: str, profile_less: bo
             session = await MemoryCache.cache(
                 cache,
                 tracker_payload.session.id,
+                tracardi.cache_session,
                 storage.driver.session.load_by_id,
                 True,
                 tracker_payload.session.id

@@ -53,13 +53,13 @@ async def _load_rule(event_type, source_id):
     return await storage_manager(index="rule").filter(query)
 
 
-async def _get_rules_for_source_and_event_type(source: Entity, events: List[Event]) -> Dict[str, List[Dict]]:
+async def _get_rules_for_source_and_event_type(source: Entity, events: List[Event]) -> Tuple[Dict[str, List[Dict]], bool]:
     event_types = {event.type for event in events}
 
     # Cache rules per event types
 
     event_type_rules = {}
-
+    has_routes = False
     for event_type in event_types:
 
         cache_key = _get_cache_key(source.id, event_type)
@@ -70,9 +70,13 @@ async def _get_rules_for_source_and_event_type(source: Entity, events: List[Even
             # todo set MemoryCache ttl from env
             memory_cache[cache_key] = CacheItem(data=rules, ttl=15)
 
-        event_type_rules[event_type] = list(memory_cache[cache_key].data)
+        routes = list(memory_cache[cache_key].data)
+        if not has_routes and routes:
+            has_routes = True
 
-    return event_type_rules
+        event_type_rules[event_type] = routes
+
+    return event_type_rules, has_routes
 
 
 def _read_rule(event_type: str, rules: Dict[str, List[Dict]]) -> List[Dict]:
@@ -82,8 +86,11 @@ def _read_rule(event_type: str, rules: Dict[str, List[Dict]]) -> List[Dict]:
     return rules[event_type]
 
 
-async def load_rules(source: Entity, events: List[Event]) -> List[Tuple[List[Dict], Event]]:
-    rules = await _get_rules_for_source_and_event_type(source, events)
+async def load_rules(source: Entity, events: List[Event]) -> Optional[List[Tuple[List[Dict], Event]]]:
+    rules, has_routing_rules = await _get_rules_for_source_and_event_type(source, events)
+
+    if not has_routing_rules:
+        return None
 
     return [(_read_rule(event.type, rules), event) for event in events]
 
