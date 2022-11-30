@@ -10,12 +10,11 @@ def test_should_limit_calls():
     key = str(uuid4())
     passes = 0
     while True:
-        passes += 1
         block, ttl = limiter.limit(key)
 
         if block is False:
             break
-
+        passes += 1
         sleep(0.5)
 
     assert passes == limit

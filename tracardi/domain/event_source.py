@@ -9,7 +9,7 @@ from tracardi.service.plugin.domain.register import Form
 
 class EventSource(Entity):
     type: str
-    bridge: Optional[NamedEntity] = NamedEntity(id="1", name="API")
+    bridge: NamedEntity
     timestamp: datetime
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"

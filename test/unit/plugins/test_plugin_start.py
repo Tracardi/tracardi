@@ -56,6 +56,7 @@ def test_plugin_start():
     flow, node = build_some_workflow_with_start_action(True)
 
     result = run_plugin(StartAction, init, payload, profile=Profile(id="1"), flow=flow,
-                        node=node)
-    Event(**result.output.value)
+                        node=node, event=event)
+
+    assert result.output.value == {}
     assert result.output.port == 'payload'
