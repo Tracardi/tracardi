@@ -28,6 +28,10 @@
         "type": "object",
         "dynamic": "true",
         "enabled": false
+      },
+      "manual": {
+        "type": "keyword",
+        "index": false
       }
     }
   },

@@ -9,3 +9,4 @@ class Bridge(NamedEntity):
     type: str
     config: Optional[dict] = {}
     form: Optional[Form] = None
+    manual: Optional[str] = None

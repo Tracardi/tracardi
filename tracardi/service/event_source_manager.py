@@ -16,6 +16,14 @@ def event_source_types():
             "name": "Rest Api Call",
             "tags": ["rest", "inbound"]
         },
+        "redirect": {
+            "name": "Redirect Link",
+            "tags": ["link", "inbound"]
+        },
+        "webhook": {
+            "name": "Webhook",
+            "tags": ["webhook", "inbound"]
+        },
     }
 
     return standard_inbound_sources

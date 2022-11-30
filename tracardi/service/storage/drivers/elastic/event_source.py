@@ -16,14 +16,16 @@ async def load(id: str) -> Optional[EventSource]:
     return EventSource.create(await storage_manager("event-source").load(id))
 
 
-async def load_all(limit=100) -> Tuple[List[EventSource], int]:
-    result = await storage_manager('event-source').load_all(limit=limit)
-    data = [EventSource(**r) for r in result]
-    return data, result.total
+async def load_all(limit=100):
+    return await storage_manager('event-source').load_all(limit=limit)
 
 
 async def load_by_tag(tag):
     return await storage_manager('event-source').load_by('tags', tag)
+
+
+async def load_by(field, value):
+    return await storage_manager('event-source').load_by(field, value)
 
 
 async def delete_by_id(id: str):
