@@ -3,6 +3,7 @@ import os
 from tracardi.config import tracardi
 from tracardi.domain.version import Version
 from tracardi.exceptions.log_handler import log_handler
+from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.setup.setup_plugins import add_plugins
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -35,6 +36,12 @@ async def update_current_version():
         if head_version != prev_version:
             await storage.driver.version.save({"id": 0, **head_version.dict()})
             logger.info(f"Saved current version {head_version}")
+
+
+async def install_default_data():
+    for index, data in default_db_data.items():
+        for record in data:
+            await storage.driver.raw.index(index).upsert(record)
 
 
 async def create_indices():

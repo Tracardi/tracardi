@@ -193,7 +193,7 @@ class Resource:
 
         self.resources.update(indices)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Index:
         if item in self.resources:
             return self.resources[item]
         raise ValueError(f"Index `{item}` does not exists.")
