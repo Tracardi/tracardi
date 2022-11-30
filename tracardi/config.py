@@ -48,7 +48,7 @@ class TracardiConfig:
             'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
-        self.installation_token = env.get('INSTALLATION_TOKEN', '')
+        self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self._config = None
         self._unset_secrets()
 

@@ -3,10 +3,19 @@ Version 0.7.4-dev
 
 ## Features
 
+* Plugins:
+  * Google analytics 4 plugin
+  * Github plugins
 * Event redirect bridge (collector)
-* Google analytics 4 plugin
-* Github plugins
 * Upgrade to node v18.12.1
+* Profile synchronisation configuration in the event source
+* Storage access refactoring
+* Event source configuration caching
+* Event validation schema caching
+* Minor GUI changes
+* Event source configuration form display for more advanced bridges
+* Performance tweaks
+* Event data display configuration 
 
 Version 0.7.3
 ----------------------------------------------------------

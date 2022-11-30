@@ -22,6 +22,16 @@
       "type": {
         "type": "keyword"
       },
+      "bridge": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
       "name": {
         "type": "keyword"
       },
@@ -51,11 +61,6 @@
         "index": false
       },
       "config": {
-        "type": "object",
-        "dynamic": "true",
-        "enabled": false
-      },
-      "form": {
         "type": "object",
         "dynamic": "true",
         "enabled": false
