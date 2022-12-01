@@ -393,7 +393,7 @@ async def invoke_track_process_step_2(tracker_payload: TrackerPayload,
                                                              event=None,
                                                              flow=None,
                                                              memory=None)
-                    # todo performance - could be not awaited add to save_task
+                    # todo performance - could be not awaited  - add to save_task
                     await destination_manager.send_data(profile.id, events, debug=False)
                 except Exception as e:
                     # todo - this appends error to the same profile - it rather should be en event error

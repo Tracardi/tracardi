@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import List
 from uuid import uuid4
 
 from tracardi.config import tracardi
@@ -29,7 +30,7 @@ class DestinationManager:
         self.session = session
 
     @staticmethod
-    async def _load_destinations():
+    async def load_destinations():
         for destination in await storage.driver.destination.load_all():
             yield DestinationRecord(**destination).decode()
 
@@ -41,10 +42,14 @@ class DestinationManager:
         return ".".join(parts[:-1]), parts[-1]
 
     async def send_data(self, profile_id, events, debug):
+        destinations = [destination async for destination in self.load_destinations()]
+        return await self.send_data_to_destinations(destinations, profile_id, events, debug)
+
+    async def send_data_to_destinations(self, destinations: List[Destination], profile_id, events, debug):
 
         template = DictTraverser(self.dot, default=None)
 
-        async for destination in self._load_destinations():  # type: Destination
+        for destination in destinations:  # type: Destination
 
             if not destination.enabled:
                 continue
