@@ -234,6 +234,9 @@ class ElasticClient:
         if elastic_config.verify_certs is not None:
             kwargs['verify_certs'] = elastic_config.verify_certs
 
+        if elastic_config.query_timeout is not None:
+            kwargs['timeout'] = elastic_config.query_timeout
+
         return kwargs
 
     @staticmethod
