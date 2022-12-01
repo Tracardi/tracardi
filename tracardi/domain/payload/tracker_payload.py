@@ -99,6 +99,34 @@ class TrackerPayload(BaseModel):
     def is_debugging_on(self) -> bool:
         return tracardi.track_debug and self.is_on('debugger', default=False)
 
+    async def get_static_profile_and_session(self, session: Session, load_merged_profile, profile_less) -> Tuple[
+        Optional[Profile], Session]:
+
+        if profile_less:
+            profile = None
+        else:
+            if not self.profile.id:
+                raise ValueError("Can not use static profile id without profile.id.")
+
+            profile = await load_merged_profile(self.profile.id)
+            if not profile:
+                profile = Profile(
+                    id=self.profile.id
+                )
+                profile.operation.new = True
+
+            if session is None:
+                session = Session(
+                    id=self.session.id,
+                    metadata=SessionMetadata(
+                        time=SessionTime(
+                            insert=datetime.utcnow()
+                        )
+                    )
+                )
+
+        return profile, session
+
     async def get_profile_and_session(self, session: Session, load_merged_profile, profile_less) -> Tuple[
         Optional[Profile], Session]:
 

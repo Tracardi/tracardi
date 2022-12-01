@@ -1,1 +1,1 @@
-__all__ = ["plugin"]
+__all__ = ["plugin", "cache_manager"]

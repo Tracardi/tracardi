@@ -10,11 +10,12 @@ async def load_by_id(id: str) -> Optional[StorageRecord]:
     return await storage_manager("profile").load(id)
 
 
-async def load_merged_profile(id: str) -> Profile:
+async def load_merged_profile(id: str) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     """
 
+    # TODO this should be removed or corrected
     if tracardi.cache_profiles is True:
         profile_cache = ProfileCache()
         if profile_cache.exists(id):
@@ -22,7 +23,11 @@ async def load_merged_profile(id: str) -> Profile:
     try:
 
         profile = Profile.create(await storage_manager('profile').load(id))
-        if profile is not None and profile.metadata.merged_with is not None:
+
+        if profile is None:
+            return None
+
+        if profile.metadata.merged_with is not None:
             # Has merged profile
             profile = await load_merged_profile(profile.metadata.merged_with)
 

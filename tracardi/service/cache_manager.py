@@ -12,7 +12,8 @@ class CacheManager(metaclass=Singleton):
     _cache = {
         'SESSION': MemoryCache(),
         'EVENT_SOURCE': MemoryCache(),
-        'EVENT_VALIDATION': MemoryCache()
+        'EVENT_VALIDATION': MemoryCache(),
+        'EVENT_TAG': MemoryCache()
     }
 
     def session_cache(self) -> MemoryCache:
@@ -23,6 +24,9 @@ class CacheManager(metaclass=Singleton):
 
     def event_validation_cache(self) -> MemoryCache:
         return self._cache['EVENT_VALIDATION']
+
+    def event_tag_cache(self) -> MemoryCache:
+        return self._cache['EVENT_TAG']
 
     # Caches
 
@@ -69,3 +73,15 @@ class CacheManager(metaclass=Singleton):
                 True,
                 event_type)
         return await storage.driver.event_validation.load_by_event_type(event_type)
+
+    async def event_tag(self, event_type, ttl):
+        if ttl > 0:
+            return await MemoryCache.cache(
+                self.event_tag_cache(),
+                event_type,
+                ttl,
+                storage.driver.event_management.get_event_type_metadata,
+                True,
+                event_type)
+
+        return await storage.driver.event_management.get_event_type_metadata(event_type)

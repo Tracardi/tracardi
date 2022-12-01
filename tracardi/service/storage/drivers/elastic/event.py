@@ -2,26 +2,27 @@ import logging
 from datetime import datetime, timedelta
 
 from tracardi.domain.agg_result import AggResult
-from tracardi.domain.entity import Entity
-from tracardi.domain.event_type_metadata import EventTypeMetadata
+
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
-from tracardi.service.storage.factory import StorageFor, storage_manager, StorageForBulk
-from typing import Union, List, Optional, Dict, Generator, Any, AsyncGenerator
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.domain.value_object.save_result import SaveResult
-from tracardi.domain.event import Event
-from tracardi.config import tracardi
+from tracardi.service.storage.factory import storage_manager, StorageForBulk
+from typing import List, Optional, Dict
+
+import tracardi.config as config
 
 logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
+logger.setLevel(config.tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
 async def load(id: str) -> Optional[StorageRecord]:
     return await storage_manager("event").load(id)
+
+
+async def save(event, exclude=None):
+    return await storage_manager("event").upsert(event, exclude)
 
 
 async def delete_by_id(id: str) -> dict:
@@ -147,48 +148,6 @@ async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> 
         query["query"] = {"term": {"profile.id": profile_id}}
 
     return await storage_manager(index="event").aggregate(query, aggregate_key='key_as_string')
-
-
-def get_persistent_events(events: List[Event]):
-    for event in events:
-        if event.is_persistent():
-            yield event
-
-
-async def tag_events(events: Union[List[Event], Generator[Event, Any, None]]) -> AsyncGenerator[Event, Any]:
-
-    for event in events:
-        try:
-
-            event_meta_data = await storage_manager("event-management").load(event.type)
-            if event_meta_data:
-                event_type_meta_data = event_meta_data.to_entity(EventTypeMetadata)
-
-                event.tags.values = tuple(tag.lower() for tag in set(
-                    tuple(event.tags.values) + tuple(event_type_meta_data.tags)
-                ))
-
-        except ValueError as e:
-            logger.error(str(e))
-
-        yield event
-
-
-async def save_events(events: Union[List[Event], Generator[Event, Any, None]],
-                      persist_events: bool = True) -> Union[SaveResult, BulkInsertResult]:
-
-    if not persist_events:
-        return BulkInsertResult()
-
-    tagged_events = [event async for event in tag_events(get_persistent_events(events))]
-    event_result = await storage_manager("event").upsert(tagged_events, exclude={"update": ...})
-    event_result = SaveResult(**event_result.dict())
-
-    # Add event types
-    for event in events:
-        event_result.types.append(event.type)
-
-    return event_result
 
 
 async def load_event_by_type(event_type, limit=1) -> StorageRecords:

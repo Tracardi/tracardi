@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
@@ -7,6 +8,7 @@ from tracardi.config import tracardi, ElasticConfig
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.log_handler import log_handler
+from tracardi.service.pool_manager import PoolManager
 
 _singleton = None
 logger = logging.getLogger(__name__)
@@ -19,8 +21,16 @@ class ElasticClient:
     def __init__(self, **kwargs):
         self._cache = {}
         self._client = AsyncElasticsearch(**kwargs)
+        pool = PoolManager(max_pool=500, on_pool_purge=self._bulk_save)
+        self.pool = pool
+
+    async def _bulk_save(self, bulk):
+        print("save", len(bulk))
+        # pprint(bulk)
+        success, errors = await helpers.async_bulk(self._client, bulk)
 
     async def close(self):
+        await self.pool.purge()
         await self._client.close()
 
     async def get(self, index, id):
@@ -86,8 +96,8 @@ class ElasticClient:
         if not isinstance(records, list):
             raise ValueError("Insert expects payload to be list.")
 
-        bulk = []
         ids = []
+        self.pool.set_ttl(asyncio.get_running_loop(), ttl=15)
         for record in records:
 
             if '_id' in record:
@@ -105,13 +115,11 @@ class ElasticClient:
                 "_source": record
             }
 
-            bulk.append(record)
-
-        success, errors = await helpers.async_bulk(self._client, bulk)
+            await self.pool.append(record)
 
         return BulkInsertResult(
-            saved=success,
-            errors=errors,
+            saved=1,
+            errors=[],
             ids=ids
         )
 

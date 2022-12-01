@@ -70,6 +70,7 @@ class MemoryCacheConfig:
         self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 0
         self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 0
         self.event_validation_cache_ttl = int(env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 0
+        self.event_tag_cache_ttl = int(env['EVENT_TAG_CACHE_TTL']) if 'EVENT_TAG_CACHE_TTL' in env else 0
 
 
 class ElasticConfig:
@@ -99,6 +100,8 @@ class ElasticConfig:
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
         self.query_timeout = int(env['ELASTIC_QUERY_TIMEOUT']) if 'ELASTIC_QUERY_TIMEOUT' in env else 12
+        self.save_pool = int(env['ELASTIC_SAVE_POOL']) if 'ELASTIC_SAVE_POOL' in env else 0
+        self.save_pool_ttl = int(env['ELASTIC_SAVE_POOL_TTL']) if 'ELASTIC_SAVE_POOL_TTL' in env else 5
 
         self._unset_credentials()
 
