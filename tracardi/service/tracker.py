@@ -1,7 +1,9 @@
 import asyncio
 import logging
+from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Union, Generator, AsyncGenerator, Any
+from pprint import pprint
+from typing import List, Optional, Tuple, Dict, Callable, Union
 from uuid import uuid4
 
 import redis
@@ -10,9 +12,7 @@ from deepdiff import DeepDiff
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
 from tracardi.domain.event_source import EventSource
-from tracardi.domain.event_type_metadata import EventTypeMetadata
 from tracardi.domain.value_object.operation import Operation
-from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.process_engine.debugger import Debugger
 from tracardi.service.cache_manager import CacheManager
 
@@ -20,20 +20,17 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.destination_manager import DestinationManager
 from tracardi.service.notation.dot_accessor import DotAccessor
-
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-
 from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.domain.event import Event, PROCESSED
+from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.value_object.tracker_payload_result import TrackerPayloadResult
-from tracardi.exceptions.exception import UnauthorizedException, StorageException, FieldTypeConflictException, \
+from tracardi.exceptions.exception import UnauthorizedException, \
     TracardiException, DuplicatedRecordException
 from tracardi.process_engine.rules_engine import RulesEngine
-from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.pool_manager import PoolManager
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
 from tracardi.service.consistency.session_corrector import correct_session
@@ -42,6 +39,7 @@ from tracardi.service.storage.helpers.source_cacher import validate_source
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
 from tracardi.service.tracker_event_reshaper import reshape_event
 from tracardi.service.tracker_event_validator import validate_event
+from tracardi.service.tracker_persister import persist
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
@@ -51,130 +49,48 @@ logger.addHandler(log_handler)
 cache = CacheManager()
 
 
-async def _save_profile(profile):
-    try:
-        if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
-            profile.operation.new = False
-            return await storage.driver.profile.save(profile)
-        else:
-            return BulkInsertResult()
-
-    except StorageException as e:
-        raise FieldTypeConflictException("Could not save profile. Error: {}".format(str(e)), rows=e.details)
+@dataclass
+class TrackerResult:
+    tracker_payload: TrackerPayload
+    response: dict
+    events: List[Event]
+    session: Optional[Session] = None
+    profile: Optional[Profile] = None
+    console_log: Optional[ConsoleLog] = None
 
 
-async def _save_session(tracker_payload, session, profile):
-    try:
-        persist_session = tracker_payload.is_on('saveSession', default=True)
-        # TODO rethink if session must be saved all the time. It only saves the duration.
-        result = await storage.driver.session.save_session(session, profile, persist_session)
-        if session and session.operation.new:
-            """
-            Until the session is saved and it is usually within 1s the system can create many profiles for 1 session. 
-            System checks if the session exists by loading it from ES. If it is a new session then is does not exist 
-            and must be saved before it can be read. So there is a 1s when system thinks that the session does not 
-            exist.
-
-            If session is new we will refresh the session in ES.
-            """
-
-            await storage.driver.session.refresh()
-        return result
-    except StorageException as e:
-        raise FieldTypeConflictException("Could not save session. Error: {}".format(str(e)), rows=e.details)
+async def save_data(console_log: ConsoleLog, session: Session, events: List[Event],
+                    tracker_payload: TrackerPayload, profile: Optional[Profile] = None):
+    pprint(events)
+    pprint(session)
+    pprint(profile)
+    await persist(
+        console_log,
+        session,
+        events,
+        tracker_payload,
+        profile)
 
 
-def __get_persistent_events(events: List[Event]):
-    for event in events:
-        if event.is_persistent():
-            yield event
+async def send_data(grouped_tracker_payloads: Dict[str, List[TrackerPayload]], attributes):
+    source, ip, run_async, static_profile_id = attributes
+    print("grouped", len(grouped_tracker_payloads['8053d658529deac0522bc903a2d398e36f3d19f5']))
+
+    for finger_print, tracker_payloads in grouped_tracker_payloads.items():
+        print("invoke", len(tracker_payloads))
+        await _invoke_track_process_step_0(
+            tracker_payloads,
+            source,
+            ip,
+            run_async,
+            static_profile_id
+        )
 
 
-async def __tag_events(events: Union[List[Event], Generator[Event, Any, None]]) -> AsyncGenerator[Event, Any]:
-
-    for event in events:
-        try:
-
-            event_meta_data = await cache.event_tag(event.type, ttl=memory_cache.event_tag_cache_ttl)
-            if event_meta_data:
-                event_type_meta_data = event_meta_data.to_entity(EventTypeMetadata)
-
-                event.tags.values = tuple(tag.lower() for tag in set(
-                    tuple(event.tags.values) + tuple(event_type_meta_data.tags)
-                ))
-
-        except ValueError as e:
-            logger.error(str(e))
-
-        yield event
-
-
-async def __save_events(events: Union[List[Event], Generator[Event, Any, None]],
-                        persist_events: bool = True) -> Union[SaveResult, BulkInsertResult]:
-
-    if not persist_events:
-        return BulkInsertResult()
-
-    tagged_events = [event async for event in __tag_events(__get_persistent_events(events))]
-    event_result = await storage.driver.event.save(tagged_events, exclude={"update": ...})
-    event_result = SaveResult(**event_result.dict())
-
-    # Add event types
-    for event in events:
-        event_result.types.append(event.type)
-
-    return event_result
-
-
-async def _save_events(tracker_payload, console_log, events):
-    try:
-        persist_events = tracker_payload.is_on('saveEvents', default=True)
-
-        # Set statuses
-        log_event_journal = console_log.get_indexed_event_journal()
-
-        for event in events:
-
-            event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
-                event.metadata.time.insert)
-
-            # Reset session id if session is not saved
-
-            if tracker_payload.is_on('saveSession', default=True) is False:
-                # DO NOT remove session if it already exists in db
-                if not isinstance(event.session, Entity) or not await storage.driver.session.exist(event.session.id):
-                    event.session = None
-
-            if event.id in log_event_journal:
-                log = log_event_journal[event.id]
-                if log.is_error():
-                    event.metadata.error = True
-                    continue
-                elif log.is_warning():
-                    event.metadata.warning = True
-                    continue
-                else:
-                    event.metadata.status = PROCESSED
-
-        return await __save_events(events, persist_events)
-
-    except StorageException as e:
-        raise FieldTypeConflictException("Could not save event. Error: {}".format(str(e)), rows=e.details)
-
-
-async def _persist(console_log: ConsoleLog, session: Session, events: List[Event],
-                   tracker_payload: TrackerPayload, profile: Optional[Profile] = None) -> CollectResult:
-    results = await asyncio.gather(
-        _save_profile(profile),
-        _save_session(tracker_payload, session, profile),
-        _save_events(tracker_payload, console_log, events)
-    )
-
-    return CollectResult(
-        profile=results[0],
-        session=results[1],
-        events=results[2]
-    )
+pool = PoolManager('event-pooling',
+                   max_pool=10,
+                   pass_pool_as_dict=True,
+                   on_pool_purge=send_data)
 
 
 async def validate_and_reshape_events(events, profile: Optional[Profile], session, console_log: ConsoleLog) -> Tuple[
@@ -220,9 +136,12 @@ async def validate_and_reshape_events(events, profile: Optional[Profile], sessio
 async def invoke_track_process_step_2(tracker_payload: TrackerPayload,
                                       source: EventSource,
                                       profile_less: bool,
+                                      persister: Callable,
                                       profile=None,
                                       session=None,
-                                      ip='0.0.0.0'):
+                                      ip='0.0.0.0'
+                                      ) -> TrackerResult:
+
     console_log = ConsoleLog()
     profile_copy = None
 
@@ -415,7 +334,14 @@ async def invoke_track_process_step_2(tracker_payload: TrackerPayload,
 
             events = synced_events
 
-        collect_result = await _persist(console_log, session, events, tracker_payload, profile)
+        track_result = TrackerResult(
+            session=session,
+            profile=profile,
+            events=events,
+            tracker_payload=tracker_payload,
+            console_log=console_log
+        )
+        # collect_result = await persister(console_log, session, events, tracker_payload, profile)
         # save_tasks.append(asyncio.create_task(_persist(console_log, session, events, tracker_payload, profile)))
 
         # Save console log
@@ -465,15 +391,15 @@ async def invoke_track_process_step_2(tracker_payload: TrackerPayload,
     # Prepare response
     result = {}
 
-    # Debugging
-    # todo save result to different index
-    if tracker_payload.is_debugging_on():
-        debug_result = TrackerPayloadResult(**collect_result.dict())
-        debug_result = debug_result.dict()
-        debug_result['execution'] = debugger
-        debug_result['segmentation'] = segmentation_result
-        debug_result['logs'] = console_log
-        result['debugging'] = debug_result
+    # # Debugging
+    # # todo save result to different index
+    # if tracker_payload.is_debugging_on():
+    #     debug_result = TrackerPayloadResult(**collect_result.dict())
+    #     debug_result = debug_result.dict()
+    #     debug_result['execution'] = debugger
+    #     debug_result['segmentation'] = segmentation_result
+    #     debug_result['logs'] = console_log
+    #     result['debugging'] = debug_result
 
     # Add profile to response
     if tracker_payload.return_profile() and profile_less is True:
@@ -498,17 +424,20 @@ async def invoke_track_process_step_2(tracker_payload: TrackerPayload,
 
     result['response'] = flow_responses.merge()
 
-    return result
+    # todo track_result may not exist
+    track_result.response = result
+
+    return track_result
 
 
 async def track_event(tracker_payload: TrackerPayload,
                       ip: str,
-                      profile_less: bool,
                       allowed_bridges: List[str],
                       internal_source=None,
                       run_async: bool = False,
                       static_profile_id: bool = False
                       ):
+
     # Trim ids - spaces are frequent issues
 
     if tracker_payload.source:
@@ -531,9 +460,55 @@ async def track_event(tracker_payload: TrackerPayload,
     except ValueError as e:
         raise UnauthorizedException(e)
 
-    # Synchronize profiles
+    # Async
+    pool.set_ttl(asyncio.get_running_loop(), ttl=3)
+    pool.set_attributes(
+        (source, ip, run_async, static_profile_id)
+    )
 
+    # If async
+    await pool.append(tracker_payload, key=tracker_payload.get_finger_print())
+
+    # No async
+
+    # Todo no return right now
+
+    # tracker_result = await invoke_track_process_step_0(
+    #     [tracker_payload],
+    #     source,
+    #     ip,
+    #     run_async,
+    #     static_profile_id
+    # )
+
+
+async def _invoke_track_process_step_0(tracker_payloads: List[TrackerPayload],
+                                       source: EventSource,
+                                       ip: str,
+                                       run_async: bool = False,
+                                       static_profile_id: bool = False) -> Union[TrackerResult, List[TrackerResult]]:
+
+    tracker_results = []
+    for tracker_payload in tracker_payloads:
+        result = await invoke_track_process_step_0(tracker_payload,
+                                                   source,
+                                                   ip,
+                                                   run_async,
+                                                   static_profile_id)
+        tracker_results.append(result)
+
+    # TODO Save bulk
+
+    return tracker_results
+
+
+async def invoke_track_process_step_0(tracker_payload: TrackerPayload,
+                                      source: EventSource,
+                                      ip: str,
+                                      run_async: bool = False,
+                                      static_profile_id: bool = False) -> TrackerResult:
     try:
+
         if source.synchronize_profiles:
             async with ProfileTracksSynchronizer(tracker_payload.profile,
                                                  wait=tracardi.sync_profile_tracks_wait,
@@ -542,7 +517,8 @@ async def track_event(tracker_payload: TrackerPayload,
                     tracker_payload,
                     source,
                     ip=ip,
-                    profile_less=profile_less,
+                    profile_less=tracker_payload.profile_less,
+                    persister=save_data,
                     run_async=run_async,
                     static_profile_id=static_profile_id
                 )
@@ -551,7 +527,8 @@ async def track_event(tracker_payload: TrackerPayload,
                 tracker_payload,
                 source,
                 ip=ip,
-                profile_less=profile_less,
+                profile_less=tracker_payload.profile_less,
+                persister=save_data,
                 run_async=run_async,
                 static_profile_id=static_profile_id
             )
@@ -564,9 +541,10 @@ async def invoke_track_process_step_1(tracker_payload: TrackerPayload,
                                       source: EventSource,
                                       ip: str,
                                       profile_less: bool,
+                                      persister: Callable,
                                       run_async: bool = False,
                                       static_profile_id: bool = False
-                                      ):
+                                      ) -> TrackerResult:
     tracker_payload.set_transitional(source)
     tracker_payload.set_return_profile(source)
 
@@ -621,17 +599,29 @@ async def invoke_track_process_step_1(tracker_payload: TrackerPayload,
             profile_less
         )
 
-    task = invoke_track_process_step_2(tracker_payload, source, profile_less, profile, session, ip)
+    task = invoke_track_process_step_2(
+        tracker_payload,
+        source,
+        profile_less,
+        persister,  # Callable
+        profile,
+        session,
+        ip)
 
+    # todo do not know is makes sense - async
     if run_async:
         asyncio.create_task(task)
-        return {
-            "profile": {
-                "id": profile.id
+        return TrackerResult(
+            tracker_payload=tracker_payload,
+            response={
+                "profile": {
+                    "id": profile.id
+                },
+                "ux": [],
+                "response": {}
             },
-            "ux": [],
-            "response": {}
-        }
+            events=[]
+        )
     else:
         return await task
 
@@ -639,8 +629,8 @@ async def invoke_track_process_step_1(tracker_payload: TrackerPayload,
 # Todo remove 2023-04-01 - obsolete
 async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
                                       allowed_bridges: List[str], internal_source=None):
+    tracker_payload.profile_less = profile_less
     return await track_event(tracker_payload,
                              ip=host,
-                             profile_less=profile_less,
                              allowed_bridges=allowed_bridges,
                              internal_source=internal_source)

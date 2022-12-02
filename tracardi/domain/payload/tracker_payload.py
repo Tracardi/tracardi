@@ -1,5 +1,7 @@
+import json
 import logging
 from datetime import datetime
+from hashlib import sha1
 from typing import Optional, List, Tuple, Any
 from uuid import uuid4
 
@@ -33,6 +35,7 @@ class TrackerPayload(BaseModel):
     request: Optional[dict] = {}
     events: List[EventPayload] = []
     options: Optional[dict] = {}
+    profile_less: bool = False
 
     def __init__(self, **data: Any):
         data['metadata'] = EventPayloadMetadata(
@@ -40,6 +43,11 @@ class TrackerPayload(BaseModel):
                 insert=datetime.utcnow()
             ))
         super().__init__(**data)
+
+    def get_finger_print(self) -> str:
+        jdump = json.dumps(self.dict(exclude={'events': ..., 'metadata': ...}), sort_keys=True, default=str)
+        props_hash = sha1(jdump.encode())
+        return props_hash.hexdigest()
 
     def get_events(self, session: Optional[Session], profile: Optional[Profile], has_profile, ip: str) -> List[Event]:
         event_list = []

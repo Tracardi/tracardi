@@ -59,8 +59,11 @@ class PoolManager:
     async def __aenter__(self):
         return self
 
-    def purge_task(self):
-        asyncio.create_task(self.purge())
+    def _purge_task(self):
+        items = dict(self.items)
+        self.counter = 0
+        self.items = defaultdict(list)
+        asyncio.create_task(self._purge(items))
 
     async def _purge(self, items):
         if self.last_task:
@@ -95,4 +98,4 @@ class PoolManager:
             print('call for later')
             if self.last_task:
                 self.last_task.cancel()
-            self.last_task = self.loop.call_later(self.ttl, self.purge_task)
+            self.last_task = self.loop.call_later(self.ttl, self._purge_task)
