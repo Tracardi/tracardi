@@ -11,11 +11,11 @@ from tracardi.service.storage.driver import storage
 
 class CacheManager(metaclass=Singleton):
     _cache = {
-        'SESSION': MemoryCache("session"),
-        'EVENT_SOURCE': MemoryCache("event-source"),
-        'EVENT_VALIDATION': MemoryCache("event-validation"),
-        'EVENT_TAG': MemoryCache("event-tags"),
-        'EVENT_RESHAPING': MemoryCache("event-reshaping")
+        'SESSION': MemoryCache("session", max_pool=1000),
+        'EVENT_SOURCE': MemoryCache("event-source", max_pool=100),
+        'EVENT_VALIDATION': MemoryCache("event-validation", max_pool=500),
+        'EVENT_TAG': MemoryCache("event-tags", max_pool=200),
+        'EVENT_RESHAPING': MemoryCache("event-reshaping", max_pool=200)
     }
 
     def session_cache(self) -> MemoryCache:

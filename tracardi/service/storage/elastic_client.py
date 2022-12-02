@@ -22,7 +22,7 @@ class ElasticClient:
         self._cache = {}
         self._client = AsyncElasticsearch(**kwargs)
         if elastic.save_pool > 0:
-            pool = PoolManager(max_pool=elastic.save_pool, on_pool_purge=self._bulk_save)
+            pool = PoolManager("es-bulk-save", max_pool=elastic.save_pool, on_pool_purge=self._bulk_save)
             self.pool = pool
 
     async def _bulk_save(self, bulk):
