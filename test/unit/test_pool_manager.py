@@ -7,7 +7,7 @@ def test_should_group_pool_items():
     async def main():
         result = []
 
-        async def purge(items):
+        async def purge(items, attributes):
             result.append(items)
 
         async with PoolManager("test", 3, on_pool_purge=purge, replace_item_on_append=False) as m:
@@ -30,7 +30,7 @@ def test_should_group_pool_items_by_key():
     async def main():
         result = []
 
-        async def purge(items):
+        async def purge(items, attributes):
             result.append(dict(items))
 
         async with PoolManager("test", 3,
@@ -54,11 +54,34 @@ def test_should_group_pool_items_by_key():
     assert result == [{'a': [1], 'b': [2, 3]}, {'a': [4], 'test': [5, 5]}]
 
 
+def test_should_pass_attributes():
+    async def main():
+        result = []
+
+        async def purge(items, attributes):
+            result.append(items)
+            assert attributes == ("a", "b")
+
+        async with PoolManager("test", 3, on_pool_purge=purge, replace_item_on_append=False) as m:
+            m.set_attributes(("a", "b"))
+            await m.append(1)
+            await m.append(2)
+            await m.append(3)
+            await m.append(4)
+            await m.append(5)
+            await m.append(5)
+
+        return result
+
+    result = asyncio.run(main())
+    assert result == [[1, 2, 3], [4, 5, 5]]
+
+
 def test_should_group_pool_items_and_time_out():
     async def main():
         result = []
 
-        async def purge(items):
+        async def purge(items, attributes):
             result.append(items)
 
         async with PoolManager("test", 3, on_pool_purge=purge, replace_item_on_append=False) as m:
@@ -86,7 +109,7 @@ def test_should_run_without_context():
     async def main():
         result = []
 
-        async def purge(items):
+        async def purge(items, attributes):
             result.append(items)
 
         pool = PoolManager("test", 4, purge)
