@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
-memory_cache = MemoryCache()
+memory_cache = MemoryCache("rules")
 
 
 def _get_cache_key(source_id, event_type):

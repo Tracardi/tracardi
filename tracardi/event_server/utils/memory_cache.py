@@ -1,6 +1,6 @@
 import asyncio
 from time import time
-from typing import Any
+from typing import Any, Dict
 
 from pydantic import BaseModel
 
@@ -9,11 +9,12 @@ from tracardi.exceptions.exception import ExpiredException
 
 class CacheItem(BaseModel):
     data: Any
-    ttl: int = 60
+    ttl: float = 60
 
     def __init__(self, **data: Any):
         if 'ttl' in data:
-            data['ttl'] = time() + data['ttl']
+            data['ttl'] = time() + float(data['ttl'])
+
         super().__init__(**data)
 
     def expired(self):
@@ -22,8 +23,11 @@ class CacheItem(BaseModel):
 
 class MemoryCache:
 
-    def __init__(self):
-        self.memory_buffer = {}
+    def __init__(self, name: str, max_pool=1000):
+        self.memory_buffer: Dict[str, CacheItem] = {}
+        self.name = name
+        self.max_pool = max_pool
+        self.counter = 0
 
     def __len__(self):
         return len(self.memory_buffer)
@@ -48,6 +52,18 @@ class MemoryCache:
         if not isinstance(value, CacheItem):
             raise ValueError("MemoryCache item must be CacheItem type.")
         self.memory_buffer[key] = value
+        self.counter += 1
+        if self.counter > self.max_pool:
+            self.purge()
+
+    def __delitem__(self, key):
+        if key in self.memory_buffer:
+            del self.memory_buffer[key]
+
+    def purge(self):
+        for key, value in self.memory_buffer.copy().items():
+            if value.expired():
+                del self.memory_buffer[key]
 
     @staticmethod
     async def cache(cache: 'MemoryCache', null_cache_allowed, key, ttl, load_callable, awaitable, *args):
