@@ -2,6 +2,7 @@ import asyncio
 import logging
 from datetime import datetime
 from typing import List, Optional, Tuple, Union, Generator, AsyncGenerator, Any
+from uuid import uuid4
 
 import redis
 from deepdiff import DeepDiff
@@ -65,6 +66,7 @@ async def _save_profile(profile):
 async def _save_session(tracker_payload, session, profile):
     try:
         persist_session = tracker_payload.is_on('saveSession', default=True)
+        # TODO rethink if session must be saved all the time. It only saves the duration.
         result = await storage.driver.session.save_session(session, profile, persist_session)
         if session and session.operation.new:
             """
@@ -567,14 +569,18 @@ async def invoke_track_process_step_1(tracker_payload: TrackerPayload,
                                       ):
     tracker_payload.set_transitional(source)
     tracker_payload.set_return_profile(source)
-    tracker_payload.force_there_is_a_session()
 
     # Load session from storage
     try:
-        session = await cache.session(
-            session_id=tracker_payload.session.id,
-            ttl=memory_cache.session_cache_ttl
-        )
+        if tracker_payload.session is not None:
+            session = await cache.session(
+                session_id=tracker_payload.session.id,
+                ttl=memory_cache.session_cache_ttl
+            )
+        else:
+            session = Session(id=str(uuid4()), metadata=SessionMetadata())
+            tracker_payload.force_session(session)
+
     except DuplicatedRecordException as e:
 
         # There may be a case when we have 2 sessions with the same id.

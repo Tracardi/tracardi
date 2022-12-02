@@ -4,7 +4,7 @@ from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from ssl import create_default_context
-from tracardi.config import tracardi, ElasticConfig
+from tracardi.config import tracardi, ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.log_handler import log_handler
@@ -21,16 +21,18 @@ class ElasticClient:
     def __init__(self, **kwargs):
         self._cache = {}
         self._client = AsyncElasticsearch(**kwargs)
-        pool = PoolManager(max_pool=500, on_pool_purge=self._bulk_save)
-        self.pool = pool
+        if elastic.save_pool > 0:
+            pool = PoolManager(max_pool=elastic.save_pool, on_pool_purge=self._bulk_save)
+            self.pool = pool
 
     async def _bulk_save(self, bulk):
-        print("save", len(bulk))
-        # pprint(bulk)
         success, errors = await helpers.async_bulk(self._client, bulk)
+        if errors:
+            logger.error(f"Errors from pool {errors}")
 
     async def close(self):
-        await self.pool.purge()
+        if self.pool:
+            await self.pool.purge()
         await self._client.close()
 
     async def get(self, index, id):
@@ -92,12 +94,51 @@ class ElasticClient:
         return self._client.cluster
 
     async def insert(self, index, records) -> BulkInsertResult:
+        if elastic.save_pool > 0:
+            return await self.insert_via_pool(index, records)
+        return await self.insert_bulk(index, records)
+
+    async def insert_bulk(self, index, records) -> BulkInsertResult:
+
+        if not isinstance(records, list):
+            raise ValueError("Insert expects payload to be list.")
+
+        bulk = []
+        ids = []
+        for record in records:
+
+            if '_id' in record:
+                _id = record['_id']
+                del (record['_id'])
+            else:
+                _id = str(uuid4())
+                if 'id' in record and _id != record['id']:
+                    record['id'] = _id
+
+            ids.append(_id)
+            record = {
+                "_index": index,
+                "_id": _id,
+                "_source": record
+            }
+
+            bulk.append(record)
+
+        success, errors = await helpers.async_bulk(self._client, bulk)
+
+        return BulkInsertResult(
+            saved=success,
+            errors=errors,
+            ids=ids
+        )
+
+    async def insert_via_pool(self, index, records) -> BulkInsertResult:
 
         if not isinstance(records, list):
             raise ValueError("Insert expects payload to be list.")
 
         ids = []
-        self.pool.set_ttl(asyncio.get_running_loop(), ttl=15)
+        self.pool.set_ttl(asyncio.get_running_loop(), ttl=elastic.save_pool_ttl)
         for record in records:
 
             if '_id' in record:

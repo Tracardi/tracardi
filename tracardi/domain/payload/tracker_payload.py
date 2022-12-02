@@ -80,11 +80,11 @@ class TrackerPayload(BaseModel):
                 "saveEvents": False
             })
 
-    def force_there_is_a_session(self):
+    def force_session(self, session):
         # Get session
         if self.session is None or self.session.id is None:
             # Generate random
-            self.session = Session(id=str(uuid4()), metadata=SessionMetadata())
+            self.session = session
 
     def return_profile(self):
         return self.options and "profile" in self.options and self.options['profile'] is True

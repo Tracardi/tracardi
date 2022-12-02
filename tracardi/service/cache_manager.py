@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, List
 
+from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecords
@@ -13,7 +14,8 @@ class CacheManager(metaclass=Singleton):
         'SESSION': MemoryCache(),
         'EVENT_SOURCE': MemoryCache(),
         'EVENT_VALIDATION': MemoryCache(),
-        'EVENT_TAG': MemoryCache()
+        'EVENT_TAG': MemoryCache(),
+        'EVENT_RESHAPING': MemoryCache()
     }
 
     def session_cache(self) -> MemoryCache:
@@ -28,6 +30,9 @@ class CacheManager(metaclass=Singleton):
     def event_tag_cache(self) -> MemoryCache:
         return self._cache['EVENT_TAG']
 
+    def event_reshaping_cache(self) -> MemoryCache:
+        return self._cache['EVENT_RESHAPING']
+
     # Caches
 
     async def session(self, session_id, ttl) -> Optional[Session]:
@@ -35,8 +40,10 @@ class CacheManager(metaclass=Singleton):
         Session cache
         """
         if ttl > 0:
+            print('cache', session_id)
             return await MemoryCache.cache(
                 self.session_cache(),
+                True,
                 session_id,
                 ttl,
                 storage.driver.session.load_by_id,
@@ -52,6 +59,7 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_source_cache(),
+                False,
                 event_source_id,
                 ttl,
                 storage.driver.event_source.load,
@@ -67,6 +75,7 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_validation_cache(),
+                True,
                 event_type,
                 ttl,
                 storage.driver.event_validation.load_by_event_type,
@@ -78,6 +87,7 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_tag_cache(),
+                True,
                 event_type,
                 ttl,
                 storage.driver.event_management.get_event_type_metadata,
@@ -85,3 +95,22 @@ class CacheManager(metaclass=Singleton):
                 event_type)
 
         return await storage.driver.event_management.get_event_type_metadata(event_type)
+
+    @staticmethod
+    async def _load_and_convert_reshaping(event_type) -> Optional[List[EventReshapingSchema]]:
+        reshape_schemas = await storage.driver.event_reshaping.load_by_event_type(event_type)
+        if reshape_schemas:
+            return reshape_schemas.to_domain_objects(EventReshapingSchema)
+        return None
+
+    async def event_reshaping(self, event_type, ttl) -> Optional[List[EventReshapingSchema]]:
+        if ttl > 0:
+            return await MemoryCache.cache(
+                self.event_reshaping_cache(),
+                True,
+                event_type,
+                ttl,
+                self._load_and_convert_reshaping,
+                True,
+                event_type)
+        return await self._load_and_convert_reshaping(event_type)

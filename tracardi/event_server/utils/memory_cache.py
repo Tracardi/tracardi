@@ -50,13 +50,13 @@ class MemoryCache:
         self.memory_buffer[key] = value
 
     @staticmethod
-    async def cache(cache: 'MemoryCache', key, ttl, load_callable, awaitable, *args):
+    async def cache(cache: 'MemoryCache', null_cache_allowed, key, ttl, load_callable, awaitable, *args):
         if key not in cache:
             result = load_callable(*args)
             if awaitable:
                 result = await result
 
-            if result is None:
+            if result is None and not null_cache_allowed:
                 return None
 
             cache[key] = CacheItem(data=result, ttl=ttl)
