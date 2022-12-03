@@ -54,24 +54,8 @@ async def update_session_duration(session: Session):
                        f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
 
 
-async def save_session(session: Session, profile: Optional[Profile], persist_session: bool = True):
-    if persist_session:
-        if isinstance(session, Session):
-            if session.operation.new:
-                # Add new profile id to session if it does not exist, or profile id in session is different from
-                # the real profile id.
-                if session.profile is None or (isinstance(session.profile, Entity)
-                                               and isinstance(profile, Entity)
-                                               and session.profile.id != profile.id):
-                    # save only profile Entity
-                    if profile is not None:
-                        session.profile = Entity(id=profile.id)
-                return await storage_manager('session').upsert(session)
-            else:
-                # Update session duration
-                await update_session_duration(session)
-
-    return BulkInsertResult()
+async def save_session(sessions: List[Session]) -> BulkInsertResult:
+    return await storage_manager('session').upsert(sessions)
 
 
 async def save(session: Session):

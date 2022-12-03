@@ -60,7 +60,6 @@ class PostponeEventAction(ActionRunner):
             )
             await track_event(tracker_payload,
                               ip="http://localhost",
-                              profile_less=False,
                               allowed_bridges=['rest'])
 
         postponed_call = PostponedCall(

@@ -1,9 +1,11 @@
-from typing import Optional
-from pydantic import BaseModel
-from tracardi.domain.value_object.save_result import SaveResult
+from dataclasses import dataclass
+from typing import List
+
+from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
 
-class CollectResult(BaseModel):
-    session: SaveResult
-    events: SaveResult
-    profile: Optional[SaveResult] = None
+@dataclass
+class CollectResult:
+    session: List[BulkInsertResult]
+    events: List[BulkInsertResult]
+    profile: List[BulkInsertResult]

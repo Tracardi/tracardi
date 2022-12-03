@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from tracardi.domain.agg_result import AggResult
+from tracardi.domain.event import Event
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
@@ -21,8 +22,8 @@ async def load(id: str) -> Optional[StorageRecord]:
     return await storage_manager("event").load(id)
 
 
-async def save(event, exclude=None):
-    return await storage_manager("event").upsert(event, exclude)
+async def save(events: List[Event], exclude=None):
+    return await storage_manager("event").upsert(events, exclude)
 
 
 async def delete_by_id(id: str) -> dict:
