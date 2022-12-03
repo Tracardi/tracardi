@@ -40,7 +40,6 @@ class CacheManager(metaclass=Singleton):
         Session cache
         """
         if ttl > 0:
-            print('cache', session_id)
             return await MemoryCache.cache(
                 self.session_cache(),
                 True,
@@ -50,6 +49,7 @@ class CacheManager(metaclass=Singleton):
                 True,
                 session_id
             )
+        print('no cache for session', session_id)
         return await storage.driver.session.load_by_id(session_id)
 
     async def event_source(self, event_source_id, ttl) -> Optional[EventSource]:
