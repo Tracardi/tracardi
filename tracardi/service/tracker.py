@@ -33,7 +33,7 @@ async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str
 async def track_event(tracker_payload: TrackerPayload,
                       ip: str,
                       allowed_bridges: List[str],
-                      on_source_ready: Callable[[Dict[str, List[TrackerPayload]], EventSource, 'TrackerConfig'], Any] = None,
+                      on_source_ready: Callable[[TrackerPayload, EventSource, 'TrackerConfig'], Any] = None,
                       on_profile_ready: Callable = None,
                       on_flow_ready: Callable = None,
                       on_result_ready: Callable = None,
@@ -150,6 +150,9 @@ class Tracker:
                 save_results = await self.handle_on_result_ready(tracker_results, console_log)
             else:
                 save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
+
+            # Debugging rest
+
 
             logger.info(f"Invoke save results {save_results} tracker payloads.")
 
