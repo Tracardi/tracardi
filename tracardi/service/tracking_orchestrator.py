@@ -133,7 +133,6 @@ class TrackingOrchestrator:
         )
 
         tracker_result = await tracking_manager.invoke_track_process(
-            self.source,
             self.ip
         )
 

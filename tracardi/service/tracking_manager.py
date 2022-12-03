@@ -46,7 +46,7 @@ class TrackerResult:
         }
         if self.profile:
             body["profile"] = {
-                "id": self.profile
+                "id": self.profile.id
             }
 
         return body
@@ -84,10 +84,7 @@ class TrackingManager:
         if tracker_payload.profile_less is True and profile is not None:
             logger.warning("Something is wrong - profile less events should not have profile attached.")
 
-    async def invoke_track_process(self,
-                                   source: EventSource,
-                                   ip='0.0.0.0'
-                                   ) -> TrackerResult:
+    async def invoke_track_process(self, ip='0.0.0.0') -> TrackerResult:
 
         # Get events
         events = self.tracker_payload.get_events(

@@ -14,14 +14,12 @@ async def handle_tracker_payloads(grouped_tracker_payloads: Dict[str, List[Track
     """
     Starts collecting data and process it.
     """
-
-    tracker_save_results = []
+    responses = []
     for _, tracker_payloads in grouped_tracker_payloads.items():
         print("invoke", len(tracker_payloads))
 
-        tracker_results: List[TrackerResult] = []
         console_log = ConsoleLog()
-
+        tracker_results: List[TrackerResult] = []
         orchestrator = TrackingOrchestrator(
             source,
             ip,
@@ -32,12 +30,13 @@ async def handle_tracker_payloads(grouped_tracker_payloads: Dict[str, List[Track
         for tracker_payload in tracker_payloads:
             result = await orchestrator.invoke(tracker_payload)
             tracker_results.append(result)
+            responses.append(result.get_response_body())
 
         # Save bulk
         print("results", len(tracker_results))
         tp = TrackerResultPersister(console_log)
         save_results = await tp.persist(tracker_results)
         print(save_results)
-        tracker_save_results.append(save_results)
 
-    return tracker_save_results
+    print("response", responses)
+    return responses
