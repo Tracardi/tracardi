@@ -8,6 +8,7 @@ from ..entity import Entity
 from ..event import Event, EventSession
 from ..event_metadata import EventPayloadMetadata, EventMetadata
 from ..session import Session, SessionContext
+from ..value_object.operation import RecordFlag
 from ...service.utils.getters import get_entity
 
 
@@ -32,7 +33,8 @@ class EventPayload(BaseModel):
                      properties=self.properties,
                      source=source,  # Entity
                      config=self.options,
-                     context=self.context
+                     context=self.context,
+                     operation=RecordFlag(new=True)
                      )
 
     @staticmethod

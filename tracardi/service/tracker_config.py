@@ -11,7 +11,7 @@ from tracardi.service.console_log import ConsoleLog
 class TrackerConfig:
     ip: str
     allowed_bridges: List[str]
-    on_source_ready: Callable[[Dict[str, List[TrackerPayload]], EventSource, 'TrackerConfig'], Any] = None
+    on_source_ready: Callable[[TrackerPayload, EventSource, 'TrackerConfig'], Any] = None
     on_profile_ready: Callable = None
     on_profile_merge: Callable[[Profile], Profile] = None
     on_flow_ready: Callable = None

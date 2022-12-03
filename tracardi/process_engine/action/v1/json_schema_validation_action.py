@@ -1,15 +1,16 @@
+from tracardi.service.console_log import ConsoleLog
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from pydantic import validator
 from typing import Dict, Union
-from tracardi.service.tracker_event_validator import validate as validate_with_schema
 from tracardi.exceptions.exception import EventValidationException
 from tracardi.domain.event_validator import EventValidator, ValidationSchema
 import jsonschema
 import json
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.tracker_event_validator import EventsValidationHandler
 
 
 class Config(PluginConfig):
@@ -45,7 +46,7 @@ class SchemaValidator(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         payload_validator = EventValidator(
-            validation=ValidationSchema(json_schema=self.config.validation_schema, enabled=True),
+            validation=ValidationSchema(json_schema=self.config.validation_schema),
             event_type="no-type",
             name="validation",
             id="1",
@@ -53,8 +54,11 @@ class SchemaValidator(ActionRunner):
         )
 
         try:
-            validate_with_schema(dot, payload_validator)
-            return Result(port="ok", value=payload)
+            v = EventsValidationHandler(dot, ConsoleLog())
+            result = v.validate_with_multiple_schemas([payload_validator])
+            if result:
+                return Result(port="true", value=payload)
+            return Result(port="false", value=payload)
         except EventValidationException:
             return Result(port="error", value=payload)
 
@@ -66,10 +70,10 @@ def register() -> Plugin:
             module=__name__,
             className='SchemaValidator',
             inputs=["payload"],
-            outputs=["ok", "error"],
-            version='0.6.1',
+            outputs=["true", "false", "error"],
+            version='0.7.4',
             license="MIT",
-            author="Dawid Kruk",
+            author="Dawid Kruk, Risto Kowaczewski",
             manual="validate_with_json_schema_action",
             init={
                 "validation_schema": {}
@@ -101,8 +105,10 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "ok": PortDoc(desc="This port returns payload if it passes defined validation."),
-                    "error": PortDoc(desc="This port returns payload if it does not pass defined validation.")
+                    "true": PortDoc(desc="This port returns payload if it passes defined validation."),
+                    "false": PortDoc(desc="This port returns payload if it does not pass defined validation."),
+                    "error": PortDoc(desc="This port returns payload if it does not pass defined validation "
+                                          "due to an error in validation schema.")
                 }
             )
         )

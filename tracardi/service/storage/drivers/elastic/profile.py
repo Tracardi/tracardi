@@ -59,14 +59,14 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
 
 
 async def save(profile: Profile, refresh_after_save=False):
-    result = await storage_manager('profile').upsert(profile)
+    result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
     if refresh_after_save or elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
     return result
 
 
 async def save_all(profiles: List[Profile]):
-    return await storage_manager("profile").upsert(profiles)
+    return await storage_manager("profile").upsert(profiles, exclude={"operation": ...})
 
 
 async def refresh():

@@ -1,6 +1,6 @@
 import asyncio
 from time import time
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
@@ -23,11 +23,12 @@ class CacheItem(BaseModel):
 
 class MemoryCache:
 
-    def __init__(self, name: str, max_pool=1000):
+    def __init__(self, name: str, max_pool=1000, allow_null_values=False):
         self.memory_buffer: Dict[str, CacheItem] = {}
         self.name = name
         self.max_pool = max_pool
         self.counter = 0
+        self.allow_null_values = allow_null_values
 
     def __len__(self):
         return len(self.memory_buffer)
@@ -60,19 +61,26 @@ class MemoryCache:
         if key in self.memory_buffer:
             del self.memory_buffer[key]
 
+    def delete(self, key):
+        del self[key]
+
+    def delete_all(self, keys: List[str]):
+        for key in keys:
+            del self[key]
+
     def purge(self):
         for key, value in self.memory_buffer.copy().items():
             if value.expired():
                 del self.memory_buffer[key]
 
     @staticmethod
-    async def cache(cache: 'MemoryCache', null_cache_allowed, key, ttl, load_callable, awaitable, *args):
+    async def cache(cache: 'MemoryCache', key, ttl, load_callable, awaitable, *args):
         if key not in cache:
             result = load_callable(*args)
             if awaitable:
                 result = await result
 
-            if result is None and not null_cache_allowed:
+            if result is None and not cache.allow_null_values:
                 return None
 
             cache[key] = CacheItem(data=result, ttl=ttl)

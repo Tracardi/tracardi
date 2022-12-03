@@ -11,11 +11,11 @@ from tracardi.service.storage.driver import storage
 
 class CacheManager(metaclass=Singleton):
     _cache = {
-        'SESSION': MemoryCache("session", max_pool=1000),
-        'EVENT_SOURCE': MemoryCache("event-source", max_pool=100),
-        'EVENT_VALIDATION': MemoryCache("event-validation", max_pool=500),
-        'EVENT_TAG': MemoryCache("event-tags", max_pool=200),
-        'EVENT_RESHAPING': MemoryCache("event-reshaping", max_pool=200)
+        'SESSION': MemoryCache("session", max_pool=1000, allow_null_values=False),
+        'EVENT_SOURCE': MemoryCache("event-source", max_pool=100, allow_null_values=False),
+        'EVENT_VALIDATION': MemoryCache("event-validation", max_pool=500, allow_null_values=True),
+        'EVENT_TAG': MemoryCache("event-tags", max_pool=200, allow_null_values=True),
+        'EVENT_RESHAPING': MemoryCache("event-reshaping", max_pool=200, allow_null_values=True)
     }
 
     def session_cache(self) -> MemoryCache:
@@ -42,7 +42,6 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.session_cache(),
-                True,
                 session_id,
                 ttl,
                 storage.driver.session.load_by_id,
@@ -59,7 +58,6 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_source_cache(),
-                False,
                 event_source_id,
                 ttl,
                 storage.driver.event_source.load,
@@ -75,7 +73,6 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_validation_cache(),
-                True,
                 event_type,
                 ttl,
                 storage.driver.event_validation.load_by_event_type,
@@ -87,7 +84,6 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_tag_cache(),
-                True,
                 event_type,
                 ttl,
                 storage.driver.event_management.get_event_type_metadata,
@@ -107,7 +103,6 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_reshaping_cache(),
-                True,
                 event_type,
                 ttl,
                 self._load_and_convert_reshaping,

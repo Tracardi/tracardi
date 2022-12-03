@@ -29,11 +29,6 @@ class SessionTime(BaseModel):
 
         super().__init__(**data)
 
-    def update_duration(self):
-        now = datetime.utcnow()
-        now_timestamp = datetime.timestamp(now)
-        self.duration = now_timestamp - datetime.timestamp(self.insert)
-
 
 class SessionMetadata(BaseModel):
     time: SessionTime = SessionTime()

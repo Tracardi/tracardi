@@ -228,11 +228,11 @@ class TrackingManager:
 
         finally:
             # Synchronize post invoke events. Replace events with events changed by WF.
-            # Events are saved only if marked in event.update==true
+            # Events are saved only if marked in event.operation.update==true
             if post_invoke_events is not None:
                 synced_events = []
                 for ev in events:
-                    if ev.update is True and ev.id in post_invoke_events:
+                    if ev.operation.update is True and ev.id in post_invoke_events:
                         synced_events.append(post_invoke_events[ev.id])
                     else:
                         synced_events.append(ev)

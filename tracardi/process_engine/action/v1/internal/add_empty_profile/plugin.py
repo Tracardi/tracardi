@@ -41,7 +41,7 @@ class AddEmptyProfileAction(ActionRunner):
             self.console.warning(
                 "Your requested an update of event profile but events may not be updated in debug mode.")
         else:
-            self.event.update = True
+            self.event.operation.update = True
 
         self.execution_graph.set_profiles(profile)
 

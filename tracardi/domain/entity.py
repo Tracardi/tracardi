@@ -7,6 +7,7 @@ from tracardi.config import tracardi
 from tracardi.domain.storage_record import RecordMetadata, StorageRecord
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.exceptions.log_handler import log_handler
+from tracardi.protocol.operational import Operational
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -49,12 +50,18 @@ class Entity(Creatable):
 
         if 'id' in record:
             record['_id'] = record['id']
+
         if self._metadata:
             record.set_meta_data(self._metadata)
         else:
+            # Does not have metadata
             storage_info = self.storage_info()  # type: Optional[StorageInfo]
             if storage_info and storage_info.multi is True:
-                logger.info(f"Entity {type(self)} converts to index-less storage record.")
+                if isinstance(self, Operational):
+                    if self.operation.new is True:
+                        logger.error(f"Entity {type(self)} does not have index set. And it is not new.")
+                else:
+                    logger.info(f"Entity {type(self)} converts to index-less storage record.")
         return record
 
     @staticmethod

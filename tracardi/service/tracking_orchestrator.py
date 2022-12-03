@@ -70,14 +70,25 @@ class TrackingOrchestrator:
 
         # Load session from storage
         try:
-            if tracker_payload.session is not None:
-                session = await cache.session(
-                    session_id=tracker_payload.session.id,
-                    ttl=memory_cache.session_cache_ttl
-                )
-            else:
+            if tracker_payload.session is None:
+
+                # If no session in tracker payload this means that we do not need session.
+                # But we may need an artificial session for workflow handling. We create
+                # one but will not save it.
+
                 session = Session(id=str(uuid4()), metadata=SessionMetadata())
                 tracker_payload.force_session(session)
+                tracker_payload.options.update({
+                    "saveSession": False
+                })
+
+            session = await cache.session(
+                session_id=tracker_payload.session.id,
+                ttl=memory_cache.session_cache_ttl
+            )
+
+            # Session can be none if not found in db. User defined a session this means he wanted it.
+            # At this point it is null. We handle it later.
 
         except DuplicatedRecordException as e:
 

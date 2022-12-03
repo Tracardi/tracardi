@@ -33,7 +33,7 @@ class AssignProfileIdAction(ActionRunner):
                 self.event.metadata.profile_less = False
             else:
                 self.event.profile.id = value
-            self.event.update = True
+            self.event.operation.update = True
 
         return Result(port='payload', value=payload)
 

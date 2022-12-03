@@ -38,7 +38,7 @@ class EventsValidationHandler:
             except jsonschema.ValidationError as e:
                 self.console_log.append(
                     Console(
-                        event_id=self.dot.event.id,
+                        event_id=get_entity_id(self.dot.event),
                         profile_id=get_entity_id(self.dot.profile),
                         origin='tracker',
                         class_name='tracker',
@@ -52,7 +52,7 @@ class EventsValidationHandler:
             except KeyError as e:
                 self.console_log.append(
                     Console(
-                        event_id=self.dot.event.id,
+                        event_id=get_entity_id(self.dot.event),
                         profile_id=get_entity_id(self.dot.profile),
                         origin='tracker',
                         class_name='tracker',
@@ -66,7 +66,7 @@ class EventsValidationHandler:
 
         return True
 
-    def _validate_with_multiple_schemas(self, validators: List[EventValidator]) -> bool:
+    def validate_with_multiple_schemas(self, validators: List[EventValidator]) -> bool:
         validators_to_use = []
         for validator in validators:
             if validator.validation.condition:
@@ -88,7 +88,7 @@ class EventsValidationHandler:
                                                           ttl=memory_cache.event_validation_cache_ttl)
 
         if validation_schemas:
-            if self._validate_with_multiple_schemas(validation_schemas.to_domain_objects(EventValidator)) is False:
+            if self.validate_with_multiple_schemas(validation_schemas.to_domain_objects(EventValidator)) is False:
                 event.metadata.valid = False
         return event
 

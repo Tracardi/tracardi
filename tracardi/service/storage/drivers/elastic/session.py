@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import elasticsearch
 
@@ -23,43 +23,8 @@ async def save_sessions(profiles: List[Session]):
     return await storage_manager("session").upsert(profiles)
 
 
-async def update_session_duration(session: Session):
-
-    session.metadata.time.update_duration()
-
-    storage = storage_manager("session")
-    index = storage.storage.get_storage_index(session)
-
-    record = {
-        "doc": {
-            "id": session.id,
-            "profile": {
-                "id": session.profile.id
-            } if session.profile else None,
-            "metadata": {
-                "time": {
-                    "insert": session.metadata.time.insert,
-                    "update": datetime.utcnow(),
-                    "duration": session.metadata.time.duration
-                }
-            }
-        },
-        'doc_as_upsert': True
-    }
-    try:
-        result = await storage.update_by_id(id=session.id, record=record, index=index, retry_on_conflict=3)
-        return result
-    except elasticsearch.exceptions.ConflictError as e:
-        logger.warning(f"Minor Session Conflict Error: Last session duration could not be updated. "
-                       f"This may happen  when there is a rapid stream of events. Reason: {str(e)}")
-
-
-async def save_session(sessions: List[Session]) -> BulkInsertResult:
-    return await storage_manager('session').upsert(sessions)
-
-
-async def save(session: Session):
-    return await storage_manager('session').upsert(session)
+async def save(session: Union[Session, List[Session]]) -> BulkInsertResult:
+    return await storage_manager('session').upsert(session, exclude={"operation": ...})
 
 
 async def exist(id: str) -> bool:

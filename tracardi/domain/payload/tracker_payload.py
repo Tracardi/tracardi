@@ -3,8 +3,6 @@ import logging
 from datetime import datetime
 from hashlib import sha1
 from typing import Optional, List, Tuple, Any
-from uuid import uuid4
-
 from pydantic import BaseModel
 from tracardi.config import tracardi
 
@@ -18,10 +16,12 @@ from ..profile import Profile
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
 from ...exceptions.log_handler import log_handler
+# from ...service.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+# cache = CacheManager()
 
 
 class TrackerPayload(BaseModel):
@@ -130,6 +130,11 @@ class TrackerPayload(BaseModel):
                         )
                     )
                 )
+                session.operation.new = True
+
+                # # Remove the session from cache we just created one.
+                # # We repeat it when saving.
+                # cache.session_cache().delete(self.session.id)
 
         return profile, session
 
@@ -255,8 +260,5 @@ class TrackerPayload(BaseModel):
 
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
-
-        # Update existing session duration, First session gets 0, second is updated.
-        session.metadata.time.update_duration()
 
         return profile, session

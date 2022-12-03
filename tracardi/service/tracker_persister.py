@@ -5,6 +5,7 @@ from typing import List, Union, Generator, AsyncGenerator, Any, Tuple
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
 from tracardi.domain.event_type_metadata import EventTypeMetadata
+from tracardi.domain.value_object.operation import Operation
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.cache_manager import CacheManager
 
@@ -17,7 +18,6 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.domain.value_object.collect_result import CollectResult
-from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.storage.driver import storage
 from tracardi.service.tracking_manager import TrackerResult
 
@@ -37,14 +37,15 @@ class TrackerResultPersister:
         for tracker_result in tracker_results:
             profile = tracker_result.profile
             if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
-                profile.operation.new = False
+                # Clean operations
+                profile.operation = Operation()
                 yield profile
 
     @staticmethod
-    def get_sessions_to_save(tracker_results: List[TrackerResult]) -> Generator[Tuple[Session, bool], Any, None]:
+    def get_sessions_to_save(tracker_results: List[TrackerResult]) -> Generator[Session, Any, None]:
         for tracker_result in tracker_results:
             if isinstance(tracker_result.session, Session):
-                if tracker_result.session.operation.new:
+                if tracker_result.session.operation.new or tracker_result.session.operation.needs_update():
                     # Session to add. Add new profile id to session if it does not exist,
                     # or profile id in session is different from the real profile id.
                     if tracker_result.session.profile is None or (
@@ -54,10 +55,7 @@ class TrackerResultPersister:
                         # save only profile Entity
                         if tracker_result.profile is not None:
                             tracker_result.session.profile = Entity(id=tracker_result.profile.id)
-                    yield tracker_result.session, True
-                else:
-                    # Session to update
-                    yield tracker_result.session, False
+                    yield tracker_result.session
 
     async def _save_profile(self, tracker_results: List[TrackerResult]):
         try:
@@ -72,13 +70,27 @@ class TrackerResultPersister:
         try:
             for tracker_result in tracker_results:
                 persist_session = tracker_result.tracker_payload.is_on('saveSession', default=True)
-                # TODO rethink if session must be saved all the time. It only saves the duration.
                 if persist_session:
-                    sessions = list(self.get_sessions_to_save(tracker_results))
-                    sessions_to_add = [session for session, save in sessions if save is True]
+                    sessions_to_add = list(self.get_sessions_to_save(tracker_results))
                     if sessions_to_add:
-                        result = await storage.driver.session.save_session(sessions_to_add)
-                        # Todo this may cause errors
+                        """
+                        We remove saved sessions from cache. The cache may keep the information that there was
+                        no session. It depends on the cache configuration
+                        """
+                        session_cache = cache.session_cache()
+                        if session_cache.allow_null_values:
+                            for session in sessions_to_add:
+                                session_cache.delete(session.id)
+
+                        """
+                        Remove session new. Add empty operation.
+                        """
+                        for session in sessions_to_add:
+                            session.operation = Operation()
+
+                        result = await storage.driver.session.save(sessions_to_add)
+                        # Todo this may cause errors when async, we save multiple sessions at once
+
                         """
                         Until the session is saved and it is usually within 1s the system can create many profiles 
                         for 1 session.  System checks if the session exists by loading it from ES. If it is a new 
@@ -87,13 +99,16 @@ class TrackerResultPersister:
             
                         If session is new we will refresh the session in ES.
                         """
+
                         await storage.driver.session.refresh()
                         yield result
 
-                    sessions_to_update = [session for session, save in sessions if save is False]
-                    # Update session duration
-                    for session in sessions_to_update:
-                        await storage.driver.session.update_session_duration(session)
+                    # Do not update session duration. It should be calculated on the front end
+
+                    # sessions_to_update = [session for session, save in sessions if save is False]
+                    # # Update session duration
+                    # for session in sessions_to_update:
+                    #     await storage.driver.session.update_session_duration(session)
         except StorageException as e:
             raise FieldTypeConflictException("Could not save session. Error: {}".format(str(e)), rows=e.details)
 
@@ -126,7 +141,7 @@ class TrackerResultPersister:
                                                                                                     BulkInsertResult]:
 
         tagged_events = [event async for event in self.__tag_events(self.__get_persistent_events(events))]
-        event_result = await storage.driver.event.save(tagged_events, exclude={"update": ...})
+        event_result = await storage.driver.event.save(tagged_events, exclude={"operation": ...})
         event_result = SaveResult(**event_result.dict())
 
         # Add event types
@@ -141,6 +156,10 @@ class TrackerResultPersister:
 
             event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
                 event.metadata.time.insert)
+
+            # Reset operations
+            event.operation.new = False
+            event.operation.update = False
 
             # Reset session id if session is not saved
 
