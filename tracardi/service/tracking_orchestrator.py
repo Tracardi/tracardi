@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections import Callable
 from datetime import datetime
@@ -182,16 +183,6 @@ class TrackingOrchestrator:
         # Save console log
         await self.save_console_log()
 
-        # # Debugging
-        # # todo save result to different index
-        # if tracker_payload.is_debugging_on():
-        #     debug_result = TrackerPayloadResult(**collect_result.dict())
-        #     debug_result = debug_result.dict()
-        #     debug_result['execution'] = debugger
-        #     debug_result['segmentation'] = segmentation_result
-        #     debug_result['logs'] = console_log
-        #     result['debugging'] = debug_result
-
         # Add profile to response
         if tracker_payload.return_profile():
             raise NotImplementedError("Returning profile was removed from the system for security reasons.")
@@ -202,8 +193,8 @@ class TrackingOrchestrator:
         try:
             if tracardi.track_debug or debug:
                 if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
-                    # Save debug info
-                    await storage.driver.debug_info.save_debug_info(debugger)
+                    # Save debug info in background
+                    asyncio.create_task(storage.driver.debug_info.save_debug_info(debugger))
 
         except Exception as e:
             message = "Error during saving debug info: `{}`".format(str(e))
@@ -226,4 +217,5 @@ class TrackingOrchestrator:
     async def save_console_log(self):
         if self.console_log:
             encoded_console_log = list(self.console_log.get_encoded())
-            await storage.driver.console_log.save_all(encoded_console_log)
+            # Save in background
+            asyncio.create_task(storage.driver.console_log.save_all(encoded_console_log))

@@ -31,7 +31,7 @@ class ElasticClient:
             logger.error(f"Errors from pool {errors}")
 
     async def close(self):
-        if self.pool:
+        if elastic.save_pool > 0 and self.pool:
             await self.pool.purge()
         await self._client.close()
 

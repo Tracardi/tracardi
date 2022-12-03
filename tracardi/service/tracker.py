@@ -146,15 +146,12 @@ class Tracker:
                 responses.append(result.get_response_body())
 
             # Save bulk
-            logger.info(f"Invoke results {tracker_results} tracker payloads.")
-
             if self.tracker_config.on_result_ready is None:
                 save_results = await self.handle_on_result_ready(tracker_results, console_log)
             else:
                 save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
 
             logger.info(f"Invoke save results {save_results} tracker payloads.")
-            print(save_results)
 
         logger.info(f"Invoke responses {responses}.")
         if len(responses) == 1:
