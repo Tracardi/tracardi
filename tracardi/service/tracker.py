@@ -1,6 +1,9 @@
 import logging
 from typing import Callable, Any
-from tracardi.exceptions.exception import UnauthorizedException
+
+import redis
+
+from tracardi.exceptions.exception import UnauthorizedException, TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
@@ -136,35 +139,33 @@ class Tracker:
             console_log = ConsoleLog()
             tracker_results: List[TrackerResult] = []
             debugging: List[TrackerPayload] = []
-            orchestrator = TrackingOrchestrator(
-                source,
-                tracker_config,
-                console_log
-            )
-            for tracker_payload in tracker_payloads:
-                result = await orchestrator.invoke(tracker_payload)
-                tracker_results.append(result)
-                responses.append(result.get_response_body())
-                debugging.append(tracker_payload)
+            try:
+                # Uses redis to lock profiles
+                with TrackingOrchestrator(source, tracker_config, console_log) as orchestrator:
 
-            # Save bulk
-            if self.tracker_config.on_result_ready is None:
-                save_results = await self.handle_on_result_ready(tracker_results, console_log)
-            else:
-                save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
+                    # Unlocks profile after context exit
+
+                    for tracker_payload in tracker_payloads:
+                        # Locks for processing each profile
+                        result = await orchestrator.invoke(tracker_payload)
+                        tracker_results.append(result)
+                        responses.append(result.get_response_body())
+                        debugging.append(tracker_payload)
+
+                    # Save bulk
+
+                    if self.tracker_config.on_result_ready is None:
+                        save_results = await self.handle_on_result_ready(tracker_results, console_log)
+                    else:
+                        save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
+
+            except redis.exceptions.ConnectionError as e:
+                raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
 
             # Debugging rest
-            # Debugging
-            # if self.tracker_payload.is_debugging_on():
+
             if tracardi.track_debug:
                 responses = save_results.get_debugging_info(responses, debugging)
-                print(responses)
-            # debug_result = TrackerPayloadResult(**collect_result.dict())
-            #     debug_result = debug_result.dict()
-            #     debug_result['execution'] = debugger
-            #     debug_result['segmentation'] = segmentation_result
-            #     debug_result['logs'] = console_log
-            #     result['debugging'] = debug_result
 
             logger.info(f"Invoke save results {save_results} tracker payloads.")
 

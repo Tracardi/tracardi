@@ -2,6 +2,7 @@ import asyncio
 import logging
 from collections import Callable
 from datetime import datetime
+from typing import List
 from uuid import uuid4
 import redis
 from tracardi.config import tracardi, memory_cache
@@ -43,26 +44,35 @@ class TrackingOrchestrator:
         self.tracker_config = tracker_config
         self.source = source
         self.console_log = console_log
+        self.locker = ProfileTracksSynchronizer(
+            wait=tracardi.sync_profile_tracks_wait,
+            max_repeats=tracardi.sync_profile_tracks_max_repeats
+        )
 
-    # todo pass tracker_payload
+    def __aenter__(self):
+        return self
+
+    def __aexit__(self, exc_type, exc_val, exc_tb):
+        await storage.driver.profile.refresh()
+        return self.unlock()
+
+    def unlock(self):
+        # Unlocking is done after data is saved
+        self.locker.unlock_entities()
+
     async def invoke(self, tracker_payload: TrackerPayload) -> TrackerResult:
 
         """
         Controls the synchronization of profiles and invokes the process.
         """
 
-        try:
+        self.locker.set_entity_id(get_entity_id(tracker_payload.profile))
+        if self.locker.is_locked():
+            await self.locker.wait_for_unlock()
+        else:
+            self.locker.lock_entity()
 
-            if self.source.synchronize_profiles:
-                async with ProfileTracksSynchronizer(tracker_payload.profile,
-                                                     wait=tracardi.sync_profile_tracks_wait,
-                                                     max_repeats=tracardi.sync_profile_tracks_max_repeats):
-                    return await self._invoke_track_process(tracker_payload)
-            else:
-                return await self._invoke_track_process(tracker_payload)
-
-        except redis.exceptions.ConnectionError as e:
-            raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
+        return await self._invoke_track_process(tracker_payload)
 
     async def _invoke_track_process(self, tracker_payload: TrackerPayload) -> TrackerResult:
 
