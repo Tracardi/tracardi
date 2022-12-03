@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from tracardi.domain.console import Console
 
@@ -24,7 +24,7 @@ class StatusLog:
         return "{}".format(self.__dict__)
 
 
-class ConsoleLog(list):
+class ConsoleLog(List[Console]):
 
     def get_indexed_event_journal(self) -> Dict[str, StatusLog]:
         return {log.event_id: StatusLog(
@@ -39,5 +39,5 @@ class ConsoleLog(list):
         ) for log in self}
 
     def get_encoded(self):
-        for log in self:  # type: Console
+        for log in self:
             yield log.encode_record()

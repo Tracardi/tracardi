@@ -1,4 +1,5 @@
 import logging
+from collections import Callable
 from datetime import datetime
 from uuid import uuid4
 import redis
@@ -20,6 +21,7 @@ from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.destination_orchestrator import DestinationOrchestrator
 from tracardi.service.storage.driver import storage
 from tracardi.service.synchronizer import ProfileTracksSynchronizer
+from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking_manager import TrackingManager, TrackerResult
 from tracardi.service.utils.getters import get_entity_id
 
@@ -33,14 +35,11 @@ class TrackingOrchestrator:
 
     def __init__(self,
                  source: EventSource,
-                 ip: str,
-                 console_log: ConsoleLog,
-                 run_async: bool = False,
-                 static_profile_id: bool = False):
+                 tracker_config: TrackerConfig,
+                 console_log: ConsoleLog
+                 ):
 
-        self.static_profile_id = static_profile_id
-        self.run_async = run_async
-        self.ip = ip
+        self.tracker_config = tracker_config
         self.source = source
         self.console_log = console_log
 
@@ -106,7 +105,7 @@ class TrackingOrchestrator:
             if len(list_of_profile_ids_referenced_by_session) == 1:
                 session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
 
-        if self.static_profile_id is True:
+        if self.tracker_config.static_profile_id is True:
             # Get static profile - This is dangerous
             profile, session = await tracker_payload.get_static_profile_and_session(
                 session,
@@ -121,20 +120,29 @@ class TrackingOrchestrator:
                 tracker_payload.profile_less
             )
 
+            session.context['ip'] = self.tracker_config.ip
+
         # Make profile copy
         has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
         profile_copy = profile.dict(exclude={"operation": ...}) if has_profile else None
 
-        tracking_manager = TrackingManager(
-            self.console_log,
-            tracker_payload,
-            profile,
-            session
-        )
+        if self.tracker_config.on_profile_ready is None:
+            tracking_manager = TrackingManager(
+                self.console_log,
+                self.tracker_config,
+                tracker_payload,
+                profile,
+                session
+            )
 
-        tracker_result = await tracking_manager.invoke_track_process(
-            self.ip
-        )
+            tracker_result = await tracking_manager.invoke_track_process()
+        else:
+            tracker_result = await self.tracker_config.on_profile_ready(
+                self.console_log,
+                tracker_payload,
+                profile,
+                session
+            )
 
         # From now on do not use profile or session, use tracker_result.profile, tracker_result.session
         # For security we override old values
@@ -142,7 +150,7 @@ class TrackingOrchestrator:
         session = tracker_result.session
 
         # todo do not know is makes sense - async
-        if self.run_async:
+        if self.tracker_config.run_async:
             pass
 
         debug = tracker_payload.is_on('debugger', default=False)
@@ -156,7 +164,7 @@ class TrackingOrchestrator:
             self.console_log
         )
         await do.sync_destination(
-            tracking_manager.has_profile,
+            has_profile,
             profile_copy,
         )
 
@@ -203,46 +211,6 @@ class TrackingOrchestrator:
                     traceback=get_traceback(e)
                 )
             )
-
-    # @staticmethod
-    # async def _send_to_destination(profile: Profile, session: Session, events: List[Event], profile_delta):
-    #     logger.info("Profile changed. Destination scheduled to run.")
-    #
-    #     destination_manager = DestinationManager(profile_delta,
-    #                                              profile,
-    #                                              session,
-    #                                              payload=None,
-    #                                              event=None,
-    #                                              flow=None,
-    #                                              memory=None)
-    #     # todo performance - could be not awaited  - add to save_task
-    #     await destination_manager.send_data(profile.id, events, debug=False)
-    #
-    # async def sync_destination(self, has_profile, profile_copy, profile: Profile, session: Session, events: List[Event]):
-    #     if has_profile and profile_copy is not None:
-    #         new_profile = profile.dict(exclude={"operation": ...})
-    #
-    #         if profile_copy != new_profile:
-    #             profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)
-    #             if profile_delta:
-    #                 logger.info("Profile changed. Destination scheduled to run.")
-    #                 try:
-    #                     await self._send_to_destination(profile, session, events, profile_delta)
-    #                 except Exception as e:
-    #                     # todo - this appends error to the same profile - it rather should be en event error
-    #                     self.console_log.append(Console(
-    #                         flow_id=None,
-    #                         node_id=None,
-    #                         event_id=None,
-    #                         profile_id=get_entity_id(profile),
-    #                         origin='destination',
-    #                         class_name='DestinationManager',
-    #                         module=__name__,
-    #                         type='error',
-    #                         message=str(e),
-    #                         traceback=get_traceback(e)
-    #                     ))
-    #                     logger.error(str(e))
 
     async def save_console_log(self):
         if self.console_log:

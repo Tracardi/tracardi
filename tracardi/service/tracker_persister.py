@@ -181,7 +181,6 @@ class TrackerResultPersister:
             raise FieldTypeConflictException("Could not save event. Error: {}".format(str(e)), rows=e.details)
 
     async def persist(self, tracker_results: List[TrackerResult]) -> CollectResult:
-        print("persist")
         return CollectResult(
             profile=[result async for result in self._save_profile(tracker_results)],
             session=[result async for result in self._save_session(tracker_results)],

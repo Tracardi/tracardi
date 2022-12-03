@@ -49,7 +49,7 @@ class TrackerPayload(BaseModel):
         props_hash = sha1(jdump.encode())
         return props_hash.hexdigest()
 
-    def get_events(self, session: Optional[Session], profile: Optional[Profile], has_profile, ip: str) -> List[Event]:
+    def get_events(self, session: Optional[Session], profile: Optional[Profile], has_profile) -> List[Event]:
         event_list = []
         if self.events:
             debugging = self.is_debugging_on()
@@ -69,8 +69,6 @@ class TrackerPayload(BaseModel):
                     _event.request.update(self.request)
                 else:
                     _event.request = self.request
-
-                _event.request['ip'] = ip
 
                 event_list.append(_event)
         return event_list

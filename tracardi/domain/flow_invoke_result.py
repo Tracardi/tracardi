@@ -14,7 +14,7 @@ class FlowInvokeResult:
                  profile: Optional[Profile] = None,
                  session: Optional[Session] = None):
         self.debug_info = debug_info
-        self.log_list = log_list
+        self.log_list: List[Log] = log_list
         self.event = event
         self.profile = profile
         self.session = session

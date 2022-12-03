@@ -2,7 +2,6 @@ import logging
 from dataclasses import dataclass
 from typing import List, Optional
 from tracardi.config import tracardi
-from tracardi.domain.event_source import EventSource
 from tracardi.process_engine.debugger import Debugger
 from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
@@ -17,8 +16,8 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
 from tracardi.service.storage.driver import storage
-from tracardi.service.tracker_event_reshaper import reshape_event
-from tracardi.service.tracker_event_validator import validate_event
+from tracardi.service.tracker_config import TrackerConfig
+from tracardi.service.tracker_event_validator import EventsValidationHandler
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
@@ -56,10 +55,12 @@ class TrackingManager:
 
     def __init__(self,
                  console_log: ConsoleLog,
+                 tracker_config: TrackerConfig,
                  tracker_payload: TrackerPayload,
                  profile: Optional[Profile] = None,
                  session: Optional[Session] = None):
 
+        self.tracker_config = tracker_config
         self.tracker_payload = tracker_payload
         self.profile = profile
         self.session = session
@@ -84,17 +85,42 @@ class TrackingManager:
         if tracker_payload.profile_less is True and profile is not None:
             logger.warning("Something is wrong - profile less events should not have profile attached.")
 
-    async def invoke_track_process(self, ip='0.0.0.0') -> TrackerResult:
+    @staticmethod
+    async def merge_profile(profile: Profile) -> Profile:
+        merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
+        merged_profile = await ProfileMerger.invoke_merge_profile(
+            profile,
+            merge_by=merge_key_values,
+            override_old_data=True,
+            limit=1000)
+
+        if merged_profile is not None:
+            # Replace profile with merged_profile
+            return merged_profile
+
+        return profile
+
+    async def invoke_track_process(self) -> TrackerResult:
 
         # Get events
         events = self.tracker_payload.get_events(
             self.session,
             self.profile,
-            self.has_profile,
-            ip)
+            self.has_profile)
 
         # Validates json schemas of events and reshapes properties
-        events = await self.validate_and_reshape_events(events)
+
+        dot = DotAccessor(
+            profile=self.profile,
+            session=self.session,
+            payload=None,
+            event=None,
+            flow=None,
+            memory=None
+        )
+
+        evh = EventsValidationHandler(dot, self.console_log)
+        events = await evh.validate_and_reshape_events(events)
 
         debugger = None
         segmentation_result = None
@@ -128,8 +154,6 @@ class TrackingManager:
                     )
 
                     debugger = rule_invoke_result.debugger
-                    ran_event_types = rule_invoke_result.ran_event_types
-                    self.console_log = rule_invoke_result.console_log
                     post_invoke_events = rule_invoke_result.post_invoke_events
                     invoked_rules = rule_invoke_result.invoked_rules
                     flow_responses = FlowResponses(rule_invoke_result.flow_responses)
@@ -154,7 +178,7 @@ class TrackingManager:
                     if isinstance(self.profile, Profile):
                         # Segment
                         segmentation_result = await segment(self.profile,
-                                                            ran_event_types,
+                                                            rule_invoke_result.ran_event_types,
                                                             storage.driver.segment.load_segments)
 
                 except Exception as e:
@@ -179,16 +203,10 @@ class TrackingManager:
                 try:
                     if self.profile is not None:  # Profile can be None if profile_less event is processed
                         if self.profile.operation.needs_merging():
-                            merge_key_values = ProfileMerger.get_merging_keys_and_values(self.profile)
-                            merged_profile = await ProfileMerger.invoke_merge_profile(
-                                self.profile,
-                                merge_by=merge_key_values,
-                                override_old_data=True,
-                                limit=1000)
-
-                            if merged_profile is not None:
-                                # Replace profile with merged_profile
-                                profile = merged_profile
+                            if self.tracker_config.on_profile_merge:
+                                self.profile = await self.tracker_config.on_profile_merge(self.profile)
+                            else:
+                                self.profile = await self.merge_profile(self.profile)
 
                 except Exception as e:
                     message = 'Profile merging returned an error `{}`'.format(str(e))
@@ -209,10 +227,6 @@ class TrackingManager:
                     )
 
         finally:
-            # todo maybe persisting profile is not necessary - it is persisted right after workflow - see above
-            # TODO notice that profile is saved only when it's new change it when it need update
-            # Save profile, session, events
-
             # Synchronize post invoke events. Replace events with events changed by WF.
             # Events are saved only if marked in event.update==true
             if post_invoke_events is not None:
@@ -235,43 +249,5 @@ class TrackingManager:
                 debugger=debugger,
                 ux=ux
             )
-
-    async def validate_and_reshape_events(self, events) -> List[Event]:
-        dot = DotAccessor(
-            profile=self.profile,
-            session=self.session,
-            payload=None,
-            event=None,
-            flow=None,
-            memory=None
-        )
-
-        processed_events = []
-        for event in events:
-
-            dot.set_storage("event", event)
-
-            # mutates console_log
-            event = await validate_event(event, dot, self.console_log)
-
-            try:
-                event = await reshape_event(event, dot)
-            except Exception as e:
-                self.console_log.append(
-                    Console(
-                        event_id=event.id,
-                        profile_id=get_entity_id(self.profile),
-                        origin='tracker',
-                        class_name='tracker',
-                        module=__name__,
-                        type='error',
-                        message=str(e),
-                        traceback=get_traceback(e)
-                    )
-                )
-
-            processed_events.append(event)
-
-        return processed_events
 
 

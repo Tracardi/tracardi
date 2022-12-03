@@ -25,6 +25,7 @@ from ..domain.session import Session
 from ..domain.rule import Rule
 from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import log_handler
+from ..service.console_log import ConsoleLog
 
 logger = logging.getLogger("Routing rule")
 logger.setLevel(tracardi.logging_level)
@@ -37,11 +38,8 @@ class RulesEngine:
                  session: Session,
                  profile: Optional[Profile],
                  events_rules: List[Tuple[List[Dict], Event]],
-                 console_log=None
+                 console_log: ConsoleLog
                  ):
-
-        if console_log is None:
-            console_log = []
 
         self.console_log = console_log
         self.session = session
@@ -217,7 +215,10 @@ class RulesEngine:
 
         ran_event_types = list(flow_task_store.keys())
 
-        return RuleInvokeResult(debugger, ran_event_types, self.console_log, post_invoke_events, invoked_rules,
+        return RuleInvokeResult(debugger,
+                                ran_event_types,
+                                post_invoke_events,
+                                invoked_rules,
                                 flow_responses)
 
     @staticmethod

@@ -1,11 +1,12 @@
 import asyncio
 from collections import defaultdict
-from typing import List, Dict
+from typing import List, Dict, Callable, Any, Union
 
 
 class PoolManager:
 
-    def __init__(self, name, max_pool, on_pool_purge=None,
+    def __init__(self, name, max_pool,
+                 on_pool_purge: Callable[[Union[dict,list], tuple], Any] = None,
                  on_append=None,
                  pass_pool_as_dict=False,
                  replace_item_on_append=False,
@@ -84,7 +85,6 @@ class PoolManager:
         key = key if key else self.name
         self.items[key].append(item)
         self.counter += 1
-        print('counter', self.counter, self.max_pool)
 
         if self.counter >= self.max_pool:
             # Make sure that we have a copy of items to process
@@ -95,7 +95,6 @@ class PoolManager:
             await self._purge(items)
 
         elif self.ttl > 0 and self.loop:
-            print('call for later')
             if self.last_task:
                 self.last_task.cancel()
             self.last_task = self.loop.call_later(self.ttl, self._purge_task)

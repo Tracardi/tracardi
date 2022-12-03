@@ -31,3 +31,6 @@ class Debugger:
     def items(self):
         return self.traces.items()
 
+    def __str__(self):
+        return f"{self.traces}"
+
