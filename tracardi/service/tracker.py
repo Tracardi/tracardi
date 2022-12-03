@@ -157,4 +157,6 @@ class Tracker:
             print(save_results)
 
         logger.info(f"Invoke responses {responses}.")
+        if len(responses) == 1:
+            return responses[0]
         return responses
