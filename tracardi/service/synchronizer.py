@@ -62,7 +62,7 @@ class ProfileTracksSynchronizer:
     async def __aenter__(self):
         while True:
             if self._is_profile_processed() and self.max_repeats > 0:
-                logger.info(f"Waiting for /track/{self.profile.id} to finish. Left repeats {self.max_repeats}")
+                print(f"Waiting for /track/{self.profile.id} to finish. Left repeats {self.max_repeats}")
                 await asyncio.sleep(self.wait)
                 self.max_repeats -= 1
             else:

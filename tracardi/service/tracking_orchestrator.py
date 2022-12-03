@@ -32,7 +32,6 @@ cache = CacheManager()
 class TrackingOrchestrator:
 
     def __init__(self,
-                 tracker_payload: TrackerPayload,
                  source: EventSource,
                  ip: str,
                  console_log: ConsoleLog,
@@ -43,10 +42,10 @@ class TrackingOrchestrator:
         self.run_async = run_async
         self.ip = ip
         self.source = source
-        self.tracker_payload = tracker_payload
         self.console_log = console_log
 
-    async def invoke(self) -> TrackerResult:
+    # todo pass tracker_payload
+    async def invoke(self, tracker_payload: TrackerPayload) -> TrackerResult:
 
         """
         Controls the synchronization of profiles and invokes the process.
@@ -55,31 +54,31 @@ class TrackingOrchestrator:
         try:
 
             if self.source.synchronize_profiles:
-                async with ProfileTracksSynchronizer(self.tracker_payload.profile,
+                async with ProfileTracksSynchronizer(tracker_payload.profile,
                                                      wait=tracardi.sync_profile_tracks_wait,
                                                      max_repeats=tracardi.sync_profile_tracks_max_repeats):
-                    return await self._invoke_track_process()
+                    return await self._invoke_track_process(tracker_payload)
             else:
-                return await self._invoke_track_process()
+                return await self._invoke_track_process(tracker_payload)
 
         except redis.exceptions.ConnectionError as e:
             raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
 
-    async def _invoke_track_process(self) -> TrackerResult:
+    async def _invoke_track_process(self, tracker_payload: TrackerPayload) -> TrackerResult:
 
-        self.tracker_payload.set_transitional(self.source)
-        self.tracker_payload.set_return_profile(self.source)
+        tracker_payload.set_transitional(self.source)
+        tracker_payload.set_return_profile(self.source)
 
         # Load session from storage
         try:
-            if self.tracker_payload.session is not None:
+            if tracker_payload.session is not None:
                 session = await cache.session(
-                    session_id=self.tracker_payload.session.id,
+                    session_id=tracker_payload.session.id,
                     ttl=memory_cache.session_cache_ttl
                 )
             else:
                 session = Session(id=str(uuid4()), metadata=SessionMetadata())
-                self.tracker_payload.force_session(session)
+                tracker_payload.force_session(session)
 
         except DuplicatedRecordException as e:
 
@@ -87,12 +86,12 @@ class TrackingOrchestrator:
             logger.error(str(e))
 
             # Try to recover sessions
-            list_of_profile_ids_referenced_by_session = await correct_session(self.tracker_payload.session.id)
+            list_of_profile_ids_referenced_by_session = await correct_session(tracker_payload.session.id)
 
             # If there is duplicated session create new random session.
             # As a consequence of this a new profile is created.
             session = Session(
-                id=self.tracker_payload.session.id,
+                id=tracker_payload.session.id,
                 metadata=SessionMetadata(
                     time=SessionTime(
                         insert=datetime.utcnow()
@@ -109,26 +108,26 @@ class TrackingOrchestrator:
 
         if self.static_profile_id is True:
             # Get static profile - This is dangerous
-            profile, session = await self.tracker_payload.get_static_profile_and_session(
+            profile, session = await tracker_payload.get_static_profile_and_session(
                 session,
                 storage.driver.profile.load_merged_profile,
-                self.tracker_payload.profile_less
+                tracker_payload.profile_less
             )
         else:
             # Get profile
-            profile, session = await self.tracker_payload.get_profile_and_session(
+            profile, session = await tracker_payload.get_profile_and_session(
                 session,
                 storage.driver.profile.load_merged_profile,
-                self.tracker_payload.profile_less
+                tracker_payload.profile_less
             )
 
         # Make profile copy
-        has_profile = not self.tracker_payload.profile_less and isinstance(profile, Profile)
+        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
         profile_copy = profile.dict(exclude={"operation": ...}) if has_profile else None
 
         tracking_manager = TrackingManager(
             self.console_log,
-            self.tracker_payload,
+            tracker_payload,
             profile,
             session
         )
@@ -147,7 +146,8 @@ class TrackingOrchestrator:
         if self.run_async:
             pass
 
-        await self.save_debug_data(tracker_result.debugger, get_entity_id(tracker_result.profile))
+        debug = tracker_payload.is_on('debugger', default=False)
+        await self.save_debug_data(tracker_result.debugger, debug, get_entity_id(tracker_result.profile))
 
         # Send to destination
         do = DestinationOrchestrator(
@@ -160,18 +160,9 @@ class TrackingOrchestrator:
             tracking_manager.has_profile,
             profile_copy,
         )
-        # await self.sync_destination(
-        #     tracking_manager.has_profile,
-        #     profile_copy,
-        #     tracker_result.profile,
-        #     tracker_result.session,
-        #     tracker_result.events)
 
         # Save console log
         await self.save_console_log()
-
-        # Prepare response
-        result = {}
 
         # # Debugging
         # # todo save result to different index
@@ -184,14 +175,14 @@ class TrackingOrchestrator:
         #     result['debugging'] = debug_result
 
         # Add profile to response
-        if self.tracker_payload.return_profile():
+        if tracker_payload.return_profile():
             raise NotImplementedError("Returning profile was removed from the system for security reasons.")
 
         return tracker_result
 
-    async def save_debug_data(self, debugger, profile_id):
+    async def save_debug_data(self, debugger, debug: bool, profile_id):
         try:
-            if tracardi.track_debug or self.tracker_payload.is_on('debugger', default=False):
+            if tracardi.track_debug or debug:
                 if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
                     # Save debug info
                     await storage.driver.debug_info.save_debug_info(debugger)

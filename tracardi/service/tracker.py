@@ -22,22 +22,21 @@ async def send_data(grouped_tracker_payloads: Dict[str, List[TrackerPayload]], a
     source, ip, run_async, static_profile_id = attributes
 
     tracker_save_results = []
-    for finger_print, tracker_payloads in grouped_tracker_payloads.items():
+    for _, tracker_payloads in grouped_tracker_payloads.items():
         print("invoke", len(tracker_payloads))
 
         tracker_results: List[TrackerResult] = []
         console_log = ConsoleLog()
 
+        orchestrator = TrackingOrchestrator(
+            source,
+            ip,
+            console_log,
+            run_async,
+            static_profile_id
+        )
         for tracker_payload in tracker_payloads:
-            orchestrator = TrackingOrchestrator(
-                tracker_payload,
-                source,
-                ip,
-                console_log,
-                run_async,
-                static_profile_id
-            )
-            result = await orchestrator.invoke()
+            result = await orchestrator.invoke(tracker_payload)
             tracker_results.append(result)
 
         # Save bulk
@@ -49,7 +48,7 @@ async def send_data(grouped_tracker_payloads: Dict[str, List[TrackerPayload]], a
     return tracker_save_results
 
 pool = PoolManager('event-pooling',
-                   max_pool=10,
+                   max_pool=20,
                    pass_pool_as_dict=True,
                    on_pool_purge=send_data)
 
@@ -86,24 +85,19 @@ async def track_event(tracker_payload: TrackerPayload,
         raise UnauthorizedException(e)
 
     # Async
-    pool.set_ttl(asyncio.get_running_loop(), ttl=3)
+    pool.set_ttl(asyncio.get_running_loop(), ttl=30)
     pool.set_attributes(
         (source, ip, run_async, static_profile_id)
     )
-
-    # If async
-    await pool.append(tracker_payload, key=tracker_payload.get_finger_print())
+    await pool.append(tracker_payload)
 
     # No async
 
     # Todo no return right now
 
-    # tracker_result = await invoke_track_process_step_0(
-    #     [tracker_payload],
-    #     source,
-    #     ip,
-    #     run_async,
-    #     static_profile_id
+    # return await send_data(
+    #     {"no-finger-print": [tracker_payload]},
+    #     (source, ip, run_async, static_profile_id)
     # )
 
 
