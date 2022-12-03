@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Callable, Any, Dict
+from typing import List, Callable, Any
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
+from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.console_log import ConsoleLog
 
 

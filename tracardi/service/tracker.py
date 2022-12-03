@@ -117,7 +117,7 @@ class Tracker:
         return source
 
     @staticmethod
-    async def handle_on_result_ready(tracker_results, console_log):
+    async def handle_on_result_ready(tracker_results, console_log) -> CollectResult:
         tp = TrackerResultPersister(console_log)
         return await tp.persist(tracker_results)
 
@@ -135,6 +135,7 @@ class Tracker:
 
             console_log = ConsoleLog()
             tracker_results: List[TrackerResult] = []
+            debugging: List[TrackerPayload] = []
             orchestrator = TrackingOrchestrator(
                 source,
                 tracker_config,
@@ -144,6 +145,7 @@ class Tracker:
                 result = await orchestrator.invoke(tracker_payload)
                 tracker_results.append(result)
                 responses.append(result.get_response_body())
+                debugging.append(tracker_payload)
 
             # Save bulk
             if self.tracker_config.on_result_ready is None:
@@ -152,7 +154,17 @@ class Tracker:
                 save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
 
             # Debugging rest
-
+            # Debugging
+            # if self.tracker_payload.is_debugging_on():
+            if tracardi.track_debug:
+                responses = save_results.get_debugging_info(responses, debugging)
+                print(responses)
+            # debug_result = TrackerPayloadResult(**collect_result.dict())
+            #     debug_result = debug_result.dict()
+            #     debug_result['execution'] = debugger
+            #     debug_result['segmentation'] = segmentation_result
+            #     debug_result['logs'] = console_log
+            #     result['debugging'] = debug_result
 
             logger.info(f"Invoke save results {save_results} tracker payloads.")
 
