@@ -19,6 +19,27 @@ def _is_elastic_on_localhost():
     return elastic.host in local_hosts
 
 
+async def wait_for_installation(no_of_tries: int = 10):
+    success = False
+    while True:
+        is_installed, _ = await storage.driver.system.is_schema_ok()
+
+        if is_installed:
+            success = True
+            break
+
+        if no_of_tries < 0:
+            break
+
+        logger.warning(f"System not installed. {no_of_tries} more checks left. Waiting...")
+        no_of_tries -= 1
+        await asyncio.sleep(2)
+
+    if not success:
+        logger.error(f"System not installed. Exiting...")
+        exit()
+
+
 async def wait_for_connection(no_of_tries=10):
     success = False
     while True:
