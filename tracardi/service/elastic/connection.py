@@ -33,7 +33,7 @@ async def wait_for_installation(no_of_tries: int = 10):
 
         logger.warning(f"System not installed. {no_of_tries} more checks left. Waiting...")
         no_of_tries -= 1
-        await asyncio.sleep(2)
+        await asyncio.sleep(15)
 
     if not success:
         logger.error(f"System not installed. Exiting...")
