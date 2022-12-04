@@ -3,7 +3,9 @@ import logging
 from datetime import datetime
 from hashlib import sha1
 from typing import Optional, List, Tuple, Any
-from pydantic import BaseModel
+from uuid import uuid4
+
+from pydantic import BaseModel, PrivateAttr
 from tracardi.config import tracardi
 
 from tracardi.domain.event import Event, COLLECTED
@@ -21,10 +23,14 @@ from ...exceptions.log_handler import log_handler
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+# TODO remove circular dep
 # cache = CacheManager()
 
 
 class TrackerPayload(BaseModel):
+
+    _id: str = PrivateAttr(None)
+
     source: Entity
     session: Optional[Entity] = None
 
@@ -43,6 +49,10 @@ class TrackerPayload(BaseModel):
                 insert=datetime.utcnow()
             ))
         super().__init__(**data)
+        self._id = str(uuid4())
+
+    def get_id(self) -> str:
+        return self._id
 
     def get_finger_print(self) -> str:
         jdump = json.dumps(self.dict(exclude={'events': ..., 'metadata': ...}), sort_keys=True, default=str)

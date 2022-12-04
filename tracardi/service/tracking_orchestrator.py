@@ -1,10 +1,7 @@
 import asyncio
 import logging
-from collections import Callable
 from datetime import datetime
-from typing import List
 from uuid import uuid4
-import redis
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
 from tracardi.domain.event_source import EventSource
@@ -17,12 +14,12 @@ from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
-from tracardi.exceptions.exception import TracardiException, DuplicatedRecordException
+from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.destination_orchestrator import DestinationOrchestrator
 from tracardi.service.storage.driver import storage
-from tracardi.service.synchronizer import ProfileTracksSynchronizer
+from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking_manager import TrackingManager, TrackerResult
 from tracardi.service.utils.getters import get_entity_id
@@ -37,41 +34,20 @@ class TrackingOrchestrator:
 
     def __init__(self,
                  source: EventSource,
-                 tracker_config: TrackerConfig,
-                 console_log: ConsoleLog
+                 tracker_config: TrackerConfig
                  ):
-
         self.tracker_config = tracker_config
         self.source = source
-        self.console_log = console_log
-        self.locker = ProfileTracksSynchronizer(
-            wait=tracardi.sync_profile_tracks_wait,
-            max_repeats=tracardi.sync_profile_tracks_max_repeats
-        )
+        self.console_log = None
+        self.locked = []
 
-    def __aenter__(self):
-        return self
-
-    def __aexit__(self, exc_type, exc_val, exc_tb):
-        await storage.driver.profile.refresh()
-        return self.unlock()
-
-    def unlock(self):
-        # Unlocking is done after data is saved
-        self.locker.unlock_entities()
-
-    async def invoke(self, tracker_payload: TrackerPayload) -> TrackerResult:
+    async def invoke(self, tracker_payload: TrackerPayload, console_log: ConsoleLog) -> TrackerResult:
 
         """
         Controls the synchronization of profiles and invokes the process.
         """
 
-        self.locker.set_entity_id(get_entity_id(tracker_payload.profile))
-        if self.locker.is_locked():
-            await self.locker.wait_for_unlock()
-        else:
-            self.locker.lock_entity()
-
+        self.console_log = console_log
         return await self._invoke_track_process(tracker_payload)
 
     async def _invoke_track_process(self, tracker_payload: TrackerPayload) -> TrackerResult:
@@ -147,6 +123,12 @@ class TrackingOrchestrator:
         # Make profile copy
         has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
         profile_copy = profile.dict(exclude={"operation": ...}) if has_profile else None
+
+        # Lock
+        if has_profile:
+            await profile_synchronizer.wait_for_unlock(profile.id, seq=tracker_payload.get_id())
+            self.locked.append(profile.id)
+            profile_synchronizer.lock_entity(profile.id)
 
         if self.tracker_config.on_profile_ready is None:
             tracking_manager = TrackingManager(

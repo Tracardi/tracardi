@@ -37,8 +37,9 @@ class TrackerResult:
     debugger: Optional[Debugger] = None
     ux: Optional[list] = None
 
-    def get_response_body(self):
+    def get_response_body(self, tracker_payload_id: str):
         body = {
+            'task': tracker_payload_id,
             'ux': self.ux if self.ux else [],
             'response': self.response if self.response else {}
 

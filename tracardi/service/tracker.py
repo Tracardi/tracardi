@@ -5,6 +5,7 @@ import redis
 
 from tracardi.exceptions.exception import UnauthorizedException, TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
@@ -133,43 +134,51 @@ class Tracker:
         Starts collecting data and process it.
         """
         responses = []
-        for _, tracker_payloads in grouped_tracker_payloads.items():
-            logger.info(f"Invoking {len(tracker_payloads)} tracker payloads.")
+        try:
+            # Uses redis to lock profiles
+            orchestrator = TrackingOrchestrator(source, tracker_config)
 
-            console_log = ConsoleLog()
-            tracker_results: List[TrackerResult] = []
-            debugging: List[TrackerPayload] = []
-            try:
-                # Uses redis to lock profiles
-                with TrackingOrchestrator(source, tracker_config, console_log) as orchestrator:
+            for seq, (finger_print, tracker_payloads) in enumerate(grouped_tracker_payloads.items()):
+                logger.info(f"Invoking {len(tracker_payloads)} tracker payloads.")
 
-                    # Unlocks profile after context exit
+                console_log = ConsoleLog()
+                tracker_results: List[TrackerResult] = []
+                debugging: List[TrackerPayload] = []
 
-                    for tracker_payload in tracker_payloads:
-                        # Locks for processing each profile
-                        result = await orchestrator.invoke(tracker_payload)
-                        tracker_results.append(result)
-                        responses.append(result.get_response_body())
-                        debugging.append(tracker_payload)
+                # Unlocks profile after context exit
 
-                    # Save bulk
+                for tracker_payload in tracker_payloads:
+                    # Locks for processing each profile
+                    result = await orchestrator.invoke(tracker_payload, console_log)
+                    tracker_results.append(result)
+                    responses.append(result.get_response_body(tracker_payload.get_id()))
+                    debugging.append(tracker_payload)
 
-                    if self.tracker_config.on_result_ready is None:
-                        save_results = await self.handle_on_result_ready(tracker_results, console_log)
-                    else:
-                        save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
+                # Save bulk
 
-            except redis.exceptions.ConnectionError as e:
-                raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
+                if self.tracker_config.on_result_ready is None:
+                    save_results = await self.handle_on_result_ready(tracker_results, console_log)
+                else:
+                    save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
+                print(save_results)
 
-            # Debugging rest
+                # UnLock
 
-            if tracardi.track_debug:
-                responses = save_results.get_debugging_info(responses, debugging)
+                if orchestrator.locked:
+                    print('unlocking_all')
+                    profile_synchronizer.unlock_entities(orchestrator.locked)
 
-            logger.info(f"Invoke save results {save_results} tracker payloads.")
+                logger.info(f"Invoke save results {save_results} tracker payloads.")
 
-        logger.info(f"Invoke responses {responses}.")
+                # Debugging rest
+
+                if tracardi.track_debug:
+                    responses = save_results.get_debugging_info(responses, debugging)
+
+        except redis.exceptions.ConnectionError as e:
+            raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
+
+        logger.info(f"Track responses {responses}.")
         if len(responses) == 1:
             return responses[0]
         return responses
