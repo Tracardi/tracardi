@@ -5,6 +5,7 @@ import redis
 
 from tracardi.exceptions.exception import UnauthorizedException, TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.storage.driver import storage
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
@@ -160,13 +161,15 @@ class Tracker:
                     save_results = await self.handle_on_result_ready(tracker_results, console_log)
                 else:
                     save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
-                print(save_results)
+
+                print(save_results.profile)
 
                 # UnLock
 
                 if orchestrator.locked:
                     print('unlocking_all')
                     profile_synchronizer.unlock_entities(orchestrator.locked)
+                    await storage.driver.profile.refresh()
 
                 logger.info(f"Invoke save results {save_results} tracker payloads.")
 

@@ -67,7 +67,7 @@ class ProfileTracksSynchronizer:
         while True:
             if self.is_locked(key):
                 print(
-                    f"Tracker payload - {seq}: Waiting {self.wait}s for profile {key} to finish. Expires in {self.expires_in(key)}")
+                    f"Tracker payload - {seq}: Waiting {self.wait}s for profile {key} to finish. Expires in {self.expires_in(key)}s")
                 await asyncio.sleep(self.wait)
                 continue
             self.unlock_entity(key)
@@ -84,10 +84,13 @@ class ProfileTracksSynchronizer:
             self.unlock_entity(key)
 
     def lock_entity(self, key: str):
-        print(self.redis.client.set(self._get_key(key), '1', ex=self.ttl))
+        result = self.redis.client.set(self._get_key(key), '1', ex=self.ttl)
+        if result is True:
+            print(f"Locking key {key} {result}")
 
     def unlock_entity(self, key: str):
-        self.redis.client.delete(self._get_key(key))
+        result = self.redis.client.delete(self._get_key(key))
+        print(f"UnLocking key {key} {result}")
 
 
 profile_synchronizer = ProfileTracksSynchronizer(

@@ -6,7 +6,7 @@ from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
-from .value_object.operation import Operation, RecordFlag
+from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 
 COLLECTED = 'collected'
