@@ -125,10 +125,11 @@ class TrackingOrchestrator:
         profile_copy = profile.dict(exclude={"operation": ...}) if has_profile else None
 
         # Lock
-        if has_profile:
-            await profile_synchronizer.wait_for_unlock(profile.id, seq=tracker_payload.get_id())
-            self.locked.append(profile.id)
-            profile_synchronizer.lock_entity(profile.id)
+        if has_profile and self.source.synchronize_profiles:
+            key = f"profile:{profile.id}"
+            await profile_synchronizer.wait_for_unlock(key, seq=tracker_payload.get_id())
+            profile_synchronizer.lock_entity(key)
+            self.locked.append(key)
 
         if self.tracker_config.on_profile_ready is None:
             tracking_manager = TrackingManager(

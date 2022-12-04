@@ -162,12 +162,11 @@ class Tracker:
                 else:
                     save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
 
-                print(save_results.profile)
+                # print(save_results.profile)
 
                 # UnLock
 
-                if orchestrator.locked:
-                    print('unlocking_all')
+                if orchestrator.locked and source.synchronize_profiles:
                     profile_synchronizer.unlock_entities(orchestrator.locked)
                     await storage.driver.profile.refresh()
 
