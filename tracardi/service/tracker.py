@@ -169,6 +169,7 @@ class Tracker:
                 if orchestrator.locked and source.synchronize_profiles:
                     profile_synchronizer.unlock_entities(orchestrator.locked)
                     await storage.driver.profile.refresh()
+                    await storage.driver.session.refresh()
 
                 logger.info(f"Invoke save results {save_results} tracker payloads.")
 

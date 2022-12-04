@@ -149,8 +149,6 @@ class TrackingOrchestrator:
                 session
             )
 
-        await asyncio.sleep(4)
-
         # From now on do not use profile or session, use tracker_result.profile, tracker_result.session
         # For security we override old values
         profile = tracker_result.profile
