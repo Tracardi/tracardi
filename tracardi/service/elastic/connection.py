@@ -31,12 +31,12 @@ async def wait_for_installation(no_of_tries: int = 10):
         if no_of_tries < 0:
             break
 
-        logger.warning(f"System version {tracardi.version.version} not installed. {no_of_tries} more checks left. Waiting...")
+        logger.warning(f"System version {tracardi.version.version} not installed at {elastic.host}. {no_of_tries} more checks left. Waiting...")
         no_of_tries -= 1
         await asyncio.sleep(15)
 
     if not success:
-        logger.error(f"System not installed. Exiting...")
+        logger.error(f"System v{tracardi.version.version} not installed. Exiting...")
         exit()
 
 
@@ -75,6 +75,8 @@ async def wait_for_connection(no_of_tries=10):
             logger.error(f"Could not save data. Number of tries left: {no_of_tries}. Waiting 1s to retry.")
             logger.error(f"Error details: {repr(e)}")
 
-    if not success:
-        logger.error(f"Could not connect to elasticsearch")
-        exit()
+    if success:
+        logger.info(f"Connected to elastic at {elastic.host}")
+
+    logger.error(f"Could not connect to elasticsearch at {elastic.host}")
+    exit()
