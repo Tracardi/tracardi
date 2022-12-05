@@ -31,7 +31,7 @@ async def wait_for_installation(no_of_tries: int = 10):
         if no_of_tries < 0:
             break
 
-        logger.warning(f"System not installed. {no_of_tries} more checks left. Waiting...")
+        logger.warning(f"System version {tracardi.version.version} not installed. {no_of_tries} more checks left. Waiting...")
         no_of_tries -= 1
         await asyncio.sleep(15)
 
