@@ -77,6 +77,7 @@ async def wait_for_connection(no_of_tries=10):
 
     if success:
         logger.info(f"Connected to elastic at {elastic.host}")
+        return
 
     logger.error(f"Could not connect to elasticsearch at {elastic.host}")
     exit()
