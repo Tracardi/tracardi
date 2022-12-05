@@ -67,7 +67,7 @@ class RulesEngine:
 
                 # this is main roles loop
                 if 'name' in rule:
-                    invoked_rules[event.type].append(rule['name'])
+                    invoked_rules[event.id].append(rule['name'])
                     rule_name = rule['name']
                 else:
                     rule_name = 'Unknown'
@@ -84,17 +84,17 @@ class RulesEngine:
                         module=__name__,
                         class_name='RulesEngine',
                         type="error",
-                        message=f"Rule '{rule_name}' validation error: {str(e)}",
+                        message=f"Rule '{rule_name}:{rule.id}' validation error: {str(e)}",
                         traceback=get_traceback(e)
                     )
                     self.console_log.append(console)
                     continue
 
                 if not rule.enabled:
-                    logger.info(f"Rule {rule.name} skipped. Rule is disabled.")
+                    logger.info(f"Rule {rule.name}:{rule.id} skipped. Rule is disabled.")
                     continue
 
-                logger.info(f"Running rule {rule.name}")
+                logger.info(f"Running rule {rule.name}:{rule.id}")
 
                 try:
 
@@ -130,7 +130,7 @@ class RulesEngine:
                         )
 
                         # Flows are run concurrently
-
+                        logger.info(f"Invoked workflow {flow.name}:{flow.id} for event {event.type}:{event.id}")
                         flow_task = asyncio.create_task(
                             workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))

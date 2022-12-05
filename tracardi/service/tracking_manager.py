@@ -171,8 +171,7 @@ class TrackingManager:
                     # Append invoked rules to event metadata
 
                     for event in events:
-                        if event.type in invoked_rules:
-                            event.metadata.processed_by.rules = invoked_rules[event.type]
+                        event.metadata.processed_by.rules = invoked_rules[event.id]
 
                     # Segment only if there is profile
 
