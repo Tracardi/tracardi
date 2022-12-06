@@ -53,7 +53,9 @@ class ReshapePayloadAction(ActionRunner):
             template = DictTraverser(dot, default=None)
         else:
             template = DictTraverser(dot)
+
         output = json.loads(self.config.value)
+
         result = template.reshape(reshape_template=output)
 
         return Result(port="payload", value=result)
@@ -64,7 +66,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='ReshapePayloadAction',
+            className=ReshapePayloadAction.__name__,
             inputs=["payload"],
             outputs=['payload'],
             init={"value": "{}", "default": True},

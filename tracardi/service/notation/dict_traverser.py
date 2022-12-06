@@ -32,10 +32,16 @@ class DictTraverser:
         return value
 
     def traverse(self, value, key=None, path="root"):
+        if key is None and isinstance(value,list):
+            raise ValueError("Can not traverse list. Please provide an object.")
+
         if isinstance(value, dict):
             for k, v in value.items():
                 yield from self.traverse(v, k, path + "." + k)
         elif isinstance(value, list):
+            # Return empty lists as they are.
+            if not value:
+                yield key, [], path
             for n, v in enumerate(value):
                 k = str(n)
                 yield from self.traverse(v, k, path + '.' + k)

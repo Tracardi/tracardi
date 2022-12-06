@@ -1,5 +1,34 @@
+import pytest
+
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.notation.dot_accessor import DotAccessor
+
+
+def test__should_return_value_event_if_is_is_empty():
+    template = {
+        "x": {
+            "a": []
+        }
+    }
+
+    dot = DotAccessor()
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result['x']['a'] == []
+
+    with pytest.raises(ValueError):
+        template = []
+        dot = DotAccessor()
+        t = DictTraverser(dot)
+        t.reshape(reshape_template=template)
+
+    template = {
+            "x": [[1, 2, 3], "a", []]
+        }
+    dot = DotAccessor()
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result == template
 
 
 def test_dot_traverser():

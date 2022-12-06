@@ -29,7 +29,7 @@ class EventPayload(BaseModel):
                      metadata=meta,
                      session=self._get_event_session(session),
                      profile=get_entity(profile),  # profile can be None when profile_less event.
-                     type=self.type,
+                     type=self.type.strip(),
                      properties=self.properties,
                      source=source,  # Entity
                      config=self.options,
