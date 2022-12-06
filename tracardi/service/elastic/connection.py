@@ -22,8 +22,8 @@ def _is_elastic_on_localhost():
 async def wait_for_installation(no_of_tries: int = 10):
     success = False
     while True:
-        is_installed, _ = await storage.driver.system.is_schema_ok()
-
+        is_installed, _ind = await storage.driver.system.is_schema_ok()
+        print(_ind)
         if is_installed:
             success = True
             break
