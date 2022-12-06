@@ -35,6 +35,9 @@
               "type": "keyword",
               "null_value": "NULL"
             },
+            "channel": {
+              "type": "keyword"
+            },
             "processed_by": {
               "properties": {
                 "rules": {

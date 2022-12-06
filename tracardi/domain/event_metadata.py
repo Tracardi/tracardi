@@ -26,6 +26,7 @@ class EventMetadata(BaseModel):
     time: EventTime
     ip: str = None
     status: str = None
+    channel: Optional[str] = None
     processed_by: EventProcessors = EventProcessors()
     profile_less: bool = False
     debug: bool = False

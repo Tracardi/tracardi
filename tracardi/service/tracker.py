@@ -88,6 +88,9 @@ class Tracker:
             else:
                 source = await self.validate_source(source_id=tracker_payload.source.id)
 
+            # Update tracker source with full object
+            tracker_payload.source = source
+
         except ValueError as e:
             raise UnauthorizedException(e)
 

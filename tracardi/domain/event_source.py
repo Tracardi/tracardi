@@ -13,6 +13,7 @@ class EventSource(Entity):
     timestamp: datetime
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
+    channel: Optional[str] = ""
     enabled: Optional[bool] = True
     transitional: Optional[bool] = False
     tags: Union[List[str], str] = ["general"]

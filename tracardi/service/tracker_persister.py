@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
-from typing import List, Union, Generator, AsyncGenerator, Any, Tuple
+from typing import List, Union, Generator, AsyncGenerator, Any
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
+from tracardi.domain.enum.event_status import PROCESSED
 from tracardi.domain.event_type_metadata import EventTypeMetadata
 from tracardi.domain.value_object.operation import Operation
 from tracardi.domain.value_object.save_result import SaveResult
@@ -13,7 +14,7 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.domain.event import Event, PROCESSED
+from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException

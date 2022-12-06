@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import List, Optional
 from tracardi.config import tracardi
+from tracardi.domain.enum.event_status import COLLECTED
+from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.process_engine.debugger import Debugger
 from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
@@ -59,7 +61,8 @@ class TrackingManager:
                  tracker_config: TrackerConfig,
                  tracker_payload: TrackerPayload,
                  profile: Optional[Profile] = None,
-                 session: Optional[Session] = None):
+                 session: Optional[Session] = None,
+                 ):
 
         self.tracker_config = tracker_config
         self.tracker_payload = tracker_payload
@@ -101,13 +104,40 @@ class TrackingManager:
 
         return profile
 
+    def get_events(self) -> List[Event]:
+        event_list = []
+        if self.tracker_payload.events:
+            debugging = self.tracker_payload.is_debugging_on()
+            for event in self.tracker_payload.events:  # type: EventPayload
+                _event = event.to_event(
+                    self.tracker_payload.metadata,
+                    self.tracker_payload.source,
+                    self.session,
+                    self.profile,
+                    self.has_profile)
+                _event.metadata.status = COLLECTED
+                _event.metadata.debug = debugging
+                _event.metadata.channel = self.tracker_payload.source.channel
+
+                # Append session data
+                if isinstance(self.session, Session):
+                    _event.session.start = self.session.metadata.time.insert
+                    _event.session.duration = self.session.metadata.time.duration
+
+                # Add tracker payload properties as event request values
+
+                if isinstance(_event.request, dict):
+                    _event.request.update(self.tracker_payload.request)
+                else:
+                    _event.request = self.tracker_payload.request
+
+                event_list.append(_event)
+        return event_list
+
     async def invoke_track_process(self) -> TrackerResult:
 
         # Get events
-        events = self.tracker_payload.get_events(
-            self.session,
-            self.profile,
-            self.has_profile)
+        events = self.get_events()
 
         # Validates json schemas of events and reshapes properties
 

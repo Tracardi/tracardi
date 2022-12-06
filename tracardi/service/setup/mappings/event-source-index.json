@@ -38,6 +38,9 @@
       "description": {
         "type": "text"
       },
+      "channel": {
+        "type": "keyword"
+      },
       "url": {
         "type": "keyword"
       },

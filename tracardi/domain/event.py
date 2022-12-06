@@ -9,9 +9,6 @@ from typing import Tuple
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 
-COLLECTED = 'collected'
-PROCESSED = 'processed'
-
 
 class Tags(BaseModel):
     values: Tuple['str', ...] = ()
