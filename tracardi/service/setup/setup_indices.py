@@ -1,5 +1,8 @@
 import json
 import os
+
+from elasticsearch.exceptions import ConnectionTimeout
+
 from tracardi.config import tracardi
 from tracardi.domain.version import Version
 from tracardi.exceptions.log_handler import log_handler
@@ -126,7 +129,15 @@ async def create_indices():
                 # Creates index and alias in one shot.
 
                 mapping = map['template'] if index.multi_index else map
-                result = await es.create_index(target_index, mapping)
+
+                for attempt in range(0, 3):
+                    try:
+                        result = await es.create_index(target_index, mapping)
+                        break
+                    except ConnectionTimeout as e:
+                        raise ConnectionError(
+                            f"Index `{target_index}` was NOT CREATED at attempt {attempt} due to an error: {str(e)}"
+                        )
 
                 if not acknowledged(result):
                     # Index not created
