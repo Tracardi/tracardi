@@ -68,7 +68,7 @@ class ElasticStorage:
                 query = {
                     "query": {
                         "term": {
-                            "_id": id
+                            '_id': id
                         }
                     }
                 }
@@ -104,7 +104,7 @@ class ElasticStorage:
             record = StorageRecord(**record)
 
         if replace_id is True and 'id' in record:
-            record["_id"] = record['id']
+            record['_id'] = record['id']
 
         return record
 
@@ -157,7 +157,7 @@ class ElasticStorage:
             # This function does not work on aliases
             return await self.storage.delete(index, id)
         else:
-            return await self.delete_by("_id", id, index)
+            return await self.delete_by('_id', id, index)
 
     async def search(self, query) -> StorageRecords:
         return StorageRecords.build_from_elastic(await self.storage.search(self.index.get_index_alias(), query))

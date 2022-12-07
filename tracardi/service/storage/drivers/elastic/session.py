@@ -44,7 +44,7 @@ async def load_duplicates(id: str):
     return await storage_manager('session').query({
         "query": {
             "term": {
-                "_id": id
+                '_id': id
             }
         },
         "sort": [

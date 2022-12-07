@@ -118,7 +118,7 @@ class ElasticClient:
             ids.append(_id)
             record = {
                 "_index": index,
-                "_id": _id,
+                '_id': _id,
                 "_source": record
             }
 
@@ -152,7 +152,7 @@ class ElasticClient:
             ids.append(_id)
             record = {
                 "_index": index,
-                "_id": _id,
+                '_id': _id,
                 "_source": record
             }
 

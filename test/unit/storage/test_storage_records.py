@@ -21,7 +21,7 @@ def test_should_assign_and_read_values():
             "hits": [
                 {
                     "_index": "my-index-000001",
-                    "_id": "0",
+                    '_id': "0",
                     "_score": 1.3862942,
                     "_source": {
                         "@timestamp": "2099-11-15T14:12:12",
@@ -98,7 +98,7 @@ def test_should_slice_records():
             "hits": [
                 {
                     "_index": "my-index-000001",
-                    "_id": "0",
+                    '_id': "0",
                     "_score": 1.3862942,
                     "_source": {
                         "@timestamp": "2099-11-15T14:12:12",
@@ -123,7 +123,7 @@ def test_should_slice_records():
                 },
                 {
                     "_index": "my-index-000002",
-                    "_id": "1",
+                    '_id': "1",
                     "_score": 1.3862942,
                     "_source": {
                         "@timestamp": "2099-11-15T14:12:12",
@@ -148,7 +148,7 @@ def test_should_slice_records():
                 },
                 {
                     "_index": "my-index-000003",
-                    "_id": "2",
+                    '_id': "2",
                     "_score": 1.3862942,
                     "_source": {
                         "@timestamp": "2099-11-15T14:12:12",
