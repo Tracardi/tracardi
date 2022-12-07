@@ -32,6 +32,7 @@ class SessionTime(BaseModel):
 
 class SessionMetadata(BaseModel):
     time: SessionTime = SessionTime()
+    channel: Optional[str] = None
 
 
 class SessionContext(dict):

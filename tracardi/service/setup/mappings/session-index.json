@@ -27,14 +27,17 @@
                 },
                 "update": {
                   "type": "date"
+                },
+                "timestamp": {
+                  "type": "integer"
+                },
+                "duration": {
+                  "type": "float"
                 }
               }
             },
-            "timestamp": {
-              "type": "integer"
-            },
-            "duration": {
-              "type": "float"
+            "channel": {
+              "type": "keyword"
             }
           }
         },
