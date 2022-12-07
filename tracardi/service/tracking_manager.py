@@ -279,5 +279,3 @@ class TrackingManager:
                 debugger=debugger,
                 ux=ux
             )
-
-
