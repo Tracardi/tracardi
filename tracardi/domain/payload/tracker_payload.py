@@ -49,6 +49,13 @@ class TrackerPayload(BaseModel):
         super().__init__(**data)
         self._id = str(uuid4())
 
+    def set_headers(self, headers: dict):
+        if 'authorization' in headers:
+            del headers['authorization']
+        if 'cookie' in headers:
+            del headers['cookie']
+        self.request['headers'] = headers
+
     def get_id(self) -> str:
         return self._id
 

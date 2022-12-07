@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
@@ -18,12 +19,18 @@ class EventPayload(BaseModel):
     options: Optional[dict] = {}
     context: Optional[dict] = {}
 
-    def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Optional[Session],
+    def to_event(self, request: dict, metadata: EventPayloadMetadata, source: Entity, session: Optional[Session],
                  profile: Optional[Entity],
                  has_profile: bool) -> Event:
         meta = EventMetadata(**metadata.dict())
         meta.profile_less = not has_profile
         meta.instance = Entity(id=ApiInstance().id)
+        try:
+            if request['headers']['x-timestamp'].isnumeric():
+                ts = int(request['headers']['x-timestamp'])/1000
+                meta.time.create = datetime.fromtimestamp(ts)
+        except KeyError:
+            pass
 
         return Event(id=str(uuid4()),
                      metadata=meta,

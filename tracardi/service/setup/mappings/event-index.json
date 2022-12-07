@@ -26,6 +26,9 @@
                 "insert": {
                   "type": "date"
                 },
+                "create": {
+                  "type": "date"
+                },
                 "process_time": {
                   "type": "float"
                 }

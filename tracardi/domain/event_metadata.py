@@ -14,6 +14,7 @@ class EventProcessors(BaseModel):
 
 class EventTime(BaseModel):
     insert: Optional[datetime]
+    create: Optional[datetime]
     process_time: float = None
 
     def __init__(self, **data: Any):

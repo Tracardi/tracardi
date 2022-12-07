@@ -69,6 +69,7 @@ class Tracker:
         self.tracker_config = tracker_config
 
     async def track_event(self, tracker_payload: TrackerPayload):
+
         # Trim ids - spaces are frequent issues
 
         if tracker_payload.source:
