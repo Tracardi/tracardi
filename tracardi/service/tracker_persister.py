@@ -114,9 +114,10 @@ class TrackerResultPersister:
             raise FieldTypeConflictException("Could not save session. Error: {}".format(str(e)), rows=e.details)
 
     @staticmethod
-    def __get_persistent_events(events: List[Event]):
+    def __get_persistent_events_without_source(events: List[Event]):
         for event in events:
             if event.is_persistent():
+                event.source = Entity(id=event.source.id)
                 yield event
 
     @staticmethod
@@ -141,7 +142,7 @@ class TrackerResultPersister:
     async def __save_events(self, events: Union[List[Event], Generator[Event, Any, None]]) -> Union[SaveResult,
                                                                                                     BulkInsertResult]:
 
-        tagged_events = [event async for event in self.__tag_events(self.__get_persistent_events(events))]
+        tagged_events = [event async for event in self.__tag_events(self.__get_persistent_events_without_source(events))]
         event_result = await storage.driver.event.save(tagged_events, exclude={"operation": ...})
         event_result = SaveResult(**event_result.dict())
 
