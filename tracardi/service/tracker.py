@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Callable, Any
 
@@ -46,26 +47,45 @@ async def track_event(tracker_payload: TrackerPayload,
                       run_async: bool = False,
                       static_profile_id: bool = False
                       ):
-    tr = Tracker(
-        TrackerConfig(
-            ip=ip,
-            allowed_bridges=allowed_bridges,
-            on_source_ready=on_source_ready,
-            on_profile_ready=on_profile_ready,
-            on_flow_ready=on_flow_ready,
-            on_result_ready=on_result_ready,
-            internal_source=internal_source,
-            run_async=run_async,
-            static_profile_id=static_profile_id
-        )
-    )
 
-    return await tr.track_event(tracker_payload)
+    console_log = ConsoleLog()
+    try:
+
+        tr = Tracker(
+            console_log,
+            TrackerConfig(
+                ip=ip,
+                allowed_bridges=allowed_bridges,
+                on_source_ready=on_source_ready,
+                on_profile_ready=on_profile_ready,
+                on_flow_ready=on_flow_ready,
+                on_result_ready=on_result_ready,
+                internal_source=internal_source,
+                run_async=run_async,
+                static_profile_id=static_profile_id
+            )
+        )
+
+        return await tr.track_event(tracker_payload)
+
+    finally:
+        if tracardi.save_logs:
+            """
+            Saves errors caught by logger
+            """
+            if await storage.driver.log.exists():
+                if log_handler.has_logs():
+                    # do not await
+                    asyncio.create_task(storage.driver.log.save(log_handler.collection))
+                    log_handler.reset()
+            else:
+                logger.warning("Log index still not created. Saving logs postponed.")
 
 
 class Tracker:
 
-    def __init__(self, tracker_config: TrackerConfig):
+    def __init__(self, console_log: ConsoleLog, tracker_config: TrackerConfig):
+        self.console_log = console_log
         self.tracker_config = tracker_config
 
     async def track_event(self, tracker_payload: TrackerPayload):
@@ -125,9 +145,8 @@ class Tracker:
 
         return source
 
-    @staticmethod
-    async def handle_on_result_ready(tracker_results, console_log) -> CollectResult:
-        tp = TrackerResultPersister(console_log)
+    async def handle_on_result_ready(self, tracker_results) -> CollectResult:
+        tp = TrackerResultPersister(self.console_log)
         return await tp.persist(tracker_results)
 
     async def handle_source_ready(self,
@@ -146,7 +165,6 @@ class Tracker:
             for seq, (finger_print, tracker_payloads) in enumerate(grouped_tracker_payloads.items()):
                 logger.info(f"Invoking {len(tracker_payloads)} tracker payloads.")
 
-                console_log = ConsoleLog()
                 tracker_results: List[TrackerResult] = []
                 debugging: List[TrackerPayload] = []
 
@@ -154,7 +172,7 @@ class Tracker:
 
                 for tracker_payload in tracker_payloads:
                     # Locks for processing each profile
-                    result = await orchestrator.invoke(tracker_payload, console_log)
+                    result = await orchestrator.invoke(tracker_payload, self.console_log)
                     tracker_results.append(result)
                     responses.append(result.get_response_body(tracker_payload.get_id()))
                     debugging.append(tracker_payload)
@@ -162,9 +180,9 @@ class Tracker:
                 # Save bulk
 
                 if self.tracker_config.on_result_ready is None:
-                    save_results = await self.handle_on_result_ready(tracker_results, console_log)
+                    save_results = await self.handle_on_result_ready(tracker_results)
                 else:
-                    save_results = await self.tracker_config.on_result_ready(tracker_results, console_log)
+                    save_results = await self.tracker_config.on_result_ready(tracker_results, self.console_log)
 
                 # print(save_results.profile)
 

@@ -26,7 +26,7 @@ class ElasticLogHandler(Handler):
             # "exc_info": record.exc_info  # Can not save this to TrackerPayload
         }
 
-        if tracardi.save_logs or tracardi.monitor_logs_event_type:
+        if tracardi.save_logs:
             self.collection.append(log)
 
     def has_logs(self):
