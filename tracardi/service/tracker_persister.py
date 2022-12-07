@@ -166,10 +166,7 @@ class TrackerResultPersister:
             # Reset session id if session is not saved
 
             if tracker_result.tracker_payload.is_on('saveSession', default=True) is False:
-                # DO NOT remove session if it already exists in db
-                if not isinstance(event.session, Entity) or not await storage.driver.session.exist(
-                        event.session.id):
-                    event.session = None
+                event.session = None
 
             if event.id in log_event_journal:
                 log = log_event_journal[event.id]
