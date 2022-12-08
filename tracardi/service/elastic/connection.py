@@ -6,6 +6,7 @@ import elasticsearch
 from tracardi.config import tracardi, elastic
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.driver import storage
+from tracardi.service.storage.drivers.elastic.bridge import install_bridge
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -84,3 +85,26 @@ async def wait_for_connection(no_of_tries=10):
 
     logger.error(f"Could not connect to elasticsearch at {elastic.host}")
     exit()
+
+
+async def wait_for_bridge_install(bridge) -> bool:
+    success = False
+    no_of_tries = 30
+    while True:
+        logger.info("Registering bridge")
+        if no_of_tries < 0:
+            break
+
+        try:
+            await install_bridge(bridge)
+            success = True
+            break
+        except Exception as e:
+            no_of_tries -= 1
+            logger.error(
+                f"Could install bridge die to an error {str(e)}. Bridge install postponed. "
+                f"Number of tries left: {no_of_tries}. "
+                f"Waiting 15s to retry.")
+            await asyncio.sleep(15)
+
+    return success
