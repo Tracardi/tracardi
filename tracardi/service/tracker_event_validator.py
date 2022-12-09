@@ -106,7 +106,7 @@ class EventsValidationHandler:
     async def index_event_traits(self, event: Event) -> Event:
         event_meta_data = await cache.event_metadata(event.type, ttl=memory_cache.event_metadata_cache_ttl)
 
-        if 'index_enabled' in event_meta_data:
+        if isinstance(event_meta_data, dict) and 'index_enabled' in event_meta_data:
             index_enabled = event_meta_data['index_enabled']
             if index_enabled is True and 'index_schema' in event_meta_data:
                 index_schema = event_meta_data['index_schema']
