@@ -45,6 +45,7 @@ class TracardiConfig:
         self.tracardi_scheduler_host = env[
             'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
+        self.server_logging_level = _get_logging_level(env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self._config = None
@@ -68,7 +69,7 @@ class MemoryCacheConfig:
         self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 0
         self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 0
         self.event_validation_cache_ttl = int(env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 0
-        self.event_tag_cache_ttl = int(env['EVENT_TAG_CACHE_TTL']) if 'EVENT_TAG_CACHE_TTL' in env else 0
+        self.event_metadata_cache_ttl = int(env['EVENT_METADATA_CACHE_TTL']) if 'EVENT_METADATA_CACHE_TTL' in env else 0
 
 
 class ElasticConfig:
@@ -100,6 +101,8 @@ class ElasticConfig:
         self.query_timeout = int(env['ELASTIC_QUERY_TIMEOUT']) if 'ELASTIC_QUERY_TIMEOUT' in env else 12
         self.save_pool = int(env['ELASTIC_SAVE_POOL']) if 'ELASTIC_SAVE_POOL' in env else 0
         self.save_pool_ttl = int(env['ELASTIC_SAVE_POOL_TTL']) if 'ELASTIC_SAVE_POOL_TTL' in env else 5
+        self.logging_level = _get_logging_level(
+            env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.WARNING
 
         self._unset_credentials()
 

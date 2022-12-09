@@ -8,6 +8,7 @@ class EventTypeMetadata(NamedEntity):
     name: str
     event_type: str
     description: Optional[str] = "No description provided"
+    index_schema: Optional[dict] = {}
     tags: List[str] = []
 
     def __init__(self, **data: Any):

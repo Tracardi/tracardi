@@ -126,7 +126,7 @@ class TrackerResultPersister:
         for event in events:
             try:
 
-                event_meta_data = await cache.event_tag(event.type, ttl=memory_cache.event_tag_cache_ttl)
+                event_meta_data = await cache.event_metadata(event.type, ttl=memory_cache.event_metadata_cache_ttl)
                 if event_meta_data:
                     event_type_meta_data = event_meta_data.to_entity(EventTypeMetadata)
 

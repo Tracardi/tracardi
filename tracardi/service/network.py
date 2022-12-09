@@ -4,7 +4,7 @@ from typing import Optional
 
 from tracardi.config import tracardi
 
-logger = logging.getLogger('utils.network')
+logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 
 

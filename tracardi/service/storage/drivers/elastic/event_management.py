@@ -5,7 +5,7 @@ from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.event_type_metadata import EventTypeMetadata
 
 
-async def add_event_type_metadata(event_type_metadata: EventTypeMetadata):
+async def save(event_type_metadata: EventTypeMetadata):
     return await storage_manager("event-management").upsert(event_type_metadata)
 
 

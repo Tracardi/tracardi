@@ -103,7 +103,35 @@ class EventsValidationHandler:
                 return resharper.reshape(schemas=reshape_schemas)
         return event
 
-    async def validate_and_reshape_events(self, events) -> List[Event]:
+    async def index_event_traits(self, event: Event) -> Event:
+        event_meta_data = await cache.event_metadata(event.type, ttl=memory_cache.event_metadata_cache_ttl)
+        if 'index_schema' in event_meta_data:
+            index_schema = event_meta_data['index_schema']
+            if isinstance(index_schema, dict):
+                for property, trait  in index_schema.items():
+                    try:
+                        if property in event.properties:
+                            event.traits[trait] = event.properties[property]
+                            del event.properties[property]
+                        else:
+                            raise KeyError(f"Property '{property}' does not exist in event {event.id}")
+                    except KeyError as e:
+                        console = Console(
+                            origin="event-indexing",
+                            event_id=event.id,
+                            flow_id=None,
+                            node_id=None,
+                            profile_id=None,
+                            module=__name__,
+                            class_name=EventsValidationHandler.__name__,
+                            type="warning",
+                            message=str(e),
+                            traceback=get_traceback(e)
+                        )
+                        self.console_log.append(console)
+        return event
+
+    async def validate_and_reshape_index_events(self, events) -> List[Event]:
         processed_events = []
         for event in events:
 
@@ -127,6 +155,8 @@ class EventsValidationHandler:
                         traceback=get_traceback(e)
                     )
                 )
+
+            event = await self.index_event_traits(event)
 
             processed_events.append(event)
 

@@ -11,7 +11,7 @@ from ..config import tracardi
 from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 import logging
 
-logger = logging.getLogger("Flow")
+logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 
 

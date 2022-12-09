@@ -1,10 +1,11 @@
 import logging
 from dataclasses import dataclass
 from typing import List, Optional
-from tracardi.config import tracardi
+from tracardi.config import tracardi, memory_cache
 from tracardi.domain.enum.event_status import COLLECTED
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.process_engine.debugger import Debugger
+from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -26,6 +27,7 @@ from tracardi.service.wf.domain.flow_response import FlowResponses
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+cache = CacheManager()
 
 
 @dataclass
@@ -151,8 +153,9 @@ class TrackingManager:
             memory=None
         )
 
+        # Index traits
         evh = EventsValidationHandler(dot, self.console_log)
-        events = await evh.validate_and_reshape_events(events)
+        events = await evh.validate_and_reshape_index_events(events)
 
         debugger = None
         segmentation_result = None

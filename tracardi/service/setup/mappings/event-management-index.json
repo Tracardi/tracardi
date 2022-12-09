@@ -21,6 +21,9 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "index_schema": {
+        "type": "flattened"
       }
     }
   },

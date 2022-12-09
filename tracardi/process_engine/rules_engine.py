@@ -27,7 +27,7 @@ from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import log_handler
 from ..service.console_log import ConsoleLog
 
-logger = logging.getLogger("Routing rule")
+logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 

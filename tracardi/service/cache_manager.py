@@ -15,7 +15,8 @@ class CacheManager(metaclass=Singleton):
         'EVENT_SOURCE': MemoryCache("event-source", max_pool=100, allow_null_values=False),
         'EVENT_VALIDATION': MemoryCache("event-validation", max_pool=500, allow_null_values=True),
         'EVENT_TAG': MemoryCache("event-tags", max_pool=200, allow_null_values=True),
-        'EVENT_RESHAPING': MemoryCache("event-reshaping", max_pool=200, allow_null_values=True)
+        'EVENT_RESHAPING': MemoryCache("event-reshaping", max_pool=200, allow_null_values=True),
+        'EVENT_INDEXING': MemoryCache("event-indexing", max_pool=200, allow_null_values=True)
     }
 
     def session_cache(self) -> MemoryCache:
@@ -27,11 +28,14 @@ class CacheManager(metaclass=Singleton):
     def event_validation_cache(self) -> MemoryCache:
         return self._cache['EVENT_VALIDATION']
 
-    def event_tag_cache(self) -> MemoryCache:
+    def event_metadata_cache(self) -> MemoryCache:
         return self._cache['EVENT_TAG']
 
     def event_reshaping_cache(self) -> MemoryCache:
         return self._cache['EVENT_RESHAPING']
+
+    def event_indexing_cache(self) -> MemoryCache:
+        return self._cache['EVENT_INDEXING']
 
     # Caches
 
@@ -80,10 +84,10 @@ class CacheManager(metaclass=Singleton):
                 event_type)
         return await storage.driver.event_validation.load_by_event_type(event_type)
 
-    async def event_tag(self, event_type, ttl):
+    async def event_metadata(self, event_type, ttl):
         if ttl > 0:
             return await MemoryCache.cache(
-                self.event_tag_cache(),
+                self.event_metadata_cache(),
                 event_type,
                 ttl,
                 storage.driver.event_management.get_event_type_metadata,
