@@ -365,6 +365,16 @@ def get_resource_types() -> List[ResourceSettings]:
             name='GitHub',
             manual='github_resource',
         ),
+        ResourceSettings(
+            id='discord',
+            config={
+                'url': '<webhook_url>',
+            },
+            icon='discord',
+            tags=['discord'],
+            name='Discord',
+            manual='discord_resource',
+        )
     ]
 
 
