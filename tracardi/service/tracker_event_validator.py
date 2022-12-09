@@ -8,7 +8,7 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 import jsonschema
 from tracardi.domain.event_validator import EventValidator
 from tracardi.exceptions.exception import EventValidationException
-from dotty_dict import Dotty
+from dotty_dict import Dotty, dotty
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.parser import Parser
 from typing import List
@@ -108,11 +108,14 @@ class EventsValidationHandler:
         if 'index_schema' in event_meta_data:
             index_schema = event_meta_data['index_schema']
             if isinstance(index_schema, dict):
-                for property, trait  in index_schema.items():
+                dot_event_properties = dotty(event.properties)
+                dot_event_traits = dotty(event.traits)
+
+                for property, trait in index_schema.items():  # type: str, str
                     try:
-                        if property in event.properties:
-                            event.traits[trait] = event.properties[property]
-                            del event.properties[property]
+                        if property in dot_event_properties:
+                            dot_event_traits[trait] = dot_event_properties[property]
+                            del dot_event_properties[property]
                         else:
                             raise KeyError(f"Property '{property}' does not exist in event {event.id}")
                     except KeyError as e:
@@ -129,6 +132,9 @@ class EventsValidationHandler:
                             traceback=get_traceback(e)
                         )
                         self.console_log.append(console)
+
+                event.properties = dot_event_properties.to_dict()
+                event.traits = dot_event_traits.to_dict()
         return event
 
     async def validate_and_reshape_index_events(self, events) -> List[Event]:
