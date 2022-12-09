@@ -105,36 +105,39 @@ class EventsValidationHandler:
 
     async def index_event_traits(self, event: Event) -> Event:
         event_meta_data = await cache.event_metadata(event.type, ttl=memory_cache.event_metadata_cache_ttl)
-        if 'index_schema' in event_meta_data:
-            index_schema = event_meta_data['index_schema']
-            if isinstance(index_schema, dict):
-                dot_event_properties = dotty(event.properties)
-                dot_event_traits = dotty(event.traits)
 
-                for property, trait in index_schema.items():  # type: str, str
-                    try:
-                        if property in dot_event_properties:
-                            dot_event_traits[trait] = dot_event_properties[property]
-                            del dot_event_properties[property]
-                        else:
-                            raise KeyError(f"Property '{property}' does not exist in event {event.id}")
-                    except KeyError as e:
-                        console = Console(
-                            origin="event-indexing",
-                            event_id=event.id,
-                            flow_id=None,
-                            node_id=None,
-                            profile_id=None,
-                            module=__name__,
-                            class_name=EventsValidationHandler.__name__,
-                            type="warning",
-                            message=str(e),
-                            traceback=get_traceback(e)
-                        )
-                        self.console_log.append(console)
+        if 'index_enabled' in event_meta_data:
+            index_enabled = event_meta_data['index_enabled']
+            if index_enabled is True and 'index_schema' in event_meta_data:
+                index_schema = event_meta_data['index_schema']
+                if isinstance(index_schema, dict):
+                    dot_event_properties = dotty(event.properties)
+                    dot_event_traits = dotty(event.traits)
 
-                event.properties = dot_event_properties.to_dict()
-                event.traits = dot_event_traits.to_dict()
+                    for property, trait in index_schema.items():  # type: str, str
+                        try:
+                            if property in dot_event_properties:
+                                dot_event_traits[trait] = dot_event_properties[property]
+                                del dot_event_properties[property]
+                            else:
+                                raise KeyError(f"Property '{property}' does not exist in event {event.id}")
+                        except KeyError as e:
+                            console = Console(
+                                origin="event-indexing",
+                                event_id=event.id,
+                                flow_id=None,
+                                node_id=None,
+                                profile_id=None,
+                                module=__name__,
+                                class_name=EventsValidationHandler.__name__,
+                                type="warning",
+                                message=str(e),
+                                traceback=get_traceback(e)
+                            )
+                            self.console_log.append(console)
+
+                    event.properties = dot_event_properties.to_dict()
+                    event.traits = dot_event_traits.to_dict()
         return event
 
     async def validate_and_reshape_index_events(self, events) -> List[Event]:
