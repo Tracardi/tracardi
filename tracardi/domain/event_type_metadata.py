@@ -8,6 +8,7 @@ class EventTypeMetadata(NamedEntity):
     name: str
     event_type: str
     description: Optional[str] = "No description provided"
+    index_enabled: Optional[bool] = False
     index_schema: Optional[dict] = {}
     tags: List[str] = []
 
