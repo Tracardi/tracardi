@@ -10,6 +10,10 @@ async def load_by_id(id: str) -> Optional[StorageRecord]:
     return await storage_manager("profile").load(id)
 
 
+async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
+    return await storage_manager('profile').load_all(start, limit, sort)
+
+
 async def load_merged_profile(id: str) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
