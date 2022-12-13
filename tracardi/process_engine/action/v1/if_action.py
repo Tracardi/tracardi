@@ -63,10 +63,12 @@ class IfAction(ActionRunner):
                 node_id=self.node.id,
                 profile_id=get_entity_id(self.profile),
                 ttl=int(self.config.ttl),
-                debug=False
+                debug=self.debug
             )
 
-            if not await vtm.pass_threshold(result):
+            allow_passage = await vtm.pass_threshold(result)
+
+            if not allow_passage:
                 return None
 
         if result:
