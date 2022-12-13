@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import validator
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -6,10 +8,15 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 
 from tracardi.process_engine.tql.condition import Condition
+from tracardi.service.utils.getters import get_entity_id
+from tracardi.service.value_threshold_manager import ValueThresholdManager
 
 
 class IfConfiguration(PluginConfig):
     condition: str
+    trigger_once: bool = False
+    pass_payload: bool = True
+    ttl: int = 0
 
     @validator("condition")
     def is_valid_condition(cls, value):
@@ -18,6 +25,13 @@ class IfConfiguration(PluginConfig):
             _condition.parse(value)
         except Exception as e:
             raise ValueError(str(e))
+
+        return value
+
+    @validator("ttl")
+    def is_bigger_then_zero(cls, value):
+        if value < 0:
+            raise ValueError("This value must be greater then 0")
 
         return value
 
@@ -33,7 +47,7 @@ class IfAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    async def run(self, payload: dict, in_edge=None) -> Result:
+    async def run(self, payload: dict, in_edge=None) -> Optional[Result]:
 
         if self.config.condition is None:
             raise ValueError("Condition is not set. Define it in config section.")
@@ -41,10 +55,24 @@ class IfAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
 
         condition = Condition()
-        if await condition.evaluate(self.config.condition, dot):
-            return Result(port="true", value=payload)
+        result = await condition.evaluate(self.config.condition, dot)
+
+        if self.config.trigger_once:
+            vtm = ValueThresholdManager(
+                name=self.node.name,
+                node_id=self.node.id,
+                profile_id=get_entity_id(self.profile),
+                ttl=int(self.config.ttl),
+                debug=False
+            )
+
+            if not await vtm.pass_threshold(result):
+                return None
+
+        if result:
+            return Result(port="true", value=payload if self.config.pass_payload else {"result": True})
         else:
-            return Result(port="false", value=payload)
+            return Result(port="false", value=payload if self.config.pass_payload else {"result": False})
 
 
 def register() -> Plugin:
@@ -55,7 +83,12 @@ def register() -> Plugin:
             className='IfAction',
             inputs=["payload"],
             outputs=["true", "false"],
-            init={"condition": ""},
+            init={
+                "condition": "",
+                "trigger_once": False,
+                "pass_payload": True,
+                "ttl": 0
+            },
             form=Form(groups=[
                 FormGroup(
                     name="Condition statement",
@@ -66,12 +99,35 @@ def register() -> Plugin:
                             description="Provide condition for IF statement. If the condition is met then the payload "
                                         "will be returned on TRUE port if not then FALSE port is triggered.",
                             component=FormComponent(type="textarea", props={"label": "condition"})
+                        ),
+                        FormField(
+                            id="trigger_once",
+                            name="Return value only once per condition change",
+                            description="It will trigger the relevant port only once per condition change. Otherwise "
+                                        "the flow will be stopped.",
+                            component=FormComponent(type="bool", props={"label": "Trigger once per condition change"})
+                        ),
+                        FormField(
+                            id="ttl",
+                            name="Expire trigger once after",
+                            description="This value is a number of seconds the system should wait to trigger port "
+                                        "again regardless of the condition change. "
+                                        "It will trigger regardless of the condition change after some defined time."
+                                        "Default value 0, means wait forever for value change. ",
+                            component=FormComponent(type="text", props={"label": "Suppression time to live"})
+                        ),
+                        FormField(
+                            id="pass_payload",
+                            name="Return input payload instead of True/False",
+                            description="It will return input payload on the output ports if enabled "
+                                        "otherwise True/False.",
+                            component=FormComponent(type="bool", props={"label": "Return input payload"})
                         )
                     ]
                 ),
             ]),
             manual="if_action",
-            version='0.7.1',
+            version='0.7.4',
             license="MIT",
             author="Risto Kowaczewski"
         ),
