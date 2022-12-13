@@ -100,7 +100,7 @@ class ElasticClient:
             return await self.insert_via_pool(index, records)
         return await self.insert_bulk(index, records)
 
-    async def insert_bulk(self, index, records) -> BulkInsertResult:
+    async def insert_bulk(self, index, records, repeats: int = 3) -> BulkInsertResult:
 
         if not isinstance(records, list):
             raise ValueError("Insert expects payload to be list.")
@@ -126,13 +126,19 @@ class ElasticClient:
 
             bulk.append(record)
 
-        success, errors = await helpers.async_bulk(self._client, bulk)
+        while repeats > 0:
+            try:
+                success, errors = await helpers.async_bulk(self._client, bulk)
+                return BulkInsertResult(
+                    saved=success,
+                    errors=errors,
+                    ids=ids
+                )
+            except Exception as e:
+                logger.error(f"Bulk insert error: {str(e)}")
+                await asyncio.sleep(2)
 
-        return BulkInsertResult(
-            saved=success,
-            errors=errors,
-            ids=ids
-        )
+            repeats -= 1
 
     async def insert_via_pool(self, index, records) -> BulkInsertResult:
 
