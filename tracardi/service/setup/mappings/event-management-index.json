@@ -24,7 +24,7 @@
       },
       "index_enabled": {
         "type": "boolean"
-      },,
+      },
       "index_schema": {
         "type": "flattened"
       }

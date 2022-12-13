@@ -2,7 +2,7 @@ import json
 import os
 
 from elasticsearch.exceptions import ConnectionTimeout
-
+from json import JSONDecodeError
 from tracardi.config import tracardi
 from tracardi.domain.version import Version
 from tracardi.exceptions.log_handler import log_handler
@@ -74,7 +74,11 @@ async def create_indices():
 
             map = file.read()
             map = index.prepare_mappings(map)
-            map = json.loads(map)
+            try:
+                map = json.loads(map)
+            except JSONDecodeError as e:
+                logger.error(f"Could not read JSON mapping file {map_file}. error {str(e)}")
+                raise e
 
             target_index = index.get_aliased_data_index()
             alias_index = index.get_index_alias()
