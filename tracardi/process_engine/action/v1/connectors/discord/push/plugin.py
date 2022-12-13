@@ -21,7 +21,7 @@ class DiscordWebHookAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await storage.driver.resource.load(config.resource.id)
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=DiscordCredentials)
@@ -127,7 +127,7 @@ def register() -> Plugin:
                 )
             ]
             ),
-            version="0.6.1",
+            version="0.7.4",
             author="Risto Kowaczewski",
             license="MIT",
             manual="discord_webhook_action"
