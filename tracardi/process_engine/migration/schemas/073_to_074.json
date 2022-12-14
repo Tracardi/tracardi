@@ -126,7 +126,7 @@
       "from_index": "tracardi-source",
       "to_index": "tracardi-source",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\n//row.bridge = <type _complex>;\nrow.channel = \"\";\nrow.config = {};\nrow.bridge.id = null;\nrow.bridge.name = \"Undefined\";\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.bridge = {\"id\":\"1\",\"name\":\"Undefined\"};\nrow.channel = \"\";\nrow.config = {};\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -210,7 +210,7 @@
       "from_index": "tracardi-event-redirect",
       "to_index": "tracardi-event-redirect",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.description = \"\";\n//row.source = <type _complex>;\nrow.tags = \"\";\nrow.name = \"\";\nrow.source.id = null;\nrow.source.name = \"Undefined\";\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": null
     },
     "worker": "reindex",
     "conflicts": null,
@@ -258,7 +258,7 @@
       "from_index": "tracardi-session",
       "to_index": "tracardi-session",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.metadata.channel = \"\";\nrow.metadata.time.duration = (float)ctx._source.metadata.duration;\nrow.metadata.time.timestamp = (integer)ctx._source.metadata.timestamp;\nrow.metadata.remove(\"timestamp\");\nrow.metadata.remove(\"duration\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.metadata.channel = \"\";\nrow.metadata.time.timestamp = ctx._source.metadata.timestamp;\nrow.metadata.remove(\"timestamp\");\nrow.metadata.remove(\"duration\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
