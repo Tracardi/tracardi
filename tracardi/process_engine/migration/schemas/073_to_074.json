@@ -93,18 +93,7 @@
       "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.metadata.channel = \"\";\nrow.session.tz = \"\";\n//row.metadata.time.create = null;\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
-    "conflicts": [
-      {
-        "name": "context",
-        "old_type": "object",
-        "new_type": "flattened"
-      },
-      {
-        "name": "aux",
-        "old_type": "object",
-        "new_type": "flattened"
-      }
-    ],
+    "conflicts": null,
     "asynchronous": true
   },
   {
@@ -272,18 +261,7 @@
       "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.metadata.channel = \"\";\nrow.metadata.time.duration = (float)ctx._source.metadata.duration;\nrow.metadata.time.timestamp = (integer)ctx._source.metadata.timestamp;\nrow.metadata.remove(\"timestamp\");\nrow.metadata.remove(\"duration\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
-    "conflicts": [
-      {
-        "name": "properties",
-        "old_type": "object",
-        "new_type": "flattened"
-      },
-      {
-        "name": "context",
-        "old_type": "object",
-        "new_type": "flattened"
-      }
-    ],
+    "conflicts": null,
     "asynchronous": true
   },
   {
@@ -295,13 +273,7 @@
       "script": null
     },
     "worker": "reindex",
-    "conflicts": [
-      {
-        "name": "pii.other",
-        "old_type": "object",
-        "new_type": "flattened"
-      }
-    ],
+    "conflicts": null,
     "asynchronous": true
   },
   {
