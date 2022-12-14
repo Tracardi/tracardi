@@ -89,6 +89,11 @@ class MigrationManager:
             self.to_version.version,
             self.to_version.name
         )
+
+        if target_version is None:
+            raise ValueError(f"Installed system is version {self.to_version.version}, "
+                             f"but storage version index has not this version.")
+
         warn = f"{self.from_version.get_version_prefix()}.{self.from_version.name}" in target_version.get(
             "upgrades",
             []

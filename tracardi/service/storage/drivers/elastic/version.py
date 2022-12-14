@@ -11,7 +11,7 @@ def save(version: dict):
 
 
 async def load_by_version_and_name(version: str, name: str) -> StorageRecord:
-    result = await storage_manager('version').query({
+    query = {
         "query": {
             "bool": {
                 "must": [
@@ -20,6 +20,7 @@ async def load_by_version_and_name(version: str, name: str) -> StorageRecord:
                 ]
             }
         }
-    })
+    }
+    result = await storage_manager('version').query(query)
 
     return result.first()
