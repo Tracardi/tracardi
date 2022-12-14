@@ -145,12 +145,14 @@ class StorageRecords(dict):
         """
         return self._hits[n]
 
-    def first(self) -> StorageRecord:
-        first_hit = self._hits[0]
-        row = StorageRecord.build_from_elastic(first_hit)
-        row['id'] = first_hit['_id']
+    def first(self) -> Optional[StorageRecord]:
+        if len(self._hits) > 0:
+            first_hit = self._hits[0]
+            row = StorageRecord.build_from_elastic(first_hit)
+            row['id'] = first_hit['_id']
 
-        return row
+            return row
+        return None
 
     def dict(self):
         return {
