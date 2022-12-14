@@ -33,6 +33,9 @@ class InjectProfileByField(ActionRunner):
 
         record = result.first()
 
+        if not record:
+            return Result(port="error", value={"message": "Could not find profile."})
+
         profile = record.to_entity(Profile)
 
         self.event.profile = profile
