@@ -31,7 +31,9 @@ class InjectProfileByField(ActionRunner):
             self.console.warning(message)
             return Result(port="error", value={"message": message})
 
-        profile = Profile(**result.first())
+        record = result.first()
+
+        profile = record.to_entity(Profile)
 
         self.event.profile = profile
         self.event.metadata.profile_less = False
