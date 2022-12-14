@@ -1,6 +1,6 @@
 from tracardi.config import elastic, tracardi
 from tracardi.domain.profile import *
-from tracardi.domain.storage_record import StorageRecord
+from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.storage.profile_cacher import ProfileCache
@@ -111,13 +111,24 @@ async def load_duplicates(id: str):
     })
 
 
-async def load_by_field(field: str, value: str, start: int = 0, limit: int = 100):
+async def load_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
     return await storage_manager('profile').query({
         "from": start,
         "size": limit,
         "query": {
-            "term": {
-                field: value
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            field: value
+                        }
+                    },
+                    {
+                        "term": {
+                            "active": True
+                        }
+                    }
+                ]
             }
         }
     })
