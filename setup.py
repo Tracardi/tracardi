@@ -7,7 +7,7 @@ with open("README.md", "r",encoding="utf-8") as fh:
 
 setup(
     name='tracardi',
-    version='0.7.4-dev',
+    version='0.8.0-dev',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -61,7 +61,7 @@ setup(
         'celery==5.2.6',
         'random-password-generator==2.2.0',
         'asyncio-mqtt==0.12.1',
-        'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker',  # Change to 0.7.4-dev
+        'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker',  # Change to 0.8.0-dev
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
         'googletrans==3.1.0a0',
         'tweepy==4.10.1',
