@@ -111,8 +111,8 @@ async def load_duplicates(id: str):
     })
 
 
-async def load_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
-    return await storage_manager('profile').query({
+async def load_active_profile_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
+    query={
         "from": start,
         "size": limit,
         "query": {
@@ -131,7 +131,8 @@ async def load_by_field(field: str, value: str, start: int = 0, limit: int = 100
                 ]
             }
         }
-    })
+    }
+    return await storage_manager('profile').query(query)
 
 
 async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket_size: int = 100,

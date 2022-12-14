@@ -24,7 +24,7 @@ class InjectProfileByField(ActionRunner):
         dot = self._get_dot_accessor(payload)
         value = dot[self.config.value]
 
-        result = await storage.driver.profile.load_by_field(self.config.field, value, start=0, limit=2)
+        result = await storage.driver.profile.load_active_profile_by_field(self.config.field, value, start=0, limit=2)
 
         if result.total != 1:
             message = "Found {} records for {} = {}.".format(result.total, self.config.field, value)
