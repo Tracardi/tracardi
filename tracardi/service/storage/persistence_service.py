@@ -557,7 +557,7 @@ class PersistenceService:
         engine = SqlSearchQueryEngine(self)
         return await engine.search(query, start, limit)
 
-    async def query_by_sql_in_time_range(self, query: DatetimeRangePayload, query_type="tql") -> QueryResult:
+    async def query_by_sql_in_time_range(self, query: DatetimeRangePayload, query_type="kql") -> QueryResult:
         engine = SqlSearchQueryEngine(self)
         return await engine.time_range(query, query_type)
 

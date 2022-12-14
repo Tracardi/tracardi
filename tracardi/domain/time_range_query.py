@@ -1,8 +1,13 @@
+from time import time
+
 import pytz
 from _datetime import datetime, timedelta
 from typing import Optional, Tuple
+
 from pydantic import BaseModel
 from enum import Enum
+
+from tracardi.service.time import parse_date, parse_date_delta
 
 
 class DatetimeType(str, Enum):
@@ -58,6 +63,12 @@ class DatetimePayload(BaseModel):
                                hour=now.hour, minute=now.minute, second=now.second,
                                meridiem=now.strftime("%p"))
 
+    @staticmethod
+    def build(date: datetime) -> 'DatetimePayload':
+        return DatetimePayload(year=date.year, month=date.month, date=date.day,
+                               hour=date.hour, minute=date.minute, second=date.second,
+                               meridiem=date.strftime("%p"))
+
     def is_set(self):
         return self.year is not None \
                and self.month is not None \
@@ -94,6 +105,26 @@ class DatetimePayload(BaseModel):
 class DatePayload(BaseModel):
     delta: Optional[DateDeltaPayload] = None
     absolute: Optional[DatetimePayload] = None
+
+    @staticmethod
+    def create(string: str) -> 'DatePayload':
+        if string == 'now':
+            return DatePayload()
+        else:
+            date = parse_date(string)
+            if date is not None:
+                return DatePayload(
+                    absolute=DatetimePayload.build(date)
+                )
+            else:
+                delta = parse_date_delta(string)
+                if delta is not None:
+                    date = datetime.fromtimestamp(time() + delta)
+                    return DatePayload(
+                        absolute=DatetimePayload.build(date)
+                    )
+
+        raise ValueError(f"Could not parse date {string}")
 
     def get_date(self) -> datetime:
         if self.absolute is None:
