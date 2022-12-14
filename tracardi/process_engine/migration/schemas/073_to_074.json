@@ -42,7 +42,7 @@
       "from_index": "tracardi-event-management",
       "to_index": "tracardi-event-management",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.index_enabled = false;\nrow.index_schema = {};\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": null
     },
     "worker": "reindex",
     "conflicts": null,
