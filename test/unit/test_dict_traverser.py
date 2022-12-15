@@ -4,7 +4,43 @@ from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 
-def test__should_return_value_event_if_is_is_empty():
+def test_should_traverse_list():
+    template = []
+
+    dot = DotAccessor(profile={"a": [1, 2], "b": [1, 2]}, session={"b": 2}, event={})
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result == []
+
+    template = [
+        "profile@a", "abc", {"a": "profile@a"}
+    ]
+
+    dot = DotAccessor(profile={"a": [1, 2], "b": [1, 2]}, session={"b": 2}, event={})
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result == [[1, 2], "abc", {"a": [1, 2]}]
+
+
+def test_should_traverse_empty_object():
+    template = {}
+
+    dot = DotAccessor(profile={"a": [1, 2], "b": [1, 2]}, session={"b": 2}, event={})
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result == {}
+
+
+def test_should_traverse_none():
+    template = None
+
+    dot = DotAccessor(profile={"a": [1, 2], "b": [1, 2]}, session={"b": 2}, event={})
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result is None
+
+
+def test_should_return_value_event_if_is_is_empty():
     template = {
         "x": {
             "a": []
@@ -23,8 +59,8 @@ def test__should_return_value_event_if_is_is_empty():
         t.reshape(reshape_template=template)
 
     template = {
-            "x": [[1, 2, 3], "a", []]
-        }
+        "x": [[1, 2, 3], "a", []]
+    }
     dot = DotAccessor()
     t = DictTraverser(dot)
     result = t.reshape(reshape_template=template)

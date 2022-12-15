@@ -32,8 +32,8 @@ class DictTraverser:
         return value
 
     def traverse(self, value, key=None, path="root"):
-        if key is None and isinstance(value,list):
-            raise ValueError("Can not traverse list. Please provide an object.")
+        if key is None and isinstance(value, list) and len(value) == 0:
+            raise ValueError("Can not traverse empty list.")
 
         if isinstance(value, dict):
             for k, v in value.items():
@@ -49,9 +49,15 @@ class DictTraverser:
             yield key, value, path
 
     def reshape(self, reshape_template: Union[Dict, List]):
+
+        if reshape_template is None:
+            return None
+
+        if isinstance(reshape_template, list) and len(reshape_template) == 0:
+            return []
+
         out_dot = dotty()
         for key, value, path in self.traverse(reshape_template):
-
             if key is not None:
                 path = path[:-len(key)-1]
 
