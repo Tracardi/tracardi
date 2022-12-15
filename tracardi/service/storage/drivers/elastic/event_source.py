@@ -16,9 +16,9 @@ async def load(id: str) -> Optional[EventSource]:
     return EventSource.create(await storage_manager("event-source").load(id))
 
 
-async def load_by_bridge_id(bridge_id: str) -> List[EventSource]:
+async def load_by_active_event_sources_bridge_id(bridge_id: str) -> List[EventSource]:
     result = await storage_manager("event-source").load_by_values(
-        [("bridge.id", bridge_id)]
+        [("bridge.id", bridge_id), ("enabled", True)]
     )
     return result.to_domain_objects(EventSource)
 
