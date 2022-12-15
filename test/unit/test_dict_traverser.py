@@ -52,12 +52,6 @@ def test_should_return_value_event_if_is_is_empty():
     result = t.reshape(reshape_template=template)
     assert result['x']['a'] == []
 
-    with pytest.raises(ValueError):
-        template = []
-        dot = DotAccessor()
-        t = DictTraverser(dot)
-        t.reshape(reshape_template=template)
-
     template = {
         "x": [[1, 2, 3], "a", []]
     }
