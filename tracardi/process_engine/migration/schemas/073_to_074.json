@@ -126,7 +126,7 @@
       "from_index": "tracardi-source",
       "to_index": "tracardi-source",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.bridge = {\"id\":\"1\",\"name\":\"Undefined\"};\nrow.channel = \"\";\nrow.config = {};\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": null
     },
     "worker": "reindex",
     "conflicts": null,
