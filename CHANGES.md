@@ -8,9 +8,8 @@ Version 0.7.4
   * Github plugins
   * New if plugin
   * New discord plugin
-* Event redirect bridge (collector)
 * Upgrade to node v18.12.1
-* Profile synchronisation configuration in the event source
+* Profile synchronisation configuration moved from envs to the event source
 * Storage access refactoring
 * Event source configuration caching
 * Event validation schema caching
@@ -22,9 +21,16 @@ Version 0.7.4
 * Major redo of collection engine.
 * Event indexing inside the event metadata configuration
 * New GUI display configuration 
+* New Bridge API for developers
+* Installation token for protecting uninstalled instances
+* Security fixes - Removing envs with credentials
 * Errors
   * Fixed bridge error
   * Profile duplication fix
+* Commercial features:
+  * Event redirect bridge (collector)
+  * Webhook bridge
+  * Background processes for profile merging and deduplication
 
 Version 0.7.3
 ----------------------------------------------------------
