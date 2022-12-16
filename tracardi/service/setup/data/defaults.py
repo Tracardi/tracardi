@@ -7,7 +7,7 @@ default_db_data = {
         Bridge(
             id=str(uuid4()),
             type="rest",
-            name="API Bridge",
+            name="API Bridge Open-source",
             description="Opens and API and collects from it"
         )
     ]
