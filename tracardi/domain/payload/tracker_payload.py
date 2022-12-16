@@ -29,7 +29,7 @@ class TrackerPayload(BaseModel):
 
     _id: str = PrivateAttr(None)
 
-    source: Union[Entity, EventSource]  # When read from a API then it is Entity then is replaced by EventSource
+    source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
 
     metadata: Optional[EventPayloadMetadata]
