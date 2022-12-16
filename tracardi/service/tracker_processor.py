@@ -3,6 +3,7 @@ import redis
 
 from abc import ABC, abstractmethod
 
+from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -12,11 +13,11 @@ from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.exceptions.log_handler import log_handler
-from typing import Dict, List
+from typing import List, Callable, Coroutine, Any, Type
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_persister import TrackerResultPersister
-from tracardi.service.tracking_manager import TrackerResult
+from tracardi.service.tracking_manager import TrackerResult, TrackingManagerBase
 from tracardi.service.tracking_orchestrator import TrackingOrchestrator
 
 logger = logging.getLogger(__name__)
@@ -26,9 +27,16 @@ logger.addHandler(log_handler)
 
 class TrackProcessorBase(ABC):
 
-    def __init__(self, console_log: ConsoleLog, tracker_config: TrackerConfig):
+    def __init__(self,
+                 console_log: ConsoleLog,
+                 on_profile_merge: Callable[[Profile], Profile] = None,
+                 on_profile_ready: Type[TrackingManagerBase] = None,
+                 on_result_ready: Callable[[List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None):
+
+        self.on_profile_ready = on_profile_ready
+        self.on_profile_merge = on_profile_merge
         self.console_log = console_log
-        self.tracker_config = tracker_config
+        self.on_result_ready = on_result_ready
 
     @abstractmethod
     async def handle(self,
@@ -40,8 +48,9 @@ class TrackProcessorBase(ABC):
 
 class TrackerProcessor(TrackProcessorBase):
 
-    async def _handle_on_result_ready(self, tracker_results) -> CollectResult:
-        tp = TrackerResultPersister(self.console_log)
+    @staticmethod
+    async def _handle_on_result_ready(tracker_results, console_log) -> CollectResult:
+        tp = TrackerResultPersister(console_log)
         return await tp.persist(tracker_results)
 
     async def handle(self,
@@ -55,7 +64,12 @@ class TrackerProcessor(TrackProcessorBase):
         responses = []
         try:
             # Uses redis to lock profiles
-            orchestrator = TrackingOrchestrator(source, tracker_config)
+            orchestrator = TrackingOrchestrator(
+                source,
+                tracker_config,
+                on_profile_merge=self.on_profile_merge,
+                on_profile_ready=self.on_profile_ready
+            )
 
             for seq, (finger_print, tracker_payloads) in enumerate(grouped_tracker_payloads.items()):
                 logger.info(f"Invoking {len(tracker_payloads)} tracker payloads.")
@@ -74,10 +88,10 @@ class TrackerProcessor(TrackProcessorBase):
 
                 # Save bulk
 
-                if self.tracker_config.on_result_ready is None:
-                    save_results = await self._handle_on_result_ready(tracker_results)
+                if self.on_result_ready is None:
+                    save_results = await self._handle_on_result_ready(tracker_results, self.console_log)
                 else:
-                    save_results = await self.tracker_config.on_result_ready(tracker_results, self.console_log)
+                    save_results = await self.on_result_ready(tracker_results, self.console_log)
 
                 # print(save_results.profile)
 

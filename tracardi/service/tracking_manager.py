@@ -1,6 +1,7 @@
 import logging
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Type, Callable
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.enum.event_status import COLLECTED
 from tracardi.domain.payload.event_payload import EventPayload
@@ -56,17 +57,35 @@ class TrackerResult:
         return body
 
 
-class TrackingManager:
+class TrackingManagerBase(ABC):
 
+    @abstractmethod
     def __init__(self,
                  console_log: ConsoleLog,
                  tracker_config: TrackerConfig,
                  tracker_payload: TrackerPayload,
                  profile: Optional[Profile] = None,
                  session: Optional[Session] = None,
+                 on_profile_merge: Callable[[Profile], Profile] = None
+                 ):
+        pass
+
+    @abstractmethod
+    async def invoke_track_process(self) -> TrackerResult:
+        pass
+
+
+class TrackingManager(TrackingManagerBase):
+
+    def __init__(self,
+                 console_log: ConsoleLog,
+                 tracker_payload: TrackerPayload,
+                 profile: Optional[Profile] = None,
+                 session: Optional[Session] = None,
+                 on_profile_merge: Callable[[Profile], Profile] = None
                  ):
 
-        self.tracker_config = tracker_config
+        self.on_profile_merge = on_profile_merge
         self.tracker_payload = tracker_payload
         self.profile = profile
         self.session = session
@@ -237,8 +256,8 @@ class TrackingManager:
                 try:
                     if self.profile is not None:  # Profile can be None if profile_less event is processed
                         if self.profile.operation.needs_merging():
-                            if self.tracker_config.on_profile_merge:
-                                self.profile = await self.tracker_config.on_profile_merge(self.profile)
+                            if self.on_profile_merge:
+                                self.profile = await self.on_profile_merge(self.profile)
                             else:
                                 self.profile = await self.merge_profile(self.profile)
 

@@ -1,6 +1,8 @@
 import asyncio
 import logging
+from collections import Callable
 from datetime import datetime
+from typing import Type
 from uuid import uuid4
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
@@ -21,7 +23,7 @@ from tracardi.service.destination_orchestrator import DestinationOrchestrator
 from tracardi.service.storage.driver import storage
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.tracking_manager import TrackingManager, TrackerResult
+from tracardi.service.tracking_manager import TrackingManager, TrackerResult, TrackingManagerBase
 from tracardi.service.utils.getters import get_entity_id
 
 logger = logging.getLogger(__name__)
@@ -34,8 +36,13 @@ class TrackingOrchestrator:
 
     def __init__(self,
                  source: EventSource,
-                 tracker_config: TrackerConfig
+                 tracker_config: TrackerConfig,
+                 on_profile_merge: Callable[[Profile], Profile] = None,
+                 on_profile_ready: Type[TrackingManagerBase] = None
                  ):
+
+        self.on_profile_ready: Type[TrackingManagerBase] = on_profile_ready
+        self.on_profile_merge = on_profile_merge
         self.tracker_config = tracker_config
         self.source = source
         self.console_log = None
@@ -136,23 +143,29 @@ class TrackingOrchestrator:
             profile_synchronizer.lock_entity(key)
             self.locked.append(key)
 
-        if self.tracker_config.on_profile_ready is None:
+        if self.on_profile_ready is None:
             tracking_manager = TrackingManager(
                 self.console_log,
-                self.tracker_config,
                 tracker_payload,
                 profile,
-                session
+                session,
+                self.on_profile_merge
             )
 
             tracker_result = await tracking_manager.invoke_track_process()
         else:
-            tracker_result = await self.tracker_config.on_profile_ready(
-                self.console_log,
-                tracker_payload,
-                profile,
-                session
-            )
+            if not issubclass(self.on_profile_ready, TrackingManagerBase):
+                raise AssertionError("Callable self.on_profile_ready should be a subtype of TrackingManagerBase.")
+
+            tracking_manager = self.on_profile_read(
+                    self.console_log,
+                    tracker_payload,
+                    profile,
+                    session,
+                    self.on_profile_merge
+                )
+
+            tracker_result = await tracking_manager.invoke_track_process()
 
         # From now on do not use profile or session, use tracker_result.profile, tracker_result.session
         # For security we override old values
