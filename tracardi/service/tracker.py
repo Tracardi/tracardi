@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Callable, Any
+from typing import Callable, Any, Type
 
 import redis
 
@@ -17,6 +17,7 @@ from typing import Dict, List
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_persister import TrackerResultPersister
+from tracardi.service.tracker_processor import TrackerProcessor, TrackProcessorBase
 from tracardi.service.tracking_manager import TrackerResult
 from tracardi.service.tracking_orchestrator import TrackingOrchestrator
 
@@ -26,20 +27,10 @@ logger.addHandler(log_handler)
 cache = CacheManager()
 
 
-# Todo remove 2023-04-01 - obsolete
-async def synchronized_event_tracking(tracker_payload: TrackerPayload, host: str, profile_less: bool,
-                                      allowed_bridges: List[str], internal_source=None):
-    tracker_payload.profile_less = profile_less
-    return await track_event(tracker_payload,
-                             ip=host,
-                             allowed_bridges=allowed_bridges,
-                             internal_source=internal_source)
-
-
 async def track_event(tracker_payload: TrackerPayload,
                       ip: str,
                       allowed_bridges: List[str],
-                      on_source_ready: Callable[[TrackerPayload, EventSource, 'TrackerConfig'], Any] = None,
+                      on_source_ready: Type[TrackProcessorBase] = None,
                       on_profile_ready: Callable = None,
                       on_flow_ready: Callable = None,
                       on_result_ready: Callable = None,
@@ -116,16 +107,22 @@ class Tracker:
             raise UnauthorizedException(e)
 
         if self.tracker_config.on_source_ready is None:
-            return await self.handle_source_ready(
+
+            tp = TrackerProcessor(self.console_log, self.tracker_config)
+
+            return await tp.handle(
                 {"no-finger-print": [tracker_payload]},
                 source,
                 self.tracker_config
             )
 
         # Custom handler
+        if not issubclass(self.tracker_config.on_source_ready, TrackProcessorBase):
+            raise AssertionError("Callable self.tracker_config.on_source_ready must a TrackProcessorBase object.")
 
-        return await self.tracker_config.on_source_ready(
-            tracker_payload,
+        tp = self.tracker_config.on_source_ready(self.console_log, self.tracker_config)
+        return await tp.handle(
+            {"no-finger-print": [tracker_payload]},  ## todo ?
             source,
             self.tracker_config
         )
