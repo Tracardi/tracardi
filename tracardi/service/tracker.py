@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Callable, Any, Type
+from typing import Callable, Type
 
 import redis
 
@@ -122,7 +122,7 @@ class Tracker:
 
         tp = self.tracker_config.on_source_ready(self.console_log, self.tracker_config)
         return await tp.handle(
-            {"no-finger-print": [tracker_payload]},  ## todo ?
+            {"no-finger-print": [tracker_payload]},  ## todo ? TrackerPayload may have fingerprints, I do not know
             source,
             self.tracker_config
         )

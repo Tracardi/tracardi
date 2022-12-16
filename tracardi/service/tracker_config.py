@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 from typing import List, Callable, Any, Type
+from pydantic import BaseModel
 from tracardi.domain.profile import Profile
 from tracardi.service.console_log import ConsoleLog
 
 
-@dataclass
-class TrackerConfig:
+class TrackerConfig(BaseModel):
     ip: str
     allowed_bridges: List[str]
     on_source_ready: Type = None

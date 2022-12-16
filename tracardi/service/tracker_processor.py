@@ -29,10 +29,6 @@ class TrackProcessorBase(ABC):
         self.tracker_config = tracker_config
 
     @abstractmethod
-    async def _handle_on_result_ready(self, tracker_results) -> CollectResult:
-        pass
-
-    @abstractmethod
     async def handle(self,
                      grouped_tracker_payloads: Dict[str, List[TrackerPayload]],
                      source: EventSource,
