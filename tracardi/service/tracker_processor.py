@@ -72,7 +72,7 @@ class TrackerProcessor(TrackProcessorBase):
             )
 
             for seq, (finger_print, tracker_payloads) in enumerate(grouped_tracker_payloads.items()):
-                logger.info(f"Invoking {len(tracker_payloads)} tracker payloads.")
+                logger.debug(f"Invoking {len(tracker_payloads)} tracker payloads.")
 
                 tracker_results: List[TrackerResult] = []
                 debugging: List[TrackerPayload] = []
@@ -102,7 +102,7 @@ class TrackerProcessor(TrackProcessorBase):
                     await storage.driver.profile.refresh()
                     await storage.driver.session.refresh()
 
-                logger.info(f"Invoke save results {save_results} tracker payloads.")
+                logger.debug(f"Invoke save results {save_results} tracker payloads.")
 
                 # Debugging rest
 
