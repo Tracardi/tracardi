@@ -4,6 +4,7 @@ from typing import Callable, Type
 
 import redis
 
+from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import UnauthorizedException, TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.storage.driver import storage
@@ -111,7 +112,7 @@ class Tracker:
             tp = TrackerProcessor(self.console_log, self.tracker_config)
 
             return await tp.handle(
-                {"no-finger-print": [tracker_payload]},
+                TrackerPayloads({"no-finger-print": [tracker_payload]}),
                 source,
                 self.tracker_config
             )
@@ -122,7 +123,7 @@ class Tracker:
 
         tp = self.tracker_config.on_source_ready(self.console_log, self.tracker_config)
         return await tp.handle(
-            {"no-finger-print": [tracker_payload]},  ## todo ? TrackerPayload may have fingerprints, I do not know
+            TrackerPayloads({"no-finger-print": [tracker_payload]}),  ## todo ? TrackerPayload may have fingerprints, I do not know
             source,
             self.tracker_config
         )

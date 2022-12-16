@@ -2,6 +2,8 @@ import logging
 import redis
 
 from abc import ABC, abstractmethod
+
+from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.storage.driver import storage
@@ -30,7 +32,7 @@ class TrackProcessorBase(ABC):
 
     @abstractmethod
     async def handle(self,
-                     grouped_tracker_payloads: Dict[str, List[TrackerPayload]],
+                     grouped_tracker_payloads: TrackerPayloads,
                      source: EventSource,
                      tracker_config: TrackerConfig) -> List[CollectResult]:
         pass
@@ -43,7 +45,7 @@ class TrackerProcessor(TrackProcessorBase):
         return await tp.persist(tracker_results)
 
     async def handle(self,
-                     grouped_tracker_payloads: Dict[str, List[TrackerPayload]],
+                     grouped_tracker_payloads: TrackerPayloads,
                      source: EventSource,
                      tracker_config: TrackerConfig) -> List[CollectResult]:
 
