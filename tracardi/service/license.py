@@ -41,6 +41,9 @@ class License(BaseModel):
             raise PermissionError("License not available")
         return self.services[service_id]
 
+    def get_service_ids(self):
+        return self.services.keys()
+
     @staticmethod
     def check() -> 'License':
 
