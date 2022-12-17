@@ -8,9 +8,9 @@ def event_source_types():
             "name": "IMAP Bridge",
             "tags": ["imap", "inbound"]
         },
-        "mqtt": {
-            "name": "Mqtt Bridge",
-            "tags": ["mqtt", "inbound"]
+        "queue": {
+            "name": "Queue Bridge",
+            "tags": ["queue", "inbound"]
         },
         "rest": {
             "name": "Rest Api Call",
