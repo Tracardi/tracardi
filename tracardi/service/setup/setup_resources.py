@@ -15,6 +15,16 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="kafka",
+            name="Kafka",
+            icon="kafka",
+            tags=["kafka"],
+            config={
+                "broker": "<broker>",
+                "password": "<password>"
+            }
+        ),
+        ResourceSettings(
             id="api",
             name="API endpoint",
             icon="cloud",
