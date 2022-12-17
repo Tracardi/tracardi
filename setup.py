@@ -67,7 +67,8 @@ setup(
         'tweepy==4.10.1',
         'strsimpy==0.2.1',
         'python-whois==0.8.0',
-        'PyYAML==6.0'
+        'PyYAML==6.0',
+        'telebot==0.0.4'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

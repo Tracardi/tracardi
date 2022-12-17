@@ -50,6 +50,15 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="telegram",
+            name="Telegram",
+            tags=["telegram"],
+            config={
+                "bot_token": "<bot-token>",
+                "chat_id": "<chat-id>"
+            }
+        ),
+        ResourceSettings(
             id="ip-geo-locator",
             name="MaxMing Geo-Location",
             tags=["api", "geo-locator"],
