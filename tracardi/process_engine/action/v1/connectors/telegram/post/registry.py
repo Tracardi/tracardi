@@ -19,8 +19,7 @@ def register() -> Plugin:
                     "id": "",
                     "name": ""
                 },
-                "message": "",
-                "sender": ""
+                "message": ""
             },
             manual="telegram/telegram_post_plugin",
             form=Form(
@@ -41,12 +40,6 @@ def register() -> Plugin:
                                 component=FormComponent(type="textarea", props={
                                     "label": "Message template"
                                 })
-                            ),
-                            FormField(
-                                id="sender",
-                                name="Sender",
-                                description="Type sender or leave it blank if you would like to use default sender. ",
-                                component=FormComponent(type="dotPath", props={"label": "Sender"})
                             )
                         ]
                     )

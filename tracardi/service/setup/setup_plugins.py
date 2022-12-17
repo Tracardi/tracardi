@@ -19,6 +19,14 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.connectors.telegram.post.registry": PluginTestTemplate(
+        init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},
+        resource={
+            "bot_token": "bot_token",
+            "chat_id": 100
+        }
+    ),
+
     "tracardi.process_engine.action.v1.connectors.google.analytics.registry": PluginTestTemplate(
         init={'source': {'id': 'id', 'name': 'name'}, 'category': 'category', 'action': 'action', 'label': 'label',
               'value': 'value'},

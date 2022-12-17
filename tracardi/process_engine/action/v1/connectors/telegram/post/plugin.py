@@ -14,7 +14,6 @@ from tracardi.service.plugin.runner import ActionRunner
 class Config(PluginConfig):
     resource: NamedEntity
     message: str
-    sender: str
 
 
 def validate(config: dict) -> Config:
