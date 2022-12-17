@@ -36,6 +36,11 @@ class License(BaseModel):
     def __contains__(self, item) -> bool:
         return item in self.services
 
+    def get_service(self, service_id) -> Service:
+        if service_id not in self.services:
+            raise PermissionError("License not available")
+        return self.services[service_id]
+
     @staticmethod
     def check() -> 'License':
 
@@ -83,6 +88,9 @@ class License(BaseModel):
             raise AssertionError("Invalid license")
 
         license = b64_decoder(content)
+
+        if 'u' not in license or 'e' not in license or 's' not in license:
+            raise AssertionError("Invalid license")
 
         return License(owner=license['u'],
                        expires=license['e'],
