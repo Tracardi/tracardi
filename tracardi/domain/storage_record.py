@@ -48,14 +48,21 @@ class StorageRecord(dict):
         }
 
 
+class Buckets(List[dict]):
+
+    def get_keys(self):
+        for item in self:
+            yield item['key']
+
+
 class StorageAggregate(dict):
 
     def __init__(self, *args, **kwargs):
         super(StorageAggregate, self).__init__(*args, **kwargs)
         if 'buckets' in kwargs:
-            self._buckets = kwargs['buckets']
+            self._buckets = Buckets(kwargs['buckets'])
 
-    def buckets(self):
+    def buckets(self) -> Buckets:
         return self._buckets
 
 
