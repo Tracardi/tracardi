@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
+WEBHOOK_BRIDGE = "as6d3jGa"
+API_BRIDGE = "kdIye85A"
+REDIRECT_BRIGDE = "kdIye85A"
+RABBITMQ_BRIDGE = "U7YYa25d"
+KAFKA_BRIDGE = "adef43sA"
+
 
 class Service(BaseModel):
     id: str
