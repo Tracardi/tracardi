@@ -21,6 +21,9 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=["kafka"],
             config={
                 "broker": "<broker>",
+                "security_protocol": "SASL_SSL",
+                "sasl_mechanism": "SCRAM-SHA-512",
+                "username": "<username>",
                 "password": "<password>"
             }
         ),
