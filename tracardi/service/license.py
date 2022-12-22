@@ -20,6 +20,7 @@ API_BRIDGE = "kdIye85A"
 REDIRECT_BRIGDE = "kdIye85A"
 RABBITMQ_BRIDGE = "U7YYa25d"
 KAFKA_BRIDGE = "adef43sA"
+IMAP_BRIDGE = "dkfu7sd1"
 
 
 class Service(BaseModel):

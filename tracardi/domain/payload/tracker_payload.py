@@ -89,6 +89,9 @@ class TrackerPayload(BaseModel):
     #             event_list.append(_event)
     #     return event_list
 
+    def has_events(self):
+        return len(self.events) > 0
+
     def set_return_profile(self, source: EventSource):
         if source.returns_profile is False:
             self.options.update({

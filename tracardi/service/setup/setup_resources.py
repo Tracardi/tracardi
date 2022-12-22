@@ -63,6 +63,17 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="imap-server",
+            name="IMAP",
+            tags=["mail", "imap"],
+            config={
+                "host": "<imap-server-host>",
+                "port": "<port>",
+                "username": "<username>",
+                "password": "<password>"
+            }
+        ),
+        ResourceSettings(
             id="telegram",
             name="Telegram",
             tags=["telegram"],
