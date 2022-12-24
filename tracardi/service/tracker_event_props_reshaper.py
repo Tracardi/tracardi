@@ -76,7 +76,7 @@ class EventDataReshaper:
                         event.properties = self._reshape(schema.reshaping.reshape_schema.properties)
 
                     if schema.reshaping.reshape_schema.context:
-                        event.context = self._reshape(schema.reshaping.reshape_schema.properties)
+                        event.context = self._reshape(schema.reshaping.reshape_schema.context)
 
                 if schema.reshaping.reshape_schema.has_session_reshapes():
                     session = Session(**self.session.dict())
