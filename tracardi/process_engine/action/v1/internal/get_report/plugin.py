@@ -110,6 +110,7 @@ def register() -> Plugin:
                     "result": PortDoc(desc="This port returns results of selected report on success."),
                     "error": PortDoc(desc="This port returns error info")
                 }
-            )
+            ),
+            pro=True
         )
     )

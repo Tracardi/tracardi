@@ -118,7 +118,7 @@ def register() -> Plugin:
             name='Load entity',
             desc='Loads entity by its id.',
             icon='entity',
-            group=["Input/Output"],
+            group=["Entity"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={
@@ -129,6 +129,7 @@ def register() -> Plugin:
                     "missing": PortDoc(desc="This port returns payload if entity does not exist."),
                     "error": PortDoc(desc="This port returns error message.")
                 }
-            )
+            ),
+            pro=True
         )
     )

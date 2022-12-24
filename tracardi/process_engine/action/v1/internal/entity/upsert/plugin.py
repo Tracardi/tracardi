@@ -163,7 +163,7 @@ def register() -> Plugin:
             name='Create entity',
             desc='Adds or updates entity.',
             icon='entity',
-            group=["Input/Output"],
+            group=["Entity"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")
@@ -172,6 +172,7 @@ def register() -> Plugin:
                     "result": PortDoc(desc="This port returns input payload."),
                     "error": PortDoc(desc="This port returns error message.")
                 }
-            )
+            ),
+            pro=True
         )
     )
