@@ -2,7 +2,6 @@ from typing import List, Dict, Union
 
 from dotty_dict import dotty
 from .dot_accessor import DotAccessor
-import datetime
 
 
 class DictTraverser:

@@ -22,6 +22,9 @@
       "reshaping": {
         "type": "flattened"
       },
+      "mapping": {
+        "type": "flattened"
+      },
       "tags": {
         "type": "keyword"
       },

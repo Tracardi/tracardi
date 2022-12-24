@@ -1,13 +1,15 @@
+from tracardi.domain.entity import Entity
+from tracardi.domain.session import Session
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.domain.event import Event
-from tracardi.domain.event_reshaping_schema import EventReshapingSchema
+from tracardi.domain.event_reshaping_schema import EventReshapingSchema, EventReshapeDefinition
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.parser import Parser
-from typing import List
+from typing import List, Tuple, Optional
 
 
-class Conditions(list):
+class Conditions(List[Tuple[bool, EventReshapingSchema]]):
 
     def is_valid(self):
         counter = 0
@@ -20,11 +22,12 @@ class Conditions(list):
         return counter < 2
 
 
-class EventPropsReshaper:
+class EventDataReshaper:
 
     parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
 
-    def __init__(self, dot: DotAccessor, event: Event):
+    def __init__(self, dot: DotAccessor, event: Event, session: Session):
+        self.session = session
         self.event = event
         self.dot = dot
 
@@ -44,7 +47,12 @@ class EventPropsReshaper:
 
         return conditions
 
-    def reshape(self, schemas: List[EventReshapingSchema]) -> Event:
+    def _reshape(self, schema: dict):
+        return DictTraverser(dot=self.dot, include_none=True, default=None).reshape(
+            schema
+        )
+
+    def reshape(self, schemas: List[EventReshapingSchema]) -> Tuple[Event, Optional[Session]]:
 
         conditions = self._validate(schemas)
 
@@ -54,11 +62,39 @@ class EventPropsReshaper:
                       f"for type {self.event.type}"
             raise ValueError(message)
 
+        event = self.event
+        session = self.session
         for condition, schema in conditions:
+            # Return first reshaped event
             if condition:
-                props = DictTraverser(dot=self.dot, include_none=True, default=None).reshape(
-                    schema.reshaping.reshape_schema
-                )
-                return Event(**self.event.dict(exclude={"properties"}), properties=props)
 
-        return self.event
+                if schema.reshaping.reshape_schema.has_event_reshapes():
+
+                    event = Event(**self.event.dict())
+
+                    if schema.reshaping.reshape_schema.properties:
+                        event.properties = self._reshape(schema.reshaping.reshape_schema.properties)
+
+                    if schema.reshaping.reshape_schema.context:
+                        event.context = self._reshape(schema.reshaping.reshape_schema.properties)
+
+                if schema.reshaping.reshape_schema.has_session_reshapes():
+                    session = Session(**self.session.dict())
+                    if schema.reshaping.reshape_schema.session:
+                        session.context = self._reshape(schema.reshaping.reshape_schema.session)
+
+                if schema.reshaping.has_mapping():
+                    if schema.reshaping.mapping.event_type:
+                        event.type = schema.reshaping.mapping.event_type
+
+                    if schema.reshaping.mapping.profile:
+                        # todo read value
+                        event.profile = Entity(id=schema.reshaping.mapping.profile.id)
+
+                    if schema.reshaping.mapping.session:
+                        # todo read value
+                        event.session = Entity(id=schema.reshaping.mapping.session.id)
+
+                return event, session
+
+        return event, session

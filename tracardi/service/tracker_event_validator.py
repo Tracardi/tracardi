@@ -1,6 +1,7 @@
 from tracardi.config import memory_cache
 from tracardi.domain.console import Console
 from tracardi.domain.event import Event
+from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
@@ -11,9 +12,9 @@ from tracardi.exceptions.exception import EventValidationException
 from dotty_dict import Dotty, dotty
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.parser import Parser
-from typing import List
+from typing import List, Tuple, Optional
 
-from tracardi.service.tracker_event_props_reshaper import EventPropsReshaper
+from tracardi.service.tracker_event_props_reshaper import EventDataReshaper
 from tracardi.service.utils.getters import get_entity_id
 
 parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
@@ -92,16 +93,17 @@ class EventsValidationHandler:
                 event.metadata.valid = False
         return event
 
-    async def reshape_event(self, event: Event) -> Event:
+    async def reshape_event(self, event: Event, session: Session) -> Tuple[Event, Optional[Session]]:
         if event.metadata.valid:
             reshape_schemas = await cache.event_reshaping(event.type, ttl=15)
             if reshape_schemas:
-                resharper = EventPropsReshaper(
+                resharper = EventDataReshaper(
                     dot=self.dot,
                     event=event,
+                    session=session
                 )
                 return resharper.reshape(schemas=reshape_schemas)
-        return event
+        return event, session
 
     async def index_event_traits(self, event: Event) -> Event:
         event_meta_data = await cache.event_metadata(event.type, ttl=memory_cache.event_metadata_cache_ttl)
@@ -140,17 +142,29 @@ class EventsValidationHandler:
                     event.traits = dot_event_traits.to_dict()
         return event
 
-    async def validate_and_reshape_index_events(self, events) -> List[Event]:
+    async def validate_and_reshape_index_events(self, events: List[Event], session: Session) -> Tuple[List[Event], List[Session]]:
+        """
+        Returns reshaped events, if there is not reshape for event the original event is returned.
+        The same with session.
+        """
         processed_events = []
+        processed_sessions = []
         for event in events:
 
             self.dot.set_storage("event", event)
+            self.dot.set_storage("session", session)
 
             # mutates console_log
             event = await self.validate_event(event)
 
             try:
-                event = await self.reshape_event(event)
+                event, session = await self.reshape_event(event, session)
+
+                event = await self.index_event_traits(event)
+                processed_events.append(event)
+
+                processed_sessions.append(session)
+
             except Exception as e:
                 self.console_log.append(
                     Console(
@@ -165,8 +179,4 @@ class EventsValidationHandler:
                     )
                 )
 
-            event = await self.index_event_traits(event)
-
-            processed_events.append(event)
-
-        return processed_events
+        return processed_events, processed_sessions

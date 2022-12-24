@@ -1,11 +1,31 @@
+from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, List
 from pydantic import BaseModel, validator
 from tracardi.process_engine.tql.condition import Condition
 
 
+class ReshapeMapping(BaseModel):
+    profile: Optional[Entity] = None
+    session: Optional[Entity] = None
+    event_type: Optional[str] = None
+
+
+class EventReshapeDefinition(BaseModel):
+    properties: Optional[dict] = None
+    context: Optional[dict] = None
+    session: Optional[dict] = None
+
+    def has_event_reshapes(self) -> bool:
+        return bool(self.properties) or bool(self.context)
+
+    def has_session_reshapes(self) -> bool:
+        return bool(self.session)
+
+
 class ReshapeSchema(BaseModel):
-    reshape_schema: dict
+    reshape_schema: EventReshapeDefinition
+    mapping: Optional[ReshapeMapping] = None
     condition: Optional[str] = None
 
     @validator("condition")
@@ -19,6 +39,11 @@ class ReshapeSchema(BaseModel):
             return value
         else:
             return None
+
+    def has_mapping(self) -> bool:
+        return bool(self.mapping)
+
+
 
 
 class EventReshapingSchema(NamedEntity):

@@ -174,8 +174,19 @@ class TrackingManager(TrackingManagerBase):
 
         # Index traits
         evh = EventsValidationHandler(dot, self.console_log)
-        events = await evh.validate_and_reshape_index_events(events)
+        events, sessions = await evh.validate_and_reshape_index_events(events, self.session)
+        # Sessions has modified sessions
+        # It is quite hard to know what to do with it. When there are 3 events in 1 tracker paylaod
+        # and one of the events reshapes session we do not know what is the right session. The reshaped one
+        # or the first we got. We assume that the last session is right
 
+        if len(sessions) > 0:
+            self.session = sessions[-1]
+
+        # print('events', len(events))
+        # print([s.type for s in events])
+        # print('sessions', len(sessions))
+        # print([s.context for s in sessions])
         debugger = None
         segmentation_result = None
 
