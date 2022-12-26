@@ -21,6 +21,7 @@ REDIRECT_BRIGDE = "kdIye85A"
 RABBITMQ_BRIDGE = "U7YYa25d"
 KAFKA_BRIDGE = "adef43sA"
 IMAP_BRIDGE = "dkfu7sd1"
+SCHEDULER = "scheda75"
 
 
 class Service(BaseModel):
@@ -45,7 +46,7 @@ class License(BaseModel):
 
     def get_service(self, service_id) -> Service:
         if service_id not in self.services:
-            raise PermissionError("License not available")
+            raise AssertionError("License not available")
         return self.services[service_id]
 
     def get_service_ids(self):
@@ -54,6 +55,20 @@ class License(BaseModel):
     @staticmethod
     def has_license() -> bool:
         return os.environ.get('LICENSE', None) is not None
+
+    @staticmethod
+    def has_service(service_id):
+        if not License.has_license():
+            return False
+
+        try:
+            license_string = os.environ.get('LICENSE', None)
+            if not license_string:
+                return False
+            license = License.get_license(license_string)
+            return license.get_service(service_id)
+        except AssertionError:
+            return False
 
     @staticmethod
     def check() -> 'License':

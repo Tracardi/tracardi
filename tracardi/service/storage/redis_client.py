@@ -27,12 +27,14 @@ class AsyncRedisClient(metaclass=Singleton):
 
 class RedisClient(metaclass=Singleton):
     def __init__(self):
-        host = redis_config.redis_host
-        password = redis_config.redis_password
+        # host = redis_config.redis_host
+        # password = redis_config.redis_password
 
-        if password is None:
-            self.client = redis.from_url(host)
-        else:
-            self.client = redis.from_url(host, password=password)
+        # if password is None:
+        #     self.client = redis.from_url(redis_config.get_redis_with_password())
+        # else:
+        #     self.client = redis.from_url(host, password=password)
 
-        logger.info(f"Redis at {host} connected.")
+        self.client = redis.from_url(redis_config.get_redis_with_password())
+
+        logger.info(f"Redis at {redis_config.redis_host} connected.")
