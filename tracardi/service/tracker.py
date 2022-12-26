@@ -56,7 +56,11 @@ async def track_event(tracker_payload: TrackerPayload,
 
         return await tr.track_event(tracker_payload)
 
+    except Exception as e:
+        logger.error(str(e))
+
     finally:
+
         if tracardi.save_logs:
             """
             Saves errors caught by logger
@@ -104,7 +108,8 @@ class Tracker:
         try:
             if self.tracker_config.internal_source is not None:
                 if self.tracker_config.internal_source.id != tracker_payload.source.id:
-                    raise ValueError(f"Invalid event source `{tracker_payload.source.id}`")
+                    msg = f"Invalid event source `{tracker_payload.source.id}`"
+                    raise ValueError(msg)
                 source = self.tracker_config.internal_source
             else:
                 source = await self.validate_source(source_id=tracker_payload.source.id)
