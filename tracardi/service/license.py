@@ -52,6 +52,10 @@ class License(BaseModel):
         return self.services.keys()
 
     @staticmethod
+    def has_license() -> bool:
+        return os.environ.get('LICENSE', None) is not None
+
+    @staticmethod
     def check() -> 'License':
 
         license = os.environ.get('LICENSE', None)
