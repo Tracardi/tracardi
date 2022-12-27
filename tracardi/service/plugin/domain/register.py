@@ -151,6 +151,7 @@ class MetaData(BaseModel):
     group: Optional[List[str]] = ["General"]
     tags: List[str] = []
     pro: bool = False
+    commercial: bool = False
     remote: bool = False
     frontend: bool = False
     emits_event: Optional[Dict[str, str]] = {}

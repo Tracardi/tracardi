@@ -205,6 +205,7 @@ class MetaDataRecord(BaseModel):
     group: Optional[List[str]] = ["General"]
     tags: List[str] = []
     pro: bool = False
+    commercial: bool = False
     remote: bool = False
     frontend: bool = False
     emits_event: Optional[str] = ""
@@ -225,6 +226,7 @@ class MetaDataRecord(BaseModel):
             group=metadata.group,
             tags=metadata.tags,
             pro=metadata.pro,
+            commercial=metadata.commercial,
             remote=metadata.remote,
             frontend=metadata.frontend,
             emits_event=b64_encoder(metadata.emits_event),
@@ -245,6 +247,7 @@ class MetaDataRecord(BaseModel):
             group=self.group,
             tags=self.tags,
             pro=self.pro,
+            commercial=self.commercial,
             remote=self.remote,
             frontend=self.frontend,
             emits_event=b64_decoder(self.emits_event),

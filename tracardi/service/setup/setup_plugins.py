@@ -1,5 +1,6 @@
 from typing import Dict
 
+from tracardi.service.license import VALIDATOR, License
 from tracardi.service.plugin.plugin_install import install_plugins
 from tracardi.service.setup.domain.plugin_test_template import PluginTestTemplate
 
@@ -328,11 +329,6 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
 
     "tracardi.process_engine.action.v1.events.event_discarder.plugin": PluginTestTemplate(
         init={},
-        resource=None
-    ),
-
-    "tracardi.process_engine.action.v1.json_schema_validation_action": PluginTestTemplate(
-        init={'validation_schema': {}},
         resource=None
     ),
 
@@ -706,8 +702,13 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             'personal_access_token': '<your-PAT-here>',
         },
     ),
-
 }
+
+if License.has_service(VALIDATOR):
+    installed_plugins["com_tracardi.action.v1.validator.plugin"] = PluginTestTemplate(
+        init={'validation_schema': {}},
+        resource=None
+    )
 
 # Plugins only for testing
 test_plugins: Dict[str, PluginTestTemplate] = {

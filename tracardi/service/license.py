@@ -22,6 +22,7 @@ RABBITMQ_BRIDGE = "U7YYa25d"
 KAFKA_BRIDGE = "adef43sA"
 IMAP_BRIDGE = "dkfu7sd1"
 SCHEDULER = "scheda75"
+VALIDATOR = "vali34k0"
 
 
 class Service(BaseModel):
