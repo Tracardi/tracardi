@@ -23,6 +23,7 @@ KAFKA_BRIDGE = "adef43sA"
 IMAP_BRIDGE = "dkfu7sd1"
 SCHEDULER = "scheda75"
 VALIDATOR = "vali34k0"
+MQTT_BRIDGE = "mqtt1kse"
 
 
 class Service(BaseModel):
