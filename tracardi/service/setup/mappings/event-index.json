@@ -14,7 +14,7 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": "false",
+      "dynamic": "strict",
       "properties": {
         "id": {
           "type": "keyword"

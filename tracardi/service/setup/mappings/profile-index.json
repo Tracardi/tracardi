@@ -12,7 +12,7 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": "false",
+      "dynamic": "strict",
       "date_detection": false,
       "properties": {
         "id": {
@@ -94,11 +94,6 @@
             }
           }
         },
-        "flags": {
-          "type": "object",
-          "dynamic": "true",
-          "enabled": false
-        },
         "collections": {
           "type": "nested"
         },
@@ -112,6 +107,12 @@
         },
         "active": {
           "type": "boolean"
+        },
+        "interests": {
+          "type": "flattened"
+        },
+        "aux": {
+          "type": "flattened"
         }
       }
     },

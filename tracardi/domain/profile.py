@@ -30,7 +30,8 @@ class Profile(Entity):
     segments: Optional[List[str]] = []
     interests: Optional[dict] = {}
     consents: Optional[Dict[str, ConsentRevoke]] = {}
-    active: bool = True
+    active: bool = True,
+    aux: Optional[dict] = {}
 
     def serialize(self):
         return {
@@ -59,6 +60,7 @@ class Profile(Entity):
             self.consents = profile.consents
             self.active = profile.active
             self.interests = profile.interests
+            self.aux = profile.aux
 
     def get_merge_key_values(self) -> List[tuple]:
         converter = DotNotationConverter(self)
