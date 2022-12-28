@@ -18,12 +18,14 @@ logger.addHandler(log_handler)
 WEBHOOK_BRIDGE = "as6d3jGa"
 API_BRIDGE = "kdIye85A"
 REDIRECT_BRIGDE = "kdIye85A"
+
+IMAP_BRIDGE = "dkfu7sd1"
 RABBITMQ_BRIDGE = "U7YYa25d"
 KAFKA_BRIDGE = "adef43sA"
-IMAP_BRIDGE = "dkfu7sd1"
+MQTT_BRIDGE = "mqtt1kse"
+
 SCHEDULER = "scheda75"
 VALIDATOR = "vali34k0"
-MQTT_BRIDGE = "mqtt1kse"
 
 
 class Service(BaseModel):
