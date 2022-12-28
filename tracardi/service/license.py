@@ -74,7 +74,6 @@ class License(BaseModel):
 
     @staticmethod
     def check() -> 'License':
-
         license = os.environ.get('LICENSE', None)
 
         if license is None:
@@ -90,8 +89,13 @@ class License(BaseModel):
 
     @staticmethod
     def periodic_check(loop):
-        once_a_week = 60 * 24 * 7
-        loop.call_later(once_a_week, License.check, loop)
+
+        def _check(loop):
+            once_a_week = 60 * 60 * 24 * 7
+            License.check()
+            loop.call_later(once_a_week, _check, loop)
+
+        _check(loop)
 
     @staticmethod
     def get_license(license: str) -> 'License':
