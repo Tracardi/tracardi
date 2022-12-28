@@ -62,6 +62,8 @@ class Session(Entity):
     profile: Optional[Entity] = None
     context: Optional[SessionContext] = {}
     properties: Optional[dict] = {}
+    traits: Optional[dict] = {}
+    aux: Optional[dict] = {}
 
     def __init__(self, **data: Any):
 
@@ -78,6 +80,8 @@ class Session(Entity):
             self.profile = session.profile
             self.context = session.context
             self.properties = session.properties
+            self.traits = self.traits
+            self.aux = session.aux
 
     @staticmethod
     def storage_info() -> StorageInfo:

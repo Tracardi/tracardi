@@ -13,7 +13,7 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": "false",
+      "dynamic": "strict",
       "properties": {
         "id": {
           "type": "keyword"
@@ -52,6 +52,13 @@
           "type": "flattened"
         },
         "properties": {
+          "type": "flattened"
+        },
+        "traits": {
+           "dynamic": "true",
+           "type": "object"
+        },
+        "aux": {
           "type": "flattened"
         }
       }
