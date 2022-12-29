@@ -8,6 +8,7 @@ expr:       statement
             | or_multiple_joins
             | and_multiple_joins
             | multi_expr
+            
 or_multiple_joins: (OPEN_BRACKET ( or_join (OR_TERMINAL statement)*) CLOSE_BRACKET)
 and_multiple_joins: (OPEN_BRACKET ( and_join (AND_TERMINAL statement)*) CLOSE_BRACKET)
 
@@ -38,7 +39,7 @@ OR_TERMINAL: /OR/i
 parser = Lark(schema, parser="lalr")
 
 interactive = parser.parse_interactive("""
-a:as or (as:a and sas:as) and (sss>1 or d:a or d:a or d:a or d:a )
+a:as or (as:a and sas:as) and (sss>1 or d:a or d:a or d:a or d:a ) and sd:as or sad:ass or sdsada:as or ssd:asas
 
 """)
 # (s:"d" or d:s or (as:a and d:ss))
