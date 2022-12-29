@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
-WEBHOOK_BRIDGE = "as6d3jGa"
+WEBHOOK_BRIDGE = "webhojGa"
 API_BRIDGE = "kdIye85A"
-REDIRECT_BRIGDE = "kdIye85A"
+REDIRECT_BRIGDE = "redi235s"
 
-IMAP_BRIDGE = "dkfu7sd1"
-RABBITMQ_BRIDGE = "U7YYa25d"
-KAFKA_BRIDGE = "adef43sA"
+IMAP_BRIDGE = "imap7sd1"
+RABBITMQ_BRIDGE = "rabYa25d"
+KAFKA_BRIDGE = "kaff43sA"
 MQTT_BRIDGE = "mqtt1kse"
 
 SCHEDULER = "scheda75"
