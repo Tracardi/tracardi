@@ -4,10 +4,7 @@ from lark import Lark
 schema = r"""
 ?start: multi_expr
 multi_expr: statement 
-            | or_expr
-            | and_expr 
-            | and_expr (OR_TERMINAL (and_expr|or_expr))*
-            | or_expr (AND_TERMINAL (and_expr|or_expr))*
+            | (and_expr|or_expr) ((OR_TERMINAL|AND_TERMINAL) (and_expr|or_expr))*
 or_expr: or_multiple_joins
             | or_join
 and_expr: and_multiple_joins
@@ -42,7 +39,7 @@ OR_TERMINAL: /OR/i
 parser = Lark(schema, parser="lalr", debug = True)
 
 interactive = parser.parse_interactive("""
-(sa:as or ((sd:asa or sds:as)and ddd:as))
+( sa:as or (sd:asa or sds:as) or ddd:as) and sa:as or (as:as or sdsA:s or sd>as)
 """)
 # (s:"d" or d:s or (as:a and d:ss))
 # feeds the text given to above into the parsers. This is not done automatically.
