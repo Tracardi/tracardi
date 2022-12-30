@@ -8,7 +8,7 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": "false",
+    "dynamic": "strict",
     "properties": {
       "id": {
         "type": "keyword"
@@ -20,10 +20,14 @@
         "type": "keyword"
       },
       "reshaping": {
-        "type": "flattened"
+        "enabled": false,
+        "dynamic": "true",
+        "type": "object"
       },
-      "mapping": {
-        "type": "flattened"
+      "query": {
+        "enabled": false,
+        "dynamic": "true",
+        "type": "object"
       },
       "tags": {
         "type": "keyword"

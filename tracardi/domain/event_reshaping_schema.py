@@ -5,9 +5,9 @@ from pydantic import BaseModel, validator
 from tracardi.process_engine.tql.condition import Condition
 
 
-class ReshapeMapping(BaseModel):
-    profile: Optional[Entity] = None
-    session: Optional[Entity] = None
+class MergeQuery(BaseModel):
+    profile: Optional[str] = "{}"
+    session: Optional[str] = "{}"
     event_type: Optional[str] = None
 
 
@@ -25,7 +25,7 @@ class EventReshapeDefinition(BaseModel):
 
 class ReshapeSchema(BaseModel):
     reshape_schema: EventReshapeDefinition
-    mapping: Optional[ReshapeMapping] = None
+    query: Optional[MergeQuery] = None
     condition: Optional[str] = None
 
     @validator("condition")
@@ -40,10 +40,8 @@ class ReshapeSchema(BaseModel):
         else:
             return None
 
-    def has_mapping(self) -> bool:
-        return bool(self.mapping)
-
-
+    def has_query(self) -> bool:
+        return bool(self.query)
 
 
 class EventReshapingSchema(NamedEntity):
