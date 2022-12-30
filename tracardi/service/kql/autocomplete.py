@@ -3,6 +3,8 @@ from typing import List
 from lark import Lark, Token
 from lark.lexer import TerminalDef
 
+from tracardi.service.storage.driver import storage
+
 schema = r"""
 ?start: multi_expr
 multi_expr: statement 
@@ -38,36 +40,36 @@ OR: /OR/i
 class Values:
 
     @staticmethod
-    def _quote(field):
+    async def _quote(field):
         return ['"']
 
     @staticmethod
-    def _op(field):
+    async def _op(field):
         return [':', '>=', '<=', '<', '>']
 
-    @staticmethod
-    def _field(field):
-        return ['a', 'b']
+    async def _field(self, field):
+        print(self.index)
+        fields = await storage.driver.raw.get_mapping_fields(self.index)
+        return fields
 
     @staticmethod
-    def _and_link(field):
+    async def _and_link(field):
         return ['AND']
 
     @staticmethod
-    def _or_link(field):
+    async def _or_link(field):
         return ['OR']
 
     @staticmethod
-    def _open_bracket(field):
+    async def _open_bracket(field):
         return ['(']
 
     @staticmethod
-    def _close_bracket(field):
+    async def _close_bracket(field):
         return [')']
 
-    @staticmethod
-    def _value(field):
-        print(field)
+    async def _value(self, field):
+        print(self.index, field)
         return ['1', '2']
 
     def __init__(self, index):
@@ -83,10 +85,10 @@ class Values:
             "VALUE": self._value
         }
 
-    def get(self, token, field) -> List[dict]:
+    async def get(self, token, field) -> List[dict]:
         values = []
         if token in self.values:
-            for value in self.values[token](field):
+            for value in await self.values[token](field):
                 values.append({
                     "value": value,
                     "token": token
@@ -106,7 +108,7 @@ class KQLAutocomplete:
 
     def _get_terms(self, query):
         interactive = parser.parse_interactive(query)
-        for token in interactive.iter_parse():   # type: Token
+        for token in interactive.iter_parse():  # type: Token
             if token.type == "FIELD":
                 self.last_field = token.value
             elif token.type == "OP":
@@ -126,13 +128,20 @@ class KQLAutocomplete:
                 if term_def.name == term:
                     yield term_def.name
 
-    def autocomplete(self, query: str):
+    async def autocomplete(self, query: str):
         values = []
         for token in self.autocomplete_token(query):
-            values += self.values.get(token, self.last_field)
+            values += await self.values.get(token, self.last_field)
         return values
 
 
 if __name__ == "__main__":
-    ac = KQLAutocomplete("index")
-    print(ac.autocomplete("asas>\"saas\" or as:"))
+    import asyncio
+
+
+    async def main():
+        ac = KQLAutocomplete("profile")
+        print(await ac.autocomplete(""))
+
+
+    asyncio.run(main())

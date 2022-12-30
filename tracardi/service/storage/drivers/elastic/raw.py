@@ -1,20 +1,14 @@
 from tracardi.domain.storage.index_mapping import IndexMapping
 from tracardi.domain.storage_record import StorageRecords
+from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.storage.persistence_service import PersistenceService
+memory_cache = MemoryCache("index-mapping")
 
 
 def index(idx) -> PersistenceService:
     return storage_manager(idx)
-
-#
-# def entity(entity: Entity) -> StorageCrud:
-#     return StorageFor(entity).index()
-
-
-# def collection(index, dataset: List) -> CollectionCrud:
-#     return StorageForBulk(dataset).index(index)
 
 
 async def query(index: str, query: dict) -> StorageRecords:
@@ -92,3 +86,12 @@ async def refresh(index):
 
 async def mapping(index) -> IndexMapping:
     return await storage_manager(index).get_mapping()
+
+
+async def get_mapping_fields(index) -> list:
+    memory_key = f"{index}-mapping-cache"
+    if memory_key not in memory_cache:
+        mapping = await storage_manager(index).get_mapping()
+        fields = mapping.get_field_names()
+        memory_cache[memory_key] = CacheItem(data=fields, ttl=5)  # result is cached for 5 seconds
+    return memory_cache[memory_key].data
