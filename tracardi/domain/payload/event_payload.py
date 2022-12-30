@@ -47,13 +47,19 @@ class EventPayload(BaseModel):
     @staticmethod
     def _get_event_session(session: Session) -> Optional[EventSession]:
         if session is not None:
-            if isinstance(session.context, dict):
+            if isinstance(session, Session) and isinstance(session.context, dict):
                 session.context = SessionContext(session.context)
 
-            event_session = EventSession(
-                id=session.id,
-                tz=session.context.get_time_zone()
-            )
+                event_session = EventSession(
+                    id=session.id,
+                    tz=session.context.get_time_zone()
+                )
+
+            else:
+                event_session = EventSession(
+                    id=session.id
+                )
+
             return event_session
 
         return None

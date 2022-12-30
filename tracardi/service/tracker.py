@@ -97,11 +97,11 @@ class Tracker:
         # Trim ids - spaces are frequent issues
 
         if tracker_payload.source:
-            tracker_payload.source.id = tracker_payload.source.id.strip()
+            tracker_payload.source.id = str(tracker_payload.source.id).strip()
         if tracker_payload.session:
-            tracker_payload.session.id = tracker_payload.session.id.strip()
+            tracker_payload.session.id = str(tracker_payload.session.id).strip()
         if tracker_payload.profile:
-            tracker_payload.profile.id = tracker_payload.profile.id.strip()
+            tracker_payload.profile.id = str(tracker_payload.profile.id).strip()
 
         # Validate event source
 

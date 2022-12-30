@@ -9,6 +9,7 @@ from pydantic import BaseModel, PrivateAttr
 from tracardi.config import tracardi
 
 from ..entity import Entity
+from ..event import Event
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
@@ -48,6 +49,15 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
         self._id = str(uuid4())
+
+    def get_domain_events(self) -> List[Event]:
+        for event_payload in self.events:
+            yield event_payload.to_event(self.request,
+                                         self.metadata,
+                                         self.source,
+                                         self.session,
+                                         self.profile,
+                                         self.profile_less)
 
     def set_headers(self, headers: dict):
         if 'authorization' in headers:

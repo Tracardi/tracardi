@@ -30,7 +30,7 @@ class Profile(Entity):
     segments: Optional[List[str]] = []
     interests: Optional[dict] = {}
     consents: Optional[Dict[str, ConsentRevoke]] = {}
-    active: bool = True,
+    active: bool = True
     aux: Optional[dict] = {}
 
     def serialize(self):

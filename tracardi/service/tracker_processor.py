@@ -2,11 +2,12 @@ import logging
 import redis
 
 from abc import ABC, abstractmethod
-
+from tracardi.service.license import License, VALIDATOR
 from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.storage.driver import storage
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
@@ -19,6 +20,10 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_persister import TrackerResultPersister
 from tracardi.service.tracking_manager import TrackerResult, TrackingManagerBase
 from tracardi.service.tracking_orchestrator import TrackingOrchestrator
+
+if License.has_service(VALIDATOR):
+    from com_tracardi.service.tracker_event_validator import EventsValidationHandler
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -71,6 +76,9 @@ class TrackerProcessor(TrackProcessorBase):
                 on_profile_ready=self.on_profile_ready
             )
 
+            # Todo validation and reshaping should be here. Jezeli np jeden z eventów bedzie miał zmienione profile id
+            # Todo to można wydzielić go do osobnego tracker_payload
+
             for seq, (finger_print, tracker_payloads) in enumerate(grouped_tracker_payloads.items()):
                 logger.debug(f"Invoking {len(tracker_payloads)} tracker payloads.")
 
@@ -80,6 +88,26 @@ class TrackerProcessor(TrackProcessorBase):
                 # Unlocks profile after context exit
 
                 for tracker_payload in tracker_payloads:
+
+                    # Validation and reshaping
+
+                    dot = DotAccessor(
+                        profile=None,
+                        session=None,
+                        payload=None,
+                        event=None,
+                        flow=None,
+                        memory=None
+                    )
+
+                    if License.has_service(VALIDATOR):
+                        # Index traits, validate and reshape
+                        evh = EventsValidationHandler(dot, self.console_log)
+                        tracker_payload = await evh.validate_and_reshape_index_events(tracker_payload)
+
+                        # todo sessja moze zostac zmieniona ale profile_id zostanie wygenerowany jeżeli nie istnieje
+                        # todo pytanie czy powinien byc profile id statyczny
+
                     # Locks for processing each profile
                     result = await orchestrator.invoke(tracker_payload, self.console_log)
                     tracker_results.append(result)

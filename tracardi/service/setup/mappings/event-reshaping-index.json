@@ -24,7 +24,7 @@
         "dynamic": "true",
         "type": "object"
       },
-      "query": {
+      "mapping": {
         "enabled": false,
         "dynamic": "true",
         "type": "object"
@@ -34,6 +34,16 @@
       },
       "event_type": {
         "type": "keyword"
+      },
+      "event_source": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
       },
       "enabled": {
         "type": "boolean"

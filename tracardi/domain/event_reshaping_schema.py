@@ -2,13 +2,15 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, List
 from pydantic import BaseModel, validator
+
+from tracardi.domain.ref_value import RefValue
 from tracardi.process_engine.tql.condition import Condition
 
 
-class MergeQuery(BaseModel):
-    profile: Optional[str] = "{}"
-    session: Optional[str] = "{}"
-    event_type: Optional[str] = None
+class EntityMapping(BaseModel):
+    profile: RefValue
+    session: RefValue
+    event_type: RefValue
 
 
 class EventReshapeDefinition(BaseModel):
@@ -25,7 +27,7 @@ class EventReshapeDefinition(BaseModel):
 
 class ReshapeSchema(BaseModel):
     reshape_schema: EventReshapeDefinition
-    query: Optional[MergeQuery] = None
+    mapping: Optional[EntityMapping] = None
     condition: Optional[str] = None
 
     @validator("condition")
@@ -40,12 +42,13 @@ class ReshapeSchema(BaseModel):
         else:
             return None
 
-    def has_query(self) -> bool:
-        return bool(self.query)
+    def has_mapping(self) -> bool:
+        return bool(self.mapping)
 
 
 class EventReshapingSchema(NamedEntity):
     event_type: str
+    event_source: NamedEntity
     description: Optional[str] = "No description provided"
     tags: List[str] = []
     reshaping: ReshapeSchema

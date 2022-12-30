@@ -25,7 +25,6 @@ async def load_merged_profile(id: str) -> Optional[Profile]:
         if profile_cache.exists(id):
             return profile_cache.get_profile(id)
     try:
-
         profile = Profile.create(await storage_manager('profile').load(id))
 
         if profile is None:
