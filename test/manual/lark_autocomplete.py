@@ -39,7 +39,7 @@ OR_TERMINAL: /OR/i
 parser = Lark(schema, parser="lalr", debug = True)
 
 interactive = parser.parse_interactive("""
-( sa:as or (sd:asa or sds:as) or ddd:as) and sa:as or (as:as or sdsA:s or sd>as)
+( sa:as or (sd:asa or sds:as) or ddd:as) and sa:as or (as:as or sdsA:s or sd:
 """)
 # (s:"d" or d:s or (as:a and d:ss))
 # feeds the text given to above into the parsers. This is not done automatically.
