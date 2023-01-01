@@ -10,7 +10,7 @@ def test_should_group_pool_items():
         async def purge(items, attributes):
             result.append(items)
 
-        async with PoolManager("test", 3, on_pool_purge=purge, replace_item_on_append=False) as m:
+        async with PoolManager("test", 3, on_pool_purge=purge, pass_pool_as_dict=False, replace_item_on_append=False) as m:
             await m.append(1)
             await m.append(2)
             await m.append(3)

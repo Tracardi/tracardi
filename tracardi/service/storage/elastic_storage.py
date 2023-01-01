@@ -89,7 +89,6 @@ class ElasticStorage:
 
     @staticmethod
     def _get_storage_record(record, replace_id, exclude=None) -> StorageRecord:
-
         if isinstance(record, StorageRecord):
             return record
 

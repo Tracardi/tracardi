@@ -13,3 +13,8 @@ class TrackerPayloads(Dict[str, List[TrackerPayload]]):
         for key, values in data.items():
             tp[key] = [TrackerPayload(**v) for v in values]
         return tp
+
+    def yield_payloads(self) -> List[TrackerPayload]:
+        for key, payloads in self.items():
+            for payload in payloads:
+                yield payload

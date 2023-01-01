@@ -23,7 +23,7 @@ async def load(id: str) -> Optional[StorageRecord]:
 
 
 async def save(events: List[Event], exclude=None):
-    return await storage_manager("event").upsert(events, exclude)
+    return await storage_manager("event").upsert(events, exclude=exclude)
 
 
 async def delete_by_id(id: str) -> dict:
