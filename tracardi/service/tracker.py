@@ -130,7 +130,7 @@ class Tracker:
             )
 
             return await tp.handle(
-                TrackerPayloads({"no-finger-print": [tracker_payload]}),
+                TrackerPayloads([tracker_payload]),
                 source,
                 self.tracker_config
             )
@@ -146,7 +146,7 @@ class Tracker:
             self.on_result_ready
         )
         return await tp.handle(
-            TrackerPayloads({"no-finger-print": [tracker_payload]}),  ## todo ? TrackerPayload may have fingerprints, I do not know
+            TrackerPayloads([tracker_payload]),
             source,
             self.tracker_config
         )

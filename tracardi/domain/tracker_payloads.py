@@ -1,20 +1,13 @@
-from typing import Dict, List
+from typing import List
 
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 
 
-class TrackerPayloads(Dict[str, List[TrackerPayload]]):
-    def serialize(self) -> dict:
-        return {key: [v.dict() for v in values] for key, values in self.items()}
+class TrackerPayloads(List[TrackerPayload]):
+    def serialize(self) -> List[dict]:
+        return [v.dict() for v in self]
 
     @staticmethod
     def deserialize(data: dict) -> 'TrackerPayloads':
-        tp = TrackerPayloads()
-        for key, values in data.items():
-            tp[key] = [TrackerPayload(**v) for v in values]
-        return tp
+        return TrackerPayloads([TrackerPayload(**v) for v in data])
 
-    def yield_payloads(self) -> List[TrackerPayload]:
-        for key, payloads in self.items():
-            for payload in payloads:
-                yield payload

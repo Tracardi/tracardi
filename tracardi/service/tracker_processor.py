@@ -45,7 +45,7 @@ class TrackProcessorBase(ABC):
 
     @abstractmethod
     async def handle(self,
-                     grouped_tracker_payloads: TrackerPayloads,
+                     tracker_payloads: TrackerPayloads,
                      source: EventSource,
                      tracker_config: TrackerConfig) -> List[CollectResult]:
         pass
@@ -59,7 +59,7 @@ class TrackerProcessor(TrackProcessorBase):
         return await tp.persist(tracker_results)
 
     async def handle(self,
-                     grouped_tracker_payloads: TrackerPayloads,
+                     tracker_payloads: TrackerPayloads,
                      source: EventSource,
                      tracker_config: TrackerConfig) -> List[CollectResult]:
 
@@ -79,63 +79,60 @@ class TrackerProcessor(TrackProcessorBase):
             # Todo validation and reshaping should be here. Jezeli np jeden z eventów bedzie miał zmienione profile id
             # Todo to można wydzielić go do osobnego tracker_payload
 
-            for seq, (finger_print, tracker_payloads) in enumerate(grouped_tracker_payloads.items()):
-                logger.debug(f"Invoking {len(tracker_payloads)} tracker payloads.")
+            tracker_results: List[TrackerResult] = []
+            debugging: List[TrackerPayload] = []
 
-                tracker_results: List[TrackerResult] = []
-                debugging: List[TrackerPayload] = []
+            # Unlocks profile after loop exit
 
-                # Unlocks profile after context exit
+            for tracker_payload in tracker_payloads:
 
-                for tracker_payload in tracker_payloads:
+                # Validation and reshaping
 
-                    # Validation and reshaping
+                dot = DotAccessor(
+                    profile=None,
+                    session=None,
+                    payload=None,
+                    event=None,
+                    flow=None,
+                    memory=None
+                )
 
-                    dot = DotAccessor(
-                        profile=None,
-                        session=None,
-                        payload=None,
-                        event=None,
-                        flow=None,
-                        memory=None
-                    )
+                if License.has_service(VALIDATOR):
+                    # Index traits, validate and reshape
+                    evh = EventsValidationHandler(dot, self.console_log)
+                    tracker_payload = await evh.validate_and_reshape_index_events(tracker_payload)
 
-                    if License.has_service(VALIDATOR):
-                        # Index traits, validate and reshape
-                        evh = EventsValidationHandler(dot, self.console_log)
-                        tracker_payload = await evh.validate_and_reshape_index_events(tracker_payload)
+                    # todo sessja moze zostac zmieniona ale profile_id zostanie wygenerowany jeżeli nie istnieje
+                    # todo pytanie czy powinien byc profile id statyczny
 
-                        # todo sessja moze zostac zmieniona ale profile_id zostanie wygenerowany jeżeli nie istnieje
-                        # todo pytanie czy powinien byc profile id statyczny
+                # Locks for processing each profile
+                result = await orchestrator.invoke(tracker_payload, self.console_log)
+                tracker_results.append(result)
+                responses.append(result.get_response_body(tracker_payload.get_id()))
+                debugging.append(tracker_payload)
 
-                    # Locks for processing each profile
-                    result = await orchestrator.invoke(tracker_payload, self.console_log)
-                    tracker_results.append(result)
-                    responses.append(result.get_response_body(tracker_payload.get_id()))
-                    debugging.append(tracker_payload)
+            # Save bulk
 
-                # Save bulk
+            if self.on_result_ready is None:
+                save_results = await self._handle_on_result_ready(tracker_results, self.console_log)
+            else:
+                save_results = await self.on_result_ready(tracker_results, self.console_log)
 
-                if self.on_result_ready is None:
-                    save_results = await self._handle_on_result_ready(tracker_results, self.console_log)
-                else:
-                    save_results = await self.on_result_ready(tracker_results, self.console_log)
+            # print(save_results.profile)
 
-                # print(save_results.profile)
+            # UnLock
 
-                # UnLock
+            if orchestrator.locked and source.synchronize_profiles:
+                profile_synchronizer.unlock_entities(orchestrator.locked)
+                await storage.driver.profile.refresh()
+                await storage.driver.session.refresh()
 
-                if orchestrator.locked and source.synchronize_profiles:
-                    profile_synchronizer.unlock_entities(orchestrator.locked)
-                    await storage.driver.profile.refresh()
-                    await storage.driver.session.refresh()
+            logger.debug(f"Invoke save results {save_results} tracker payloads.")
 
-                logger.debug(f"Invoke save results {save_results} tracker payloads.")
+            # Debugging rest
 
-                # Debugging rest
-
-                if tracardi.track_debug:
-                    responses = save_results.get_debugging_info(responses, debugging)
+            if tracardi.track_debug:
+                responses = save_results.get_debugging_info(responses, debugging)
 
         except redis.exceptions.ConnectionError as e:
             raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
