@@ -22,7 +22,7 @@ astral
 jsonschema==4.3.3
 python-dateutil
 mailchimp-transactional
-# email-validator
+email-validator
 lxml
 beautifulsoup4
 mailchimp-marketing
