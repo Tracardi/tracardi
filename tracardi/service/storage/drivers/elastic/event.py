@@ -9,7 +9,7 @@ from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 
 import tracardi.config as config
 
@@ -532,3 +532,40 @@ async def reassign_session(new_session_id: str, old_session_id: str, profile_id:
             await storage_manager('event').upsert(event_record)
         except Exception as e:
             logger.error(str(e))
+
+
+async def get_all_events_by_fields(search_by: List[Tuple[str, str]], return_fields: Optional[List[str]] = None) -> List[
+    StorageRecords]:
+    def get_query(chunk=0, size=500):
+        query = {
+            "sort": [
+                {"metadata.time.insert": {"order": "asc"}}
+            ],
+            "from": chunk * size,
+            "size": chunk * size + size,
+            "query": {
+                "bool": {
+                    "must": []
+                }
+            }
+        }
+
+        if return_fields:
+            query['_source'] = return_fields
+
+        for field, value in search_by:
+            query['query']['bool']['must'].append({
+                "term": {field: value}
+            })
+
+        return query
+
+    chunk = 0
+    while True:
+        query = get_query(chunk, size=500)
+        chunk += 1
+        result = await storage_manager('event').query(query)
+
+        if not bool(result):
+            break
+        yield result

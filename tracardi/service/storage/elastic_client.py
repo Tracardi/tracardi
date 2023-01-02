@@ -83,15 +83,18 @@ class ElasticClient:
             return False
 
     async def search(self, index, query):
+        print(index)
+        print(query)
         return await self._client.search(index=index, body=query)
 
-    def scan(self, index, query, scroll="5m", size=1000):
+    def scan(self, index, query, scroll="5m", size=1000, preserve_order=False):
         return helpers.async_scan(
             self._client,
             query=query,
             index=index,
             scroll=scroll,
-            size=size
+            size=size,
+            preserve_order=preserve_order
         )
 
     @property
