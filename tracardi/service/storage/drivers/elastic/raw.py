@@ -4,6 +4,7 @@ from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.storage.persistence_service import PersistenceService
+
 memory_cache = MemoryCache("index-mapping")
 
 
@@ -84,8 +85,20 @@ async def refresh(index):
     return await es.refresh(index)
 
 
-async def mapping(index) -> IndexMapping:
-    return await storage_manager(index).get_mapping()
+async def get_mapping(index):
+    es = ElasticClient.instance()
+    result = await es.get_mapping(index)
+    return result[index]
+
+
+async def set_mapping(index: str, mapping: dict):
+    es = ElasticClient.instance()
+    return await es.set_mapping(index, mapping)
+
+
+async def create_index(index: str, mapping: dict):
+    es = ElasticClient.instance()
+    return await es.create_index(index, mapping)
 
 
 async def get_mapping_fields(index) -> list:

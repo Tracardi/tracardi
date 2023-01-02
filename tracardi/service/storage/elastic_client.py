@@ -69,6 +69,9 @@ class ElasticClient:
     async def get_mapping(self, index):
         return await self._client.indices.get_mapping(index=index)
 
+    async def set_mapping(self, index, mapping: dict):
+        return await self._client.indices.put_mapping(body=mapping, index=index)
+
     async def exists_index_template(self, name):
         return await self._client.indices.exists_index_template(name)
 

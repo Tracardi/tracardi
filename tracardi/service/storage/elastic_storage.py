@@ -289,5 +289,8 @@ class ElasticStorage:
     async def delete_by_query(self, query):
         return await self.storage.delete_by_query(index=self.index.get_index_alias(), body=query)
 
-    async def get_mapping(self, index):
+    async def get_mapping(self, index: str):
         return await self.storage.get_mapping(index)
+
+    async def set_mapping(self, index: str, mapping: dict):
+        return await self.storage.set_mapping(index, mapping)

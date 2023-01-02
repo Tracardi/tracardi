@@ -1,6 +1,3 @@
-from pprint import pprint
-
-
 class IndexMapping:
 
     def __init__(self, mapping):

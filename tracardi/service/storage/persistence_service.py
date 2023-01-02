@@ -412,6 +412,16 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
+    async def set_mapping(self, index: str, mapping: dict):
+        try:
+            return await self.storage.set_mapping(index, mapping)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
     async def load_by(self, field: str, value: Union[str, int, float, bool], limit: int = 100,
                       sort: List[Dict[str, Dict]] = None) -> StorageRecords:
         try:
