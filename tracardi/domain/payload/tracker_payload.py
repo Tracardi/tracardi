@@ -17,18 +17,16 @@ from ..profile import Profile
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
 from ...exceptions.log_handler import log_handler
-# from ...service.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
-# TODO remove circular dep
-# cache = CacheManager()
 
 
 class TrackerPayload(BaseModel):
 
     _id: str = PrivateAttr(None)
+    _make_static_profile_id: bool = PrivateAttr(False)
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -49,6 +47,12 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
         self._id = str(uuid4())
+
+    def force_static_profile_id(self, flag=True):
+        self._make_static_profile_id = flag
+
+    def has_static_profile_id(self) -> bool:
+        return self._make_static_profile_id
 
     def get_domain_events(self) -> List[Event]:
         for event_payload in self.events:
@@ -73,31 +77,6 @@ class TrackerPayload(BaseModel):
         jdump = json.dumps(self.dict(exclude={'events': ..., 'metadata': ...}), sort_keys=True, default=str)
         props_hash = sha1(jdump.encode())
         return props_hash.hexdigest()
-
-    # TODO remove after 2023-01-01
-    # def get_events(self, session: Optional[Session], profile: Optional[Profile], has_profile) -> List[Event]:
-    #     event_list = []
-    #     if self.events:
-    #         debugging = self.is_debugging_on()
-    #         for event in self.events:  # type: EventPayload
-    #             _event = event.to_event(self.metadata, self.source, session, profile, has_profile)
-    #             _event.metadata.status = COLLECTED
-    #             _event.metadata.debug = debugging
-    #
-    #             # Append session data
-    #             if isinstance(session, Session):
-    #                 _event.session.start = session.metadata.time.insert
-    #                 _event.session.duration = session.metadata.time.duration
-    #
-    #             # Add tracker payload properties as event request values
-    #
-    #             if isinstance(_event.request, dict):
-    #                 _event.request.update(self.request)
-    #             else:
-    #                 _event.request = self.request
-    #
-    #             event_list.append(_event)
-    #     return event_list
 
     def has_events(self):
         return len(self.events) > 0
@@ -160,6 +139,16 @@ class TrackerPayload(BaseModel):
                     )
                 )
                 session.operation.new = True
+
+                if isinstance(session.context, dict):
+                    session.context.update(self.context)
+                else:
+                    session.context = self.context
+
+                if isinstance(session.properties, dict):
+                    session.properties.update(self.properties)
+                else:
+                    session.properties = self.properties
 
                 # # Remove the session from cache we just created one.
                 # # We repeat it when saving.

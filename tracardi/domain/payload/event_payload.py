@@ -19,6 +19,10 @@ class EventPayload(BaseModel):
     options: Optional[dict] = {}
     context: Optional[dict] = {}
 
+    @staticmethod
+    def from_event(event: Event) -> 'EventPayload':
+        return EventPayload(type=event.type, properties=event.properties, context=event.context)
+
     def to_event(self, request: dict, metadata: EventPayloadMetadata, source: Entity, session: Optional[Session],
                  profile: Optional[Entity],
                  has_profile: bool) -> Event:

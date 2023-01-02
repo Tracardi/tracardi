@@ -76,6 +76,8 @@ class TrackingOrchestrator:
                     "saveSession": False
                 })
 
+            # Loads session from ES if necessary
+
             session = await cache.session(
                 session_id=tracker_payload.session.id,
                 ttl=memory_cache.session_cache_ttl
@@ -110,7 +112,7 @@ class TrackingOrchestrator:
             if len(list_of_profile_ids_referenced_by_session) == 1:
                 session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
 
-        if self.tracker_config.static_profile_id is True:
+        if self.tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id():
             # Get static profile - This is dangerous
             profile, session = await tracker_payload.get_static_profile_and_session(
                 session,
@@ -171,10 +173,6 @@ class TrackingOrchestrator:
         # For security we override old values
         profile = tracker_result.profile
         session = tracker_result.session
-
-        # todo do not know is makes sense - async
-        if self.tracker_config.run_async:
-            pass
 
         debug = tracker_payload.is_on('debugger', default=False)
         await self.save_debug_data(tracker_result.debugger, debug, get_entity_id(tracker_result.profile))

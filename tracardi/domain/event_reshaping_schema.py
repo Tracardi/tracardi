@@ -1,4 +1,3 @@
-from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, List
 from pydantic import BaseModel, validator
@@ -11,6 +10,12 @@ class EntityMapping(BaseModel):
     profile: RefValue
     session: RefValue
     event_type: RefValue
+
+    def has_profile_mapping(self) -> bool:
+        return bool(self.profile.value)
+
+    def has_session_mapping(self) -> bool:
+        return bool(self.session.value)
 
 
 class EventReshapeDefinition(BaseModel):

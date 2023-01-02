@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from uuid import uuid4
+
 from .entity import Entity
 from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
