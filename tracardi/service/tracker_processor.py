@@ -1,10 +1,6 @@
 import logging
-from pprint import pprint
-
 import redis
-
 from abc import ABC, abstractmethod
-
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.service.license import License, VALIDATOR
 from tracardi.domain.profile import Profile
