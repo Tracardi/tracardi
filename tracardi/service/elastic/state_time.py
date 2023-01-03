@@ -1,20 +1,26 @@
 import asyncio
+import logging
 from collections import namedtuple, defaultdict
 from dataclasses import dataclass
 from datetime import timedelta, datetime
-from pprint import pprint
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Dict, Any
 from dateutil import parser
 from dotty_dict import dotty
 
+from tracardi.config import tracardi
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.driver import storage
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 @dataclass
 class PointInTime:
     pos: int
     timestamp: datetime
-    field:str
+    field: str
     old: Any
     new: Any
     start_time: Optional[datetime]
@@ -38,12 +44,8 @@ class TimeTable:
         self.last_value: Dict[str, str] = {}  # key = field
         self.last_point_in_time: Dict[str, PointInTime] = {}
 
-    def __enter__(self):
-        return self
-
     def finish(self, now):
         for field, start_time in self.last_change.items():
-            print(field, start_time)
             value = self.last_value[field]
             self.add(
                 Row(now, field, value),
@@ -60,10 +62,6 @@ class TimeTable:
 
     def add(self, row: Row, point_in_time: PointInTime):
         self.change_table[(row.field, row.value)].append(point_in_time)
-        print(f"{point_in_time}  {point_in_time.get_duration()}")
-
-    def items(self):
-        return self.change_table.items()
 
     def mark_change(self, row: Row, now: datetime):
         self.set_last_change(row, now)
@@ -90,22 +88,14 @@ class TimeTable:
         return row.value != self.last_value[row.field]
 
 
-async def get_event_field_value_duration_time(event_type: str, fields: List[str], source_id: str = None,
-                                              range: Optional[Tuple[datetime, datetime]] = None):
-    search_by = [('type', event_type)]
-    if source_id:
-        search_by.append(
-            ('source.id', source_id)
-        )
-
-    chunk_result = storage.driver.event.get_all_events_by_fields(search_by, fields + ["metadata.time.insert"])
-
+async def get_event_field_value_duration_time(chunk_result, fields: List[str]):
     record_no = 0
     chunk_no = 0
 
-    # When exists context remaining PointInTimes are added
     time_table = TimeTable()
+
     now = None
+
     async for result in chunk_result:
         chunk_no += 1
 
@@ -122,16 +112,6 @@ async def get_event_field_value_duration_time(event_type: str, fields: List[str]
                 except KeyError:
                     continue
 
-                if (record_no == 3 or record_no == 4 or record_no == 6) and field == 'type':
-                    value = 2
-                if (record_no == 31) and field == 'properties.Vacation':
-                    value = 31
-
-                if record_no < 30 and field == 'properties.Vacation':
-                    continue
-                if record_no >= 15 and field == 'type':
-                    continue
-
                 row = Row(now, field, value)
 
                 if not time_table.has_row_in_table(row):
@@ -140,8 +120,7 @@ async def get_event_field_value_duration_time(event_type: str, fields: List[str]
 
                 is_changed = time_table.has_changed(row)
 
-                print(
-                    f"{record_no} {is_changed} {now}   {row.field}={row.value} ")
+                logger.debug(f"{record_no} {is_changed} {now} {row.field}={row.value} ")
 
                 if is_changed:
                     time_table.add(
@@ -158,23 +137,38 @@ async def get_event_field_value_duration_time(event_type: str, fields: List[str]
                     time_table.mark_change(row, now)
     if now:
         time_table.finish(now)
-#####
 
+    # Sum results
 
     durations_per_period = {key: [point_in_time.get_duration() for point_in_time in point_in_times] for
-                            key, point_in_times in time_table.items()}
+                            key, point_in_times in time_table.change_table.items()}
     total_durations_per_period = {
         key: timedelta(seconds=sum([point_in_time.get_duration().total_seconds() for point_in_time in point_in_times]))
-        for key, point_in_times in time_table.items()}
+        for key, point_in_times in time_table.change_table.items()}
 
     result = {key: {
         "periods": values,
         "total": total_durations_per_period[key]
     } for key, values in durations_per_period.items()}
-    pprint(result)
+
+    return result
 
 
-asyncio.run(get_event_field_value_duration_time("profile-interest", ['type', 'properties.Vacation']))
+async def main():
+    source_id = None
+    event_type = "profile-interest"
+    search_by = [('type', event_type)]
+    if source_id:
+        search_by.append(
+            ('source.id', source_id)
+        )
+
+    fields = ['type', 'properties.Vacation']
+    result = storage.driver.event.get_all_events_by_fields(search_by, fields + ["metadata.time.insert"])
+    return await get_event_field_value_duration_time(result, fields)
+
+
+print(asyncio.run(main()))
 
 # start_time = datetime(2022, 12, 22, 17, 42, 10, 954105)
 # end_time = datetime(2022, 12, 22, 17, 42, 53, 10046)
