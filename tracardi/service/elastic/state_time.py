@@ -1,12 +1,13 @@
 import asyncio
 from collections import namedtuple, defaultdict
 from datetime import timedelta
+from pprint import pprint
 from typing import List, Optional
 from dateutil import parser
 from tracardi.service.storage.driver import storage
 
 
-async def get_event_filed_state_duration_time(event_type: str, fields: List[str], source_id: str = None):
+async def get_event_field_value_duration_time(event_type: str, fields: List[str], source_id: str = None):
     search_by = [('type', event_type)]
     if source_id:
         search_by.append(
@@ -16,7 +17,7 @@ async def get_event_filed_state_duration_time(event_type: str, fields: List[str]
     point_in_times = {}
     PointInTime = namedtuple("PointInTime", "start_time end_time")
     i = 0
-    rr = defaultdict(list)
+    times_per_period = defaultdict(list)
     last_key = None
     async for result in chunk_result:
         for event in result:
@@ -28,8 +29,8 @@ async def get_event_filed_state_duration_time(event_type: str, fields: List[str]
                 if i >= 10 and i < 13:
                     value = 2
                 if i >= 20 and i < 33:
-                    value = 2
-                print(now, value)
+                    value = 3
+
                 key = f"{field}={value}"
 
                 if key not in point_in_times:
@@ -42,13 +43,22 @@ async def get_event_filed_state_duration_time(event_type: str, fields: List[str]
                     # Key has changed
                     point_in_times[last_key] = PointInTime(point_in_times[last_key].start_time, now)
                     # Append and delete old value
-                    rr[last_key].append(point_in_times[last_key])
+                    times_per_period[last_key].append(point_in_times[last_key])
                     del point_in_times[last_key]
 
                 last_key = key
     # finish
-    rr[last_key].append(point_in_times[last_key])
+    times_per_period[last_key].append(point_in_times[last_key])
 
-    print({k: [(v.end_time - v.start_time) for v in value]  for k, value in rr.items()})
+    durations_per_period = {key: [(value.end_time - value.start_time) for value in values] for key, values in times_per_period.items()}
+    total_durations_per_period = {key: timedelta(seconds=sum([(value.end_time - value.start_time).total_seconds() for value in values])) for key, values in
+           times_per_period.items()}
 
-asyncio.run(get_event_filed_state_duration_time("profile-interest", ['properties.Vacation']))
+    result = {key: {
+        "periods": values,
+        "total": total_durations_per_period[key]
+    } for key, values in durations_per_period.items()}
+    pprint(result)
+
+
+asyncio.run(get_event_field_value_duration_time("profile-interest", ['properties.Vacation']))
