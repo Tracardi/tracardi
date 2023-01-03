@@ -88,7 +88,7 @@ class TimeTable:
         return row.value != self.last_value[row.field]
 
 
-async def get_event_field_value_duration_time(chunk_result, fields: List[str]):
+async def report_duration_time_per_field(chunk_result, fields: List[str]):
     record_no = 0
     chunk_no = 0
 
@@ -165,7 +165,8 @@ async def main():
 
     fields = ['type', 'properties.Vacation']
     result = storage.driver.event.get_all_events_by_fields(search_by, fields + ["metadata.time.insert"])
-    return await get_event_field_value_duration_time(result, fields)
+
+    return await report_duration_time_per_field(result, fields)
 
 
 print(asyncio.run(main()))
