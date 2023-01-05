@@ -1,10 +1,11 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from pydantic import BaseModel
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import ProfileMetadata
+from .named_entity import NamedEntity
 from .pii import PII
 from .profile_traits import ProfileTraits
 from .storage_record import RecordMetadata
