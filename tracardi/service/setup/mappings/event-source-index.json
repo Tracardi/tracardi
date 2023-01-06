@@ -83,6 +83,9 @@
       "requires_consent": {
         "type": "boolean"
       },
+      "synchronize_profiles": {
+        "type": "boolean"
+      },
       "manual": {
         "type": "keyword",
         "index": false
