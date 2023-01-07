@@ -25,7 +25,6 @@ class EventSource(Entity):
     locked: bool = False
     synchronize_profiles: bool = True
     config: Optional[dict] = None
-    form: Optional[Form] = None
 
     def __init__(self, **data: Any):
         if 'timestamp' not in data:

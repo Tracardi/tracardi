@@ -37,7 +37,7 @@ async def save_source(event_source: EventSource):
     types = event_source_types()
     if event_source.type in types:
         result = await storage.driver.event_source.save(event_source)
-        if result.is_nothing_saved():
+        if result is None or result.is_nothing_saved():
             raise OSError("Could not save event source.")
         await storage.driver.event_source.refresh()
         return result
