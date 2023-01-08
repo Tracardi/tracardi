@@ -4,7 +4,7 @@
   ],
   "template": {
     "settings": {
-    "number_of_shards": %%SHARDS%%,
+    "number_of_shards": %%CONF_SHARDS%%,
     "number_of_replicas": %%REPLICAS%%
     },
     "mappings": {

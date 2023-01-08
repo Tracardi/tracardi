@@ -77,7 +77,8 @@ class ElasticConfig:
     def __init__(self, env):
         self.env = env
         self.replicas = env['ELASTIC_INDEX_REPLICAS'] if 'ELASTIC_INDEX_REPLICAS' in env else "1"
-        self.shards = env['ELASTIC_INDEX_SHARDS'] if 'ELASTIC_INDEX_SHARDS' in env else "5"
+        self.shards = env['ELASTIC_INDEX_SHARDS'] if 'ELASTIC_INDEX_SHARDS' in env else "3"
+        self.conf_shards = env['ELASTIC_CONF_INDEX_SHARDS'] if 'ELASTIC_CONF_INDEX_SHARDS' in env else "1"
         self.sniff_on_start = env['ELASTIC_SNIFF_ON_START'] if 'ELASTIC_SNIFF_ON_START' in env else None
         self.sniff_on_connection_fail = env[
             'ELASTIC_SNIFF_ON_CONNECTION_FAIL'] if 'ELASTIC_SNIFF_ON_CONNECTION_FAIL' in env else None

@@ -37,6 +37,7 @@ class Index:
         json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
         json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)
         json_map = json_map.replace("%%SHARDS%%", elastic.shards)
+        json_map = json_map.replace("%%CONF_SHARDS%%", elastic.conf_shards)
         return json_map
 
     def get_index_alias(self) -> str:
