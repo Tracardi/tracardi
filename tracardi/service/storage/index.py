@@ -153,8 +153,9 @@ class Resource:
             "schedule": Index(multi_index=False, index="tracardi-schedule", mapping="mappings/schedule-index.json"),
             "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json"),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",
-                                  mapping="mappings/consent-type.json"),
-
+                                  mapping="mappings/consent-type-index.json"),
+            "consent-data-compliance": Index(multi_index=False, index="tracardi-consent-data-compliance",
+                                             mapping="mappings/consent-data-compliance-index.json"),
             "event-reshaping": Index(multi_index=False, index="tracardi-event-reshaping",
                                      mapping="mappings/event-reshaping-index.json"),
             "event-validation": Index(multi_index=False, index="tracardi-event-validation",
