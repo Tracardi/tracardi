@@ -16,6 +16,9 @@
       "name": {
         "type" :"keyword"
       },
+      "description": {
+        "type" :"keyword"
+      },
       "event_type": {
         "properties": {
           "id": {
