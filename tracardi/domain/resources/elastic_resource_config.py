@@ -48,9 +48,18 @@ class ElasticResourceConfig(BaseModel):
         client = credentials.get_client()
 
         indices = await client.list_indices()
-        indices = indices.keys()
+        aliases = await client.list_aliases()
+        indices = [("I", item) for item in indices.keys()]
+
+        list_of_aliases = []
+        for alias in aliases.values():
+            if 'aliases' in alias:
+                for _alias in alias['aliases']:
+                    list_of_aliases.append(("A", _alias))
+
+        aliases_and_indices = list_of_aliases + indices
 
         return {
-            "total": len(indices),
-            "result": [{"name": record, "id": record} for record in indices]
+            "total": len(aliases_and_indices),
+            "result": [{"name": f"({record[0]}) {record[1]}", "id": record[1]} for record in aliases_and_indices]
         }

@@ -50,7 +50,7 @@ class ElasticIndexImporter(Importer):
                 name="Elastic resource",
                 id="source",
                 description="Select Elasticsearch resource you want to connect to. Resource must have database credentials defined.",
-                component=FormComponent(type="resource", props={"tag": "elastic"})
+                component=FormComponent(type="resource", props={"tag": "elasticsearch"})
             ),
             FormField(
                 name="Index name",

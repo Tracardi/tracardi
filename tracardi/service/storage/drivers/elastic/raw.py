@@ -1,4 +1,3 @@
-from tracardi.domain.storage.index_mapping import IndexMapping
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.storage.elastic_client import ElasticClient

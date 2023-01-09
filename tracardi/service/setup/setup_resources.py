@@ -107,7 +107,7 @@ def get_resource_types() -> List[ResourceSettings]:
         ResourceSettings(
             id="elastic-search",
             name="Elasticsearch",
-            tags=["elastic"],
+            tags=["elasticsearch", "database"],
             icon="elasticsearch",
             config={
                 "url": "<url>",
