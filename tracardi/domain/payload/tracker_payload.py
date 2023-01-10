@@ -5,7 +5,7 @@ from hashlib import sha1
 from typing import Optional, List, Tuple, Any, Union
 from uuid import uuid4
 
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, PrivateAttr, validator
 from tracardi.config import tracardi
 
 from ..entity import Entity
@@ -39,6 +39,12 @@ class TrackerPayload(BaseModel):
     events: List[EventPayload] = []
     options: Optional[dict] = {}
     profile_less: bool = False
+
+    @validator("events")
+    def events_must_not_be_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Tracker payload must not have empty events.")
+        return value
 
     def __init__(self, **data: Any):
         data['metadata'] = EventPayloadMetadata(

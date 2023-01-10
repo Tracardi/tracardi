@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
@@ -18,6 +18,13 @@ class EventPayload(BaseModel):
     properties: Optional[dict] = {}
     options: Optional[dict] = {}
     context: Optional[dict] = {}
+
+    @validator("type")
+    def event_type_can_not_be_empty(cls, value):
+        value = value.strip()
+        if value == "":
+            raise ValueError("Event type can not be empty")
+        return value
 
     @staticmethod
     def from_event(event: Event) -> 'EventPayload':
