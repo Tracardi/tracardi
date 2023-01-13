@@ -52,7 +52,8 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=["trait"],
             init={
-                "trait": ""
+                "trait": "",
+                "key": ""
             },
             form=Form(groups=[
                 FormGroup(
