@@ -56,7 +56,14 @@ class ReshapePayloadAction(ActionRunner):
 
         output = json.loads(self.config.value)
 
-        result = template.reshape(reshape_template=output)
+        try:
+            result = template.reshape(reshape_template=output)
+        except Exception as e:
+            return Result(port="error", value={"message": str(e)})
+
+        if not isinstance(result, dict):
+            message = "Result from this node is not an object/dictionary."
+            return Result(port="error", value={"message": message})
 
         return Result(port="payload", value=result)
 
@@ -68,7 +75,7 @@ def register() -> Plugin:
             module=__name__,
             className=ReshapePayloadAction.__name__,
             inputs=["payload"],
-            outputs=['payload'],
+            outputs=['payload', 'error'],
             init={"value": "{}", "default": True},
             form=Form(groups=[
                 FormGroup(
@@ -91,15 +98,15 @@ def register() -> Plugin:
                 ),
             ]),
             manual="reshape_payload_action",
-            version='0.6.0',
+            version='0.8.0',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Create payload',
+            name='Inject payload',
             desc='Creates new payload from provided data. Configuration defines where the data should be copied.',
             icon='json',
-            group=["Data processing"],
+            group=["Input/Output"],
             tags=['reshape', 'create', 'payload', 'data', 'make'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

@@ -52,6 +52,9 @@ class DictTraverser:
         if reshape_template is None:
             return None
 
+        if not isinstance(reshape_template, dict) and not isinstance(reshape_template, list):
+            raise ValueError("Reshape template is not object or list.")
+
         if isinstance(reshape_template, list) and len(reshape_template) == 0:
             return []
 

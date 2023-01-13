@@ -58,8 +58,8 @@ def register() -> Plugin:
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
-            name='Last profile visit',
-            desc='Returns last profile visit and the time difference till now.',
+            name='Last profile visit time',
+            desc='Returns last profile visit time difference till now.',
             icon='time',
             group=["Time"],
             tags=['previous', 'last'],

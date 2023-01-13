@@ -55,10 +55,10 @@ def register() -> Plugin:
             ]),
         ),
         metadata=MetaData(
-            name='Inject event into payload',
+            name='Inject event',
             desc='This node will inject event of given id into payload',
             icon='json',
-            keywords=['load', 'new', 'add'],
+            tags=['load', 'new', 'add', 'create', 'data'],
             group=["Events"],
             documentation=Documentation(
                 inputs={

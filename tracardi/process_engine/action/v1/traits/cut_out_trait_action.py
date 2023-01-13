@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -9,6 +11,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 class CutOutTraitConfig(PluginConfig):
     trait: str
+    key: Optional[str] = None
 
     @validator("trait")
     def trait_should_not_be_empty(cls, value):
@@ -31,7 +34,13 @@ class CutOutTraitAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
-        return Result(port="trait", value=dot[self.property.trait])
+        result = dot[self.property.trait]
+        if self.property.key:
+            key = self.property.key.strip()
+            if key == "":
+                self.console.error("Key is empty")
+            return Result(port="trait", value={self.property.key.strip(): result})
+        return Result(port="trait", value=result)
 
 
 def register() -> Plugin:
@@ -57,11 +66,20 @@ def register() -> Plugin:
                             component=FormComponent(type="dotPath", props={"label": "Field path",
                                                                            "defaultSourceValue": "event",
                                                                            "forceMode": 1})
+                        ),
+                        FormField(
+                            id="key",
+                            name="Return as",
+                            description="Return the data as an object with the specified key. For example, if the "
+                                        "key is \"key\" and the cut-out-value is \"value\", the returned object "
+                                        "would be {\"key\": \"value\"}. If you do not want to define a key, leave "
+                                        "this field empty and the data will be returned as it is.",
+                            component=FormComponent(type="text", props={"label": "Key"})
                         )
                     ]
                 )
             ]),
-            version='0.6.1',
+            version='0.8.0',
             license="MIT",
             author="Risto Kowaczewski"
         ),
