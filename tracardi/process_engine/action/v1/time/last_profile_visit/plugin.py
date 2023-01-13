@@ -62,6 +62,7 @@ def register() -> Plugin:
             desc='Returns last profile visit and the time difference till now.',
             icon='time',
             group=["Time"],
+            tags=['previous', 'last'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={

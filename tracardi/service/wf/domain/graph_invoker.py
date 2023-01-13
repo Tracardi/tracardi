@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from time import time
 from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -375,9 +375,15 @@ class GraphInvoker(BaseModel):
                 _single_input_edge = InputEdges()
                 if input_edge_id is not None:
                     """ Skip if there is no input edge """
-                    _single_input_edge.add_edge(input_edge_id,
-                                                InputEdge(id=input_edge_id, active=active, port=input_port,
-                                                          params=input_params))
+                    try:
+                        _single_input_edge.add_edge(input_edge_id,
+                                                    InputEdge(id=input_edge_id, active=active, port=input_port,
+                                                              params=input_params))
+                    except ValidationError as e:
+                        raise ValueError(f"Node name `{node.name}` received data that is not a object/dictionary. "
+                                         f"Data come from edge name `{edge.name}`. "
+                                         f"Expected dict got `{input_params}` of type {type(input_params)}. "
+                                         f"Inner error: {str(e)}")
 
                 yield result, \
                       task_start_time, \

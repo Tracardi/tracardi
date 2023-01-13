@@ -69,7 +69,7 @@ def register() -> Plugin:
                  'payload.',
             icon='previous',
             group=["Sessions"],
-            keywords=['last'],
+            tags=['last', 'previous'],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
                 inputs={

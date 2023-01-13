@@ -91,6 +91,7 @@ def register() -> Plugin:
             desc='Injects the previous event for current profile into payload, according to the event type '
                  'and offset value.',
             icon='previous',
+            tags=['previous', 'last'],
             group=["Events"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

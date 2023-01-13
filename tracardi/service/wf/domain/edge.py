@@ -21,6 +21,10 @@ class Edge(BaseModel):
     def has_name(self):
         return self.data is not None and self.data.name != "" and self.data.name is not None
 
+    @property
+    def name(self) -> str:
+        return self.data.name if self.has_name() else "No name"
+
     def __key(self):
         return self.source.node_id, self.source.param, self.target.node_id, self.target.param
 
