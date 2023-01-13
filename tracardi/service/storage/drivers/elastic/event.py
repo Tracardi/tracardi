@@ -40,8 +40,12 @@ def _get_name(source_names_idx, id):
     return source_names_idx[id] if id in source_names_idx else id
 
 
-async def search(query):
+async def search(query: dict):
     return await storage_manager("event").query({"query": query})
+
+
+async def query(query: dict):
+    return await storage_manager("event").query(query)
 
 
 async def count_events_by_type(profile_id: str, event_type: str, time_span: int) -> int:
@@ -542,14 +546,14 @@ async def get_all_events_by_fields(search_by: List[Tuple[str, str]], return_fiel
                 {"metadata.time.insert": {"order": "asc"}}
             ],
             "from": chunk * size,
-            "size": chunk * size + size,
+            "size": size,
             "query": {
                 "bool": {
                     "must": []
                 }
             }
         }
-
+        print(query)
         if return_fields:
             query['_source'] = return_fields
 

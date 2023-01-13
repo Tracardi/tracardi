@@ -83,6 +83,7 @@ class StorageRecords(dict):
 
     @staticmethod
     def build_from_elastic(elastic_records: dict = None) -> 'StorageRecords':
+        print(elastic_records)
         if elastic_records is None:
             return StorageRecords()
 
