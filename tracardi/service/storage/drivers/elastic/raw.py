@@ -2,6 +2,7 @@ from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.index import resources
 from tracardi.service.storage.persistence_service import PersistenceService
 
 memory_cache = MemoryCache("index-mapping")
@@ -98,6 +99,19 @@ async def set_mapping(index: str, mapping: dict):
 async def create_index(index: str, mapping: dict):
     es = ElasticClient.instance()
     return await es.create_index(index, mapping)
+
+
+async def get_unique_field_values(index, field):
+    es = ElasticClient.instance()
+    query = {
+        "size": 0,
+        "aggs": {
+            "fields": {
+                "terms": {"field": field, "size": 500}
+            }
+        }}
+    index = resources[index]
+    return StorageRecords.build_from_elastic(await es.search(index.get_index_alias(), query))
 
 
 async def get_mapping_fields(index) -> list:

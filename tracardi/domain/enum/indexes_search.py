@@ -10,3 +10,9 @@ class IndexesSearch(str, Enum):
     segment = "segment"
     flow = "flow",
     log = "log"
+
+
+class IndexesAutocomplete(str, Enum):
+    session = "session"
+    profile = "profile"
+    event = "event"

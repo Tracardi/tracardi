@@ -22,9 +22,9 @@ statement: FIELD OP (QUOTE VALUE QUOTE | VALUE)
 OPEN_BRACKET: "("
 CLOSE_BRACKET: ")"
 QUOTE:      /[\"]/
-VALUE:      /\w+/ 
+VALUE:      /([^\s\"]+|(?<!\\)([\"].*?(?<!\\)[\"]))/ 
             | "*"
-FIELD:      /\w+/
+FIELD:      /[a-zA-z_\.-0-9]+/
 operator:   ":" 
             | ">=" 
             | "<=" 
@@ -33,9 +33,11 @@ operator:   ":"
 OP: /(:|<=|>=|>|<)/
 AND: /AND/i
 OR: /OR/i
+
+%import common.ESCAPED_STRING
 %ignore /\s+/
 """
-
+# (\w+|(?<!\\)([\"].*?(?<!\\)[\"]))
 
 class Values:
 
@@ -48,7 +50,6 @@ class Values:
         return [':', '>=', '<=', '<', '>']
 
     async def _field(self, field):
-        print(self.index)
         fields = await storage.driver.raw.get_mapping_fields(self.index)
         return fields
 
@@ -70,7 +71,8 @@ class Values:
 
     async def _value(self, field):
         print(self.index, field)
-        return ['1', '2']
+        result = await storage.driver.raw.get_unique_field_values(self.index, field)
+        return [item.get("key_as_string", item.get("key", None)) for item in result.aggregations("fields").buckets()]
 
     def __init__(self, index):
         self.index = index
@@ -84,6 +86,16 @@ class Values:
             "CLOSE_BRACKET": self._close_bracket,
             "VALUE": self._value
         }
+        self.names = {
+            "QUOTE": ("quote", "String quote"),
+            "OP": ("operation", "JOIN operation"),
+            "FIELD": ("field", "Index field"),
+            "AND": ("and", "Boolean AND operation"),
+            "OR": ("or", "Boolean OR operation"),
+            "OPEN_BRACKET": ("bracket", "OPEN bracket"),
+            "CLOSE_BRACKET": ("bracket", "CLOSE bracket"),
+            "VALUE": ("value", "FIELD value")
+        }
 
     async def get(self, token, field) -> List[dict]:
         values = []
@@ -91,7 +103,8 @@ class Values:
             for value in await self.values[token](field):
                 values.append({
                     "value": value,
-                    "token": token
+                    "token": self.names[token][0],
+                    "desc": self.names[token][1],
                 })
         return values
 
@@ -132,6 +145,7 @@ class KQLAutocomplete:
         values = []
         for token in self.autocomplete_token(query):
             values += await self.values.get(token, self.last_field)
+
         return values
 
 
@@ -140,8 +154,8 @@ if __name__ == "__main__":
 
 
     async def main():
-        ac = KQLAutocomplete("profile")
-        print(await ac.autocomplete(""))
+        ac = KQLAutocomplete(index="event")
+        print(await ac.autocomplete("metadata.time.insert:"))
 
 
     asyncio.run(main())
