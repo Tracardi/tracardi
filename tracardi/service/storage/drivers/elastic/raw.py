@@ -101,13 +101,13 @@ async def create_index(index: str, mapping: dict):
     return await es.create_index(index, mapping)
 
 
-async def get_unique_field_values(index, field):
+async def get_unique_field_values(index, field, limit=50):
     es = ElasticClient.instance()
     query = {
         "size": 0,
         "aggs": {
             "fields": {
-                "terms": {"field": field, "size": 500}
+                "terms": {"field": field, "size": limit}
             }
         }}
     index = resources[index]

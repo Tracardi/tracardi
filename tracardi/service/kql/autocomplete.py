@@ -105,7 +105,6 @@ class Values:
     @staticmethod
     async def _op(last: dict[str, Any], current: Value):
         current_value = current.value
-        print("_op_current", current.token, f"`{current_value}`")
         operations = [':', '>=', '<=', '<', '>']
         if current.token == "OP":
             return Values._filter(current_value, operations)
@@ -163,7 +162,6 @@ class Values:
 
     async def _value(self, last: dict[str, Any], current: Value):
         field = last['FIELD']
-        print(self.index, field)
         result = await storage.driver.raw.get_unique_field_values(self.index, field)
         values = [item.get("key_as_string", item.get("key", None)) for item in result.aggregations("fields").buckets()]
         if current.token == "VALUE":
@@ -262,10 +260,8 @@ class KQLAutocomplete:
 
         result = {}
         for value in values:
-            # print(value)
             if value.key() not in result:
                 result[value.key()] = dict(value)
-        # print(result)
         return list(result.values())
 
     async def autocomplete(self, query: str) -> Tuple[list, Value]:
@@ -277,15 +273,3 @@ class KQLAutocomplete:
             current_values += _current_values
         return self._get_unique(current_values + next_values), \
                Value(token=self.current.type, value=self.current.value) if self.current else None
-
-
-if __name__ == "__main__":
-    import asyncio
-
-
-    async def main():
-        ac = KQLAutocomplete(index="event")
-        print(await ac.autocomplete(""))
-
-
-    asyncio.run(main())
