@@ -18,6 +18,9 @@
         "id": {
           "type": "keyword"
         },
+        "ids": {
+          "type": "keyword"
+        },
         "metadata": {
           "dynamic": "false",
           "properties": {

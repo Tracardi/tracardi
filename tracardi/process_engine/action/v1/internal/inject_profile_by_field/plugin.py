@@ -71,6 +71,7 @@ def register() -> Plugin:
                             name="Profile field",
                             description="Select the PII profile field by which will be used to identify the profile.",
                             component=FormComponent(type="select", props={"label": "Field", "items": {
+                                "id": "Id",
                                 "pii.email": "E-mail",
                                 "pii.telephone": "Phone",
                                 "pii.twitter": "Twitter handle"
