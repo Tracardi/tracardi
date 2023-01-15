@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from hashlib import sha1
-from typing import List, Optional, Generator, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Any, Callable
 
 from lark import Lark, Token
 from lark.lexer import TerminalDef
@@ -24,7 +23,7 @@ statement: FIELD OP (QUOTE VALUE QUOTE | VALUE)
 OPEN_BRACKET: "("
 CLOSE_BRACKET: ")"
 QUOTE:      /[\"]/
-VALUE:      /([^\s\"]+|(?<!\\)([\"].*?(?<!\\)[\"]))/ 
+VALUE:      /[^\s\"]+|(?<!\\)[\"](.*?)(?<!\\)[\"]/ 
             | "*"
 FIELD:      /[a-zA-z_\.-0-9]+/
 SPACE:      /[\s]+/
@@ -40,9 +39,14 @@ OR: /OR/i
 %ignore /\s+/
 """
 
-
-# (\w+|(?<!\\)([\"].*?(?<!\\)[\"]))
+# ([^\s\"]+|(?<!\\)([\"].*?(?<!\\)[\"]))
 # %import common.ESCAPED_STRING
+
+APPEND_NONE = None
+APPEND_BOTH = 0
+APPEND_BEFORE = -1
+APPEND_AFTER = 1
+
 
 @dataclass
 class Value:
@@ -56,93 +60,164 @@ class AutocompleteValue:
     current_token: Value
 
 
+@dataclass
+class TokenSettings:
+    func: Callable
+    name: str
+    token: str
+    description: Optional[Callable] = None
+    space: Optional[int] = None
+    color: Optional[str] = "#ef6c00"
+
+
 class HashableDict(Dict):
-    def __hash__(self):
-        return sha1(self['value'].encode())
+    def key(self):
+        return self['value']
 
 
 class Values:
 
     @staticmethod
-    async def _quote(field, current_value):
+    def _filter(current_value, fields):
+        return [field for field in fields if current_value in field and current_value != field]
+
+    @staticmethod
+    async def _quote_description(value):
+        return "Quote"
+
+    @staticmethod
+    async def _quote(last: dict[str, Any], current: Value):
+        if current.token == "QUOTE":
+            return []
         return ['"']
 
     @staticmethod
-    async def _op(field, current_value):
-        return [':', '>=', '<=', '<', '>']
+    async def _op_description(value):
+        descriptions = {
+            ":": "Equals",
+            ">=": "Greater or equal than",
+            "<=": "Lower or equal than",
+            "<": "Lower than",
+            ">": "Greater than",
+        }
+        return descriptions[value]
 
-    async def _field(self, field, current_value):
+    @staticmethod
+    async def _op(last: dict[str, Any], current: Value):
+        current_value = current.value
+        print("_op_current", current.token, f"`{current_value}`")
+        operations = [':', '>=', '<=', '<', '>']
+        if current.token == "OP":
+            return Values._filter(current_value, operations)
+        return operations
+
+    @staticmethod
+    async def _field_description(value):
+        return f"Field `{value}`"
+
+    async def _field(self, last: dict[str, Any], current: Value):
+        current_value = current.value
         fields = await storage.driver.raw.get_mapping_fields(self.index)
         if current_value.strip() == "":
             return fields
-        filtered = [field for field in fields if field.startswith(current_value)]
-        return sorted(filtered)
+        if current.token == "FIELD":
+            filtered = self._filter(current_value, fields)
+            return sorted(filtered)
+        return fields
 
     @staticmethod
-    async def _and_link(field, current_value):
+    async def _boolean_description(value):
+        return f"Boolean `{value}`"
+
+    @staticmethod
+    async def _and_link(last: dict[str, Any], current: Value):
+        if current.token == "AND":
+            return []
         return ['AND']
 
     @staticmethod
-    async def _or_link(field, current_value):
+    async def _or_link(last: dict[str, Any], current: Value):
+        if current.token == "OR":
+            return []
         return ['OR']
 
     @staticmethod
-    async def _open_bracket(field, current_value):
+    async def _bracket_description(value):
+        return f"Boolean `{value}`"
+
+    @staticmethod
+    async def _open_bracket(last: dict[str, Any], current: Value):
+        if current.token == "(":
+            return []
         return ['(']
 
     @staticmethod
-    async def _close_bracket(field, current_value):
+    async def _close_bracket(last: dict[str, Any], current: Value):
+        if current.token == "(":
+            return []
         return [')']
 
-    async def _value(self, field, current_value):
+    @staticmethod
+    async def _value_description(value):
+        return f"Value"
+
+    async def _value(self, last: dict[str, Any], current: Value):
+        field = last['FIELD']
         print(self.index, field)
         result = await storage.driver.raw.get_unique_field_values(self.index, field)
-        return [item.get("key_as_string", item.get("key", None)) for item in result.aggregations("fields").buckets()]
+        values = [item.get("key_as_string", item.get("key", None)) for item in result.aggregations("fields").buckets()]
+        if current.token == "VALUE":
+            return self._filter(current.value, values)
+        return values
 
     def __init__(self, index):
         self.index = index
-        self.values = {
-            "QUOTE": self._quote,
-            "OP": self._op,
-            "FIELD": self._field,
-            "AND": self._and_link,
-            "OR": self._or_link,
-            "OPEN_BRACKET": self._open_bracket,
-            "CLOSE_BRACKET": self._close_bracket,
-            "VALUE": self._value
-        }
-        self.names = {
-            "QUOTE": ("quote", "String quote"),
-            "OP": ("operation", "JOIN operation"),
-            "FIELD": ("field", "Index field"),
-            "AND": ("and", "Boolean AND operation"),
-            "OR": ("or", "Boolean OR operation"),
-            "OPEN_BRACKET": ("bracket", "OPEN bracket"),
-            "CLOSE_BRACKET": ("bracket", "CLOSE bracket"),
-            "VALUE": ("value", "FIELD value")
+        self.tokens: Dict[str, TokenSettings] = {
+            "QUOTE": TokenSettings(func=self._quote, token="QUOTE", name="quote", description=self._quote_description,
+                                   space=APPEND_NONE, color="#546e7a"),
+            "OP": TokenSettings(func=self._op, token="OP", name="operation", description=self._op_description,
+                                space=APPEND_AFTER),
+            "FIELD": TokenSettings(func=self._field, token="FIELD", name="field", description=self._field_description,
+                                   space=APPEND_NONE, color="#00acc1"),
+            "AND": TokenSettings(func=self._and_link, token="AND", name="and", description=self._boolean_description,
+                                 space=APPEND_BOTH, color="#689f38"),
+            "OR": TokenSettings(func=self._or_link, token="OR", name="or", description=self._boolean_description,
+                                space=APPEND_BOTH, color="#689f38"),
+            "OPEN_BRACKET": TokenSettings(func=self._open_bracket, token="BRACKET", name="bracket",
+                                          description=self._bracket_description,
+                                          space=APPEND_NONE, color="#e64a19"),
+            "CLOSE_BRACKET": TokenSettings(func=self._close_bracket, token="BRACKET", name="bracket",
+                                           description=self._bracket_description,
+                                           space=APPEND_NONE, color="#e64a19"),
+            "VALUE": TokenSettings(func=self._value, name="value", token="VALUE", description=self._value_description,
+                                   space=APPEND_NONE, color="#afb42b")
         }
 
-    async def get(self, autocomplete_item: AutocompleteValue, last_field):
+    async def get(self, autocomplete_item: AutocompleteValue, last):
         next_values = []
         current_values = []
         next_token = autocomplete_item.next_token.token
         current_token = autocomplete_item.current_token.token
-        if next_token in self.values:
-            for value in await self.values[next_token](
-                    field=last_field,
-                    current_value=autocomplete_item.current_token.value):
+        if next_token in self.tokens:
+            next_token = self.tokens[next_token]
+            for value in await next_token.func(last=last, current=autocomplete_item.current_token):
                 next_values.append(HashableDict({
                     "value": value,
-                    "token": self.names[next_token][0],
-                    "desc": self.names[next_token][1],
+                    "token": next_token.token,
+                    "name": next_token.name,
+                    "desc": await next_token.description(value) if next_token else "",
+                    "space": next_token.space,
+                    "color": next_token.color
                 }))
-            for value in await self.values[current_token](
-                    field=last_field,
-                    current_value=autocomplete_item.current_token.value):
+            current_token = self.tokens[current_token]
+            for value in await current_token.func(last=last, current=autocomplete_item.current_token):
                 current_values.append(HashableDict({
                     "value": value,
-                    "token": self.names[current_token][0],
-                    "desc": self.names[current_token][1],
+                    "token": current_token.token,
+                    "name": current_token.name,
+                    "desc": await current_token.description(value) if next_token else "",
+                    "space": current_token.space,
+                    "color": current_token.color
                 }))
 
         return next_values, current_values
@@ -153,9 +228,7 @@ parser = Lark(schema, parser="lalr")
 
 class KQLAutocomplete:
     def __init__(self, index):
-        self.last_field = None
-        self.last_value = None
-        self.last_op = None
+        self.last = {}
         self.current = None
         self.values = Values(index)
 
@@ -163,13 +236,7 @@ class KQLAutocomplete:
         interactive = parser.parse_interactive(query)
         for token in interactive.iter_parse():  # type: Token
             self.current = token
-            self.last_token = token.type
-            if token.type == "FIELD":
-                self.last_field = token.value
-            elif token.type == "OP":
-                self.last_op = token.value
-            elif token.type == "VALUE":
-                self.last_value = token.value
+            self.last[token.type] = token
 
         interactive.exhaust_lexer()
 
@@ -188,16 +255,28 @@ class KQLAutocomplete:
                             value=self.current.value if self.current else query)
                     )
 
-    async def autocomplete(self, query: str):
+    @staticmethod
+    def _get_unique(values):
+        if not values:
+            return []
+
+        result = {}
+        for value in values:
+            # print(value)
+            if value.key() not in result:
+                result[value.key()] = dict(value)
+        # print(result)
+        return list(result.values())
+
+    async def autocomplete(self, query: str) -> Tuple[list, Value]:
         next_values = []
         current_values = []
         for autocomplete_item in self.autocomplete_token(query):
-            _next_values, _current_values = await self.values.get(autocomplete_item, self.last_field)
+            _next_values, _current_values = await self.values.get(autocomplete_item, self.last)
             next_values += _next_values
             current_values += _current_values
-        if query.strip() == "":
-            return next_values
-        return current_values + next_values
+        return self._get_unique(current_values + next_values), \
+               Value(token=self.current.type, value=self.current.value) if self.current else None
 
 
 if __name__ == "__main__":
