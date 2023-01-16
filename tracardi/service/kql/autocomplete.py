@@ -112,7 +112,7 @@ class Values:
 
     @staticmethod
     async def _field_description(value):
-        return f"Field `{value}`"
+        return ""
 
     async def _field(self, last: dict[str, Any], current: Value):
         current_value = current.value
@@ -142,7 +142,7 @@ class Values:
 
     @staticmethod
     async def _bracket_description(value):
-        return f"Boolean `{value}`"
+        return "Closing bracket" if value == ")" else "Opening bracket"
 
     @staticmethod
     async def _open_bracket(last: dict[str, Any], current: Value):
@@ -158,7 +158,7 @@ class Values:
 
     @staticmethod
     async def _value_description(value):
-        return f"Value"
+        return ""
 
     async def _value(self, last: dict[str, Any], current: Value):
         field = last['FIELD']
@@ -203,7 +203,7 @@ class Values:
                     "value": value,
                     "token": next_token.token,
                     "name": next_token.name,
-                    "desc": await next_token.description(value) if next_token else "",
+                    "desc": await next_token.description(value) if next_token and next_token.description is not None else "",
                     "space": next_token.space,
                     "color": next_token.color
                 }))
@@ -213,7 +213,7 @@ class Values:
                     "value": value,
                     "token": current_token.token,
                     "name": current_token.name,
-                    "desc": await current_token.description(value) if next_token else "",
+                    "desc": await current_token.description(value) if next_token and next_token.description is not None else "",
                     "space": current_token.space,
                     "color": current_token.color
                 }))
