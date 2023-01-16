@@ -158,6 +158,12 @@ class ElasticStorage:
         else:
             return await self.delete_by('_id', id, index)
 
+    async def bulk_delete(self, record_ids):
+        return await self.storage.delete_bulk(
+            index=self.index.get_index_alias(),
+            record_ids=record_ids
+        )
+
     async def search(self, query) -> StorageRecords:
         return StorageRecords.build_from_elastic(await self.storage.search(self.index.get_index_alias(), query))
 

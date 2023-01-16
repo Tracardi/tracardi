@@ -20,7 +20,6 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
 from tracardi.service.storage.driver import storage
-from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
@@ -61,7 +60,6 @@ class TrackingManagerBase(ABC):
     @abstractmethod
     def __init__(self,
                  console_log: ConsoleLog,
-                 tracker_config: TrackerConfig,
                  tracker_payload: TrackerPayload,
                  profile: Optional[Profile] = None,
                  session: Optional[Session] = None,
@@ -112,6 +110,7 @@ class TrackingManager(TrackingManagerBase):
     @staticmethod
     async def merge_profile(profile: Profile) -> Profile:
         merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
+        print(merge_key_values)
         merged_profile = await ProfileMerger.invoke_merge_profile(
             profile,
             merge_by=merge_key_values,
@@ -244,6 +243,20 @@ class TrackingManager(TrackingManagerBase):
                                 self.profile = await self.on_profile_merge(self.profile)
                             else:
                                 self.profile = await self.merge_profile(self.profile)
+                    else:
+                        self.console_log.append(
+                            Console(
+                                flow_id=None,
+                                node_id=None,
+                                event_id=None,
+                                profile_id=get_entity_id(self.profile),
+                                origin='profile',
+                                class_name=TrackingManager.__class__,
+                                module=__name__,
+                                type='warning',
+                                message="Can not merge profile-less event."
+                            )
+                        )
 
                 except Exception as e:
                     message = 'Profile merging returned an error `{}`'.format(str(e))

@@ -51,6 +51,22 @@ class ProfileMerger:
             await storage.driver.profile.save_all(dup_profile_bulk)
 
     @staticmethod
+    async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile, duplicate_profiles: List[Profile]) -> Profile:
+        merged_profile.ids.append(merged_profile.id)
+        for dup_profile in duplicate_profiles:
+            merged_profile.ids += dup_profile.ids
+        merged_profile.ids = list(set(merged_profile.ids))
+        return merged_profile
+
+    @staticmethod
+    async def _save_profile(profile):
+        await storage.driver.profile.save(profile, refresh_after_save=True)
+
+    @staticmethod
+    async def _delete_profile(profile_ids):
+        return await storage.driver.profile.bulk_delete_by_id(ids=profile_ids)
+
+    @staticmethod
     async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
         for old_profile in duplicate_profiles:
             if old_profile.id != merged_profile.id:
@@ -83,18 +99,29 @@ class ProfileMerger:
                 similar_profiles,
                 override_old_data=override_old_data)
 
+            print(merged_profile)
+            print(duplicate_profiles)
+
             if merged_profile:
-                # Schedule - mark duplicated profiles
-                await ProfileMerger._save_mark_duplicates_as_inactive_profiles(duplicate_profiles)
+                # Copy ids
+                merged_profile = await ProfileMerger._copy_duplicated_profiles_ids_to_merged_profile_ids(
+                    merged_profile,
+                    duplicate_profiles)
+
+                print(merged_profile.ids)
+
+                await ProfileMerger._save_profile(merged_profile)
 
                 # Schedule - move events from duplicated profiles
                 await ProfileMerger._move_profile_events_and_sessions(duplicate_profiles, merged_profile)
 
+                # Schedule - mark duplicated profiles
+                # await ProfileMerger._save_mark_duplicates_as_inactive_profiles(duplicate_profiles)
+                records_to_delete = [profile.id for profile in duplicate_profiles]
+                print(await ProfileMerger._delete_profile(records_to_delete))
+
                 # Replace current profile with merged profile
                 profile.replace(merged_profile)
-
-                # Update profile after merge
-                profile.operation.update = True
 
                 return profile
 
@@ -140,7 +167,8 @@ class ProfileMerger:
     @staticmethod
     def _get_merge_key_values(profile: Profile) -> List[tuple]:
         converter = DotNotationConverter(profile)
-        return [converter.get_profile_file_value_pair(key) for key in profile.operation.merge]
+        values = [converter.get_profile_file_value_pair(key) for key in profile.operation.merge]
+        return values
 
     @staticmethod
     def get_merging_keys_and_values(profile: Profile) -> List[Tuple[str, str]]:

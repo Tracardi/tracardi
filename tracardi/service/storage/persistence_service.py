@@ -510,6 +510,16 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
+    async def bulk_delete(self, ids: List[str]) -> dict:
+        try:
+            return await self.storage.bulk_delete(ids)
+        except elasticsearch.exceptions.ElasticsearchException as e:
+            _logger.error(str(e))
+            if len(e.args) == 2:
+                message, details = e.args
+                raise StorageException(str(e), message=message, details=details)
+            raise StorageException(str(e))
+
     async def filter(self, query: dict) -> StorageRecords:
         try:
             return await self.storage.search(query)

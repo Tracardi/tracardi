@@ -159,7 +159,7 @@ class TrackingOrchestrator:
             if not issubclass(self.on_profile_ready, TrackingManagerBase):
                 raise AssertionError("Callable self.on_profile_ready should be a subtype of TrackingManagerBase.")
 
-            tracking_manager = self.on_profile_read(
+            tracking_manager = self.on_profile_ready(
                     self.console_log,
                     tracker_payload,
                     profile,

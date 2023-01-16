@@ -100,6 +100,35 @@ class ElasticClient:
     def cluster(self):
         return self._client.cluster
 
+    async def delete_bulk(self, index, record_ids, repeats: int = 3) -> BulkInsertResult:
+
+        if not isinstance(record_ids, list):
+            raise ValueError("Bulk delete expects payload to be list.")
+
+        bulk = []
+        for record_id in record_ids:
+
+            record = {
+                "_index": index,
+                '_id': record_id,
+            }
+
+            bulk.append(record)
+
+        while repeats > 0:
+            try:
+                success, errors = await helpers.async_bulk(self._client, bulk)
+                return BulkInsertResult(
+                    saved=success,
+                    errors=errors,
+                    ids=record_ids
+                )
+            except Exception as e:
+                logger.error(f"Bulk delete error: {str(e)}")
+                await asyncio.sleep(2)
+
+            repeats -= 1
+
     async def insert(self, index, records) -> BulkInsertResult:
         if elastic.save_pool > 0:
             return await self.insert_via_pool(index, records)
@@ -108,7 +137,7 @@ class ElasticClient:
     async def insert_bulk(self, index, records, repeats: int = 3) -> BulkInsertResult:
 
         if not isinstance(records, list):
-            raise ValueError("Insert expects payload to be list.")
+            raise ValueError("Bulk insert expects payload to be list.")
 
         bulk = []
         ids = []

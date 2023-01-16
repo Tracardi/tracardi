@@ -19,13 +19,9 @@ async def load_merged_profile(id: str) -> Optional[Profile]:
     Loads current profile. If profile was merged then it loads merged profile.
     """
 
-    # TODO this should be removed or corrected
-    if tracardi.cache_profiles is True:
-        profile_cache = ProfileCache()
-        if profile_cache.exists(id):
-            return profile_cache.get_profile(id)
     try:
-        profile = Profile.create(await storage_manager('profile').load(id))
+        profile_records = await storage_manager('profile').load_by("ids", id, limit=2)
+        profile = Profile.create(profile_records.first())
 
         if profile is None:
             return None
@@ -83,6 +79,11 @@ async def flush():
 async def delete_by_id(id: str, index: str):
     sm = storage_manager('profile')
     return await sm.delete(id, index)
+
+
+async def bulk_delete_by_id(ids: List[str]):
+    sm = storage_manager('profile')
+    return await sm.bulk_delete(ids)
 
 
 def scan(query: dict = None):

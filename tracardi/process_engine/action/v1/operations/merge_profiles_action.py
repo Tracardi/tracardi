@@ -40,13 +40,17 @@ class MergeProfilesAction(ActionRunner):
         self.merge_key = [key.lower() for key in config.mergeBy]
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+        if self.debug is True:
+            self.console.warning("Profiles are not merged when in debug mode.")
         if isinstance(self.profile, Profile):
             self.profile.operation.merge = self.merge_key
         else:
             if self.event.metadata.profile_less is True:
                 self.console.warning("Can not merge profile when processing profile less events.")
             else:
-                self.console.error("Can not merge profile. Profile is empty.")
+                message = "Can not merge profile. Profile is empty."
+                self.console.error(message)
+                return Result(value={"message": message}, port="error")
 
         return Result(value=payload, port="payload")
 
@@ -58,9 +62,9 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.operations.merge_profiles_action',
             className='MergeProfilesAction',
             inputs=["payload"],
-            outputs=["payload"],
+            outputs=["payload", "error"],
             init={"mergeBy": []},
-            version="0.6.0.1",
+            version="0.8.0",
             form=Form(groups=[
                 FormGroup(
                     fields=[

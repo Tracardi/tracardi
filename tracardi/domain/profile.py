@@ -56,6 +56,7 @@ class Profile(Entity):
             profile.segments = list(set(profile.segments))
 
             self.id = profile.id
+            self.ids = profile.ids
             self.metadata = profile.metadata
             self.operation = profile.operation
             self.stats = profile.stats
