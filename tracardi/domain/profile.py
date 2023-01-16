@@ -1,11 +1,10 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import ProfileMetadata
-from .named_entity import NamedEntity
 from .pii import PII
 from .profile_traits import ProfileTraits
 from .storage_record import RecordMetadata
@@ -23,6 +22,7 @@ class ConsentRevoke(BaseModel):
 
 
 class Profile(Entity):
+    ids: Optional[List[str]] = []
     metadata: Optional[ProfileMetadata] = ProfileMetadata(time=ProfileTime())
     operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
@@ -33,6 +33,10 @@ class Profile(Entity):
     consents: Optional[Dict[str, ConsentRevoke]] = {}
     active: bool = True
     aux: Optional[dict] = {}
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self._add_id_to_ids()
 
     def serialize(self):
         return {
@@ -85,6 +89,11 @@ class Profile(Entity):
             disabled_profiles.append(profile)
 
         return disabled_profiles
+
+    def _add_id_to_ids(self):
+        if self.id not in self.ids:
+            self.ids.append(self.id)
+            self.operation.update = True
 
     async def segment(self, event_types, load_segments):
 
