@@ -32,6 +32,7 @@ import tracardi.service.storage.drivers.elastic.event_management
 import tracardi.service.storage.drivers.elastic.event_redirect
 import tracardi.service.storage.drivers.elastic.bridge
 import tracardi.service.storage.drivers.elastic.data_compliance
+import tracardi.service.storage.drivers.elastic.identification
 
 
 class ElasticDriver:
@@ -63,6 +64,10 @@ class ElasticDriver:
     @property
     def data_compliance(self):
         return tracardi.service.storage.drivers.elastic.data_compliance
+
+    @property
+    def identification(self):
+        return tracardi.service.storage.drivers.elastic.identification
 
     @property
     def event(self):
