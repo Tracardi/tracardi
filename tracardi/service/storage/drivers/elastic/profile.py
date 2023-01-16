@@ -3,7 +3,6 @@ from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage.factory import storage_manager
-from tracardi.service.storage.profile_cacher import ProfileCache
 
 
 async def load_by_id(id: str) -> Optional[StorageRecord]:

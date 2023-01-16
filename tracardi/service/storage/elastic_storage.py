@@ -145,7 +145,6 @@ class ElasticStorage:
             record = self._get_storage_record(data, exclude=exclude, replace_id=replace_id)
             index = self.get_storage_index(record)
             records = [record]
-
         return await self.storage.insert(index, records)
 
     async def delete(self, id: str, index: str):

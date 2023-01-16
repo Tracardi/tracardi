@@ -110,7 +110,6 @@ class TrackingManager(TrackingManagerBase):
     @staticmethod
     async def merge_profile(profile: Profile) -> Profile:
         merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
-        print(merge_key_values)
         merged_profile = await ProfileMerger.invoke_merge_profile(
             profile,
             merge_by=merge_key_values,

@@ -53,9 +53,12 @@ class ProfileMerger:
     @staticmethod
     async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile, duplicate_profiles: List[Profile]) -> Profile:
         merged_profile.ids.append(merged_profile.id)
+
         for dup_profile in duplicate_profiles:
-            merged_profile.ids += dup_profile.ids
+            if isinstance(dup_profile.ids, list):
+                merged_profile.ids += dup_profile.ids
         merged_profile.ids = list(set(merged_profile.ids))
+
         return merged_profile
 
     @staticmethod
@@ -99,16 +102,11 @@ class ProfileMerger:
                 similar_profiles,
                 override_old_data=override_old_data)
 
-            print(merged_profile)
-            print(duplicate_profiles)
-
             if merged_profile:
                 # Copy ids
                 merged_profile = await ProfileMerger._copy_duplicated_profiles_ids_to_merged_profile_ids(
                     merged_profile,
                     duplicate_profiles)
-
-                print(merged_profile.ids)
 
                 await ProfileMerger._save_profile(merged_profile)
 
@@ -118,7 +116,7 @@ class ProfileMerger:
                 # Schedule - mark duplicated profiles
                 # await ProfileMerger._save_mark_duplicates_as_inactive_profiles(duplicate_profiles)
                 records_to_delete = [profile.id for profile in duplicate_profiles]
-                print(await ProfileMerger._delete_profile(records_to_delete))
+                await ProfileMerger._delete_profile(records_to_delete)
 
                 # Replace current profile with merged profile
                 profile.replace(merged_profile)
@@ -232,16 +230,8 @@ class ProfileMerger:
             """
 
             current_profile_dict = self.current_profile.dict()
-            # i = 0
-            for profile in all_profiles:
-                # i += 1
-                # if i == 5:
-                #     profile.pii.name = "risto"
-                #     profile.traits.private['a'] =1
-                #
-                # if i == 8:
-                #     profile.traits.private = {}
 
+            for profile in all_profiles:
                 current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
                                                                    profile.traits.dict())
                 current_profile_dict['pii'] = self._deep_update(current_profile_dict['pii'], profile.pii.dict())
@@ -311,6 +301,7 @@ class ProfileMerger:
         profile = Profile(
             metadata=ProfileMetadata(time=time),
             id=id,
+            ids=self.current_profile.ids,
             stats=stats if merge_stats else self.current_profile.stats,
             traits=traits,
             pii=piis,
@@ -362,7 +353,7 @@ class ProfileMerger:
                           override_old_data: bool = True) -> Tuple[Optional[Profile], List[Profile]]:
 
         merged_profile = None
-        profiles_to_delete= []
+        profiles_to_delete = []
         if len(similar_profiles) > 1:
             # Add current profile to existing ones and get merged profile
 
