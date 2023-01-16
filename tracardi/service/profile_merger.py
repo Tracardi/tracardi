@@ -1,6 +1,4 @@
-import asyncio
 import logging
-from asyncio import Task
 from collections import defaultdict
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple, Any
@@ -16,7 +14,6 @@ from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merger import merge as dict_merge
 from ..service.storage.driver import storage
-
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -51,7 +48,8 @@ class ProfileMerger:
             await storage.driver.profile.save_all(dup_profile_bulk)
 
     @staticmethod
-    async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile, duplicate_profiles: List[Profile]) -> Profile:
+    async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
+                                                                  duplicate_profiles: List[Profile]) -> Profile:
         merged_profile.ids.append(merged_profile.id)
 
         for dup_profile in duplicate_profiles:
@@ -259,7 +257,8 @@ class ProfileMerger:
                     if time.insert > profile.metadata.time.insert:
                         time.insert = profile.metadata.time.insert
 
-                if isinstance(time.visit.current, datetime) and isinstance(profile.metadata.time.visit.current, datetime):
+                if isinstance(time.visit.current, datetime) and isinstance(profile.metadata.time.visit.current,
+                                                                           datetime):
                     if time.visit.current < profile.metadata.time.visit.current:
                         time.visit.current = profile.metadata.time.visit.current
 
@@ -370,6 +369,5 @@ class ProfileMerger:
 
             profiles_to_delete = [p for p in similar_profiles
                                   if p.get_meta_data().index != self.current_profile.get_meta_data().index]
-
 
         return merged_profile, profiles_to_delete
