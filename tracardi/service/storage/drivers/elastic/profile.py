@@ -6,7 +6,7 @@ from tracardi.service.storage.factory import storage_manager
 
 
 async def load_by_id(id: str) -> Optional[StorageRecord]:
-    return await storage_manager("profile").load(id)
+    raise OSError("Do not use profile.load_by_id use load_merged_profile")
 
 
 async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
@@ -25,6 +25,7 @@ async def load_merged_profile(id: str) -> Optional[Profile]:
         if profile is None:
             return None
 
+        # Todo remove merged by
         if profile.metadata.merged_with is not None:
             # Has merged profile
             profile = await load_merged_profile(profile.metadata.merged_with)

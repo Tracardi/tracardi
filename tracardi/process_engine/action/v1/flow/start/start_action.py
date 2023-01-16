@@ -44,7 +44,7 @@ class StartAction(ActionRunner):
             session = await storage.driver.session.load_by_id(event.session.id)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
-            profile = Profile.create(await storage.driver.profile.load_by_id(event.profile.id))
+            profile = await storage.driver.profile.load_merged_profile(event.profile.id)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(

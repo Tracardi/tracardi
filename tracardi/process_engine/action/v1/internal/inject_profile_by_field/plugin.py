@@ -23,20 +23,28 @@ class InjectProfileByField(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         value = dot[self.config.value]
+        field = self.config.field
 
-        result = await storage.driver.profile.load_active_profile_by_field(self.config.field, value, start=0, limit=2)
+        if field == 'id':
+            profile = await storage.driver.profile.load_merged_profile(value)
 
-        if result.total != 1:
-            message = "Found {} records for {} = {}.".format(result.total, self.config.field, value)
-            self.console.warning(message)
-            return Result(port="error", value={"message": message})
+            if not profile:
+                return Result(port="error", value={"message": "Could not find profile."})
 
-        record = result.first()
+        else:
+            result = await storage.driver.profile.load_active_profile_by_field(self.config.field, value, start=0, limit=2)
 
-        if not record:
-            return Result(port="error", value={"message": "Could not find profile."})
+            if result.total != 1:
+                message = "Found {} records for {} = {}.".format(result.total, self.config.field, value)
+                self.console.warning(message)
+                return Result(port="error", value={"message": message})
 
-        profile = record.to_entity(Profile)
+            record = result.first()
+
+            if not record:
+                return Result(port="error", value={"message": "Could not find profile."})
+
+            profile = record.to_entity(Profile)
 
         self.event.profile = profile
         self.event.metadata.profile_less = False
