@@ -44,6 +44,9 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "settings": {
+        "type": "flattened"
       }
     }
   },

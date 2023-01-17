@@ -31,6 +31,9 @@
       },
       "settings": {
         "type": "flattened"
+      },
+      "enabled": {
+        "type": "boolean"
       }
     }
   },

@@ -18,3 +18,4 @@ class ConsentFieldCompliance(Entity):
     description: Optional[str] = ""
     event_type: NamedEntity
     settings: List[ConsentFieldComplianceSetting]  # Flattened ES field
+    enabled: Optional[bool] = False
