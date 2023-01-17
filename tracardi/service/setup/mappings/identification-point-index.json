@@ -39,8 +39,8 @@
           }
         }
       },
-      "field": {
-        "type": "keyword"
+      "fields": {
+        "type": "flattened"
       },
       "settings": {
         "type": "flattened"
