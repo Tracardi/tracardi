@@ -78,7 +78,7 @@ class ProfileMerger:
 
     @staticmethod
     async def invoke_merge_profile(profile: Optional[Profile],
-                                   merge_by: List[Tuple[str, str]],
+                                   merge_by: List[Tuple[str, str]],  # Field: value
                                    override_old_data: bool = True,
                                    limit: int = 2000) -> Optional[Profile]:
         if len(merge_by) > 0:

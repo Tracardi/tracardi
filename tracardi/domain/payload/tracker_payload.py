@@ -54,6 +54,17 @@ class TrackerPayload(BaseModel):
         super().__init__(**data)
         self._id = str(uuid4())
 
+    def has_type(self, event_type):
+        for event_payload in self.events:
+            if event_payload.type == event_type:
+                return True
+        return False
+
+    def get_event_properties(self, event_type) -> List[dict]:
+        for event in self.events:
+            if event.type == event_type:
+                yield event.properties
+
     def force_static_profile_id(self, flag=True):
         self._make_static_profile_id = flag
 
