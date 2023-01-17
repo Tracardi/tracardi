@@ -18,4 +18,4 @@ class IdentificationPoint(Entity):
     source: NamedEntity
     event_type: NamedEntity
     fields: List[IdentificationField]
-    settings: Optional[dict] = {}  # Flattened ES field
+    enabled: bool = False

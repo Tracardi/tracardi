@@ -172,7 +172,7 @@ class Resource:
             "version": Index(multi_index=False, index="tracardi-version", mapping="mappings/version-index.json",
                              aliased=True),
             "report": Index(multi_index=False, index="tracardi-report", mapping="mappings/report-index.json"),
-            "identification-point": Index(multi_index=False, index="identification-point",
+            "identification-point": Index(multi_index=False, index="tracardi-identification-point",
                                           mapping="mappings/identification-point-index.json")
         }
 

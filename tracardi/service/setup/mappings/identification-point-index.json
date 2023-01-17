@@ -42,8 +42,8 @@
       "fields": {
         "type": "flattened"
       },
-      "settings": {
-        "type": "flattened"
+      "enabled": {
+        "type": "boolean"
       }
     }
   },
