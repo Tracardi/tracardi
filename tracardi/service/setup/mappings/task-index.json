@@ -32,9 +32,7 @@
         "type": "keyword"
       },
       "params": {
-        "type": "object",
-        "enabled": false,
-        "dynamic": "true"
+        "type": "flatten"
       },
       "event_type": {
         "type": "keyword"
