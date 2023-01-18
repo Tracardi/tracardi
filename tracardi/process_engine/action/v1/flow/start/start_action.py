@@ -45,7 +45,7 @@ class StartAction(ActionRunner):
 
         if self.config.profile_less is False and isinstance(event.profile, Entity):
             profile_records = await storage.driver.profile.load_by_id(event.profile.id)
-            profile = Profile.create(**profile_records)
+            profile = Profile.create(profile_records)
 
         if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
             raise ValueError(
