@@ -1,11 +1,9 @@
 import logging
 from collections import defaultdict
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple, Any
 from pydantic.utils import deep_update, KeyType
 
-from ..config import tracardi
 from ..domain.metadata import ProfileMetadata
 from ..domain.profile import Profile
 from ..domain.profile_stats import ProfileStats
@@ -13,29 +11,12 @@ from ..domain.time import ProfileTime
 from ..exceptions.log_handler import log_handler
 from ..service.dot_notation_converter import DotNotationConverter
 
-from tracardi.service.merger import merge as dict_merge
+from tracardi.service.merger import merge as dict_merge, get_changed_values
 from ..service.storage.driver import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
-
-
-@dataclass
-class MergeConflicts:
-    traits: Optional[dict] = None
-    piis: Optional[dict] = None
-
-    def dict(self):
-        result = {}
-
-        if self.traits:
-            result['traits'] = self.traits
-
-        if self.piis:
-            result['piis'] = self.piis
-
-        return result
 
 
 class ProfileMerger:
@@ -223,8 +204,6 @@ class ProfileMerger:
 
         # Merge traits and piis
 
-        conflicts = MergeConflicts()
-
         """
            Marge do not loose data. Conflicts are resoled to list of values.
            E.g. Name="bill" + Name="Wiliam"  = Name=['bill','wiliam']
@@ -233,8 +212,17 @@ class ProfileMerger:
         _traits = [profile.traits.dict() for profile in all_profiles]
         _piis = [profile.pii.dict() for profile in all_profiles]
 
-        conflicts.traits = dict_merge({}, _traits)
-        conflicts.piis = dict_merge({}, _piis)
+        old_value = {
+            'traits': _traits,
+            'piis': _piis
+        }
+
+        new_value = {
+            'traits': dict_merge({}, _traits),
+            'piis': dict_merge({}, _piis)
+        }
+
+        conflicts_aux = get_changed_values(old_value, new_value)
 
         """
             Marge overrides data. Conflicts are resoled to single value. Latest wins.
@@ -311,7 +299,7 @@ class ProfileMerger:
         # Set id to merged id or current profile id.
         id = self.current_profile.metadata.merged_with if self.current_profile.metadata.merged_with is not None else self.current_profile.id
 
-        self.current_profile.aux[conflict_aux_key] = conflicts.dict()
+        self.current_profile.aux[conflict_aux_key] = conflicts_aux
 
         profile = Profile(
             metadata=ProfileMetadata(time=time),

@@ -1,3 +1,10 @@
+from typing import List
+
+from deepdiff import DeepDiff
+from deepdiff.model import DiffLevel
+from dotty_dict import dotty
+
+
 def validate_list_values(values):
     for value in values:
         if type(value) not in [str, int, float, bool]:
@@ -57,7 +64,8 @@ def append(base, key, value):
     return base
 
 
-def merge(base: dict, dict_list: list) -> dict:
+def merge(base: dict, dict_list: List[dict]) -> dict:
+    base = dict(base)
     for key in set().union(*dict_list):
         for data in dict_list:
             if key in data:
@@ -81,3 +89,14 @@ def merge(base: dict, dict_list: list) -> dict:
                     raise ValueError("Unknown type `{}: {}`".format(key, type(data[key])))
 
     return base
+
+
+def get_changed_values(old_dict: dict, new_dict: dict):
+    diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
+    changed_values = dotty()
+    for change in diff_result["type_changes"]:  # type: DiffLevel
+        key = ".".join(change.path(output_format='list'))
+        value = change.t2
+        changed_values[key] = value
+
+    return changed_values

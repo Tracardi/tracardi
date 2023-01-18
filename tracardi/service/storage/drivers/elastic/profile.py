@@ -1,5 +1,5 @@
 from tracardi.config import elastic
-from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.domain.payload.tracker_payload import *
 from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException

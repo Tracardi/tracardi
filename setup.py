@@ -30,7 +30,7 @@ setup(
         'dotty-dict @ git+https://github.com/Tracardi/dotty_dict@master#egg=dotty-dict',
         'pytz',
         'device_detector==5.0.1',
-        'deepdiff>=5.5.0',
+        'deepdiff==6.2.2',
         'pytimeparse',
         'barcodenumber',
         'astral==2.2',
