@@ -7,4 +7,4 @@ if License.has_service(IDENTIFICATION):
 def get_profile_loader():
     if License.has_service(IDENTIFICATION):
         return identify_customer
-    return load_merged_profile
+    return load_profile_without_identification
