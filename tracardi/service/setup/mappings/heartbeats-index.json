@@ -28,10 +28,10 @@
             "type": "keyword"
           },
           "properties": {
-            "type": "flatten"
+            "type": "flattened"
           },
           "context": {
-             "type": "flatten"
+             "type": "flattened"
           },
           "session": {
             "properties": {
