@@ -27,6 +27,8 @@ MQTT_BRIDGE = "mqtt1kse"
 SCHEDULER = "scheda75"
 VALIDATOR = "vali34k0"
 
+IDENTIFICATION = "ident19Ha"
+
 
 class Service(BaseModel):
     id: str

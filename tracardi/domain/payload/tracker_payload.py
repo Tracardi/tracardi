@@ -2,12 +2,10 @@ import json
 import logging
 from datetime import datetime
 from hashlib import sha1
-from typing import Optional, List, Tuple, Any, Union
+from typing import Optional, List, Tuple, Any, Union, Callable, Coroutine, Awaitable
 from uuid import uuid4
-
 from pydantic import BaseModel, PrivateAttr, validator
 from tracardi.config import tracardi
-
 from ..entity import Entity
 from ..event import Event
 from ..event_metadata import EventPayloadMetadata
@@ -17,6 +15,7 @@ from ..profile import Profile
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
 from ...exceptions.log_handler import log_handler
+from ...service.storage.drivers.elastic.profile import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -24,7 +23,6 @@ logger.addHandler(log_handler)
 
 
 class TrackerPayload(BaseModel):
-
     _id: str = PrivateAttr(None)
     _make_static_profile_id: bool = PrivateAttr(False)
 
@@ -130,8 +128,10 @@ class TrackerPayload(BaseModel):
     def is_debugging_on(self) -> bool:
         return tracardi.track_debug and self.is_on('debugger', default=False)
 
-    async def get_static_profile_and_session(self, session: Session, load_merged_profile, profile_less) -> Tuple[
-        Optional[Profile], Session]:
+    async def get_static_profile_and_session(self,
+                                             session: Session,
+                                             profile_loader: Callable[['TrackerPayload'], Awaitable],
+                                             profile_less: bool) -> Tuple[Optional[Profile], Session]:
 
         if profile_less:
             profile = None
@@ -139,7 +139,7 @@ class TrackerPayload(BaseModel):
             if not self.profile.id:
                 raise ValueError("Can not use static profile id without profile.id.")
 
-            profile = await load_merged_profile(self.profile.id)
+            profile = await profile_loader(self)
             if not profile:
                 profile = Profile(
                     id=self.profile.id
@@ -173,8 +173,9 @@ class TrackerPayload(BaseModel):
 
         return profile, session
 
-    async def get_profile_and_session(self, session: Session, load_merged_profile, profile_less) -> Tuple[
-        Optional[Profile], Session]:
+    async def get_profile_and_session(self, session: Session,
+                                      profile_loader: Callable[['TrackerPayload'], Awaitable],
+                                      profile_less) -> Tuple[Optional[Profile], Session]:
 
         """
         Returns session. Creates profile if it does not exist.If it exists connects session with profile.
@@ -216,7 +217,7 @@ class TrackerPayload(BaseModel):
                 else:
 
                     # ID exists, load profile from storage
-                    profile = await load_merged_profile(id=self.profile.id)  # type: Profile
+                    profile: Optional[Profile] = await profile_loader(self)
 
                     if profile is None:
                         # Profile id delivered but profile does not exist in storage.
@@ -253,7 +254,10 @@ class TrackerPayload(BaseModel):
                     # Loaded session has profile
 
                     # Load profile based on profile id saved in session
-                    profile = await load_merged_profile(id=session.profile.id)  # type: Profile
+                    copy_of_tracker_payload = TrackerPayload(**self.dict())
+                    copy_of_tracker_payload.profile.id = session.profile.id
+
+                    profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
 
                     if isinstance(profile, Profile) and session.profile.id != profile.id:
                         # Profile in session id has been merged. Change profile in session.

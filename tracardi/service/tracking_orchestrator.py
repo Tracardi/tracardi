@@ -21,6 +21,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.destination_orchestrator import DestinationOrchestrator
 from tracardi.service.storage.driver import storage
+from tracardi.service.storage.loaders import get_profile_loader
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking_manager import TrackingManager, TrackerResult, TrackingManagerBase
@@ -112,18 +113,21 @@ class TrackingOrchestrator:
             if len(list_of_profile_ids_referenced_by_session) == 1:
                 session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
 
+        # Load profile
+        profile_loader = get_profile_loader()
+
         if self.tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id():
             # Get static profile - This is dangerous
             profile, session = await tracker_payload.get_static_profile_and_session(
                 session,
-                storage.driver.profile.load_merged_profile,
+                profile_loader,
                 tracker_payload.profile_less
             )
         else:
-            # Get profile
+
             profile, session = await tracker_payload.get_profile_and_session(
                 session,
-                storage.driver.profile.load_merged_profile,
+                profile_loader,
                 tracker_payload.profile_less
             )
 

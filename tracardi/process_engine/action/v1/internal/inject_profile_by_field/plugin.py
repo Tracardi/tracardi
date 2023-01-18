@@ -26,7 +26,8 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
-            profile = await storage.driver.profile.load_merged_profile(value)
+            profile_records = await storage.driver.profile.load_by_id(profile_id=value)
+            profile = Profile.create(**profile_records)
 
             if not profile:
                 return Result(port="error", value={"message": "Could not find profile."})

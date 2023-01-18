@@ -14,9 +14,8 @@ from ..exceptions.log_handler import log_handler
 from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merger import merge as dict_merge
-from ..service.storage.driver import storage
+from ..service.storage.driver import *
 
-logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
