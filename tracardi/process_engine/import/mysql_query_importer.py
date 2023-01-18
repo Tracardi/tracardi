@@ -27,7 +27,8 @@ class MySQLQueryImportConfig(BaseModel):
     @validator('query')
     def validate_query(cls, value):
         if (not value.lower().startswith("select")) or "limit" in value.lower():
-            raise ValueError("Provided query cannot contain LIMIT keyword ans has to start with SELECT keyword.")
+            raise ValueError("Provided query cannot contain LIMIT keyword and has to start with SELECT keyword. "
+                             "Limit is used to batch the data during import.")
         return value
 
     @validator("source", "database_name")
