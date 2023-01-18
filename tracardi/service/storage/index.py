@@ -151,7 +151,7 @@ class Resource:
                                 mapping="mappings/debug-info-index.json"),
             "api-instance": Index(multi_index=False, index="tracardi-api-instance",
                                   mapping="mappings/api-instance-index.json"),
-            "schedule": Index(multi_index=False, index="tracardi-schedule", mapping="mappings/schedule-index.json"),
+            "heartbeats": Index(multi_index=False, index="tracardi-heartbeats", mapping="mappings/heartbeats-index.json"),
             "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json"),
             "consent-type": Index(multi_index=False, index="tracardi-consent-type",
                                   mapping="mappings/consent-type-index.json"),

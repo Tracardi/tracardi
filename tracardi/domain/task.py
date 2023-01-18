@@ -5,6 +5,11 @@ from typing import Optional
 
 
 class Task(NamedEntity):
+
+    """
+    This object is for storing background tasks that run for example imports, etc.
+    """
+
     task_id: str
     timestamp: Optional[datetime]
     status: str = 'pending'
