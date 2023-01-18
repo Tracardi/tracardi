@@ -85,7 +85,8 @@ class MySQLQueryImporter(Importer):
             FormField(
                 name="MySQL resource",
                 id="source",
-                description="Select MySQL resource you want to connect to. Resource must have database credentials defined.",
+                description="Select MySQL resource you want to connect to. "
+                            "Resource must have database credentials defined.",
                 component=FormComponent(type="resource", props={"tag": "mysql"})
             ),
             FormField(
@@ -111,8 +112,8 @@ class MySQLQueryImporter(Importer):
             FormField(
                 name="Batch",
                 id="batch",
-                description="System will not import the whole data at once. It will break the whole data set into small batches. "
-                            "Type a number of records that will be processed in one batch.",
+                description="System will not import the whole data at once. It will break the whole data set "
+                            "into small batches. Type a number of records that will be processed in one batch.",
                 component=FormComponent(type="text", props={"label": "Batch"})
             )
         ])])
