@@ -66,16 +66,22 @@ class PoolManager:
     async def __aenter__(self):
         return self
 
-    def _purge_task(self):
-        items = dict(self.items)
-        self.counter = 0
-        self.items = defaultdict(list)
-        asyncio.create_task(self._purge(items))
-
-    async def _purge(self, items):
+    async def __invoke_purge_callable(self, items):
         if self.last_task:
             self.last_task.cancel()
         await self._invoke(items)
+
+    async def _purge(self, items):
+        await self.__invoke_purge_callable(items)
+        self.items = defaultdict(list)
+        self.counter = 0
+
+    def _purge_task(self):
+        items = dict(self.items)
+        # Reset first then invoke
+        self.counter = 0
+        self.items = defaultdict(list)
+        asyncio.create_task(self.__invoke_purge_callable(items))
 
     async def purge(self):
         await self._purge(dict(self.items))
@@ -96,8 +102,6 @@ class PoolManager:
             # Make sure that we have a copy of items to process
             items = dict(self.items)
             # Now reset
-            self.counter = 0
-            self.items = defaultdict(list)
             await self._purge(items)
 
         elif self.ttl > 0 and self.loop:

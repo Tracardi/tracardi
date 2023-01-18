@@ -1,6 +1,5 @@
-from tracardi.config import elastic
-from tracardi.domain.payload.tracker_payload import *
 from tracardi.domain.profile import *
+from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage.drivers.elastic.raw import load_by_key_value_pairs
@@ -25,7 +24,7 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
     return await storage_manager('profile').load_all(start, limit, sort)
 
 
-async def load_profile_without_identification(tracker_payload: TrackerPayload) -> Optional[Profile]:
+async def load_profile_without_identification(tracker_payload) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     """

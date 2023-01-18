@@ -19,6 +19,9 @@
       "description": {
         "type": "keyword"
       },
+      "event_type": {
+        "type": "keyword"
+      },
       "tags": {
         "type": "keyword"
       },

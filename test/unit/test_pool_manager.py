@@ -104,8 +104,7 @@ def test_should_group_pool_items_and_time_out():
     result = asyncio.run(main())
     assert result == [[1, 2], [3, 4, 5], [5]]
 
-
-def test_should_run_without_context():
+def test_should_purge():
     async def main():
         result = []
 
@@ -117,6 +116,37 @@ def test_should_run_without_context():
             loop=asyncio.get_running_loop(),
             ttl=0.5
         )
+
+        await pool.append(1)
+        await pool.append(2)
+        await pool.purge()
+        await pool.append(3)
+        await pool.append(4)
+        await pool.purge()
+        await pool.append(5)
+        await pool.append(6)
+        await pool.purge()
+
+        return result
+
+    result = asyncio.run(main())
+    assert result == [[1, 2], [3, 4], [5, 6]]
+
+
+def test_should_run_without_context():
+
+    async def main():
+        result = []
+
+        async def purge(items, attributes):
+            result.append(items)
+
+        pool = PoolManager("test", 4, purge)
+        pool.set_ttl(
+            loop=asyncio.get_running_loop(),
+            ttl=0.5
+        )
+
         await pool.append(1)
         await pool.append(2)
 

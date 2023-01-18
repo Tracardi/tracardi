@@ -23,6 +23,10 @@
         "type": "keyword",
         "index": false
       },
+      "condition": {
+        "type": "keyword",
+        "index": false
+      },
       "mapping": {
         "type": "keyword",
         "index": false
@@ -36,6 +40,9 @@
             "type": "keyword"
           }
         }
+      },
+      "tags": {
+        "type": "keyword"
       }
     }
   },
