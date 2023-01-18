@@ -10,6 +10,10 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
     return await storage_manager("identification-point").load_all(start, limit, sort)
 
 
+async def load_enabled(limit: int = 100) -> StorageRecords:
+    return await storage_manager("identification-point").load_by_values([("enabled", True)], limit=limit)
+
+
 async def load_by_id(id) -> Optional[IdentificationPoint]:
     return IdentificationPoint.create(await storage_manager("identification-point").load(id))
 

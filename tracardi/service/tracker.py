@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import traceback
 from typing import Type, Callable, Coroutine, Any
 
 from tracardi.domain.profile import Profile
@@ -57,6 +58,7 @@ async def track_event(tracker_payload: TrackerPayload,
         return await tr.track_event(tracker_payload)
 
     except Exception as e:
+        traceback.print_exc()
         logger.error(str(e))
 
     finally:
