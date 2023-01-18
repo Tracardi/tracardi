@@ -113,7 +113,6 @@ class TrackingManager(TrackingManagerBase):
         merged_profile = await ProfileMerger.invoke_merge_profile(
             profile,
             merge_by=merge_key_values,
-            override_old_data=True,
             limit=1000)
 
         if merged_profile is not None:

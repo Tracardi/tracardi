@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple, Any
 from pydantic.utils import deep_update, KeyType
@@ -19,6 +20,23 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+
+
+@dataclass
+class MergeConflicts:
+    traits: Optional[dict] = None
+    piis: Optional[dict] = None
+
+    def dict(self):
+        result = {}
+
+        if self.traits:
+            result['traits'] = self.traits
+
+        if self.piis:
+            result['piis'] = self.piis
+
+        return result
 
 
 class ProfileMerger:
@@ -79,7 +97,7 @@ class ProfileMerger:
     @staticmethod
     async def invoke_merge_profile(profile: Optional[Profile],
                                    merge_by: List[Tuple[str, str]],  # Field: value
-                                   override_old_data: bool = True,
+                                   conflict_aux_key: str = "conflicts",
                                    limit: int = 2000) -> Optional[Profile]:
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
@@ -98,7 +116,7 @@ class ProfileMerger:
             # Merge
             merged_profile, duplicate_profiles = await merger.merge(
                 similar_profiles,
-                override_old_data=override_old_data)
+                conflict_aux_key=conflict_aux_key)
 
             if merged_profile:
                 # Copy ids
@@ -129,7 +147,6 @@ class ProfileMerger:
     @staticmethod
     async def invoke_deduplicate_profile(profile: Optional[Profile],
                                          merge_by: List[Tuple[str, str]],
-                                         override_old_data: bool = True,
                                          limit: int = 2000) -> Optional[Profile]:
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
@@ -142,8 +159,7 @@ class ProfileMerger:
 
             # Merge
             merged_profile, profiles_to_delete = await merger.deduplicate(
-                similar_profiles,
-                override_old_data=override_old_data)
+                similar_profiles)
 
             if merged_profile:
                 # Remove duplicated profiles
@@ -199,7 +215,7 @@ class ProfileMerger:
 
     def _get_merged_profile(self,
                             similar_profiles: List[Profile],
-                            override_old_data: bool = True,
+                            conflict_aux_key: str = "conflicts",
                             merge_stats: bool = True,
                             merge_time: bool = True
                             ) -> Profile:
@@ -208,34 +224,33 @@ class ProfileMerger:
 
         # Merge traits and piis
 
-        if override_old_data is False:
+        conflicts = MergeConflicts()
 
-            """
-                Marge do not loose data. Conflicts are resoled to list of values.
-                E.g. Name="bill" + Name="Wiliam"  = Name=['bill','wiliam']
-            """
+        """
+           Marge do not loose data. Conflicts are resoled to list of values.
+           E.g. Name="bill" + Name="Wiliam"  = Name=['bill','wiliam']
+        """
 
-            traits = [profile.traits.dict() for profile in all_profiles]
-            piis = [profile.pii.dict() for profile in all_profiles]
-            traits = dict_merge({}, traits)
-            piis = dict_merge({}, piis)
+        _traits = [profile.traits.dict() for profile in all_profiles]
+        _piis = [profile.pii.dict() for profile in all_profiles]
 
-        else:
+        conflicts.traits = dict_merge({}, _traits)
+        conflicts.piis = dict_merge({}, _piis)
 
-            """
-                Marge overrides data. Conflicts are resoled to single value. Latest wins.
-                E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
-            """
+        """
+            Marge overrides data. Conflicts are resoled to single value. Latest wins.
+            E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
+        """
 
-            current_profile_dict = self.current_profile.dict()
+        current_profile_dict = self.current_profile.dict()
 
-            for profile in all_profiles:
-                current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
-                                                                   profile.traits.dict())
-                current_profile_dict['pii'] = self._deep_update(current_profile_dict['pii'], profile.pii.dict())
+        for profile in all_profiles:
+            current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
+                                                               profile.traits.dict())
+            current_profile_dict['pii'] = self._deep_update(current_profile_dict['pii'], profile.pii.dict())
 
-            traits = current_profile_dict['traits']
-            piis = current_profile_dict['pii']
+        traits = current_profile_dict['traits']
+        piis = current_profile_dict['pii']
 
         # Merge stats, consents, segments, etc.
 
@@ -297,6 +312,8 @@ class ProfileMerger:
         # Set id to merged id or current profile id.
         id = self.current_profile.metadata.merged_with if self.current_profile.metadata.merged_with is not None else self.current_profile.id
 
+        self.current_profile.aux[conflict_aux_key] = conflicts.dict()
+
         profile = Profile(
             metadata=ProfileMetadata(time=time),
             id=id,
@@ -307,7 +324,8 @@ class ProfileMerger:
             segments=segments,
             consents=consents,
             interests=dict(interests),
-            active=True
+            active=True,
+            aux=self.current_profile.aux
         )
 
         profile.set_meta_data(self.current_profile.get_meta_data())
@@ -316,7 +334,7 @@ class ProfileMerger:
 
     async def merge(self,
                     similar_profiles: List[Profile],
-                    override_old_data: bool = True) -> Tuple[Optional[Profile], List[Profile]]:
+                    conflict_aux_key: str = "conflicts") -> Tuple[Optional[Profile], List[Profile]]:
         """
         Merges profiles on keys set in profile.operation.merge. Loads profiles from database and
         combines its data into current profile. Returns Profiles object with profiles to be disables.
@@ -337,7 +355,7 @@ class ProfileMerger:
 
                 merged_profile = self._get_merged_profile(
                     profiles_to_merge,
-                    override_old_data=override_old_data)
+                    conflict_aux_key=conflict_aux_key)
 
                 # Deactivate all other profiles except merged one
 
@@ -348,8 +366,7 @@ class ProfileMerger:
         return merged_profile, disabled_profiles
 
     async def deduplicate(self,
-                          similar_profiles: List[Profile],
-                          override_old_data: bool = True) -> Tuple[Optional[Profile], List[Profile]]:
+                          similar_profiles: List[Profile]) -> Tuple[Optional[Profile], List[Profile]]:
 
         merged_profile = None
         profiles_to_delete = []
@@ -358,7 +375,6 @@ class ProfileMerger:
 
             merged_profile = self._get_merged_profile(
                 similar_profiles,
-                override_old_data=override_old_data,
                 merge_stats=False,
                 merge_time=True
             )

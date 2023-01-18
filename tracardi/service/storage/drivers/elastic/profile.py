@@ -2,6 +2,8 @@ from tracardi.config import elastic, tracardi
 from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
+from tracardi.service.storage.drivers.elastic.raw import load_by_key_value_pairs
+from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
 
 
@@ -98,6 +100,11 @@ async def count(query: dict = None):
     return await storage_manager('profile').count(query)
 
 
+async def load_profile_by_values(key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
+                                 limit: int = 20) -> StorageRecords:
+    return await load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
+
+
 async def load_duplicates(id: str):
     return await storage_manager('profile').query({
         "query": {
@@ -112,7 +119,7 @@ async def load_duplicates(id: str):
 
 
 async def load_active_profile_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
-    query={
+    query = {
         "from": start,
         "size": limit,
         "query": {

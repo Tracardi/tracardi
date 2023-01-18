@@ -1,6 +1,9 @@
+from typing import List, Optional
+
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.storage.elastic_client import ElasticClient
+from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
 from tracardi.service.storage.index import resources
 from tracardi.service.storage.persistence_service import PersistenceService
@@ -14,6 +17,11 @@ def index(idx) -> PersistenceService:
 
 async def query(index: str, query: dict) -> StorageRecords:
     return await storage_manager(index).query(query)
+
+
+async def load_by_key_value_pairs(index, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
+                                  limit: int = 20) -> StorageRecords:
+    return await storage_manager(index).load_by_values(key_value_pairs, sort_by, limit=limit)
 
 
 async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id):

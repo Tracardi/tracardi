@@ -10,6 +10,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple
+from .raw import load_by_key_value_pairs
 
 import tracardi.config as config
 
@@ -161,7 +162,7 @@ async def load_event_by_type(event_type, limit=1) -> StorageRecords:
 
 async def load_event_by_values(key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
                                limit: int = 20) -> StorageRecords:
-    return await storage_manager('event').load_by_values(key_value_pairs, sort_by, limit=limit)
+    return await load_by_key_value_pairs('event', key_value_pairs, sort_by, limit=limit)
 
 
 async def aggregate_profile_events_by_type(profile_id: str, bucket_name) -> StorageAggregateResult:
