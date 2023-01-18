@@ -8,7 +8,7 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": "false",
+    "dynamic": "strict",
     "properties": {
       "event_id": {
         "type": "keyword"

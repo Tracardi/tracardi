@@ -8,7 +8,7 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": "false",
+    "dynamic": "strict",
     "properties": {
       "id": {
         "type": "keyword"
@@ -63,6 +63,9 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
       }
     }
   },

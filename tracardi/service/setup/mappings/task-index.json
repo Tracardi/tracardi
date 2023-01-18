@@ -8,7 +8,7 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": "false",
+    "dynamic": "strict",
     "properties": {
       "id": {
         "type": "keyword"
@@ -32,7 +32,7 @@
         "type": "keyword"
       },
       "params": {
-        "type": "flatten"
+        "type": "flattened"
       },
       "event_type": {
         "type": "keyword"

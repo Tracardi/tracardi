@@ -8,13 +8,16 @@
       "version": "%%VERSION%%",
       "name": "%%PREFIX%%"
     },
-    "dynamic": "false",
+    "dynamic": "strict",
     "properties": {
       "id": {
         "type": "keyword"
       },
       "eventType": {
         "type": "keyword"
+      },
+      "name": {
+        "type": "text"
       },
       "description": {
         "type": "text"

@@ -39,6 +39,10 @@
               "desc": {
                 "type": "text"
               },
+              "brand": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
               "group": {
                 "type": "keyword",
                 "ignore_above": 32
@@ -68,6 +72,9 @@
                 "ignore_above": 32
               },
               "pro": {
+                "type": "boolean"
+              },
+              "commercial": {
                 "type": "boolean"
               },
               "remote": {

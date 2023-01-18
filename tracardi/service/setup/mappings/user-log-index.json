@@ -12,7 +12,7 @@
         "version": "%%VERSION%%",
         "name": "%%PREFIX%%"
       },
-      "dynamic": "false",
+      "dynamic": "strict",
       "properties": {
         "timestamp": {
           "type": "date"
