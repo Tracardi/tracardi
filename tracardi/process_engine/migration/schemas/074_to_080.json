@@ -90,7 +90,7 @@
       "from_index": "tracardi-source",
       "to_index": "tracardi-source",
       "multi": false,
-      "script": null
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.bridge = [:];\nrow.bridge.id=\"778ded05-4ff3-4e08-9a86-72c0195fa95d\";\nrow.bridge.name=\"API Bridge Open-source\";\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
