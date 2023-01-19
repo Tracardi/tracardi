@@ -14,10 +14,6 @@
         "type": "keyword",
         "ignore_above": 64
       },
-      "ids": {
-        "type": "keyword",
-        "ignore_above": 64
-      },
       "metadata": {
         "properties": {
           "time": {
