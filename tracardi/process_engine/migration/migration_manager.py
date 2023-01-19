@@ -94,7 +94,8 @@ class MigrationManager:
 
         if target_version is None:
             raise ValueError(f"Installed system version is {self.to_version.version}, "
-                             f"but storage point to other version. ")
+                             f"but storage point to other version. Please delete tracardi-version index and refresh "
+                             f"and install the system.")
 
         warn = f"{self.from_version.get_version_prefix()}.{self.from_version.name}" in target_version.get(
             "upgrades",

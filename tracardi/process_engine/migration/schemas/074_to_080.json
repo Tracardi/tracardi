@@ -151,18 +151,6 @@
     "asynchronous": true
   },
   {
-    "id": "5425c363afa8f668b504b8e0e5c8fe96fd617089",
-    "copy_index": {
-      "from_index": "tracardi-version",
-      "to_index": "tracardi-version",
-      "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.id = ctx._id;\nctx._source = [:];\nctx._source.putAll(row);"
-    },
-    "worker": "reindex",
-    "conflicts": null,
-    "asynchronous": true
-  },
-  {
     "id": "855b6ac1ba9369289be86f63403c9ac8b3adc90e",
     "copy_index": {
       "from_index": "tracardi-pro",
