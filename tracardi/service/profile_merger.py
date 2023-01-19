@@ -22,8 +22,7 @@ logger.addHandler(log_handler)
 
 class ProfileMerger:
 
-    def __init__(self, profile: Profile, allow_merge_by_id=False):
-        self.allow_merge_by_id = allow_merge_by_id
+    def __init__(self, profile: Profile):
         self.current_profile = profile
 
     @staticmethod
@@ -81,7 +80,6 @@ class ProfileMerger:
     async def invoke_merge_profile(profile: Optional[Profile],
                                    merge_by: List[Tuple[str, str]],  # Field: value
                                    conflict_aux_key: str = "conflicts",
-                                   allow_merge_by_id=False,
                                    limit: int = 2000) -> Optional[Profile]:
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
@@ -95,7 +93,7 @@ class ProfileMerger:
                 logger.info("No similar profiles to merge")
                 return None
 
-            merger = ProfileMerger(profile, allow_merge_by_id)
+            merger = ProfileMerger(profile)
 
             # Merge
             merged_profile, duplicate_profiles = await merger.merge(
@@ -338,10 +336,7 @@ class ProfileMerger:
         if len(similar_profiles) > 0:
 
             # Filter only profiles that are not current profile and where not merged
-            if self.allow_merge_by_id is True:
-                profiles_to_merge = [p for p in similar_profiles if p.active is True]
-            else:
-                profiles_to_merge = [p for p in similar_profiles if p.id != self.current_profile.id and p.active is True]
+            profiles_to_merge = [p for p in similar_profiles if p.id != self.current_profile.id and p.active is True]
 
             # Are there any profiles to merge?
             if len(profiles_to_merge) > 0:
@@ -353,9 +348,9 @@ class ProfileMerger:
 
                 # Deactivate all other profiles except merged one
 
-                # todo On id then strange
-
                 profiles_to_disable = [p for p in similar_profiles if p.id != self.current_profile.id]
+
+                # TODO Do not have ti mark it will bre removed
                 disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable,
                                                                   merge_with=self.current_profile.id)
 
