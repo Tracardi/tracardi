@@ -25,6 +25,7 @@ class MigrationManager:
         ("0.7.2", "0.7.3"): "072_to_073",
         ("0.7.3", "0.7.4"): "072_to_073",
         ("0.7.4", "0.8.0"): "074_to_080",
+        ("0.7.4-dev", "0.8.0"): "074_to_080",
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
