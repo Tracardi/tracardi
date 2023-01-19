@@ -163,8 +163,16 @@ class StorageRecords(dict):
     def transform_hits(self, func: Callable) -> None:
         self._hits = [{**hit, "_source": func(hit["_source"])} for hit in self._hits]
 
+    @staticmethod
+    def _make_domain_object(domain_object: Type[T], record: StorageRecord) -> T:
+        domain = domain_object(**record)
+        meta = record.get_meta_data()
+        if meta:
+            domain.set_meta_data(meta)
+        return domain
+
     def to_domain_objects(self, domain_object: Type[T]) -> List[T]:
-        return [domain_object(**hit) for hit in self]
+        return [self._make_domain_object(domain_object, hit) for hit in self]
 
     def __len__(self):
         return self.chunk

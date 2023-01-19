@@ -1,3 +1,4 @@
+from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata, StorageAggregate, \
     StorageAggregates
 
@@ -251,3 +252,117 @@ def test_should_handle_aggregates():
                         }
                     }
                 ]
+
+
+def test_should_keep_metadata_in_domain_objects():
+
+    class Record(Entity):
+        message: str
+
+    records = StorageRecords.build_from_elastic({
+        "took": 5,
+        "timed_out": False,
+        "_shards": {
+            "total": 1,
+            "successful": 1,
+            "skipped": 0,
+            "failed": 0
+        },
+        "hits": {
+            "total": {
+                "value": 20,
+                "relation": "eq"
+            },
+            "max_score": 1.3862942,
+            "hits": [
+                {
+                    "_index": "my-index-000001",
+                    '_id': "0",
+                    "_score": 1.3862942,
+                    "_source": {
+                        "@timestamp": "2099-11-15T14:12:12",
+                        "id": "1",
+                        "http": {
+                            "request": {
+                                "method": "get"
+                            },
+                            "response": {
+                                "status_code": 200,
+                                "bytes": 1070000
+                            },
+                            "version": "1.1"
+                        },
+                        "source": {
+                            "ip": "127.0.0.1"
+                        },
+                        "message": "GET /search HTTP/1.1 200 1070000",
+                        "user": {
+                            "id": "kimchy"
+                        }
+                    }
+                },
+                {
+                    "_index": "my-index-000002",
+                    '_id': "1",
+                    "_score": 1.3862942,
+                    "_source": {
+                        "@timestamp": "2099-11-15T14:12:12",
+                        "id": "2",
+                        "http": {
+                            "request": {
+                                "method": "get"
+                            },
+                            "response": {
+                                "status_code": 200,
+                                "bytes": 1070000
+                            },
+                            "version": "1.1"
+                        },
+                        "source": {
+                            "ip": "127.0.0.1"
+                        },
+                        "message": "GET /search HTTP/1.1 200 1070000",
+                        "user": {
+                            "id": "kimchy"
+                        }
+                    }
+                },
+                {
+                    "_index": "my-index-000003",
+                    '_id': "2",
+                    "_score": 1.3862942,
+                    "_source": {
+                        "@timestamp": "2099-11-15T14:12:12",
+                        "id": "3",
+                        "http": {
+                            "request": {
+                                "method": "get"
+                            },
+                            "response": {
+                                "status_code": 200,
+                                "bytes": 1070000
+                            },
+                            "version": "1.1"
+                        },
+                        "source": {
+                            "ip": "127.0.0.1"
+                        },
+                        "message": "GET /search HTTP/1.1 200 1070000",
+                        "user": {
+                            "id": "kimchy"
+                        }
+                    }
+                }
+            ]
+        }
+    })
+
+    domain_records = records.to_domain_objects(Record)
+    indices = [domain_record.get_meta_data().index for domain_record in domain_records]
+    assert 'my-index-000001' in indices
+    assert 'my-index-000002' in indices
+    assert 'my-index-000003' in indices
+
+    record = records.first().to_entity(Record)
+    assert record.get_meta_data().index == 'my-index-000001'
+
