@@ -160,6 +160,7 @@ class ElasticClient:
 
             bulk.append(record)
 
+        last_exception = None
         while repeats > 0:
             try:
                 success, errors = await helpers.async_bulk(self._client, bulk)
@@ -169,10 +170,17 @@ class ElasticClient:
                     ids=ids
                 )
             except Exception as e:
+                last_exception = e
                 logger.error(f"Bulk insert error: {str(e)}")
                 await asyncio.sleep(2)
 
             repeats -= 1
+
+        return BulkInsertResult(
+            saved=0,
+            errors=[str(last_exception) if last_exception is not None else "Could not save data."],
+            ids=[]
+        )
 
     async def insert_via_pool(self, index, records) -> BulkInsertResult:
 

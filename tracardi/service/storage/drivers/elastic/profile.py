@@ -1,3 +1,5 @@
+# from tracardi.service.profile_merger import ProfileMerger
+
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
@@ -8,11 +10,15 @@ from tracardi.service.storage.factory import storage_manager
 
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
+
+    """
+    @throws DuplicatedRecordException
+    """
+
     profile_records = await storage_manager('profile').load_by("ids", profile_id, limit=2)
 
     if profile_records.total > 1:
-        raise ValueError(
-            "Profile {} id duplicate in the database..".format(profile_id))
+        raise DuplicatedRecordException("Profile {} id duplicated in the database..".format(profile_id))
 
     if profile_records == 0:
         return None
@@ -27,40 +33,46 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
 async def load_profile_without_identification(tracker_payload) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
+    @throws DuplicatedRecordException
     """
     if tracker_payload.profile is None:
         return None
 
     profile_id = tracker_payload.profile.id
 
-    try:
-        profile_record = await load_by_id(profile_id)
+    # try:
+    profile_record = await load_by_id(profile_id)
 
-        if profile_record is None:
-            return None
+    if profile_record is None:
+        return None
 
-        profile = Profile.create(profile_record)
+    profile = Profile.create(profile_record)
 
-        return profile
+    return profile
 
-    except DuplicatedRecordException:
-
-        # Merge duplicated profiles
-        _duplicated_profiles = await load_duplicates(profile_id)  # 1st records is the newest
-        valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
-        profile = valid_profile_record.to_entity(Profile)
-
-        if len(_duplicated_profiles) == 1:
-            # If 1 then there is no duplication
-            return profile
-
-        # We have duplicated records. Delete all but first profile.
-        for _profile_record in _duplicated_profiles[1:]:  # type: StorageRecord
-            if _profile_record.has_meta_data():
-                sm = storage_manager('profile')
-                await sm.delete(profile_id, index=_profile_record.get_meta_data().index)
-
-        return profile
+    # except DuplicatedRecordException:
+    #     # todo use standard merging
+    #     profile_records = await storage_manager('profile').load_by("ids", profile_id, limit=2)
+    #     profile = profile_records.first()
+    #
+    #     profile = await ProfileMerger.invoke_merge_profile(profile, merge_by=[("id", profile_id)])
+    #     print ("dedp")
+    #     # Merge duplicated profiles
+    #     # _duplicated_profiles = await load_duplicates(profile_id)  # 1st records is the newest
+    #     # valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
+    #     # profile = valid_profile_record.to_entity(Profile)
+    #     #
+    #     # if len(_duplicated_profiles) == 1:
+    #     #     # If 1 then there is no duplication
+    #     #     return profile
+    #     #
+    #     # # We have duplicated records. Delete all but first profile.
+    #     # for _profile_record in _duplicated_profiles[1:]:  # type: StorageRecord
+    #     #     if _profile_record.has_meta_data():
+    #     #         sm = storage_manager('profile')
+    #     #         await sm.delete(profile_id, index=_profile_record.get_meta_data().index)
+    #     #
+    #     # return profile
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:

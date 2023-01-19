@@ -91,7 +91,7 @@ def merge(base: dict, dict_list: List[dict]) -> dict:
     return base
 
 
-def get_changed_values(old_dict: dict, new_dict: dict):
+def get_changed_values(old_dict: dict, new_dict: dict) -> dict:
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
     changed_values = dotty()
     for change in diff_result["type_changes"]:  # type: DiffLevel
@@ -99,4 +99,4 @@ def get_changed_values(old_dict: dict, new_dict: dict):
         value = change.t2
         changed_values[key] = value
 
-    return changed_values
+    return changed_values.to_dict()

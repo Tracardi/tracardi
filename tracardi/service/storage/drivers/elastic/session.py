@@ -19,8 +19,8 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-async def save_sessions(profiles: List[Session]):
-    return await storage_manager("session").upsert(profiles)
+async def save_sessions(sessions: List[Session]):
+    return await storage_manager("session").upsert(sessions, exclude={"operation": ...})
 
 
 async def save(session: Union[Session, List[Session]]) -> BulkInsertResult:

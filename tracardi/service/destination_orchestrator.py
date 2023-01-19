@@ -28,7 +28,7 @@ class DestinationOrchestrator:
         self.profile = profile
 
     async def _send_to_destination(self, profile_delta):
-        logger.info("Profile changed. Destination scheduled to run.")
+        logger.debug("Profile changed. Destination scheduled to run.")
 
         destination_manager = DestinationManager(profile_delta,
                                                  self.profile,
@@ -47,7 +47,7 @@ class DestinationOrchestrator:
             if profile_copy != new_profile:
                 profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)
                 if profile_delta:
-                    logger.info("Profile changed. Destination scheduled to run.")
+                    logger.debug("Profile changed. Destination scheduled to run.")
                     try:
                         await self._send_to_destination(profile_delta)
                     except Exception as e:
