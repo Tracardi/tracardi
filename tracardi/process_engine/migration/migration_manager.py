@@ -19,6 +19,20 @@ class MigrationNotFoundException(Exception):
 
 
 class MigrationManager:
+
+    """
+    This code defines a class "MigrationManager" which is used to handle the migration of data between
+    different versions of the software. The class has two attributes, "from_version" and "to_version",
+    which are used to specify the source and destination versions of the migration. The class also has a
+    dictionary "available_migrations" which maps tuples of source and destination versions to the name of the
+    migration script that should be used. The class has several methods, including "get_schemas()", which loads
+    the migration script corresponding to the source and destination versions specified in the attributes,
+    "get_multi_indices()" which returns a list of indices that match a given template name, and
+    "get_customized_schemas()" which returns a dictionary of customized schemas for the migration.
+    The class also has an async method called "run()" which is used to run the migration job in an async
+     way by using ThreadPoolExecutor and Celery worker.
+    """
+
     available_migrations = {
         ("0.7.0", "0.7.1"): "070_to_071",
         ("0.7.1", "0.7.2"): "071_to_072",
