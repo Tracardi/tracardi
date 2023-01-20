@@ -21,7 +21,7 @@ class MigrationNotFoundException(Exception):
 class MigrationManager:
 
     """
-    This code defines a class "MigrationManager" which is used to handle the migration of data between
+    This code defines a class which is used to handle the migration of data between
     different versions of the software. The class has two attributes, "from_version" and "to_version",
     which are used to specify the source and destination versions of the migration. The class also has a
     dictionary "available_migrations" which maps tuples of source and destination versions to the name of the
