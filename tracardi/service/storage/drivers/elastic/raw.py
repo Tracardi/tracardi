@@ -1,5 +1,5 @@
 from typing import List, Optional
-
+from elasticsearch import NotFoundError
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -46,6 +46,20 @@ async def count_by_query(index: str, query: str, time_span: int) -> StorageRecor
         f"{time_span}s" if time_span < 0 else ""
     )
     return result
+
+
+async def count_all_indices_by_alias(prefix: str = None):
+    """
+    Missing indices are returned as count = 0
+    """
+
+    for name, index in resources.resources.items():
+        try:
+            sm = storage_manager(name)
+            count = await sm.storage.count(prefix=prefix)
+            yield name, count['count']
+        except NotFoundError:
+            yield name, 0
 
 
 async def indices():

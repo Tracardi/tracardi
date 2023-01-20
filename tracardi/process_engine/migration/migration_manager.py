@@ -76,7 +76,8 @@ class MigrationManager:
                             script=schema.copy_index.script
                         ),
                         asynchronous=schema.asynchronous,
-                        worker=schema.worker
+                        worker=schema.worker,
+                        wait_for_completion=schema.wait_for_completion
                     ))
 
             else:

@@ -42,6 +42,20 @@ async def get_indices_status():
 
 
 async def check_indices_mappings_consistency():
+    """
+
+    This code is checking the mapping of an Elasticsearch
+    index against a system mapping file. It loops through
+    a dictionary of resources and for each resource, it
+    retrieves the system mapping file and loads it into memory.
+    It then compares this system mapping to the mapping of an
+    Elasticsearch index that is being written to. If there are
+    any differences between the two mappings, it saves these
+    differences in a dictionary. And, it returns the result dictionary at the end.
+
+    :return: dict
+    """
+
     result = {}
 
     es = ElasticClient.instance()

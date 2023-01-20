@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import Optional
 from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
@@ -264,7 +265,7 @@ class ElasticClient:
     async def update_by_query(self, index, query):
         return await self._client.update_by_query(index=index, body=query)
 
-    async def count(self, index, query: dict = None):
+    async def count(self, index, query: Optional[dict] = None):
         return await self._client.count(index=index, body=query)
 
     """ Snapshots """

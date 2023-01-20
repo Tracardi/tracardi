@@ -52,8 +52,17 @@ class ElasticStorage:
             return await self.load(id) is not None
         return await self.storage.exists(self.index.get_index_alias(), id)
 
-    async def count(self, query: dict = None) -> bool:
-        return await self.storage.count(self.index.get_index_alias(), query)
+    async def count(self, query: Optional[dict] = None, prefix: Optional[str] = None) -> dict:
+        """
+        It counts by alias
+        """
+
+        if prefix is None:
+            index = self.index.get_index_alias()
+        else:
+            index = self.index.get_index_alias(prefix)
+
+        return await self.storage.count(index, query)
 
     async def load(self, id) -> Optional[StorageRecord]:
         try:

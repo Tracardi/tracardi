@@ -14,3 +14,4 @@ class MigrationSchema(BaseModel):
     copy_index: CopyIndex
     worker: str
     asynchronous: bool
+    wait_for_completion: Optional[bool] = False

@@ -1,8 +1,8 @@
+from tracardi.config import tracardi
 from tracardi.domain.storage.index_mapping import IndexMapping
+from tracardi.service.storage.index import Index
 
-
-def test_index_mapping():
-    im = IndexMapping({
+mapping_mock = {
         "tracardi-event-2022-2": {
             "mappings": {
                 "dynamic": "false",
@@ -96,10 +96,22 @@ def test_index_mapping():
                 }
             }
         }
-    })
+    }
+
+def test_index_mapping():
+    im = IndexMapping(mapping_mock)
 
     assert im.get_field_names() == ['aux', 'id', 'metadata.debugged', 'metadata.processed_by.rules',
                                     'metadata.processed_by.third_party', 'metadata.profile_less', 'metadata.status',
                                     'metadata.time.insert', 'metadata.time.process_time', 'profile.id', 'properties',
                                     'session.duration', 'session.id', 'session.start', 'source.id', 'tags.count',
                                     'tags.values', 'type']
+
+
+def test_index_prefixing():
+    index = Index(multi_index=False, index="index-name", mapping=mapping_mock, aliased=True)
+    alias = index.get_index_alias()
+    assert alias == f"{tracardi.version.name}.{index.index}"
+
+    alias = index.get_index_alias(prefix="prefix")
+    assert alias == f"prefix.{index.index}"

@@ -111,11 +111,11 @@ def register() -> Plugin:
                         ),
                         FormField(
                             id="ttl",
-                            name="Expire trigger once after",
-                            description="This value is a number of seconds the system should wait to trigger port "
-                                        "again regardless of the condition change. "
-                                        "It will trigger regardless of the condition change after some defined time."
-                                        "Default value 0, means wait forever for value change. ",
+                            name="Expire trigger again after",
+                            description="Ff the value is set to 0, the event will only occur once and will not be "
+                                        "triggered again unless the conditions change. However, if a value greater "
+                                        "than 0 is set, the event will be triggered again after the specified "
+                                        "number of seconds, regardless of whether the conditions have changed or not.",
                             component=FormComponent(type="text", props={"label": "Suppression time to live"})
                         ),
                         FormField(

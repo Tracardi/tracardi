@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Optional
 
 from tracardi.config import tracardi, elastic
 
@@ -22,12 +23,13 @@ class Index:
 
         return os.path.join(f"{_local_dir}/../setup", mapping_file)
 
-    def get_prefixed_index(self) -> str:
+    def get_prefixed_index(self, prefix: Optional[str] = None) -> str:
         """
         Gets real prefixed - index
-        :return: str
         """
         if self.aliased:
+            if prefix is not None:
+                return prefix + "." + self.index
             return self.prefix + self.index
         return self.index
 
@@ -40,8 +42,8 @@ class Index:
         json_map = json_map.replace("%%CONF_SHARDS%%", elastic.conf_shards)
         return json_map
 
-    def get_index_alias(self) -> str:
-        return self.get_prefixed_index()
+    def get_index_alias(self, prefix: Optional[str] = None) -> str:
+        return self.get_prefixed_index(prefix)
 
     def get_write_index(self):
 

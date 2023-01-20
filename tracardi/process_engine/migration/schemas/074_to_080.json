@@ -34,7 +34,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "0fd59b15e03c17702a3d1704ccb8d1087a063ac3",
@@ -46,7 +47,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "67ffc4208b8e52cac124962528ade4b55659531a",
@@ -70,7 +72,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "864d5521dc24b2064ded7efb8c7585d347912d13",
@@ -90,11 +93,12 @@
       "from_index": "tracardi-source",
       "to_index": "tracardi-source",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.bridge = [:];\nrow.bridge.id=\"778ded05-4ff3-4e08-9a86-72c0195fa95d\";\nrow.bridge.name=\"API Bridge Open-source\";\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.bridge = [:];\nrow.bridge.id=\"778ded05-4ff3-4e08-9a86-72c0195fa95d\";\nrow.bridge.name=\"API Bridge Open-source\";\nrow.remove(\"form\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "5bd3f891da70ecbb66d3611a927b9f639abb6193",
@@ -105,14 +109,9 @@
       "script": null
     },
     "worker": "reindex",
-    "conflicts": [
-      {
-        "name": "params",
-        "old_type": "object",
-        "new_type": "flattened"
-      }
-    ],
-    "asynchronous": true
+    "conflicts": null,
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "b3a6edcfccd727f7392f87fd0c2476a2b85a3d4f",
@@ -124,7 +123,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "39f3030c3d8ec09d13a510c7b1748a2e45a9fe6d",
@@ -136,7 +136,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "880ac2abe6092aa94881b4d46fda2dae875059ed",
@@ -160,7 +161,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "3ee469711148d582eea28a49dbcd1e3d3cd9f28a",
@@ -172,7 +174,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "3f6599ef4d6c759067b724b3233cc0ded7dc2635",
@@ -184,7 +187,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "add745a36cf0a8ad6764d6d766821a27b9fb3c28",
@@ -196,7 +200,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6826bbda13e802ed938420585a47aeee503c6b94",
@@ -208,7 +213,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6cb382a86778e6b4fcc6819297bb95b4fae7ffb1",
@@ -220,7 +226,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "845b5f68937e3ef90fa03aa803bacffa140540ac",
@@ -231,14 +238,9 @@
       "script": null
     },
     "worker": "reindex",
-    "conflicts": [
-      {
-        "name": "reshaping",
-        "old_type": "flattened",
-        "new_type": "object"
-      }
-    ],
-    "asynchronous": true
+    "conflicts": null,
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "b0ce09529369d7955f37ed42bbf36cf926e14e2e",
@@ -262,7 +264,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "627af261e45e464c3f2044d15878cf3bcc0b2b4b",
@@ -274,7 +277,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "a842a75768fe52aa24a589321b3fb1ad9b26e4c1",
@@ -295,18 +299,6 @@
       "to_index": "tracardi-debug-info",
       "multi": false,
       "script": null
-    },
-    "worker": "reindex",
-    "conflicts": null,
-    "asynchronous": true
-  },
-  {
-    "id": "c04bae2c6d58b41dc02eecf1b03a24b1bda02c6e",
-    "copy_index": {
-      "from_index": "tracardi-flow-action-plugins",
-      "to_index": "tracardi-flow-action-plugins",
-      "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.plugin.metadata.commercial = False;\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -334,7 +326,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "40ac8499751b4dc22a3fea426bd962c6611a8272",
@@ -346,7 +339,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "06d78105b8597a17ef2591cc7bf2e03ff3c05820",
@@ -358,7 +352,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "3eb061ed56a10a6c8cc98eead9da258cd6b775fa",
