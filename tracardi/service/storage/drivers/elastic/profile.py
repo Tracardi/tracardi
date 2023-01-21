@@ -14,7 +14,28 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
     @throws DuplicatedRecordException
     """
 
-    profile_records = await storage_manager('profile').load_by("ids", profile_id, limit=2)
+    query = {
+        "size": 2,
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            "ids": profile_id
+                        }
+                    },
+                    {
+                        "term": {
+                            "id": profile_id
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        }
+    }
+
+    profile_records = await storage_manager('profile').query(query)
 
     if profile_records.total > 1:
         raise DuplicatedRecordException("Profile {} id duplicated in the database..".format(profile_id))
@@ -117,7 +138,8 @@ async def count(query: dict = None):
     return await storage_manager('profile').count(query)
 
 
-async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]], sort_by: Optional[List[ElasticFiledSort]] = None,
+async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],
+                                 sort_by: Optional[List[ElasticFiledSort]] = None,
                                  limit: int = 20) -> StorageRecords:
     return await load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
 

@@ -392,6 +392,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
         resource=None
     ),
 
+    "tracardi.process_engine.action.v1.time.profile_live_time.plugin": PluginTestTemplate(
+        init={'end': "10:10:10", 'start': "12:10:10", 'timezone': 'session@context.time.tz'},
+        resource=None
+    ),
+
     "tracardi.process_engine.action.v1.time.time_difference.plugin": PluginTestTemplate(
         init={'now': 'now', 'reference_date': "12:10:10"},
         resource=None
