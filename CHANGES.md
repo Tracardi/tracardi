@@ -3,7 +3,8 @@ Version 0.8.0
 
 ## Features
 
-* ...
+* Profile live time plugin
+* Identity resolution (Identification points)
 
 
 Version 0.7.4
