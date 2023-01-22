@@ -4,7 +4,11 @@ from typing import Tuple, List
 from tracardi.service.storage.driver import storage
 
 
-async def get_min_max(search_by: List[Tuple[str, str]] = [], time_range=None):
+async def get_min_max(search_by=None, time_range=None):
+
+    if search_by is None:
+        search_by = []
+
     query = {
         "size": 0,
         "query": {
@@ -39,7 +43,7 @@ async def get_min_max(search_by: List[Tuple[str, str]] = [], time_range=None):
     result = await storage.driver.event.query(
         query
     )
-
+    print(result)
     aggregates = result.aggregations()
     try:
         min = aggregates['min']['value']
@@ -54,9 +58,8 @@ async def get_min_max(search_by: List[Tuple[str, str]] = [], time_range=None):
 
 
 async def main():
-    # event_type = "tlv-meas-SKWzug2"
-    # search_by = [('type', event_type)]
-    result = await get_min_max(search_by=[], time_range=1)
+    search_by = [('type', "tlv-meas-SKWzug2"), ("traits.tlv_id", 8331), ("traits.plc", "a")]
+    result = await get_min_max(search_by=search_by, time_range=1)
     print(result)
 
 
