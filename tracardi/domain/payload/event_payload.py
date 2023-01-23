@@ -6,9 +6,9 @@ from pydantic import BaseModel, validator
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
-from ..event import Event, EventSession
+from ..event import Event, EventSession, Tags
 from ..event_metadata import EventMetadata
-from ..time import EventPayloadMetadata
+from ..event_metadata import EventPayloadMetadata
 from ..session import Session, SessionContext
 from ..time import Time
 from ..value_object.operation import RecordFlag
@@ -16,11 +16,12 @@ from ...service.utils.getters import get_entity
 
 
 class EventPayload(BaseModel):
-    metadata: Optional[Time] = Time()
+    time: Optional[Time] = Time()
     type: str
     properties: Optional[dict] = {}
     options: Optional[dict] = {}
     context: Optional[dict] = {}
+    tags: Optional[list] = []
 
     @validator("type")
     def event_type_can_not_be_empty(cls, value):
@@ -33,18 +34,19 @@ class EventPayload(BaseModel):
     def from_event(event: Event) -> 'EventPayload':
         return EventPayload(type=event.type, properties=event.properties, context=event.context)
 
-    def to_event(self, request: dict, metadata: EventPayloadMetadata, source: Entity, session: Optional[Session],
+    def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Optional[Session],
                  profile: Optional[Entity],
                  has_profile: bool) -> Event:
+
         meta = EventMetadata(**metadata.dict())
         meta.profile_less = not has_profile
         meta.instance = Entity(id=ApiInstance().id)
-        try:
-            if request['headers']['x-timestamp'].isnumeric():
-                ts = int(request['headers']['x-timestamp'])/1000
-                meta.time.create = datetime.fromtimestamp(ts)
-        except KeyError:
-            pass
+
+        if self.time.insert:
+            meta.time.insert = self.time.insert
+
+        if self.time.create:
+            meta.time.create = self.time.create
 
         return Event(id=str(uuid4()),
                      metadata=meta,
@@ -55,7 +57,8 @@ class EventPayload(BaseModel):
                      source=source,  # Entity
                      config=self.options,
                      context=self.context,
-                     operation=RecordFlag(new=True)
+                     operation=RecordFlag(new=True),
+                     tags=Tags(values=tuple(self.tags), count=len(self.tags))
                      )
 
     @staticmethod

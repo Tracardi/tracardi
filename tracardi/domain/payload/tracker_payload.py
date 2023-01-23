@@ -8,7 +8,7 @@ from pydantic import BaseModel, PrivateAttr, validator
 from tracardi.config import tracardi
 from ..entity import Entity
 from ..event import Event
-from ..time import EventPayloadMetadata
+from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
@@ -71,8 +71,7 @@ class TrackerPayload(BaseModel):
 
     def get_domain_events(self) -> List[Event]:
         for event_payload in self.events:
-            yield event_payload.to_event(self.request,
-                                         self.metadata,
+            yield event_payload.to_event(self.metadata,
                                          self.source,
                                          self.session,
                                          self.profile,

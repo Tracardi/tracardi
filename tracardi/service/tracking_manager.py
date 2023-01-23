@@ -127,7 +127,6 @@ class TrackingManager(TrackingManagerBase):
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
                 _event = event.to_event(
-                    self.tracker_payload.request,
                     self.tracker_payload.metadata,
                     self.tracker_payload.source,
                     self.session,

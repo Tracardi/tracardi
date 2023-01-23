@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
 from tracardi.domain.entity import Entity
-from tracardi.domain.time import EventTime
+from tracardi.domain.time import EventTime, Time
 
 
 class EventProcessors(BaseModel):
@@ -23,3 +23,9 @@ class EventMetadata(BaseModel):
     error: bool = False
     warning: bool = False
     instance: Optional[Entity] = None
+
+
+class EventPayloadMetadata(BaseModel):
+    time: Time
+    ip: str = None
+    status: str = None

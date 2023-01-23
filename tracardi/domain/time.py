@@ -28,12 +28,6 @@ class ProfileVisit(BaseModel):
         self.current = datetime.utcnow()
 
 
-class EventPayloadMetadata(BaseModel):
-    time: Time
-    ip: str = None
-    status: str = None
-
-
 class ProfileTime(Time):
     visit: ProfileVisit = ProfileVisit()
 
