@@ -1,5 +1,5 @@
 from tracardi.domain.entity import Entity
-from tracardi.domain.event_metadata import EventPayloadMetadata
+from tracardi.domain.time import EventPayloadMetadata
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.time import Time

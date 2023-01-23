@@ -3,7 +3,8 @@ from tracardi.process_engine.action.v1.converters.data_to_json.plugin import Obj
 from tracardi.domain.profile import Profile
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity
-from tracardi.domain.event_metadata import EventMetadata, EventTime
+from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.time import EventTime
 
 
 def test_data_to_json_plugin():

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class Time(BaseModel):
     insert: Optional[datetime]
+    create: Optional[datetime]
 
     def __init__(self, **data: Any):
         if 'insert' not in data:
@@ -27,10 +28,16 @@ class ProfileVisit(BaseModel):
         self.current = datetime.utcnow()
 
 
+class EventPayloadMetadata(BaseModel):
+    time: Time
+    ip: str = None
+    status: str = None
+
+
 class ProfileTime(Time):
     visit: ProfileVisit = ProfileVisit()
 
-    def __init__(self, **data: Any):
-        if 'insert' not in data:
-            data['insert'] = datetime.utcnow()
-        super().__init__(**data)
+
+class EventTime(Time):
+    process_time: float = None
+

@@ -4,7 +4,8 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.process_engine.action.v1.connectors.matomo.send_event.service.page_performance import \
     PerformanceValueGetter
 from tracardi.domain.event import Event
-from tracardi.domain.event_metadata import EventMetadata, EventTime
+from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.time import EventTime
 
 
 def test_should_get_previous_value():

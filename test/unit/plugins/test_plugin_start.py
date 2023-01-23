@@ -8,7 +8,8 @@ from tracardi.service.wf.service.builders import action
 from tracardi.service.wf.utils.dag_processor import DagProcessor
 from tracardi.service.wf.utils.flow_graph_converter import FlowGraphConverter
 from tracardi.domain.event import Event, EventSession
-from tracardi.domain.event_metadata import EventMetadata, EventTime
+from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.time import EventTime
 from tracardi.domain.entity import Entity
 
 

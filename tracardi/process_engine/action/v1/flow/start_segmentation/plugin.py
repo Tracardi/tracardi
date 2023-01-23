@@ -1,6 +1,7 @@
 from uuid import uuid4
 
-from tracardi.domain.event_metadata import EventMetadata, EventTime
+from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.time import EventTime
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result

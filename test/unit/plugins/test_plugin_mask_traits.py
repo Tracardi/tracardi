@@ -1,5 +1,6 @@
 from tracardi.domain.entity import Entity
-from tracardi.domain.event_metadata import EventMetadata, EventTime
+from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.time import EventTime
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.event import Event, EventSession
 from tracardi.process_engine.action.v1.traits.mask_traits_action import MaskTraitsAction

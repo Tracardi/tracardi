@@ -7,13 +7,16 @@ from pydantic import BaseModel, validator
 from ..api_instance import ApiInstance
 from ..entity import Entity
 from ..event import Event, EventSession
-from ..event_metadata import EventPayloadMetadata, EventMetadata
+from ..event_metadata import EventMetadata
+from ..time import EventPayloadMetadata
 from ..session import Session, SessionContext
+from ..time import Time
 from ..value_object.operation import RecordFlag
 from ...service.utils.getters import get_entity
 
 
 class EventPayload(BaseModel):
+    metadata: Optional[Time] = Time()
     type: str
     properties: Optional[dict] = {}
     options: Optional[dict] = {}

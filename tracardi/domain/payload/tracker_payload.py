@@ -8,7 +8,7 @@ from pydantic import BaseModel, PrivateAttr, validator
 from tracardi.config import tracardi
 from ..entity import Entity
 from ..event import Event
-from ..event_metadata import EventPayloadMetadata
+from ..time import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
 from ..profile import Profile
