@@ -11,7 +11,8 @@ from tracardi.domain.settings import Settings
 from tracardi.domain.time import Time
 from tracardi.process_engine.action.v1.flow.postpone_event.model.configuration import Configuration
 from tracardi.service.notation.dict_traverser import DictTraverser
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.postpone_call import PostponedCall
 from tracardi.service.tracker import track_event
@@ -40,8 +41,13 @@ class PostponeEventAction(ActionRunner):
         async def _postponed_run():
             ip = self.event.request['ip'] if 'ip' in self.event.request else '127.0.0.1'
 
+            if self.config.source.id == "":
+                even_source_id = self.event.source.id
+            else:
+                even_source_id = self.config.source.id
+
             tracker_payload = TrackerPayload(
-                source=Entity(id=self.event.source.id),
+                source=Entity(id=even_source_id),
                 session=Entity(id=self.session.id),
                 profile=Entity(id=self.profile.id),
                 context={},
@@ -83,7 +89,58 @@ def register() -> Tuple[Plugin, Settings]:
             inputs=["payload"],
             outputs=[],
             version="0.6.2",
-            manual=None
+            manual=None,
+            init={
+                'event_type': '',
+                'source': {
+                    'id': '',
+                    'name': ''
+                },
+                'event_properties': '{}',
+                'delay': 60
+            },
+            form=Form(groups=[
+                FormGroup(
+                    name="Event delay",
+                    description="Define when the even should be raised.",
+                    fields=[
+                        FormField(
+                            id="delay",
+                            name="Delay",
+                            description="Type number of seconds that the event should be postponed after the visit ends. "
+                                        "We consider that visit ends if there is no new event after X seconds. "
+                                        "Delay is the X variable in this "
+                                        "algorithm.",
+                            component=FormComponent(type="text", props={"label": "Delay in seconds"})
+                        )
+                    ]
+                ),
+                FormGroup(
+                    name="Event details",
+                    description="Define event type and properties that will be rend to the system.",
+                    fields=[
+                        FormField(
+                            id="source",
+                            name="Event source",
+                            description="Select where to send delayed event. What event source to use.",
+                            component=FormComponent(type="source", props={"label": "Event source"})
+                        ),
+                        FormField(
+                            id="event_type",
+                            name="Raise event type",
+                            description="Type event type you would like to raise.",
+                            component=FormComponent(type="text", props={"label": "Event type"})
+                        ),
+                        FormField(
+                            id="event_properties",
+                            name="Event properties",
+                            description="Type additional properties to be sent with event. Event will fire within the "
+                                        "current profile context and with current session.",
+                            component=FormComponent(type="json", props={"label": "Event properties"})
+                        ),
+                    ]
+                ),
+            ]),
         ),
         metadata=MetaData(
             name='Delayed event',

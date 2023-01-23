@@ -1,9 +1,12 @@
 from pydantic import validator
+
+from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Configuration(PluginConfig):
     event_type: str
+    source: NamedEntity
     event_properties: str = "{}"
     delay: int = 60
 

@@ -105,6 +105,8 @@ class License(BaseModel):
 
     @staticmethod
     def get_license(license: str) -> 'License':
+        if license == "":
+            raise AssertionError("Invalid license")
 
         license_key = license[: -7]
         license_id = int(license[-7:])
