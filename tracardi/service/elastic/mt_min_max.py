@@ -1,4 +1,6 @@
 import asyncio
+from collections import defaultdict
+from datetime import timedelta
 from typing import Tuple, List
 
 from tracardi.service.storage.driver import storage
@@ -64,7 +66,7 @@ async def get_min_max(train, tlv_id, plc="a", metric="Metric", unit=None):
 
     query['query']['bool']['must'].append({"range": {
             "metadata.time.insert": {
-                "gte": "now-1d",
+                "gte": "now-10d",
                 "lte": "now"
             }
         }
@@ -77,10 +79,23 @@ async def get_min_max(train, tlv_id, plc="a", metric="Metric", unit=None):
 
     aggregates = result.aggregations("cars").buckets()
     for m in aggregates:
-        print()
-        print("Car:", m['key'])
-        print("No of measurments:", m['doc_count'])
-        print(metric, m['max']['value'] - m['min']['value'], unit)
+        diff = m['max']['value'] - m['min']['value']
+        if unit == "time":
+            value = timedelta(seconds=diff)
+        elif unit in ["km", "kWh"]:
+            value = diff/1000
+        else:
+            value = diff
+        yield {
+            "car":  m['key'],
+            "metric": metric,
+            "values": m['doc_count'],
+            "max": m['max']['value'],
+            "min": m['min']['value'],
+            "diff": m['max']['value'] - m['min']['value'],
+            "value": value,
+            "unit": unit
+        }
 
     # try:
     #     min = aggregates['min']['value']
@@ -95,7 +110,25 @@ async def get_min_max(train, tlv_id, plc="a", metric="Metric", unit=None):
 
 
 async def main():
-    result = await get_min_max(train="SKWzug2", tlv_id=8333, metric="Distance", unit="m")
+    train = "SKWzug2"
+    report = defaultdict(list)
+    async for result in get_min_max(train=train, tlv_id=8331, metric="Motor work time", unit="time"):
+        report[result['car']].append(result)
+    async for result in get_min_max(train=train, tlv_id=8332, metric="Battery work time", unit="time"):
+        report[result['car']].append(result)
+    async for result in get_min_max(train=train, tlv_id=8333, metric="Distance", unit="km"):
+        report[result['car']].append(result)
+    async for result in get_min_max(train=train, tlv_id=520, metric="Charge power", unit="kWh"):
+        report[result['car']].append(result)
+    async for result in get_min_max(train=train, tlv_id=8335, metric="Drain power", unit="kWh"):
+        report[result['car']].append(result)
 
+    from tabulate import tabulate
+    data = []
+    for car, stats in report.items():
+        for stat in stats:
+            data.append([train, f"Car {car}", stat['metric'], stat['values'], stat['value'], stat['unit']])
+
+    print(tabulate(data, headers=['Train', 'Car', 'Metric', 'Readings', 'Value', "Unit"], tablefmt='presto'))
 
 asyncio.run(main())
