@@ -26,8 +26,10 @@ MQTT_BRIDGE = "mqtt1kse"
 
 SCHEDULER = "scheda75"
 VALIDATOR = "vali34k0"
-
 IDENTIFICATION = "ident19Ha"
+COMPLIANCE = "compl1532"
+RESHAPING = "resha-9ds"
+REDIRECTS = "redir-atr"
 
 
 class Service(BaseModel):
