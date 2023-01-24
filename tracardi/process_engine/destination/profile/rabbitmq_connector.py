@@ -3,12 +3,12 @@ from typing import List
 from .connector import Connector
 from kombu import Connection
 
-from ...domain.event import Event
-from ...domain.profile import Profile
-from ...domain.session import Session
-from ...service.rabbitmq.queue_config import QueueConfig
-from ...service.rabbitmq.queue_publisher import QueuePublisher
-from ...service.rabbitmq.rabbit_configuration import RabbitConfiguration
+from ....domain.event import Event
+from ....domain.profile import Profile
+from ....domain.session import Session
+from ....service.rabbitmq.queue_config import QueueConfig
+from ....service.rabbitmq.queue_publisher import QueuePublisher
+from ....service.rabbitmq.rabbit_configuration import RabbitConfiguration
 
 
 class RabbitMqConnector(Connector):

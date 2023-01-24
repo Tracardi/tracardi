@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from typing import List
-from uuid import uuid4
 
 from tracardi.config import tracardi
 from tracardi.domain.api_instance import ApiInstance
@@ -10,7 +9,7 @@ from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.domain.destination import DestinationRecord, Destination
-from tracardi.process_engine.destination.connector import Connector
+from tracardi.process_engine.destination.profile.connector import Connector
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.postpone_call import PostponedCall
 from tracardi.service.storage.driver import storage
@@ -19,6 +18,19 @@ from tracardi.service.storage.driver import storage
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+
+
+def _get_class_and_module(package):
+    parts = package.split(".")
+    if len(parts) < 2:
+        raise ValueError(f"Can not find class in package on {package}")
+    return ".".join(parts[:-1]), parts[-1]
+
+
+def get_destination_class(destination: Destination):
+    module, class_name = _get_class_and_module(destination.destination.package)
+    module = import_package(module)
+    return load_callable(module, class_name)
 
 
 class DestinationManager:
@@ -34,13 +46,6 @@ class DestinationManager:
         for destination in await storage.driver.destination.load_all():
             yield DestinationRecord(**destination).decode()
 
-    @staticmethod
-    def _get_class_and_module(package):
-        parts = package.split(".")
-        if len(parts) < 2:
-            raise ValueError(f"Can not find class in package on {package}")
-        return ".".join(parts[:-1]), parts[-1]
-
     async def send_data(self, profile_id, events, debug):
         destinations = [destination async for destination in self.load_destinations()]
         return await self.send_data_to_destinations(destinations, profile_id, events, debug)
@@ -54,9 +59,7 @@ class DestinationManager:
             if not destination.enabled:
                 continue
 
-            module, class_name = self._get_class_and_module(destination.destination.package)
-            module = import_package(module)
-            destination_class = load_callable(module, class_name)
+            destination_class = get_destination_class(destination)
 
             # Load resource
             resource = await storage.driver.resource.load(destination.resource.id)

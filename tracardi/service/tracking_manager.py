@@ -3,10 +3,20 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable
 
+from dotty_dict import dotty
+
+from tracardi.service.destination_manager import get_destination_class
+from tracardi.service.notation.dict_traverser import DictTraverser
+
+from tracardi.service.notation.dot_accessor import DotAccessor
+
+from tracardi.domain.destination import DestinationRecord
+
 from tracardi.config import tracardi
 from tracardi.domain.enum.event_status import COLLECTED
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.process_engine.debugger import Debugger
+from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
@@ -280,11 +290,50 @@ class TrackingManager(TrackingManagerBase):
                 synced_events = []
                 for ev in events:
                     if ev.operation.update is True and ev.id in post_invoke_events:
-                        synced_events.append(post_invoke_events[ev.id])
-                    else:
-                        synced_events.append(ev)
+                        ev = post_invoke_events[ev.id]
+
+                    synced_events.append(ev)
 
                 events = synced_events
+
+            # Run event destination
+
+            dot = DotAccessor(self.profile, self.session)
+            for ev in events:
+                destinations = [DestinationRecord(**destination) for destination in
+                                await cache.event_destination(ev.type, ev.source.id, ttl=60)]
+
+                dot.set_storage("event", ev)
+                template = DictTraverser(dot, default=None)
+
+                for destination in destinations:
+                    if not destination.enabled:
+                        continue
+                    print(destination)
+                    if destination.condition:
+
+                        condition = Condition()
+                        condition_result = await condition.evaluate(destination.condition, dot)
+                        if not condition_result:
+                            logger.info(f"Condition not met for destination {destination.name}. Data was not sent to "
+                                        f"this destination.")
+                            continue
+
+                    destination = destination.decode()
+                    destination_class = get_destination_class(destination)
+
+                    # Load resource
+                    resource = await storage.driver.resource.load(destination.resource.id)
+
+                    if resource.enabled is False:
+                        raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
+
+                    # Pass resource to destination class
+
+                    # destination_instance = destination_class(debug, resource, destination)
+                    #
+                    # result = template.reshape(reshape_template=destination.mapping)
+                    # print(result, destination)
 
             return TrackerResult(
                 session=self.session,

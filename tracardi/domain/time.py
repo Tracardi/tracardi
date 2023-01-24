@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class Time(BaseModel):
     insert: Optional[datetime]
-    create: Optional[datetime]
+    create: Optional[datetime] = None
 
     def __init__(self, **data: Any):
         if 'insert' not in data:

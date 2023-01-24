@@ -15,7 +15,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
-from tracardi.process_engine.destination.connector import Connector
+from .connector import Connector
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

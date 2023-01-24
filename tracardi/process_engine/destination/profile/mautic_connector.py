@@ -1,11 +1,11 @@
 from typing import List
 
-from tracardi.process_engine.destination.connector import Connector
-from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
 from tracardi.service.storage.driver import storage
-from ...domain.event import Event
-from ...domain.profile import Profile
-from ...domain.session import Session
+from ...action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
+from .connector import Connector
+from ....domain.event import Event
+from ....domain.profile import Profile
+from ....domain.session import Session
 
 
 class MauticConnector(Connector):

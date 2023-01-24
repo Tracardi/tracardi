@@ -24,3 +24,13 @@ async def delete(id: str):
 
 async def refresh():
     return await storage_manager('destination').refresh()
+
+
+async def load_by_type(event_type, source_id) -> StorageRecords:
+    field_value_pairs = [
+        ("event_type.id", event_type),
+        ("enabled", True),
+        ("on_profile_change_only", False),
+        ("source.id", source_id)
+    ]
+    return await storage_manager("destination").load_by_values(field_value_pairs)

@@ -35,7 +35,10 @@ class Destination(NamedEntity):
     tags: List[str] = []
     mapping: dict = {}
     condition: Optional[str] = ""
+    on_profile_change_only: Optional[bool] = True
     resource: Entity
+    event_type: NamedEntity
+    source: NamedEntity
 
     @validator("name")
     def name_not_empty(cls, value):
@@ -63,7 +66,10 @@ class DestinationRecord(NamedEntity):
     tags: List[str] = []
     mapping: Optional[str] = None
     condition: Optional[str] = ""
+    on_profile_change_only: Optional[bool] = True
     resource: Entity
+    event_type: NamedEntity
+    source: NamedEntity
 
     @validator("destination")
     def destination_not_empty(cls, value):
@@ -81,7 +87,10 @@ class DestinationRecord(NamedEntity):
             enabled=self.enabled,
             tags=self.tags,
             mapping=b64_decoder(self.mapping) if self.mapping else {},
-            condition=self.condition
+            condition=self.condition,
+            on_profile_change_only=self.on_profile_change_only,
+            event_type=self.event_type,
+            source=self.source
         )
 
     @staticmethod
@@ -95,7 +104,10 @@ class DestinationRecord(NamedEntity):
             enabled=destination.enabled,
             tags=destination.tags,
             mapping=b64_encoder(destination.mapping),
-            condition=destination.condition
+            condition=destination.condition,
+            on_profile_change_only=destination.on_profile_change_only,
+            event_type=destination.event_type,
+            source=destination.source
         )
 
     @staticmethod

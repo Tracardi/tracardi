@@ -1,5 +1,5 @@
-from tracardi.process_engine.destination.connector import Connector
-from ..action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
+from .connector import Connector
+from ...action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
 
 
 class CiviCRMConnector(Connector):

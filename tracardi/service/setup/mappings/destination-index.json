@@ -34,6 +34,29 @@
       "enabled": {
         "type": "boolean"
       },
+      "on_profile_change_only": {
+        "type": "boolean"
+      },
+      "event_type": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "source": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
       "resource": {
         "properties": {
           "id": {
