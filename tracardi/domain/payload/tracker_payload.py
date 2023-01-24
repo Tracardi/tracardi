@@ -37,6 +37,7 @@ class TrackerPayload(BaseModel):
     events: List[EventPayload] = []
     options: Optional[dict] = {}
     profile_less: bool = False
+    debug: Optional[bool] = False
 
     @validator("events")
     def events_must_not_be_empty(cls, value):

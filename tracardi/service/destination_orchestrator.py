@@ -11,7 +11,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.destination_manager import DestinationManager
+from tracardi.service.destinations.profile_destination_manager import ProfileDestinationManager
 from tracardi.service.utils.getters import get_entity_id
 
 logger = logging.getLogger(__name__)
@@ -30,15 +30,14 @@ class DestinationOrchestrator:
     async def _send_to_destination(self, profile_delta):
         logger.debug("Profile changed. Destination scheduled to run.")
 
-        destination_manager = DestinationManager(profile_delta,
-                                                 self.profile,
-                                                 self.session,
-                                                 payload=None,
-                                                 event=None,
-                                                 flow=None,
-                                                 memory=None)
+        destination_manager = ProfileDestinationManager(self.profile,
+                                                        self.session,
+                                                        payload=None,
+                                                        event=None,
+                                                        flow=None,
+                                                        memory=None)
         # todo performance - could be not awaited  - add to save_task
-        await destination_manager.send_data(self.profile.id, self.events, debug=False)
+        await destination_manager.send_data(self.profile.id, self.events, profile_delta=profile_delta, debug=False)
 
     async def sync_destination(self, has_profile, profile_copy):
         if has_profile and profile_copy is not None:

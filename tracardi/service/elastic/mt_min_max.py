@@ -66,12 +66,11 @@ async def get_min_max(train, tlv_id, plc="a", metric="Metric", unit=None):
 
     query['query']['bool']['must'].append({"range": {
             "metadata.time.insert": {
-                "gte": "now-10d",
+                "gte": "now-1d",
                 "lte": "now"
             }
         }
     })
-
 
     result = await storage.driver.event.query(
         query
@@ -118,7 +117,7 @@ async def main():
         report[result['car']].append(result)
     async for result in get_min_max(train=train, tlv_id=8333, metric="Distance", unit="km"):
         report[result['car']].append(result)
-    async for result in get_min_max(train=train, tlv_id=520, metric="Charge power", unit="kWh"):
+    async for result in get_min_max(train=train, tlv_id=8334, metric="Charge power", unit="kWh"):
         report[result['car']].append(result)
     async for result in get_min_max(train=train, tlv_id=8335, metric="Drain power", unit="kWh"):
         report[result['car']].append(result)

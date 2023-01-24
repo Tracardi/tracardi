@@ -2,18 +2,19 @@ import asyncio
 import logging
 from typing import List
 
+from tracardi.exceptions.log_handler import log_handler
+
+from tracardi.service.module_loader import load_callable, import_package
+
+from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.config import tracardi
 from tracardi.domain.api_instance import ApiInstance
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.process_engine.destination.profile_destination import ProfileDestination
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dict_traverser import DictTraverser
-from tracardi.domain.destination import DestinationRecord, Destination
-from tracardi.process_engine.destination.profile.connector import Connector
-from tracardi.service.module_loader import load_callable, import_package
+from tracardi.domain.destination import Destination
 from tracardi.service.postpone_call import PostponedCall
 from tracardi.service.storage.driver import storage
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -34,23 +35,13 @@ def get_destination_class(destination: Destination):
 
 
 class DestinationManager:
-
-    def __init__(self, delta, profile=None, session=None, payload=None, event=None, flow=None, memory=None):
+    def __init__(self, profile=None, session=None, payload=None, event=None, flow=None, memory=None):
         self.dot = DotAccessor(profile, session, payload, event, flow, memory)
-        self.delta = delta
         self.profile = profile
         self.session = session
 
-    @staticmethod
-    async def load_destinations():
-        for destination in await storage.driver.destination.load_all():
-            yield DestinationRecord(**destination).decode()
-
-    async def send_data(self, profile_id, events, debug):
-        destinations = [destination async for destination in self.load_destinations()]
-        return await self.send_data_to_destinations(destinations, profile_id, events, debug)
-
-    async def send_data_to_destinations(self, destinations: List[Destination], profile_id, events, debug):
+    async def send_data_to_destinations(self, destinations: List[Destination], profile_id, events, profile_delta,
+                                        debug):
 
         template = DictTraverser(self.dot, default=None)
 
@@ -71,7 +62,7 @@ class DestinationManager:
 
             destination_instance = destination_class(debug, resource, destination)
 
-            if isinstance(destination_instance, Connector):
+            if isinstance(destination_instance, ProfileDestination):
                 if destination.condition:
                     condition = Condition()
                     condition_result = await condition.evaluate(destination.condition, self.dot)
@@ -89,7 +80,7 @@ class DestinationManager:
                         destination_instance.run,
                         ApiInstance().id,
                         result,  # *args
-                        self.delta,
+                        profile_delta,
                         self.profile,
                         self.session,
                         events
@@ -97,4 +88,4 @@ class DestinationManager:
                     postponed_call.wait = tracardi.postpone_destination_sync
                     postponed_call.run(asyncio.get_running_loop())
                 else:
-                    await destination_instance.run(result, self.delta, self.profile, self.session, events)
+                    await destination_instance.run(result, profile_delta, self.profile, self.session, events)

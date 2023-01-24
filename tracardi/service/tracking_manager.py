@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable
 
-from dotty_dict import dotty
-
-from tracardi.service.destination_manager import get_destination_class
+from tracardi.process_engine.destination.event.event_destination import EventDestination
+from tracardi.service.destinations.destination_manager import get_destination_class
+from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.notation.dict_traverser import DictTraverser
 
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -297,43 +297,12 @@ class TrackingManager(TrackingManagerBase):
                 events = synced_events
 
             # Run event destination
-
-            dot = DotAccessor(self.profile, self.session)
-            for ev in events:
-                destinations = [DestinationRecord(**destination) for destination in
-                                await cache.event_destination(ev.type, ev.source.id, ttl=60)]
-
-                dot.set_storage("event", ev)
-                template = DictTraverser(dot, default=None)
-
-                for destination in destinations:
-                    if not destination.enabled:
-                        continue
-                    print(destination)
-                    if destination.condition:
-
-                        condition = Condition()
-                        condition_result = await condition.evaluate(destination.condition, dot)
-                        if not condition_result:
-                            logger.info(f"Condition not met for destination {destination.name}. Data was not sent to "
-                                        f"this destination.")
-                            continue
-
-                    destination = destination.decode()
-                    destination_class = get_destination_class(destination)
-
-                    # Load resource
-                    resource = await storage.driver.resource.load(destination.resource.id)
-
-                    if resource.enabled is False:
-                        raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
-
-                    # Pass resource to destination class
-
-                    # destination_instance = destination_class(debug, resource, destination)
-                    #
-                    # result = template.reshape(reshape_template=destination.mapping)
-                    # print(result, destination)
+            load_destination_task = cache.event_destination
+            await event_destination_dispatch(load_destination_task,
+                                             self.profile,
+                                             self.session,
+                                             events,
+                                             self.tracker_payload.debug)
 
             return TrackerResult(
                 session=self.session,

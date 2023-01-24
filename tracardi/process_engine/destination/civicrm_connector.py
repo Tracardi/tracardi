@@ -1,8 +1,8 @@
-from .connector import Connector
-from ...action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
+from .profile_destination import ProfileDestination
+from ..action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
 
 
-class CiviCRMConnector(Connector):
+class CiviCRMConnector(ProfileDestination):
 
     async def run(self, data, delta) -> None:
 

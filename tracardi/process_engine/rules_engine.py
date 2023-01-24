@@ -131,8 +131,11 @@ class RulesEngine:
 
                         # Flows are run concurrently
                         logger.info(f"Invoked workflow {flow.name}:{flow.id} for event {event.type}:{event.id}")
+
+                        # Debugging can be controlled from tracker payload.
+
                         flow_task = asyncio.create_task(
-                            workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
+                            workflow.invoke(flow, event, self.profile, self.session, ux, debug=tracker_payload.debug))
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
                     else:

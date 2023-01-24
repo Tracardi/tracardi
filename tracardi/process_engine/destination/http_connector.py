@@ -15,7 +15,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
-from .connector import Connector
+from .profile_destination import ProfileDestination
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -57,7 +57,7 @@ class HttpConfiguration(BaseModel):
             return {"data": json.dumps(body)}
 
 
-class HttpConnector(Connector):
+class HttpConnector(ProfileDestination):
 
     @staticmethod
     def _validate_key_value(values, label):

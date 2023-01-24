@@ -17,8 +17,8 @@ class CacheManager(metaclass=Singleton):
         'EVENT_TAG': MemoryCache("event-tags", max_pool=200, allow_null_values=True),
         'EVENT_RESHAPING': MemoryCache("event-reshaping", max_pool=200, allow_null_values=True),
         'EVENT_INDEXING': MemoryCache("event-indexing", max_pool=200, allow_null_values=True),
-        'EVENT_DESTINATION': MemoryCache("destinations", max_pool=100, allow_null_values=True),
-        'DESTINATIONS': MemoryCache("destinations", max_pool=10, allow_null_values=True)
+        'EVENT_DESTINATION': MemoryCache("event-destinations", max_pool=100, allow_null_values=True),
+        'PROFILE_DESTINATIONS': MemoryCache("profile-destinations", max_pool=10, allow_null_values=True)
     }
 
     def session_cache(self) -> MemoryCache:
@@ -39,8 +39,8 @@ class CacheManager(metaclass=Singleton):
     def event_indexing_cache(self) -> MemoryCache:
         return self._cache['EVENT_INDEXING']
 
-    def destinations_cache(self) -> MemoryCache:
-        return self._cache['DESTINATIONS']
+    def profile_destination_cache(self) -> MemoryCache:
+        return self._cache['PROFILE_DESTINATIONS']
 
     def event_destination_cache(self) -> MemoryCache:
         return self._cache['EVENT_DESTINATION']
@@ -53,31 +53,31 @@ class CacheManager(metaclass=Singleton):
         """
         if ttl > 0:
             return await MemoryCache.cache(
-                self.destinations_cache(),
+                self.event_destination_cache(),
                 f"{event_type}-{source_id}",
                 ttl,
-                storage.driver.destination.load_by_type,
+                storage.driver.destination.load_event_destinations,
                 True,
                 event_type,
                 source_id
             )
 
-        return await storage.driver.destination.load_by_type(event_type=event_type, source_id=source_id)
+        return await storage.driver.destination.load_event_destinations(event_type=event_type, source_id=source_id)
 
-    async def destinations(self, ttl) -> StorageRecords:
+    async def profile_destinations(self, ttl) -> StorageRecords:
         """
         Session cache
         """
         if ttl > 0:
             return await MemoryCache.cache(
-                self.destinations_cache(),
-                "destinations-key",
+                self.profile_destination_cache(),
+                "profile-destination-key",
                 ttl,
-                storage.driver.destination.load_all,
+                storage.driver.destination.load_profile_destinations,
                 True
             )
 
-        return await storage.driver.destination.load_all()
+        return await storage.driver.destination.load_profile_destinations()
 
     async def session(self, session_id, ttl) -> Optional[Session]:
         """

@@ -1,14 +1,14 @@
 from typing import List
 
 from tracardi.service.storage.driver import storage
-from ...action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
-from .connector import Connector
-from ....domain.event import Event
-from ....domain.profile import Profile
-from ....domain.session import Session
+from .profile_destination import ProfileDestination
+from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
+from ...domain.event import Event
+from ...domain.profile import Profile
+from ...domain.session import Session
 
 
-class MauticConnector(Connector):
+class MauticConnector(ProfileDestination):
 
     async def run(self, data, delta, profile: Profile, session: Session, events: List[Event]) -> None:
 
