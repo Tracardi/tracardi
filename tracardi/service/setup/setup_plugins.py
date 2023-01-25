@@ -702,6 +702,11 @@ installed_plugins: Dict[str, PluginTestTemplate] = {
             'personal_access_token': '<your-PAT-here>',
         },
     ),
+
+    "tracardi.process_engine.action.v1.connectors.elasticsearch.query_local.plugin": PluginTestTemplate(
+        init={'index': {'id': '1', 'name': 'Some value'}, 'query': '{"query":{"match_all":{}}}'},
+        resource=None
+    ),
 }
 
 if License.has_service(VALIDATOR):
