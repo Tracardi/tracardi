@@ -1,16 +1,14 @@
-from typing import List
-
 from tracardi.service.storage.driver import storage
-from .profile_destination import ProfileDestination
+from .destination_interface import DestinationInterface
 from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
 from ...domain.event import Event
 from ...domain.profile import Profile
 from ...domain.session import Session
 
 
-class MauticConnector(ProfileDestination):
+class MauticConnector(DestinationInterface):
 
-    async def run(self, data, delta, profile: Profile, session: Session, events: List[Event]) -> None:
+    async def _dispatch(self, data):
 
         if "email" not in data:
             raise ValueError("Given mapping must contain email.")
@@ -41,3 +39,8 @@ class MauticConnector(ProfileDestination):
 
             await storage.driver.resource.save_record(self.resource)
 
+    async def dispatch_profile(self, data, profile: Profile, session: Session):
+        await self._dispatch(data)
+
+    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
+        await self._dispatch(data)

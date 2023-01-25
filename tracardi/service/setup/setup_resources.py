@@ -39,7 +39,7 @@ def get_resource_types() -> List[ResourceSettings]:
             },
             tags=['api', "destination"],
             destination=DestinationData(
-                package="tracardi.process_engine.destination.profile.http_connector.HttpConnector",
+                package="tracardi.process_engine.destination.http_connector.HttpConnector",
                 init={
                     "method": "post",
                     "timeout": 30,
@@ -295,7 +295,7 @@ def get_resource_types() -> List[ResourceSettings]:
                 "api_url": "<url-of-mautic-instance>"
             },
             destination=DestinationData(
-                package="tracardi.process_engine.destination.profile.mautic_connector.MauticConnector",
+                package="tracardi.process_engine.destination.mautic_connector.MauticConnector",
                 init={
                     "overwrite_with_blank": False
                 }
@@ -353,7 +353,7 @@ def get_resource_types() -> List[ResourceSettings]:
                 "api_url": "<api-url>"
             },
             destination=DestinationData(
-                package="tracardi.process_engine.destination.profile.civicrm_connector.CiviCRMConnector"
+                package="tracardi.process_engine.destination.civicrm_connector.CiviCRMConnector"
             ),
             manual="civi_resource"
         ),

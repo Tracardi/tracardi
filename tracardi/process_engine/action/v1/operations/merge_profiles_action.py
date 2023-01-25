@@ -71,9 +71,9 @@ def register() -> Plugin:
                         FormField(
                             id="mergeBy",
                             name="Merge by fields",
-                            description="Provide a list od fields that can identify user. These fields will be treated"
-                                        " as primary keys for merging. Profiles will be grouped by this value and "
-                                        "merged.",
+                            description="Provide a list of fields that can identify user. For example profile@pii.email. "
+                                        "These fields will be treated as primary keys for merging. Profiles will be "
+                                        "grouped by this value and merged.",
                             component=FormComponent(type="listOfDotPaths", props={"label": "condition"})
                         )
                     ]

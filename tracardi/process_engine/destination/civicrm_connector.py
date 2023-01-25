@@ -1,11 +1,13 @@
-from .profile_destination import ProfileDestination
+from .destination_interface import DestinationInterface
 from ..action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
+from ...domain.event import Event
+from ...domain.profile import Profile
+from ...domain.session import Session
 
 
-class CiviCRMConnector(ProfileDestination):
+class CiviCRMConnector(DestinationInterface):
 
-    async def run(self, data, delta) -> None:
-
+    async def _dispatch(self, data):
         if "id" not in data or "email" not in data:
             raise ValueError("Given fields mapping must contain \"id\" and \"email\" keys.")
 
@@ -15,4 +17,8 @@ class CiviCRMConnector(ProfileDestination):
 
         await client.add_contact(data)
 
+    async def dispatch_profile(self, data, profile: Profile, session: Session):
+        await self._dispatch(data)
 
+    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
+        await self._dispatch(data)

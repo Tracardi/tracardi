@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 from deepdiff import DeepDiff
+from tracardi.service.cache_manager import CacheManager
 
 from tracardi.config import tracardi
 from tracardi.domain.console import Console
@@ -11,12 +12,13 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.destinations.profile_destination_manager import ProfileDestinationManager
+from tracardi.service.destinations.dispatchers import profile_destination_dispatch
 from tracardi.service.utils.getters import get_entity_id
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+cache = CacheManager()
 
 
 class DestinationOrchestrator:
@@ -27,18 +29,6 @@ class DestinationOrchestrator:
         self.session = session
         self.profile = profile
 
-    async def _send_to_destination(self, profile_delta):
-        logger.debug("Profile changed. Destination scheduled to run.")
-
-        destination_manager = ProfileDestinationManager(self.profile,
-                                                        self.session,
-                                                        payload=None,
-                                                        event=None,
-                                                        flow=None,
-                                                        memory=None)
-        # todo performance - could be not awaited  - add to save_task
-        await destination_manager.send_data(self.profile.id, self.events, profile_delta=profile_delta, debug=False)
-
     async def sync_destination(self, has_profile, profile_copy):
         if has_profile and profile_copy is not None:
             new_profile = self.profile.dict(exclude={"operation": ...})
@@ -48,7 +38,11 @@ class DestinationOrchestrator:
                 if profile_delta:
                     logger.debug("Profile changed. Destination scheduled to run.")
                     try:
-                        await self._send_to_destination(profile_delta)
+                        load_destination_task = cache.profile_destinations
+                        await profile_destination_dispatch(load_destination_task,
+                                                           profile=self.profile,
+                                                           session=self.session,
+                                                           debug=False)
                     except Exception as e:
                         # todo - this appends error to the same profile - it rather should be en event error
                         self.console_log.append(Console(

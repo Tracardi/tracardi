@@ -70,6 +70,8 @@ class MemoryCacheConfig:
         self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 0
         self.event_validation_cache_ttl = int(env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 0
         self.event_metadata_cache_ttl = int(env['EVENT_METADATA_CACHE_TTL']) if 'EVENT_METADATA_CACHE_TTL' in env else 0
+        self.event_destination_cache_ttl = int(env['EVENT_DESTINATION_CACHE_TTL']) if 'EVENT_DESTINATION_CACHE_TTL' in env else 0
+        self.profile_destination_cache_ttl = int(env['PROFILE_DESTINATION_CACHE_TTL']) if 'PROFILE_DESTINATION_CACHE_TTL' in env else 0
 
 
 class ElasticConfig:

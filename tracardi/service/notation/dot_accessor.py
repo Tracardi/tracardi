@@ -84,6 +84,10 @@ class DotAccessor:
 
     def set_storage(self, name, data):
 
+        storage = f"{name}@"
+        if storage not in self.storage.keys():
+            raise ValueError("Unknown storage")
+
         if name == 'profile':
             self.profile = data
         elif name == 'event':
@@ -97,10 +101,20 @@ class DotAccessor:
         elif name == 'memory':
             self.memory = data
 
-        storage = f"{name}@"
-        if storage not in self.storage.keys():
-            raise ValueError("Unknown storage")
         self.storage[storage] = self._convert(data, name)
+
+        if name == 'profile':
+            self.profile = self.storage[storage]
+        elif name == 'event':
+            self.event = self.storage[storage]
+        elif name == 'session':
+            self.session = self.storage[storage]
+        elif name == 'flow':
+            self.flow = self.storage[storage]
+        elif name == 'payload':
+            self.payload = self.storage[storage]
+        elif name == 'memory':
+            self.memory = self.storage[storage]
 
     @staticmethod
     def source(key):

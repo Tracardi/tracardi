@@ -11,14 +11,14 @@ class PII(BaseModel):
     passport number, and email address.
     """
 
-    name: Optional[Any] = None
-    surname: Optional[Any] = None
-    birth_date: Optional[Any] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    birth_date: Optional[str] = None
     marital_status: Optional[str] = None
-    email: Optional[Any] = None
-    telephone: Optional[Any] = None
-    twitter: Optional[Any] = None
-    facebook: Optional[Any] = None
-    whatsapp: Optional[Any] = None
+    email: Optional[str] = None
+    telephone: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    whatsapp: Optional[str] = None
     other: Optional[dict] = {}
 

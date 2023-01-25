@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Any, Union
 
-from pydantic import validator
+from pydantic import validator, ValidationError
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -80,19 +80,36 @@ class AppendTraitAction(ActionRunner):
                 raise ValueError(
                     "Error when appending profile@traits.public to value `{}`. Public must have key:value pair. "
                     "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
+            try:
+                profile = Profile(**dot.profile)
+            except ValidationError as e:
+                self.console.error(f"Profile could not be updated. Some values where set incorrectly. "
+                                   f"Please see the error {str(e)}")
+                return Result(port="error", value=payload)
 
-            profile = Profile(**dot.profile)
             self.profile.replace(profile)
         else:
             if dot.profile:
                 self.console.warning("Profile changes were discarded in node `Append/Remove Trait`. "
                                      "This event is profile less so there is no profile.")
 
-        event = Event(**dot.event)
+        try:
+            event = Event(**dot.event)
+        except ValidationError as e:
+            self.console.error(f"Event could not be updated. Some values where set incorrectly. "
+                               f"Please see the error {str(e)}")
+            return Result(port="error", value=payload)
+
         self.event.replace(event)
 
         if 'id' in dot.session:
-            session = Session(**dot.session)
+            try:
+                session = Session(**dot.session)
+            except ValidationError as e:
+                self.console.error(f"Session could not be updated. Some values where set incorrectly. "
+                                   f"Please see the error {str(e)}")
+                return Result(port="error", value=payload)
+
             self.session.replace(session)
 
         self.update_profile()
@@ -107,7 +124,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.traits.append_trait_action',
             className='AppendTraitAction',
             inputs=['payload'],
-            outputs=["payload"],
+            outputs=["payload", "error"],
             init={
                 "append": {
                     "target1": "source1",
@@ -134,7 +151,8 @@ def register() -> Plugin:
                 },
                 outputs={
                     "payload": PortDoc(desc="This port returns given payload with traits appended or removed according"
-                                            " to configuration.")
+                                            " to configuration."),
+                    "error": PortDoc(desc="This port returns error if appending was not successful.")
                 }
             )
         )

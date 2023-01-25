@@ -2,21 +2,11 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable
-
-from tracardi.process_engine.destination.event.event_destination import EventDestination
-from tracardi.service.destinations.destination_manager import get_destination_class
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
-from tracardi.service.notation.dict_traverser import DictTraverser
-
-from tracardi.service.notation.dot_accessor import DotAccessor
-
-from tracardi.domain.destination import DestinationRecord
-
 from tracardi.config import tracardi
 from tracardi.domain.enum.event_status import COLLECTED
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.process_engine.debugger import Debugger
-from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler

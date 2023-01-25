@@ -5,12 +5,15 @@ from tracardi.domain.resource import Resource
 from tracardi.domain.session import Session
 
 
-class EventDestination:
+class DestinationInterface:
 
     def __init__(self, debug: bool, resource: Resource, destination: Destination):
         self.destination = destination
-        self.resource = resource
         self.debug = debug
+        self.resource = resource
 
-    async def run(self, data, profile: Profile, session: Session, event: Event):
+    async def dispatch_profile(self, data, profile: Profile, session: Session):
+        pass
+
+    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
         pass
