@@ -1,12 +1,15 @@
+import asyncio
 import logging
 from collections import Callable
 from typing import Any
+
+from tracardi.domain.api_instance import ApiInstance
+from tracardi.service.postpone_call import PostponedCall
 
 from tracardi.domain.resource import Resource
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.config import tracardi
 from tracardi.process_engine.destination.event.event_destination import EventDestination
-from tracardi.process_engine.destination.profile_destination import ProfileDestination
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.destinations.destination_manager import get_destination_class
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -60,9 +63,8 @@ async def event_destination_dispatch(load_destination_task: Callable, profile, s
                 template):  # type: Destination, Resource, Any
 
             destination_class = get_destination_class(destination)
-
-            # Pass resource to destination class
             destination_instance = destination_class(debug, resource, destination)
+
             print(isinstance(destination_instance, EventDestination), destination)
             if isinstance(destination_instance, EventDestination):
                 reshaped_data = template.reshape(reshape_template=destination.mapping)
@@ -78,6 +80,7 @@ async def profile_destination_dispatch(load_destination_task: Callable,
 
     dot = DotAccessor(profile, session)
     template = DictTraverser(dot, default=None)
+
     destinations = [DestinationRecord(**destination_record) for destination_record in
                     await load_destination_task(ttl=30)]
 

@@ -22,7 +22,9 @@ class ReadFromMemoryAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
-            result = self.client.client.get(name=f"TRACARDI-USER-MEMORY-{self.config.key}")
+            dot = self._get_dot_accessor(payload)
+            key = dot[self.config.key]
+            result = self.client.client.get(name=f"TRACARDI-USER-MEMORY-{key}")
             return Result(port="success", value={"value": b64_decoder(result)})
 
         except Exception as e:
@@ -37,9 +39,9 @@ def register() -> Plugin:
             className='ReadFromMemoryAction',
             inputs=["payload"],
             outputs=["success", "error"],
-            version='0.6.3',
-            license="MIT",
-            author="Dawid Kruk",
+            version='0.8.0',
+            license="MIT + CC",
+            author="Dawid Kruk, Risto Kowaczewski",
             init={
                 "key": None
             },
@@ -52,8 +54,10 @@ def register() -> Plugin:
                             FormField(
                                 id="key",
                                 name="Key",
-                                description="Provide a key associated with data that you want to get from memory.",
-                                component=FormComponent(type="text", props={"label": "Key"})
+                                description="Provide a key where the data will be stored. Think of a “key” as a "
+                                            "unique identifier and a “value” as whatever data you want to associate "
+                                            "with that key. Key can ba a value from profile, event, etc.",
+                                component=FormComponent(type="dotPath", props={"label": "Key"})
                             )
                         ]
                     )

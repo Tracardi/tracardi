@@ -22,12 +22,15 @@ class WriteToMemoryAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
+
         value = dot[self.config.value]
         value = b64_encoder(value)
 
+        key = dot[self.config.key]
+
         try:
             self.client.client.set(
-                name=f"TRACARDI-USER-MEMORY-{self.config.key}",
+                name=f"TRACARDI-USER-MEMORY-{key}",
                 value=value,
                 ex=self.config.ttl
             )
@@ -45,9 +48,9 @@ def register() -> Plugin:
             className='WriteToMemoryAction',
             inputs=["payload"],
             outputs=["success", "error"],
-            version='0.6.3',
-            license="MIT",
-            author="Dawid Kruk",
+            version='0.8.0',
+            license="MIT + CC",
+            author="Dawid Kruk, Risto Kowaczewski",
             init={
                 "key": None,
                 "value": None,
@@ -64,7 +67,7 @@ def register() -> Plugin:
                                 name="Key",
                                 description="Provide a key for this data. Data will be accessible by providing this "
                                             "key in Read from memory plugin.",
-                                component=FormComponent(type="text", props={"label": "Key"})
+                                component=FormComponent(type="dotPath", props={"label": "Key"})
                             ),
                             FormField(
                                 id="value",
