@@ -1,6 +1,13 @@
+from typing import Any
+
+import redis
+
+from tracardi.config import RedisConfig
+from tracardi.domain.resources.redis_resource import RedisCredentials
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormField, \
     FormGroup, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.driver import storage
 from .model.config import Config
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.plugin.domain.result import Result
@@ -13,12 +20,26 @@ def validate(config: dict) -> Config:
 
 class WriteToMemoryAction(ActionRunner):
 
-    client: RedisClient
+    client: Any
     config: Config
 
     async def set_up(self, init):
         self.config = validate(init)
-        self.client = RedisClient()
+
+        if self.config.resource.id == "":
+            self.client = RedisClient().client
+        else:
+            resource = await storage.driver.resource.load(self.config.resource.id)
+            credentials = resource.credentials.get_credentials(self, output=RedisCredentials)
+
+            uri = RedisConfig.get_redis_uri(
+                credentials.url,
+                credentials.user,
+                credentials.password,
+                credentials.protocol,
+                credentials.database
+            )
+            self.client = redis.from_url(uri)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -29,10 +50,10 @@ class WriteToMemoryAction(ActionRunner):
         key = dot[self.config.key]
 
         try:
-            self.client.client.set(
-                name=f"TRACARDI-USER-MEMORY-{key}",
+            self.client.set(
+                name=f"tracardi-user-memory:{key}",
                 value=value,
-                ex=self.config.ttl
+                ex=self.config.ttl if self.config.ttl > 0 else None
             )
             return Result(port="success", value=payload)
 
@@ -52,9 +73,13 @@ def register() -> Plugin:
             license="MIT + CC",
             author="Dawid Kruk, Risto Kowaczewski",
             init={
-                "key": None,
-                "value": None,
-                "ttl": 15
+                "key": "",
+                "value": "",
+                "ttl": 15,
+                "resource": {
+                    "name": "",
+                    "id": ""
+                }
             },
             manual="write_to_memory_action",
             form=Form(
@@ -62,6 +87,13 @@ def register() -> Plugin:
                     FormGroup(
                         name="Write to memory",
                         fields=[
+                            FormField(
+                                id="resource",
+                                name="Resource",
+                                description="Select remote redis server or leave it empty to read from local server.",
+                                component=FormComponent(type="resource",
+                                                        props={"label": "Redis server", "tag": "redis"})
+                            ),
                             FormField(
                                 id="key",
                                 name="Key",

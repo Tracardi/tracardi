@@ -1,6 +1,13 @@
+from typing import Any
+
+import redis
+
+from tracardi.config import RedisConfig
+from tracardi.domain.resources.redis_resource import RedisCredentials
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormField, \
     FormGroup, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.driver import storage
 from .model.config import Config
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.plugin.domain.result import Result
@@ -13,18 +20,33 @@ def validate(config: dict) -> Config:
 
 class ReadFromMemoryAction(ActionRunner):
 
-    client: RedisClient
+    client: Any
     config: Config
 
     async def set_up(self, init):
         self.config = validate(init)
-        self.client = RedisClient()
+        if self.config.resource.id == "":
+            self.client = RedisClient().client
+        else:
+            resource = await storage.driver.resource.load(self.config.resource.id)
+            credentials = resource.credentials.get_credentials(self, output=RedisCredentials)
+
+            uri = RedisConfig.get_redis_uri(
+                credentials.url,
+                credentials.user,
+                credentials.password,
+                credentials.protocol,
+                credentials.database
+            )
+            self.client = redis.from_url(uri)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             dot = self._get_dot_accessor(payload)
             key = dot[self.config.key]
-            result = self.client.client.get(name=f"TRACARDI-USER-MEMORY-{key}")
+            result = self.client.get(name=f"tracardi-user-memory:{key}")
+            if result is None:
+                return Result(port="not-exists", value=payload)
             return Result(port="success", value={"value": b64_decoder(result)})
 
         except Exception as e:
@@ -38,12 +60,16 @@ def register() -> Plugin:
             module=__name__,
             className='ReadFromMemoryAction',
             inputs=["payload"],
-            outputs=["success", "error"],
+            outputs=["success", "not-exists", "error"],
             version='0.8.0',
             license="MIT + CC",
             author="Dawid Kruk, Risto Kowaczewski",
             init={
-                "key": None
+                "resource": {
+                    "name": "",
+                    "id": ""
+                },
+                "key": ""
             },
             manual="read_from_memory_action",
             form=Form(
@@ -51,6 +77,12 @@ def register() -> Plugin:
                     FormGroup(
                         name="Read from memory",
                         fields=[
+                            FormField(
+                                id="resource",
+                                name="Resource",
+                                description="Select remote redis server or leave it empty to read from local server.",
+                                component=FormComponent(type="resource", props={"label": "Redis server", "tag": "redis"})
+                            ),
                             FormField(
                                 id="key",
                                 name="Key",
@@ -75,7 +107,8 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes payload object.")
                 },
                 outputs={
-                    "success": PortDoc(desc="This port returns payload if data was successfully read from memory."),
+                    "success": PortDoc(desc="This port returns data from memory if data was successfully read."),
+                    "not-exists": PortDoc(desc="This port returns payload if data does not exist."),
                     "error": PortDoc(desc="This port returns some error detail if there was an error while reading data"
                                           " from memory.")
                 }

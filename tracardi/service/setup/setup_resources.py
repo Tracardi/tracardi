@@ -181,9 +181,12 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=["redis"],
             icon="redis",
             config={
-                "url": "<url>",
+                "url": "<url>:<port>",
                 "user": "<user>",
-                "password": "<password>"
+                "password": "<password>",
+                "protocol": "redis",
+                "database": "0"
+
             },
             manual="redis_resource"
         ),

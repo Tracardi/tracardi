@@ -139,11 +139,17 @@ class RedisConfig:
         # self._unset_credentials()
 
     def get_redis_with_password(self):
-        if not self.redis_host.startswith('redis://'):
-            self.redis_host = f"redis://{self.redis_host}"
-        if self.redis_password:
-            return f"redis://:{self.redis_password}@{self.redis_host[8:]}"
-        return self.redis_host
+        return self.get_redis_uri(self.redis_host, password=self.redis_password)
+
+    @staticmethod
+    def get_redis_uri(host, user=None, password=None, protocol="redis", database="0"):
+        if not host.startswith('redis://'):
+            host = f"{protocol}://{host}/{database}"
+        if user and password:
+            return f"{protocol}://{user}:{password}@{host[8:]}/{database}"
+        elif password:
+            return f"{protocol}://:{password}@{host[8:]}/{database}"
+        return host
 
     # Tych danych potrebuje jeszcze worker moze tam można je wykasować
     # def _unset_credentials(self):
