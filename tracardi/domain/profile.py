@@ -23,7 +23,7 @@ class ConsentRevoke(BaseModel):
 
 class Profile(Entity):
     ids: Optional[List[str]] = []
-    metadata: Optional[ProfileMetadata] = ProfileMetadata(time=ProfileTime())
+    metadata: Optional[ProfileMetadata] = ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
     operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[ProfileTraits] = ProfileTraits()

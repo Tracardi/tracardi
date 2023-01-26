@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from tracardi.domain.event_metadata import EventMetadata
@@ -11,7 +12,7 @@ from .model.configuration import Configuration
 from typing import Optional
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.entity import Entity
 
 
@@ -33,12 +34,14 @@ class StartSegmentationAction(ActionRunner):
                 id=str(uuid4()),
                 type="@segmentation",
                 source=Entity(id=str(uuid4())),
-                metadata=EventMetadata(time=EventTime(), debug=self.debug)
+                metadata=EventMetadata(time=EventTime(insert=datetime.utcnow()), debug=self.debug)
             )
 
             session = Session(
                 id=str(uuid4()),
-                metadata=SessionMetadata()
+                metadata=SessionMetadata(time=SessionTime(
+                    insert=datetime.utcnow(),
+                    timestamp=datetime.timestamp(datetime.utcnow())))
             )
 
             if not self.config.profile_id:

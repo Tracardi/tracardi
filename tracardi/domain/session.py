@@ -31,7 +31,7 @@ class SessionTime(BaseModel):
 
 
 class SessionMetadata(BaseModel):
-    time: SessionTime = SessionTime()
+    time: SessionTime = SessionTime(insert=datetime.utcnow(), timestamp=datetime.timestamp(datetime.utcnow()))
     channel: Optional[str] = None
 
 
