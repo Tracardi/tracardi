@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 from uuid import uuid4
 
 from pydantic import BaseModel, validator
@@ -22,6 +22,11 @@ class EventPayload(BaseModel):
     options: Optional[dict] = {}
     context: Optional[dict] = {}
     tags: Optional[list] = []
+
+    def __init__(self, **data: Any):
+        if 'time' not in data or 'insert' not in data['time']:
+            data['time'] = Time(insert=datetime.utcnow())
+        super().__init__(**data)
 
     @validator("type")
     def event_type_can_not_be_empty(cls, value):
