@@ -1,9 +1,20 @@
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 
+def test_should_access_object_with_dollar():
+    dot = DotAccessor(profile={"a": {"$id": 10, "$c": {"d": 20}}})
+    assert dot["profile@a.$id"] == 10
+    assert dot["profile@a.$c.d"] == 20
+
+
 def test_should_validate_dot_notation():
     assert not DotAccessor.validate("invalid@dot.notation")
+    assert DotAccessor.validate("payload@dot.0.notation")
+    assert DotAccessor.validate("payload@dot.0.$")
+    assert DotAccessor.validate("payload@dot.0.$test")
     assert DotAccessor.validate("payload@dot.notation")
+    assert DotAccessor.validate("payload@dot.notłóśćąation.@$#$%^&*")
+    assert DotAccessor.validate("payload@dot.$notation")
     assert not DotAccessor.validate("invalid@dot.[0].notation")
 
 

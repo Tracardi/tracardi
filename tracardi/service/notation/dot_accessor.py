@@ -57,8 +57,10 @@ class DotAccessor:
                         raise KeyError(f"No key {value} in {prefix}")
                 return value
             except KeyError as e:
-                raise KeyError("Invalid dot notation. Could not find value for `{}` "
-                               "in `{}`. Error: {}".format(value, prefix, str(e)))
+                raise KeyError(
+                    f"Invalid data reference. Dot notation `{prefix}{value}` could not access data. "
+                    f"The reason for this may be that there is no data in {value} in `{prefix.strip('@')}. "
+                    f"Error details: {str(e)}")
             except TypeError as e:
                 raise KeyError("Invalid dot notation. You are trying to access {} "
                                "when it its value is not a dictionary `{}`.".format(value, str(e)))
@@ -152,8 +154,14 @@ class DotAccessor:
             key = key[len('memory@'):]
             del self.memory[key]
         else:
+            try:
+                _source, _value = key.split('@')
+            except Exception:
+                _source = 'unknown'
+                _value = 'unknown'
             raise ValueError(
-                "Invalid dot notation. Accessor not available. " +
+                f"Invalid data reference. Dot notation `{key}` could not access data. The reason for this may be that "
+                f"there is no data in {_source} at `{_value}. " +
                 "Please start dotted path with one of the accessors: [profile@, session@, payload@, event@] ")
 
     def __setitem__(self, key, value):
@@ -176,8 +184,8 @@ class DotAccessor:
             self.memory[key] = self.__getitem__(value) if not isinstance(value, dict) else value
         else:
             raise ValueError(
-                "Invalid dot notation. Accessor not available. " +
-                "Please start dotted path with one of the accessors: [profile@, session@, payload@, event@] ")
+                "Invalid dot notation. Source not available. " +
+                "Please start dotted path with one of the sources: [profile@, session@, payload@, event@] ")
 
     def __getitem__(self, dot_notation):
         cast = False

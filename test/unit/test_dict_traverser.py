@@ -4,6 +4,18 @@ from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 
+def test_should_return_object_with_dollar():
+    template = {
+        "s": "profile@$a",
+        "a": "profile@b.1.$c"
+    }
+
+    dot = DotAccessor(profile={"$a": [1, 2], "b": [1, {"$c": 10}]}, session={"b": 2}, event={})
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result == {'s': [1, 2], 'a': 10}
+
+
 def test_should_return_full_object():
     template = {
         "s": "session@..."
