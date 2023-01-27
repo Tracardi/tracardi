@@ -49,9 +49,15 @@ class WriteToMemoryAction(ActionRunner):
 
         key = dot[self.config.key]
 
+        prefix = self.config.prefix.strip()
+        if prefix:
+            key = f"tracardi-user-memory:{prefix}:{key}"
+        else:
+            key = f"tracardi-user-memory:{key}"
+
         try:
             self.client.set(
-                name=f"tracardi-user-memory:{key}",
+                name=key,
                 value=value,
                 ex=self.config.ttl if self.config.ttl > 0 else None
             )
@@ -74,6 +80,7 @@ def register() -> Plugin:
             author="Dawid Kruk, Risto Kowaczewski",
             init={
                 "key": "",
+                "prefix": "",
                 "value": "",
                 "ttl": 15,
                 "resource": {
@@ -113,6 +120,14 @@ def register() -> Plugin:
                                 description="Provide a number of seconds for the value to live. After this amount "
                                             "of time, the value will be deleted.",
                                 component=FormComponent(type="text", props={"label": "Time to live"})
+                            ),
+                            FormField(
+                                id="prefix",
+                                name="Key prefix",
+                                description="Type key prefix if you would like to store different values for the "
+                                            "same key. Key prefix can be any string. Leave empty if you do no need "
+                                            "to prefix the key.",
+                                component=FormComponent(type="text", props={"label": "Prefix"})
                             )
                         ]
                     )

@@ -8,6 +8,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 class Config(PluginConfig):
     key: str
+    prefix: Optional[str] = ""
     value: str
     ttl: Optional[int] = 0
     resource: Optional[NamedEntity] = NamedEntity(name="Local redis", id="")

@@ -59,6 +59,7 @@ class ReshapePayloadAction(ActionRunner):
         try:
             result = template.reshape(reshape_template=output)
         except Exception as e:
+            self.console.error(str(e))
             return Result(port="error", value={"message": str(e)})
 
         if not isinstance(result, dict):

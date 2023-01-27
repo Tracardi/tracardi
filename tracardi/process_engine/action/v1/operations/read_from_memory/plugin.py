@@ -44,7 +44,12 @@ class ReadFromMemoryAction(ActionRunner):
         try:
             dot = self._get_dot_accessor(payload)
             key = dot[self.config.key]
-            result = self.client.get(name=f"tracardi-user-memory:{key}")
+            prefix = self.config.prefix.strip()
+            if prefix:
+                key = f"tracardi-user-memory:{prefix}:{key}"
+            else:
+                key = f"tracardi-user-memory:{key}"
+            result = self.client.get(name=key)
             if result is None:
                 return Result(port="not-exists", value=payload)
             return Result(port="success", value={"value": b64_decoder(result)})
@@ -69,7 +74,8 @@ def register() -> Plugin:
                     "name": "",
                     "id": ""
                 },
-                "key": ""
+                "key": "",
+                "prefix": ""
             },
             manual="read_from_memory_action",
             form=Form(
@@ -90,6 +96,14 @@ def register() -> Plugin:
                                             "unique identifier and a “value” as whatever data you want to associate "
                                             "with that key. Key can ba a value from profile, event, etc.",
                                 component=FormComponent(type="dotPath", props={"label": "Key"})
+                            ),
+                            FormField(
+                                id="prefix",
+                                name="Key prefix",
+                                description="Type key prefix if you would like to store different values for the "
+                                            "same key. Key prefix can be any string. Leave empty if you do no need "
+                                            "to prefix the key.",
+                                component=FormComponent(type="text", props={"label": "Prefix"})
                             )
                         ]
                     )
