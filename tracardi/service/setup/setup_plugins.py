@@ -1,6 +1,5 @@
 from typing import Dict
 from tracardi.service.license import VALIDATOR, License
-from tracardi.service.plugin.plugin_install import install_plugins
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 
 installed_plugins: Dict[str, PluginMetadata] = {
@@ -18,29 +17,34 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.connectors.telegram.post.registry": PluginMetadata(
-        test=PluginTest(init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},
+    "tracardi.process_engine.action.v1.connectors.telegram.post.plugin": PluginMetadata(
+        test=PluginTest(
+            init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},
                         resource={
                             "bot_token": "bot_token",
                             "chat_id": 100
-                        })
+                        }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.telegram.post.registry"
     ),
 
-    "tracardi.process_engine.action.v1.connectors.google.analytics.registry": PluginMetadata(
+    "tracardi.process_engine.action.v1.connectors.google.analytics.plugin": PluginMetadata(
         test=PluginTest(
             init={'source': {'id': 'id', 'name': 'name'}, 'category': 'category', 'action': 'action', 'label': 'label',
                   'value': 'value'},
             resource={
                 "google_analytics_id": "google_analytics_id"
-            })
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.google.analytics.registry"
     ),
 
-    "tracardi.process_engine.action.v1.connectors.google.analytics_v4.registry": PluginMetadata(
-        test=PluginTest(init={'source': {'id': 'id', 'name': 'name'}, 'name': 'event_name', 'params': "payload@id"},
-                        resource={
-                            "api_key": "api_key",
-                            "measurement_id": "measurement_id"
-                        })
+    "tracardi.process_engine.action.v1.connectors.google.analytics_v4.plugin": PluginMetadata(
+        test=PluginTest(
+            init={'source': {'id': 'id', 'name': 'name'}, 'name': 'event_name', 'params': "payload@id"},
+            resource={
+                "api_key": "api_key",
+                "measurement_id": "measurement_id"
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.google.analytics_v4.registry"
     ),
 
     "tracardi.process_engine.action.v1.connectors.whois.plugin": PluginMetadata(
@@ -777,19 +781,21 @@ test_plugins: Dict[str, PluginMetadata] = {
                         })
     ),
 
-    "tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry": PluginMetadata(
-        test=PluginTest(init={
-            "resource": {
-                "id": "1",
-                "name": "1"
+    "tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "resource": {
+                    "id": "1",
+                    "name": "1"
+                },
+                "message": "text",
+                "recipient": "a",
+                "sender": "b"
             },
-            "message": "text",
-            "recipient": "a",
-            "sender": "b"
-        },
             resource={
                 "api_key": "api_key"
-            })
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry"
     ),
 
     "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginMetadata(
@@ -1130,23 +1136,27 @@ test_plugins: Dict[str, PluginMetadata] = {
             })
     ),
 
-    "tracardi.process_engine.action.v1.pro.scheduler.registry": PluginMetadata(
-        test=PluginTest(init={
-            'resource': {"id": '1', "name": '2'},
-            'source': {"id": '1', "name": '2'},
-            'event_type': 'type',
-            'postpone': 10
-        },
+    "tracardi.process_engine.action.v1.pro.scheduler.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                'resource': {"id": '1', "name": '2'},
+                'source': {"id": '1', "name": '2'},
+                'event_type': 'type',
+                'postpone': 10
+            },
             resource={
                 "callback_host": "http://localhost:8686"
-            })
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.pro.scheduler.registry"
     ),
-    "tracardi.process_engine.action.v1.connectors.novu.trigger.registry": PluginMetadata(
-        test=PluginTest(init={'payload': '{}', 'recipient_email': 'profile@pii.email', 'source': {'id': '', 'name': ''},
-                              'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
-                        resource={
-                            "token": "token"
-                        })
+    "tracardi.process_engine.action.v1.connectors.novu.trigger.plugin": PluginMetadata(
+        test=PluginTest(
+            init={'payload': '{}', 'recipient_email': 'profile@pii.email', 'source': {'id': '', 'name': ''},
+                  'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
+            resource={
+                "token": "token"
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.novu.trigger.registry"
     ),
 
     "tracardi.process_engine.action.v1.connectors.pushover.push.plugin": PluginMetadata(
@@ -1440,6 +1450,3 @@ test_plugins: Dict[str, PluginMetadata] = {
     # ),
 }
 
-
-async def add_plugins():
-    return await install_plugins(installed_plugins)

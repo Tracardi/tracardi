@@ -4,6 +4,8 @@ import os
 from collections import defaultdict
 from typing import Dict
 
+from tracardi.service.setup.setup_plugins import test_plugins, installed_plugins
+
 from tracardi.config import tracardi
 from tracardi.domain.settings import Settings
 from tracardi.exceptions.log_handler import log_handler
@@ -19,26 +21,25 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-async def install_plugin(module, install=False, upgrade=False):
+async def install_plugin(module):
     try:
 
-        # upgrade
-        if install and upgrade:
-            pip_install(module.split(".")[0], upgrade=True)
+        _module = import_package(module)
 
         try:
-            # import
-            module = import_package(module)
-        except ImportError as e:
-            # install
-            if install:
-                pip_install(module.split(".")[0])
-                module = import_package(module)
+            # loads and installs dependencies
+            plugin = load_callable(_module, 'register')
+        except AttributeError as e:
+            # No register function in module. Check if is is not somewhere else.
+            if module in test_plugins:
+                plugin_metadata = test_plugins[module]
+            elif module in installed_plugins:
+                plugin_metadata = installed_plugins[module]
             else:
                 raise e
 
-        # loads and installs dependencies
-        plugin = load_callable(module, 'register')
+            return await install_plugin(plugin_metadata.plugin_registry)
+
         plugin_data = plugin()  # type: Plugin
 
         # If register returns tuple then is has to be Plugin and Settings.
@@ -88,7 +89,7 @@ async def install_plugins(plugins_list: Dict[str, PluginMetadata]):
         await storage.driver.action.refresh()
 
         for plugin in plugins_list.keys():
-            status = await install_plugin(plugin, install=False, upgrade=False)
+            status = await install_plugin(plugin)
             if status is not None:
                 result["registered"].append(plugin)
             else:
@@ -107,3 +108,7 @@ async def install_remote_plugin(plugin_data: Plugin):
 
     logger.info(f"Remote MICROSERVICE module `{plugin_data.spec.module}` was REGISTERED.")
     return await storage.driver.action.save_plugin(plugin_data)
+
+
+async def add_plugins():
+    return await install_plugins(installed_plugins)

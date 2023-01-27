@@ -9,3 +9,4 @@ class PluginTest(BaseModel):
 
 class PluginMetadata(BaseModel):
     test: PluginTest
+    plugin_registry: Optional[str] = None
