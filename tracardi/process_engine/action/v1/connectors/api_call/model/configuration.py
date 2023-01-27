@@ -46,7 +46,8 @@ class RemoteCallConfiguration(PluginConfig):
     method: Method = Method.get
     headers: Optional[dict] = {}
     cookies: Optional[dict] = {}
-    ssl_check: bool = True
+    ssl_check: Optional[bool] = True
+    set_default_null: Optional[bool] = True
     body: Content
 
     def get_params(self, dot: DotAccessor, **kwargs) -> dict:

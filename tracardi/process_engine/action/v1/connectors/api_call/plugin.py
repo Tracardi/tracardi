@@ -41,9 +41,10 @@ class RemoteCallAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
-        kwargs = {
-            "default": None
-        }
+        kwargs = {}
+
+        if self.config.set_default_null:
+            kwargs['default'] = None
         try:
 
             dot = self._get_dot_accessor(payload)
@@ -127,6 +128,7 @@ def register() -> Plugin:
                 "method": "post",
                 "source": {"name": None, "id": None},
                 "endpoint": None,
+                "set_default_null": True,
                 "timeout": 30,
                 "headers": {},
                 "cookies": {},
@@ -171,6 +173,13 @@ def register() -> Plugin:
                                         "content-type. You can use dot notation to inject values from profile, event, "
                                         "or session. For HTML or TEXT use double curly braces, e.g. {{profile@id}}.",
                             component=FormComponent(type="contentInput", props={"label": "Content", "rows": 13})
+                        ),
+                        FormField(
+                            id="set_default_null",
+                            name="On missing data set null",
+                            description="If there is no data for some referenced value, set null and complete the "
+                                        "call. If not set return error when there is missing data if call body.",
+                            component=FormComponent(type="bool", props={"label": "Set null for missing data"})
                         ),
                     ]),
                 FormGroup(
