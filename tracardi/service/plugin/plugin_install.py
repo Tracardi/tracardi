@@ -110,5 +110,5 @@ async def install_remote_plugin(plugin_data: Plugin):
     return await storage.driver.action.save_plugin(plugin_data)
 
 
-async def add_plugins():
+async def install_default_plugins():
     return await install_plugins(installed_plugins)

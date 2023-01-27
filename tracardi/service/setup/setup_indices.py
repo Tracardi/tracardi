@@ -6,7 +6,7 @@ from json import JSONDecodeError
 from tracardi.config import tracardi
 from tracardi.domain.version import Version
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.plugin.plugin_install import add_plugins
+from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -17,7 +17,7 @@ __local_dir = os.path.dirname(__file__)
 
 index_mapping = {
     'action': {
-        "on-start": add_plugins  # Callable to fill the index
+        "on-start": install_default_plugins  # Callable to fill the index
     }
 }
 
