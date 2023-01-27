@@ -4,6 +4,22 @@ from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 
+def test_should_return_spread_data():
+    template = "event@properties"
+
+    dot = DotAccessor(event={"properties": [1, 2], "traits": {"$c": 10}}, session={"b": 2})
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result == [1, 2]
+
+    template = "event@traits"
+
+    dot = DotAccessor(event={"properties": [1, 2], "traits": {"$c": 10}}, session={"b": 2})
+    t = DictTraverser(dot)
+    result = t.reshape(reshape_template=template)
+    assert result == {"$c": 10}
+
+
 def test_should_return_object_with_dollar():
     template = {
         "s": "profile@$a",

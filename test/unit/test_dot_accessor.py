@@ -11,6 +11,7 @@ def test_should_validate_dot_notation():
     assert not DotAccessor.validate("invalid@dot.notation")
     assert DotAccessor.validate("payload@dot.0.notation")
     assert DotAccessor.validate("payload@dot.0.$")
+    assert DotAccessor.validate("payload@dot.0.*")
     assert DotAccessor.validate("payload@dot.0.$test")
     assert DotAccessor.validate("payload@dot.notation")
     assert DotAccessor.validate("payload@dot.notłóśćąation.@$#$%^&*")

@@ -47,10 +47,13 @@ class DictTraverser:
         else:
             yield key, value, path
 
-    def reshape(self, reshape_template: Union[Dict, List]):
+    def reshape(self, reshape_template: Union[Dict, List, str]):
 
         if reshape_template is None:
             return None
+
+        if isinstance(reshape_template, str):
+            return self.dot[reshape_template]
 
         if not isinstance(reshape_template, dict) and not isinstance(reshape_template, list):
             raise ValueError("Reshape template is not object or list.")
