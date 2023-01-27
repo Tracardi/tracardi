@@ -41,10 +41,13 @@ class RemoteCallAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
+        kwargs = {
+            "default": None
+        }
         try:
 
             dot = self._get_dot_accessor(payload)
-            traverser = DictTraverser(dot)
+            traverser = DictTraverser(dot, **kwargs)
 
             cookies = traverser.reshape(reshape_template=self.config.cookies)
             headers = traverser.reshape(reshape_template=self.config.headers)
@@ -56,10 +59,11 @@ class RemoteCallAction(ActionRunner):
 
             node = self.node  # type: Node
 
+            content = None
             timeout = aiohttp.ClientTimeout(total=self.config.timeout)
             async with HttpClient(timeout=timeout, retries=node.on_connection_error_repeat) as session:
 
-                params = self.config.get_params(dot)
+                params = self.config.get_params(dot, **kwargs)
                 url = self.credentials.get_url(dot=dot, endpoint=self.config.endpoint)
 
                 self.console.log("Making {} request to {}".format(self.config.method.upper(), url))
@@ -92,14 +96,23 @@ class RemoteCallAction(ActionRunner):
                     if response.status in [200, 201, 202, 203]:
                         return Result(port="response", value=result)
                     else:
-                        return Result(port="error", value={"message": f"Response returned status {response.status}. "
-                                                                      f"Body: {response.text()}"})
+                        if content is not None:
+                            result = {
+                                "status": response.status,
+                                "content": content,
+                                "cookies": response.cookies
+                            }
+                        else:
+                            result = {
+                                "status": response.status,
+                                "content": await response.text(),
+                                "cookies": response.cookies
+                            }
+                        return Result(port="error", value=result)
 
-        except ClientConnectorError as e:
+        except Exception as e:
+            self.console.error(str(e))
             return Result(port="error", value={"message": str(e)})
-
-        except asyncio.exceptions.TimeoutError:
-            return Result(port="error", value={"message": "Remote call timed out."})
 
 
 def register() -> Plugin:

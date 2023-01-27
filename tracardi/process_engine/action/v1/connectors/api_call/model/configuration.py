@@ -49,12 +49,12 @@ class RemoteCallConfiguration(PluginConfig):
     ssl_check: bool = True
     body: Content
 
-    def get_params(self, dot: DotAccessor) -> dict:
+    def get_params(self, dot: DotAccessor, **kwargs) -> dict:
         if self.body.type == 'application/json':
             body = self.body.load_body_as_dict()
 
             # Use template
-            template = DictTraverser(dot)
+            template = DictTraverser(dot, **kwargs)
             body = template.reshape(reshape_template=body)  # type: dict
 
             if self.method.lower() == 'get':
