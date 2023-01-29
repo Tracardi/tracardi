@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Optional
 from tracardi.domain.value_threshold import ValueThreshold
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.redis_client import RedisClient
+
+redis = RedisClient()
 
 
 class ValueThresholdManager:
@@ -11,38 +13,35 @@ class ValueThresholdManager:
         self.ttl = int(ttl)
         self.name = name
         self.profile_id = profile_id
-        self.node_id = "{}-{}".format(node_id, "1" if self.debug is True else "0")
+
+        debug = "1" if self.debug is True else "0"
+
+        self.node_id = f"{debug}-{node_id}"
         if profile_id is not None:
-            self.id = "{}-{}-{}".format("1" if self.debug is True else "0", node_id, profile_id)
+            self.id = f"{debug}-{node_id}-{profile_id}"
         else:
-            self.id = "{}-{}".format("1" if self.debug is True else "0", node_id)
+            self.id = f"{debug}-{node_id}"
+
+    @staticmethod
+    def _get_key(key):
+        return f"value-threshold:{key}"
 
     async def pass_threshold(self, current_value):
-        value_threshold = await self.load_last_value()
-        if value_threshold is not None:
-            if self.ttl > 0:
-                # With timestamp
-                ttl_timestamp = datetime.timestamp(value_threshold.timestamp) + self.ttl
-                now = datetime.timestamp(datetime.utcnow())
-                if value_threshold.last_value == current_value and now < ttl_timestamp:
-                    return False
-            else:
-                if value_threshold.last_value == current_value:
-                    return False
-
+        value = await self.load_last_value()
+        if value is not None:
+            if value.last_value == current_value:
+                return False
         await self.save_current_value(current_value)
         return True
 
     async def load_last_value(self) -> Optional[ValueThreshold]:
-        record = await storage.driver.value_threshold.load(self.id)
+        record = redis.client.get(self._get_key(self.id))
         if record is not None:
             return ValueThreshold.decode(record)
         return None
 
     async def delete(self):
-        result = await storage.driver.value_threshold.delete_by_id(self.id)
-        await storage.driver.value_threshold.refresh()
-        return result
+        return redis.client.delete(self._get_key(self.id))
 
     async def save_current_value(self, current_value):
         value = ValueThreshold(
@@ -54,6 +53,7 @@ class ValueThresholdManager:
             last_value=current_value,
         )
         record = value.encode()
-        result = await storage.driver.value_threshold.save(record)
-        await storage.driver.value_threshold.refresh()
-        return result
+        kwargs = {}
+        if self.ttl > 0:
+            kwargs['ex'] = self.ttl
+        return redis.client.set(self._get_key(self.id), record, **kwargs)

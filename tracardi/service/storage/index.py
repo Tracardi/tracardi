@@ -195,8 +195,6 @@ class Resource:
                                      mapping="mappings/event-reshaping-index.json"),
             "event-validation": Index(staging=True, multi_index=False, index="tracardi-event-validation",
                                       mapping="mappings/event-validator-index.json"),
-            "value-threshold": Index(staging=False, multi_index=False, index='tracardi-state-threshold',
-                                     mapping="mappings/value-threshold-index.json"),
             "destination": Index(staging=True, multi_index=False, index='tracardi-destination',
                                  mapping="mappings/destination-index.json"),
             "action": Index(staging=True, multi_index=False, index="tracardi-flow-action-plugins",
