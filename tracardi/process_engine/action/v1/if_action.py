@@ -112,7 +112,7 @@ def register() -> Plugin:
                         FormField(
                             id="ttl",
                             name="Expire trigger again after",
-                            description="Ff the value is set to 0, the event will only occur once and will not be "
+                            description="If the value is set to 0, the event will only occur once and will not be "
                                         "triggered again unless the conditions change. However, if a value greater "
                                         "than 0 is set, the event will be triggered again after the specified "
                                         "number of seconds, regardless of whether the conditions have changed or not.",
