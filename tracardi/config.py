@@ -27,6 +27,7 @@ def _get_logging_level(level: str) -> int:
 class TracardiConfig:
     def __init__(self, env):
         self.env = env
+        self.production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.save_logs = (env['SAVE_LOGS'].lower() == 'yes') if 'SAVE_LOGS' in env else True
         self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
@@ -46,7 +47,7 @@ class TracardiConfig:
             'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
-        self.version = Version(version=VERSION, name=NAME)
+        self.version = Version(version=VERSION, name=NAME, production=self.production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self._config = None
         self._unset_secrets()

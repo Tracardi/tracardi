@@ -62,6 +62,39 @@ async def count_all_indices_by_alias(prefix: str = None):
             yield name, 0
 
 
+def _acknowledged(result):
+    return 'acknowledged' in result and result['acknowledged'] is True
+
+
+async def remove_alias(alias_index):
+    es = ElasticClient.instance()
+    if await es.exists_alias(alias_index, index=None):
+        result = await es.delete_alias(alias=alias_index, index="_all")
+        if _acknowledged(result):
+            return True
+    return False
+
+
+async def update_aliases(query):
+    es = ElasticClient.instance()
+    return await es.update_aliases(query)
+
+
+async def remove_template(template_name):
+    es = ElasticClient.instance()
+    if await es.exists_index_template(template_name):
+        result = await es.delete_index_template(template_name)
+        if not _acknowledged(result):
+            return False
+    return True
+
+
+async def add_template(template_name, map) -> bool:
+    es = ElasticClient.instance()
+    result = await es.put_index_template(template_name, map)
+    return _acknowledged(result)
+
+
 async def indices():
     es = ElasticClient.instance()
     return await es.list_indices()
@@ -118,9 +151,10 @@ async def set_mapping(index: str, mapping: dict):
     return await es.set_mapping(index, mapping)
 
 
-async def create_index(index: str, mapping: dict):
+async def create_index(index: str, mapping: dict) -> bool:
     es = ElasticClient.instance()
-    return await es.create_index(index, mapping)
+    result = await es.create_index(index, mapping)
+    return _acknowledged(result)
 
 
 async def get_unique_field_values(index, field, limit=50):

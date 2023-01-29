@@ -9,7 +9,6 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import resources, Index
 import logging
 
@@ -24,7 +23,6 @@ index_mapping = {
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
-es = ElasticClient.instance()
 
 
 async def update_current_version():
@@ -58,14 +56,6 @@ async def create_indices():
     def acknowledged(result):
         return 'acknowledged' in result and result['acknowledged'] is True
 
-    async def remove_alias(alias_index):
-        if await es.exists_alias(alias_index, index=None):
-            result = await es.delete_alias(alias=alias_index, index="_all")
-            if acknowledged(result):
-                logger.info(f"{alias_index} - DELETED old alias {alias_index}. New will be created", result)
-                return True
-        return False
-
     for key, index in resources.resources.items():  # type: str, Index
 
         map_file = index.get_mapping()
@@ -88,22 +78,23 @@ async def create_indices():
             if index.multi_index is True:
 
                 # Remove alias with all indexes first
-                await remove_alias(alias_index)
+                result = await storage.driver.raw.remove_alias(alias_index)
+                if result:
+                    logger.info(f"{alias_index} - DELETED old alias {alias_index}. New will be created", result)
 
                 template_name = index.get_prefixed_template_name()
 
                 # if template exists it must be deleted. Only one template can be per index.
 
-                if await es.exists_index_template(template_name):
-                    result = await es.delete_index_template(template_name)
-                    if not acknowledged(result):
-                        raise ConnectionError(f"Can NOT DELETE template {template_name}.")
-                    logger.info(f"{alias_index} - DELETED template {template_name}.")
+                if not await storage.driver.raw.remove_template(template_name):
+                    raise ConnectionError(f"Can NOT DELETE template {template_name}.")
+
+                logger.info(f"{alias_index} - DELETED template {template_name}.")
 
                 # Multi indices need templates. Index will be created automatically on first insert
-                result = await es.put_index_template(template_name, map)
+                result = await storage.driver.raw.add_template(template_name, map)
 
-                if not acknowledged(result):
+                if not result:
                     raise ConnectionError(
                         "Could not create the template `{}`. Received result: {}".format(
                             template_name,
@@ -120,10 +111,10 @@ async def create_indices():
             if index.aliased is False:
                 target_index = index.get_index_alias()
 
-            if not await es.exists_index(target_index):
+            if not await storage.driver.raw.exists_index(target_index):
 
                 # There is no index but the alias may exist
-                exists_index_with_alias_name = await es.exists_index(alias_index)
+                exists_index_with_alias_name = await storage.driver.raw.exists_index(alias_index)
                 if exists_index_with_alias_name:
                     message = f"Could not create index `{target_index}` and alias `{alias_index}`. " \
                               f"There is an index name with the same name as the alias."
@@ -136,16 +127,15 @@ async def create_indices():
 
                 for attempt in range(0, 3):
                     try:
-                        result = await es.create_index(target_index, mapping)
+                        result = await storage.driver.raw.create_index(target_index, mapping)
                         break
                     except ConnectionTimeout as e:
                         raise ConnectionError(
                             f"Index `{target_index}` was NOT CREATED at attempt {attempt} due to an error: {str(e)}"
                         )
 
-                if not acknowledged(result):
+                if not result:
                     # Index not created
-
                     raise ConnectionError(
                         f"Index `{target_index}` was NOT CREATED. The following result was returned: {result}"
                     )
@@ -169,14 +159,14 @@ async def create_indices():
 
             actions.append({"remove": {"index": "_all", "alias": alias_index}})
             if index.multi_index:
-                target_index = index.get_template_pattern()
+                target_index = index.get_template_index_pattern()
             else:
                 target_index = index.get_aliased_data_index()
 
             actions.append({"add": {"index": target_index, "alias": alias_index}})
 
     if actions:
-        result = await es.update_aliases({
+        result = await storage.driver.raw.update_aliases({
             "actions": actions
         })
         if acknowledged(result):
@@ -196,7 +186,7 @@ async def create_indices():
 
             # Check if alias created
 
-            if not await es.exists_alias(alias_index):
+            if not await storage.driver.raw.exists_alias(alias_index, index=None):
                 raise ConnectionError(f"Could not recreate alias `{alias_index}` for index `{target_index}`")
 
             output["aliases"].append(alias_index)

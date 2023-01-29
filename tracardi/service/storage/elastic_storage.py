@@ -158,7 +158,7 @@ class ElasticStorage:
 
     async def delete(self, id: str, index: str):
         if index is None:
-            raise ValueError("Index can  not be None")
+            raise ValueError("Index can not be None when deleting data.")
 
         if not self.index.multi_index:  # Single
             # This function does not work on aliases

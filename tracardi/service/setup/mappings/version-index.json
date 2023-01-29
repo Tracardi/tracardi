@@ -19,6 +19,9 @@
       "name": {
         "type": "keyword"
       },
+      "production": {
+         "type": "boolean"
+      },
       "prev_version": {
         "type": "object",
         "enabled": false

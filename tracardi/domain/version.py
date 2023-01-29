@@ -13,13 +13,27 @@ class Version(BaseModel):
     version: str
     name: Optional[str] = None
     upgrades: List[str] = []
+    production: bool = False
 
     @validator("name")
     def validate_prefix(cls, value, values):
         return value if value is not None else md5(values["version"].encode('utf-8')).hexdigest()[:5]
 
+    def prefix_with_production(self, version_string):
+        if self.production:
+            return f"prod-{version_string}"
+        return version_string
+
     def get_version_prefix(self):
-        return self.version.replace(".", "")
+        """
+        e.g. prod-070 or 070
+        """
+        version_prefix = self.version.replace(".", "")
+
+        if self.production:
+            version_prefix = self.prefix_with_production(version_prefix)
+
+        return version_prefix
 
     def get_head_with_prev_version(self, prev: 'Version'):
         version_copy = self.copy(update={'prev_version': None})

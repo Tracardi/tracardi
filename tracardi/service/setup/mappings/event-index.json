@@ -146,7 +146,7 @@
       }
     },
     "aliases": {
-      "%%PREFIX%%.tracardi-event": {}
+      "%%ALIAS%%": {}
     }
   }
 }

@@ -42,7 +42,7 @@
       }
     },
     "aliases": {
-      "%%PREFIX%%.tracardi-log": {}
+      "%%ALIAS%%": {}
     }
   }
 }

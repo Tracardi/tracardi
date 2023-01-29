@@ -120,7 +120,7 @@
       }
     },
     "aliases": {
-      "%%PREFIX%%.tracardi-profile": {}
+      "%%ALIAS%%": {}
     }
   }
 }

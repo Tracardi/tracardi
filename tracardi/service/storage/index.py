@@ -8,12 +8,13 @@ _local_dir = os.path.dirname(__file__)
 
 
 class Index:
-    def __init__(self, multi_index, index, mapping, aliased=True):
+    def __init__(self, multi_index, index, mapping, aliased=True, staging=False):
         self.aliased = aliased
         self.multi_index = multi_index
         self.index = index
         self.prefix = "{}.".format(tracardi.version.name)
         self.mapping = mapping
+        self.staging = staging
 
     def get_mapping(self):
         if self.mapping:
@@ -23,15 +24,20 @@ class Index:
 
         return os.path.join(f"{_local_dir}/../setup", mapping_file)
 
-    def get_prefixed_index(self, prefix: Optional[str] = None) -> str:
+    def _get_prefixed_index(self, prefix: Optional[str] = None) -> str:
         """
         Gets real prefixed - index
+        E.g. fa73a.tracardi-event
         """
         if self.aliased:
             if prefix is not None:
-                return prefix + "." + self.index
-            return self.prefix + self.index
-        return self.index
+                prefixed_index = prefix + "." + self.index
+            else:
+                prefixed_index = self.prefix + self.index
+        else:
+            prefixed_index = self.index
+
+        return prefixed_index
 
     def prepare_mappings(self, mapping):
         json_map = mapping.replace("%%PREFIX%%", tracardi.version.name)
@@ -43,19 +49,24 @@ class Index:
         return json_map
 
     def get_index_alias(self, prefix: Optional[str] = None) -> str:
-        return self.get_prefixed_index(prefix)
+        """
+        E.g. prod-fa73a.tracardi-event
+        """
+        prefixed_index = self._get_prefixed_index(prefix)
+        return tracardi.version.prefix_with_production(prefixed_index)
 
     def get_write_index(self):
 
         # Single index writes to alias
 
         if self.multi_index is False:
-            return self.get_prefixed_index()
+            prefixed_index = self._get_prefixed_index()
+            return tracardi.version.prefix_with_production(prefixed_index)
 
         # Multi index must write to month index
 
         date = datetime.now()
-        return f"{tracardi.version.get_version_prefix()}.{self.get_prefixed_index()}-{date.year}-{date.month}"
+        return f"{tracardi.version.get_version_prefix()}.{self._get_prefixed_index()}-{date.year}-{date.month}"
 
     def get_version_write_index(self) -> str:
         if self.multi_index:
@@ -74,14 +85,16 @@ class Index:
         version_prefix = tracardi.version.get_version_prefix()
 
         if self.multi_index is False:
-            return f"{version_prefix}.{self.get_prefixed_index()}"
+            # (prod-070 | 070) . fa73a.tracardi-event
+            return f"{version_prefix}.{self._get_prefixed_index()}"
 
         # Multi index must write to month index
 
         date = datetime.now()
-        return f"{version_prefix}.{self.get_prefixed_index()}-{date.year}-{date.month}"
+        # (prod-070 | 070) . fa73a.tracardi-event - year - month
+        return f"{version_prefix}.{self._get_prefixed_index()}-{date.year}-{date.month}"
 
-    def get_template_pattern(self):
+    def get_template_index_pattern(self):
 
         """
         Returns template pattern.
@@ -90,91 +103,113 @@ class Index:
         version_prefix = tracardi.version.get_version_prefix()
 
         if self.multi_index is False:
-            raise ValueError(f"Index {self.get_prefixed_index()} is not multi index.")
+            raise ValueError(f"Index {self._get_prefixed_index()} is not multi index.")
 
-        return f"{version_prefix}.{self.get_prefixed_index()}-*-*"
+        # prod-070 . fa73a.tracardi-event - * - *
+        return f"{version_prefix}.{self._get_prefixed_index()}-*-*"
 
     def get_prefixed_template_name(self):
-        return "template.{}.{}".format(tracardi.version.name, self.index)
+        prefixed_template = f"template.{tracardi.version.name}.{self.index}"
+        # (prod-070 | 070) . template . fa73a . tracardi-event
+        return tracardi.version.prefix_with_production(prefixed_template)
 
     def get_single_storage_index(self) -> str:
         if self.multi_index:  # not single
             raise AssertionError("Can not use single index on multi index storage. "
                                  "Use get_current_multi_storage_index or get_multi_storage_alias instead.")
-        return self.get_prefixed_index()
+        # (prod-070 | 070) . fa73a.tracardi-event
+        return f"{tracardi.version.get_version_prefix()}.{self._get_prefixed_index()}"
 
     def get_current_multi_storage_index(self) -> str:
         if not self.multi_index:  # single
             raise AssertionError("Can not use multi index on single index storage. "
                                  "Use get_single_storage_index instead.")
         date = datetime.now()
-        return f"{tracardi.version.get_version_prefix()}.{self.get_prefixed_index()}-{date.year}-{date.month}"
+
+        # prod-070 . fa73a.tracardi-event - year - month
+        return f"{tracardi.version.get_version_prefix()}.{self._get_prefixed_index()}-{date.year}-{date.month}"
 
     def get_multi_storage_alias(self) -> str:
         if not self.multi_index:  # single
             raise AssertionError("Can not use multi index alias on single index storage. "
                                  "Use get_single_storage_index instead.")
         date = datetime.now()
-        return f"{tracardi.version.get_version_prefix()}.{self.get_prefixed_index()}-{date.year}-{date.month}"
+
+        # prod-070 . fa73a.tracardi-event - year - month
+        return f"{tracardi.version.get_version_prefix()}.{self._get_prefixed_index()}-{date.year}-{date.month}"
 
 
 class Resource:
 
     def __init__(self):
         self.resources = {
-            "bridge": Index(multi_index=False, index="tracardi-bridge", mapping="mappings/bridge-index.json"),
-            "event": Index(multi_index=True, index="tracardi-event", mapping="mappings/event-index.json"),
-            "entity": Index(multi_index=False, index="tracardi-entity", mapping="mappings/entity-index.json"),
-            "log": Index(multi_index=True,
+            "bridge": Index(staging=True, multi_index=False, index="tracardi-bridge",
+                            mapping="mappings/bridge-index.json"),
+            "event": Index(staging=False, multi_index=True, index="tracardi-event",
+                           mapping="mappings/event-index.json"),
+            "entity": Index(staging=False, multi_index=False, index="tracardi-entity",
+                            mapping="mappings/entity-index.json"),
+            "log": Index(staging=False, multi_index=True,
                          index='tracardi-log',
                          mapping="mappings/log-index.json"),
-            "user-logs": Index(multi_index=True, index="tracardi-user-log", mapping="mappings/user-log-index.json"),
+            "user-logs": Index(staging=False, multi_index=True, index="tracardi-user-log",
+                               mapping="mappings/user-log-index.json"),
 
-            "session": Index(multi_index=True, index="tracardi-session", mapping="mappings/session-index.json"),
-            "profile": Index(multi_index=True, index="tracardi-profile", mapping="mappings/profile-index.json"),
-            "console-log": Index(multi_index=False, index="tracardi-console-log",
+            "session": Index(staging=False, multi_index=True, index="tracardi-session",
+                             mapping="mappings/session-index.json"),
+            "profile": Index(staging=False, multi_index=True, index="tracardi-profile",
+                             mapping="mappings/profile-index.json"),
+            "console-log": Index(staging=False, multi_index=False, index="tracardi-console-log",
                                  mapping="mappings/console-log-index.json"),
-            "user": Index(multi_index=False, index="tracardi-user", mapping="mappings/user-index.json"),
-            "tracardi-pro": Index(multi_index=False, index="tracardi-pro", mapping="mappings/tracardi-pro-index.json"),
+            "user": Index(staging=False, multi_index=False, index="tracardi-user", mapping="mappings/user-index.json"),
+            "tracardi-pro": Index(staging=False, multi_index=False, index="tracardi-pro",
+                                  mapping="mappings/tracardi-pro-index.json"),
 
-            "resource": Index(multi_index=False, index="tracardi-resource", mapping="mappings/resource-index.json"),
-            "event-source": Index(multi_index=False, index="tracardi-source",
+            "resource": Index(staging=True, multi_index=False, index="tracardi-resource",
+                              mapping="mappings/resource-index.json"),
+            "event-source": Index(staging=True, multi_index=False, index="tracardi-source",
                                   mapping="mappings/event-source-index.json"),
-            "event-redirect": Index(multi_index=False, index="tracardi-event-redirect",
+            "event-redirect": Index(staging=True, multi_index=False, index="tracardi-event-redirect",
                                     mapping="mappings/event-redirect-index.json"),
-            "flow": Index(multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json"),
-            "rule": Index(multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json"),
-            "segment": Index(multi_index=False, index="tracardi-segment", mapping="mappings/segment-index.json"),
-            "live-segment": Index(multi_index=False, index="tracardi-live-segment",
+            "flow": Index(staging=True, multi_index=False, index="tracardi-flow", mapping="mappings/flow-index.json"),
+            "rule": Index(staging=True, multi_index=False, index="tracardi-rule", mapping="mappings/rule-index.json"),
+            "segment": Index(staging=True, multi_index=False, index="tracardi-segment",
+                             mapping="mappings/segment-index.json"),
+            "live-segment": Index(staging=True, multi_index=False, index="tracardi-live-segment",
                                   mapping="mappings/live-segment-index.json"),
-            "event-management": Index(multi_index=False, index="tracardi-event-management",
+            "event-management": Index(staging=True, multi_index=False, index="tracardi-event-management",
                                       mapping="mappings/event-management-index.json"),
-            "debug-info": Index(multi_index=False, index="tracardi-debug-info",
+            "debug-info": Index(staging=False, multi_index=False, index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json"),
-            "api-instance": Index(multi_index=False, index="tracardi-api-instance",
+            "api-instance": Index(staging=False, multi_index=False, index="tracardi-api-instance",
                                   mapping="mappings/api-instance-index.json"),
-            "heartbeats": Index(multi_index=False, index="tracardi-heartbeats", mapping="mappings/heartbeats-index.json"),
-            "event-tags": Index(multi_index=False, index="tracardi-events-tags", mapping="mappings/tag-index.json"),
-            "consent-type": Index(multi_index=False, index="tracardi-consent-type",
+            "heartbeats": Index(staging=True, multi_index=False, index="tracardi-heartbeats",
+                                mapping="mappings/heartbeats-index.json"),
+            "event-tags": Index(staging=True, multi_index=False, index="tracardi-events-tags",
+                                mapping="mappings/tag-index.json"),
+            "consent-type": Index(staging=True, multi_index=False, index="tracardi-consent-type",
                                   mapping="mappings/consent-type-index.json"),
-            "consent-data-compliance": Index(multi_index=False, index="tracardi-consent-data-compliance",
+            "consent-data-compliance": Index(staging=True, multi_index=False, index="tracardi-consent-data-compliance",
                                              mapping="mappings/consent-data-compliance-index.json"),
-            "event-reshaping": Index(multi_index=False, index="tracardi-event-reshaping",
+            "event-reshaping": Index(staging=True, multi_index=False, index="tracardi-event-reshaping",
                                      mapping="mappings/event-reshaping-index.json"),
-            "event-validation": Index(multi_index=False, index="tracardi-event-validation",
+            "event-validation": Index(staging=True, multi_index=False, index="tracardi-event-validation",
                                       mapping="mappings/event-validator-index.json"),
-            "value-threshold": Index(multi_index=False, index='tracardi-state-threshold',
+            "value-threshold": Index(staging=False, multi_index=False, index='tracardi-state-threshold',
                                      mapping="mappings/value-threshold-index.json"),
-            "destination": Index(multi_index=False, index='tracardi-destination',
+            "destination": Index(staging=True, multi_index=False, index='tracardi-destination',
                                  mapping="mappings/destination-index.json"),
-            "action": Index(multi_index=False, index="tracardi-flow-action-plugins",
+            "action": Index(staging=True, multi_index=False, index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json"),
-            "import": Index(multi_index=False, index="tracardi-import", mapping="mappings/import-index.json"),
-            "task": Index(multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
-            "version": Index(multi_index=False, index="tracardi-version", mapping="mappings/version-index.json",
+            "import": Index(staging=False, multi_index=False, index="tracardi-import",
+                            mapping="mappings/import-index.json"),
+            "task": Index(staging=False, multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
+            "version": Index(staging=False, multi_index=False, index="tracardi-version",
+                             mapping="mappings/version-index.json",
                              aliased=True),
-            "report": Index(multi_index=False, index="tracardi-report", mapping="mappings/report-index.json"),
-            "identification-point": Index(multi_index=False, index="tracardi-identification-point",
+            "report": Index(staging=True, multi_index=False, index="tracardi-report",
+                            mapping="mappings/report-index.json"),
+            "identification-point": Index(staging=True, multi_index=False, index="tracardi-identification-point",
                                           mapping="mappings/identification-point-index.json")
         }
 
@@ -186,18 +221,18 @@ class Resource:
             return self.resources[name]
         raise ValueError(f"Index `{name}` does not exists.")
 
-    def add_indices(self, indices: dict):
-        for name, index in indices.items():
-            if not isinstance(index, Index):
-                raise ValueError("Index must be Index object. {} given".format(type(index)))
-
-            if name in self.resources:
-                raise ValueError(
-                    "Index `{}` already exist. Check the setup process and defined resources.".format(name))
-
-            self.resources[name] = index
-
-        self.resources.update(indices)
+    # def add_indices(self, indices: dict):
+    #     for name, index in indices.items():
+    #         if not isinstance(index, Index):
+    #             raise ValueError("Index must be Index object. {} given".format(type(index)))
+    #
+    #         if name in self.resources:
+    #             raise ValueError(
+    #                 "Index `{}` already exist. Check the setup process and defined resources.".format(name))
+    #
+    #         self.resources[name] = index
+    #
+    #     self.resources.update(indices)
 
     def __getitem__(self, item) -> Index:
         if item in self.resources:

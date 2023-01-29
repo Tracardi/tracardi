@@ -355,9 +355,15 @@ class PersistenceService:
         self.storage = storage
 
     def get_single_storage_index(self) -> str:
+        """
+        This is needed for delete operation
+        """
         return self.storage.index.get_single_storage_index()
 
     def get_current_multi_storage_index(self) -> str:
+        """
+        This is needed for delete operation
+        """
         return self.storage.index.get_current_multi_storage_index()
 
     def get_multi_storage_alias(self) -> str:
