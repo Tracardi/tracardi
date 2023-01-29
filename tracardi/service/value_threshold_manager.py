@@ -29,7 +29,7 @@ class ValueThresholdManager:
     async def pass_threshold(self, current_value):
         value = await self.load_last_value()
 
-        if value is None or value.ttl != self.ttl:
+        if value is None or value.ttl != self.ttl or value.last_value != current_value:
             await self.save_current_value(current_value)
 
         if value is None:
@@ -37,6 +37,7 @@ class ValueThresholdManager:
 
         if value.last_value == current_value:
             return False
+        return True
 
     async def load_last_value(self) -> Optional[ValueThreshold]:
         record = redis.client.get(self._get_key(self.id))
