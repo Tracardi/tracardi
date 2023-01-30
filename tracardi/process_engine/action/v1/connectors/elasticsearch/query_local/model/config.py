@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import validator
 import json
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -6,6 +8,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class Config(PluginConfig):
     index: str
     query: str
+    log: Optional[bool] = False
 
     @validator("index")
     def validate_index(cls, value):

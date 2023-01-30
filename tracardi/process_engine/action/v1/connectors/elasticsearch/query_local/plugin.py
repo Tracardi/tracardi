@@ -1,5 +1,7 @@
 import json
 
+from tracardi.service.notation.dict_traverser import DictTraverser
+
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -31,6 +33,9 @@ class QueryLocalDatabase(ActionRunner):
 
         try:
             query = json.loads(self.config.query)
+            dot = self._get_dot_accessor(payload)
+            reshaper = DictTraverser(dot)
+            query = reshaper.reshape(query)
 
             if 'size' not in query:
                 query["size"] = 20
@@ -38,10 +43,16 @@ class QueryLocalDatabase(ActionRunner):
             if query["size"] > 50:
                 self.console.warning("Fetching more then 50 records may impact the GUI performance.")
 
+            if self.config.log:
+                self.console.log(f"Executed query {query}")
+
             result = await storage.driver.raw.query(
                 index=self.config.index,
                 query=query
             )
+
+            if self.config.log:
+                self.console.log(f"Query result {result}")
 
         except Exception as e:
             self.console.error(str(e))
@@ -65,7 +76,8 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             init={
                 "index": None,
-                "query": "{\"query\":{\"match_all\":{}}}"
+                "query": "{\"query\":{\"match_all\":{}}}",
+                "log": False
             },
             form=Form(
                 groups=[
@@ -90,7 +102,14 @@ def register() -> Plugin:
                                 name="Query",
                                 description="Please provide Elasticsearch DSL query.",
                                 component=FormComponent(type="json", props={"label": "DSL query"})
-                            )
+                            ),
+
+                            FormField(
+                                id="log",
+                                name="Log query",
+                                description="Switch logging query body. Please disable when tests are finished.",
+                                component=FormComponent(type="bool", props={"label": "Log query"})
+                            ),
                         ]
                     )
                 ]
