@@ -135,7 +135,7 @@ class TrackingOrchestrator:
 
         # Add channel
 
-        if isinstance(tracker_payload.source, EventSource):
+        if isinstance(tracker_payload.source, EventSource) and isinstance(session, Session):
             session.metadata.channel = tracker_payload.source.channel
 
         # Make profile copy
