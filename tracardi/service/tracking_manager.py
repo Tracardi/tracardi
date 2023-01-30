@@ -2,6 +2,9 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable
+
+from tracardi.service.license import License, INDEXER
+
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.config import tracardi
 from tracardi.domain.enum.event_status import COLLECTED
@@ -22,6 +25,8 @@ from tracardi.service.segmentation import segment
 from tracardi.service.storage.driver import storage
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
+if License.has_service(INDEXER):
+    from com_tracardi.service.event_indexer import index_event_traits
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -121,8 +126,9 @@ class TrackingManager(TrackingManagerBase):
 
         return profile
 
-    def get_events(self) -> List[Event]:
+    async def get_events(self) -> List[Event]:
         event_list = []
+
         if self.tracker_payload.events:
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
@@ -148,13 +154,17 @@ class TrackingManager(TrackingManagerBase):
                 else:
                     _event.request = self.tracker_payload.request
 
+                # Index event
+                if License.has_service(INDEXER):
+                    _event = await index_event_traits(_event, self.console_log)
+
                 event_list.append(_event)
         return event_list
 
     async def invoke_track_process(self) -> TrackerResult:
 
         # Get events
-        events = self.get_events()
+        events = await self.get_events()
 
         debugger = None
         segmentation_result = None

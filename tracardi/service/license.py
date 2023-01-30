@@ -30,6 +30,7 @@ IDENTIFICATION = "ident19Ha"
 COMPLIANCE = "compl1532"
 RESHAPING = "resha-9ds"
 REDIRECTS = "redir-atr"
+INDEXER = "indxs4k1"
 
 
 class Service(BaseModel):
