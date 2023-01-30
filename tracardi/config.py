@@ -46,7 +46,8 @@ class TracardiConfig:
         self.tracardi_scheduler_host = env[
             'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
-        self.server_logging_level = _get_logging_level(env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
+        self.server_logging_level = _get_logging_level(
+            env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME, production=self.production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self._config = None
@@ -69,10 +70,13 @@ class MemoryCacheConfig:
     def __init__(self, env):
         self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 0
         self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 0
-        self.event_validation_cache_ttl = int(env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 0
+        self.event_validation_cache_ttl = int(
+            env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 0
         self.event_metadata_cache_ttl = int(env['EVENT_METADATA_CACHE_TTL']) if 'EVENT_METADATA_CACHE_TTL' in env else 0
-        self.event_destination_cache_ttl = int(env['EVENT_DESTINATION_CACHE_TTL']) if 'EVENT_DESTINATION_CACHE_TTL' in env else 0
-        self.profile_destination_cache_ttl = int(env['PROFILE_DESTINATION_CACHE_TTL']) if 'PROFILE_DESTINATION_CACHE_TTL' in env else 0
+        self.event_destination_cache_ttl = int(
+            env['EVENT_DESTINATION_CACHE_TTL']) if 'EVENT_DESTINATION_CACHE_TTL' in env else 0
+        self.profile_destination_cache_ttl = int(
+            env['PROFILE_DESTINATION_CACHE_TTL']) if 'PROFILE_DESTINATION_CACHE_TTL' in env else 0
 
 
 class ElasticConfig:
@@ -96,8 +100,7 @@ class ElasticConfig:
 
         self.refresh_profiles_after_save = (env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'].lower() == 'yes') \
             if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
-        self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env \
-            else logging.WARNING
+
         self.host = self.get_host()
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
