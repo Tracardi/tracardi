@@ -1,5 +1,5 @@
 from typing import Dict
-from tracardi.service.license import VALIDATOR, License
+from tracardi.service.license import VALIDATOR, License, SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 
 installed_plugins: Dict[str, PluginMetadata] = {
@@ -20,10 +20,10 @@ installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.connectors.telegram.post.plugin": PluginMetadata(
         test=PluginTest(
             init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},
-                        resource={
-                            "bot_token": "bot_token",
-                            "chat_id": 100
-                        }),
+            resource={
+                "bot_token": "bot_token",
+                "chat_id": 100
+            }),
         plugin_registry="tracardi.process_engine.action.v1.connectors.telegram.post.registry"
     ),
 
@@ -723,6 +723,19 @@ installed_plugins: Dict[str, PluginMetadata] = {
 if License.has_service(VALIDATOR):
     installed_plugins["com_tracardi.action.v1.validator.plugin"] = PluginMetadata(
         test=PluginTest(init={'validation_schema': {}}, resource=None)
+    )
+
+if License.has_service(SCHEDULER):
+    installed_plugins["com_tracardi.action.v1.wait.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "resource": {
+                    "id": "",
+                    "name": ""
+                },
+                "postpone": 60
+            },
+            resource={"callback_host": "http://localhost"})
     )
 
 # Plugins only for testing
@@ -1449,4 +1462,3 @@ test_plugins: Dict[str, PluginMetadata] = {
     #     }
     # ),
 }
-

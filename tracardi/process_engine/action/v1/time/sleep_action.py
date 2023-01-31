@@ -67,7 +67,7 @@ def register() -> Plugin:
 
         ),
         metadata=MetaData(
-            name='Wait',
+            name='Sleep',
             desc='Stops workflow for given time.',
             icon='sleep',
             group=["Time"],

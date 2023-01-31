@@ -64,7 +64,8 @@ class WriteToMemoryAction(ActionRunner):
             return Result(port="success", value=payload)
 
         except Exception as e:
-            return Result(port="error", value={"detail": str(e)})
+            self.console.error(str(e))
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:

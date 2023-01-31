@@ -123,10 +123,10 @@ class TrackerPayload(BaseModel):
                 "profile": False
             })
 
-    def set_ephemeral(self):
+    def set_ephemeral(self, flag=True):
         self.options.update({
-            "saveSession": False,
-            "saveEvents": False
+            "saveSession": not flag,
+            "saveEvents": not flag
         })
 
     def force_session(self, session):

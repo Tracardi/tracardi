@@ -55,7 +55,8 @@ class ReadFromMemoryAction(ActionRunner):
             return Result(port="success", value={"value": b64_decoder(result)})
 
         except Exception as e:
-            return Result(port="error", value={"detail": str(e)})
+            self.console.error(str(e))
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:

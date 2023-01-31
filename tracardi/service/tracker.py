@@ -164,7 +164,7 @@ class Tracker:
                 name="Scheduler event source",
                 description="This is internal event source for delayed events.",
                 channel="Scheduler",
-                transitional=True,
+                transitional=False,  # ephemeral
                 tags=['internal']
             )
 

@@ -181,7 +181,7 @@ class TrackingManager(TrackingManagerBase):
 
             # Set ephemeral if scheduled event
 
-            self.tracker_payload.set_ephemeral()
+            self.tracker_payload.set_ephemeral(False)
 
             event_rules = [(
                 [
