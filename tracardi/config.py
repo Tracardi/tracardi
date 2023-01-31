@@ -1,5 +1,6 @@
 import logging
 import os
+from hashlib import md5
 
 import yaml
 
@@ -50,9 +51,11 @@ class TracardiConfig:
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.version = Version(version=VERSION, name=NAME, production=self.production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
+        self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}".encode()).hexdigest()
         self._config = None
         self._unset_secrets()
 
+        print(self.fingerprint)
     @property
     def config(self) -> YamlConfig:
         if not self._config:

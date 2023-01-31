@@ -3,11 +3,13 @@ import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any
 
+from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.exceptions.exception import UnauthorizedException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.setup.data.defaults import open_source_bridge
 from tracardi.service.storage.driver import storage
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
@@ -34,9 +36,9 @@ async def track_event(tracker_payload: TrackerPayload,
                       on_source_ready: Type[TrackProcessorBase] = None,
                       on_profile_merge: Callable[[Profile], Profile] = None,
                       on_profile_ready: Type[TrackingManagerBase] = None,
-                      on_result_ready: Callable[[List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None
+                      on_result_ready: Callable[
+                          [List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None
                       ):
-
     console_log = ConsoleLog()
     try:
 
@@ -123,7 +125,6 @@ class Tracker:
             raise UnauthorizedException(e)
 
         if self.on_source_ready is None:
-
             tp = TrackerProcessor(
                 self.console_log,
                 self.on_profile_merge,
@@ -154,6 +155,19 @@ class Tracker:
         )
 
     async def validate_source(self, source_id: str) -> EventSource:
+
+        if source_id == f"@{tracardi.fingerprint}":
+            return EventSource(
+                id=source_id,
+                type='rest',
+                bridge=NamedEntity(id=open_source_bridge.id, name=open_source_bridge.name),
+                name="Scheduler event source",
+                description="This is internal event source for delayed events.",
+                channel="Scheduler",
+                transitional=True,
+                tags=['internal']
+            )
+
         source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
 
         if source is None:

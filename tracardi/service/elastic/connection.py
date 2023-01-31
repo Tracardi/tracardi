@@ -23,7 +23,7 @@ def _is_elastic_on_localhost():
 async def wait_for_installation(no_of_tries: int = 10):
     success = False
     while True:
-        is_installed, missing_indices = await storage.driver.system.is_schema_ok()
+        is_installed, indices = await storage.driver.system.is_schema_ok()
 
         if is_installed:
             success = True
@@ -34,7 +34,7 @@ async def wait_for_installation(no_of_tries: int = 10):
 
         logger.warning(f"System version {tracardi.version.version} not installed at {elastic.host}. "
                        f"{no_of_tries} more checks left. Waiting...")
-        logger.warning(f"Missing indices {missing_indices}")
+        logger.warning(f"Missing indices {[idx[1] for idx in indices if idx[0] in ['missing_alias', 'missing_index']]}")
 
         no_of_tries -= 1
         await asyncio.sleep(15)
