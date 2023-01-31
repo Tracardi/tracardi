@@ -41,6 +41,9 @@
             "channel": {
               "type": "keyword"
             },
+            "ip": {
+              "type": "keyword"
+            },
             "processed_by": {
               "properties": {
                 "rules": {

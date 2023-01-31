@@ -108,6 +108,7 @@ class RulesEngine:
                         flow.scheduled_node_id = tracker_payload.scheduled_node_id
 
                 except Exception as e:
+                    logger.error(str(e))
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(
                         timestamp=time(),

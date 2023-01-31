@@ -218,25 +218,23 @@ class GraphInvoker(BaseModel):
 
         tasks = []
 
-        if node.start:
+        if flow.scheduled_node_id == node.id:
+            # Scheduled event
+            _port = "payload"
+            _payload = {}
 
+            params = {"payload": payload}
+            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
+
+        elif node.start:
             _port = "payload"
             _payload = {}
 
             params = {"payload": payload}
 
-            if flow.scheduled_node_id is None:
-                # Not scheduled event
+            # This is first node in graph.
 
-                # This is first node in graph.
-
-                tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
-
-            elif flow.scheduled_node_id == node.id:
-
-                # Scheduled event
-
-                tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
+            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
 
         elif node.graph.in_edges:
 
