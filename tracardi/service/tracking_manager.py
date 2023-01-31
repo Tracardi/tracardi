@@ -198,6 +198,8 @@ class TrackingManager(TrackingManagerBase):
             # Routing rules are subject to caching
             event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
 
+        logger.debug(f"Found {len(event_rules)} for flow {len(events)}")
+
         ux = []
         post_invoke_events = None
         flow_responses = FlowResponses([])
