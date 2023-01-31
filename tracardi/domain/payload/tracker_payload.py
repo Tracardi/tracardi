@@ -28,6 +28,9 @@ class ScheduledEventConfig:
     def is_scheduled(self) -> bool:
         return self.node_id is not None and self.flow_id is not None
 
+    def __repr__(self):
+        return f"ScheduledEventConfig(node_id={self.node_id}, flow_id={self.flow_id})"
+
 
 class TrackerPayload(BaseModel):
     _id: str = PrivateAttr(None)
