@@ -1,8 +1,13 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional, Callable
+from typing import List, Optional, Callable, Tuple
+from uuid import uuid4
 
+from tracardi.domain.event_list_metadata import EventListMetadata
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.rule import Rule
+from tracardi.domain.type import Type
 from tracardi.service.license import License, INDEXER
 
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
@@ -25,6 +30,7 @@ from tracardi.service.segmentation import segment
 from tracardi.service.storage.driver import storage
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
+
 if License.has_service(INDEXER):
     from com_tracardi.service.event_indexer import index_event_traits
 
@@ -126,9 +132,9 @@ class TrackingManager(TrackingManagerBase):
 
         return profile
 
-    async def get_events(self) -> List[Event]:
+    async def get_events(self) -> Tuple[List[Event], EventListMetadata]:
         event_list = []
-
+        event_list_metadata = EventListMetadata()
         if self.tracker_payload.events:
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
@@ -138,6 +144,10 @@ class TrackingManager(TrackingManagerBase):
                     self.session,
                     self.profile,
                     self.has_profile)
+
+                if _event.scheduled_flow_id:
+                    event_list_metadata.has_scheduled = True
+
                 _event.metadata.status = COLLECTED
                 _event.metadata.debug = debugging
                 _event.metadata.channel = self.tracker_payload.source.channel
@@ -159,18 +169,40 @@ class TrackingManager(TrackingManagerBase):
                     _event = await index_event_traits(_event, self.console_log)
 
                 event_list.append(_event)
-        return event_list
+        return event_list, event_list_metadata
 
     async def invoke_track_process(self) -> TrackerResult:
 
         # Get events
-        events = await self.get_events()
+        events, events_metadata = await self.get_events()
 
         debugger = None
         segmentation_result = None
 
-        # Routing rules are subject to caching
-        event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
+        # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
+
+        if events_metadata.has_scheduled:
+
+            # Set ephemeral if scheduled event
+
+            self.tracker_payload.set_ephemeral()
+
+            event_rules = [(
+                [
+                    Rule(
+                        id=str(uuid4()),
+                        name="Schedule route rule",
+                        event=Type(type=event.type),  # event type is equal to schedule node id
+                        flow=NamedEntity(id=event.scheduled_flow_id, name="Scheduled"),
+                        source=NamedEntity(id=event.source.id, name="Scheduled"),
+                        enabled=True,
+                    ).dict()
+                ],
+                event
+            ) for event in events]
+        else:
+            # Routing rules are subject to caching
+            event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
 
         ux = []
         post_invoke_events = None

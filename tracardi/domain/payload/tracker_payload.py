@@ -102,12 +102,11 @@ class TrackerPayload(BaseModel):
                 "profile": False
             })
 
-    def set_transitional(self, source: EventSource):
-        if source.transitional is True:
-            self.options.update({
-                "saveSession": False,
-                "saveEvents": False
-            })
+    def set_ephemeral(self):
+        self.options.update({
+            "saveSession": False,
+            "saveEvents": False
+        })
 
     def force_session(self, session):
         # Get session

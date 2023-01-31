@@ -60,7 +60,9 @@ class TrackingOrchestrator:
 
     async def _invoke_track_process(self, tracker_payload: TrackerPayload) -> TrackerResult:
 
-        tracker_payload.set_transitional(self.source)
+        # Is source ephemeral
+        if self.source.transitional is True:
+            tracker_payload.set_ephemeral()
         tracker_payload.set_return_profile(self.source)
 
         # Load session from storage

@@ -207,7 +207,7 @@ class GraphInvoker(BaseModel):
                         duration=session.metadata.time.duration
                     ) if session is not None else None
 
-    async def run_node(self, node: Node, payload, ready_upstream_results: ActionsResults) -> AsyncIterable[Tuple[
+    async def run_node(self, node: Node, event: Event, payload, ready_upstream_results: ActionsResults) -> AsyncIterable[Tuple[
         Result, float, Optional[Profile], Optional[Session], ConsoleStatus, InputEdges]]:
 
         task_start_time = time()
@@ -219,14 +219,23 @@ class GraphInvoker(BaseModel):
 
         if node.start:
 
-            # This is first node in graph.
-            # During debugging, debug nodes are removed.
-
             _port = "payload"
             _payload = {}
 
             params = {"payload": payload}
-            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
+
+            if event.scheduled_flow_id is None:
+                # Not scheduled event
+
+                # This is first node in graph.
+
+                tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
+
+            elif 'node_id' in event.properties and event.properties['node_id'] == node.id:
+
+                # Scheduled event
+
+                tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
 
         elif node.graph.in_edges:
 
@@ -554,7 +563,7 @@ class GraphInvoker(BaseModel):
                           task_start_time, \
                           _profile_reference_to_update, _session_reference_to_update, \
                           node_console_status, input_edges in \
-                        self.run_node(node, payload, ready_upstream_results=actions_results):
+                        self.run_node(node, event, payload, ready_upstream_results=actions_results):
 
                     # If the profile or session changed during node execution change its reference in graph invoker
 

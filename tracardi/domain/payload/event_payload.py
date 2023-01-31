@@ -22,6 +22,7 @@ class EventPayload(BaseModel):
     options: Optional[dict] = {}
     context: Optional[dict] = {}
     tags: Optional[list] = []
+    schedule: Optional[str] = None
 
     def __init__(self, **data: Any):
         if 'time' not in data or 'insert' not in data['time']:
@@ -53,18 +54,23 @@ class EventPayload(BaseModel):
         if self.time.create:
             meta.time.create = self.time.create
 
-        return Event(id=str(uuid4()),
-                     metadata=meta,
-                     session=self._get_event_session(session),
-                     profile=get_entity(profile),  # profile can be None when profile_less event.
-                     type=self.type.strip(),
-                     properties=self.properties,
-                     source=source,  # Entity
-                     config=self.options,
-                     context=self.context,
-                     operation=RecordFlag(new=True),
-                     tags=Tags(values=tuple(self.tags), count=len(self.tags))
-                     )
+        event = Event(id=str(uuid4()),
+                      metadata=meta,
+                      session=self._get_event_session(session),
+                      profile=get_entity(profile),  # profile can be None when profile_less event.
+                      type=self.type.strip(),
+                      properties=self.properties,
+                      source=source,  # Entity
+                      config=self.options,
+                      context=self.context,
+                      operation=RecordFlag(new=True),
+                      tags=Tags(values=tuple(self.tags), count=len(self.tags))
+                      )
+
+        if self.schedule:
+            event.set_as_scheduled(self.schedule)
+
+        return event
 
     @staticmethod
     def _get_event_session(session: Session) -> Optional[EventSession]:
