@@ -177,7 +177,7 @@ class TrackingManager(TrackingManagerBase):
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
-        if self.tracker_payload.is_scheduled():
+        if self.tracker_payload.scheduled_event_config.is_scheduled():
 
             # Set ephemeral if scheduled event
 
@@ -189,7 +189,7 @@ class TrackingManager(TrackingManagerBase):
                         id=str(uuid4()),
                         name="Schedule route rule",
                         event=Type(type=event.type),  # event type is equal to schedule node id
-                        flow=NamedEntity(id=self.tracker_payload.scheduled_flow_id, name="Scheduled"),
+                        flow=NamedEntity(id=self.tracker_payload.scheduled_event_config.flow_id, name="Scheduled"),
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
                         enabled=True,
                     ).dict()

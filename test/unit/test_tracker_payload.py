@@ -20,8 +20,8 @@ def test_should_be_scheduled():
         options={"saveSession": False, 'scheduledFlowId': 'aaabbb', 'scheduledNodeId': "111"}
     )
 
-    assert tp1.scheduled_flow_id == 'aaabbb'
-    assert tp1.scheduled_node_id == '111'
+    assert tp1.scheduled_event_config.flow_id == 'aaabbb'
+    assert tp1.scheduled_event_config.node_id == '111'
 
     tp1 = TrackerPayload(
         source=Entity(id="@1"),
@@ -35,8 +35,8 @@ def test_should_be_scheduled():
         options={"saveSession": False, 'scheduledFlowId': True, 'scheduledNodeId': "1"}
     )
 
-    assert tp1.scheduled_flow_id is None
-    assert tp1.is_scheduled() is False
+    assert tp1.scheduled_event_config.flow_id is None
+    assert tp1.scheduled_event_config.is_scheduled() is False
 
     # incorrect source
     with pytest.raises(ValueError):
@@ -77,4 +77,4 @@ def test_should_be_scheduled():
         options={"saveSession": False, 'scheduledFlowId': "True"}
     )
 
-    assert tp1.is_scheduled() is False
+    assert tp1.scheduled_event_config.is_scheduled() is False

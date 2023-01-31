@@ -16,20 +16,26 @@ class WorkFlow:
 
     def __init__(self, flow_history: FlowHistory, tracker_payload: TrackerPayload = None):
         self.tracker_payload = tracker_payload
+        self.scheduled_event_config = tracker_payload.scheduled_event_config if tracker_payload else None
         self.flow_history = flow_history
 
-    def make_dag(self, flow: Flow, debug: bool) -> GraphInvoker:
+    def _make_dag(self, flow: Flow, debug: bool) -> GraphInvoker:
         # Convert Editor graph to exec graph
         converter = FlowGraphConverter(flow.flowGraph.dict())
         dag_graph = converter.convert_to_dag_graph()
         dag = DagProcessor(dag_graph)
 
         try:
-            return dag.make_execution_dag(debug=debug)
+            # If scheduled event find node with defined id
+            if self.scheduled_event_config is not None and self.scheduled_event_config.is_scheduled():
+                # It must be equal to scheduled node id
+                node_id = self.scheduled_event_config.node_id
+                return dag.make_execution_dag(start_nodes=dag.find_scheduled_nodes(node_ids=[node_id]), debug=debug)
+            return dag.make_execution_dag(start_nodes=dag.find_start_nodes(), debug=debug)
         except DagGraphError as e:
             raise DagGraphError("Flow `{}` returned the following error: `{}`".format(flow.id, str(e)))
 
-    async def run(self, exec_dag: GraphInvoker, flow: Flow, event: Event, profile, session, ux: list):
+    async def _run(self, exec_dag: GraphInvoker, flow: Flow, event: Event, profile, session, ux: list):
         flow_start_time = time()
         debug_info = DebugInfo(
             timestamp=flow_start_time,
@@ -53,7 +59,6 @@ class WorkFlow:
         if not debug_info.has_errors():
             debug_info, log_list, profile, session = await exec_dag.run(
                 payload={},
-                flow=flow,
                 event=event,
                 profile=profile,
                 session=session,
@@ -80,8 +85,8 @@ class WorkFlow:
             raise DagGraphError("Flow {} is empty".format(flow.id))
 
         if self.flow_history.is_acyclic(flow.id):
-            exec_dag = self.make_dag(flow, debug=debug)
-            result = await self.run(exec_dag, flow, event, profile, session, ux)
+            exec_dag = self._make_dag(flow, debug=debug)
+            result = await self._run(exec_dag, flow, event, profile, session, ux)
             return result
 
         raise RuntimeError("Workflow has circular reference.")

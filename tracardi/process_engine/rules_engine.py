@@ -103,10 +103,6 @@ class RulesEngine:
 
                     flow = await load_flow_callable(rule.flow.id)  # type: Flow
 
-                    # if this is scheduled event then set flow.scheduled_node_id to the start node
-                    if tracker_payload.is_scheduled():
-                        flow.scheduled_node_id = tracker_payload.scheduled_node_id
-
                 except Exception as e:
                     logger.error(str(e))
                     # This is empty DebugInfo without nodes

@@ -24,9 +24,10 @@ def build_some_workflow_with_start_action(debug: bool = False):
 
     converter = FlowGraphConverter(flow.flowGraph.dict())
     dag_graph = converter.convert_to_dag_graph()
-    dag = DagProcessor(dag_graph)
 
-    exec_dag = dag.make_execution_dag(debug=debug)
+    dag = DagProcessor(dag_graph)
+    exec_dag = dag.make_execution_dag(start_nodes=dag.find_start_nodes(), debug=debug)
+
     return flow, exec_dag.graph[1]
 
 

@@ -8,8 +8,7 @@ from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel, ValidationError
 
 from tracardi.domain.event import Event, EventSession
-from tracardi.domain.flow import Flow
-from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.domain.payload.tracker_payload import TrackerPayload, ScheduledEventConfig
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.tql.condition import Condition
@@ -208,7 +207,7 @@ class GraphInvoker(BaseModel):
                         duration=session.metadata.time.duration
                     ) if session is not None else None
 
-    async def run_node(self, node: Node, flow: Flow, payload, ready_upstream_results: ActionsResults) -> AsyncIterable[Tuple[
+    async def run_node(self, node: Node, payload, ready_upstream_results: ActionsResults) -> AsyncIterable[Tuple[
         Result, float, Optional[Profile], Optional[Session], ConsoleStatus, InputEdges]]:
 
         task_start_time = time()
@@ -218,21 +217,14 @@ class GraphInvoker(BaseModel):
 
         tasks = []
 
-        if flow.scheduled_node_id == node.id:
-            # Scheduled event
+        if node.start:
+
+            # This is start node
+
             _port = "payload"
             _payload = {}
 
             params = {"payload": payload}
-            tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
-
-        elif node.start:
-            _port = "payload"
-            _payload = {}
-
-            params = {"payload": payload}
-
-            # This is first node in graph.
 
             tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
 
@@ -522,13 +514,13 @@ class GraphInvoker(BaseModel):
         return event.metadata.debug is True or self.debug is True
 
     async def run(self,
-                  flow: Flow,
                   payload: dict,
                   event: Event,
                   profile: Profile,
                   session: Session,
                   debug_info: DebugInfo,
-                  log_list: List[Log]) -> Tuple[DebugInfo, List[Log], Profile, Session]:
+                  log_list: List[Log],
+                  ) -> Tuple[DebugInfo, List[Log], Profile, Session]:
 
         actions_results = ActionsResults()
         flow_start_time = debug_info.timestamp
@@ -568,7 +560,7 @@ class GraphInvoker(BaseModel):
                           task_start_time, \
                           _profile_reference_to_update, _session_reference_to_update, \
                           node_console_status, input_edges in \
-                        self.run_node(node, flow, payload, ready_upstream_results=actions_results):
+                        self.run_node(node, payload, ready_upstream_results=actions_results):
 
                     # If the profile or session changed during node execution change its reference in graph invoker
 

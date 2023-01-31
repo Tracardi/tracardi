@@ -34,9 +34,15 @@ class DagProcessor:
     def _find_node(self, node_id) -> Node:
         return self._nodes[node_id] if node_id in self._nodes else None
 
-    def _find_start_nodes(self) -> List[Node]:
+    def find_start_nodes(self) -> List[Node]:
         for _, node in self._nodes.items():
             if node.start:
+                yield node
+
+    def find_scheduled_nodes(self, node_ids: List[str]) -> List[Node]:
+        for _, node in self._nodes.items():
+            if node.id in node_ids:
+                node.start = True
                 yield node
 
     def _forward_pass(self, start_node_ids):
@@ -71,14 +77,12 @@ class DagProcessor:
 
                     self._back_pass([edge.source.node_id])
 
-    def make_execution_dag(self, debug=False) -> GraphInvoker:
+    def make_execution_dag(self, start_nodes, debug=False) -> GraphInvoker:
         self._last_nodes = set()
-        # Find first nodes
-        start_nodes = self._find_start_nodes()
         start_node_ids = [node.id for node in start_nodes]
 
         if len(start_node_ids) == 0:
-            raise DagGraphError("There is not start action in workflow graph.")
+            raise DagGraphError("There is not start action or scheduled node in workflow graph ")
 
         # Finds outputs
         self._forward_pass(start_node_ids)

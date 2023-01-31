@@ -1,17 +1,14 @@
 import json
 import logging
-from datetime import datetime
 from hashlib import sha1
-from typing import Optional, List, Tuple, Any, Union, Callable, Coroutine, Awaitable
+from typing import Union, Callable, Awaitable
 from uuid import uuid4
-from pydantic import BaseModel, PrivateAttr, validator
+from pydantic import PrivateAttr, validator
 from tracardi.config import tracardi
-from ..entity import Entity
 from ..event import Event
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
-from ..profile import Profile
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
 from ...exceptions.log_handler import log_handler
@@ -20,6 +17,16 @@ from ...service.storage.drivers.elastic.profile import *
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
+
+
+class ScheduledEventConfig:
+
+    def __init__(self, flow_id: Optional[str], node_id: Optional[str]):
+        self.node_id = node_id
+        self.flow_id = flow_id
+
+    def is_scheduled(self) -> bool:
+        return self.node_id is not None and self.flow_id is not None
 
 
 class TrackerPayload(BaseModel):
@@ -64,16 +71,9 @@ class TrackerPayload(BaseModel):
                 self._scheduled_flow_id = self.options['scheduledFlowId']
                 self._scheduled_node_id = self.options['scheduledNodeId']
 
-    def is_scheduled(self) -> bool:
-        return self._scheduled_node_id is not None and self._scheduled_flow_id is not None
-
     @property
-    def scheduled_flow_id(self) -> str:
-        return self._scheduled_flow_id
-
-    @property
-    def scheduled_node_id(self) -> str:
-        return self._scheduled_node_id
+    def scheduled_event_config(self) -> ScheduledEventConfig:
+        return ScheduledEventConfig(flow_id=self._scheduled_flow_id, node_id=self._scheduled_node_id)
 
     def has_type(self, event_type):
         for event_payload in self.events:
