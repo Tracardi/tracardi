@@ -26,6 +26,7 @@ class TrackerPayload(BaseModel):
     _id: str = PrivateAttr(None)
     _make_static_profile_id: bool = PrivateAttr(False)
     _scheduled_flow_id: str = PrivateAttr(None)
+    _scheduled_node_id: str = PrivateAttr(None)
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -54,15 +55,17 @@ class TrackerPayload(BaseModel):
         super().__init__(**data)
         self._id = str(uuid4())
 
-        if 'scheduledFlowId' in self.options:
-            if isinstance(self.options['scheduledFlowId'], str):
+        if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
+            if isinstance(self.options['scheduledFlowId'], str) and isinstance(self.options['scheduledNodeId'], str):
                 if len(self.events) > 1:
                     raise ValueError("Scheduled events may have only one event per tracker payload.")
                 if self.source.id[0] != "@":
                     raise ValueError("Scheduled events must be send via internal scheduler event source.")
-                if 'node_id' not in self.events[0].properties:
-                    raise ValueError("Scheduled events must have node_id in properties.")
                 self._scheduled_flow_id = self.options['scheduledFlowId']
+                self._scheduled_node_id = self.options['scheduledNodeId']
+
+    def is_scheduled(self) -> bool:
+        return self._scheduled_node_id is not None and self._scheduled_flow_id is not None
 
     @property
     def scheduled_flow_id(self) -> str:
@@ -70,9 +73,7 @@ class TrackerPayload(BaseModel):
 
     @property
     def scheduled_node_id(self) -> str:
-        if 'node_id' not in self.events[0].properties:
-            raise ValueError("Scheduled events must have node_id in properties.")
-        return self.events[0].properties['node_id']
+        return self._scheduled_node_id
 
     def has_type(self, event_type):
         for event_payload in self.events:

@@ -16,11 +16,12 @@ def test_should_be_scheduled():
         context={},
         request={},
         properties={},
-        events=[EventPayload(type="111222", properties={"node_id": "1"})],
-        options={"saveSession": False, 'scheduledFlowId': 'aaabbb'}
+        events=[EventPayload(type="111222", properties={})],
+        options={"saveSession": False, 'scheduledFlowId': 'aaabbb', 'scheduledNodeId': "111"}
     )
 
     assert tp1.scheduled_flow_id == 'aaabbb'
+    assert tp1.scheduled_node_id == '111'
 
     tp1 = TrackerPayload(
         source=Entity(id="@1"),
@@ -30,11 +31,12 @@ def test_should_be_scheduled():
         context={},
         request={},
         properties={},
-        events=[EventPayload(type="111222", properties={"node_id": "1"})],
-        options={"saveSession": False, 'scheduledFlowId': True}
+        events=[EventPayload(type="111222", properties={})],
+        options={"saveSession": False, 'scheduledFlowId': True, 'scheduledNodeId': "1"}
     )
 
     assert tp1.scheduled_flow_id is None
+    assert tp1.is_scheduled() is False
 
     # incorrect source
     with pytest.raises(ValueError):
@@ -46,33 +48,33 @@ def test_should_be_scheduled():
             context={},
             request={},
             properties={},
-            events=[EventPayload(type="111222", properties={"node_id": "1"})],
-            options={"saveSession": False, 'scheduledFlowId': "True"}
-        )
-
-    with pytest.raises(ValueError):
-        tp1 = TrackerPayload(
-            source=Entity(id="@1"),
-            session=None,
-            metadata=EventPayloadMetadata(time=Time()),
-            profile=Entity(id="2"),
-            context={},
-            request={},
-            properties={},
-            events=[EventPayload(type="111222", properties={"node_id": "1"}), EventPayload(type="111222", properties={})],
-            options={"saveSession": False, 'scheduledFlowId': "True"}
-        )
-
-    with pytest.raises(ValueError):
-        tp1 = TrackerPayload(
-            source=Entity(id="@1"),
-            session=None,
-            metadata=EventPayloadMetadata(time=Time()),
-            profile=Entity(id="2"),
-            context={},
-            request={},
-            properties={},
             events=[EventPayload(type="111222", properties={})],
-            options={"saveSession": False, 'scheduledFlowId': "True"}
+            options={"saveSession": False, 'scheduledFlowId': "True", 'scheduledNodeId': "1"}
         )
 
+    with pytest.raises(ValueError):
+        tp1 = TrackerPayload(
+            source=Entity(id="@1"),
+            session=None,
+            metadata=EventPayloadMetadata(time=Time()),
+            profile=Entity(id="2"),
+            context={},
+            request={},
+            properties={},
+            events=[EventPayload(type="111222", properties={}), EventPayload(type="111222", properties={})],
+            options={"saveSession": False, 'scheduledFlowId': "True", 'scheduledNodeId': "1"}
+        )
+
+    tp1 = TrackerPayload(
+        source=Entity(id="@1"),
+        session=None,
+        metadata=EventPayloadMetadata(time=Time()),
+        profile=Entity(id="2"),
+        context={},
+        request={},
+        properties={},
+        events=[EventPayload(type="111222", properties={})],
+        options={"saveSession": False, 'scheduledFlowId': "True"}
+    )
+
+    assert tp1.is_scheduled() is False

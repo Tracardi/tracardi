@@ -177,7 +177,7 @@ class TrackingManager(TrackingManagerBase):
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
-        if self.tracker_payload.scheduled_flow_id is not None:
+        if self.tracker_payload.is_scheduled():
 
             # Set ephemeral if scheduled event
 
