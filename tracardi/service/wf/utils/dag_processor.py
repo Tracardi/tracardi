@@ -41,6 +41,8 @@ class DagProcessor:
 
     def find_scheduled_nodes(self, node_ids: List[str]) -> List[Node]:
         for _, node in self._nodes.items():
+            # All nodes are not start nodes except the scheduled node.
+            node.start = False
             if node.id in node_ids:
                 node.start = True
                 yield node

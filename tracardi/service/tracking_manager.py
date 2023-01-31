@@ -176,7 +176,7 @@ class TrackingManager(TrackingManagerBase):
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
         if self.tracker_payload.scheduled_event_config.is_scheduled():
-
+            logger.debug("This is scheduled event. ")
             # Set ephemeral if scheduled event
 
             self.tracker_payload.set_ephemeral(False)
@@ -194,11 +194,11 @@ class TrackingManager(TrackingManagerBase):
                 ],
                 event
             ) for event in events]
+
+            logger.debug(f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
         else:
             # Routing rules are subject to caching
             event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
-
-
 
         ux = []
         post_invoke_events = None
