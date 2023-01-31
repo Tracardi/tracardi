@@ -63,7 +63,6 @@ class TrackingOrchestrator:
         # Is source ephemeral
         if self.source.transitional is True:
             tracker_payload.set_ephemeral()
-        tracker_payload.set_return_profile(self.source)
 
         # Load session from storage
         try:
@@ -197,10 +196,6 @@ class TrackingOrchestrator:
 
         # Save console log
         await self.save_console_log()
-
-        # Add profile to response
-        if tracker_payload.return_profile():
-            raise NotImplementedError("Returning profile was removed from the system for security reasons.")
 
         return tracker_result
 

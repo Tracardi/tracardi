@@ -4,7 +4,6 @@ from typing import Optional, Union, List, Any
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.domain.entity import Entity
-from tracardi.service.plugin.domain.register import Form
 
 
 class EventSource(Entity):
@@ -18,7 +17,7 @@ class EventSource(Entity):
     transitional: Optional[bool] = False
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
-    returns_profile: Optional[bool] = False
+    returns_profile: Optional[bool] = False   # Todo remove - not used
     permanent_profile_id: Optional[bool] = False
     requires_consent: Optional[bool] = False
     manual: Optional[str] = None

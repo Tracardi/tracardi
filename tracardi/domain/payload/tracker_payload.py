@@ -121,12 +121,6 @@ class TrackerPayload(BaseModel):
     def has_events(self):
         return len(self.events) > 0
 
-    def set_return_profile(self, source: EventSource):
-        if source.returns_profile is False:
-            self.options.update({
-                "profile": False
-            })
-
     def set_ephemeral(self, flag=True):
         self.options.update({
             "saveSession": not flag,
@@ -138,9 +132,6 @@ class TrackerPayload(BaseModel):
         if self.session is None or self.session.id is None:
             # Generate random
             self.session = session
-
-    def return_profile(self):
-        return self.options and "profile" in self.options and self.options['profile'] is True
 
     def is_on(self, key, default):
         if key not in self.options or not isinstance(self.options[key], bool):
