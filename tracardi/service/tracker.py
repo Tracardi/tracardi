@@ -124,6 +124,8 @@ class Tracker:
         except ValueError as e:
             raise UnauthorizedException(e)
 
+        logger.debug(f"Source {source.id} validated.")
+
         if self.on_source_ready is None:
             tp = TrackerProcessor(
                 self.console_log,

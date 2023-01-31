@@ -132,7 +132,7 @@ class RulesEngine:
                         )
 
                         # Flows are run concurrently
-                        logger.info(f"Invoked workflow {flow.name}:{flow.id} for event {event.type}:{event.id}")
+                        logger.debug(f"Invoked workflow {flow.name}:{flow.id} for event {event.type}:{event.id}")
 
                         # Debugging can be controlled from tracker payload.
 

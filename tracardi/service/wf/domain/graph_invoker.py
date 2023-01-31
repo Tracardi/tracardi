@@ -1,14 +1,17 @@
 import asyncio
 import inspect
 import json
+import logging
 from collections import defaultdict
 
 from time import time
 from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel, ValidationError
+from tracardi.exceptions.log_handler import log_handler
 
+from tracardi.config import tracardi
 from tracardi.domain.event import Event, EventSession
-from tracardi.domain.payload.tracker_payload import TrackerPayload, ScheduledEventConfig
+from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.tql.condition import Condition
@@ -32,6 +35,10 @@ from ...notation.dict_traverser import DictTraverser
 from ...notation.dot_accessor import DotAccessor
 from ...utils.getters import get_entity_id
 from ...value_threshold_manager import ValueThresholdManager
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 class InputEdge(BaseModel):
@@ -226,6 +233,8 @@ class GraphInvoker(BaseModel):
 
             params = {"payload": payload}
 
+            logger.debug(f"Runs start node \"{node.name}\". ")
+
             tasks = await self._run_in_event_loop(tasks, node, params, _port, _payload, in_edge=None)
 
         elif node.graph.in_edges:
@@ -268,6 +277,8 @@ class GraphInvoker(BaseModel):
 
                             # Run spec with every downstream message (param)
                             # Runs as many times as downstream edges
+
+                            logger.debug(f"Runs node \"{node.name}\". ")
 
                             tasks = await self._run_in_event_loop(
                                 tasks,
@@ -528,6 +539,9 @@ class GraphInvoker(BaseModel):
         sequence_number = 0
         execution_number = 0
         for node in self.graph:  # type: Node
+
+            print(node)
+
             task_start_time = time()
             sequence_number += 1
             executed_node = False

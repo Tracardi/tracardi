@@ -1,10 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional, Callable, Tuple
+from typing import List, Optional, Callable
 from uuid import uuid4
-
-from tracardi.domain.event_list_metadata import EventListMetadata
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 from tracardi.domain.type import Type
