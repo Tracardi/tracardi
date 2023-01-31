@@ -55,7 +55,6 @@ class TracardiConfig:
         self._config = None
         self._unset_secrets()
 
-        print(self.fingerprint)
     @property
     def config(self) -> YamlConfig:
         if not self._config:
