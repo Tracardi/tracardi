@@ -22,7 +22,7 @@ class ElasticLogHandler(Handler):
             "file": record.filename,
             "line": record.lineno,
             "level": record.levelname,
-            # "stack_info": record.stack_info,
+            "stack_info": record.stack_info,
             # "exc_info": record.exc_info  # Can not save this to TrackerPayload
         }
 
