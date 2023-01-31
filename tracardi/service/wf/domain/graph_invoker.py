@@ -540,8 +540,6 @@ class GraphInvoker(BaseModel):
         execution_number = 0
         for node in self.graph:  # type: Node
 
-            print(node)
-
             task_start_time = time()
             sequence_number += 1
             executed_node = False
