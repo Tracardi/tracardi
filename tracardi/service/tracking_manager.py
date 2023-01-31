@@ -198,7 +198,7 @@ class TrackingManager(TrackingManagerBase):
             # Routing rules are subject to caching
             event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
 
-        logger.debug(f"Found {len(event_rules)} for flow {len(events)}")
+
 
         ux = []
         post_invoke_events = None
@@ -310,6 +310,8 @@ class TrackingManager(TrackingManagerBase):
                             traceback=get_traceback(e)
                         )
                     )
+            else:
+                logger.debug(f"No routing rules found for workflow.")
 
         finally:
             # Synchronize post invoke events. Replace events with events changed by WF.
