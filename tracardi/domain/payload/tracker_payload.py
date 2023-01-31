@@ -25,6 +25,7 @@ logger.addHandler(log_handler)
 class TrackerPayload(BaseModel):
     _id: str = PrivateAttr(None)
     _make_static_profile_id: bool = PrivateAttr(False)
+    _scheduled_flow_id: str = PrivateAttr(None)
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -52,6 +53,26 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
         self._id = str(uuid4())
+
+        if 'scheduledFlowId' in self.options:
+            if isinstance(self.options['scheduledFlowId'], str):
+                if len(self.events) > 1:
+                    raise ValueError("Scheduled events may have only one event per tracker payload.")
+                if self.source.id[0] != "@":
+                    raise ValueError("Scheduled events must be send via internal scheduler event source.")
+                if 'node_id' not in self.events[0].properties:
+                    raise ValueError("Scheduled events must have node_id in properties.")
+                self._scheduled_flow_id = self.options['scheduledFlowId']
+
+    @property
+    def scheduled_flow_id(self) -> str:
+        return self._scheduled_flow_id
+
+    @property
+    def scheduled_node_id(self) -> str:
+        if 'node_id' not in self.events[0].properties:
+            raise ValueError("Scheduled events must have node_id in properties.")
+        return self.events[0].properties['node_id']
 
     def has_type(self, event_type):
         for event_payload in self.events:

@@ -31,8 +31,6 @@ class EventSession(Entity):
 
 
 class Event(Entity):
-    _scheduled_flow_id: str = PrivateAttr(None)
-
     metadata: EventMetadata
     type: str
     properties: Optional[dict] = {}
@@ -63,13 +61,6 @@ class Event(Entity):
             self.config = event.config
             self.tags = event.tags
             self.aux = event.aux
-
-    def set_as_scheduled(self, scheduled_flow_id):
-        self._scheduled_flow_id = scheduled_flow_id
-
-    @property
-    def scheduled_flow_id(self):
-        return self._scheduled_flow_id
 
     def is_persistent(self) -> bool:
         if 'save' in self.config and isinstance(self.config['save'], bool):

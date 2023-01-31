@@ -132,9 +132,8 @@ class TrackingManager(TrackingManagerBase):
 
         return profile
 
-    async def get_events(self) -> Tuple[List[Event], EventListMetadata]:
+    async def get_events(self) -> List[Event]:
         event_list = []
-        event_list_metadata = EventListMetadata()
         if self.tracker_payload.events:
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
@@ -144,9 +143,6 @@ class TrackingManager(TrackingManagerBase):
                     self.session,
                     self.profile,
                     self.has_profile)
-
-                if _event.scheduled_flow_id:
-                    event_list_metadata.has_scheduled = True
 
                 _event.metadata.status = COLLECTED
                 _event.metadata.debug = debugging
@@ -169,19 +165,19 @@ class TrackingManager(TrackingManagerBase):
                     _event = await index_event_traits(_event, self.console_log)
 
                 event_list.append(_event)
-        return event_list, event_list_metadata
+        return event_list
 
     async def invoke_track_process(self) -> TrackerResult:
 
         # Get events
-        events, events_metadata = await self.get_events()
+        events = await self.get_events()
 
         debugger = None
         segmentation_result = None
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
-        if events_metadata.has_scheduled:
+        if self.tracker_payload.scheduled_flow_id is not None:
 
             # Set ephemeral if scheduled event
 
@@ -193,7 +189,7 @@ class TrackingManager(TrackingManagerBase):
                         id=str(uuid4()),
                         name="Schedule route rule",
                         event=Type(type=event.type),  # event type is equal to schedule node id
-                        flow=NamedEntity(id=event.scheduled_flow_id, name="Scheduled"),
+                        flow=NamedEntity(id=self.tracker_payload.scheduled_flow_id, name="Scheduled"),
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
                         enabled=True,
                     ).dict()

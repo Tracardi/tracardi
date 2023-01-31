@@ -1,10 +1,10 @@
 from time import time
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
+from tracardi.domain.flow import Flow
 from tracardi.domain.flow_invoke_result import FlowInvokeResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from .debug_info import DebugInfo, FlowDebugInfo
-from .flow import Flow
 from .flow_history import FlowHistory
 from .graph_invoker import GraphInvoker
 from ..utils.dag_error import DagGraphError
@@ -53,6 +53,7 @@ class WorkFlow:
         if not debug_info.has_errors():
             debug_info, log_list, profile, session = await exec_dag.run(
                 payload={},
+                flow=flow,
                 event=event,
                 profile=profile,
                 session=session,

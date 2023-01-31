@@ -22,7 +22,6 @@ class EventPayload(BaseModel):
     options: Optional[dict] = {}
     context: Optional[dict] = {}
     tags: Optional[list] = []
-    schedule: Optional[str] = None
 
     def __init__(self, **data: Any):
         if 'time' not in data or 'insert' not in data['time']:
@@ -66,9 +65,6 @@ class EventPayload(BaseModel):
                       operation=RecordFlag(new=True),
                       tags=Tags(values=tuple(self.tags), count=len(self.tags))
                       )
-
-        if self.schedule:
-            event.set_as_scheduled(self.schedule)
 
         return event
 

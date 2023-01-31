@@ -17,6 +17,7 @@ from .debugger import Debugger
 from ..config import tracardi
 from ..domain.console import Console
 from ..domain.entity import Entity
+from ..domain.flow import Flow
 from ..domain.flow_invoke_result import FlowInvokeResult
 from ..domain.payload.tracker_payload import TrackerPayload
 from ..domain.profile import Profile
@@ -100,7 +101,11 @@ class RulesEngine:
 
                     # Loads flow for given rule
 
-                    flow = await load_flow_callable(rule.flow.id)
+                    flow = await load_flow_callable(rule.flow.id)  # type: Flow
+
+                    # if this is scheduled event then set flow.scheduled_node_id to the start node
+                    if tracker_payload.scheduled_flow_id is not None:
+                        flow.scheduled_node_id = tracker_payload.scheduled_node_id
 
                 except Exception as e:
                     # This is empty DebugInfo without nodes
