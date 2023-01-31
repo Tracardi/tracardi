@@ -30,7 +30,6 @@ class Flow(GraphFlow):
     lock: bool = False
     type: str
     wf_schema: FlowSchema = FlowSchema()
-    scheduled_node_id: Optional[str] = None
 
     def arrange_nodes(self):
         if self.flowGraph is not None:
