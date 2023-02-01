@@ -91,6 +91,8 @@ class DagProcessor:
         # Finds inputs
         self._back_pass(self._last_nodes)
 
+        # Todo it sort all nodes except the nodes after start node
+
         # Sort graph
         nodes = set(self._nodes.keys())
         graph = DagGraphSorter(nodes)

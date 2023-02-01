@@ -149,6 +149,8 @@ class Resource:
                            mapping="mappings/event-index.json"),
             "entity": Index(staging=False, multi_index=False, index="tracardi-entity",
                             mapping="mappings/entity-index.json"),
+            "entity-list": Index(staging=True, multi_index=False, index="tracardi-entity-list",
+                                 mapping="mappings/entity-list-index.json"),
             "log": Index(staging=False, multi_index=True,
                          index='tracardi-log',
                          mapping="mappings/log-index.json"),
