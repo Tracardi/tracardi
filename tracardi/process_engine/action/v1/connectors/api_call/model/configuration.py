@@ -49,6 +49,7 @@ class RemoteCallConfiguration(PluginConfig):
     ssl_check: Optional[bool] = True
     set_default_null: Optional[bool] = True
     body: Content
+    log: Optional[bool] = False
 
     def get_params(self, dot: DotAccessor, **kwargs) -> dict:
         if self.body.type == 'application/json':

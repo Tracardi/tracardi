@@ -35,7 +35,8 @@ def get_resource_types() -> List[ResourceSettings]:
                 "url": "<url>",
                 "proxy": "<proxy>",
                 "username": "<username>",
-                "password": "<password>"
+                "password": "<password>",
+                "headers": {}
             },
             tags=['api', "destination"],
             destination=DestinationData(

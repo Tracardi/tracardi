@@ -50,8 +50,11 @@ class RemoteCallAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             traverser = DictTraverser(dot, **kwargs)
 
+            headers = self.credentials.headers
+            headers.update(self.config.headers)
+
             cookies = traverser.reshape(reshape_template=self.config.cookies)
-            headers = traverser.reshape(reshape_template=self.config.headers)
+            headers = traverser.reshape(reshape_template=headers)
 
             self._validate_key_value(headers, "Header")
             self._validate_key_value(cookies, "Cookie")
@@ -68,6 +71,10 @@ class RemoteCallAction(ActionRunner):
                 url = self.credentials.get_url(dot=dot, endpoint=self.config.endpoint)
 
                 self.console.log("Making {} request to {}".format(self.config.method.upper(), url))
+
+                if self.config.log:
+                    self.console.log(f"Node: {self.node.name}. Making {self.config.method} request to {url} with headers {headers} and cookies {cookies}")
+                    self.console.log(f"Node: {self.node.name}. Request data {params}")
 
                 async with session.request(
                         method=self.config.method,
@@ -93,6 +100,10 @@ class RemoteCallAction(ActionRunner):
                         "content": content,
                         "cookies": response.cookies
                     }
+
+                    if self.config.log:
+                        self.console.log(
+                            f"Node: {self.node.name}. Response {response.status} {content}")
 
                     if response.status in [200, 201, 202, 203]:
                         return Result(port="response", value=result)
@@ -133,7 +144,8 @@ def register() -> Plugin:
                 "headers": {},
                 "cookies": {},
                 "ssl_check": True,
-                "body": {"type": "application/json", "content": "{}"}
+                "body": {"type": "application/json", "content": "{}"},
+                "log": False
             },
             form=Form(groups=[
                 FormGroup(
@@ -209,11 +221,18 @@ def register() -> Plugin:
                             name="Cookies",
                             description="Type key and value for cookies.",
                             component=FormComponent(type="keyValueList", props={"label": "Cookies"})
-                        )
+                        ),
+                        FormField(
+                            id="log",
+                            name="Log request and response data",
+                            description="Logging can be only useful for debugging purposes. "
+                                        "Please disable logging on production.",
+                            component=FormComponent(type="bool", props={"label": "Saves URL and request data in log."})
+                        ),
                     ]
                 ),
             ]),
-            version="0.6.0.1",
+            version="0.8.0",
             author="Risto Kowaczewski",
             license="MIT",
             manual="remote_call_action"

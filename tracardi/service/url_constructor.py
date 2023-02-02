@@ -10,6 +10,7 @@ class ApiCredentials(BaseModel):
     proxy: Optional[str] = None
     password: Optional[str] = None
     username: Optional[str] = None
+    headers: Optional[dict] = {}
 
     def _get_url(self) -> Tuple[str, str]:
         url = self.url
