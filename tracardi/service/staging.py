@@ -1,8 +1,14 @@
-import asyncio
+import logging
+
+from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.config import tracardi
 from tracardi.service.storage.driver import storage
 from tracardi.service.storage.index import resources
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 def get_staged_indices():
@@ -27,39 +33,62 @@ async def check_if_production_db_exists():
 
 async def add_alias_staging_to_production():
     actions = []
-    for stage_index, _, _, production_alias in get_staged_indices():
+    for stage_index, _, production_index, production_alias in get_staged_indices():
         action = {"add": {"index": stage_index, "alias": production_alias}}
         actions.append(action)
+        action = {"remove": {"index": production_index, "alias": production_alias}}
+        actions.append(action)
     if actions:
-        await storage.driver.raw.update_aliases({
+        return await storage.driver.raw.update_aliases({
             "actions": actions
         })
 
 
 async def remove_alias_staging_to_production():
     actions = []
-    for stage_index, _, _, production_alias in get_staged_indices():
+    for stage_index, _, production_index, production_alias in get_staged_indices():
         action = {"remove": {"index": stage_index, "alias": production_alias}}
         actions.append(action)
+        action = {"add": {"index": production_index, "alias": production_alias}}
+        actions.append(action)
     if actions:
-        await storage.driver.raw.update_aliases({
+        return await storage.driver.raw.update_aliases({
             "actions": actions
         })
 
 
+def add_up(key, result, result_sum):
+    if key in result:
+        result_sum[key] += result[key]
+    return result_sum
+
+
 async def move_from_staging_to_production():
-    print(tracardi.version)
     if not await check_if_production_db_exists():
         raise ValueError("Could not find production server data in current database.")
 
     await add_alias_staging_to_production()
 
+    result_sum = {
+        "took": 0,
+        'total': 0,
+        'updated': 0,
+        'created': 0,
+        'deleted': 0,
+        'batches': 0,
+        'version_conflicts': 0,
+        'noops': 0,
+        'failures': []
+    }
+    results = []
+
     for stage_index, _, production_index, _ in get_staged_indices():
-        print(stage_index, production_index)
-        # await storage.driver.raw.reindex(source="", destination="")
-
+        logger.info(f"Coping data from {stage_index} to {production_index}")
+        result = await storage.driver.raw.reindex(source=stage_index, destination=production_index)
+        for key in result_sum.keys():
+            result_sum = add_up(key, result, result_sum)
+        result["index"] = production_index
+        results.append(result)
     await remove_alias_staging_to_production()
-    await remove_alias_staging_to_production()
 
-
-asyncio.run(move_from_staging_to_production())
+    return results
