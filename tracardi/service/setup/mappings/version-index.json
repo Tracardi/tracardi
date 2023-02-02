@@ -1,7 +1,7 @@
 {
   "settings": {
-    "number_of_shards": %%CONF_SHARDS%%,
-    "number_of_replicas": %%REPLICAS%%
+    "number_of_shards":%%CONF_SHARDS%%,
+    "number_of_replicas":%%REPLICAS%%
   },
   "mappings": {
     "_meta": {
@@ -20,7 +20,7 @@
         "type": "keyword"
       },
       "production": {
-         "type": "boolean"
+        "type": "boolean"
       },
       "prev_version": {
         "type": "object",
@@ -28,6 +28,11 @@
       },
       "upgrades": {
         "type": "keyword"
+      },
+      "config": {
+        "enabled": false,
+        "dynamic": "true",
+        "type": "object"
       }
     }
   }

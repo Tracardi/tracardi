@@ -1,7 +1,7 @@
 import json
 
 from deepdiff import DeepDiff
-
+from dotty_dict import dotty
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.index import resources, Index
 
@@ -41,6 +41,18 @@ async def get_indices_status():
                 yield "missing_alias", _alias
 
 
+def get_changed_values(old_dict: dict, new_dict: dict) -> dict:
+    diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree", exclude_paths=["root['aliases']"])
+    changed_values = dotty()
+    for _, diff in diff_result.items():
+        for change in diff:
+            key = ".".join(change.path(output_format='list'))
+            value = change.t2
+            changed_values[key] = value
+
+    return changed_values.to_dict()
+
+
 async def check_indices_mappings_consistency():
     """
 
@@ -69,12 +81,12 @@ async def check_indices_mappings_consistency():
             if index.multi_index:
                 system_mapping = system_mapping['template']
             del system_mapping['settings']
+
         es_mapping = await es.get_mapping(index.get_write_index())
         es_mapping = es_mapping[index.get_version_write_index()]
 
-        diff = DeepDiff(es_mapping, system_mapping, exclude_paths=["root['aliases']"])
-
+        diff = get_changed_values(old_dict=es_mapping, new_dict=system_mapping)
         if diff:
-            result[index.get_version_write_index()] = json.loads(json.dumps(diff.to_dict(), default=str))
+            result[index.get_version_write_index()] = json.loads(json.dumps(diff, default=str))
 
-        return result
+    return result

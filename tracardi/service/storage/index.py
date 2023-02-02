@@ -205,13 +205,13 @@ class Resource:
             "import": Index(staging=False, multi_index=False, index="tracardi-import",
                             mapping="mappings/import-index.json"),
             "task": Index(staging=False, multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
-            "version": Index(staging=False, multi_index=False, index="tracardi-version",
-                             mapping="mappings/version-index.json",
-                             aliased=True),
             "report": Index(staging=True, multi_index=False, index="tracardi-report",
                             mapping="mappings/report-index.json"),
             "identification-point": Index(staging=True, multi_index=False, index="tracardi-identification-point",
-                                          mapping="mappings/identification-point-index.json")
+                                          mapping="mappings/identification-point-index.json"),
+            "version": Index(staging=False, multi_index=False, index="tracardi-version",
+                             mapping="mappings/version-index.json",
+                             aliased=True),
         }
 
     def list_aliases(self) -> set:
