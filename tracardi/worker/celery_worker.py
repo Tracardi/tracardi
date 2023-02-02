@@ -1,15 +1,15 @@
 from celery import Celery
 import logging
-from worker.config import redis_config
-from worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
-from worker.service.worker.mysql_worker import MysqlConnectionConfig, MySQLImporter
-from worker.service.worker.mysql_query_worker import MysqlConnectionConfig as MysqlQueryConnConfig, MySQLQueryImporter
-from worker.service.import_dispatcher import ImportDispatcher
-from worker.domain.import_config import ImportConfig
-from worker.domain.migration_schema import MigrationSchema
-import worker.service.worker.migration_workers as migration_workers
-from worker.misc.update_progress import update_progress
-from worker.misc.add_task import add_task
+from tracardi.worker.config import redis_config
+from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
+from tracardi.worker.service.worker.mysql_worker import MysqlConnectionConfig, MySQLImporter
+from tracardi.worker.service.worker.mysql_query_worker import MysqlConnectionConfig as MysqlQueryConnConfig, MySQLQueryImporter
+from tracardi.worker.service.import_dispatcher import ImportDispatcher
+from tracardi.worker.domain.import_config import ImportConfig
+from tracardi.worker.domain.migration_schema import MigrationSchema
+import tracardi.worker.service.worker.migration_workers as migration_workers
+from tracardi.worker.misc.update_progress import update_progress
+from tracardi.worker.misc.add_task import add_task
 
 
 celery = Celery(

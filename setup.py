@@ -68,7 +68,10 @@ setup(
         'strsimpy==0.2.1',
         'python-whois==0.8.0',
         'PyYAML==6.0',
-        'telebot==0.0.4'
+        'telebot==0.0.4',
+        'requests',
+        'mysql-connector-python==8.0.29'
+
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

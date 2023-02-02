@@ -1,10 +1,10 @@
-from worker.domain.migration_schema import MigrationSchema
-from worker.misc.update_progress import update_progress
-from worker.misc.add_task import add_task
+from tracardi.worker.domain.migration_schema import MigrationSchema
+from tracardi.worker.misc.update_progress import update_progress
+from tracardi.worker.misc.add_task import add_task
 from time import sleep
-from worker.service.worker.migration_workers.utils.migration_error import MigrationError
+from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
 import logging
-from worker.service.worker.migration_workers.utils.client import ElasticClient
+from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
 
 def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):

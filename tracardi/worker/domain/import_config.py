@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import validator, BaseModel, AnyHttpUrl
 
-from worker.domain.named_entity import NamedEntity
+from tracardi.worker.domain.named_entity import NamedEntity
 
 
 class ImportConfig(BaseModel):

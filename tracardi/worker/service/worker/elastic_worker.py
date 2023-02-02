@@ -2,7 +2,7 @@ from typing import Optional, Union, List
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 from ssl import create_default_context
-from worker.domain.named_entity import NamedEntity
+from tracardi.worker.domain.named_entity import NamedEntity
 
 
 class ElasticCredentials(BaseModel):

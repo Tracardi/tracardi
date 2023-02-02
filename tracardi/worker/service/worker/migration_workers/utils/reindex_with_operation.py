@@ -1,7 +1,7 @@
-from worker.domain.migration_schema import MigrationSchema
-from worker.misc.update_progress import update_progress
-from worker.misc.add_task import add_task
-from worker.service.worker.migration_workers.utils.migration_error import MigrationError
+from tracardi.worker.domain.migration_schema import MigrationSchema
+from tracardi.worker.misc.update_progress import update_progress
+from tracardi.worker.misc.add_task import add_task
+from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
 import functools
 from .client import ElasticClient
 

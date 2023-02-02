@@ -1,7 +1,7 @@
-from worker.domain.migration_schema import MigrationSchema
-from worker.service.worker.migration_workers.utils.reindex_with_operation import reindex_with_operation
-from worker.misc.base_64 import b64_decoder, b64_encoder
-from worker.domain.storage_record import StorageRecord
+from tracardi.worker.domain.migration_schema import MigrationSchema
+from tracardi.worker.service.worker.migration_workers.utils.reindex_with_operation import reindex_with_operation
+from tracardi.worker.misc.base_64 import b64_decoder, b64_encoder
+from tracardi.worker.domain.storage_record import StorageRecord
 
 
 @reindex_with_operation

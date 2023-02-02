@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 
-from worker.config import elasticsearch_config
-from worker.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
+from tracardi.worker.config import elasticsearch_config
+from tracardi.worker.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
 from typing import Optional
 from elasticsearch.exceptions import NotFoundError
 
