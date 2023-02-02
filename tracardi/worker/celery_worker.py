@@ -1,5 +1,5 @@
-from celery import Celery
 import logging
+from celery import Celery
 from tracardi.worker.config import redis_config
 from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
 from tracardi.worker.service.worker.mysql_worker import MysqlConnectionConfig, MySQLImporter
