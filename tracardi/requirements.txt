@@ -1,4 +1,4 @@
-git+https://github.com/Tracardi/worker.git@master  # chenge to 0.8.0-dev
+# git+https://github.com/Tracardi/worker.git@master  # chenge to 0.8.0-dev
 git+https://github.com/elasticemail/elasticemail-python.git@4.0.20
 
 pydantic

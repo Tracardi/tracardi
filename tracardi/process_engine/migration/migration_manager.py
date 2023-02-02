@@ -2,7 +2,7 @@ from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
 from tracardi.service.storage.elastic_client import ElasticClient
-from worker.celery_worker import run_migration_job
+from tracardi.worker.celery_worker import run_migration_job
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from hashlib import sha1

@@ -4,3 +4,4 @@ recursive-include tracardi/exceptions *
 recursive-include tracardi/process_engine *
 recursive-include tracardi/protocol *
 recursive-include tracardi/service *
+recursive-include tracardi/worker *

@@ -12,7 +12,7 @@ from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver import storage
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
-from worker.celery_worker import run_elastic_import_job
+from tracardi.worker.celery_worker import run_elastic_import_job
 
 
 class ElasticIndexImportConfig(BaseModel):
