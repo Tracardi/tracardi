@@ -14,6 +14,7 @@ class Version(BaseModel):
     name: Optional[str] = None
     upgrades: List[str] = []
     production: bool = False
+    config: Optional[dict] = {}
 
     @validator("name")
     def validate_prefix(cls, value, values):
