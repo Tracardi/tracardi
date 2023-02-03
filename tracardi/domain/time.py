@@ -33,5 +33,5 @@ class ProfileTime(Time):
 
 
 class EventTime(Time):
-    pass
+    process_time: Optional[float] = 0
 
