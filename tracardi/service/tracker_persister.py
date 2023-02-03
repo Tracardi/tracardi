@@ -156,7 +156,7 @@ class TrackerResultPersister:
     async def _modify_events(tracker_result: TrackerResult, log_event_journal) -> List[Event]:
         for event in tracker_result.events:
 
-            event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
+            event.metadata.aux['process_time'] = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
                 event.metadata.time.insert)
 
             # Reset operations

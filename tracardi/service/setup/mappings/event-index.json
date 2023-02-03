@@ -21,6 +21,9 @@
         },
         "metadata": {
           "properties": {
+            "aux": {
+              "type": "flattened"
+            },
             "time": {
               "properties": {
                 "insert": {
@@ -28,9 +31,6 @@
                 },
                 "create": {
                   "type": "date"
-                },
-                "process_time": {
-                  "type": "float"
                 }
               }
             },

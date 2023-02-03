@@ -12,6 +12,7 @@ class EventProcessors(BaseModel):
 
 
 class EventMetadata(BaseModel):
+    aux: Optional[dict] = {}
     time: EventTime
     ip: str = None
     status: str = None
