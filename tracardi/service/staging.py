@@ -91,4 +91,7 @@ async def move_from_staging_to_production():
         results.append(result)
     await remove_alias_staging_to_production()
 
-    return results
+    return {
+        "indices": results,
+        "result": result_sum
+    }
