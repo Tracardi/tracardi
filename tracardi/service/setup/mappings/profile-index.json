@@ -23,6 +23,9 @@
         },
         "metadata": {
           "properties": {
+            "aux": {
+              "type": "flattened"
+            },
             "time": {
               "properties": {
                 "insert": {
@@ -46,9 +49,6 @@
                 }
               }
             }
-          },
-          "aux": {
-            "type": "flattened"
           }
         },
         "stats": {
