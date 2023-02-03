@@ -4,7 +4,15 @@ Version 0.8.0
 ## Features
 
 * Profile live time plugin
-* Identity resolution (Identification points)
+* Staging of all data
+* Fixed merging
+* Upgrade to React 18
+* 
+* Commercial features:
+  * Wait and resume plugin
+  * Identity resolution (Identification points)
+  * Commercial parts are disabled now
+  * 
 
 
 Version 0.7.4

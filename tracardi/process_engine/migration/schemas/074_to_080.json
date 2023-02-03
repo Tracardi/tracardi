@@ -81,7 +81,7 @@
       "from_index": "tracardi-profile",
       "to_index": "tracardi-profile",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.remove(\"flags\");row.remove(\"operation\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.remove(\"flags\");\nrow.remove(\"metadata.merged_with\");\nrow.remove(\"operation\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -361,7 +361,7 @@
       "from_index": "tracardi-event",
       "to_index": "tracardi-event",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.remove(\"operation\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.remove(\"operation\");row.remove(\"metadata.time.process_time\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
