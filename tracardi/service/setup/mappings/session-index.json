@@ -38,6 +38,9 @@
             },
             "channel": {
               "type": "keyword"
+            },
+            "aux": {
+              "type": "flattened"
             }
           }
         },

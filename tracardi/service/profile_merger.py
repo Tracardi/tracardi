@@ -174,17 +174,6 @@ class ProfileMerger:
         return merge_key_values
 
     @staticmethod
-    def _mark_profiles_as_merged(profiles: List[Profile], merge_with: str) -> List[Profile]:
-        disabled_profiles = []
-
-        for profile in profiles:
-            profile.active = False
-            profile.metadata.merged_with = merge_with
-            disabled_profiles.append(profile)
-
-        return disabled_profiles
-
-    @staticmethod
     def _deep_update(mapping: Dict[KeyType, Any], *updating_mappings: Dict[KeyType, Any]) -> Dict[KeyType, Any]:
         updated_mapping = mapping.copy()
         for updating_mapping in updating_mappings:
@@ -298,14 +287,11 @@ class ProfileMerger:
                     interests[interest] = 0
                 interests[interest] += profile.interests[interest]
 
-        # Set id to merged id or current profile id.
-        id = self.current_profile.metadata.merged_with if self.current_profile.metadata.merged_with is not None else self.current_profile.id
-
         self.current_profile.aux[conflict_aux_key] = conflicts_aux
 
         profile = Profile(
             metadata=ProfileMetadata(time=time),
-            id=id,
+            id=self.current_profile.id,
             ids=self.current_profile.ids,
             stats=stats if merge_stats else self.current_profile.stats,
             traits=traits,
@@ -345,14 +331,6 @@ class ProfileMerger:
                 merged_profile = self._get_merged_profile(
                     profiles_to_merge,
                     conflict_aux_key=conflict_aux_key)
-
-                # Deactivate all other profiles except merged one
-
-                profiles_to_disable = [p for p in similar_profiles if p.id != self.current_profile.id]
-
-                # TODO Do not have ti mark it will bre removed
-                disabled_profiles = self._mark_profiles_as_merged(profiles_to_disable,
-                                                                  merge_with=self.current_profile.id)
 
         return merged_profile, disabled_profiles
 

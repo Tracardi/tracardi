@@ -10,4 +10,3 @@ class Metadata(BaseModel):
 
 class ProfileMetadata(BaseModel):
     time: ProfileTime
-    merged_with: Optional[str] = None

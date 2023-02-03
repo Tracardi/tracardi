@@ -22,7 +22,6 @@
           "type": "keyword"
         },
         "metadata": {
-          "dynamic": "false",
           "properties": {
             "time": {
               "properties": {
@@ -47,6 +46,9 @@
                 }
               }
             }
+          },
+          "aux": {
+            "type": "flattened"
           }
         },
         "stats": {
@@ -66,7 +68,6 @@
           }
         },
         "pii": {
-          "dynamic": "false",
           "properties": {
             "name": {
               "type": "text"
@@ -105,8 +106,7 @@
           "ignore_above": 64
         },
         "consents": {
-          "dynamic": "true",
-          "type": "object"
+          "type": "flattened"
         },
         "active": {
           "type": "boolean"

@@ -80,17 +80,6 @@ class Profile(Entity):
 
         return merge_key_values
 
-    @staticmethod
-    def _mark_profiles_as_merged(profiles, merge_with) -> List['Profile']:
-        disabled_profiles = []
-
-        for profile in profiles:  # type: Profile
-            profile.active = False
-            profile.metadata.merged_with = merge_with
-            disabled_profiles.append(profile)
-
-        return disabled_profiles
-
     def _add_id_to_ids(self):
         if self.id not in self.ids:
             self.ids.append(self.id)

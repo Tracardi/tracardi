@@ -226,17 +226,6 @@ class RulesEngine:
                                 invoked_rules,
                                 flow_responses)
 
-    @staticmethod
-    def _mark_profiles_as_merged(profiles, merge_with) -> List[Profile]:
-        disabled_profiles = []
-
-        for profile in profiles:  # type: Profile
-            profile.active = False
-            profile.metadata.merged_with = merge_with
-            disabled_profiles.append(profile)
-
-        return disabled_profiles
-
     def _get_merging_keys_and_values(self):
         merge_key_values = self.profile.get_merge_key_values()
 
