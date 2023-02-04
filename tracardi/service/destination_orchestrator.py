@@ -51,7 +51,7 @@ class DestinationOrchestrator:
                             event_id=None,
                             profile_id=get_entity_id(self.profile),
                             origin='destination',
-                            class_name='DestinationManager',
+                            class_name=DestinationOrchestrator.__name__,
                             module=__name__,
                             type='error',
                             message=str(e),
