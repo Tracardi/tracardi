@@ -35,5 +35,6 @@ class RedisClient(metaclass=Singleton):
         # else:
         #     self.client = redis.from_url(host, password=password)
         uri = redis_config.get_redis_with_password()
+        logger.debug(f"Connecting redis at {uri}")
         self.client = redis.from_url(uri)
         logger.info(f"Redis at {redis_config.redis_host} connected.")
