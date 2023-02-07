@@ -37,6 +37,7 @@ async def uninstall_bridge(bridge_id):
 
     result = await delete_by_id(bridge_id)
     logger.info(f"Bridge unregistered with id {bridge_id} and result {result}")
+    return result
 
 
 async def install_bridge(bridge: Bridge):
