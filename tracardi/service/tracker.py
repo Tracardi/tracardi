@@ -62,6 +62,7 @@ async def track_event(tracker_payload: TrackerPayload,
     except Exception as e:
         traceback.print_exc()
         logger.error(str(e))
+        raise e
 
     finally:
 
@@ -179,7 +180,10 @@ class Tracker:
             raise ValueError("Event source disabled.")
 
         if source.type not in self.tracker_config.allowed_bridges:
-            raise ValueError(f"Event source `{source_id}` is not within allowed bridge "
-                             f"types {self.tracker_config.allowed_bridges}.")
+            raise ValueError(f"This endpoint allows only bridges of "
+                             f"types {self.tracker_config.allowed_bridges}, but the even source "
+                             f"`{source.name}`.`{source_id}` is of type `{source.type}`. "
+                             f"Change bridge type in event source `{source.name}` to one that has endpoint type "
+                             f"{self.tracker_config.allowed_bridges} or call `{source.type}` endpoint.")
 
         return source
