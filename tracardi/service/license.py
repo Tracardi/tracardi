@@ -109,35 +109,39 @@ class License(BaseModel):
         if license == "":
             raise AssertionError("Invalid license")
 
-        license_key = license[: -7]
-        license_id = int(license[-7:])
+        try:
+            license_key = license[: -7]
+            license_id = int(license[-7:])
 
-        not_coded = license_key[: -64]
-        mesh = license_key[-64:]
-        hash = []
-        content = []
-        for position, letter in enumerate(mesh):
-            if position % 2 == 0:
-                hash.append(letter)
-            else:
-                content.append(letter)
+            not_coded = license_key[: -64]
+            mesh = license_key[-64:]
+            hash = []
+            content = []
+            for position, letter in enumerate(mesh):
+                if position % 2 == 0:
+                    hash.append(letter)
+                else:
+                    content.append(letter)
 
-        hash = "".join(hash)
-        content = "".join(content)
-        content = f"{content}{not_coded}"
+            hash = "".join(hash)
+            content = "".join(content)
+            content = f"{content}{not_coded}"
 
-        check_hash = md5(f"{license_id}:{content}".encode('utf-8')).hexdigest()
+            check_hash = md5(f"{license_id}:{content}".encode('utf-8')).hexdigest()
 
-        if check_hash != hash:
-            raise AssertionError("Invalid license")
+            if check_hash != hash:
+                raise AssertionError("Invalid license")
 
-        license = b64_decoder(content)
+            license = b64_decoder(content)
 
-        if 'u' not in license or 'e' not in license or 's' not in license:
-            raise AssertionError("Invalid license")
+            if 'u' not in license or 'e' not in license or 's' not in license:
+                raise AssertionError("Invalid license")
 
-        return License(owner=license['u'],
-                       expires=license['e'],
-                       services={
-                           key: Service(id=service['i']) for key, service in license['s'].items()
-                       })
+            return License(owner=license['u'],
+                           expires=license['e'],
+                           services={
+                               key: Service(id=service['i']) for key, service in license['s'].items()
+                           })
+        except ValueError as e:
+            raise ValueError("License incorrect. Please check if you paste everything form the license key.")
+
