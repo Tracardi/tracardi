@@ -29,8 +29,30 @@ async def save(bridge: Bridge):
     return await storage_manager('bridge').upsert(bridge)
 
 
+async def uninstall_bridge(bridge_id):
+    if tracardi.version.production:
+        bridge_id = f"prod-{bridge_id}"
+    else:
+        bridge_id = f"stage-{bridge_id}"
+
+    result = await delete_by_id(bridge_id)
+    logger.info(f"Bridge unregistered with id {bridge_id} and result {result}")
+
+
 async def install_bridge(bridge: Bridge):
     bridge_record = await load_by_id(bridge.id)
-    if bridge_record is None:
-        result = await save(bridge)
-        logger.info(f"Bridge registered with id {bridge.id} and result {result}")
+
+    if bridge_record is not None:
+        if 'config' in bridge_record:
+            bridge.config = bridge_record['config']
+
+    # Depending on the type bridge Production or Staging add prefix
+    if tracardi.version.production:
+        bridge.name = f"(Production) {bridge.name}"
+        bridge.id = f"prod-{bridge.id}"
+    else:
+        bridge.name = f"(Staging) {bridge.name}"
+        bridge.id = f"stage-{bridge.id}"
+
+    result = await save(bridge)
+    logger.info(f"Bridge registered with id {bridge.id} and result {result}")
