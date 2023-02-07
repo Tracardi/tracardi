@@ -1,5 +1,6 @@
 import json
 
+import tracardi.config
 from deepdiff import DeepDiff
 from dotty_dict import dotty
 from elasticsearch import NotFoundError
@@ -23,7 +24,13 @@ async def get_indices_status():
 
             _alias = index.get_index_alias()
             _template_pattern = index.get_templated_index_pattern()
-            if not await es.exists_alias(_alias, index=_template_pattern):
+
+            if tracardi.config.tracardi.version.production:
+                has_alias = await es.exists_alias(_alias)
+            else:
+                has_alias = await es.exists_alias(_alias, index=_template_pattern)
+
+            if not has_alias:
                 yield "missing_alias", _alias
 
         else:
@@ -37,7 +44,13 @@ async def get_indices_status():
 
             # Alias
             _alias = index.get_index_alias()
-            if not await es.exists_alias(_alias, index=_index):
+
+            if tracardi.config.tracardi.version.production:
+                has_alias = await es.exists_alias(_alias)
+            else:
+                has_alias = await es.exists_alias(_alias, index=_index)
+
+            if not has_alias:
                 yield "missing_alias", _alias
             else:
                 yield "existing_alias", _alias

@@ -174,7 +174,10 @@ class Resource:
                              mapping="mappings/profile-index.json"),
             "console-log": Index(staging=False, multi_index=False, index="tracardi-console-log",
                                  mapping="mappings/console-log-index.json"),
-            "user": Index(staging=False, multi_index=False, index="tracardi-user", mapping="mappings/user-index.json"),
+            "user": Index(staging=False,
+                          multi_index=False,
+                          index="tracardi-user",
+                          mapping="mappings/user-index.json"),
             "tracardi-pro": Index(staging=False, multi_index=False, index="tracardi-pro",
                                   mapping="mappings/tracardi-pro-index.json"),
 
