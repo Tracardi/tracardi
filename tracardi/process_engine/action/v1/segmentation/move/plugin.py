@@ -3,7 +3,8 @@ from pydantic import validator
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
 
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 
@@ -72,6 +73,31 @@ def register() -> Plugin:
                 "from_segment": "",
                 "to_segment": ""
             },
+            form=Form(groups=[
+                FormGroup(
+                    name="Segment to move from",
+                    fields=[
+                        FormField(
+                            id="from_segment",
+                            name="Move from segment",
+                            description="Please type segment name.",
+                            component=FormComponent(type="text", props={"label": "Source segment"})
+                        )
+                    ]
+                ),
+                FormGroup(
+                    name="Segment to move to",
+                    fields=[
+                        FormField(
+                            id="to_segment",
+                            name="Move to segment",
+                            description="Please type segment name.",
+                            component=FormComponent(type="text", props={"label": "Target segment"})
+                        )
+                    ]
+                )
+            ]
+            ),
             manual="move_add_action"
         ),
         metadata=MetaData(

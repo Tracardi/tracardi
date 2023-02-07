@@ -62,7 +62,7 @@ def register() -> Plugin:
                         FormField(
                             id="segment",
                             name="Profile segment to check",
-                            component=FormComponent(type="text", props={"label": "segment"})
+                            component=FormComponent(type="text", props={"label": "Segment"})
                         )
                     ]
                 )]
@@ -73,6 +73,7 @@ def register() -> Plugin:
             name='Has segment',
             desc='Checks if profile is in defined segment.',
             icon='segment',
+            type="condNode",
             group=["Segmentation"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

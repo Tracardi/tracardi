@@ -6,7 +6,8 @@ from tracardi.domain.profile import Profile
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.config import PluginConfig
 
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 
@@ -80,6 +81,19 @@ def register() -> Plugin:
             init={
                 "segment": ""
             },
+            form=Form(groups=[
+                FormGroup(
+                    name="Segment",
+                    fields=[
+                        FormField(
+                            id="segment",
+                            name="Segment name",
+                            description="Please type segment name.",
+                            component=FormComponent(type="text", props={"label": "Segment name"})
+                        )
+                    ]
+                )]
+            ),
             manual="segment_add_action"
         ),
         metadata=MetaData(
