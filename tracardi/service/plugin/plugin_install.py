@@ -73,6 +73,7 @@ async def install_plugin(module):
 async def install_plugins(plugins_list: Dict[str, PluginMetadata]):
     result = defaultdict(list)
     action_index = resources.get_index_constant('action')
+    # Actions are in static indices
     action_index = action_index.get_write_index()
     tries = 0
     while True:

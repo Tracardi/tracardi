@@ -16,8 +16,8 @@ def get_staged_indices():
         if index.staging:
             stage_index = index.get_single_storage_index()
             stage_alias = index.get_index_alias()
-            production_index = f"prod-{stage_index}"
-            production_alias = f"prod-{stage_alias}"
+            production_index = index._prefix_with_production(stage_index)
+            production_alias = index._prefix_with_production(stage_alias)
             yield stage_index, stage_alias, production_index, production_alias
 
 
@@ -32,8 +32,12 @@ async def check_if_production_db_exists():
 
 
 async def add_alias_staging_to_production():
+    if not await check_if_production_db_exists():
+        raise ValueError("Could not find production server data in current database.")
+
     actions = []
     for stage_index, _, production_index, production_alias in get_staged_indices():
+        print(stage_index, production_index, production_alias)
         action = {"add": {"index": stage_index, "alias": production_alias}}
         actions.append(action)
         action = {"remove": {"index": production_index, "alias": production_alias}}
@@ -45,6 +49,8 @@ async def add_alias_staging_to_production():
 
 
 async def remove_alias_staging_to_production():
+    if not await check_if_production_db_exists():
+        raise ValueError("Could not find production server data in current database.")
     actions = []
     for stage_index, _, production_index, production_alias in get_staged_indices():
         action = {"remove": {"index": stage_index, "alias": production_alias}}

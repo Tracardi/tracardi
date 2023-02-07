@@ -63,14 +63,14 @@ async def create_indices():
         with open(map_file) as file:
 
             map = file.read()
-            map = index.prepare_mappings(map)
+            map = index.prepare_mappings(map, index)
             try:
                 map = json.loads(map)
             except JSONDecodeError as e:
                 logger.error(f"Could not read JSON mapping file {map_file}. error {str(e)}")
                 raise e
 
-            target_index = index.get_aliased_data_index()
+            target_index = index.get_write_index()
             alias_index = index.get_index_alias()
 
             # -------- TEMPLATE --------
@@ -108,18 +108,18 @@ async def create_indices():
 
             # -------- INDEX --------
 
-            if index.aliased is False:
-                target_index = index.get_index_alias()
-
             if not await storage.driver.raw.exists_index(target_index):
 
                 # There is no index but the alias may exist
                 exists_index_with_alias_name = await storage.driver.raw.exists_index(alias_index)
-                if exists_index_with_alias_name:
-                    message = f"Could not create index `{target_index}` and alias `{alias_index}`. " \
-                              f"There is an index name with the same name as the alias."
-                    logger.error(message)
-                    raise ConnectionError(message)
+
+                # Skip this error if the index is static. With static indexes there must be one alias to two indices.
+                if not index.static:
+                    if exists_index_with_alias_name:
+                        message = f"Could not create index `{target_index}` because the alias `{alias_index}` exists " \
+                                  f"and points to other index or there is an index name with the same name as the alias."
+                        logger.error(message)
+                        raise ConnectionError(message)
 
                 # Creates index and alias in one shot.
 
@@ -153,19 +153,20 @@ async def create_indices():
     actions = []
 
     for key, index in resources.resources.items():
-        if index.aliased:
-
-            alias_index = index.get_index_alias()
-
+        alias_index = index.get_index_alias()
+        # Do not remove aliases for static indices.
+        if not index.static:
             actions.append({"remove": {"index": "_all", "alias": alias_index}})
-            if index.multi_index:
-                target_index = index.get_template_index_pattern()
-            else:
-                target_index = index.get_aliased_data_index()
 
-            actions.append({"add": {"index": target_index, "alias": alias_index}})
+        if index.multi_index:
+            target_index = index.get_templated_index_pattern()
+        else:
+            target_index = index.get_write_index()
+
+        actions.append({"add": {"index": target_index, "alias": alias_index}})
 
     if actions:
+
         result = await storage.driver.raw.update_aliases({
             "actions": actions
         })
@@ -179,17 +180,15 @@ async def create_indices():
     for key, index in resources.resources.items():
 
         # After creating index recreate alias
-        if index.aliased:
+        target_index = index.get_write_index()
+        alias_index = index.get_index_alias()
 
-            target_index = index.get_aliased_data_index()
-            alias_index = index.get_index_alias()
+        # Check if alias created
 
-            # Check if alias created
+        if not await storage.driver.raw.exists_alias(alias_index, index=None):
+            raise ConnectionError(f"Could not recreate alias `{alias_index}` for index `{target_index}`")
 
-            if not await storage.driver.raw.exists_alias(alias_index, index=None):
-                raise ConnectionError(f"Could not recreate alias `{alias_index}` for index `{target_index}`")
-
-            output["aliases"].append(alias_index)
+        output["aliases"].append(alias_index)
 
         # -------- SETUP --------
 

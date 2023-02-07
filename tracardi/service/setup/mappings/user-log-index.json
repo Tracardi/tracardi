@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "%%VERSION%%.%%PREFIX%%.tracardi-user-log-*-*"
+    "%%TEMPLATE_PATTERN%%"
   ],
   "template": {
     "settings": {

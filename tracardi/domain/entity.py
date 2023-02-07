@@ -22,7 +22,12 @@ class Creatable(BaseModel):
     def create(cls: Type[T], record: Optional[StorageRecord]) -> Optional[T]:
         if not record:
             return None
-        return cls(**record)
+
+        obj = cls(**record)
+
+        if hasattr(obj, 'set_meta_data'):
+            obj.set_meta_data(record.get_meta_data())
+        return obj
 
 
 class NullableEntity(Creatable):
