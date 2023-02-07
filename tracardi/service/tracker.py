@@ -9,8 +9,8 @@ from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.exceptions.exception import UnauthorizedException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.logger_manager import save_logs
 from tracardi.service.setup.data.defaults import open_source_bridge
-from tracardi.service.storage.driver import storage
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
@@ -65,18 +65,8 @@ async def track_event(tracker_payload: TrackerPayload,
         raise e
 
     finally:
-
-        if tracardi.save_logs:
-            """
-            Saves errors caught by logger
-            """
-            if await storage.driver.log.exists():
-                if log_handler.has_logs():
-                    # do not await
-                    asyncio.create_task(storage.driver.log.save(log_handler.collection))
-                    log_handler.reset()
-            else:
-                logger.warning("Log index still not created. Saving logs postponed.")
+        if await save_logs() is False:
+            logger.warning("Log index still not created. Saving logs postponed.")
 
 
 class Tracker:
