@@ -52,5 +52,6 @@ class Version(BaseModel):
         self.upgrades = list(upgrades)
 
     def is_production(self) -> bool:
-        print(get_context().context(), get_context().user)
+        if get_context().context() == 'production':
+            return True
         return self.production
