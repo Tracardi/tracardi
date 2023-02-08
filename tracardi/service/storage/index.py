@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 from typing import Optional
-
 from tracardi.config import tracardi, elastic
 
 _local_dir = os.path.dirname(__file__)
@@ -32,7 +31,7 @@ class Index:
     def _prod_or_static(self, index):
         if self.static:
             return self._prefix_with_static(index)
-        if tracardi.version.production:
+        if tracardi.version.is_production():
             return self._prefix_with_production(index)
         return index
 
@@ -78,6 +77,7 @@ class Index:
         return self.get_index_alias(prefix)
 
     def get_index_alias(self, prefix: Optional[str] = None) -> str:
+
         """
         E.g. (prod|static)-fa73a.tracardi-event
         """

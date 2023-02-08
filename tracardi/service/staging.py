@@ -22,7 +22,7 @@ def get_staged_indices():
 
 
 async def check_if_production_db_exists():
-    if tracardi.version.production:
+    if tracardi.version.is_production():
         raise ValueError("Can not deploy in production server.")
 
     for _, stage_alias, _, production_alias in get_staged_indices():

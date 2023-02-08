@@ -25,7 +25,7 @@ async def get_indices_status():
             _alias = index.get_index_alias()
             _template_pattern = index.get_templated_index_pattern()
 
-            if tracardi.config.tracardi.version.production:
+            if tracardi.config.tracardi.version.is_production():
                 has_alias = await es.exists_alias(_alias)
             else:
                 has_alias = await es.exists_alias(_alias, index=_template_pattern)
@@ -45,7 +45,7 @@ async def get_indices_status():
             # Alias
             _alias = index.get_index_alias()
 
-            if tracardi.config.tracardi.version.production:
+            if tracardi.config.tracardi.version.is_production():
                 has_alias = await es.exists_alias(_alias)
             else:
                 has_alias = await es.exists_alias(_alias, index=_index)
