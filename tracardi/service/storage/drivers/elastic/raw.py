@@ -189,6 +189,8 @@ async def set_mapping(index: str, mapping: dict):
 async def create_index(index: str, mapping: dict) -> bool:
     es = ElasticClient.instance()
     result = await es.create_index(index, mapping)
+    if 'error' in result:
+        raise ValueError(f"{result['error']}")
     return _acknowledged(result)
 
 

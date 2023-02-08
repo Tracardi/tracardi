@@ -18,7 +18,9 @@ class EntityPropertyMeta(BaseModel):
 
 class EntityMappingMeta(BaseModel):
     name: str
+    description: Optional[str] = ""
     version: str
+    part_of: List[str] = []
     pk: Optional[str] = None
     properties: Dict[str, EntityPropertyMeta] = []
 
