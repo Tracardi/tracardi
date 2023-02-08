@@ -1,6 +1,7 @@
 from typing import List, Optional
 from elasticsearch import NotFoundError
-from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
+from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
@@ -15,8 +16,42 @@ def index(idx) -> PersistenceService:
     return storage_manager(idx)
 
 
-async def query(index: str, query: dict) -> StorageRecords:
+async def query_by_index(index: str, query: dict) -> StorageRecords:
     return await storage_manager(index).query(query)
+
+
+async def load_by_id(index: str, id: str) -> StorageRecords:
+    query = {
+        "query": {
+            "term": {
+                '_id': id
+            }
+        }
+    }
+    es = ElasticClient.instance()
+    result = await es.search(index, query)
+    return StorageRecords.build_from_elastic(result)
+
+
+async def load_all(index: str) -> StorageRecords:
+    query = {
+        "query": {
+            "match_all": {}
+        }
+    }
+    es = ElasticClient.instance()
+    result = await es.search(index, query)
+    return StorageRecords.build_from_elastic(result)
+
+
+async def delete_by_id(index: str, id: str) -> dict:
+    es = ElasticClient.instance()
+    return await es.delete(index, id)
+
+
+async def upsert(index: str, data: dict) -> BulkInsertResult:
+    es = ElasticClient.instance()
+    return await es.insert(index, [data])
 
 
 async def load_by_key_value_pairs(index, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
@@ -154,6 +189,12 @@ async def set_mapping(index: str, mapping: dict):
 async def create_index(index: str, mapping: dict) -> bool:
     es = ElasticClient.instance()
     result = await es.create_index(index, mapping)
+    return _acknowledged(result)
+
+
+async def remove_index(index: str) -> bool:
+    es = ElasticClient.instance()
+    result = await es.remove_index(index)
     return _acknowledged(result)
 
 

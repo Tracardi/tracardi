@@ -46,7 +46,7 @@ class QueryLocalDatabase(ActionRunner):
             if self.config.log:
                 self.console.log(f"Executed query {query}")
 
-            result = await storage.driver.raw.query(
+            result = await storage.driver.raw.query_by_index(
                 index=self.config.index,
                 query=query
             )
