@@ -1,7 +1,6 @@
 from pydantic import BaseModel, validator
 from typing import Optional, List
 from hashlib import md5
-from tracardi.context import get_context
 
 
 class SubVersion(BaseModel):
@@ -50,8 +49,3 @@ class Version(BaseModel):
         upgrades = set(self.upgrades)
         upgrades.add(name)
         self.upgrades = list(upgrades)
-
-    def is_production(self) -> bool:
-        if get_context().context() == 'production':
-            return True
-        return self.production

@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from tracardi.config import tracardi
+from tracardi.context import get_context
 from tracardi.domain.bridge import Bridge
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
@@ -30,7 +31,7 @@ async def save(bridge: Bridge):
 
 
 async def uninstall_bridge(bridge_id):
-    if tracardi.version.is_production():
+    if get_context().is_production():
         bridge_id = f"prod-{bridge_id}"
     else:
         bridge_id = f"stage-{bridge_id}"
@@ -48,7 +49,7 @@ async def install_bridge(bridge: Bridge):
             bridge.config = bridge_record['config']
 
     # Depending on the type bridge Production or Staging add prefix
-    if tracardi.version.is_production():
+    if get_context().is_production():
         bridge.name = f"(Production) {bridge.name}"
         bridge.id = f"prod-{bridge.id}"
     else:

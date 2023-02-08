@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from typing import Optional
 from tracardi.config import tracardi, elastic
+from tracardi.context import get_context
 
 _local_dir = os.path.dirname(__file__)
 
@@ -31,7 +32,7 @@ class Index:
     def _prod_or_static(self, index):
         if self.static:
             return self._prefix_with_static(index)
-        if tracardi.version.is_production():
+        if get_context().is_production():
             return self._prefix_with_production(index)
         return index
 

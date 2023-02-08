@@ -1,5 +1,6 @@
 import logging
 
+from tracardi.context import get_context
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.config import tracardi
@@ -22,7 +23,7 @@ def get_staged_indices():
 
 
 async def check_if_production_db_exists():
-    if tracardi.version.is_production():
+    if get_context().is_production():
         raise ValueError("Can not deploy in production server.")
 
     for _, stage_alias, _, production_alias in get_staged_indices():
