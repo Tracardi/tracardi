@@ -29,7 +29,8 @@ def register() -> Plugin:
                 FormGroup(
                     name="Scheduled event settings",
                     description="This action will schedule event with defined event type and properties. "
-                                "Event will have the same profile as current event.",
+                                "Event will have the same profile as current event. Workflow will continue after this "
+                                "as usual.",
                     fields=[
                         FormField(
                             id="resource",
@@ -39,7 +40,8 @@ def register() -> Plugin:
                         ),
                         FormField(
                             id="postpone",
-                            name="Event delay in seconds",
+                            name="Schedule event",
+                            description="Schedule event to be triggered after defined X seconds.",
                             component=FormComponent(type="text", props={
                                 "label": "delay in seconds"
                             })
@@ -85,6 +87,7 @@ def register() -> Plugin:
             name='Schedule event',
             desc='This plugin schedules events',
             icon='calendar',
+            type="startNode",
             group=["Time"],
             tags=["pro", "scheduler", "postpone", "delay", "event"],
             pro=True,
