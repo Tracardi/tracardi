@@ -77,5 +77,12 @@ class ServerContext:
     def get_context(self):
         return self.cm.get("request-context")
 
+    @staticmethod
+    def get_context_id():
+        return ctx_id.get()
+
+
+fake_admin = User(id="1", password="pass", full_name="test", email="none", roles=['admin'])
+
 
 

@@ -67,7 +67,6 @@ class Index:
         if index.multi_index:
             template_pattern = index.get_templated_index_pattern()
             json_map = json_map.replace("%%TEMPLATE_PATTERN%%", template_pattern)
-            print(f"{self.get_index_alias()} as {template_pattern}")
 
         return json_map
 

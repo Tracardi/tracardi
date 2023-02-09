@@ -80,7 +80,7 @@ async def create_indices():
                 # Remove alias with all indexes first
                 result = await storage.driver.raw.remove_alias(alias_index)
                 if result:
-                    logger.info(f"{alias_index} - DELETED old alias {alias_index}. New will be created", result)
+                    logger.info(f"{alias_index} - DELETED old alias {alias_index}. New will be created")
 
                 template_name = index.get_prefixed_template_name()
 
