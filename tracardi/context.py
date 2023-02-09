@@ -23,6 +23,9 @@ class Context:
 
         return False
 
+    def __repr__(self):
+        return f"Context(on {'production' if self.production else 'staging'} as user: {self.user.full_name if self.user else 'Unknown'})"
+
 
 class ContextManager(metaclass=Singleton):
 
