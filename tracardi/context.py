@@ -1,7 +1,8 @@
 from contextvars import ContextVar
-from dataclasses import dataclass
 from typing import Optional, Any
 from uuid import uuid4
+
+from pydantic import BaseModel
 
 from tracardi.config import tracardi
 from tracardi.domain.user import User
@@ -10,8 +11,7 @@ from tracardi.service.singleton import Singleton
 ctx_id: ContextVar[str] = ContextVar("request_id", default=None)
 
 
-@dataclass
-class Context:
+class Context(BaseModel):
     production: bool = tracardi.version.production
     user: Optional[User] = None
 
