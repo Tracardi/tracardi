@@ -243,6 +243,7 @@ class TrackingManager(TrackingManagerBase):
 
                     for event in events:
                         event.metadata.processed_by.rules = invoked_rules[event.id]
+                        event.metadata.processed_by.flows = rule_invoke_result.invoked_flows
 
                     # Segment only if there is profile
 

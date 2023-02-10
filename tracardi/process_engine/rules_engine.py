@@ -53,6 +53,7 @@ class RulesEngine:
         flow_task_store = defaultdict(list)
         debugger = Debugger()
         invoked_rules = defaultdict(list)
+        invoked_flows = []
 
         for rules, event in self.events_rules:
 
@@ -75,6 +76,7 @@ class RulesEngine:
 
                 try:
                     rule = Rule(**rule)
+                    invoked_flows.append(rule.flow.id)
                 except ValidationError as e:
                     console = Console(
                         origin="rule",
@@ -224,6 +226,7 @@ class RulesEngine:
                                 ran_event_types,
                                 post_invoke_events,
                                 invoked_rules,
+                                invoked_flows,
                                 flow_responses)
 
     def _get_merging_keys_and_values(self):

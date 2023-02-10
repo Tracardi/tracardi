@@ -8,6 +8,7 @@ from tracardi.domain.time import EventTime, Time
 
 class EventProcessors(BaseModel):
     rules: List[str] = []
+    flows: List[str] = []
     third_party: List[str] = []
 
 

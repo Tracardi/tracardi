@@ -9,7 +9,7 @@ open_rest_source_bridge = Bridge(
 
 open_webhook_source_bridge = Bridge(
     id="3d8bb87e-28d1-4a38-b19c-d0c1fbb71e22",
-    type="rest",
+    type="webhook",
     name="API Webhook Bridge",
     description="API Webhook collector"
 )
