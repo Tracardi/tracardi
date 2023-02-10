@@ -64,11 +64,6 @@ def get_context() -> Context:
     return cm.get("request-context", Context())
 
 
-def set_context(ctx: Context):
-    cm = ContextManager()
-    return cm.set("request-context", ctx)
-
-
 class ServerContext:
     ctx_handler: Any
 
@@ -78,7 +73,7 @@ class ServerContext:
 
     def __enter__(self):
         self.ctx_handler = ctx_id.set(str(uuid4()))
-        set_context(self.context)
+        self.cm.set("request-context", self.context)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
