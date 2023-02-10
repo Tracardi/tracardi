@@ -18,6 +18,11 @@ class Context(BaseModel):
     def is_production(self) -> bool:
         return self.production
 
+    def switch_context(self, production, user=None) -> 'Context':
+        if user is None:
+            user = self.user
+        return Context(production=production, user=user)
+
     def __str__(self):
         return f"Context(on {'production' if self.production else 'staging'} as user: {self.user.full_name if self.user else 'Unknown'})"
 
@@ -59,6 +64,11 @@ def get_context() -> Context:
     return cm.get("request-context", Context())
 
 
+def set_context(ctx: Context):
+    cm = ContextManager()
+    return cm.set("request-context", ctx)
+
+
 class ServerContext:
     ctx_handler: Any
 
@@ -68,7 +78,7 @@ class ServerContext:
 
     def __enter__(self):
         self.ctx_handler = ctx_id.set(str(uuid4()))
-        self.cm.set("request-context", self.context)
+        set_context(self.context)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -81,9 +91,3 @@ class ServerContext:
     @staticmethod
     def get_context_id():
         return ctx_id.get()
-
-
-fake_admin = User(id="1", password="pass", full_name="test", email="none", roles=['admin'])
-
-
-

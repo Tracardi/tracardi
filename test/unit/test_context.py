@@ -1,7 +1,7 @@
 import asyncio
 from uuid import uuid4
 
-from tracardi.context import ContextManager, ctx_id, ServerContext, Context, fake_admin
+from tracardi.context import ContextManager, ctx_id, ServerContext, Context, get_context, set_context
 
 
 def test_context():
@@ -46,7 +46,7 @@ def test_context():
 
 
 def test_server_context():
-    ctx1 = Context(production=True, user=fake_admin)
+    ctx1 = Context(production=True)
     ctx2 = Context(production=False)
     with ServerContext(ctx1) as sc1:
         assert sc1.get_context() == ctx1
@@ -61,7 +61,7 @@ def test_server_context_async():
     async def main():
         async def context1():
             await asyncio.sleep(0.1)
-            ctx1 = Context(production=True, user=fake_admin)
+            ctx1 = Context(production=True)
             with ServerContext(ctx1) as sc1:
                 await asyncio.sleep(0.5)
                 assert sc1.get_context() == ctx1
@@ -79,6 +79,30 @@ def test_server_context_async():
     asyncio.run(main())
 
 
+def test_server_switch_context_async():
+    async def main():
+        async def context1():
+            await asyncio.sleep(0.1)
+            ctx1 = Context(production=False)
+            set_context(ctx1)
+            switched_ctx1 = get_context().switch_context(production=True)
+            with ServerContext(switched_ctx1) as sc1:
+                await asyncio.sleep(0.5)
+                assert sc1.get_context() == switched_ctx1
+
+        async def context2():
+            ctx2 = Context(production=True)
+            set_context(ctx2)
+            switched_ctx2 = get_context().switch_context(production=False)
+            with ServerContext(switched_ctx2) as sc2:
+                await asyncio.sleep(0.5)
+                assert sc2.get_context() == switched_ctx2
+
+        c1 = asyncio.create_task(context1())
+        c2 = asyncio.create_task(context2())
+        await asyncio.gather(c1, c2)
+
+    asyncio.run(main())
 
 
 
