@@ -16,12 +16,7 @@ class Context(BaseModel):
     user: Optional[User] = None
 
     def is_production(self) -> bool:
-        if self.production:
-            # only admin can have context production
-            if self.user and self.user.is_admin() and not self.user.is_expired():
-                return True
-
-        return False
+        return self.production
 
     def __str__(self):
         return f"Context(on {'production' if self.production else 'staging'} as user: {self.user.full_name if self.user else 'Unknown'})"
