@@ -738,6 +738,24 @@ if License.has_service(SCHEDULER):
             resource={"callback_host": "http://localhost"})
     )
 
+if License.has_license():
+    installed_plugins["com_tracardi.action.v1.sequencer.query.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "query": "",
+                "intermediate": True
+            },
+            resource=None)
+    )
+    installed_plugins["com_tracardi.action.v1.sequencer.matcher.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "sequence": [],
+                "list_of_events": {"ref": True, "value": "payload@sequence"}
+            },
+            resource=None)
+    )
+
 # Plugins only for testing
 test_plugins: Dict[str, PluginMetadata] = {
 
