@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any
@@ -10,7 +9,7 @@ from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.exceptions.exception import UnauthorizedException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
-from tracardi.service.setup.data.defaults import open_source_bridge
+from tracardi.service.setup.data.defaults import open_rest_source_bridge
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
@@ -153,7 +152,7 @@ class Tracker:
             return EventSource(
                 id=source_id,
                 type='rest',
-                bridge=NamedEntity(id=open_source_bridge.id, name=open_source_bridge.name),
+                bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
                 name="Scheduler event source",
                 description="This is internal event source for delayed events.",
                 channel="Scheduler",
