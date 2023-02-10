@@ -89,29 +89,34 @@ def test_server_switch_context():
 
 
 def test_server_switch_context_async():
-    fake_user = User(id="1", password="pass", full_name="name", roles=['market'], email="a")
-    async def main():
-        async def context1():
-            await asyncio.sleep(0.1)
-            with ServerContext(Context(production=False, user=fake_user)):
-                assert get_context().user == fake_user
-                switched_ctx1 = get_context().switch_context(production=True)
-                assert switched_ctx1.user == fake_user
-                with ServerContext(switched_ctx1) as sc1:
-                    await asyncio.sleep(0.5)
-                    assert sc1.get_context() == switched_ctx1
+    fake_user1 = User(id="2", password="pass", full_name="name", roles=['market'], email="some")
+    with ServerContext(Context(production=True, user=fake_user1)) as ctx:
+        fake_user2 = User(id="1", password="pass", full_name="name", roles=['market'], email="a")
 
-        async def context2():
-            with ServerContext(Context(production=True, user=fake_user)):
-                assert get_context().user == fake_user
-                switched_ctx2 = get_context().switch_context(production=False)
-                with ServerContext(switched_ctx2) as sc2:
-                    await asyncio.sleep(0.5)
-                    assert sc2.get_context() == switched_ctx2
-                    assert sc2.get_context().user == fake_user
+        async def main():
+            async def context1():
+                await asyncio.sleep(0.1)
+                with ServerContext(Context(production=False, user=fake_user2)):
+                    assert get_context().user == fake_user2
+                    switched_ctx1 = get_context().switch_context(production=True)
+                    assert switched_ctx1.user == fake_user2
+                    with ServerContext(switched_ctx1) as sc1:
+                        await asyncio.sleep(0.5)
+                        assert sc1.get_context() == switched_ctx1
 
-        c1 = asyncio.create_task(context1())
-        c2 = asyncio.create_task(context2())
-        await asyncio.gather(c1, c2)
+            async def context2():
+                with ServerContext(Context(production=True, user=fake_user2)):
+                    assert get_context().user == fake_user2
+                    switched_ctx2 = get_context().switch_context(production=False)
+                    with ServerContext(switched_ctx2) as sc2:
+                        await asyncio.sleep(0.5)
+                        assert sc2.get_context() == switched_ctx2
+                        assert sc2.get_context().user == fake_user2
 
-    asyncio.run(main())
+            c1 = asyncio.create_task(context1())
+            c2 = asyncio.create_task(context2())
+            await asyncio.gather(c1, c2)
+
+        assert ctx.context.user.id == '2'
+
+        asyncio.run(main())
