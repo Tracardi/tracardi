@@ -185,7 +185,7 @@ class TrackingManager(TrackingManagerBase):
                 [
                     Rule(
                         id=str(uuid4()),
-                        name="Schedule route rule",
+                        name="@Internal route",
                         event=Type(type=event.type),  # event type is equal to schedule node id
                         flow=NamedEntity(id=self.tracker_payload.scheduled_event_config.flow_id, name="Scheduled"),
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
