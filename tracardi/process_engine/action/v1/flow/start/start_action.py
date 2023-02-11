@@ -1,3 +1,5 @@
+import json
+from json import JSONDecodeError
 from uuid import uuid4
 
 from tracardi.domain.event_metadata import EventMetadata
@@ -42,6 +44,12 @@ class StartAction(ActionRunner):
 
         event_id = self.config.event_id if self.config.event_id else str(uuid4())
 
+        try:
+            properties = json.loads(self.config.properties)
+        except JSONDecodeError:
+            self.console.error("Could not decode properties as JSON in start node.")
+            properties = {}
+
         event = Event(
             metadata=EventMetadata(time=EventTime(), debug=True),
             id=event_id,
@@ -49,6 +57,7 @@ class StartAction(ActionRunner):
             source=source,
             profile=event_profile,
             session=event_session,
+            properties=properties,
             context={
                 "config": {
                     "debugger": True
