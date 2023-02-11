@@ -1,17 +1,17 @@
+from uuid import uuid4
+
+from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.time import EventTime
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.configuration import Configuration
-from tracardi.service.storage.driver import storage
-from datetime import datetime
 from tracardi.service.wf.domain.graph_invoker import GraphInvoker
-from typing import Tuple, Optional
-from tracardi.domain.event import Event
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
-import json
-from json import JSONDecodeError
+from typing import Optional
+from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity
 
 
@@ -20,130 +20,64 @@ def validate(config: dict):
 
 
 class StartAction(ActionRunner):
-
     config: Configuration
 
     async def set_up(self, init):
         self.config = validate(init)
 
-    async def _create_full_event(self, event_data) -> Tuple[Event, Optional[Profile], Optional[Session]]:
-
-        session = None
-        profile = None
-        event = Event(**event_data)
-        event.metadata.profile_less = self.config.profile_less
-
-        # Do it only for made-up events - when no event ID and event type is specified
-        if (not self.config.event_id) and not (self.config.event_type and self.config.event_type.id):
-            try:
-                event.properties = json.loads(self.config.properties)
-            except JSONDecodeError as e:
-                self.console.warning(str(e))
-
-        if event.session is not None:
-            session = await storage.driver.session.load_by_id(event.session.id)
-
-        if self.config.profile_less is False and isinstance(event.profile, Entity):
-            profile_records = await storage.driver.profile.load_by_id(event.profile.id)
-            profile = Profile.create(profile_records)
-
-        if self.config.profile_less is False and isinstance(event.profile, Entity) and profile is None:
-            raise ValueError(
-                "Event type '{}' has reference to empty profile id '{}'. Debug stopped. This event is corrupted.".format(
-                    event.id, event.profile.id))
-
-        return event, profile, session
-
     async def debug_run(self):
-        if self.config.event_id:
-            event = await storage.driver.event.load(self.config.event_id)
-            if event is None:
-                raise ValueError(
-                    f"There is no event with ID '{self.config.event_id}'. Check configuration of start node."
-                )
-            events = [event]
 
-        elif self.config.event_type is not None and self.config.event_type.id:
-            result = await storage.driver.event.load_event_by_type(self.config.event_type.id, limit=10)
-            if result.total == 0:
-                raise ValueError(
-                    f"There is no event with type '{self.config.event_type.id}'. Check configuration for event type."
-                )
-            events = list(result)
+        # Set debug event
 
-        else:
-            events = [
-                {
-                    "id": "@debug-event-id",
-                    "metadata": {
-                        "time": {
-                            "insert": datetime.utcnow()
-                        },
-                        "ip": "127.0.0.1",
-                        "profile_less": True
-                    },
-                    "source": {
-                        "id": "debug-source"
-                    },
-                    "type": "debug-event-type",
-                    "properties": {},
-                    "context": {
-                        "config": {
-                            "debugger": True
-                        },
-                        "params": {}
-                    }
-                }
-            ]
+        session = Session(id=self.config.session_id if self.config.session_id else str(uuid4()),
+                          metadata=SessionMetadata())
+        profile = Profile(id=self.config.profile_id if self.config.profile_id else str(uuid4()))
 
-        for event_data in events:
+        event_session = EventSession(id=session.id)
+        event_profile = Entity(id=profile.id)
 
-            try:
+        source = Entity(id="@debug-event-source")
 
-                event, profile, session = await self._create_full_event(event_data)
+        event_type = self.config.event_type.id if self.config.event_type.id else "@debug-event-type"
 
-                if self.event is not None:
-                    self.event.replace(event)
-                else:
-                    self.event = event
-                self.event.metadata.debug = True
-                self.event.session = session
-                self.event.source = event.source
+        event_id = self.config.event_id if self.config.event_id else str(uuid4())
 
-                # Session can be None is user requested not to save it.
-                if self.config.session_less is True or session is None:
-                    self.event.session = None
-                    self.session = None
-
-                    # Remove session in all nodes because the event is session less
-                    graph = self.execution_graph  # type: GraphInvoker
-                    if isinstance(graph, GraphInvoker):
-                        graph.set_sessions(None)
-
-                elif self.session is not None:
-                    self.session.replace(session)
-
-                # Event can be profile less if collected via webhook
-                if self.config.profile_less is True:
-                    self.event.profile = None
-                    self.profile = None
-
-                    # Remove profiles in all nodes because the event is profile less
-                    graph = self.execution_graph  # type: GraphInvoker
-                    if isinstance(graph, GraphInvoker):
-                        graph.set_profiles(None)
-                else:
-                    if self.profile is not None and profile is not None:
-                        self.profile.replace(profile)
-
-                return Result(port="payload", value={})
-
-            except ValueError as e:
-                self.console.warning(str(e))
-
-        raise ValueError(
-            f"There is no event that is consistent in terms of current configuration. See log error for details."
+        event = Event(
+            metadata=EventMetadata(time=EventTime(), debug=True),
+            id=event_id,
+            type=event_type,
+            source=source,
+            profile=event_profile,
+            session=event_session,
+            context={
+                "config": {
+                    "debugger": True
+                },
+                "params": {}
+            }
         )
+
+        try:
+
+            self.event.replace(event)
+            self.event.session = session
+            self.event.source = source
+            self.event.profile = profile
+
+            # Remove session in all nodes because the event is session less
+            graph = self.execution_graph  # type: GraphInvoker
+            if isinstance(graph, GraphInvoker):
+                graph.set_sessions(session)
+
+            # Remove profiles in all nodes because the event is profile less
+            graph = self.execution_graph  # type: GraphInvoker
+            if isinstance(graph, GraphInvoker):
+                graph.set_profiles(profile)
+
+            return Result(port="payload", value={})
+
+        except ValueError as e:
+            self.console.warning(str(e))
 
     async def production_run(self):
         self.event.metadata.debug = self.config.debug
@@ -174,10 +108,10 @@ def register() -> Plugin:
             init={
                 "debug": False,
                 "event_types": [],
-                "profile_less": False,
-                "session_less": False,
                 "properties": "{}",
                 "event_id": None,
+                "profile_id": None,
+                "session_id": None,
                 "event_type": {
                     "name": "",
                     "id": ""
@@ -209,16 +143,21 @@ def register() -> Plugin:
                     description="In debug mode the following event will be injected into workflow.",
                     fields=[
                         FormField(
-                            id="profile_less",
-                            name="Profile-less event",
-                            description="Profile-less events are events that does not attach profile data.",
-                            component=FormComponent(type="bool", props={"label": "Profile-less event"})
+                            id="event_id",
+                            name="Event ID",
+                            description="Define event id. It may match the event that exists in database. "
+                                        "If left empty random id will be generated.",
+                            component=FormComponent(type="text", props={"label": "Event ID"})
                         ),
                         FormField(
-                            id="session_less",
-                            name="Session-less event",
-                            description="Session-less events may occur when user did not want session to be saved.",
-                            component=FormComponent(type="bool", props={"label": "Session-less event"})
+                            id="event_type",
+                            name="Event type",
+                            description="Define event type. It may match the event that exists in database. "
+                                        "If left empty then @debug-event-type will be defined.",
+                            component=FormComponent(type="eventType", props={
+                                "label": "Event type",
+                                "onlyValueWithOptions": False
+                            })
                         ),
                         FormField(
                             id="properties",
@@ -228,24 +167,24 @@ def register() -> Plugin:
                             component=FormComponent(type="json", props={"label": "Event types"})
                         ),
                         FormField(
-                            id="event_id",
-                            name="Event ID",
-                            description="You can load event by its id for debug purpose. This field is optional. "
-                                        "If provided than id takes precedence before event type.",
-                            component=FormComponent(type="text", props={"label": "Event ID"})
+                            id="profile_id",
+                            name="Profile ID",
+                            description="Define profile id. It may match the event that exists in database. "
+                                        "If left empty random id will be generated.",
+                            component=FormComponent(type="text", props={"label": "Profile ID"})
                         ),
                         FormField(
-                            id="event_type",
-                            name="Event type",
-                            description="You can load event of selected type in debug mode. If left empty, generates "
-                                        "debug-event-type event or loads event by id if provided.",
-                            component=FormComponent(type="eventType", props={"label": "Event type"})
+                            id="session_id",
+                            name="Session ID",
+                            description="Define session id. It may match the event that exists in database. "
+                                        "If left empty random id will be generated.",
+                            component=FormComponent(type="text", props={"label": "Session ID"})
                         ),
                     ]
                 ),
             ]),
-            version='0.6.1',
-            license="MIT",
+            version='0.8.0',
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="start_action"
         ),

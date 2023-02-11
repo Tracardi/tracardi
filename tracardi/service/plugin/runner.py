@@ -1,4 +1,4 @@
-from typing import Dict, List, final
+from typing import Dict, final, Optional
 
 from pydantic import BaseModel
 
@@ -31,7 +31,7 @@ class ActionRunner:
     debug = True
     event: Event = None
     session = None
-    profile: Profile = None
+    profile: Optional[Profile] = None
     flow: BaseModel = None  # Flow
     flow_history = None
     console: Console = None

@@ -9,12 +9,11 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class Configuration(PluginConfig):
     debug: bool = False
     event_types: List[NamedEntity] = []
-
-    profile_less: Optional[bool] = False
-    session_less: Optional[bool] = False
-    properties: Optional[str] = "{}"
     event_id: Optional[str] = None
     event_type: Optional[NamedEntity] = None
+    profile_id: Optional[str] = None
+    session_id: Optional[str] = None
+    properties: Optional[str] = "{}"
 
     @validator("properties")
     def convert_to_json_id_dict(cls, value):
@@ -27,6 +26,18 @@ class Configuration(PluginConfig):
 
     @validator("event_id")
     def remove_whitespaces_from_event_id(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+        return value
+
+    @validator("profile_id")
+    def remove_whitespaces_from_profile_id(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+        return value
+
+    @validator("session_id")
+    def remove_whitespaces_from_session_id(cls, value):
         if isinstance(value, str):
             value = value.strip()
         return value
