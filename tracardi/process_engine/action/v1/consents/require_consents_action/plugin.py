@@ -43,6 +43,14 @@ class RequireConsentsAction(ActionRunner):
                     return Result(port="false", value=payload)
 
                 if consent_type.revokable is True:
+
+                    if self.profile.consents[consent_id].revoke is None:
+                        self.console.warning(f"Consent type {consent_type.name} is set as revokable by "
+                                             f"the revoke date is not set for this profile. "
+                                             f"I an assuming that this consent is "
+                                             f"timeless.")
+                        continue
+
                     try:
                         revoke_timestamp = self.profile.consents[consent_id].revoke.timestamp()
                     except AttributeError:
@@ -55,6 +63,9 @@ class RequireConsentsAction(ActionRunner):
             else:
                 if consent_id in self.profile.consents:
                     if consent_type.revokable is False:
+                        return Result(port="true", value=payload)
+
+                    if self.profile.consents[consent_id].revoke is None:
                         return Result(port="true", value=payload)
 
                     try:

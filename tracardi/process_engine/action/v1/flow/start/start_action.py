@@ -10,6 +10,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.driver import storage
 from .model.configuration import Configuration
 from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from typing import Optional
@@ -65,6 +66,16 @@ class StartAction(ActionRunner):
                 "params": {}
             }
         )
+
+        if profile:
+            _profile = await storage.driver.profile.load_by_id(profile.id)
+            if _profile:
+                profile = _profile.to_entity(Profile)
+
+        if session:
+            _session = await storage.driver.session.load_by_id(session.id)
+            if _session:
+                session = _session
 
         try:
 

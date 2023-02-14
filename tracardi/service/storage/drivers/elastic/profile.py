@@ -98,6 +98,7 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
 
 
 async def save(profile: Profile, refresh_after_save=False):
+    profile.metadata.aux['update'] = datetime.utcnow()
     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
     if refresh_after_save or elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
