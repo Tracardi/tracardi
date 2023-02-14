@@ -19,6 +19,10 @@ class PropertyExistsAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
         dot = self._get_dot_accessor(payload)
         if self.config.property in dot and dot[self.config.property] is not None:
+            if isinstance(dot[self.config.property], str):
+                if dot[self.config.property] == "":
+                    return Result(port="false", value=payload)
+
             return Result(port="true", value=payload)
 
         return Result(port="false", value=payload)
@@ -33,17 +37,18 @@ def register() -> Plugin:
             author="Risto Kowaczewski",
             inputs=["payload"],
             outputs=["true", "false"],
-            version="0.6.2",
+            version="0.8.0",
             init={
-                'property': 'event@context.page.url'
+                'property': 'profile@pii.email'
             },
+            manual="data_exists_action",
             form=Form(groups=[
                 FormGroup(
                     fields=[
                         FormField(
                             id="property",
                             name="Data property to check",
-                            description="Type data to validate if exists.",
+                            description="Type data to validate if exists and not empty.",
                             component=FormComponent(type="dotPath", props={
                                 "defaultSourceValue": "event",
                                 "defaultMode": 1
@@ -51,12 +56,11 @@ def register() -> Plugin:
                         ),
                     ]
                 ),
-            ]),
-            manual=None
+            ])
         ),
         metadata=MetaData(
             name='Data exists',
-            desc='Checks if the data property exists and is not null.',
+            desc='Checks if the data property exists and is not null or empty.',
             icon='exists',
             type="condNode",
             group=["Flow control"],
