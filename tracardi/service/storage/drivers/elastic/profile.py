@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from tracardi.domain.profile import *
 from tracardi.config import elastic
@@ -97,8 +97,13 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
     return [profile.to_entity(Profile) for profile in profiles]
 
 
-async def save(profile: Profile, refresh_after_save=False):
-    profile.metadata.aux['update'] = datetime.utcnow()
+async def save(profile: Union[Profile, List[Profile]], refresh_after_save=False):
+    if isinstance(profile, list):
+        for _profile in profile:
+            if isinstance(_profile, Profile):
+                _profile.metadata.aux['update'] = datetime.utcnow()
+    elif isinstance(profile, Profile):
+        profile.metadata.aux['update'] = datetime.utcnow()
     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
     if refresh_after_save or elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
