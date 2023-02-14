@@ -18,7 +18,7 @@ class PropertyExistsAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         dot = self._get_dot_accessor(payload)
-        if self.config.property in dot:
+        if self.config.property in dot and dot[self.config.property] is not None:
             return Result(port="true", value=payload)
 
         return Result(port="false", value=payload)
