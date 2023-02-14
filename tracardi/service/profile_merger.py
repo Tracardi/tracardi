@@ -1,4 +1,6 @@
 import logging
+
+from ..context import get_context
 from ..service.storage.driver import storage
 from collections import defaultdict
 from datetime import datetime
@@ -83,7 +85,7 @@ class ProfileMerger:
                                    limit: int = 2000) -> Optional[Profile]:
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
-            logger.info("Loading profiles to merge")
+
             similar_profiles = await storage.driver.profile.load_profiles_to_merge(
                 merge_by,
                 limit=limit
@@ -92,6 +94,9 @@ class ProfileMerger:
             if len(similar_profiles) == 0:
                 logger.info("No similar profiles to merge")
                 return None
+
+            logger.info(f"Loading profiles to merge in context {get_context()}. Found {len(similar_profiles)} "
+                        f"similar profiles.")
 
             merger = ProfileMerger(profile)
 
@@ -112,8 +117,11 @@ class ProfileMerger:
                 await ProfileMerger._move_profile_events_and_sessions(duplicate_profiles, merged_profile)
 
                 # Schedule - mark duplicated profiles
-                # await ProfileMerger._save_mark_duplicates_as_inactive_profiles(duplicate_profiles)
+                print([p.get_meta_data() for p in duplicate_profiles])
                 records_to_delete = [profile.id for profile in duplicate_profiles]
+
+                logger.info(f"Profiles to delete {records_to_delete}.")
+
                 await ProfileMerger._delete_profile(records_to_delete)
 
                 # Replace current profile with merged profile
@@ -317,22 +325,24 @@ class ProfileMerger:
         """
 
         merged_profile = None
-        disabled_profiles = []
 
-        if len(similar_profiles) > 0:
+        if len(similar_profiles) == 0:
+            return merged_profile, []
 
-            # Filter only profiles that are not current profile and where not merged
-            profiles_to_merge = [p for p in similar_profiles if p.id != self.current_profile.id and p.active is True]
+        # Filter only profiles that are not current profile and where not merged
+        profiles_to_merge = [p for p in similar_profiles if p.id != self.current_profile.id]
 
-            # Are there any profiles to merge?
-            if len(profiles_to_merge) > 0:
-                # Add current profile to existing ones and get merged profile
+        # Are there any profiles to merge?
+        if len(profiles_to_merge) > 0:
+            # Add current profile to existing ones and get merged profile
 
-                merged_profile = self._get_merged_profile(
-                    profiles_to_merge,
-                    conflict_aux_key=conflict_aux_key)
+            merged_profile = self._get_merged_profile(
+                profiles_to_merge,
+                conflict_aux_key=conflict_aux_key)
 
-        return merged_profile, disabled_profiles
+            # merged_profile.ids += profiles_to_merge
+
+        return merged_profile, profiles_to_merge
 
     async def deduplicate(self,
                           similar_profiles: List[Profile]) -> Tuple[Optional[Profile], List[Profile]]:
