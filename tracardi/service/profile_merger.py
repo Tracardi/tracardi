@@ -1,6 +1,8 @@
+import asyncio
 import logging
 
 from ..context import get_context
+from ..domain.storage_record import RecordMetadata
 from ..service.storage.driver import storage
 from collections import defaultdict
 from datetime import datetime
@@ -66,8 +68,10 @@ class ProfileMerger:
         await storage.driver.profile.refresh()
 
     @staticmethod
-    async def _delete_profile(profile_ids):
-        return await storage.driver.profile.bulk_delete_by_id(ids=profile_ids)
+    async def _delete_profile(profile_ids: List[Tuple[str, RecordMetadata]]):
+        tasks = [asyncio.create_task(storage.driver.profile.delete_by_id(profile_id, metadata.index))
+                 for profile_id, metadata in profile_ids]
+        return await asyncio.gather(*tasks)
 
     @staticmethod
     async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
@@ -117,8 +121,8 @@ class ProfileMerger:
                 await ProfileMerger._move_profile_events_and_sessions(duplicate_profiles, merged_profile)
 
                 # Schedule - mark duplicated profiles
-                print([p.get_meta_data() for p in duplicate_profiles])
-                records_to_delete = [profile.id for profile in duplicate_profiles]
+                records_to_delete: List[Tuple[str, RecordMetadata]] = [(profile.id, profile.get_meta_data())
+                                                                       for profile in duplicate_profiles]
 
                 logger.info(f"Profiles to delete {records_to_delete}.")
 
