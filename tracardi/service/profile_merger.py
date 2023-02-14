@@ -95,12 +95,17 @@ class ProfileMerger:
                 limit=limit
             )
 
-            if len(similar_profiles) == 0:
+            logger.info(f"Loading profiles to merge in context {get_context()}. Found {len(similar_profiles)} "
+                        f"similar profiles.")
+
+            no_if_similar_profiles = len(similar_profiles)
+            if no_if_similar_profiles == 0:
                 logger.info("No similar profiles to merge")
                 return None
 
-            logger.info(f"Loading profiles to merge in context {get_context()}. Found {len(similar_profiles)} "
-                        f"similar profiles.")
+            if no_if_similar_profiles == 1 and similar_profiles[0].id == profile.id:
+                logger.info("No profiles to merge")
+                return None
 
             merger = ProfileMerger(profile)
 
