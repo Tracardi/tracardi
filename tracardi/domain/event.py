@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 from uuid import uuid4
 
 from .entity import Entity
@@ -22,6 +22,16 @@ class Tags(BaseModel):
     def total_tags(cls, values):
         values["count"] = len(values.get("values"))
         return values
+
+    def add(self, tag: Union[str, List[str]]):
+
+        if isinstance(tag, list):
+            tag = tuple(tag)
+            self.values += tag
+        else:
+            self.values += tag,
+
+        self.count = len(self.values)
 
 
 class EventSession(Entity):

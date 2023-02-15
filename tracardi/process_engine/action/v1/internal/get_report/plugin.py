@@ -6,7 +6,6 @@ from tracardi.service.report_manager import ReportManager, ReportManagerExceptio
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
-import json
 from tracardi.domain.entity import NullableEntity
 
 

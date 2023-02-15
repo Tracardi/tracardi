@@ -4,6 +4,10 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.internal.tag_event.plugin": PluginMetadata(
+        test=PluginTest(init={"tags": "tag1,tag2"}, resource=None),
+    ),
+
     "tracardi.process_engine.action.v1.time.last_profile_visit.plugin": PluginMetadata(
         test=PluginTest(init=None, resource=None),
     ),
