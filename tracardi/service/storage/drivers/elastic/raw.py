@@ -54,6 +54,11 @@ async def delete_by_id(index: str, id: str) -> dict:
     return await es.delete(index, id)
 
 
+async def delete_by_query(index: str, query: str) -> dict:
+    es = ElasticClient.instance()
+    return await es.delete_by_query(index, query)
+
+
 async def upsert(index: str, data: dict) -> BulkInsertResult:
     es = ElasticClient.instance()
     return await es.insert(index, [data])
