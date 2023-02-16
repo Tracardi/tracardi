@@ -16,6 +16,11 @@ def index(idx) -> PersistenceService:
     return storage_manager(idx)
 
 
+async def query(index: str, query: dict):
+    es = ElasticClient.instance()
+    return await es.search(index, query)
+
+
 async def query_by_index(index: str, query: dict) -> StorageRecords:
     return await storage_manager(index).query(query)
 
