@@ -68,7 +68,6 @@ setup(
         'python-whois==0.8.0',
         'PyYAML==6.0',
         'telebot==0.0.4',
-        'openai==0.26.5',
         # Worker requirements
         'requests',
         'mysql-connector-python==8.0.29'
