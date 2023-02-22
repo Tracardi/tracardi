@@ -59,7 +59,8 @@
       },
       "properties": {
         "type": "object",
-        "dynamic": "true"
+        "dynamic": "true",
+        "enabled": false
       },
       "enabled": {
         "type": "boolean"

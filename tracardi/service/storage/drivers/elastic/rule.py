@@ -53,7 +53,8 @@ async def _load_rule(event_type, source_id):
     return await storage_manager(index="rule").filter(query)
 
 
-async def _get_rules_for_source_and_event_type(source: Entity, events: List[Event]) -> Tuple[Dict[str, List[Dict]], bool]:
+async def _get_rules_for_source_and_event_type(source: Entity, events: List[Event]) -> Tuple[
+    Dict[str, List[Dict]], bool]:
     event_types = {event.type for event in events}
 
     # Cache rules per event types
@@ -123,3 +124,17 @@ async def refresh():
 
 async def flush():
     return await storage_manager('rule').flush()
+
+
+async def load_by_event_type(max_group: int = 20) -> StorageRecords:
+    query = {
+        "query": {"match_all": {}},
+        "collapse": {
+            "field": "event.type",
+            "inner_hits": {
+                "name": "types",
+                "size": max_group
+            }
+        }
+    }
+    return await storage_manager('rule').query(query)
