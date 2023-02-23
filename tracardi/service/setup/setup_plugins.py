@@ -760,6 +760,16 @@ if License.has_license():
             resource=None)
     )
 
+    installed_plugins["com_tracardi.action.v1.openai.chatgpt.plugin"] = PluginMetadata(
+        test=PluginTest(init={
+                "resource": {
+                    "name": "",
+                    "id": ""
+                },
+                "prompt": ""
+            }, resource={"api_key": "test"}),
+    )
+
 # Plugins only for testing
 test_plugins: Dict[str, PluginMetadata] = {
 

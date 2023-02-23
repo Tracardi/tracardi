@@ -1,5 +1,4 @@
-from typing import Callable, Iterator, List, Union, Tuple, Optional, TypeVar, Type
-
+from typing import Callable, Iterator, List, Union, Tuple, Optional, TypeVar, Type, Dict
 from pydantic import BaseModel
 
 
@@ -14,9 +13,18 @@ class RecordMetadata(BaseModel):
 class StorageRecord(dict):
 
     @staticmethod
+    def _get_inner_hits(elastic_record):
+        if 'inner_hits' in elastic_record:
+            for name, inner_hits in elastic_record['inner_hits'].items():
+                yield name, StorageRecords.build_from_elastic(inner_hits)
+
+    @staticmethod
     def build_from_elastic(elastic_record: dict) -> 'StorageRecord':
         record = StorageRecord(**elastic_record['_source'])
         record.set_meta_data(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
+        if 'inner_hits' in elastic_record:
+            for name, inner_hits in StorageRecord._get_inner_hits(elastic_record):
+                record.set_inner_hits(name, inner_hits)
         return record
 
     @staticmethod
@@ -26,6 +34,19 @@ class StorageRecord(dict):
     def __init__(self, *args, **kwargs):
         super(StorageRecord, self).__init__(*args, **kwargs)
         self._meta = None
+        self._inner_hits = {}
+
+    def set_inner_hits(self, name, data):
+        self._inner_hits[name] = data
+
+    def get_inner_hit(self, name) -> Dict[str, 'StorageRecords']:
+        return self._inner_hits[name]
+
+    def get_inner_hits(self) -> Dict[str, 'StorageRecords']:
+        return self._inner_hits
+
+    def has_inner_hits(self) -> bool:
+        return bool(self._inner_hits)
 
     def set_meta_data(self, meta: RecordMetadata) -> 'StorageRecord':
         self._meta = meta
@@ -119,7 +140,7 @@ class StorageRecords(dict):
         return StorageAggregate(**self._aggregations[key])
 
     @staticmethod
-    def _to_record(hit):
+    def _to_record(hit) -> 'StorageRecord':
         row = StorageRecord.build_from_elastic(hit)
         row['id'] = hit['_id']
 
@@ -155,9 +176,16 @@ class StorageRecords(dict):
         return None
 
     def dict(self):
+        hits = []
+        for hit in self:
+            _hit = hit
+            if hit.has_inner_hits():
+                _hit['_inner_hits'] = {name: data.dict() for name, data in hit.get_inner_hits().items()}
+            hits.append(_hit)
+
         return {
             "total": self.total,
-            "result": list(self)
+            "result": hits
         }
 
     def transform_hits(self, func: Callable) -> None:

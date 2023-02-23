@@ -20,7 +20,7 @@ class SplitterAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         string = dot[self.config.string]
-        result = string.split(self.config.delimiter)
+        result = [item.strip() for item in string.split(self.config.delimiter)]
         return Result(port="payload", value={"result": result})
 
 

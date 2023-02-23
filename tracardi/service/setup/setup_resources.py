@@ -5,6 +5,15 @@ from typing import List
 def get_resource_types() -> List[ResourceSettings]:
     return [
         ResourceSettings(
+            id="api-key",
+            name="Api Key",
+            icon="hash",
+            tags=["api", "key", "token", "api_key"],
+            config={
+                "api_key": ""
+            }
+        ),
+        ResourceSettings(
             id="web-page",
             name="Web page",
             icon="web",

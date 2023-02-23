@@ -412,11 +412,29 @@ async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
     return result[n] if len(result) >= n + 1 else None
 
 
-async def get_events_by_session(session_id: str, limit: int = 100):
+async def get_events_by_session(session_id: str, limit: int = 100) -> StorageRecords:
     query = {
         "query": {
             "term": {
                 "session.id": session_id
+            }
+        },
+        "size": limit,
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ]
+    }
+
+    return await storage_manager("event").query(query)
+
+
+async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRecords:
+    query = {
+        "query": {
+            "term": {
+                "profile.id": profile_id
             }
         },
         "size": limit,
