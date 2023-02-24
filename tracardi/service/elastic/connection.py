@@ -61,7 +61,6 @@ async def wait_for_connection(no_of_tries=10):
             break
 
         except elasticsearch.exceptions.ConnectionError as e:
-            await asyncio.sleep(5)
             no_of_tries -= 1
             logger.error(
                 f"Could not connect to elasticsearch at {elastic.host}. Number of tries left: {no_of_tries}. "
@@ -71,6 +70,7 @@ async def wait_for_connection(no_of_tries=10):
                                "then you can not use localhost as elasticsearch is probably outside the container. Use "
                                "external IP that docker can connect to.")
             logger.error(f"Error details: {str(e)}")
+            await asyncio.sleep(5)
 
         # todo check if this is needed when we make a single thread startup.
         except Exception as e:

@@ -153,9 +153,9 @@ class Tracker:
                 id=source_id,
                 type='rest',
                 bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
-                name="Scheduler event source",
-                description="This is internal event source for delayed events.",
-                channel="Scheduler",
+                name="Internal event source",
+                description="This is internal event source for internal events.",
+                channel="Internal",
                 transitional=False,  # ephemeral
                 tags=['internal']
             )
