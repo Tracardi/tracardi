@@ -3,16 +3,22 @@ Version 0.8.0
 
 ## Features
 
-* Profile live time plugin
-* Staging of all data
-* Fixed merging
+* Clear separation of test and production data
+* Fixed profile merging
 * Upgrade to React 18
-* 
+* Cleaner Menu
+* Visualisation of events routing 
+* Plugins
+  * Profile live time plugin
+  * Corrected API call plugin
+  * Several minor changes to plugins
 * Commercial features:
   * Wait and resume plugin
   * Identity resolution (Identification points)
-  * Commercial parts are disabled now
-  * 
+  * Cleaner marking of Commercial features
+  * ChatGPT plugin
+  * Kafka bridge 
+  * SMTP bridge for bounced emails.
 
 
 Version 0.7.4
