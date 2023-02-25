@@ -151,7 +151,7 @@ class Tracker:
         if source_id == f"@{tracardi.fingerprint}":
             return EventSource(
                 id=source_id,
-                type='rest',
+                type=['rest'],
                 bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
                 name="Internal event source",
                 description="This is internal event source for internal events.",
@@ -168,11 +168,11 @@ class Tracker:
         if not source.enabled:
             raise ValueError("Event source disabled.")
 
-        if source.type not in self.tracker_config.allowed_bridges:
+        if not source.is_allowed(self.tracker_config.allowed_bridges):
             raise ValueError(f"This endpoint allows only bridges of "
                              f"types {self.tracker_config.allowed_bridges}, but the even source "
-                             f"`{source.name}`.`{source_id}` is of type `{source.type}`. "
+                             f"`{source.name}`.`{source_id}` has types `{source.type}`. "
                              f"Change bridge type in event source `{source.name}` to one that has endpoint type "
-                             f"{self.tracker_config.allowed_bridges} or call `{source.type}` endpoint.")
+                             f"{self.tracker_config.allowed_bridges} or call any `{source.type}` endpoint.")
 
         return source
