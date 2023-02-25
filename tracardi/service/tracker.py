@@ -116,6 +116,9 @@ class Tracker:
 
         logger.debug(f"Source {source.id} validated.")
 
+        # Check if we need to generate profile and session id. Used in webhooks
+        tracker_payload.generate_profile_and_session()
+
         if self.on_source_ready is None:
             tp = TrackerProcessor(
                 self.console_log,
