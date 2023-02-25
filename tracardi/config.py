@@ -153,7 +153,7 @@ class TracardiConfig:
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{elastic.host}".encode()).hexdigest()
         self.cardio_source = md5(
-            f"akkdskjd-askmdj-jdff{self.installation_token}-3039djn-{_production}-{elastic.host}".encode()).hexdigest()
+            f"akkdskjd-askmdj-jdff{self.installation_token}-3039djn-{elastic.host}".encode()).hexdigest()
         self._config = None
         self._unset_secrets()
 
