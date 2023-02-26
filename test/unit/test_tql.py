@@ -1,3 +1,5 @@
+import os
+
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.time import EventTime
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -9,6 +11,8 @@ from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from lark.exceptions import VisitError
 import pytest
+
+os.environ['TZ'] = 'Europe/Berlin'
 
 payload = {
     "a": {
