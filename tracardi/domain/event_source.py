@@ -7,7 +7,7 @@ from tracardi.domain.entity import Entity
 
 
 class EventSource(Entity):
-    type: str
+    type: List[str]
     bridge: NamedEntity
     timestamp: datetime
     name: Optional[str] = "No name provided"
@@ -28,6 +28,8 @@ class EventSource(Entity):
     def __init__(self, **data: Any):
         if 'timestamp' not in data:
             data['timestamp'] = datetime.utcnow()
+        if 'type' in data and isinstance(data['type'], str):
+            data['type'] = [data['type']]
         super().__init__(**data)
 
     # Persistence
@@ -38,3 +40,6 @@ class EventSource(Entity):
             'event-source',
             EventSource
         )
+
+    def is_allowed(self, allowed_types) -> bool:
+        return bool(set(self.type).intersection(set(allowed_types)))

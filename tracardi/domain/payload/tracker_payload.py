@@ -78,6 +78,25 @@ class TrackerPayload(BaseModel):
     def scheduled_event_config(self) -> ScheduledEventConfig:
         return ScheduledEventConfig(flow_id=self._scheduled_flow_id, node_id=self._scheduled_node_id)
 
+    def generate_profile_and_session(self):
+        if isinstance(self.source, EventSource):
+
+            if 'webhook' in self.source.type:
+                if self.source.config is not None:
+                    if 'generate_profile' in self.source.config:
+                        if self.source.config['generate_profile'] is True:
+                            if not self.profile:
+                                self.profile = Entity(id=str(uuid4()))
+                                self.profile_less = False
+                                self.options.update({"saveProfile": True})
+                            if not self.session:
+                                self.session = Entity(id=str(uuid4()))
+                                self.profile_less = False
+                                self.options.update({"saveSession": True})
+        else:
+            logger.error("Can't generate profile. Method _generate_profile_and_session used before "
+                         "EventSource was created.")
+
     def has_type(self, event_type):
         for event_payload in self.events:
             if event_payload.type == event_type:

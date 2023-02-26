@@ -20,7 +20,7 @@ async def validate_source(source_id: str, allowed_bridges: list) -> EventSource:
     if not source.enabled:
         raise ValueError("Event source disabled.")
 
-    if source.type not in allowed_bridges:
+    if not source.is_allowed(allowed_bridges):
         raise ValueError(f"Event source `{source_id}` is not within allowed bridge types {allowed_bridges}.")
 
     return source

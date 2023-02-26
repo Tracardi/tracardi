@@ -25,47 +25,6 @@ def _get_logging_level(level: str) -> int:
     return logging.WARNING
 
 
-class TracardiConfig:
-    def __init__(self, env):
-        self.env = env
-        _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
-        self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
-        self.save_logs = (env['SAVE_LOGS'].lower() == 'yes') if 'SAVE_LOGS' in env else True
-        self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
-        self.sync_profile_tracks_max_repeats = int(
-            env['SYNC_PROFILE_TRACKS_MAX_REPEATS']) if 'SYNC_PROFILE_TRACKS_MAX_REPEATS' in env else 10
-        self.sync_profile_tracks_wait = int(
-            env['SYNC_PROFILE_TRACKS_WAIT']) if 'SYNC_PROFILE_TRACKS_WAIT' in env else 1
-        self.postpone_destination_sync = int(
-            env['POSTPONE_DESTINATION_SYNC']) if 'POSTPONE_DESTINATION_SYNC' in env else 20
-        self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
-        self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
-        self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
-        self.tracardi_pro_port = int(env['TRACARDI_PRO_PORT']) if 'TRACARDI_PRO_PORT' in env else 40000
-        self.tracardi_scheduler_host = env[
-            'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
-        self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
-        self.server_logging_level = _get_logging_level(
-            env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
-        self.version: Version = Version(version=VERSION, name=NAME, production=_production)
-        self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
-        self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}".encode()).hexdigest()
-        self._config = None
-        self._unset_secrets()
-
-    @property
-    def config(self) -> YamlConfig:
-        if not self._config:
-            config = self.env.get('CONFIG', 'config.yaml')
-            with open(config, "r") as stream:
-                config = yaml.safe_load(stream)
-                self._config = YamlConfig(**config)
-        return self._config
-
-    def _unset_secrets(self):
-        self.env['INSTALLATION_TOKEN'] = ""
-
-
 class MemoryCacheConfig:
     def __init__(self, env):
         self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 0
@@ -166,4 +125,49 @@ class RedisConfig:
 redis_config = RedisConfig(os.environ)
 elastic = ElasticConfig(os.environ)
 memory_cache = MemoryCacheConfig(os.environ)
+
+
+class TracardiConfig:
+    def __init__(self, env):
+        self.env = env
+        _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
+        self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
+        self.save_logs = (env['SAVE_LOGS'].lower() == 'yes') if 'SAVE_LOGS' in env else True
+        self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
+        self.sync_profile_tracks_max_repeats = int(
+            env['SYNC_PROFILE_TRACKS_MAX_REPEATS']) if 'SYNC_PROFILE_TRACKS_MAX_REPEATS' in env else 10
+        self.sync_profile_tracks_wait = int(
+            env['SYNC_PROFILE_TRACKS_WAIT']) if 'SYNC_PROFILE_TRACKS_WAIT' in env else 1
+        self.postpone_destination_sync = int(
+            env['POSTPONE_DESTINATION_SYNC']) if 'POSTPONE_DESTINATION_SYNC' in env else 20
+        self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
+        self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
+        self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
+        self.tracardi_pro_port = int(env['TRACARDI_PRO_PORT']) if 'TRACARDI_PRO_PORT' in env else 40000
+        self.tracardi_scheduler_host = env[
+            'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
+        self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
+        self.server_logging_level = _get_logging_level(
+            env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
+        self.version: Version = Version(version=VERSION, name=NAME, production=_production)
+        self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
+        self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{elastic.host}".encode()).hexdigest()
+        self.cardio_source = md5(
+            f"akkdskjd-askmdj-jdff{self.installation_token}-3039djn-{elastic.host}".encode()).hexdigest()
+        self._config = None
+        self._unset_secrets()
+
+    @property
+    def config(self) -> YamlConfig:
+        if not self._config:
+            config = self.env.get('CONFIG', 'config.yaml')
+            with open(config, "r") as stream:
+                config = yaml.safe_load(stream)
+                self._config = YamlConfig(**config)
+        return self._config
+
+    def _unset_secrets(self):
+        self.env['INSTALLATION_TOKEN'] = ""
+
+
 tracardi = TracardiConfig(os.environ)
