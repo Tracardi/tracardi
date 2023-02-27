@@ -4,7 +4,12 @@ from hashlib import sha1
 from typing import Union, Callable, Awaitable
 from uuid import uuid4
 from pydantic import PrivateAttr, validator
+from tracardi.exceptions.exception_service import get_traceback
+
+from tracardi.service.utils.getters import get_entity_id
+
 from tracardi.config import tracardi
+from ..console import Console
 from ..event import Event
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
@@ -78,24 +83,66 @@ class TrackerPayload(BaseModel):
     def scheduled_event_config(self) -> ScheduledEventConfig:
         return ScheduledEventConfig(flow_id=self._scheduled_flow_id, node_id=self._scheduled_node_id)
 
-    def generate_profile_and_session(self):
+    def _replace_profile(self, profile_id):
+        self.profile = Entity(id=profile_id)
+        self.profile_less = False
+        self.options.update({"saveProfile": True})
+
+    def generate_profile_and_session(self, console_log: list) -> bool:
+
+        """
+
+        Returns True if profile or session generated
+
+        :param console_log:
+        :return:
+
+        """
         if isinstance(self.source, EventSource):
 
             if 'webhook' in self.source.type:
                 if self.source.config is not None:
                     if 'generate_profile' in self.source.config:
                         if self.source.config['generate_profile'] is True:
+
+                            if 'replace_profile_id' in self.source.config:
+                                try:
+                                    profile_id_ref = self.source.config['replace_profile_id'].strip()
+                                    # Webhooks have only one event, so it is save to get it from self.events[0]
+                                    profile_id = self.events[0].properties[profile_id_ref]
+                                    self._replace_profile(profile_id)
+                                except KeyError as e:
+                                    message = f"Could not generate profile and session for a webhook. " \
+                                              f"Event stays profile-less. " \
+                                              f"Probable reason: Missing data: {str(e)}"
+                                    logger.error(message)
+                                    console_log.append(Console(
+                                        flow_id=None,
+                                        node_id=None,
+                                        event_id=None,
+                                        profile_id=get_entity_id(self.profile),
+                                        origin='tracker',
+                                        class_name=__name__,
+                                        module=__name__,
+                                        type='error',
+                                        message=message,
+                                        traceback=get_traceback(e)
+                                    ))
+
                             if not self.profile:
-                                self.profile = Entity(id=str(uuid4()))
-                                self.profile_less = False
-                                self.options.update({"saveProfile": True})
+                                self._replace_profile(str(uuid4()))
+
                             if not self.session:
                                 self.session = Entity(id=str(uuid4()))
                                 self.profile_less = False
                                 self.options.update({"saveSession": True})
+
+                            return True
         else:
             logger.error("Can't generate profile. Method _generate_profile_and_session used before "
                          "EventSource was created.")
+
+        return False
 
     def has_type(self, event_type):
         for event_payload in self.events:

@@ -22,7 +22,8 @@ open_webhook_source_bridge = Bridge(
     name="API Webhook Bridge",
     description="API Webhook collector",
     config={
-        "generate_profile": False
+        "generate_profile": False,
+        "replace_profile_id": ""
     },
     form=Form(groups=[
         FormGroup(
@@ -38,6 +39,14 @@ open_webhook_source_bridge = Bridge(
                                 "A profile and session are empty. You can add your own data to either "
                                 "of them in the workflow.",
                     component=FormComponent(type="bool", props={"label": "Create profile and session"})
+                ),
+                FormField(
+                    id="replace_profile_id",
+                    name="Replace profile ID",
+                    description="Replace profile ID with data from payload. Profile ID can be replaced by data sent "
+                                "in payload. Reference the data beneath or leave it empty to keep random profile ID. "
+                                "This data will not be used if no profile is created.",
+                    component=FormComponent(type="text", props={"label": "Replace profile"})
                 )
             ])
 ])
@@ -59,7 +68,7 @@ cardio_event_source = EventSource(
     type=["internal"],
     name="Cardio Source",
     channel="Cardio",
-    desctiprion="Internal event source for heartbeats.",
+    description="Internal event source for heartbeats.",
     bridge=NamedEntity(**open_rest_source_bridge.dict()),
     timestamp=utcnow(),
     tags=["internal"],
