@@ -43,9 +43,10 @@ open_webhook_source_bridge = Bridge(
                 FormField(
                     id="replace_profile_id",
                     name="Replace profile ID",
-                    description="Replace profile ID with data from payload. Profile ID can be replaced by data sent "
-                                "in payload. Reference the data beneath or leave it empty to keep random profile ID. "
-                                "This data will not be used if no profile is created.",
+                    description="If you want to replace the Profile ID with data from the payload, reference the "
+                                "data below or leave it empty if you don't want to create a profile or profile must "
+                                "have random id. Make sure the Profile ID is secure and not easily guessable, as "
+                                "easy profile IDs can lead to security issues.",
                     component=FormComponent(type="text", props={"label": "Replace profile"})
                 )
             ])
