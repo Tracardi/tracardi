@@ -41,7 +41,7 @@ class StartAction(ActionRunner):
 
         source = Entity(id="@debug-event-source")
 
-        event_type = self.config.event_type.id if self.config.event_type.id else "@debug-event-type"
+        event_type = self.config.event_type.id if self.config.event_type and self.config.event_type.id else "@debug-event-type"
 
         event_id = self.config.event_id if self.config.event_id else str(uuid4())
 
