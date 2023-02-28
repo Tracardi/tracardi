@@ -3,13 +3,17 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable
 from uuid import uuid4
+
+from dotty_dict import dotty
+
+from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 from tracardi.domain.type import Type
 from tracardi.service.license import License, INDEXER
 
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
-from tracardi.config import tracardi
+from tracardi.config import tracardi, memory_cache
 from tracardi.domain.enum.event_status import COLLECTED
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.process_engine.debugger import Debugger
@@ -199,6 +203,70 @@ class TrackingManager(TrackingManagerBase):
         else:
             # Routing rules are subject to caching
             event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
+
+        # Copy data from event to profile. This must be run just before processing.
+
+        for event in events:
+            coping_schema = await cache.event_to_profile_coping(
+                event_type=event.type,
+                ttl=memory_cache.event_to_profile_coping_ttl)
+
+            if coping_schema is not None:
+                coping_schema = coping_schema.to_entity(EventToProfile)
+                if coping_schema.event_to_profile:
+                    flat_profile = dotty(self.profile.dict())
+                    flat_event = dotty(event.dict())
+                    allowed_profile_fields = ("traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
+
+                    for event_ref, profile_ref in coping_schema.event_to_profile.items():
+                        if not profile_ref.startswith(allowed_profile_fields):
+                            self.console_log.append(
+                                Console(
+                                    flow_id=None,
+                                    node_id=None,
+                                    event_id=event.id,
+                                    profile_id=get_entity_id(self.profile),
+                                    origin='event',
+                                    class_name=TrackingManager.__name__,
+                                    module=__name__,
+                                    type='warning',
+                                    message=f"You are trying to copy the data to unknown field in profile. "
+                                            f"Your profile reference `{profile_ref}` does not start with typical "
+                                            f"fields that are {allowed_profile_fields}. Please check if there isn't "
+                                            f"an error in your copy schema. Data will not be copied if it does not "
+                                            f"match Profile schema.",
+                                    traceback=[]
+                                )
+                            )
+
+                        try:
+                            flat_profile[profile_ref] = flat_event[event_ref]
+                        except KeyError as e:
+                            if event_ref.startswith(("properties", "traits")):
+                                message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
+                                          f"Original data send to processing. Error message: {repr(e)} key."
+                            else:
+                                message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
+                                          f"Maybe `properties.{event_ref}` or `traits.{event_ref}` could work. " \
+                                          f"Original data send to processing. Error message: {repr(e)} key."
+                            self.console_log.append(
+                                Console(
+                                    flow_id=None,
+                                    node_id=None,
+                                    event_id=event.id,
+                                    profile_id=get_entity_id(self.profile),
+                                    origin='event',
+                                    class_name=TrackingManager.__name__,
+                                    module=__name__,
+                                    type='error',
+                                    message=message,
+                                    traceback=get_traceback(e)
+                                )
+                            )
+                            logger.error(message)
+
+                    self.profile = Profile(**flat_profile)
+                    self.profile.operation.update = True
 
         ux = []
         post_invoke_events = None

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from .entity import Entity
 from .event_metadata import EventMetadata
-from pydantic import BaseModel, root_validator, PrivateAttr
+from pydantic import BaseModel, root_validator
 from typing import Tuple
 
 from .value_object.operation import RecordFlag

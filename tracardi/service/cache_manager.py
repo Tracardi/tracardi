@@ -3,7 +3,7 @@ from typing import Optional, List
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.session import Session
-from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.driver import storage
@@ -17,6 +17,7 @@ class CacheManager(metaclass=Singleton):
         'EVENT_TAG': MemoryCache("event-tags", max_pool=200, allow_null_values=True),
         'EVENT_RESHAPING': MemoryCache("event-reshaping", max_pool=200, allow_null_values=True),
         'EVENT_INDEXING': MemoryCache("event-indexing", max_pool=200, allow_null_values=True),
+        'EVENT_TO_PROFILE_COPING': MemoryCache("event-to-profile-coping", max_pool=200, allow_null_values=True),
         'EVENT_DESTINATION': MemoryCache("event-destinations", max_pool=100, allow_null_values=True),
         'PROFILE_DESTINATIONS': MemoryCache("profile-destinations", max_pool=10, allow_null_values=True)
     }
@@ -38,6 +39,9 @@ class CacheManager(metaclass=Singleton):
 
     def event_indexing_cache(self) -> MemoryCache:
         return self._cache['EVENT_INDEXING']
+
+    def event_to_profile_coping_cache(self) -> MemoryCache:
+        return self._cache['EVENT_TO_PROFILE_COPING']
 
     def profile_destination_cache(self) -> MemoryCache:
         return self._cache['PROFILE_DESTINATIONS']
@@ -123,6 +127,20 @@ class CacheManager(metaclass=Singleton):
                 True,
                 event_type)
         return await storage.driver.event_validation.load_by_event_type(event_type)
+
+    async def event_to_profile_coping(self, event_type, ttl) -> Optional[StorageRecord]:
+        """
+        Event to profile coping schema cache
+        """
+        if ttl > 0:
+            return await MemoryCache.cache(
+                self.event_to_profile_coping_cache(),
+                event_type,
+                ttl,
+                storage.driver.event_to_profile.get_event_to_profile,
+                True,
+                event_type)
+        return await storage.driver.event_to_profile.get_event_to_profile(event_type)
 
     async def event_metadata(self, event_type, ttl):
         if ttl > 0:
