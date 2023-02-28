@@ -91,6 +91,19 @@ async def move_from_staging_to_production():
 
     for stage_index, _, production_index, _ in get_staged_indices():
         logger.info(f"Coping data from {stage_index} to {production_index}")
+        # Delete data in index
+        result = await storage.driver.raw.delete_by_query(index=production_index, query={
+            "query": {
+                "match_all": {}
+            }
+        })
+
+        logger.info(f"Deleted data from {production_index}, {result.get('deleted', None)}")
+
+        # Refresh
+        await storage.driver.raw.refresh(index=production_index)
+
+        # Reindex
         result = await storage.driver.raw.reindex(source=stage_index, destination=production_index)
         for key in result_sum.keys():
             result_sum = add_up(key, result, result_sum)
