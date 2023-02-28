@@ -127,6 +127,7 @@ async def create_indices():
 
                 for attempt in range(0, 3):
                     try:
+                        print(target_index, mapping)
                         result = await storage.driver.raw.create_index(target_index, mapping)
                         break
                     except ConnectionTimeout as e:

@@ -195,6 +195,8 @@ class Resource:
                                   mapping="mappings/live-segment-index.json"),
             "event-management": Index(staging=True, multi_index=False, index="tracardi-event-management",
                                       mapping="mappings/event-management-index.json"),
+            "event-to-profile": Index(staging=True, multi_index=False, index="tracardi-event_to_profile",
+                                      mapping="mappings/event-to-profile-index.json"),
             "debug-info": Index(staging=False, multi_index=False, index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json"),
             "api-instance": Index(staging=False, multi_index=False, index="tracardi-api-instance",
