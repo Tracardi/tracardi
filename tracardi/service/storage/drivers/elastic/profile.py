@@ -1,5 +1,6 @@
 from typing import Tuple, Union
 
+from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
@@ -68,7 +69,7 @@ async def deduplicate_profile(profile_id):
     return profile
 
 
-async def load_profile_without_identification(tracker_payload) -> Optional[Profile]:
+async def load_profile_without_identification(tracker_payload: TrackerPayload, is_static=False) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     @throws DuplicatedRecordException
@@ -82,6 +83,13 @@ async def load_profile_without_identification(tracker_payload) -> Optional[Profi
         profile_record = await load_by_id(profile_id)
 
         if profile_record is None:
+
+            # Static profiles can be None as they need to be created if does not exist.
+            # Static means the profile id was given in the track payload
+
+            if is_static:
+                return Profile(id=tracker_payload.profile.id)
+
             return None
 
         profile = Profile.create(profile_record)

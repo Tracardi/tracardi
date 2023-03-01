@@ -1,9 +1,10 @@
 import json
 import logging
 from hashlib import sha1
-from typing import Union, Callable, Awaitable
+from datetime import datetime
+from typing import Union, Callable, Awaitable, Optional, List, Any
 from uuid import uuid4
-from pydantic import PrivateAttr, validator
+from pydantic import PrivateAttr, validator, BaseModel
 from tracardi.exceptions.exception_service import get_traceback
 
 from tracardi.service.utils.getters import get_entity_id
@@ -16,6 +17,8 @@ from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
+from ..entity import Entity
+from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 from ...service.storage.drivers.elastic.profile import *
 
@@ -108,9 +111,10 @@ class TrackerPayload(BaseModel):
                             if 'replace_profile_id' in self.source.config:
                                 try:
                                     profile_id_ref = self.source.config['replace_profile_id'].strip()
-                                    # Webhooks have only one event, so it is save to get it from self.events[0]
-                                    profile_id = self.events[0].properties[profile_id_ref]
-                                    self._replace_profile(profile_id)
+                                    if bool(profile_id_ref):
+                                        # Webhooks have only one event, so it is save to get it from self.events[0]
+                                        profile_id = self.events[0].properties[profile_id_ref]
+                                        self._replace_profile(profile_id)
                                 except KeyError as e:
                                     message = f"Could not generate profile and session for a webhook. " \
                                               f"Event stays profile-less. " \
@@ -211,7 +215,7 @@ class TrackerPayload(BaseModel):
 
     async def get_static_profile_and_session(self,
                                              session: Session,
-                                             profile_loader: Callable[['TrackerPayload'], Awaitable],
+                                             profile_loader: Callable[['TrackerPayload', bool], Awaitable],
                                              profile_less: bool) -> Tuple[Optional[Profile], Session]:
 
         if profile_less:
@@ -220,7 +224,7 @@ class TrackerPayload(BaseModel):
             if not self.profile.id:
                 raise ValueError("Can not use static profile id without profile.id.")
 
-            profile = await profile_loader(self)
+            profile = await profile_loader(self, True)   # is_static is set to true
             if not profile:
                 profile = Profile(
                     id=self.profile.id
