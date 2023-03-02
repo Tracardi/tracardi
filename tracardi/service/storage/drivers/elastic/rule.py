@@ -126,15 +126,18 @@ async def flush():
     return await storage_manager('rule').flush()
 
 
-async def load_by_event_type(max_group: int = 20) -> StorageRecords:
-    query = {
-        "query": {"match_all": {}},
-        "collapse": {
-            "field": "event.type",
-            "inner_hits": {
-                "name": "types",
-                "size": max_group
-            }
-        }
-    }
-    return await storage_manager('rule').query(query)
+# async def load_by_event_type(max_group: int = 20) -> StorageRecords:
+#     query = {
+#         "query": {"match_all": {}},
+#         "collapse": {
+#             "field": "event.type",
+#             "inner_hits": {
+#                 "name": "types",
+#                 "size": max_group
+#             }
+#         }
+#     }
+#     return await storage_manager('rule').query(query)
+
+async def load_by_event_type(event_type:str, limit: int = 100) -> StorageRecords:
+    return await storage_manager('rule').load_by('event.type', event_type, limit=limit)
