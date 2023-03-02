@@ -448,6 +448,36 @@ async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRec
     return await storage_manager("event").query(query)
 
 
+async def aggregate_events_by_type_and_source() -> StorageRecords:
+    return await storage_manager("event").query({
+        "query": {
+            "match_all": {}
+        },
+        "size": 0,
+        "aggs": {
+            "by_type": {
+                "terms": {
+                    "field": "type"
+                },
+                "aggs": {
+                    "by_source": {
+                        "terms": {
+                            "field": "source.id"
+                        },
+                        # "aggs": {
+                        #     "last": {
+                        #         "top_hits": {
+                        #             "size": 1
+                        #         }
+                        #     }
+                        # }
+                    }
+                }
+            }
+        }
+    })
+
+
 async def aggregate_source_by_type(source_id: str, time_span: str):
     result = await storage_manager("event").query({
         "query": {
