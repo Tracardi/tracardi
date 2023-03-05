@@ -12,14 +12,14 @@ installed_plugins: Dict[str, PluginMetadata] = {
         test=PluginTest(init=None, resource=None),
     ),
 
-    "tracardi.process_engine.action.v1.internal.limiter.plugin": PluginMetadata(
-        test=PluginTest(init={
-            "keys": [],
-            "limit": 10,
-            "ttl": 60
-        },
-            resource=None)
-    ),
+    # "tracardi.process_engine.action.v1.internal.limiter.plugin": PluginMetadata(
+    #     test=PluginTest(init={
+    #         "keys": [],
+    #         "limit": 10,
+    #         "ttl": 60
+    #     },
+    #         resource=None)
+    # ),
 
     "tracardi.process_engine.action.v1.connectors.telegram.post.plugin": PluginMetadata(
         test=PluginTest(
@@ -313,21 +313,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.events.event_counter.plugin": PluginMetadata(
-        test=PluginTest(init={
-            "event_type": {'id': '1', 'name': 'Some value'},
-            "time_span": "-15m"
-        },
-            resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.events.event_aggregator.plugin": PluginMetadata(
-        test=PluginTest(init={
-            "field": {'id': '1', 'name': 'Some value'},
-            "time_span": "-15m"
-        },
-            resource=None)
-    ),
 
     "tracardi.process_engine.action.v1.events.event_discarder.plugin": PluginMetadata(
         test=PluginTest(init={},
@@ -474,16 +459,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.segmentation.memorize.plugin": PluginMetadata(
-        test=PluginTest(init={'memory_key': 'abc'},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.segmentation.recall.plugin": PluginMetadata(
-        test=PluginTest(init={'memory_key': 'abc'},
-                        resource=None)
-    ),
-
     "tracardi.process_engine.action.v1.segmentation.delete.plugin": PluginMetadata(
         test=PluginTest(init={'segment': 'abc'},
                         resource=None)
@@ -602,28 +577,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.internal.add_empty_session.plugin": PluginMetadata(
         test=PluginTest(init={},
                         resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.internal.entity.upsert.plugin": PluginMetadata(
-        test=PluginTest(init={'id': "1", 'properties': '{}', 'reference_profile': True, 'traits': '{}', 'type': 'type'},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.internal.entity.load.plugin": PluginMetadata(
-        test=PluginTest(init={'id': "1", 'reference_profile': True, 'type': {'id': 'type', 'name': 'type'}},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.internal.entity.delete.plugin": PluginMetadata(
-        test=PluginTest(init={'id': '1', 'reference_profile': True, 'type': {'id': 'type', 'name': 'type'}},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.internal.get_report.plugin": PluginMetadata(
-        test=PluginTest(init={'report_config': {'params': '{}', 'report': {'id': '1', 'name': '1'}}},
-                        resource={
-
-                        })
     ),
 
     "tracardi.process_engine.action.v1.internal.add_response.plugin": PluginMetadata(
@@ -768,6 +721,65 @@ if License.has_license():
                 },
                 "prompt": ""
             }, resource={"api_key": "test"}),
+    )
+
+    installed_plugins["com_tracardi.action.v1.limiter.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "keys": [],
+                "limit": 10,
+                "ttl": 60
+            },
+            resource=None)
+    )
+
+    installed_plugins["com_tracardi.action.v1.events.event_counter.plugin"] = PluginMetadata(
+        test=PluginTest(init={
+            "event_type": {'id': '1', 'name': 'Some value'},
+            "time_span": "-15m"
+        },
+            resource=None)
+    )
+
+    installed_plugins["com_tracardi.action.v1.events.event_aggregator.plugin"] = PluginMetadata(
+        test=PluginTest(init={
+            "field": {'id': '1', 'name': 'Some value'},
+            "time_span": "-15m"
+        },
+            resource=None)
+    )
+
+    installed_plugins["com_tracardi.action.v1.load_report.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={'report_config': {'params': '{}', 'report': {'id': '1', 'name': '1'}}},
+            resource={
+
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.entity.upsert.plugin"] = PluginMetadata(
+        test=PluginTest(init={'id': "1", 'properties': '{}', 'reference_profile': True, 'traits': '{}', 'type': 'type'},
+                        resource=None)
+    )
+
+    installed_plugins["com_tracardi.action.v1.entity.load.plugin"] = PluginMetadata(
+        test=PluginTest(init={'id': "1", 'reference_profile': True, 'type': {'id': 'type', 'name': 'type'}},
+                        resource=None)
+    )
+
+    installed_plugins["com_tracardi.action.v1.entity.delete.plugin"] = PluginMetadata(
+        test=PluginTest(init={'id': '1', 'reference_profile': True, 'type': {'id': 'type', 'name': 'type'}},
+                        resource=None)
+    )
+
+    installed_plugins["com_tracardi.action.v1.segmentation.memorize.plugin"] = PluginMetadata(
+        test=PluginTest(init={'memory_key': 'abc'},
+                        resource=None)
+    )
+
+    installed_plugins["com_tracardi.action.v1.segmentation.recall.plugin"] = PluginMetadata(
+        test=PluginTest(init={'memory_key': 'abc'},
+                        resource=None)
     )
 
 # Plugins only for testing

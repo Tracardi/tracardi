@@ -98,7 +98,6 @@ def register() -> Plugin:
                 )
             ]
             ),
-            manual="move_add_action"
         ),
         metadata=MetaData(
             name='Move segment',

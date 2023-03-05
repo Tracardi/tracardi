@@ -15,7 +15,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='EventDiscarder',
+            className=EventDiscarder.__name__,
             inputs=["payload"],
             outputs=["payload"],
             version='0.7.1',

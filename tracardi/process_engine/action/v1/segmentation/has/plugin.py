@@ -67,7 +67,6 @@ def register() -> Plugin:
                     ]
                 )]
             ),
-            manual="has_segment_action"
         ),
         metadata=MetaData(
             name='Has segment',

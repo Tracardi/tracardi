@@ -94,7 +94,6 @@ def register() -> Plugin:
                     ]
                 )]
             ),
-            manual="segment_add_action"
         ),
         metadata=MetaData(
             name='Add segment',

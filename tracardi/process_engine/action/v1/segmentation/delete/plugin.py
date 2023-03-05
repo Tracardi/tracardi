@@ -76,7 +76,6 @@ def register() -> Plugin:
                     ]
                 )]
             ),
-            manual="segment_delete_action"
         ),
         metadata=MetaData(
             name='Delete segment',
