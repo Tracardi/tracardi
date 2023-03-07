@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Type, Callable, Coroutine, Any
+from typing import Type, Callable, Coroutine, Any, Optional
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.profile import Profile
@@ -106,7 +106,7 @@ class Tracker:
                     raise ValueError(msg)
                 source = self.tracker_config.internal_source
             else:
-                source = await self.validate_source(source_id=tracker_payload.source.id)
+                source = await self.validate_source(source_id=tracker_payload.source.id, ip=tracker_payload.metadata.ip)
 
             # Update tracker source with full object
             tracker_payload.source = source
@@ -151,7 +151,7 @@ class Tracker:
             self.tracker_config
         )
 
-    async def validate_source(self, source_id: str) -> EventSource:
+    async def validate_source(self, source_id: str, ip: Optional[str] = 'n/a') -> EventSource:
 
         if source_id == f"@{tracardi.fingerprint}":
             return EventSource(
@@ -168,7 +168,7 @@ class Tracker:
         source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
 
         if source is None:
-            raise ValueError(f"Invalid event source `{source_id}`")
+            raise ValueError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}`")
 
         if not source.enabled:
             raise ValueError("Event source disabled.")
