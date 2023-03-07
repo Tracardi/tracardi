@@ -1,4 +1,5 @@
 import json
+from hashlib import sha1
 from json import JSONDecodeError
 from typing import Optional
 
@@ -19,6 +20,7 @@ class Config(PluginConfig):
     subscriber_id: str
     recipient_email: Optional[str] = ""
     payload: Optional[str] = "{}"
+    hash: bool = False
 
 
 def validate(config: dict) -> Config:
@@ -67,10 +69,13 @@ class NovuTriggerAction(ActionRunner):
         url = 'https://api.novu.co/v1/events/trigger'
         dot = self._get_dot_accessor(payload)
         timeout = aiohttp.ClientTimeout(total=15)
+
+        subscriber_id = sha1(dot[self.config.subscriber_id].encode()).hexdigest() if self.config.hash else dot[self.config.subscriber_id]
+
         params = {
             "name": self.config.template.id,
             "to": {
-                "subscriberId": dot[self.config.subscriber_id],
+                "subscriberId": subscriber_id,
                 "email": dot[self.config.recipient_email]
             },
             "payload": json.loads(self.config.payload)
