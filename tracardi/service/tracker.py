@@ -106,7 +106,7 @@ class Tracker:
                     raise ValueError(msg)
                 source = self.tracker_config.internal_source
             else:
-                source = await self.validate_source(source_id=tracker_payload.source.id, ip=tracker_payload.metadata.ip)
+                source = await self.validate_source(tracker_payload)
 
             # Update tracker source with full object
             tracker_payload.source = source
@@ -151,7 +151,10 @@ class Tracker:
             self.tracker_config
         )
 
-    async def validate_source(self, source_id: str, ip: Optional[str] = 'n/a') -> EventSource:
+    async def validate_source(self, tracker_payload: TrackerPayload) -> EventSource:
+
+        source_id = tracker_payload.source.id
+        ip = tracker_payload.metadata.ip
 
         if source_id == f"@{tracardi.fingerprint}":
             return EventSource(
@@ -168,7 +171,8 @@ class Tracker:
         source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
 
         if source is None:
-            raise ValueError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}`")
+            raise ValueError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
+                             f"width payload: {tracker_payload}")
 
         if not source.enabled:
             raise ValueError("Event source disabled.")
