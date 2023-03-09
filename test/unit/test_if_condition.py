@@ -29,5 +29,4 @@ def test_if_condition_for_spaces():
         result = await condition.evaluate('payload@A["a[\\" b@ c"] exists', dot)
         assert result is False
 
-
     asyncio.run(main())
