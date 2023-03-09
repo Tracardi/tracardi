@@ -141,6 +141,17 @@ class ExprTransformer(TransformerNamespace):
         return value1 or value2
 
     def OP_FIELD(self, args):
+        if '["' in args.value or '"]' in args.value:
+            # Convert to dotty notation
+            split = args.value.split("@", 1)
+            source = split[0]
+            ref = "".join(split[1:])
+            # converts value["a b c"] to value.a b c
+            ref = ref.replace('["', ".")
+            if ref[-2:] == '"]':
+                ref = ref[:-2]
+                ref = ref.replace('"]', ".")
+            return Field(f"{source}@{ref}", self._dot)
         return Field(args.value, self._dot)
 
     def OP(self, args):

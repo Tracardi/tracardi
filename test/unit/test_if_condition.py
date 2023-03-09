@@ -20,7 +20,14 @@ def test_if_condition_for_spaces():
         dot = DotAccessor(payload={"A": {"a b c": 1}})
 
         condition = Condition()
-        result = await condition.evaluate("payload@A.\"a b c\" exists", dot)
-        print(result)
+        result = await condition.evaluate('payload@A["a b c"] exists', dot)
+        assert result is True
+        result = await condition.evaluate('payload@A["a b c"] == 1', dot)
+        assert result is True
+        result = await condition.evaluate('payload@A["a @b c"] exists', dot)
+        assert result is False
+        result = await condition.evaluate('payload@A["a[\\" b@ c"] exists', dot)
+        assert result is False
+
 
     asyncio.run(main())
