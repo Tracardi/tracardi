@@ -8,6 +8,7 @@ from .destination import DestinationConfig
 from .entity import Entity
 from .pro_service_form_data import ProService
 from .value_object.storage_info import StorageInfo
+from ..context import get_context
 from ..service.secrets import encrypt, decrypt
 
 T = TypeVar("T")
@@ -22,7 +23,7 @@ class ResourceCredentials(BaseModel):
         Returns configuration of resource depending on the state of the executed workflow: test or production.
         """
 
-        if plugin.debug is True:
+        if plugin.debug is True or not get_context().production:
             return output(**self.test) if output is not None else self.test
         return output(**self.production) if output is not None else self.production
 
