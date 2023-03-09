@@ -28,6 +28,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "config": {
+        "type": "flattened"
+      },
       "event_to_profile": {
         "type": "flattened"
       }

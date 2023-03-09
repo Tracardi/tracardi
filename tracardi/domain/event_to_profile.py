@@ -8,6 +8,7 @@ class EventToProfile(NamedEntity):
     event_type: str
     description: Optional[str] = "No description provided"
     enabled: Optional[bool] = False
+    config: Optional[str] = None
     event_to_profile: Optional[dict] = {}
     tags: List[str] = []
 

@@ -127,7 +127,6 @@ async def create_indices():
 
                 for attempt in range(0, 3):
                     try:
-                        print(target_index, mapping)
                         result = await storage.driver.raw.create_index(target_index, mapping)
                         break
                     except ConnectionTimeout as e:
@@ -147,7 +146,10 @@ async def create_indices():
                 output['indices'].append(target_index)
 
             else:
-                logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
+                mapping = map['template'] if index.multi_index else map
+                logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
+                update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
+                logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
 
     # Recreate all aliases
 
