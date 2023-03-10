@@ -14,6 +14,11 @@ async def del_event_type_metadata(event_type: str):
     return await sm.delete(event_type, index=sm.get_single_storage_index())
 
 
+async def load_by_id(event_id: str):
+    sm = storage_manager("event-to-profile")
+    return await sm.load(event_id)
+
+
 async def get_event_to_profile(event_type: str, enabled_only: bool = False) -> StorageRecords:
     fields = [("event_type", event_type)]
     if enabled_only:
