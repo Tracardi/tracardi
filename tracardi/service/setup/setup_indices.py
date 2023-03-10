@@ -46,7 +46,6 @@ async def install_default_data():
 
 
 async def create_indices(update_mapping: bool = False):
-
     output = {
         "templates": [],
         "indices": [],
@@ -146,16 +145,18 @@ async def create_indices(update_mapping: bool = False):
                 output['indices'].append(target_index)
 
             else:
-                if update_mapping is True:
-                    try:
-                        mapping = map['template'] if index.multi_index else map
-                        logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
-                        update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
-                        logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
-                    except TransportError as e:
-                        raise ConnectionAbortedError(f"Update of index {target_index} mapping failed with error {repr(e)}")
-                else:
-                    logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
+                # Always update mappings but raise an error if there is an error
+                try:
+                    mapping = map['template'] if index.multi_index else map
+                    logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
+                    update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
+                    logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
+                except TransportError as e:
+                    message = f"Update of index {target_index} mapping failed with error {repr(e)}"
+                    if update_mapping is True:
+                        raise ConnectionAbortedError(message)
+                    else:
+                        logger.error(message)
 
     # Recreate all aliases
 
