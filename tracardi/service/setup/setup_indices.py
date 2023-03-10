@@ -45,7 +45,7 @@ async def install_default_data():
             await storage.driver.raw.index(index).upsert(record)
 
 
-async def create_indices():
+async def create_indices(update_mapping: bool = False):
 
     output = {
         "templates": [],
@@ -146,10 +146,13 @@ async def create_indices():
                 output['indices'].append(target_index)
 
             else:
-                mapping = map['template'] if index.multi_index else map
-                logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
-                update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
-                logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
+                if update_mapping is True:
+                    mapping = map['template'] if index.multi_index else map
+                    logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
+                    update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
+                    logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
+                else:
+                    logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
 
     # Recreate all aliases
 
