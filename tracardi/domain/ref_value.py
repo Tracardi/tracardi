@@ -32,6 +32,7 @@ class RefValue(BaseModel):
                     try:
                         value = dot[self.value.strip()]
                     except KeyError:
-                        logger.error(f"Could not find value in payload at `{self.value}`. ")
+                        logger.warning(f"Could not find value in payload at `{self.value}`. "
+                                       f"Default value was returned.")
 
         return value
