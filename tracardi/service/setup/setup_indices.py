@@ -1,7 +1,7 @@
 import json
 import os
 
-from elasticsearch.exceptions import ConnectionTimeout
+from elasticsearch.exceptions import ConnectionTimeout, TransportError
 from json import JSONDecodeError
 from tracardi.config import tracardi
 from tracardi.domain.version import Version
@@ -147,10 +147,13 @@ async def create_indices(update_mapping: bool = False):
 
             else:
                 if update_mapping is True:
-                    mapping = map['template'] if index.multi_index else map
-                    logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
-                    update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
-                    logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
+                    try:
+                        mapping = map['template'] if index.multi_index else map
+                        logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
+                        update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
+                        logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
+                    except TransportError as e:
+                        raise ConnectionAbortedError(f"Update of index {index.index} mapping failed with error {repr(e)}")
                 else:
                     logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
 
