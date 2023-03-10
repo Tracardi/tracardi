@@ -128,7 +128,7 @@ class CacheManager(metaclass=Singleton):
                 event_type)
         return await storage.driver.event_validation.load_by_event_type(event_type)
 
-    async def event_to_profile_coping(self, event_type, ttl) -> Optional[StorageRecord]:
+    async def event_to_profile_coping(self, event_type, ttl) -> StorageRecords:
         """
         Event to profile coping schema cache
         """
@@ -139,7 +139,9 @@ class CacheManager(metaclass=Singleton):
                 ttl,
                 storage.driver.event_to_profile.get_event_to_profile,
                 True,
-                event_type)
+                event_type,
+                True  # Only enabled
+            )
         return await storage.driver.event_to_profile.get_event_to_profile(event_type)
 
     async def event_metadata(self, event_type, ttl):

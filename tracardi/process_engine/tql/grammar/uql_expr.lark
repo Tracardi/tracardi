@@ -61,7 +61,7 @@ op_array: "[" [op_value ("," op_value)*] "]"
 OP_NULL: "NULL"i
 OP_BOOL: /(TRUE|FALSE)/i
 // OP_FIELD: /(payload|session|event|profile|flow|memory)\@([a-zA-Z0-9\._\-\~\s]+)/
-OP_FIELD: /(payload|session|event|profile|flow|memory)\@([a-z][a-z0-9\_\-]*(?:(\.[a-z][a-z0-9\_\-]*|\[\"(?:[^\"\\]|\\.)+\"\]))+|[a-z][a-z0-9\_\-]*)/i
+OP_FIELD: /(payload|session|event|profile|flow|memory)\@([a-z0-9][a-z0-9\_\-]*(?:(\.[a-z0-9][a-z0-9\_\-]*|\[\"(?:[^\"\\]|\\.)+\"\]))+|[a-z0-9][a-z0-9\_\-]*)/i
 //OP_FIELD: /(payload|session|event|profile|flow|memory)\@([a-zA-Z0-9\_]{1,}))/
 
 OP_STRING: ESCAPED_STRING
