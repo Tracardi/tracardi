@@ -153,7 +153,7 @@ async def create_indices(update_mapping: bool = False):
                         update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
                         logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
                     except TransportError as e:
-                        raise ConnectionAbortedError(f"Update of index {index.index} mapping failed with error {repr(e)}")
+                        raise ConnectionAbortedError(f"Update of index {target_index} mapping failed with error {repr(e)}")
                 else:
                     logger.info(f"{alias_index} - EXISTS Index `{target_index}`.")
 
