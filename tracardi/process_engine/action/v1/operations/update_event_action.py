@@ -7,7 +7,8 @@ class UpdateEventAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
         self.event.operation.update = True
         if self.debug is True:
-            self.console.warning("Events may not be updated in debug mode.")
+            self.console.warning("Events are not be updated in debug mode. Debug only test workflow and does not run "
+                                 "the whole ingestion process.")
         return None
 
 
@@ -20,6 +21,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=[],
             version="0.6.0.1",
+            author="Risto Kowaczewski",
             init=None,
             manual="update_event_action"
         ),

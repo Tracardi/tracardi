@@ -34,10 +34,7 @@ class DeleteSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             if self.config.segment in self.profile.segments:
-                if not self.debug:
-                    profile.operation.update = True
-                else:
-                    self.console.warning("Profile is not updated in debug mode.")
+                profile.operation.update = True
                 profile.segments = list(set(profile.segments))
                 profile.segments.remove(self.config.segment)
             self.profile.replace(profile)
