@@ -291,7 +291,7 @@ class TrackingManager(TrackingManagerBase):
                                         origin='event',
                                         class_name=TrackingManager.__name__,
                                         module=__name__,
-                                        type='error',
+                                        type='warning',
                                         message=message,
                                         traceback=get_traceback(e)
                                     )

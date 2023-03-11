@@ -71,6 +71,7 @@ class Event(Entity):
             self.config = event.config
             self.tags = event.tags
             self.aux = event.aux
+            self.request = event.request
 
     def is_persistent(self) -> bool:
         if 'save' in self.config and isinstance(self.config['save'], bool):

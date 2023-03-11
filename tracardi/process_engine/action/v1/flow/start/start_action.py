@@ -51,21 +51,31 @@ class StartAction(ActionRunner):
             self.console.error("Could not decode properties as JSON in start node.")
             properties = {}
 
-        event = Event(
-            metadata=EventMetadata(time=EventTime(), debug=True),
-            id=event_id,
-            type=event_type,
-            source=source,
-            profile=event_profile,
-            session=event_session,
-            properties=properties,
-            context={
-                "config": {
-                    "debugger": True
-                },
-                "params": {}
-            }
-        )
+        loaded_event = await storage.driver.event.load(event_id)
+
+        if loaded_event is None:
+            event = Event(
+                metadata=EventMetadata(time=EventTime(), debug=True),
+                id=event_id,
+                type=event_type,
+                source=source,
+                profile=event_profile,
+                session=event_session,
+                properties=properties,
+                context={
+                    "config": {
+                        "debugger": True
+                    },
+                    "params": {}
+                }
+            )
+        else:
+            event = loaded_event.to_entity(Event)
+            event.properties = properties
+            if self.config.profile_id:
+                event.profile.id = self.config.profile_id
+            if self.config.session_id:
+                event.session.id = self.config.session_id
 
         if profile:
             _profile = await storage.driver.profile.load_by_id(profile.id)
