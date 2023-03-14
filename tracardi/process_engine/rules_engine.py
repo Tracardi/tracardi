@@ -67,6 +67,13 @@ class RulesEngine:
 
             for rule in rules:
 
+                # Check consents
+                if 'properties' in rule and 'consents' in rule['properties'] and isinstance(rule['properties']['consents'], list):
+                    required_consent_ids = set([item['id'] for item in rule['properties']['consents'] if 'id' in item])
+                    if required_consent_ids:
+                        if required_consent_ids.intersection(self.profile.get_consent_ids()) != required_consent_ids:
+                            continue
+
                 # this is main roles loop
                 if 'name' in rule:
                     invoked_rules[event.id].append(rule['name'])
