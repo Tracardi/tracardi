@@ -2,7 +2,7 @@ import json
 import logging
 from hashlib import sha1
 from datetime import datetime
-from typing import Union, Callable, Awaitable, Optional, List, Any
+from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
 from uuid import uuid4
 from pydantic import PrivateAttr, validator, BaseModel
 from tracardi.exceptions.exception_service import get_traceback
@@ -20,7 +20,7 @@ from ..time import Time
 from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
-from ...service.storage.drivers.elastic.profile import *
+# from ...service.storage.drivers.elastic.profile import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Type, Callable, Coroutine, Any, Optional
+from typing import Type, Callable, Coroutine, Any
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.profile import Profile
