@@ -18,3 +18,6 @@ class BulkInsertResult(BaseModel):
 
     def is_nothing_saved(self) -> bool:
         return len(self.ids) == 0
+
+    def has_errors(self) -> bool:
+        return len(self.errors) > 0

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any
@@ -10,6 +11,7 @@ from tracardi.exceptions.exception import UnauthorizedException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
 from tracardi.service.setup.data.defaults import open_rest_source_bridge
+from tracardi.service.storage.driver import storage
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
@@ -56,7 +58,8 @@ async def track_event(tracker_payload: TrackerPayload,
             on_result_ready=on_result_ready
         )
 
-        return await tr.track_event(tracker_payload)
+        result = await tr.track_event(tracker_payload)
+        return result
 
     except Exception as e:
         traceback.print_exc()
@@ -64,6 +67,12 @@ async def track_event(tracker_payload: TrackerPayload,
         raise e
 
     finally:
+        # Save console log
+        encoded_console_log = list(console_log.get_encoded())
+        if encoded_console_log:
+            # Save in background
+            asyncio.create_task(storage.driver.console_log.save_all(encoded_console_log))
+
         if await save_logs() is False:
             logger.warning("Log index still not created. Saving logs postponed.")
 

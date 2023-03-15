@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List, Union, Generator, AsyncGenerator, Any
 
 from tracardi.config import tracardi, memory_cache
+from tracardi.domain.console import Console
 from tracardi.domain.entity import Entity
 from tracardi.domain.enum.event_status import PROCESSED
 from tracardi.domain.event_type_metadata import EventTypeMetadata
@@ -59,13 +60,33 @@ class TrackerResultPersister:
                     yield tracker_result.session
 
     async def _save_profile(self, tracker_results: List[TrackerResult]):
+        profiles_to_save = list(self.get_profiles_to_save(tracker_results))
+        results = []
         try:
-            profiles_to_save = list(self.get_profiles_to_save(tracker_results))
             if profiles_to_save:
-                yield await storage.driver.profile.save(profiles_to_save)
+                result = await storage.driver.profile.save(profiles_to_save)
+                if result.has_errors():
+                    for id in result.ids:
+                        self.console_log.append(
+                            Console(
+                                flow_id=None,
+                                node_id=None,
+                                event_id=None,
+                                profile_id=id,
+                                origin='profile',
+                                class_name=TrackerResultPersister.__name__,
+                                module=__name__,
+                                type='error',
+                                message=f"Error while storing profile id: {id}. Details: {result.errors}"
+                            )
+                        )
+                results.append(result)
 
         except StorageException as e:
-            raise FieldTypeConflictException("Could not save profile. Error: {}".format(str(e)), rows=e.details)
+            message = "Could not save profile. Error: {}".format(str(e))
+            raise FieldTypeConflictException(message, rows=e.details)
+
+        return results
 
     async def _save_session(self, tracker_results: List[TrackerResult]):
         try:
@@ -200,7 +221,7 @@ class TrackerResultPersister:
 
     async def persist(self, tracker_results: List[TrackerResult]) -> CollectResult:
         return CollectResult(
-            profile=[result async for result in self._save_profile(tracker_results)],
+            profile=await self._save_profile(tracker_results),
             session=[result async for result in self._save_session(tracker_results)],
             events=[result async for result in self._save_events(tracker_results)]
         )

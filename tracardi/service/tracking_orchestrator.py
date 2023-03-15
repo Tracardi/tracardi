@@ -194,9 +194,6 @@ class TrackingOrchestrator:
             profile_copy,
         )
 
-        # Save console log
-        await self.save_console_log()
-
         return tracker_result
 
     async def save_debug_data(self, debugger, debug: bool, profile_id):
@@ -223,9 +220,3 @@ class TrackingOrchestrator:
                     traceback=get_traceback(e)
                 )
             )
-
-    async def save_console_log(self):
-        if self.console_log:
-            encoded_console_log = list(self.console_log.get_encoded())
-            # Save in background
-            asyncio.create_task(storage.driver.console_log.save_all(encoded_console_log))
