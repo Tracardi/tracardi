@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import List, Union, Generator, AsyncGenerator, Any
+from typing import List, Union, Generator, AsyncGenerator, Any, Dict
 
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.console import Console
@@ -11,7 +11,7 @@ from tracardi.domain.value_object.operation import Operation
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.cache_manager import CacheManager
 
-from tracardi.service.console_log import ConsoleLog
+from tracardi.service.console_log import ConsoleLog, StatusLog
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -33,6 +33,8 @@ class TrackerResultPersister:
 
     def __init__(self, console_log: ConsoleLog):
         self.console_log = console_log
+        self.profile_errors: Dict[str, str] = {}  # Keeps errors from profiles
+        self.session_errors: Dict[str, str] = {}  # Keeps errors from session
 
     @staticmethod
     def get_profiles_to_save(tracker_results: List[TrackerResult]):
@@ -67,19 +69,7 @@ class TrackerResultPersister:
                 result = await storage.driver.profile.save(profiles_to_save)
                 if result.has_errors():
                     for id in result.ids:
-                        self.console_log.append(
-                            Console(
-                                flow_id=None,
-                                node_id=None,
-                                event_id=None,
-                                profile_id=id,
-                                origin='profile',
-                                class_name=TrackerResultPersister.__name__,
-                                module=__name__,
-                                type='error',
-                                message=f"Error while storing profile id: {id}. Details: {result.errors}"
-                            )
-                        )
+                        self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
                 results.append(result)
 
         except StorageException as e:
@@ -111,6 +101,11 @@ class TrackerResultPersister:
                             session.operation = Operation()
 
                         result = await storage.driver.session.save(sessions_to_add)
+
+                        if result.has_errors():
+                            for id in result.ids:
+                                self.session_errors[id] = f"Error while storing session id: {id}. Details: {result.errors}"
+
                         # Todo this may cause errors when async, we save multiple sessions at once
 
                         """
@@ -173,8 +168,7 @@ class TrackerResultPersister:
 
         return event_result
 
-    @staticmethod
-    async def _modify_events(tracker_result: TrackerResult, log_event_journal) -> List[Event]:
+    async def _modify_events(self, tracker_result: TrackerResult, log_event_journal: Dict[str, StatusLog]) -> List[Event]:
         for event in tracker_result.events:
 
             event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
@@ -199,6 +193,42 @@ class TrackerResultPersister:
                     continue
                 else:
                     event.metadata.status = PROCESSED
+
+            if self.profile_errors:
+                event.metadata.error = True
+
+                for profile_id, error_message in self.profile_errors.items():
+                    self.console_log.append(
+                        Console(
+                            flow_id=None,
+                            node_id=None,
+                            event_id=event.id,
+                            profile_id=profile_id,
+                            origin='profile',
+                            class_name=TrackerResultPersister.__name__,
+                            module=__name__,
+                            type='error',
+                            message=error_message
+                        )
+                    )
+
+            if self.session_errors:
+                event.metadata.error = True
+
+                for session_id, error_message in self.session_errors.items():
+                    self.console_log.append(
+                        Console(
+                            flow_id=None,
+                            node_id=None,
+                            event_id=event.id,
+                            profile_id=None,
+                            origin='session',
+                            class_name=TrackerResultPersister.__name__,
+                            module=__name__,
+                            type='error',
+                            message=error_message
+                        )
+                    )
 
         return tracker_result.events
 
