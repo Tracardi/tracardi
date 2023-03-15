@@ -67,6 +67,9 @@ class RulesEngine:
 
             for rule in rules:
 
+                if rule is None:
+                    continue
+
                 # Check consents
                 if 'properties' in rule and 'consents' in rule['properties'] and isinstance(rule['properties']['consents'], list):
                     required_consent_ids = set([item['id'] for item in rule['properties']['consents'] if 'id' in item])
