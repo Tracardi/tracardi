@@ -85,13 +85,6 @@ class RulesEngine:
                     self.console_log.append(console)
                     continue
 
-                # Check consents
-                if 'properties' in rule and 'consents' in rule['properties'] and isinstance(rule['properties']['consents'], list):
-                    required_consent_ids = set([item['id'] for item in rule['properties']['consents'] if 'id' in item])
-                    if required_consent_ids:
-                        if required_consent_ids.intersection(self.profile.get_consent_ids()) != required_consent_ids:
-                            continue
-
                 # this is main roles loop
                 if 'name' in rule:
                     invoked_rules[event.id].append(rule['name'])
@@ -101,6 +94,10 @@ class RulesEngine:
 
                 try:
                     rule = Rule(**rule)
+                    # Check consents
+                    if not rule.are_consents_met(self.profile.get_consent_ids()):
+                        # Consents disallow to run this rule
+                        continue
                     invoked_flows.append(rule.flow.id)
                 except ValidationError as e:
                     console = Console(

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Set
 
 from pydantic import validator, PrivateAttr
 
@@ -34,6 +34,22 @@ class Rule(NamedEntity):
 
     def schedule_node_id(self):
         return self._schedule_node_id
+
+    def are_consents_met(self, profile_consent_ids: Set[str]) -> bool:
+        if self.properties is None:
+            # No restriction
+            return True
+
+        if not profile_consent_ids:
+            # No consents set on profile
+            return True
+
+        if 'consents' in self.properties and isinstance(self.properties['consents'], list):
+            if len(self.properties['consents']) > 0:
+                required_consent_ids = set([item['id'] for item in self.properties['consents'] if 'id' in item])
+                return required_consent_ids.intersection(profile_consent_ids) == required_consent_ids
+
+        return True
 
     def __init__(self, **data: Any):
         if 'metadata' not in data:
