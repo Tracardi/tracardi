@@ -68,6 +68,21 @@ class RulesEngine:
             for rule in rules:
 
                 if rule is None:
+                    console = Console(
+                        origin="rule",
+                        event_id=event.id,
+                        flow_id=None,
+                        node_id=None,
+                        profile_id=self.profile.id,
+                        module=__name__,
+                        class_name=RulesEngine.__name__,
+                        type="error",
+                        message=f"Rule to workflow does not exist. This may happen when you debug a workflow that "
+                                f"has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
+                                f"that gets rescheduled and it could not find the routing to the workflow. "
+                                f"Set a routing rule and this error will be solved automatically."
+                    )
+                    self.console_log.append(console)
                     continue
 
                 # Check consents
