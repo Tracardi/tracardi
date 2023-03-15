@@ -213,6 +213,8 @@ class TrackingManager(TrackingManagerBase):
             # Routing rules are subject to caching
             event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
 
+        print("event_rules", event_rules)
+
         # Copy data from event to profile. This must be run just before processing.
 
         for event in events:

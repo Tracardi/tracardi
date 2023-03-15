@@ -69,7 +69,7 @@ async def _get_rules_for_source_and_event_type(source: Entity, events: List[Even
             rules = await _load_rule(event_type, source.id)
 
             # todo set MemoryCache ttl from env
-            memory_cache[cache_key] = CacheItem(data=rules, ttl=15)
+            memory_cache[cache_key] = CacheItem(data=rules, ttl=5)
 
         routes = list(memory_cache[cache_key].data)
         if not has_routes and routes:
