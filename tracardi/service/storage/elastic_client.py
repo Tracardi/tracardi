@@ -249,8 +249,8 @@ class ElasticClient:
     async def exists_alias(self, alias, index=None):
         return await self._client.indices.exists_alias(name=alias, index=index)
 
-    async def list_indices(self):
-        return await self._client.indices.get("*")
+    async def list_indices(self, index="*"):
+        return await self._client.indices.get(index)
 
     async def list_aliases(self):
         return await self._client.indices.get_alias(name="*")

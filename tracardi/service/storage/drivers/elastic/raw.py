@@ -140,9 +140,9 @@ async def add_template(template_name, map) -> bool:
     return _acknowledged(result)
 
 
-async def indices():
+async def indices(index="*"):
     es = ElasticClient.instance()
-    return await es.list_indices()
+    return await es.list_indices(index)
 
 
 async def health():

@@ -1,0 +1,256 @@
+{
+  "properties": {
+    "data": {
+      "properties": {
+        "media": {
+          "properties": {
+            "image": {
+              "type": "keyword"
+            },
+            "webpage": {
+              "type": "keyword"
+            },
+            "social": {
+              "properties": {
+                "twitter": {
+                  "type": "keyword"
+                },
+                "facebook": {
+                  "type": "keyword"
+                },
+                "youtube": {
+                  "type": "keyword"
+                },
+                "instagram": {
+                  "type": "keyword"
+                },
+                "tiktok": {
+                  "type": "keyword"
+                },
+                "linkedin": {
+                  "type": "keyword"
+                },
+                "reddit": {
+                  "type": "keyword"
+                },
+                "other": {
+                  "type": "flattened"
+                }
+              }
+            }
+          }
+        },
+        "pii": {
+          "properties": {
+            "firstname": {
+              "type": "keyword"
+            },
+            "lastname": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "birthday": {
+              "type": "date"
+            },
+            "language": {
+              "properties": {
+                "native": {
+                  "type": "keyword"
+                },
+                "spoken": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "gender": {
+              "type": "keyword"
+            },
+            "education": {
+              "properties": {
+                "level": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "civil": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "attributes": {
+              "properties": {
+                "height": {
+                  "type": "float"
+                },
+                "weight": {
+                  "type": "float"
+                },
+                "shoe_number": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        },
+        "contact": {
+          "properties": {
+            "email": {
+              "type": "keyword"
+            },
+            "phone": {
+              "type": "keyword"
+            },
+            "app": {
+              "properties": {
+                "whatsapp": {
+                  "type": "keyword"
+                },
+                "discord": {
+                  "type": "keyword"
+                },
+                "slack": {
+                  "type": "keyword"
+                },
+                "telegram": {
+                  "type": "keyword"
+                },
+                "wechat": {
+                  "type": "keyword"
+                },
+                "viber": {
+                  "type": "keyword"
+                },
+                "signal": {
+                  "type": "keyword"
+                },
+                "other": {
+                  "type": "flattened"
+                }
+              }
+            },
+            "address": {
+              "properties": {
+                "town": {
+                  "type": "keyword"
+                },
+                "county": {
+                  "type": "keyword"
+                },
+                "country": {
+                  "type": "keyword"
+                },
+                "postcode": {
+                  "type": "keyword"
+                },
+                "street": {
+                  "type": "keyword"
+                },
+                "other": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "job": {
+          "properties": {
+            "position": {
+              "type": "keyword"
+            },
+            "salary": {
+              "type": "float"
+            },
+            "company": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "size": {
+                  "type": "keyword"
+                },
+                "segment": {
+                  "type": "keyword"
+                },
+                "country": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "department": {
+              "type": "keyword"
+            },
+            "segment": {
+              "type": "keyword"
+            }
+          }
+        },
+        "location": {
+          "properties": {
+            "last": {
+              "type": "float"
+            }
+          }
+        },
+        "preferences": {
+          "properties": {
+            "purchase": {
+              "type": "keyword"
+            },
+            "colors": {
+              "type": "keyword"
+            },
+            "sizes": {
+              "type": "keyword"
+            },
+            "device": {
+              "type": "keyword"
+            },
+            "channel": {
+              "type": "keyword"
+            },
+            "payment": {
+              "type": "keyword"
+            }
+          }
+        },
+        "devices": {
+          "type": "keyword"
+        },
+        "metrics": {
+          "properties": {
+            "ltv": {
+              "type": "float"
+            }
+          }
+        },
+        "loyalty": {
+          "properties": {
+            "codes": {
+              "type": "keyword"
+            },
+            "card": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "issuer": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

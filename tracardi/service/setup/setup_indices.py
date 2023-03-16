@@ -45,6 +45,22 @@ async def install_default_data():
             await storage.driver.raw.index(index).upsert(record)
 
 
+async def update_mappings():
+    for key, index in resources.resources.items():
+        path = f"{__local_dir}/mappings/updates/{key}.json"
+        if os.path.isfile(path):
+            with open(path) as f:
+                update_mappings = json.load(f)
+                print(update_mappings)
+                if index.multi_index:
+                    current_indices = await storage.driver.raw.indices(index.get_templated_index_pattern())
+                    for idx, idx_data in current_indices.items():
+                        print(idx)
+                        from pprint import pprint
+                        pprint(await storage.driver.raw.set_mapping(idx, update_mappings))
+                        pprint(await storage.driver.raw.get_mapping(idx))
+
+
 async def create_indices(update_mapping: bool = False):
     output = {
         "templates": [],
@@ -210,3 +226,7 @@ async def create_indices(update_mapping: bool = False):
                     await on_start()
 
     return output
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(update_mappings())
