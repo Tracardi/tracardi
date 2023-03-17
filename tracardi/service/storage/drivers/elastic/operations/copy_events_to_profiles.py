@@ -73,7 +73,7 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
             profile.set_meta_data(profile_meta)
             asyncio.create_task(storage.driver.profile.save(profile))
 
-        except KeyError as e:
+        except Exception as e:
             console_log.append(
                 Console(
                     flow_id=None,
