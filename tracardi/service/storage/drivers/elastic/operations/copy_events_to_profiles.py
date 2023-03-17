@@ -37,6 +37,8 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
         try:
             profile_id = event['profile']['id']
             profile = await storage.driver.profile.load_by_id(profile_id)
+            profile_meta = profile.get_meta_data()
+            print(profile_meta)
             profile = dotty(profile)
 
             for mapping in mappings:
@@ -58,8 +60,9 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
                             traceback=get_traceback(e)
                         )
                     )
-
-            asyncio.create_task(storage.driver.profile.save(Profile(**profile)))
+            profile = Profile(**profile)
+            profile.set_meta_data(profile_meta)
+            asyncio.create_task(storage.driver.profile.save(profile))
 
         except KeyError as e:
             console_log.append(
