@@ -37,6 +37,8 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
         try:
             profile_id = event['profile']['id']
             profile = await storage.driver.profile.load_by_id(profile_id)
+            if profile is None:
+                continue
             profile_meta = profile.get_meta_data()
             print(profile_meta)
             profile = dotty(profile)
