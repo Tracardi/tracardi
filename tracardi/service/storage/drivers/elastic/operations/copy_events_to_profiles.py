@@ -30,8 +30,9 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
 
     mappings = list(settings.get_mappings())
     console_log = ConsoleLog()
-
+    print(settings.query)
     async for event in storage.driver.event.scan(settings.query):
+        print(event)
         event = dotty(event)
         try:
             profile_id = event['profile']['id']
