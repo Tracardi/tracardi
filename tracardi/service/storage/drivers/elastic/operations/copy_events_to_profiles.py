@@ -55,8 +55,9 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
                             class_name='copy_events_to_profiles',
                             module=__name__,
                             type='warning',
-                            message=f"While coping event data to profile system could not find data "
-                                    f"event@{mapping.event.value}. Data was not copied. Details: {repr(e)}",
+                            message=f"While coping event data from event type {event['type']} to profile, "
+                                    f"system could not find data event@{mapping.event.value}. "
+                                    f"Data was not copied. Details: {repr(e)}",
                             traceback=get_traceback(e)
                         )
                     )
