@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from dotty_dict import dotty
 from pydantic import BaseModel
@@ -13,11 +13,11 @@ logger.addHandler(log_handler)
 
 
 class RefValue(BaseModel):
-    value: Any
+    value: Optional[str] = ''
     ref: bool
 
     def has_value(self) -> bool:
-        return self.value and self.value.strip()
+        return bool(self.value and self.value.strip())
 
     def get_value(self, payload: Any):
         value = None

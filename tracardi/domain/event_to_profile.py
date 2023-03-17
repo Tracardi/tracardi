@@ -12,6 +12,9 @@ class EventToProfileMap(BaseModel):
     op: int
     profile: RefValue
 
+    def is_empty(self) -> bool:
+        return not self.event.has_value() or not self.profile.has_value()
+
 
 class EventToProfile(NamedEntity):
     event_type: str

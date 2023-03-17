@@ -167,6 +167,9 @@
             "salary": {
               "type": "float"
             },
+            "type": {
+              "type": "keyword"
+            },
             "company": {
               "properties": {
                 "name": {
@@ -184,9 +187,6 @@
               }
             },
             "department": {
-              "type": "keyword"
-            },
-            "segment": {
               "type": "keyword"
             }
           }

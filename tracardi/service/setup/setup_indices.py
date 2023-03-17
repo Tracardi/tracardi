@@ -44,7 +44,7 @@ async def install_default_data():
         for record in data:
             await storage.driver.raw.index(index).upsert(record)
 
-
+# todo add to install
 async def update_mappings():
     for key, index in resources.resources.items():
         path = f"{__local_dir}/mappings/updates/{key}.json"
