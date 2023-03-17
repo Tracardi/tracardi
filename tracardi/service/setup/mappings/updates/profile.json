@@ -156,6 +156,9 @@
                   "type": "keyword"
                 }
               }
+            },
+            "confirmations": {
+              "type": "keyword"
             }
           }
         },

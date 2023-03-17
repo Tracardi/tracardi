@@ -31,8 +31,10 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
     mappings = list(settings.get_mappings())
     console_log = ConsoleLog()
     print(settings.query)
+    record = 0
     async for event in storage.driver.event.scan(settings.query):
-        print(event)
+        record += 1
+        print(record, event)
         event = dotty(event)
         try:
 
