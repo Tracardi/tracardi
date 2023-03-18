@@ -30,23 +30,23 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
 
     mappings = list(settings.get_mappings())
     console_log = ConsoleLog()
-    print(settings.query)
+    print(settings.query, flush=True)
     record = 0
     async for event in storage.driver.event.scan(settings.query, batch=100):
         record += 1
-        print(record, event['id'])
+        print(record, event['id'], flush=True)
         event = dotty(event)
         try:
 
             if event['profile'] is None:
-                print("no profile")
+                print("no profile", flush=True)
                 continue
 
             profile_id = event['profile']['id']
             profile = await storage.driver.profile.load_by_id(profile_id)
 
             if profile is None:
-                print("empty profile")
+                print("empty profile", flush=True)
                 continue
 
             profile_meta = profile.get_meta_data()
@@ -56,7 +56,7 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
             for mapping in mappings:
                 try:
                     profile[mapping.profile.value] = event[mapping.event.value]
-                    print(mapping.profile.value, "=", mapping.event.value)
+                    print(mapping.profile.value, "=", mapping.event.value, flush=True)
                 except KeyError as e:
                     print(repr(e))
                     console_log.append(
@@ -78,7 +78,7 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
             profile = Profile(**profile)
             profile.set_meta_data(profile_meta)
             asyncio.create_task(storage.driver.profile.save(profile))
-            print('Profile save', profile.id)
+            print('Profile save', profile.id, flush=True)
 
         except Exception as e:
             print(repr(e))
