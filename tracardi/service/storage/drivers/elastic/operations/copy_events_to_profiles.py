@@ -78,6 +78,7 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
             profile = Profile(**profile)
             profile.set_meta_data(profile_meta)
             asyncio.create_task(storage.driver.profile.save(profile))
+            print('Profile save', profile.id)
 
         except Exception as e:
             print(repr(e))
