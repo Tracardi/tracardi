@@ -90,6 +90,7 @@ class ElasticClient:
         return await self._client.search(index=index, body=query)
 
     def scan(self, index, query, scroll="5m", size=1000, preserve_order=False):
+        print(index)
         # Does not preserve sorting
         return helpers.async_scan(
             self._client,

@@ -576,8 +576,8 @@ async def get_events_by_session_and_profile(profile_id: str, session_id: str, li
     return await storage_manager("event").query(query)
 
 
-def scan(query: dict = None):
-    return storage_manager('event').scan(query)
+def scan(query: dict = None, batch: int = 1000):
+    return storage_manager('event').scan(query, batch)
 
 
 async def reassign_session(new_session_id: str, old_session_id: str, profile_id: str):
