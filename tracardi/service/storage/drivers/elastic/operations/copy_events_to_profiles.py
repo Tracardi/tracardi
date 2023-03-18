@@ -34,17 +34,19 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
     record = 0
     async for event in storage.driver.event.scan(settings.query):
         record += 1
-        print(record, event)
+        print(record, event['id'])
         event = dotty(event)
         try:
 
             if event['profile'] is None:
+                print("no profile")
                 continue
 
             profile_id = event['profile']['id']
             profile = await storage.driver.profile.load_by_id(profile_id)
 
             if profile is None:
+                print("empty profile")
                 continue
 
             profile_meta = profile.get_meta_data()
@@ -54,6 +56,7 @@ async def copy_events_to_profiles(settings: EventToProfileCopySettings):
             for mapping in mappings:
                 try:
                     profile[mapping.profile.value] = event[mapping.event.value]
+                    print(mapping.profile.value, "=", mapping.event.value)
                 except KeyError as e:
                     print(repr(e))
                     console_log.append(
