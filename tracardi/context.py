@@ -42,21 +42,21 @@ class ContextManager(metaclass=Singleton):
     def get(self, var, default=None):
         if self._empty():
             return default
-        _var = ctx_id.get()
-        store = self._store[_var]
+        _request_id = ctx_id.get()
+        store = self._store[_request_id]
         return store.get(var, default)
 
     def set(self, var, value):
-        _var = ctx_id.get()
+        _request_id = ctx_id.get()
         if self._empty():
-            self._store[_var] = {}
+            self._store[_request_id] = {}
 
-        self._store[_var][var] = value
+        self._store[_request_id][var] = value
 
     def reset(self):
-        _var = ctx_id.get()
-        if _var in self._store:
-            del self._store[_var]
+        _request_id = ctx_id.get()
+        if _request_id in self._store:
+            del self._store[_request_id]
 
 
 def get_context() -> Context:
