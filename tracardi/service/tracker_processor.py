@@ -79,7 +79,7 @@ class TrackerProcessor(TrackProcessorBase):
                 memory=None
             )
 
-            if License.has_service(VALIDATOR):
+            if License.has_license():
 
                 # Get events to be reshaped
                 tracker_payloads_per_profile = []
@@ -136,7 +136,7 @@ class TrackerProcessor(TrackProcessorBase):
 
                 # Validation and reshaping
 
-                if License.has_service(VALIDATOR):
+                if License.has_license():
                     # Index traits, validate and reshape
                     evh = EventsValidationHandler(dot, self.console_log)
                     tracker_payload = await evh.validate_reshape_index_events(tracker_payload)

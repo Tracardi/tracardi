@@ -12,6 +12,13 @@ class ConsentFieldComplianceSetting(BaseModel):
     field: RefValue
     consents: List[NamedEntity]
 
+    def get_consents(self) -> set:
+        return {item.id for item in self.consents}
+
+    def complies_to_consents(self, profile_consents: set) -> bool:
+        required_consents = self.get_consents()
+        return required_consents.intersection(profile_consents) == required_consents
+
 
 class ConsentFieldCompliance(Entity):
     name: str

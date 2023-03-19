@@ -19,7 +19,8 @@ class CacheManager(metaclass=Singleton):
         'EVENT_INDEXING': MemoryCache("event-indexing", max_pool=200, allow_null_values=True),
         'EVENT_TO_PROFILE_COPING': MemoryCache("event-to-profile-coping", max_pool=200, allow_null_values=True),
         'EVENT_DESTINATION': MemoryCache("event-destinations", max_pool=100, allow_null_values=True),
-        'PROFILE_DESTINATIONS': MemoryCache("profile-destinations", max_pool=10, allow_null_values=True)
+        'PROFILE_DESTINATIONS': MemoryCache("profile-destinations", max_pool=10, allow_null_values=True),
+        'EVENT_CONSENT_COMPLIANCE': MemoryCache("event-consent-compliance", max_pool=500, allow_null_values=True),
     }
 
     def session_cache(self) -> MemoryCache:
@@ -48,6 +49,9 @@ class CacheManager(metaclass=Singleton):
 
     def event_destination_cache(self) -> MemoryCache:
         return self._cache['EVENT_DESTINATION']
+
+    def event_consent_compliance_cache(self) -> MemoryCache:
+        return self._cache['EVENT_CONSENT_COMPLIANCE']
 
     # Caches
 
@@ -127,6 +131,20 @@ class CacheManager(metaclass=Singleton):
                 True,
                 event_type)
         return await storage.driver.event_validation.load_by_event_type(event_type)
+
+    async def event_consent_compliance(self, event_type, ttl) -> StorageRecords:
+        """
+        Event consent compliance
+        """
+        if ttl > 0:
+            return await MemoryCache.cache(
+                self.event_consent_compliance_cache(),
+                event_type,
+                ttl,
+                storage.driver.data_compliance.load_by_event_type,
+                True,
+                event_type)
+        return await storage.driver.data_compliance.load_by_event_type(event_type)
 
     async def event_to_profile_coping(self, event_type, ttl) -> StorageRecords:
         """

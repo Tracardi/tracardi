@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from dotty_dict import dotty
 from pydantic.error_wrappers import ValidationError
+from tracardi.domain.consent_field_compliance import ConsentFieldCompliance
 
 from tracardi.service.notation.dot_accessor import DotAccessor
 
@@ -39,6 +40,9 @@ from tracardi.service.wf.domain.flow_response import FlowResponses
 
 if License.has_service(INDEXER):
     from com_tracardi.service.event_indexer import index_event_traits
+
+if License.has_license():
+    from com_tracardi.service.data_compliance import DataComplianceHandler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -181,6 +185,11 @@ class TrackingManager(TrackingManagerBase):
 
         # Get events
         events = await self.get_events()
+        flat_events = {event.id: dotty(event.dict()) for event in events}
+
+        # Anonymize, data compliance
+        if License.has_license():
+            events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
 
         debugger = None
         segmentation_result = None
@@ -214,8 +223,6 @@ class TrackingManager(TrackingManagerBase):
             # Routing rules are subject to caching
             event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
 
-        print("event_rules", event_rules)
-
         # Copy data from event to profile. This must be run just before processing.
 
         for event in events:
@@ -225,7 +232,7 @@ class TrackingManager(TrackingManagerBase):
 
             if coping_schemas.total > 0:
                 flat_profile = dotty(self.profile.dict())
-                flat_event = dotty(event.dict())
+                flat_event = flat_events[event.id]
                 for coping_schema in coping_schemas:
                     coping_schema = coping_schema.to_entity(EventToProfile)
 
@@ -261,7 +268,7 @@ class TrackingManager(TrackingManagerBase):
                     # Copy
                     if coping_schema.event_to_profile:
                         allowed_profile_fields = (
-                        "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
+                            "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
                         for event_ref, profile_ref, operation in coping_schema.items():
                             if not profile_ref.startswith(allowed_profile_fields):
                                 self.console_log.append(
@@ -293,7 +300,8 @@ class TrackingManager(TrackingManagerBase):
                                         flat_profile[profile_ref] = [flat_profile[profile_ref]]
                                         flat_profile[profile_ref].append(flat_event[event_ref])
                                     else:
-                                        raise KeyError(f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
+                                        raise KeyError(
+                                            f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
 
                                 elif operation == EQUALS_IF_NOT_EXISTS:
                                     if profile_ref not in profile_ref:
