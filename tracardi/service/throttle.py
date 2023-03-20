@@ -1,4 +1,6 @@
 from typing import Tuple
+
+from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 
 
@@ -11,7 +13,7 @@ class Limiter:
 
     def limit(self, key: str) -> Tuple[bool, int]:
 
-        key = f"throttle:{key}"
+        key = f"{Collection.throttle}:{key}"
 
         req = self._redis.client.incr(key)
         if req == 1:
