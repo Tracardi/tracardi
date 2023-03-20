@@ -26,7 +26,7 @@ async def get_event_to_profile(event_type: str, enabled_only: bool = False) -> S
     return await storage_manager("event-to-profile").load_by_values(fields)
 
 
-async def load_events_to_profiles(start: int = 0, limit: int = 10) -> StorageRecords:
+async def load_events_to_profiles(start: int = 0, limit: int = 200) -> StorageRecords:
     return await storage_manager("event-to-profile").load_all(start, limit)
 
 

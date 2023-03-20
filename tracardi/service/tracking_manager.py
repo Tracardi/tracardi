@@ -304,7 +304,7 @@ class TrackingManager(TrackingManagerBase):
                                             f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
 
                                 elif operation == EQUALS_IF_NOT_EXISTS:
-                                    if profile_ref not in profile_ref:
+                                    if profile_ref not in flat_profile:
                                         flat_profile[profile_ref] = flat_event[event_ref]
                                 else:
                                     flat_profile[profile_ref] = flat_event[event_ref]
