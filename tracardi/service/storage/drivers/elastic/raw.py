@@ -3,6 +3,7 @@ from elasticsearch import NotFoundError
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
+from tracardi.service.field_mappings_cache import FieldMapper
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
@@ -210,7 +211,7 @@ async def remove_index(index: str) -> bool:
     return _acknowledged(result)
 
 
-async def get_unique_field_values(index, field, limit=50):
+async def get_unique_field_values(index, field, limit=100):
     es = ElasticClient.instance()
     query = {
         "size": 0,
@@ -224,9 +225,15 @@ async def get_unique_field_values(index, field, limit=50):
 
 
 async def get_mapping_fields(index) -> list:
+    print(index)
     memory_key = f"{index}-mapping-cache"
     if memory_key not in memory_cache:
         mapping = await storage_manager(index).get_mapping()
         fields = mapping.get_field_names()
         memory_cache[memory_key] = CacheItem(data=fields, ttl=5)  # result is cached for 5 seconds
-    return memory_cache[memory_key].data
+    db_mappings = memory_cache[memory_key].data
+    print(FieldMapper().get_field_mapping(index))
+    set_of_db_mappings = set(db_mappings)
+    set_of_db_mappings.update(FieldMapper().get_field_mapping(index))
+    print(set_of_db_mappings)
+    return sorted(list(set_of_db_mappings))

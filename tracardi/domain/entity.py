@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TypeVar, Type
+from typing import Optional, TypeVar, Type, Set
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
@@ -8,6 +8,7 @@ from tracardi.domain.storage_record import RecordMetadata, StorageRecord
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.protocol.operational import Operational
+from tracardi.service.dot_notation_converter import dotter
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -76,3 +77,6 @@ class Entity(Creatable):
     @staticmethod
     def storage_info() -> Optional[StorageInfo]:
         return None
+
+    def get_dotted_properties(self) -> Set[str]:
+        return dotter(self.dict())

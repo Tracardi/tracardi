@@ -18,3 +18,14 @@ class DotNotationConverter:
             raise KeyError(
                 "Invalid dot notation. Only values from profile are allowed as merge_keys. `{}` "
                 "does not start with profile@..".format(dot_notation))
+
+
+def dotter(data, key='', dots=None):
+    if dots is None:
+        dots = set()
+    if isinstance(data, dict):
+        for k in data:
+            dotter(data[k], key + '.' + k if key else k, dots)
+    else:
+        dots.add(key)
+    return dots

@@ -20,6 +20,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.domain.value_object.collect_result import CollectResult
+from tracardi.service.field_mappings_cache import FieldMapper
 from tracardi.service.storage.driver import storage
 from tracardi.service.tracking_manager import TrackerResult
 
@@ -40,6 +41,7 @@ class TrackerResultPersister:
     def get_profiles_to_save(tracker_results: List[TrackerResult]):
         for tracker_result in tracker_results:
             profile = tracker_result.profile
+
             if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
                 # Clean operations
                 profile.operation = Operation()
@@ -63,6 +65,8 @@ class TrackerResultPersister:
 
     async def _save_profile(self, tracker_results: List[TrackerResult]):
         profiles_to_save = list(self.get_profiles_to_save(tracker_results))
+        FieldMapper().add_field_mappings('profile', profiles_to_save)
+
         results = []
         try:
             if profiles_to_save:
@@ -244,6 +248,8 @@ class TrackerResultPersister:
                     continue
                 events = await self._modify_events(tracker_result, log_event_journal)
                 bulk_events += events
+
+            FieldMapper().add_field_mappings('event', bulk_events)
             yield await self.__save_events(bulk_events)
 
         except StorageException as e:
