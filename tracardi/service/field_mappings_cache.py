@@ -27,8 +27,19 @@ class FieldMapper(metaclass=Singleton):
 
     def add_field_mappings(self, type, entities: List[Entity]):
         self.i += 1
+
+        new_props = set()
         for entity in entities:
-            field_mappings[type].update(entity.get_dotted_properties())
+            new_props.update(entity.get_dotted_properties())
+
+        diff = new_props.difference(field_mappings[type])
+
+        if not bool(diff):
+            # No changes
+            return
+
+        # Update in memory cache
+        field_mappings[type].update(new_props)
 
         if self.i > self.batch:
             self.save_cache()
@@ -39,5 +50,5 @@ class FieldMapper(metaclass=Singleton):
             if len(field_maps) > 0:
                 self.redis.client.sadd(redis_collections[type], *list(field_maps))
 
-        field_mappings['profile'] = set()
-        field_mappings['event'] = set()
+        # field_mappings['profile'] = set()
+        # field_mappings['event'] = set()
