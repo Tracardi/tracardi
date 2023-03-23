@@ -45,10 +45,7 @@ class MoveSegmentAction(ActionRunner):
                 profile.segments.remove(self.config.from_segment)
             if self.config.to_segment not in profile.segments:
                 profile.segments.append(self.config.to_segment)
-            if not self.debug:
-                profile.operation.update = True
-            else:
-                self.console.warning("Profile is not updated in debug mode.")
+            profile.operation.update = True
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:
@@ -98,7 +95,6 @@ def register() -> Plugin:
                 )
             ]
             ),
-            manual="move_add_action"
         ),
         metadata=MetaData(
             name='Move segment',

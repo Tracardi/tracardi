@@ -87,6 +87,11 @@ class ProfileMerger:
                                    merge_by: List[Tuple[str, str]],  # Field: value
                                    conflict_aux_key: str = "conflicts",
                                    limit: int = 2000) -> Optional[Profile]:
+
+        if profile is None:
+            logger.info("Method invoke_merge_profile can not merge on none existent profile. Profile equals None.")
+            return None
+
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
 

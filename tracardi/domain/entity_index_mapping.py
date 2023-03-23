@@ -12,6 +12,7 @@ class EntityPropertyMeta(BaseModel):
     name: str
     description: Optional[str] = None
     unit: Optional[str] = None
+    type: Optional[str] = None
     required: Optional[bool] = False
     rel: Optional[List[EntityRelation]] = None
 

@@ -11,7 +11,7 @@ def register() -> Plugin:
             className='NovuTriggerAction',
             inputs=['payload'],
             outputs=['response', 'error'],
-            version="0.7.2",
+            version="0.8.0",
             license="MIT",
             author="Mateusz Zitaruk, Risto Kowaczewski",
             init={
@@ -19,7 +19,8 @@ def register() -> Plugin:
                 "template": {"id": "", "name": ""},
                 "subscriber_id": "profile@id",
                 "recipient_email": "profile@pii.email",
-                "payload": "{}"
+                "payload": "{}",
+                "hash": False
             },
             manual="novu_plugin_action",
             form=Form(
@@ -53,6 +54,13 @@ def register() -> Plugin:
                                 name="Subscriber ID",
                                 description="Type path to subscriber ID. By default we use profile id.",
                                 component=FormComponent(type="dotPath", props={"label": "Subscriber ID"})
+                            ),
+                            FormField(
+                                id="hash",
+                                name="Hash Subscriber ID",
+                                description="Select if the defined subscriber id should be hashed. This can be useful "
+                                            "if ID is made out of e.g e-mail.",
+                                component=FormComponent(type="bool", props={"label": "Hash Subscriber ID"})
                             )
                         ]
                     ),
@@ -80,10 +88,11 @@ def register() -> Plugin:
             )
         ),
         metadata=MetaData(
-            name="Novu notifications",
-            desc="Create and send notification to chosen recipient.",
+            name="Trigger message",
+            desc="Creates and sends notification to chosen recipient.",
             brand="Novu",
             icon="message",
+            tags=['email','chat', 'sms'],
             group=["Novu"],
             documentation=Documentation(
                 inputs={

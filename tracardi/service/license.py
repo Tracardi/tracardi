@@ -31,6 +31,7 @@ COMPLIANCE = "compl1532"
 RESHAPING = "resha-9ds"
 REDIRECTS = "redir-atr"
 INDEXER = "indxs4k1"
+LICENSE = "lice12d4"
 
 
 class Service(BaseModel):

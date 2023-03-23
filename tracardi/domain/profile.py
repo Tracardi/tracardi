@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set
 from pydantic import BaseModel
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
@@ -84,6 +84,9 @@ class Profile(Entity):
         if self.id not in self.ids:
             self.ids.append(self.id)
             self.operation.update = True
+
+    def get_consent_ids(self) -> Set[str]:
+        return set([consent_id for consent_id, _ in self.consents.items()])
 
     async def segment(self, event_types, load_segments):
 

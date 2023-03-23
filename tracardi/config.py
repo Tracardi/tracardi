@@ -27,15 +27,16 @@ def _get_logging_level(level: str) -> int:
 
 class MemoryCacheConfig:
     def __init__(self, env):
-        self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 0
-        self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 0
+        self.event_to_profile_coping_ttl = int(env['EVENT_TO_PROFILE_COPY_CACHE_TTL']) if 'EVENT_TO_PROFILE_COPY_CACHE_TTL' in env else 2
+        self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 2
+        self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 2
         self.event_validation_cache_ttl = int(
-            env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 0
-        self.event_metadata_cache_ttl = int(env['EVENT_METADATA_CACHE_TTL']) if 'EVENT_METADATA_CACHE_TTL' in env else 0
+            env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 2
+        self.event_metadata_cache_ttl = int(env['EVENT_METADATA_CACHE_TTL']) if 'EVENT_METADATA_CACHE_TTL' in env else 2
         self.event_destination_cache_ttl = int(
-            env['EVENT_DESTINATION_CACHE_TTL']) if 'EVENT_DESTINATION_CACHE_TTL' in env else 0
+            env['EVENT_DESTINATION_CACHE_TTL']) if 'EVENT_DESTINATION_CACHE_TTL' in env else 2
         self.profile_destination_cache_ttl = int(
-            env['PROFILE_DESTINATION_CACHE_TTL']) if 'PROFILE_DESTINATION_CACHE_TTL' in env else 0
+            env['PROFILE_DESTINATION_CACHE_TTL']) if 'PROFILE_DESTINATION_CACHE_TTL' in env else 2
 
 
 class ElasticConfig:

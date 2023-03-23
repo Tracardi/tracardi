@@ -27,9 +27,6 @@ class LogAction(ActionRunner):
         template = DotTemplate()
         message = template.render(self.config.message, dot)
 
-        if self.debug is True:
-            self.console.warning("`Log message` does not save logs in debug mode.")
-
         if self.config.type == 'warning':
             self.console.warning(message)
         elif self.config.type == 'error':

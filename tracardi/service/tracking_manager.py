@@ -3,13 +3,22 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable
 from uuid import uuid4
+
+from dotty_dict import dotty
+from pydantic.error_wrappers import ValidationError
+from tracardi.domain.consent_field_compliance import ConsentFieldCompliance
+
+from tracardi.service.notation.dot_accessor import DotAccessor
+
+from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 from tracardi.domain.type import Type
+from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.license import License, INDEXER
 
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
-from tracardi.config import tracardi
+from tracardi.config import tracardi, memory_cache
 from tracardi.domain.enum.event_status import COLLECTED
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.process_engine.debugger import Debugger
@@ -32,10 +41,17 @@ from tracardi.service.wf.domain.flow_response import FlowResponses
 if License.has_service(INDEXER):
     from com_tracardi.service.event_indexer import index_event_traits
 
+if License.has_license():
+    from com_tracardi.service.data_compliance import DataComplianceHandler
+
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = CacheManager()
+
+EQUALS = 0
+EQUALS_IF_NOT_EXISTS = 1
+APPEND = 2
 
 
 @dataclass
@@ -169,6 +185,11 @@ class TrackingManager(TrackingManagerBase):
 
         # Get events
         events = await self.get_events()
+        flat_events = {event.id: dotty(event.dict()) for event in events}
+
+        # Anonymize, data compliance
+        if License.has_license():
+            events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
 
         debugger = None
         segmentation_result = None
@@ -189,16 +210,155 @@ class TrackingManager(TrackingManagerBase):
                         event=Type(type=event.type),  # event type is equal to schedule node id
                         flow=NamedEntity(id=self.tracker_payload.scheduled_event_config.flow_id, name="Scheduled"),
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
+                        properties={},
                         enabled=True,
                     ).dict()
                 ],
                 event
             ) for event in events]
 
-            logger.debug(f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
+            logger.debug(
+                f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
         else:
             # Routing rules are subject to caching
             event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
+
+        # Copy data from event to profile. This must be run just before processing.
+
+        for event in events:
+            coping_schemas = await cache.event_to_profile_coping(
+                event_type=event.type,
+                ttl=memory_cache.event_to_profile_coping_ttl)
+
+            if coping_schemas.total > 0:
+                flat_profile = dotty(self.profile.dict())
+                flat_event = flat_events[event.id]
+                for coping_schema in coping_schemas:
+                    coping_schema = coping_schema.to_entity(EventToProfile)
+
+                    # Check condition
+                    if 'condition' in coping_schema.config:
+                        if_statement = coping_schema.config['condition']
+                        try:
+                            dot = DotAccessor(event=event, profile=self.profile, session=self.session)
+                            condition = Condition()
+                            result = await condition.evaluate(if_statement, dot)
+                            if result is False:
+                                continue
+                        except Exception as e:
+                            self.console_log.append(Console(
+                                flow_id=None,
+                                node_id=None,
+                                event_id=event.id,
+                                profile_id=get_entity_id(self.profile),
+                                origin='event',
+                                class_name=TrackingManager.__name__,
+                                module=__name__,
+                                type='error',
+                                message=f"Routing error. "
+                                        f"An error occurred when coping data from event to profile. "
+                                        f"There is error in the conditional trigger settings for event "
+                                        f"`{event.type}`."
+                                        f"Could not parse or access data for if statement: `{if_statement}`. "
+                                        f"Data was not copied but the event was routed to the next step. ",
+                                traceback=get_traceback(e)
+                            ))
+                            continue
+
+                    # Copy
+                    if coping_schema.event_to_profile:
+                        allowed_profile_fields = (
+                            "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
+                        for event_ref, profile_ref, operation in coping_schema.items():
+                            if not profile_ref.startswith(allowed_profile_fields):
+                                self.console_log.append(
+                                    Console(
+                                        flow_id=None,
+                                        node_id=None,
+                                        event_id=event.id,
+                                        profile_id=get_entity_id(self.profile),
+                                        origin='event',
+                                        class_name=TrackingManager.__name__,
+                                        module=__name__,
+                                        type='warning',
+                                        message=f"You are trying to copy the data to unknown field in profile. "
+                                                f"Your profile reference `{profile_ref}` does not start with typical "
+                                                f"fields that are {allowed_profile_fields}. Please check if there isn't "
+                                                f"an error in your copy schema. Data will not be copied if it does not "
+                                                f"match Profile schema.",
+                                        traceback=[]
+                                    )
+                                )
+
+                            try:
+                                if operation == APPEND:
+                                    if profile_ref not in flat_profile:
+                                        flat_profile[profile_ref] = [flat_event[event_ref]]
+                                    elif isinstance(flat_profile[profile_ref], list):
+                                        flat_profile[profile_ref].append(flat_event[event_ref])
+                                    elif not isinstance(flat_profile[profile_ref], dict):
+                                        flat_profile[profile_ref] = [flat_profile[profile_ref]]
+                                        flat_profile[profile_ref].append(flat_event[event_ref])
+                                    else:
+                                        raise KeyError(
+                                            f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
+
+                                elif operation == EQUALS_IF_NOT_EXISTS:
+                                    if profile_ref not in flat_profile:
+                                        flat_profile[profile_ref] = flat_event[event_ref]
+                                else:
+                                    flat_profile[profile_ref] = flat_event[event_ref]
+
+                            except KeyError as e:
+                                if event_ref.startswith(("properties", "traits")):
+                                    message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
+                                              f"Original data send to processing. Error message: {repr(e)} key."
+                                else:
+                                    message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
+                                              f"Maybe `properties.{event_ref}` or `traits.{event_ref}` could work. " \
+                                              f"Original data send to processing. Error message: {repr(e)} key."
+                                self.console_log.append(
+                                    Console(
+                                        flow_id=None,
+                                        node_id=None,
+                                        event_id=event.id,
+                                        profile_id=get_entity_id(self.profile),
+                                        origin='event',
+                                        class_name=TrackingManager.__name__,
+                                        module=__name__,
+                                        type='warning',
+                                        message=message,
+                                        traceback=get_traceback(e)
+                                    )
+                                )
+                                logger.error(message)
+                try:
+                    self.profile = Profile(**flat_profile)
+                    self.profile.operation.update = True
+                except ValidationError as e:
+                    message = f"It seems that there was an error when trying to add or update some information to " \
+                              f"your profile. The error occurred because you tried to add a value that is not " \
+                              f"allowed by the type of data that the profile can accept.  For instance, you may " \
+                              f"have tried to add a name to a field in your profile that only accepts a single string, " \
+                              f"but you provided a list of strings instead. No changes were made to your profile, and " \
+                              f"the original data you sent was not copied because it did not meet the " \
+                              f"requirements of the profile. " \
+                              f"Details: {repr(e)}. See: event to profile copy schema for event `{event.type}`."
+                    self.console_log.append(
+                        Console(
+                            flow_id=None,
+                            node_id=None,
+                            event_id=event.id,
+                            profile_id=get_entity_id(self.profile),
+                            origin='event',
+                            class_name=TrackingManager.__name__,
+                            module=__name__,
+                            type='error',
+                            message=message,
+                            traceback=get_traceback(e)
+                        )
+                    )
+                    logger.error(message)
 
         ux = []
         post_invoke_events = None

@@ -389,9 +389,9 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    def scan(self, query: dict = None):
+    def scan(self, query: dict = None, batch: int = 1000):
         try:
-            return self.storage.scan(query)
+            return self.storage.scan(query, batch)
         except elasticsearch.exceptions.ElasticsearchException as e:
             _logger.error(str(e))
             if len(e.args) == 2:

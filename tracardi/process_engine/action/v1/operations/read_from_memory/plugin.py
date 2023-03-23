@@ -8,6 +8,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormGroup, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver import storage
+from tracardi.service.storage.redis.collections import Collection
 from .model.config import Config
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.plugin.domain.result import Result
@@ -46,9 +47,9 @@ class ReadFromMemoryAction(ActionRunner):
             key = dot[self.config.key]
             prefix = self.config.prefix.strip()
             if prefix:
-                key = f"tracardi-user-memory:{prefix}:{key}"
+                key = f"{Collection.plugin_memory}{prefix}:{key}"
             else:
-                key = f"tracardi-user-memory:{key}"
+                key = f"{Collection.plugin_memory}{key}"
             result = self.client.get(name=key)
             if result is None:
                 return Result(port="not-exists", value=payload)

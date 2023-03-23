@@ -37,10 +37,7 @@ class AddSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             if self.config.segment not in self.profile.segments:
-                if not self.debug:
-                    profile.operation.update = True
-                else:
-                    self.console.warning("Profile is not updated in debug mode.")
+                profile.operation.update = True
 
                 try:
                     dot = self._get_dot_accessor(payload)
@@ -94,7 +91,6 @@ def register() -> Plugin:
                     ]
                 )]
             ),
-            manual="segment_add_action"
         ),
         metadata=MetaData(
             name='Add segment',

@@ -22,7 +22,8 @@ open_webhook_source_bridge = Bridge(
     name="API Webhook Bridge",
     description="API Webhook collector",
     config={
-        "generate_profile": False
+        "generate_profile": False,
+        "replace_profile_id": ""
     },
     form=Form(groups=[
         FormGroup(
@@ -38,6 +39,15 @@ open_webhook_source_bridge = Bridge(
                                 "A profile and session are empty. You can add your own data to either "
                                 "of them in the workflow.",
                     component=FormComponent(type="bool", props={"label": "Create profile and session"})
+                ),
+                FormField(
+                    id="replace_profile_id",
+                    name="Replace profile ID",
+                    description="If you want to replace the Profile ID with data from the payload, reference the "
+                                "data below or leave it empty if you don't want to create a profile or profile must "
+                                "have random id. Make sure the Profile ID is secure and not easily guessable, as "
+                                "easy profile IDs can lead to security issues.",
+                    component=FormComponent(type="text", props={"label": "Replace profile"})
                 )
             ])
 ])
@@ -59,7 +69,7 @@ cardio_event_source = EventSource(
     type=["internal"],
     name="Cardio Source",
     channel="Cardio",
-    desctiprion="Internal event source for heartbeats.",
+    description="Internal event source for heartbeats.",
     bridge=NamedEntity(**open_rest_source_bridge.dict()),
     timestamp=utcnow(),
     tags=["internal"],
@@ -68,11 +78,11 @@ cardio_event_source = EventSource(
 
 default_db_data = {
     "bridge": [
-        open_rest_source_bridge,
-        open_webhook_source_bridge,
-        redirect_bridge
+        open_rest_source_bridge.dict(),
+        open_webhook_source_bridge.dict(),
+        redirect_bridge.dict()
     ],
     'event-source': [
-        cardio_event_source
+        cardio_event_source.dict()
     ]
 }

@@ -28,10 +28,12 @@ async def load_by_tag(tag) -> StorageRecords:
     return await storage_manager('event-reshaping').load_by('tags', tag)
 
 
-async def load_by_event_type(event_type: str) -> StorageRecords:
-    return await storage_manager('event-reshaping').load_by_values(
-        [('event_type', event_type), ('enabled', True)]
-    )
+async def load_by_event_type(event_type: str, only_enabled=True) -> StorageRecords:
+    if only_enabled is True:
+        query = [('event_type', event_type), ('enabled', True)]
+    else:
+        query = [('event_type', event_type)]
+    return await storage_manager('event-reshaping').load_by_values(query)
 
 
 async def delete(id: str):

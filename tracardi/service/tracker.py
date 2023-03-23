@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any
@@ -10,6 +11,7 @@ from tracardi.exceptions.exception import UnauthorizedException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
 from tracardi.service.setup.data.defaults import open_rest_source_bridge
+from tracardi.service.storage.drivers.elastic.operations.console_log import save_console_log
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
@@ -56,7 +58,8 @@ async def track_event(tracker_payload: TrackerPayload,
             on_result_ready=on_result_ready
         )
 
-        return await tr.track_event(tracker_payload)
+        result = await tr.track_event(tracker_payload)
+        return result
 
     except Exception as e:
         traceback.print_exc()
@@ -64,6 +67,10 @@ async def track_event(tracker_payload: TrackerPayload,
         raise e
 
     finally:
+        # Save console log
+        save_console_log(console_log)
+
+        # Save log
         if await save_logs() is False:
             logger.warning("Log index still not created. Saving logs postponed.")
 
@@ -106,7 +113,7 @@ class Tracker:
                     raise ValueError(msg)
                 source = self.tracker_config.internal_source
             else:
-                source = await self.validate_source(source_id=tracker_payload.source.id)
+                source = await self.validate_source(tracker_payload)
 
             # Update tracker source with full object
             tracker_payload.source = source
@@ -117,7 +124,9 @@ class Tracker:
         logger.debug(f"Source {source.id} validated.")
 
         # Check if we need to generate profile and session id. Used in webhooks
-        tracker_payload.generate_profile_and_session()
+        if tracker_payload.generate_profile_and_session(self.console_log):
+            # Returns true if source is a webhook with generate profile id set to true
+            self.tracker_config.static_profile_id = True
 
         if self.on_source_ready is None:
             tp = TrackerProcessor(
@@ -149,7 +158,10 @@ class Tracker:
             self.tracker_config
         )
 
-    async def validate_source(self, source_id: str) -> EventSource:
+    async def validate_source(self, tracker_payload: TrackerPayload) -> EventSource:
+
+        source_id = tracker_payload.source.id
+        ip = tracker_payload.metadata.ip
 
         if source_id == f"@{tracardi.fingerprint}":
             return EventSource(
@@ -166,7 +178,8 @@ class Tracker:
         source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
 
         if source is None:
-            raise ValueError(f"Invalid event source `{source_id}`")
+            raise ValueError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
+                             f"width payload: {tracker_payload}")
 
         if not source.enabled:
             raise ValueError("Event source disabled.")

@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime
-from typing import List, Union, Generator, AsyncGenerator, Any
+from typing import List, Union, Generator, AsyncGenerator, Any, Dict
 
 from tracardi.config import tracardi, memory_cache
+from tracardi.domain.console import Console
 from tracardi.domain.entity import Entity
 from tracardi.domain.enum.event_status import PROCESSED
 from tracardi.domain.event_type_metadata import EventTypeMetadata
@@ -10,7 +11,7 @@ from tracardi.domain.value_object.operation import Operation
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.cache_manager import CacheManager
 
-from tracardi.service.console_log import ConsoleLog
+from tracardi.service.console_log import ConsoleLog, StatusLog
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -19,6 +20,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.domain.value_object.collect_result import CollectResult
+from tracardi.service.field_mappings_cache import FieldMapper
 from tracardi.service.storage.driver import storage
 from tracardi.service.tracking_manager import TrackerResult
 
@@ -32,11 +34,14 @@ class TrackerResultPersister:
 
     def __init__(self, console_log: ConsoleLog):
         self.console_log = console_log
+        self.profile_errors: Dict[str, str] = {}  # Keeps errors from profiles
+        self.session_errors: Dict[str, str] = {}  # Keeps errors from session
 
     @staticmethod
     def get_profiles_to_save(tracker_results: List[TrackerResult]):
         for tracker_result in tracker_results:
             profile = tracker_result.profile
+
             if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
                 # Clean operations
                 profile.operation = Operation()
@@ -59,13 +64,23 @@ class TrackerResultPersister:
                     yield tracker_result.session
 
     async def _save_profile(self, tracker_results: List[TrackerResult]):
+        profiles_to_save = list(self.get_profiles_to_save(tracker_results))
+        FieldMapper().add_field_mappings('profile', profiles_to_save)
+
+        results = []
         try:
-            profiles_to_save = list(self.get_profiles_to_save(tracker_results))
             if profiles_to_save:
-                yield await storage.driver.profile.save(profiles_to_save)
+                result = await storage.driver.profile.save(profiles_to_save)
+                if result.has_errors():
+                    for id in result.ids:
+                        self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
+                results.append(result)
 
         except StorageException as e:
-            raise FieldTypeConflictException("Could not save profile. Error: {}".format(str(e)), rows=e.details)
+            message = "Could not save profile. Error: {}".format(str(e))
+            raise FieldTypeConflictException(message, rows=e.details)
+
+        return results
 
     async def _save_session(self, tracker_results: List[TrackerResult]):
         try:
@@ -90,6 +105,11 @@ class TrackerResultPersister:
                             session.operation = Operation()
 
                         result = await storage.driver.session.save(sessions_to_add)
+
+                        if result.has_errors():
+                            for id in result.ids:
+                                self.session_errors[id] = f"Error while storing session id: {id}. Details: {result.errors}"
+
                         # Todo this may cause errors when async, we save multiple sessions at once
 
                         """
@@ -152,8 +172,7 @@ class TrackerResultPersister:
 
         return event_result
 
-    @staticmethod
-    async def _modify_events(tracker_result: TrackerResult, log_event_journal) -> List[Event]:
+    async def _modify_events(self, tracker_result: TrackerResult, log_event_journal: Dict[str, StatusLog]) -> List[Event]:
         for event in tracker_result.events:
 
             event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
@@ -179,6 +198,42 @@ class TrackerResultPersister:
                 else:
                     event.metadata.status = PROCESSED
 
+            if self.profile_errors:
+                event.metadata.error = True
+
+                for profile_id, error_message in self.profile_errors.items():
+                    self.console_log.append(
+                        Console(
+                            flow_id=None,
+                            node_id=None,
+                            event_id=event.id,
+                            profile_id=profile_id,
+                            origin='profile',
+                            class_name=TrackerResultPersister.__name__,
+                            module=__name__,
+                            type='error',
+                            message=error_message
+                        )
+                    )
+
+            if self.session_errors:
+                event.metadata.error = True
+
+                for session_id, error_message in self.session_errors.items():
+                    self.console_log.append(
+                        Console(
+                            flow_id=None,
+                            node_id=None,
+                            event_id=event.id,
+                            profile_id=None,
+                            origin='session',
+                            class_name=TrackerResultPersister.__name__,
+                            module=__name__,
+                            type='error',
+                            message=error_message
+                        )
+                    )
+
         return tracker_result.events
 
     async def _save_events(self, tracker_results: List[TrackerResult]):
@@ -193,6 +248,8 @@ class TrackerResultPersister:
                     continue
                 events = await self._modify_events(tracker_result, log_event_journal)
                 bulk_events += events
+
+            FieldMapper().add_field_mappings('event', bulk_events)
             yield await self.__save_events(bulk_events)
 
         except StorageException as e:
@@ -200,7 +257,7 @@ class TrackerResultPersister:
 
     async def persist(self, tracker_results: List[TrackerResult]) -> CollectResult:
         return CollectResult(
-            profile=[result async for result in self._save_profile(tracker_results)],
+            profile=await self._save_profile(tracker_results),
             session=[result async for result in self._save_session(tracker_results)],
             events=[result async for result in self._save_events(tracker_results)]
         )

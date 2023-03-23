@@ -30,15 +30,17 @@ async def load_by_tag(tag):
     return await storage_manager('event-validation').load_by('tags', tag)
 
 
-async def load_by_event_type(event_type: str) -> StorageRecords:
-    return await storage_manager('event-validation').load_by_values(
-        [('event_type', event_type), ('enabled', True)]
-    )
+async def load_by_event_type(event_type: str, only_enabled: bool = True) -> StorageRecords:
+    if only_enabled is True:
+        query = [('event_type', event_type), ('enabled', True)]
+    else:
+        query = [('event_type', event_type)]
+    return await storage_manager('event-validation').load_by_values(query)
 
 
 async def delete(id: str):
     sm = storage_manager("event-validation")
-    return sm.delete(id, index=sm.get_single_storage_index())
+    return await sm.delete(id, index=sm.get_single_storage_index())
 
 
 async def count_by_type(event_type: str) -> int:

@@ -181,8 +181,8 @@ class ElasticStorage:
     async def reindex(self, source, destination, wait_for_completion=True):
         return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
 
-    async def scan(self, query: dict = None) -> AsyncGenerator[StorageRecord, Any]:
-        async for row in self.storage.scan(self.index.get_index_alias(), query):
+    async def scan(self, query: dict = None, batch: int = 1000) -> AsyncGenerator[StorageRecord, Any]:
+        async for row in self.storage.scan(self.index.get_index_alias(), query, size=batch):
             yield StorageRecord.build_from_elastic(row)
 
     async def load_by_query_string(self, query_string, limit=100) -> StorageRecords:

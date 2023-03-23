@@ -1,3 +1,4 @@
+from tracardi.config import tracardi
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
@@ -6,7 +7,6 @@ from tracardi.worker.celery_worker import run_migration_job
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from hashlib import sha1
-from tracardi.service.storage.driver import storage
 from pathlib import Path
 from tracardi.domain.version import Version
 import re
@@ -38,8 +38,7 @@ class MigrationManager:
         ("0.7.1", "0.7.2"): "071_to_072",
         ("0.7.2", "0.7.3"): "072_to_073",
         ("0.7.3", "0.7.4"): "072_to_073",
-        ("0.7.4", "0.8.0"): "074_to_080",
-        ("0.7.4-dev", "0.8.0"): "074_to_080",
+        ("0.7.4", "0.8.0"): "074_to_080"
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
@@ -102,20 +101,12 @@ class MigrationManager:
                 if await es.exists_index(schema.copy_index.from_index):
                     customized_schemas.append(schema)
 
-        target_version = await storage.driver.version.load_by_version_and_name(
-            self.to_version.version,
-            self.to_version.name
-        )
+        if tracardi.version != Version(version=self.to_version.version, name=self.to_version.name):
+            raise ValueError(f"Installed system version is {tracardi.version.version}, "
+                             f"but migration migrated to version {self.to_version.version}.")
 
-        if target_version is None:
-            raise ValueError(f"Installed system version is {self.to_version.version}, "
-                             f"but storage point to other version. Please delete tracardi-version index and refresh "
-                             f"and install the system.")
-
-        warn = f"{self.from_version.get_version_prefix()}.{self.from_version.name}" in target_version.get(
-            "upgrades",
-            []
-        )
+        # TODO Warning disabled - save installation info in redis.
+        warn = self.from_version.get_version_prefix() in tracardi.version.upgrades
 
         return {"warn": warn, "schemas": customized_schemas}
 
@@ -151,12 +142,7 @@ class MigrationManager:
         return [migration[0] for migration in cls.available_migrations if migration[1] == version.version]
 
     async def save_version_update(self):
-        version = await storage.driver.version.load_by_version_and_name(
-            self.to_version.version,
-            self.to_version.name
-        )
-        version_id = version["id"]
-        version = Version(**version)
-        version.add_upgrade(f"{self.from_version.get_version_prefix()}.{self.from_version.name}")
-        await storage.driver.version.save({"id": version_id, **version.dict()})
+        # TODO Warning disabled - save installation info in redis. Now it is saved only in 1 instance memory
+        tracardi.version.add_upgrade(self.from_version.get_version_prefix())
+
 

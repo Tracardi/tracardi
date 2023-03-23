@@ -19,7 +19,7 @@ async def load_by_id(id) -> Optional[IdentificationPoint]:
 
 
 async def load_by_event_type(event_type) -> StorageRecords:
-    return await storage_manager('identification-point').load_by_values([('event_type', event_type)])
+    return await storage_manager('identification-point').load_by_values([('event_type.id', event_type)])
 
 
 async def delete_by_id(id: str) -> dict:

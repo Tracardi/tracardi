@@ -69,7 +69,7 @@ async def _get_rules_for_source_and_event_type(source: Entity, events: List[Even
             rules = await _load_rule(event_type, source.id)
 
             # todo set MemoryCache ttl from env
-            memory_cache[cache_key] = CacheItem(data=rules, ttl=15)
+            memory_cache[cache_key] = CacheItem(data=rules, ttl=5)
 
         routes = list(memory_cache[cache_key].data)
         if not has_routes and routes:
@@ -126,15 +126,18 @@ async def flush():
     return await storage_manager('rule').flush()
 
 
-async def load_by_event_type(max_group: int = 20) -> StorageRecords:
-    query = {
-        "query": {"match_all": {}},
-        "collapse": {
-            "field": "event.type",
-            "inner_hits": {
-                "name": "types",
-                "size": max_group
-            }
-        }
-    }
-    return await storage_manager('rule').query(query)
+# async def load_by_event_type(max_group: int = 20) -> StorageRecords:
+#     query = {
+#         "query": {"match_all": {}},
+#         "collapse": {
+#             "field": "event.type",
+#             "inner_hits": {
+#                 "name": "types",
+#                 "size": max_group
+#             }
+#         }
+#     }
+#     return await storage_manager('rule').query(query)
+
+async def load_by_event_type(event_type:str, limit: int = 100) -> StorageRecords:
+    return await storage_manager('rule').load_by('event.type', event_type, limit=limit)

@@ -19,7 +19,6 @@ import tracardi.service.storage.drivers.elastic.pro
 import tracardi.service.storage.drivers.elastic.destination
 import tracardi.service.storage.drivers.elastic.user_log
 import tracardi.service.storage.drivers.elastic.import_config
-import tracardi.service.storage.drivers.elastic.version
 import tracardi.service.storage.drivers.elastic.snapshot
 import tracardi.service.storage.drivers.elastic.entity
 import tracardi.service.storage.drivers.elastic.report
@@ -32,6 +31,7 @@ import tracardi.service.storage.drivers.elastic.event_redirect
 import tracardi.service.storage.drivers.elastic.bridge
 import tracardi.service.storage.drivers.elastic.data_compliance
 import tracardi.service.storage.drivers.elastic.identification
+import tracardi.service.storage.drivers.elastic.event_to_profile
 
 
 class ElasticDriver:
@@ -59,6 +59,10 @@ class ElasticDriver:
     @property
     def data_compliance(self):
         return tracardi.service.storage.drivers.elastic.data_compliance
+
+    @property
+    def event_to_profile(self):
+        return tracardi.service.storage.drivers.elastic.event_to_profile
 
     @property
     def identification(self):
@@ -147,10 +151,6 @@ class ElasticDriver:
     @property
     def import_config(self) -> tracardi.service.storage.drivers.elastic.import_config:
         return tracardi.service.storage.drivers.elastic.import_config
-
-    @property
-    def version(self) -> tracardi.service.storage.drivers.elastic.version:
-        return tracardi.service.storage.drivers.elastic.version
 
     @property
     def snapshot(self):

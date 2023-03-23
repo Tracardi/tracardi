@@ -1,6 +1,10 @@
+import json
 import os
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Generator, Any, Tuple
+
+from tracardi.domain.version import Version
+
 from tracardi.config import tracardi, elastic
 from tracardi.context import get_context
 
@@ -12,6 +16,7 @@ class Index:
         self.multi_index = multi_index
         self.index = index
         self.prefix = "{}.".format(tracardi.version.name)
+        self.version_prefix = tracardi.version.get_version_prefix()
         self.mapping = mapping
         self.staging = staging
         self.static = static
@@ -36,6 +41,10 @@ class Index:
             return self._prefix_with_production(index)
         return index
 
+    def set_version(self, version):
+        self.prefix = f"{Version.generate_name(version)}."
+        self.version_prefix = Version.generate_prefix(version)
+
     def get_mapping(self):
         if self.mapping:
             mapping_file = self.mapping
@@ -56,11 +65,11 @@ class Index:
 
         return prefixed_index
 
-    def prepare_mappings(self, mapping, index):
+    def prepare_mappings(self, mapping, index) -> dict:
 
         json_map = mapping.replace("%%PREFIX%%", tracardi.version.name)
         json_map = json_map.replace("%%ALIAS%%", self.get_index_alias())
-        json_map = json_map.replace("%%VERSION%%", tracardi.version.get_version_prefix())
+        json_map = json_map.replace("%%VERSION%%", self.version_prefix)
         json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)
         json_map = json_map.replace("%%SHARDS%%", elastic.shards)
         json_map = json_map.replace("%%CONF_SHARDS%%", elastic.conf_shards)
@@ -68,7 +77,7 @@ class Index:
             template_pattern = index.get_templated_index_pattern()
             json_map = json_map.replace("%%TEMPLATE_PATTERN%%", template_pattern)
 
-        return json_map
+        return json.loads(json_map)
 
     def get_static_alias(self, prefix: Optional[str] = None) -> str:
         """
@@ -94,7 +103,7 @@ class Index:
         else:
             prefixed_index = self._get_prefixed_index()
 
-        version_prefix_index = f"{tracardi.version.get_version_prefix()}.{prefixed_index}"
+        version_prefix_index = f"{self.version_prefix}.{prefixed_index}"
 
         return self._prod_or_static(version_prefix_index)
 
@@ -109,10 +118,8 @@ class Index:
         if self.multi_index is False:
             raise ValueError(f"Index {self._get_prefixed_index()} is not multi index.")
 
-        version_prefix = tracardi.version.get_version_prefix()
-
         # (prod|static) 070 . fa73a.tracardi-event - * - *
-        index = f"{version_prefix}.{self._get_prefixed_index()}-*-*"
+        index = f"{self.version_prefix}.{self._get_prefixed_index()}-*-*"
 
         return self._prod_or_static(index)
 
@@ -121,8 +128,8 @@ class Index:
             raise AssertionError("Can not get template for not multi index.")
         if self.static is True:
             raise AssertionError("Static index should not be a multi data index.")
-        version_prefix = tracardi.version.get_version_prefix()
-        prefixed_template = f"template.{version_prefix}.{tracardi.version.name}.{self.index}"
+
+        prefixed_template = f"template.{self.version_prefix}.{tracardi.version.name}.{self.index}"
         # (prods | static) template . 070 . fa73a . tracardi-event
         return self._prod_or_static(prefixed_template)
 
@@ -195,6 +202,8 @@ class Resource:
                                   mapping="mappings/live-segment-index.json"),
             "event-management": Index(staging=True, multi_index=False, index="tracardi-event-management",
                                       mapping="mappings/event-management-index.json"),
+            "event-to-profile": Index(staging=True, multi_index=False, index="tracardi-event_to_profile",
+                                      mapping="mappings/event-to-profile-index.json"),
             "debug-info": Index(staging=False, multi_index=False, index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json"),
             "api-instance": Index(staging=False, multi_index=False, index="tracardi-api-instance",
@@ -234,18 +243,15 @@ class Resource:
             return self.resources[name]
         raise ValueError(f"Index `{name}` does not exists.")
 
-    # def add_indices(self, indices: dict):
-    #     for name, index in indices.items():
-    #         if not isinstance(index, Index):
-    #             raise ValueError("Index must be Index object. {} given".format(type(index)))
-    #
-    #         if name in self.resources:
-    #             raise ValueError(
-    #                 "Index `{}` already exist. Check the setup process and defined resources.".format(name))
-    #
-    #         self.resources[name] = index
-    #
-    #     self.resources.update(indices)
+    def get_index_mappings(self) -> Generator[Tuple[Index, dict], Any, None]:
+        for key, index in self.resources.items():  # type: str, Index
+
+            map_file = index.get_mapping()
+
+            with open(map_file) as file:
+                map = file.read()
+                map = index.prepare_mappings(map, index)
+                yield index, map
 
     def __getitem__(self, item) -> Index:
         if item in self.resources:

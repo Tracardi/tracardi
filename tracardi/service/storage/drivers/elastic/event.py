@@ -9,7 +9,7 @@ from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Union
 from .raw import load_by_key_value_pairs
 
 import tracardi.config as config
@@ -448,6 +448,36 @@ async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRec
     return await storage_manager("event").query(query)
 
 
+async def aggregate_events_by_type_and_source() -> StorageRecords:
+    return await storage_manager("event").query({
+        "query": {
+            "match_all": {}
+        },
+        "size": 0,
+        "aggs": {
+            "by_type": {
+                "terms": {
+                    "field": "type"
+                },
+                "aggs": {
+                    "by_source": {
+                        "terms": {
+                            "field": "source.id"
+                        },
+                        # "aggs": {
+                        #     "last": {
+                        #         "top_hits": {
+                        #             "size": 1
+                        #         }
+                        #     }
+                        # }
+                    }
+                }
+            }
+        }
+    })
+
+
 async def aggregate_source_by_type(source_id: str, time_span: str):
     result = await storage_manager("event").query({
         "query": {
@@ -546,6 +576,10 @@ async def get_events_by_session_and_profile(profile_id: str, session_id: str, li
     return await storage_manager("event").query(query)
 
 
+def scan(query: dict = None, batch: int = 1000):
+    return storage_manager('event').scan(query, batch)
+
+
 async def reassign_session(new_session_id: str, old_session_id: str, profile_id: str):
     result = await get_events_by_session_and_profile(profile_id, old_session_id)
     for event_record in result:
@@ -557,8 +591,12 @@ async def reassign_session(new_session_id: str, old_session_id: str, profile_id:
             logger.error(str(e))
 
 
-async def get_all_events_by_fields(search_by: List[Tuple[str, str]], return_fields: Optional[List[str]] = None) -> List[
-    StorageRecords]:
+async def get_all_events_by_fields(
+        search_by: List[Tuple[str, str]],
+        return_fields: Optional[List[str]] = None,
+        date_from: Union[str, datetime] = None,
+        date_to: Union[str, datetime] = 'now',
+) -> List[StorageRecords]:
     def get_query(chunk=0, size=500):
         query = {
             "sort": [
@@ -572,7 +610,25 @@ async def get_all_events_by_fields(search_by: List[Tuple[str, str]], return_fiel
                 }
             }
         }
-        print(query)
+
+        if date_from and date_to:
+            query['query']['bool']['must'].append({
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": date_from,
+                        "lte": date_to
+                    }
+                }
+            })
+        elif date_to:
+            query['query']['bool']['must'].append({
+                "range": {
+                    "metadata.time.insert": {
+                        "lte": date_to
+                    }
+                }
+            })
+
         if return_fields:
             query['_source'] = return_fields
 
