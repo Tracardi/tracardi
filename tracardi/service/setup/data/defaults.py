@@ -78,11 +78,11 @@ cardio_event_source = EventSource(
 
 default_db_data = {
     "bridge": [
-        open_rest_source_bridge,
-        open_webhook_source_bridge,
-        redirect_bridge
+        open_rest_source_bridge.dict(),
+        open_webhook_source_bridge.dict(),
+        redirect_bridge.dict()
     ],
     'event-source': [
-        cardio_event_source
+        cardio_event_source.dict()
     ]
 }

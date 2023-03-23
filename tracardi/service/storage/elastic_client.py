@@ -255,6 +255,9 @@ class ElasticClient:
     async def list_aliases(self):
         return await self._client.indices.get_alias(name="*")
 
+    async def get_alias(self, name):
+        return await self._client.indices.get_alias(name=name)
+
     async def clone(self, source_index, destination_index):
         return await self._client.indices.clone(index=source_index, target=destination_index)
 

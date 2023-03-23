@@ -65,6 +65,11 @@ async def upsert(index: str, data: dict) -> BulkInsertResult:
     return await es.insert(index, [data])
 
 
+async def bulk_upsert(index: str, data: list) -> BulkInsertResult:
+    es = ElasticClient.instance()
+    return await es.insert(index, data)
+
+
 async def load_by_key_value_pairs(index, key_value_pairs: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
                                   limit: int = 20) -> StorageRecords:
     return await storage_manager(index).load_by_values(key_value_pairs, sort_by, limit=limit)
@@ -126,6 +131,11 @@ async def update_aliases(query):
     return await es.update_aliases(query)
 
 
+async def get_alias(name):
+    es = ElasticClient.instance()
+    return await es.get_alias(name)
+
+
 async def remove_template(template_name):
     es = ElasticClient.instance()
     if await es.exists_index_template(template_name):
@@ -139,6 +149,11 @@ async def add_template(template_name, map) -> bool:
     es = ElasticClient.instance()
     result = await es.put_index_template(template_name, map)
     return _acknowledged(result)
+
+
+async def exists_template(template_name) -> bool:
+    es = ElasticClient.instance()
+    return await es.exists_index_template(template_name)
 
 
 async def indices(index="*"):

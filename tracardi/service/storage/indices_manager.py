@@ -1,6 +1,5 @@
 import json
 
-import tracardi.config
 from deepdiff import DeepDiff
 from dotty_dict import dotty
 from elasticsearch import NotFoundError
@@ -93,7 +92,6 @@ async def check_indices_mappings_consistency():
         with open(system_mapping_file) as file:
             system_mapping = file.read()
             system_mapping = index.prepare_mappings(system_mapping, index)
-            system_mapping = json.loads(system_mapping)
             if index.multi_index:
                 system_mapping = system_mapping['template']
             del system_mapping['settings']
