@@ -8,10 +8,23 @@ Version 0.8.0
 * Upgrade to React 18
 * Cleaner Menu
 * Visualisation of events routing 
+* Routing added to event details
+* Installer refactoring
 * Plugins
   * Profile live time plugin
   * Corrected API call plugin
   * Several minor changes to plugins
+  * Changed or added plugins:
+    * API Call
+    * Elastic query
+    * Novu
+    * Telegram
+    * Property exists
+    * Start
+    * Event tag
+    * Redis
+    * Profile live time
+    * Cut out traits
 * Commercial features:
   * Wait and resume plugin
   * Identity resolution (Identification points)
@@ -19,6 +32,7 @@ Version 0.8.0
   * ChatGPT plugin
   * Kafka bridge 
   * SMTP bridge for bounced emails.
+  * Event to profile coping (realtime and manual)
 
 
 Version 0.7.4
