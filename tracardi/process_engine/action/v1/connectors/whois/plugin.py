@@ -30,7 +30,8 @@ class WhoisAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         try:
-            result = whois.whois(self.config.domain)
+            dot = self._get_dot_accessor(payload)
+            result = whois.whois(dot[self.config.domain])
             result['exists'] = bool(result.domain_name)
             return Result(value=result, port="result")
         except Exception as e:
@@ -45,7 +46,7 @@ def register() -> Plugin:
             className=WhoisAction.__name__,
             inputs=["payload"],
             outputs=["result", "error"],
-            version='0.7.3',
+            version='0.8.0',
             init={
                 "domain": ""
             },
