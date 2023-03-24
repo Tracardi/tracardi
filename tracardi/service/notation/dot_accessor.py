@@ -32,17 +32,17 @@ class DotAccessor:
 
     def get_all(self, dot_notation):
         if dot_notation.startswith('flow@...'):
-            return self.flow
+            return self.flow.to_dict()
         elif dot_notation.startswith('profile@...'):
-            return self.profile
+            return self.profile.to_dict()
         elif dot_notation.startswith('session@...'):
-            return self.session
+            return self.session.to_dict()
         elif dot_notation.startswith('payload@...'):
-            return self.payload
+            return self.payload.to_dict()
         elif dot_notation.startswith('event@...'):
-            return self.event
+            return self.event.to_dict()
         elif dot_notation.startswith('memory@...'):
-            return self.memory
+            return self.memory.to_dict()
 
         return None
 
