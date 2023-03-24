@@ -29,6 +29,12 @@ def get_value_or_none(start, end) -> Optional[int]:
     return int(value)
 
 
+def get_float(value):
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
 class SendEventToMatomoAction(ActionRunner):
     client: MatomoClient
     config: Config
@@ -127,7 +133,7 @@ class SendEventToMatomoAction(ActionRunner):
                 # viewed a new unique ID should be generated. Use [0-9a-Z] as possible characters for the unique ID.
                 pv_id=self.make_pv_id(),
                 idgoal=int(dot[self.config.goal_id]) if self.config.goal_id is not None else None,
-                revenue=float(dot[self.config.revenue]) if self.config.revenue is not None else None,
+                revenue=get_float(dot[self.config.revenue]) if self.config.revenue in dot else None,
                 dimensions=traverser.reshape(self.config.dimensions),
                 gt_ms=get_value_or_none(request_start, response_end),
                 pf_net=get_value_or_none(redirect_start, response_start),
