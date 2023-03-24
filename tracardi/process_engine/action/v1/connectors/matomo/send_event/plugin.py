@@ -1,3 +1,8 @@
+from typing import Optional
+from uuid import uuid4
+
+from time import time
+
 from tracardi.process_engine.action.v1.connectors.matomo.client import MatomoClient, MatomoClientException
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -14,8 +19,17 @@ def validate(config: dict) -> Config:
     return Config(**config)
 
 
-class SendEventToMatomoAction(ActionRunner):
+def get_value_or_none(start, end) -> Optional[int]:
+    if 0 in (end, start):
+        return None
 
+    value = end - start
+    if value == 0:
+        return None
+    return int(value)
+
+
+class SendEventToMatomoAction(ActionRunner):
     client: MatomoClient
     config: Config
 
@@ -63,45 +77,68 @@ class SendEventToMatomoAction(ActionRunner):
         load_event_end = perf_data_service.get_performance_value("loadEventEnd")
         request_start = perf_data_service.get_performance_value("requestStart")
 
-        data = MatomoPayload(
-            cip=self.event.request.get("ip", None),
-            idsite=self.config.site_id,
-            action_name=self.event.type,
-            url=self.event.context.get("page", {"url": None}).get("url", None),
-            _id=self.profile.id.replace("-", "")[0:16],
-            urlref=dot[self.config.url_ref] if self.config.url_ref is not None else None,
-            _idvc=self.profile.metadata.time.visit.count,
-            _viewts=self.profile.metadata.time.visit.last.timestamp() if self.profile.metadata.time.visit.last
-                                                                         is not None else None,
-            _idts=self.profile.metadata.time.insert,
-            _rcn=dot[self.config.rcn] if self.config.rcn is not None else None,
-            _rck=dot[self.config.rck] if self.config.rck is not None else None,
-            res=res,
-            ua=ua,
-            lang=lang,
-            uid=self.profile.id.replace("-", "")[0:16],
-            new_visit=new_visit,
-            search=dot[self.config.search_keyword] if self.config.search_keyword is not None else None,
-            search_cat=dot[self.config.search_category] if self.config.search_category is not None else None,
-            search_count=dot[self.config.search_results_count] if self.config.search_results_count is not None
-            else None,
-            pv_id=self.make_pv_id(),
-            idgoal=int(dot[self.config.goal_id]) if self.config.goal_id is not None else None,
-            revenue=float(dot[self.config.revenue]) if self.config.revenue is not None else None,
-            gt_ms=int(response_end - request_start) if 0 not in (request_start, response_end) else None,
-            dimensions=traverser.reshape(self.config.dimensions),
-            pf_net=int(response_start - redirect_start) if 0 not in (response_start, redirect_start) else None,
-            pf_srv=int(dom_complete - response_start) if 0 not in (dom_complete, response_start) else None,
-            pf_tfr=int(response_end - response_start) if 0 not in (response_end, response_start) else None,
-            pf_dm2=int(dom_content_loaded - dom_complete) if 0 not in (dom_complete, dom_content_loaded) else None,
-            pf_dm1=int(dom_content_loaded - dom_loading) if 0 not in (dom_content_loaded, dom_loading) else None,
-            pf_onl=int(load_event_end - load_event_start) if 0 not in (load_event_end, load_event_start) else None
-        )
+        _id = self.profile.id.replace("-", "")[0:16]
 
         try:
+            data = MatomoPayload(
+
+                # (required) The ID of the website we're tracking a visit/action for.
+                idsite=self.config.site_id,
+                # (recommended) The title of the action being tracked.
+                action_name=self.event.type,
+                # (recommended) The full URL for the current action
+                url=self.event.context.get("page", {"url": 'http://localhost'}).get("url", 'http://localhost'),
+                # (recommended) The unique visitor ID, must be a 16 characters hexadecimal string.
+                _id=_id,
+                # (recommended) Random number
+                rand=str(uuid4()),
+
+                # The full HTTP Referrer URL. This value is used to determine how someone got to your website
+                urlref=dot[self.config.url_ref] if self.config.url_ref is not None else None,
+                # override the client ip
+                cip=self.event.request.get("ip", None),
+                # Visits
+                _idvc=self.profile.metadata.time.visit.count,
+                # View time stamp
+                _viewts=int(self.profile.metadata.time.visit.last.timestamp()) if self.profile.metadata.time.visit.last
+                                                                                  is not None else None,
+                # Id time stamp
+                _idts=int(
+                    self.profile.metadata.time.insert.timestamp()) if self.profile.metadata.time.insert is not None else int(
+                    time()),
+                # The Campaign name used to attribute goal conversions.
+                _rcn=dot[self.config.rcn] if self.config.rcn in dot else None,
+                # The Campaign keyword used to attribute goal conversions.
+                _rck=dot[self.config.rck] if self.config.rck in dot else None,
+                # res — The resolution of the device the visitor is using, eg 1280x1024
+                res=res,
+                # ua — An override value for the User-Agent HTTP header field.
+                ua=ua,
+                lang=lang,
+                uid=_id,
+                new_visit=new_visit,
+                search=dot[self.config.search_keyword] if self.config.search_keyword is not None else None,
+                search_cat=dot[self.config.search_category] if self.config.search_category is not None else None,
+                search_count=dot[self.config.search_results_count] if self.config.search_results_count is not None
+                else None,
+                # Accepts a six character unique ID that identifies which actions were performed on
+                # a specific page view. When a page was viewed, all following tracking requests
+                # (such as events) during that page view should use the same pageview ID. Once another page was
+                # viewed a new unique ID should be generated. Use [0-9a-Z] as possible characters for the unique ID.
+                pv_id=self.make_pv_id(),
+                idgoal=int(dot[self.config.goal_id]) if self.config.goal_id is not None else None,
+                revenue=float(dot[self.config.revenue]) if self.config.revenue is not None else None,
+                dimensions=traverser.reshape(self.config.dimensions),
+                gt_ms=get_value_or_none(request_start, response_end),
+                pf_net=get_value_or_none(redirect_start, response_start),
+                pf_srv=get_value_or_none(dom_complete, response_start),
+                pf_tfr=get_value_or_none(response_start, response_end),
+                pf_dm2=get_value_or_none(dom_complete, dom_content_loaded),
+                pf_dm1=get_value_or_none(dom_loading, dom_content_loaded),
+                pf_onl=get_value_or_none(load_event_start, load_event_end)
+            )
             await self.client.send_event(data)
             return Result(port="response", value=payload)
-
         except MatomoClientException as e:
             return Result(port="error", value={"message": str(e)})
 
@@ -127,10 +164,10 @@ def register() -> Plugin:
             className='SendEventToMatomoAction',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.2',
-            license="MIT",
-            author="Dawid Kruk",
-            # manual,
+            version='0.8.0',
+            license="MIT + CC",
+            author="Dawid Kruk, Risto Kowaczewski",
+            manual='matomo/register_event',
             init={
                 "source": {
                     "id": None,
