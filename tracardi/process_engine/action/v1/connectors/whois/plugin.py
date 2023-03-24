@@ -46,7 +46,7 @@ def register() -> Plugin:
             className=WhoisAction.__name__,
             inputs=["payload"],
             outputs=["result", "error"],
-            version='0.7.3',
+            version='0.8.0',
             init={
                 "domain": ""
             },
