@@ -35,6 +35,13 @@ def get_float(value):
     except ValueError:
         return None
 
+
+def get_not_empty_string(value):
+    if isinstance(value, str) and value.strip() != "":
+        return value
+    return None
+
+
 class SendEventToMatomoAction(ActionRunner):
     client: MatomoClient
     config: Config
@@ -123,9 +130,9 @@ class SendEventToMatomoAction(ActionRunner):
                 lang=lang,
                 uid=_id,
                 new_visit=new_visit,
-                search=dot[self.config.search_keyword] if self.config.search_keyword is not None else None,
-                search_cat=dot[self.config.search_category] if self.config.search_category is not None else None,
-                search_count=dot[self.config.search_results_count] if self.config.search_results_count is not None
+                search=get_not_empty_string(dot[self.config.search_keyword]) if self.config.search_keyword in dot else None,
+                search_cat=get_not_empty_string(dot[self.config.search_category]) if self.config.search_category in dot else None,
+                search_count=get_not_empty_string(dot[self.config.search_results_count]) if self.config.search_results_count in dot
                 else None,
                 # Accepts a six character unique ID that identifies which actions were performed on
                 # a specific page view. When a page was viewed, all following tracking requests
