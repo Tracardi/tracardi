@@ -30,6 +30,8 @@ def get_value_or_none(start, end) -> Optional[int]:
 
 
 def get_float(value):
+    if value is None:
+        return None
     try:
         return float(value)
     except ValueError:
@@ -39,6 +41,8 @@ def get_float(value):
 
 
 def get_int(value):
+    if value is None:
+        return None
     try:
         return int(value)
     except ValueError:
