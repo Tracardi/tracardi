@@ -36,6 +36,13 @@ def get_float(value):
         return None
 
 
+def get_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
 def get_not_empty_string(value):
     if isinstance(value, str) and value.strip() != "":
         return value
@@ -113,10 +120,10 @@ class SendEventToMatomoAction(ActionRunner):
                 # Visits
                 _idvc=self.profile.metadata.time.visit.count,
                 # View time stamp
-                _viewts=int(self.profile.metadata.time.visit.last.timestamp()) if self.profile.metadata.time.visit.last
+                _viewts=get_int(self.profile.metadata.time.visit.last.timestamp()) if self.profile.metadata.time.visit.last
                                                                                   is not None else None,
                 # Id time stamp
-                _idts=int(
+                _idts=get_int(
                     self.profile.metadata.time.insert.timestamp()) if self.profile.metadata.time.insert is not None else int(
                     time()),
                 # The Campaign name used to attribute goal conversions.
@@ -130,16 +137,19 @@ class SendEventToMatomoAction(ActionRunner):
                 lang=lang,
                 uid=_id,
                 new_visit=new_visit,
-                search=get_not_empty_string(dot[self.config.search_keyword]) if self.config.search_keyword in dot else None,
-                search_cat=get_not_empty_string(dot[self.config.search_category]) if self.config.search_category in dot else None,
-                search_count=get_not_empty_string(dot[self.config.search_results_count]) if self.config.search_results_count in dot
+                search=get_not_empty_string(
+                    dot[self.config.search_keyword]) if self.config.search_keyword in dot else None,
+                search_cat=get_not_empty_string(
+                    dot[self.config.search_category]) if self.config.search_category in dot else None,
+                search_count=get_not_empty_string(
+                    dot[self.config.search_results_count]) if self.config.search_results_count in dot
                 else None,
                 # Accepts a six character unique ID that identifies which actions were performed on
                 # a specific page view. When a page was viewed, all following tracking requests
                 # (such as events) during that page view should use the same pageview ID. Once another page was
                 # viewed a new unique ID should be generated. Use [0-9a-Z] as possible characters for the unique ID.
                 pv_id=self.make_pv_id(),
-                idgoal=int(dot[self.config.goal_id]) if self.config.goal_id is not None else None,
+                idgoal=get_int(dot[self.config.goal_id]) if self.config.goal_id in dot else None,
                 revenue=get_float(dot[self.config.revenue]) if self.config.revenue in dot else None,
                 dimensions=traverser.reshape(self.config.dimensions),
                 gt_ms=get_value_or_none(request_start, response_end),
