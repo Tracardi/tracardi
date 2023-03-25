@@ -73,6 +73,11 @@ class Event(Entity):
             self.tags = event.tags
             self.aux = event.aux
 
+    def get_ip(self):
+        if 'headers' in self.request and 'x-forwarded-for' in self.request['headers']:
+            return self.request['headers']['x-forwarded-for']
+        return None
+
     def is_persistent(self) -> bool:
         if 'save' in self.config and isinstance(self.config['save'], bool):
             return self.config['save']
