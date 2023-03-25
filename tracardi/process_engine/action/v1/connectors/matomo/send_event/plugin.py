@@ -109,7 +109,7 @@ class SendEventToMatomoAction(ActionRunner):
                 # The full HTTP Referrer URL. This value is used to determine how someone got to your website
                 urlref=dot[self.config.url_ref] if self.config.url_ref is not None else None,
                 # override the client ip
-                cip=self.event.request.get("ip", None),
+                cip=self.event.get_ip(),
                 # Visits
                 _idvc=self.profile.metadata.time.visit.count,
                 # View time stamp
