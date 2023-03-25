@@ -34,10 +34,34 @@ class Tags(BaseModel):
         self.count = len(self.values)
 
 
+class Browser(BaseModel):
+    family: Optional[str] = None
+    version: Optional[str] = None
+
+
+class OS(BaseModel):
+    family: Optional[str] = None
+    version: Optional[str] = None
+
+
+class Device(BaseModel):
+    family: Optional[str] = None
+    brand: Optional[str] = None
+    model: Optional[str] = None
+
+
+class UserAgent(BaseModel):
+    bot: Optional[bool] = False
+    browser: Optional[Browser] = Browser()
+    os: Optional[OS] = OS()
+    device: Optional[Device] = Device()
+
+
 class EventSession(Entity):
     start: datetime = datetime.utcnow()
     duration: float = 0
     tz: Optional[str] = 'utc'
+    agent: Optional[UserAgent] = UserAgent()
 
 
 class Event(Entity):
