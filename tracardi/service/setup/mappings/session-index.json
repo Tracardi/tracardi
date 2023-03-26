@@ -51,6 +51,129 @@
             }
           }
         },
+
+        "device": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "brand": {
+              "type": "keyword"
+            },
+            "model": {
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "keyword",
+              "ignore_above": 18
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "touch": {
+              "type": "boolean"
+            },
+            "resolution": {
+              "type": "keyword",
+              "ignore_above": 32
+            },
+            "geo": {
+              "properties": {
+                "country": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "code": {
+                      "type": "keyword",
+                      "ignore_above": 10
+                    }
+                  }
+                },
+                "county": {
+                   "type": "keyword",
+                   "ignore_above": 64
+                },
+                "city": {
+                  "type": "keyword",
+                   "ignore_above": 64
+                },
+                "latitude": {
+                  "type": "float"
+                },
+                "longitude": {
+                  "type": "float"
+                },
+                "postal": {
+                  "type": "keyword",
+                  "ignore_above": 24
+                }
+              }
+            }
+          }
+        },
+        "os": {
+          "properties": {
+            "name": {
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "version": {
+              "type": "keyword",
+              "ignore_above": 32
+            }
+          }
+        },
+        "app": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "bot": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "language": {
+              "type": "keyword",
+              "ignore_above": 32
+            },
+            "resolution": {
+              "type": "keyword",
+              "ignore_above": 32
+            }
+          }
+        },
+
+        "utm": {
+          "properties": {
+            "source": {
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "medium": {
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "campaign": {
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "term": {
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "content": {
+              "type": "keyword",
+              "ignore_above": 96
+            }
+          }
+        },
+
         "context": {
           "type": "flattened"
         },

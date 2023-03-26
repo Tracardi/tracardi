@@ -69,6 +69,7 @@ setup(
         'PyYAML==6.0',
         'telebot==0.0.4',
         'msgpack==1.0.5',
+        'user-agents==2.2.0',
         # Worker requirements
         'requests',
         'mysql-connector-python==8.0.29'

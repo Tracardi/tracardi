@@ -7,6 +7,8 @@ from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
+from .marketing import UTM
+from .metadata import OS, Device, Application, Hit
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 
@@ -34,39 +36,23 @@ class Tags(BaseModel):
         self.count = len(self.values)
 
 
-class Browser(BaseModel):
-    family: Optional[str] = None
-    version: Optional[str] = None
-
-
-class OS(BaseModel):
-    family: Optional[str] = None
-    version: Optional[str] = None
-
-
-class Device(BaseModel):
-    family: Optional[str] = None
-    brand: Optional[str] = None
-    model: Optional[str] = None
-
-
-class UserAgent(BaseModel):
-    bot: Optional[bool] = False
-    browser: Optional[Browser] = Browser()
-    os: Optional[OS] = OS()
-    device: Optional[Device] = Device()
-
-
 class EventSession(Entity):
     start: datetime = datetime.utcnow()
     duration: float = 0
     tz: Optional[str] = 'utc'
-    agent: Optional[UserAgent] = UserAgent()
 
 
 class Event(Entity):
     metadata: EventMetadata
     type: str
+
+    device: Optional[Device] = Device()
+    os: Optional[OS] = OS()
+    app: Optional[Application] = Application()
+    hit: Optional[Hit] = Hit()
+
+    utm: Optional[UTM] = UTM()
+
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     operation: RecordFlag = RecordFlag()
@@ -96,6 +82,9 @@ class Event(Entity):
             self.config = event.config
             self.tags = event.tags
             self.aux = event.aux
+            self.os = event.os
+            self.device = event.device
+            self.app = event.app
 
     def get_ip(self):
         if 'headers' in self.request and 'x-forwarded-for' in self.request['headers']:

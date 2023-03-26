@@ -4,6 +4,8 @@ from typing import Optional, Any
 from pydantic import BaseModel
 
 from .entity import Entity
+from .marketing import UTM
+from .metadata import OS, Device, Application
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 
@@ -61,6 +63,13 @@ class Session(Entity):
     metadata: SessionMetadata
     operation: Operation = Operation()
     profile: Optional[Entity] = None
+
+    device: Optional[Device] = Device()
+    os: Optional[OS] = OS()
+    app: Optional[Application] = Application()
+
+    utm: Optional[UTM] = UTM()
+
     context: Optional[SessionContext] = {}
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
@@ -83,6 +92,9 @@ class Session(Entity):
             self.properties = session.properties
             self.traits = self.traits
             self.aux = session.aux
+            self.device = session.device
+            self.os = session.os
+            self.app = session.app
 
     @staticmethod
     def storage_info() -> StorageInfo:

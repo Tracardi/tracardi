@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, Union
 from uuid import uuid4
 
 from pydantic import BaseModel, validator
@@ -9,6 +9,7 @@ from ..entity import Entity
 from ..event import Event, EventSession, Tags
 from ..event_metadata import EventMetadata
 from ..event_metadata import EventPayloadMetadata
+from ..metadata import Hit
 from ..session import Session, SessionContext
 from ..time import Time
 from ..value_object.operation import RecordFlag
@@ -39,7 +40,8 @@ class EventPayload(BaseModel):
     def from_event(event: Event) -> 'EventPayload':
         return EventPayload(type=event.type, properties=event.properties, context=event.context)
 
-    def to_event(self, metadata: EventPayloadMetadata, source: Entity, session: Optional[Session],
+    def to_event(self, metadata: EventPayloadMetadata, source: Entity,
+                 session: Union[Optional[Entity], Optional[Session]],
                  profile: Optional[Entity],
                  has_profile: bool) -> Event:
 
@@ -52,24 +54,68 @@ class EventPayload(BaseModel):
 
         if self.time.create:
             meta.time.create = self.time.create
+        if isinstance(session, Session):
 
-        event = Event(id=str(uuid4()),
-                      metadata=meta,
-                      session=self._get_event_session(session),
-                      profile=get_entity(profile),  # profile can be None when profile_less event.
-                      type=self.type.strip(),
-                      properties=self.properties,
-                      source=source,  # Entity
-                      config=self.options,
-                      context=self.context,
-                      operation=RecordFlag(new=True),
-                      tags=Tags(values=tuple(self.tags), count=len(self.tags))
-                      )
+            try:
+                title = self.context['page']['title']
+            except KeyError:
+                title = None
+
+            try:
+                url = self.context['page']['url']
+            except KeyError:
+                url = None
+
+            try:
+                referer = self.context['page']['referer']['host']
+            except KeyError:
+                referer = None
+
+            hit = Hit(
+                name=title,
+                url=url,
+                referer=referer
+            )
+
+            event = Event(id=str(uuid4()),
+                          metadata=meta,
+                          session=self._get_event_session(session),
+                          profile=get_entity(profile),  # profile can be None when profile_less event.
+                          type=self.type.strip(),
+
+                          os=session.os,
+                          app=session.app,
+                          device=session.device,
+                          hit=hit,
+
+                          utm=session.utm,
+
+                          properties=self.properties,
+                          source=source,  # Entity
+                          config=self.options,
+                          context=self.context,
+                          operation=RecordFlag(new=True),
+                          tags=Tags(values=tuple(self.tags), count=len(self.tags))
+                          )
+
+        else:
+            event = Event(id=str(uuid4()),
+                          metadata=meta,
+                          session=self._get_event_session(session),
+                          profile=get_entity(profile),  # profile can be None when profile_less event.
+                          type=self.type.strip(),
+                          properties=self.properties,
+                          source=source,  # Entity
+                          config=self.options,
+                          context=self.context,
+                          operation=RecordFlag(new=True),
+                          tags=Tags(values=tuple(self.tags), count=len(self.tags))
+                          )
 
         return event
 
     @staticmethod
-    def _get_event_session(session: Session) -> Optional[EventSession]:
+    def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession]:
         if session is not None:
             if isinstance(session, Session) and isinstance(session.context, dict):
                 session.context = SessionContext(session.context)

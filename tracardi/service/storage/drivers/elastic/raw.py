@@ -148,7 +148,7 @@ async def remove_template(template_name):
 async def add_template(template_name, map) -> bool:
     es = ElasticClient.instance()
     result = await es.put_index_template(template_name, map)
-    return _acknowledged(result)
+    return _acknowledged(result), result
 
 
 async def exists_template(template_name) -> bool:

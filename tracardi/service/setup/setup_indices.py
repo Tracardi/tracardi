@@ -88,9 +88,9 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
 
         if not await storage.driver.raw.exists_template(template_name):
             # Multi indices need templates. Index will be created automatically on first insert
-            result = await storage.driver.raw.add_template(template_name, index_map)
+            ack, result = await storage.driver.raw.add_template(template_name, index_map)
 
-            if not result:
+            if not ack:
                 raise ConnectionError(
                     "Could not create the template `{}`. Received result: {}".format(
                         template_name,

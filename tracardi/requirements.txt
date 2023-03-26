@@ -52,6 +52,7 @@ python-whois==0.8.0
 PyYAML==6.0
 telebot==0.0.4
 msgpack==1.0.5
+user-agents==2.2.0
 
 # Worker requirements
 mysql-connector-python
