@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Sign-In",
+    "description": "User signs in.",
+    "id": "sign-in",
+    "properties": {
+      "email": "string",
+      "firstname": "string",
+      "lastname": "string"
+    },
+    "event": {
+      "private.pii.email": "email",
+      "private.pii.firstname": "firstname",
+      "private.pii.lastname": "lastname"
+    },
+    "profile": {
+      "pii.email": ["traits.private.pii.email", "equal"],
+      "data.contact.email": ["traits.private.pii.email", "equal"],
+      "data.pii.firstname": ["traits.private.pii.firstname", "equal"],
+      "data.pii.lastname": ["traits.private.pii.lastname", "equal"]
+    }
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Page View",
+    "description": "Customer views a page.",
+    "id": "page-view",
+    "properties": {
+      "url": "string",
+      "category": "string"
+    }
+  }
+]

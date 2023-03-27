@@ -1,23 +1,70 @@
 [
   {
-    "name": "Products Searched",
-    "description": "User searched for products",
-    "id": "products-searched"
+    "name": "Search",
+    "description": "User searched for products, services, etc.",
+    "id": "search",
+    "properties": {
+      "type": "string",
+      "query": "string"
+    },
+    "event": {
+      "public.query.type": "type",
+      "public.query.name": "query"
+    }
   },
   {
-    "name": "Product List Viewed",
+    "name": "Product Search Result",
     "description": "User viewed a product list or category",
-    "id": "product-list-viewed"
-  },
-  {
-    "name": "Product List Filtered",
-    "description": "User filtered a product list or category",
-    "id": "product-list-filtered"
+    "id": "product-search-result",
+    "properties": {
+      "type": "product",
+      "query": "string",
+      "filters": [
+        {
+          "key": "string",
+          "value": "string"
+        }
+      ],
+      "sorting": [
+        {
+          "key": "string",
+          "order": "asc|desc"
+        }
+      ],
+      "products": [
+        {
+          "id": "string|integer",
+          "sku": "string",
+          "name": "string",
+          "category": "string",
+          "url": {
+            "image": "url",
+            "page": "url"
+          },
+          "price": 0.0
+        }
+      ]
+    },
+    "event": {
+      "public.query.type": "type",
+      "public.query.name": "query"
+    }
   },
   {
     "name": "Promotion Viewed",
     "description": "User viewed promotion",
-    "id": "promotion-viewed"
+    "id": "promotion-viewed",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "media": {
+        "image": "string"
+      }
+    },
+    "event": {
+      "public.promotion.id": "id",
+      "public.promotion.name": "name"
+    }
   },
   {
     "name": "Promotion Clicked",
@@ -32,7 +79,39 @@
   {
     "name": "Product Viewed",
     "description": "User viewed a product details",
-    "id": "product-viewed"
+    "id": "product-viewed",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": 0.0,
+      "quantity": 1,
+      "coupon": "string",
+      "position": 1,
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "event": {
+      "public.product.id": "id",
+      "public.product.name": "name",
+      "public.product.sku": "sku",
+      "public.product.category": "category",
+      "public.product.brand": "brand",
+      "public.product.variant": "variant",
+      "public.product.price": "price",
+      "public.product.quantity": "quantity",
+      "public.promotion.coupon": "coupon",
+      "public.product.position": "position"
+    }
   },
   {
     "name": "Product Added",
