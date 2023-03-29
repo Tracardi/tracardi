@@ -1,11 +1,50 @@
 [
   {
+    "name": "Search",
+    "description": "Customer searched for products, services, etc.",
+    "id": "search",
+    "properties": {
+      "category": "string",
+      "query": "string"
+    },
+    "event": {
+      "public.history.page.search.category": "category",
+      "public.history.page.search.query": "query"
+    }
+  },
+  {
     "name": "Page View",
     "description": "Customer views a page.",
     "id": "page-view",
     "properties": {
-      "url": "string",
       "category": "string"
+    },
+    "event": {
+      "public.history.page.category": "category"
+    }
+  },
+  {
+    "name": "Page Print",
+    "description": "Customer prints a page.",
+    "id": "page-print",
+    "properties": {
+      "category": "string"
+    },
+    "event": {
+      "public.history.page.category": "category"
+    }
+  },
+  {
+    "name": "Screen View",
+    "description": "Customer views a screen at mobile device.",
+    "id": "screen-view",
+    "properties": {
+      "name": "string",
+      "category": "string"
+    },
+    "event": {
+      "public.history.page.name": "name",
+      "public.history.page.category": "category"
     }
   }
 ]

@@ -1,20 +1,7 @@
 [
   {
-    "name": "Search",
-    "description": "User searched for products, services, etc.",
-    "id": "search",
-    "properties": {
-      "type": "string",
-      "query": "string"
-    },
-    "event": {
-      "public.query.type": "type",
-      "public.query.name": "query"
-    }
-  },
-  {
     "name": "Product Search Result",
-    "description": "User viewed a product list or category",
+    "description": "Customer viewed a product list or product category.",
     "id": "product-search-result",
     "properties": {
       "type": "product",
@@ -28,12 +15,12 @@
       "sorting": [
         {
           "key": "string",
-          "order": "asc|desc"
+          "order": "string"
         }
       ],
       "products": [
         {
-          "id": "string|integer",
+          "id": "string",
           "sku": "string",
           "name": "string",
           "category": "string",
@@ -41,7 +28,7 @@
             "image": "url",
             "page": "url"
           },
-          "price": 0.0
+          "price": "float"
         }
       ]
     },
@@ -52,12 +39,13 @@
   },
   {
     "name": "Promotion Viewed",
-    "description": "User viewed promotion",
+    "description": "Customer viewed promotion banner or text.",
     "id": "promotion-viewed",
     "properties": {
       "id": "string",
       "name": "string",
       "media": {
+        "text": "string",
         "image": "string"
       }
     },
@@ -68,18 +56,21 @@
   },
   {
     "name": "Promotion Clicked",
-    "description": "User clicked on promotion",
-    "id": "promotion-clicked"
+    "description": "Customer clicked on promotion banner.",
+    "id": "promotion-clicked",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    }
   },
   {
     "name": "Product Clicked",
-    "description": "User clicked on a product",
-    "id": "product-clicked"
-  },
-  {
-    "name": "Product Viewed",
-    "description": "User viewed a product details",
-    "id": "product-viewed",
+    "description": "Customer clicked on a product.",
+    "id": "product-clicked",
     "properties": {
       "id": "string",
       "name": "string",
@@ -91,10 +82,9 @@
         "color": "string",
         "size": "string"
       },
-      "price": 0.0,
-      "quantity": 1,
-      "coupon": "string",
-      "position": 1,
+      "price": "float",
+      "quantity": "int",
+      "position": "int",
       "url": {
         "image": "url",
         "page": "url"
@@ -109,113 +99,284 @@
       "public.product.variant": "variant",
       "public.product.price": "price",
       "public.product.quantity": "quantity",
-      "public.promotion.coupon": "coupon",
       "public.product.position": "position"
     }
   },
   {
-    "name": "Product Added",
-    "description": "User added a product to their shopping cart",
-    "id": "product-added"
+    "name": "Product Details Page View",
+    "description": "Customer viewed a product details page.",
+    "id": "product-details-page-view",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": "float",
+      "quantity": "int",
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "event": {
+      "public.product.id": "id",
+      "public.product.name": "name",
+      "public.product.sku": "sku",
+      "public.product.category": "category",
+      "public.product.brand": "brand",
+      "public.product.variant": "variant",
+      "public.product.price": "price",
+      "public.product.quantity": "quantity"
+    }
   },
   {
-    "name": "Product Removed",
-    "description": "User removed a product from their shopping cart",
-    "id": "product-removed"
+    "name": "Basket Viewed",
+    "description": "Customer viewed their shopping cart",
+    "id": "basket-viewed",
+    "properties": {
+      "id": "string"
+    }
   },
   {
-    "name": "Cart Viewed",
-    "description": "User viewed their shopping cart",
-    "id": "cart-viewed"
+    "name": "Product Added To Basket",
+    "description": "Customer added a product to their shopping cart",
+    "id": "product-added-to-basket",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": "float",
+      "quantity": "int",
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "event": {
+      "public.product.id": "id",
+      "public.product.name": "name",
+      "public.product.sku": "sku",
+      "public.product.category": "category",
+      "public.product.brand": "brand",
+      "public.product.variant": "variant",
+      "public.product.price": "price",
+      "public.product.quantity": "quantity"
+    }
+  },
+  {
+    "name": "Product Removed From Basket",
+    "description": "Customer removed a product from their shopping cart",
+    "id": "product-removed-from-basket",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": "float",
+      "quantity": "int",
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "event": {
+      "public.product.id": "id",
+      "public.product.name": "name",
+      "public.product.sku": "sku",
+      "public.product.category": "category",
+      "public.product.brand": "brand",
+      "public.product.variant": "variant",
+      "public.product.price": "price",
+      "public.product.quantity": "quantity"
+    }
   },
   {
     "name": "Checkout Started",
-    "description": "User initiated the order process (a transaction is created)",
-    "id": "checkout-started"
+    "description": "Customer initiated the checkout process.",
+    "id": "checkout-started",
+    "const": {
+      "id": "[local.storage:set,__tr_checkout_id]",
+      "status": "started"
+    },
+    "properties": {
+      "id": "string",
+      "order_id": "string",
+      "currency": "string",
+      "value": "string",
+      "coupon": "string"
+    },
+    "event": {
+      "public.checkout.id": "id",
+      "public.order.id": "order_id",
+      "public.checkout.status": "status",
+      "public.checkout.currency": "currency",
+      "public.checkout.value": "value",
+      "public.checkout.coupon": "coupon"
+    }
   },
   {
-    "name": "Checkout Step Viewed",
-    "description": "User viewed a checkout step",
-    "id": "checkout-step-viewed"
+    "name": "Checkout Completed",
+    "description": "Customer completed the check-out process.",
+    "id": "checkout-completed",
+    "const": {
+      "id": "[local.storage:read,__tr_checkout_id]",
+      "status": "completed"
+    },
+    "properties": {
+      "id": "string"
+    },
+    "event": {
+      "public.checkout.id": "id",
+      "public.checkout.status": "status"
+    }
   },
   {
-    "name": "Checkout Step Completed",
-    "description": "User completed a checkout step",
-    "id": "checkout-step-completed"
+    "name": "Checkout Status",
+    "description": "Customer completed a checkout step. Status changed.",
+    "id": "checkout-status",
+    "const": {
+      "id": "[local.storage:read,__tr_checkout_id]"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "event": {
+      "public.checkout.id": "id",
+      "public.checkout.status": "status"
+    }
   },
+
+  {
+    "name": "Delivery Info Entered",
+    "description": "Customer added delivery information",
+    "id": "delivery-info-entered",
+    "properties": {
+      "order_id": "string",
+      "method": "string",
+      "receiver": "string",
+      "location": {
+        "address": "string",
+        "country": "string"
+      }
+    }
+  },
+
   {
     "name": "Payment Info Entered",
-    "description": "User added payment information",
-    "id": "payment-info-entered"
+    "description": "Customer added payment information",
+    "id": "payment-info-entered",
+    "properties": {
+      "order_id": "string",
+      "method": "string",
+      "credit_card": {
+        "number": "string",
+        "expires": "string",
+        "holder": "string",
+        "cvv": ""
+      }
+    }
+  },
+
+  {
+    "name": "Order Started",
+    "description": "Customer completed the order",
+    "id": "order-started",
+    "const": {
+      "status": "started"
+    },
+    "properties": {
+      "id": "string",
+      "income": {
+        "value": "float",
+        "revenue": "float"
+      },
+      "cost": {
+        "shipping": "float",
+        "tax": "float",
+        "discount": "float",
+        "other": "float"
+      },
+      "affiliation": "string",
+      "products": [
+        {
+          "id": "string",
+          "name": "string",
+          "sku": "string",
+          "category": "string",
+          "brand": "string",
+          "variant": {
+            "name": "string",
+            "color": "string",
+            "size": "string"
+          },
+          "price": "float",
+          "quantity": "int",
+          "url": {
+            "image": "url",
+            "page": "url"
+          }
+        }
+      ]
+    },
+    "event": {
+      "public.order.id": "id",
+      "public.order.status": "status"
+    }
   },
   {
     "name": "Order Completed",
-    "description": "User completed the order",
-    "id": "order-completed"
-  },
-  {
-    "name": "Order Updated",
-    "description": "User updated the order",
-    "id": "order-updated"
-  },
-  {
-    "name": "Order Refunded",
-    "description": "User refunded the order",
-    "id": "order-refunded"
-  },
-  {
-    "name": "Order Cancelled",
-    "description": "User cancelled the order",
-    "id": "order-cancelled"
-  },
-  {
-    "name": "Coupon Entered",
-    "description": "User entered a coupon on a shopping cart or order",
-    "id": "coupon-entered"
-  },
-  {
-    "name": "Coupon Applied",
-    "description": "Coupon was applied on a user's shopping cart or order",
-    "id": "coupon-applied"
-  },
-  {
-    "name": "Coupon Denied",
-    "description": "Coupon was denied from a user's shopping cart or order",
-    "id": "coupon-denied"
-  },
-  {
-    "name": "Coupon Removed",
-    "description": "User removed a coupon from a cart or order",
-    "id": "coupon-removed"
-  },
-  {
-    "name": "Product Added to Wishlist",
-    "description": "User added a product to the wish list",
-    "id": "product-added-to-wishlist"
-  },
-  {
-    "name": "Product Removed from Wishlist",
-    "description": "User removed a product from the wish list",
-    "id": "product-removed-from-wishlist"
-  },
-  {
-    "name": "Wishlist Product Added to Cart",
-    "description": "User added a wishlist product to the cart",
-    "id": "wishlist-product-added-to-cart"
+    "description": "Customer completed the order",
+    "id": "order-completed",
+    "const": {
+      "status": "completed"
+    },
+    "event": {
+      "public.order.id": "id",
+      "public.order.status": "status"
+    }
   },
   {
     "name": "Product Shared",
-    "description": "Shared a product with one or more friends",
-    "id": "product-shared"
-  },
-  {
-    "name": "Cart Shared",
-    "description": "Shared the cart with one or more friends",
-    "id": "cart-shared"
+    "description": "Customer shared a product.",
+    "id": "product-shared",
+    "properties": {
+      "id": "string",
+      "media": "string"
+    }
   },
   {
     "name": "Product Reviewed",
-    "description": "User reviewed a product",
-    "id": "product-reviewed"
+    "description": "Customer reviewed a product.",
+    "id": "product-reviewed",
+    "properties": {
+      "id": "string",
+      "review": "string",
+      "rate": "integer"
+    },
+    "event": {
+      "public.product.id": "id",
+      "public.product.review": "review",
+      "public.product.rate": "rate"
+    }
   }
 ]

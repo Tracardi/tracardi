@@ -5,8 +5,6 @@ from tracardi.domain.event import Event, EventSession
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.time import EventTime
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
-from tracardi.domain.profile_traits import ProfileTraits
 from tracardi.service.plugin.service.plugin_runner import run_plugin
 
 from tracardi.process_engine.action.v1.strings.string_validator.plugin import StringValidatorAction
@@ -171,7 +169,7 @@ def test_string_validator_plugin_fails():
         "validator": "time"
     }
     payload = {}
-    profile = Profile(id="profile-id", traits=ProfileTraits(public={"test": "new test"}))
+    profile = Profile(id="profile-id", traits={"public":{"test": "new test"}})
     event = Event(
         id='event-id',
         type='event-type',

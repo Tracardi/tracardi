@@ -5,19 +5,110 @@
     "id": "sign-in",
     "properties": {
       "email": "string",
+      "login": "string",
       "firstname": "string",
       "lastname": "string"
     },
     "event": {
       "private.pii.email": "email",
+      "private.identifier.token": "login",
       "private.pii.firstname": "firstname",
       "private.pii.lastname": "lastname"
     },
     "profile": {
-      "pii.email": ["traits.private.pii.email", "equal"],
       "data.contact.email": ["traits.private.pii.email", "equal"],
+      "data.identifier.token": ["traits.private.identifier.token", "equal"],
       "data.pii.firstname": ["traits.private.pii.firstname", "equal"],
       "data.pii.lastname": ["traits.private.pii.lastname", "equal"]
+    }
+  },
+  {
+    "name": "Sign-Up",
+    "description": "User signs up.",
+    "id": "sign-in",
+    "properties": {
+      "email": "string",
+      "login": "string",
+      "firstname": "string",
+      "lastname": "string",
+      "custom": "object"
+    },
+    "event": {
+      "private.pii.email": "email",
+      "private.pii.firstname": "firstname",
+      "private.pii.lastname": "lastname",
+      "private.identifier.token": "login"
+    },
+    "profile": {
+      "data.contact.email": ["traits.private.pii.email", "equal"],
+      "data.identifier.token": ["traits.private.identifier.token", "equal"],
+      "data.pii.firstname": ["traits.private.pii.firstname", "equal"],
+      "data.pii.lastname": ["traits.private.pii.lastname", "equal"]
+    }
+  },
+  {
+    "name": "Identification",
+    "description": "User sends PII data.",
+    "id": "identify",
+    "properties": {
+      "firstname": "string",
+      "lastname": "string",
+      "id": "string",
+      "passport": "string",
+      "email": "string",
+      "phone": "string",
+      "login": "string",
+      "credit_card": "string",
+      "coupon": "string",
+      "twitter": "string",
+      "whatsapp": "string",
+      "discord": "string",
+      "slack": "string",
+      "telegram": "string",
+      "wechat": "string",
+      "viber": "string",
+      "signal": "string",
+      "badge": "string"
+    },
+    "event": {
+      "private.contact.email": "email",
+      "private.contact.phone": "phone",
+      "private.pii.firstname": "firstname",
+      "private.pii.lastname": "lastname",
+      "private.identifier.token": "login",
+      "private.identifier.id": "id",
+      "private.identifier.passport": "passport",
+      "private.identifier.credit_card": "credit_card",
+      "private.identifier.coupon": "coupon",
+      "private.identifier.badge": "badge",
+      "private.app.twitter": "twitter",
+      "private.app.whatsapp": "whatsapp",
+      "private.app.discord": "discord",
+      "private.app.slack": "slack",
+      "private.app.telegram": "telegram",
+      "private.app.wechat": "wechat",
+      "private.app.viber": "viber",
+      "private.app.signal": "signal"
+    },
+    "profile": {
+      "data.pii.firstname": ["traits.private.pii.firstname", "equal"],
+      "data.pii.lastname": ["traits.private.pii.lastname", "equal"],
+      "data.contact.email": ["traits.private.contact.email", "equal"],
+      "data.contact.phone": ["traits.private.contact.phone", "equal"],
+      "data.identifier.token": ["traits.private.identifier.token", "equal"],
+      "data.identifier.id": ["traits.private.identifier.id", "equal"],
+      "data.identifier.passport": ["traits.private.identifier.passport", "equal"],
+      "data.identifier.credit_card": ["traits.private.pii.credit_card", "equal"],
+      "data.identifier.coupon": ["traits.private.identifier.coupon", "equal"],
+      "data.identifier.badge": ["traits.private.identifier.badge", "equal"],
+      "data.contact.app.twitter": ["traits.private.app.twitter", "equal"],
+      "data.contact.app.whatsapp": ["traits.private.app.whatsapp", "equal"],
+      "data.contact.app.discord": ["traits.private.app.discord", "equal"],
+      "data.contact.app.slack": ["traits.private.app.slack", "equal"],
+      "data.contact.app.telegram": ["traits.private.app.telegram", "equal"],
+      "data.contact.app.wechat": ["traits.private.app.wechat", "equal"],
+      "data.contact.app.viber": ["traits.private.app.viber", "equal"],
+      "data.contact.app.signal": ["traits.private.app.signal", "equal"]
     }
   }
 ]

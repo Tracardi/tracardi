@@ -240,6 +240,40 @@
             }
           }
         },
+        "history": {
+          "properties": {
+            "page": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "url": {
+                  "type": "keyword"
+                },
+                "referer": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "type": "keyword"
+                },
+                "category": {
+                  "type": "keyword",
+                  "ignore_above": 64
+                }
+              }
+            },
+            "order": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
 
         "session": {
           "properties": {

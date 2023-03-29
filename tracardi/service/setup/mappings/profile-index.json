@@ -51,20 +51,293 @@
             }
           }
         },
+        "data": {
+          "properties": {
+            "media": {
+              "properties": {
+                "image": {
+                  "type": "keyword"
+                },
+                "webpage": {
+                  "type": "keyword"
+                },
+                "social": {
+                  "properties": {
+                    "twitter": {
+                      "type": "keyword"
+                    },
+                    "facebook": {
+                      "type": "keyword"
+                    },
+                    "youtube": {
+                      "type": "keyword"
+                    },
+                    "instagram": {
+                      "type": "keyword"
+                    },
+                    "tiktok": {
+                      "type": "keyword"
+                    },
+                    "linkedin": {
+                      "type": "keyword"
+                    },
+                    "reddit": {
+                      "type": "keyword"
+                    },
+                    "other": {
+                      "type": "flattened"
+                    }
+                  }
+                }
+              }
+            },
+            "pii": {
+              "properties": {
+                "firstname": {
+                  "type": "keyword"
+                },
+                "lastname": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "birthday": {
+                  "type": "date"
+                },
+                "language": {
+                  "properties": {
+                    "native": {
+                      "type": "keyword"
+                    },
+                    "spoken": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "gender": {
+                  "type": "keyword"
+                },
+                "education": {
+                  "properties": {
+                    "level": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "civil": {
+                  "properties": {
+                    "status": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "attributes": {
+                  "properties": {
+                    "height": {
+                      "type": "float"
+                    },
+                    "weight": {
+                      "type": "float"
+                    },
+                    "shoe_number": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "identifier": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "badge": {
+                  "type": "keyword"
+                },
+                "passport": {
+                  "type": "keyword"
+                },
+                "credit_card": {
+                  "type": "keyword"
+                },
+                "token": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "contact": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "phone": {
+                  "type": "keyword"
+                },
+                "app": {
+                  "properties": {
+                    "whatsapp": {
+                      "type": "keyword"
+                    },
+                    "discord": {
+                      "type": "keyword"
+                    },
+                    "slack": {
+                      "type": "keyword"
+                    },
+                    "twitter": {
+                      "type": "keyword"
+                    },
+                    "telegram": {
+                      "type": "keyword"
+                    },
+                    "wechat": {
+                      "type": "keyword"
+                    },
+                    "viber": {
+                      "type": "keyword"
+                    },
+                    "signal": {
+                      "type": "keyword"
+                    },
+                    "other": {
+                      "type": "flattened"
+                    }
+                  }
+                },
+                "address": {
+                  "properties": {
+                    "town": {
+                      "type": "keyword"
+                    },
+                    "county": {
+                      "type": "keyword"
+                    },
+                    "country": {
+                      "type": "keyword"
+                    },
+                    "postcode": {
+                      "type": "keyword"
+                    },
+                    "street": {
+                      "type": "keyword"
+                    },
+                    "other": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "confirmations": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "job": {
+              "properties": {
+                "position": {
+                  "type": "keyword"
+                },
+                "salary": {
+                  "type": "float"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "company": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "size": {
+                      "type": "keyword"
+                    },
+                    "segment": {
+                      "type": "keyword"
+                    },
+                    "country": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "department": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "preferences": {
+              "properties": {
+                "purchases": {
+                  "type": "keyword"
+                },
+                "colors": {
+                  "type": "keyword"
+                },
+                "sizes": {
+                  "type": "keyword"
+                },
+                "devices": {
+                  "type": "keyword"
+                },
+                "channels": {
+                  "type": "keyword"
+                },
+                "payments": {
+                  "type": "keyword"
+                },
+                "brands": {
+                  "type": "keyword"
+                },
+                "fragrances": {
+                  "type": "keyword"
+                },
+                "services": {
+                  "type": "keyword"
+                },
+                "other": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "devices": {
+              "type": "keyword"
+            },
+            "metrics": {
+              "properties": {
+                "ltv": {
+                  "type": "float"
+                }
+              }
+            },
+            "loyalty": {
+              "properties": {
+                "codes": {
+                  "type": "keyword"
+                },
+                "card": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "issuer": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "stats": {
           "dynamic": "true",
           "type": "object"
         },
         "traits": {
           "properties": {
-            "private": {
-              "dynamic": "true",
-              "type": "object"
-            },
-            "public": {
-              "dynamic": "true",
-              "type": "object"
-            }
+            "dynamic": "true",
+            "type": "object"
           }
         },
         "pii": {

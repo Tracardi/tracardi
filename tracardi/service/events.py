@@ -17,9 +17,12 @@ def cache_predefined_event_types():
     path = os.path.join(f"{_local_dir}/setup/events/*.json")
     for file_path in glob.glob(path):
         with open(file_path, "r") as file:
-            content = json.load(file)
-            for item in content:
-                _predefined_event_types[item['id']] = item
+            try:
+                content = json.load(file)
+                for item in content:
+                    _predefined_event_types[item['id']] = item
+            except Exception as e:
+                raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
 
 
 def get_event_type_names():
@@ -56,7 +59,6 @@ def get_default_event_type_schema(event_type, type) -> Optional[dict]:
 
 
 def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: dotty) -> Tuple[dotty, bool]:
-
     profile_updated_flag = False
 
     if copy_schema is not None:
@@ -108,6 +110,3 @@ def index_default_event_type(event: Event) -> Event:
         event.properties = dot_event_properties.to_dict()
         event.traits = dot_event_traits.to_dict()
     return event
-
-
-# print(get_default_event_type_schema("sign-in", "profile"))
