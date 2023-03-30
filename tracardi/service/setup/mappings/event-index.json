@@ -19,6 +19,9 @@
         "id": {
           "type": "keyword"
         },
+        "name": {
+          "type": "keyword"
+        },
         "metadata": {
           "properties": {
             "aux": {

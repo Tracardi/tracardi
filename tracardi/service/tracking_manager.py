@@ -6,7 +6,7 @@ from uuid import uuid4
 from dotty_dict import dotty
 from pydantic.error_wrappers import ValidationError
 from tracardi.service.events import index_default_event_type, copy_default_event_to_profile, \
-    get_default_event_type_schema
+    get_default_event_type_mapping
 
 from tracardi.service.notation.dot_accessor import DotAccessor
 
@@ -230,7 +230,7 @@ class TrackingManager(TrackingManagerBase):
 
             # Default event types coping
 
-            copy_schema = get_default_event_type_schema(event.type, 'profile')
+            copy_schema = get_default_event_type_mapping(event.type, 'profile')
 
             profile_updated_flag = False
             flat_profile = None

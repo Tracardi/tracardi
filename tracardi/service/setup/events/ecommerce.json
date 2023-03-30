@@ -33,8 +33,8 @@
       ]
     },
     "event": {
-      "public.query.type": "type",
-      "public.query.name": "query"
+      "query.type": "type",
+      "query.name": "query"
     }
   },
   {
@@ -50,8 +50,8 @@
       }
     },
     "event": {
-      "public.promotion.id": "id",
-      "public.promotion.name": "name"
+      "promotion.id": "id",
+      "promotion.name": "name"
     }
   },
   {
@@ -91,15 +91,15 @@
       }
     },
     "event": {
-      "public.product.id": "id",
-      "public.product.name": "name",
-      "public.product.sku": "sku",
-      "public.product.category": "category",
-      "public.product.brand": "brand",
-      "public.product.variant": "variant",
-      "public.product.price": "price",
-      "public.product.quantity": "quantity",
-      "public.product.position": "position"
+      "product.id": "id",
+      "product.name": "name",
+      "product.sku": "sku",
+      "product.category": "category",
+      "product.brand": "brand",
+      "product.variant": "variant",
+      "product.price": "price",
+      "product.quantity": "quantity",
+      "product.position": "position"
     }
   },
   {
@@ -125,14 +125,14 @@
       }
     },
     "event": {
-      "public.product.id": "id",
-      "public.product.name": "name",
-      "public.product.sku": "sku",
-      "public.product.category": "category",
-      "public.product.brand": "brand",
-      "public.product.variant": "variant",
-      "public.product.price": "price",
-      "public.product.quantity": "quantity"
+      "product.id": "id",
+      "product.name": "name",
+      "product.sku": "sku",
+      "product.category": "category",
+      "product.brand": "brand",
+      "product.variant": "variant",
+      "product.price": "price",
+      "product.quantity": "quantity"
     }
   },
   {
@@ -166,14 +166,14 @@
       }
     },
     "event": {
-      "public.product.id": "id",
-      "public.product.name": "name",
-      "public.product.sku": "sku",
-      "public.product.category": "category",
-      "public.product.brand": "brand",
-      "public.product.variant": "variant",
-      "public.product.price": "price",
-      "public.product.quantity": "quantity"
+      "product.id": "id",
+      "product.name": "name",
+      "product.sku": "sku",
+      "product.category": "category",
+      "product.brand": "brand",
+      "product.variant": "variant",
+      "product.price": "price",
+      "product.quantity": "quantity"
     }
   },
   {
@@ -199,14 +199,14 @@
       }
     },
     "event": {
-      "public.product.id": "id",
-      "public.product.name": "name",
-      "public.product.sku": "sku",
-      "public.product.category": "category",
-      "public.product.brand": "brand",
-      "public.product.variant": "variant",
-      "public.product.price": "price",
-      "public.product.quantity": "quantity"
+      "product.id": "id",
+      "product.name": "name",
+      "product.sku": "sku",
+      "product.category": "category",
+      "product.brand": "brand",
+      "product.variant": "variant",
+      "product.price": "price",
+      "product.quantity": "quantity"
     }
   },
   {
@@ -225,12 +225,12 @@
       "coupon": "string"
     },
     "event": {
-      "public.checkout.id": "id",
-      "public.order.id": "order_id",
-      "public.checkout.status": "status",
-      "public.checkout.currency": "currency",
-      "public.checkout.value": "value",
-      "public.checkout.coupon": "coupon"
+      "checkout.id": "id",
+      "order.id": "order_id",
+      "checkout.status": "status",
+      "checkout.currency": "currency",
+      "checkout.value": "value",
+      "checkout.coupon": "coupon"
     }
   },
   {
@@ -245,8 +245,8 @@
       "id": "string"
     },
     "event": {
-      "public.checkout.id": "id",
-      "public.checkout.status": "status"
+      "checkout.id": "id",
+      "checkout.status": "status"
     }
   },
   {
@@ -261,8 +261,8 @@
       "status": "string"
     },
     "event": {
-      "public.checkout.id": "id",
-      "public.checkout.status": "status"
+      "checkout.id": "id",
+      "checkout.status": "status"
     }
   },
 
@@ -339,8 +339,8 @@
       ]
     },
     "event": {
-      "public.order.id": "id",
-      "public.order.status": "status"
+      "order.id": "id",
+      "order.status": "status"
     }
   },
   {
@@ -351,8 +351,8 @@
       "status": "completed"
     },
     "event": {
-      "public.order.id": "id",
-      "public.order.status": "status"
+      "order.id": "id",
+      "order.status": "status"
     }
   },
   {
@@ -374,9 +374,9 @@
       "rate": "integer"
     },
     "event": {
-      "public.product.id": "id",
-      "public.product.review": "review",
-      "public.product.rate": "rate"
+      "product.id": "id",
+      "product.review": "review",
+      "product.rate": "rate"
     }
   },
   {
@@ -396,10 +396,10 @@
       "loyalty.card.expires": "expires"
     },
     "profile": {
-      "loyalty.card.id":  ["traits.loyalty.card.id", "equals"],
-      "loyalty.card.name": ["traits.loyalty.card.name", "equals"],
-      "loyalty.card.issuer": ["traits.loyalty.card.issuer", "equals"],
-      "loyalty.card.expires": ["traits.loyalty.card.expires", "equals"]
+      "loyalty.card.id":  ["traits.loyalty.card.id", "equal"],
+      "loyalty.card.name": ["traits.loyalty.card.name", "equal"],
+      "loyalty.card.issuer": ["traits.loyalty.card.issuer", "equal"],
+      "loyalty.card.expires": ["traits.loyalty.card.expires", "equal"]
     }
   },
   {

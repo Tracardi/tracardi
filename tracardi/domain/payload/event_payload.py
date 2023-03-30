@@ -13,6 +13,7 @@ from ..metadata import Hit
 from ..session import Session, SessionContext
 from ..time import Time
 from ..value_object.operation import RecordFlag
+from ...service.string_manager import capitalize_event_type_id
 from ...service.utils.getters import get_entity
 
 
@@ -76,12 +77,13 @@ class EventPayload(BaseModel):
                 url=url,
                 referer=referer
             )
-
+            event_type = self.type.strip()
             event = Event(id=str(uuid4()),
+                          name=capitalize_event_type_id(event_type),
                           metadata=meta,
                           session=self._get_event_session(session),
                           profile=get_entity(profile),  # profile can be None when profile_less event.
-                          type=self.type.strip(),
+                          type=event_type,
 
                           os=session.os,
                           app=session.app,
@@ -99,11 +101,13 @@ class EventPayload(BaseModel):
                           )
 
         else:
+            event_type = self.type.strip()
             event = Event(id=str(uuid4()),
+                          name=capitalize_event_type_id(event_type),
                           metadata=meta,
                           session=self._get_event_session(session),
                           profile=get_entity(profile),  # profile can be None when profile_less event.
-                          type=self.type.strip(),
+                          type=event_type,
                           properties=self.properties,
                           source=source,  # Entity
                           config=self.options,

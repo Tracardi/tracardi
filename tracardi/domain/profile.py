@@ -58,10 +58,21 @@ class ProfileContactApp(BaseModel):
     other: Optional[dict] = {}
 
 
+class ProfileContactAddress(BaseModel):
+    town: Optional[str] = None
+    county: Optional[str] = None
+    country: Optional[str] = None
+    postcode: Optional[str] = None
+    street: Optional[str] = None
+    other: Optional[dict] = {}
+
+
 class ProfileContact(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     app: Optional[ProfileContactApp] = ProfileContactApp()
+    address: Optional[ProfileContactAddress] = ProfileContactAddress()
+    confirmations: List[str] = []
 
 
 class ProfileIdentifier(BaseModel):

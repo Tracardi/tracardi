@@ -48,7 +48,7 @@ async def get_event_types(query: str = None, limit: int = 1000):
     }
 
 
-def get_default_event_type_schema(event_type, type) -> Optional[dict]:
+def get_default_event_type_mapping(event_type, type) -> Optional[dict]:
     if event_type not in _predefined_event_types:
         cache_predefined_event_types()
 
@@ -56,6 +56,14 @@ def get_default_event_type_schema(event_type, type) -> Optional[dict]:
     if schema and type in schema:
         return schema[type]
     return None
+
+
+def get_default_event_type_schema(event_type) -> Optional[dict]:
+    if event_type not in _predefined_event_types:
+        cache_predefined_event_types()
+
+    schema = _predefined_event_types.get(event_type, None)
+    return schema
 
 
 def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: dotty) -> Tuple[dotty, bool]:
@@ -94,7 +102,7 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
 
 
 def index_default_event_type(event: Event) -> Event:
-    index_schema = get_default_event_type_schema(event.type, 'event')
+    index_schema = get_default_event_type_mapping(event.type, 'event')
 
     if index_schema is not None:
 

@@ -8,8 +8,8 @@
       "query": "string"
     },
     "event": {
-      "public.history.page.search.category": "category",
-      "public.history.page.search.query": "query"
+      "hit.page.search.category": "category",
+      "hit.page.search.query": "query"
     }
   },
   {
@@ -20,7 +20,7 @@
       "category": "string"
     },
     "event": {
-      "public.history.page.category": "category"
+      "hit.page.category": "category"
     }
   },
   {
@@ -31,7 +31,7 @@
       "category": "string"
     },
     "event": {
-      "public.history.page.category": "category"
+      "hit.page.category": "category"
     }
   },
   {
@@ -43,8 +43,8 @@
       "category": "string"
     },
     "event": {
-      "public.history.page.name": "name",
-      "public.history.page.category": "category"
+      "hit.page.name": "name",
+      "hit.page.category": "category"
     }
   }
 ]

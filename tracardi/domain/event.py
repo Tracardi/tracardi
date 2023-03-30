@@ -9,6 +9,7 @@ from typing import Tuple
 
 from .marketing import UTM
 from .metadata import OS, Device, Application, Hit
+from .named_entity import NamedEntity
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 
@@ -42,7 +43,7 @@ class EventSession(Entity):
     tz: Optional[str] = 'utc'
 
 
-class Event(Entity):
+class Event(NamedEntity):
     metadata: EventMetadata
     type: str
 
