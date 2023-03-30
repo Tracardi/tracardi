@@ -274,10 +274,30 @@
       "order_id": "string",
       "method": "string",
       "receiver": "string",
-      "location": {
-        "address": "string",
-        "country": "string"
+      "delivery": {
+        "town": "string",
+        "county": "string",
+        "country": "string",
+        "postcode": "string",
+        "street": "string"
       }
+    },
+    "event": {
+      "order.id": "id",
+      "payment.method": "method",
+      "order.receiver": "receiver",
+      "contact.address.town": "delivery.town",
+      "contact.address.county": "delivery.county",
+      "contact.address.country": "delivery.country",
+      "contact.address.postcode": "delivery.postcode",
+      "contact.address.street": "delivery.street"
+    },
+    "profile": {
+      "data.contact.address.town": ["traits.contact.address.town", "equals"],
+      "data.contact.address.county": ["traits.contact.address.county", "equals"],
+      "data.contact.address.country": ["traits.contact.address.country","equals"],
+      "data.contact.address.postcode": ["traits.contact.address.postcode","equals"],
+      "data.contact.address.street": ["traits.contact.address.street","equals"]
     }
   },
 
@@ -396,10 +416,10 @@
       "loyalty.card.expires": "expires"
     },
     "profile": {
-      "loyalty.card.id":  ["traits.loyalty.card.id", "equal"],
-      "loyalty.card.name": ["traits.loyalty.card.name", "equal"],
-      "loyalty.card.issuer": ["traits.loyalty.card.issuer", "equal"],
-      "loyalty.card.expires": ["traits.loyalty.card.expires", "equal"]
+      "data.loyalty.card.id":  ["traits.loyalty.card.id", "equal"],
+      "data.loyalty.card.name": ["traits.loyalty.card.name", "equal"],
+      "data.loyalty.card.issuer": ["traits.loyalty.card.issuer", "equal"],
+      "data.loyalty.card.expires": ["traits.loyalty.card.expires", "equal"]
     }
   },
   {
@@ -413,10 +433,10 @@
       "loyalty.card.id": "id"
     },
     "profile": {
-      "loyalty.card.id":  [null, "delete"],
-      "loyalty.card.name": [null, "delete"],
-      "loyalty.card.issuer": [null, "delete"],
-      "loyalty.card.expires": [null, "delete"]
+      "data.loyalty.card.id":  [null, "delete"],
+      "data.loyalty.card.name": [null, "delete"],
+      "data.loyalty.card.issuer": [null, "delete"],
+      "data.loyalty.card.expires": [null, "delete"]
     }
   }
 ]

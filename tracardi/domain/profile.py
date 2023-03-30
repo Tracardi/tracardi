@@ -64,7 +64,7 @@ class ProfileContactAddress(BaseModel):
     country: Optional[str] = None
     postcode: Optional[str] = None
     street: Optional[str] = None
-    other: Optional[dict] = {}
+    other: Optional[str] = None
 
 
 class ProfileContact(BaseModel):
