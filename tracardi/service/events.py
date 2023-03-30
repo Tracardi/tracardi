@@ -84,6 +84,9 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
                 elif operation == 'equals_if_not_exists':
                     if profile_path not in flat_profile:
                         flat_profile[profile_path] = flat_event[event_path]
+                elif operation == 'delete':
+                    if profile_path in flat_profile:
+                        flat_profile[profile_path] = None
                 else:
                     flat_profile[profile_path] = flat_event[event_path]
 

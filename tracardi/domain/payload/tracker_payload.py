@@ -411,7 +411,21 @@ class TrackerPayload(BaseModel):
                     'pc' if user_agent.is_pc else \
                         'tablet' if user_agent.is_tablet else \
                             'email' if user_agent.is_email_client else None
-                # session.device.resolution = self.context['screen']
+
+                try:
+                    session.device.resolution = f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"
+                except KeyError:
+                    pass
+
+                try:
+                    session.device.color_depth = int(self.context['screen']['local']['colorDepth'])
+                except KeyError:
+                    pass
+
+                try:
+                    session.device.orientation = self.context['screen']['local']['orientation']
+                except KeyError:
+                    pass
 
                 session.app.bot = user_agent.is_bot
                 session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
@@ -426,7 +440,7 @@ class TrackerPayload(BaseModel):
                         pass
 
                 # session.app.resolution = session.context['screen']
-            except Exception:
+            except Exception as e:
                 pass
 
             try:

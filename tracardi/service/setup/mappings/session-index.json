@@ -77,6 +77,13 @@
               "type": "keyword",
               "ignore_above": 32
             },
+            "color_depth": {
+              "type": "integer"
+            },
+            "orientation": {
+              "type": "keyword",
+              "ignore_above": 32
+            },
             "geo": {
               "properties": {
                 "country": {

@@ -29,6 +29,8 @@ class Device(BaseModel):
     ip: Optional[str] = None
     resolution: Optional[str] = None
     geo: Optional[Geo] = Geo()
+    color_depth: Optional[int] = None
+    orientation: Optional[str] = None
 
 
 class Application(BaseModel):

@@ -378,5 +378,45 @@
       "public.product.review": "review",
       "public.product.rate": "rate"
     }
+  },
+  {
+    "name": "Loyalty Card Added",
+    "description": "Customer adds or receives loyalty card.",
+    "id": "loyalty-card-added",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "issuer": "string",
+      "expires": "datetime"
+    },
+    "event": {
+      "loyalty.card.id": "id",
+      "loyalty.card.name": "name",
+      "loyalty.card.issuer": "issuer",
+      "loyalty.card.expires": "expires"
+    },
+    "profile": {
+      "loyalty.card.id":  ["traits.loyalty.card.id", "equals"],
+      "loyalty.card.name": ["traits.loyalty.card.name", "equals"],
+      "loyalty.card.issuer": ["traits.loyalty.card.issuer", "equals"],
+      "loyalty.card.expires": ["traits.loyalty.card.expires", "equals"]
+    }
+  },
+  {
+    "name": "Loyalty Card Removed",
+    "description": "Customer removes or loyalty card is deleted.",
+    "id": "loyalty-card-removed",
+    "properties": {
+      "id": "string"
+    },
+    "event": {
+      "loyalty.card.id": "id"
+    },
+    "profile": {
+      "loyalty.card.id":  [null, "delete"],
+      "loyalty.card.name": [null, "delete"],
+      "loyalty.card.issuer": [null, "delete"],
+      "loyalty.card.expires": [null, "delete"]
+    }
   }
 ]
