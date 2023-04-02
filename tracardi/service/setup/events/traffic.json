@@ -46,5 +46,35 @@
       "hit.page.name": "name",
       "hit.page.category": "category"
     }
+  },
+  {
+    "name": "Session Opened",
+    "description": "Customer visit starts.",
+    "id": "session-opened",
+    "properties": {}
+  },
+  {
+    "name": "Session Closed",
+    "description": "Customer visit ends.",
+    "id": "session-closed",
+    "properties": {}
+  },
+  {
+    "name": "Profile Created",
+    "description": "Customer profile was created.",
+    "id": "profile-created",
+    "properties": {}
+  },
+  {
+    "name": "Profile Inactive",
+    "description": "Customer profile was marked as inactive.",
+    "id": "profile-inactive",
+    "properties": {}
+  },
+  {
+    "name": "Profile Archived",
+    "description": "Customer profile was archived.",
+    "id": "profile-archived",
+    "properties": {}
   }
 ]

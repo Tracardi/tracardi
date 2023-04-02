@@ -387,6 +387,12 @@ class TrackerPayload(BaseModel):
         session.operation.new = is_new_session
 
         if session.operation.new:
+
+            # Add session created
+            self.events.append(
+                EventPayload(type='session-opened', properties={})
+            )
+
             # Compute the User Agent data
             try:
                 ua_string = session.context['browser']['local']['browser']['userAgent']
@@ -475,5 +481,11 @@ class TrackerPayload(BaseModel):
 
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
+
+        if profile.operation.new:
+            # Add session created
+            self.events.append(
+                EventPayload(type='profile-created', properties={})
+            )
 
         return profile, session

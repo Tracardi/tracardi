@@ -49,7 +49,7 @@
   {
     "name": "Identification",
     "description": "User sends PII data.",
-    "id": "identify",
+    "id": "identification",
     "properties": {
       "firstname": "string",
       "lastname": "string",
