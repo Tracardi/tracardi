@@ -13,17 +13,11 @@ class AddEmptySessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
-        if self.debug is True:
-            self.console.warning(
-                "Your requested an update of the event session but events may not be updated in debug mode.")
-
         session = Session(
                 id=str(uuid4()),
                 profile=Entity(id=self.profile.id) if self.profile is not None else None,
                 metadata=SessionMetadata(),
-                operation=Operation(
-                    update=True if self.debug is False else False
-                )
+                operation=Operation(update=True)
             )
         self.session = session
         self.event.session = EventSession(
