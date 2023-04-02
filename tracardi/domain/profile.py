@@ -137,6 +137,7 @@ class ProfileLoyaltyCard(BaseModel):
     name: Optional[str] = None
     issuer: Optional[str] = None
     expires: Optional[datetime] = None
+    points: Optional[float] = 0
 
 
 class ProfileLoyalty(BaseModel):

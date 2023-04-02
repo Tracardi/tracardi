@@ -1,7 +1,5 @@
-from typing import Optional
-
 from tracardi.domain.event_to_profile import EventToProfile
-from tracardi.domain.storage_record import StorageRecord, StorageRecords
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 
 
@@ -20,7 +18,7 @@ async def load_by_id(event_id: str):
 
 
 async def get_event_to_profile(event_type: str, enabled_only: bool = False) -> StorageRecords:
-    fields = [("event_type", event_type)]
+    fields = [("event_type.id", event_type)]
     if enabled_only:
         fields.append(("enabled", True))
     return await storage_manager("event-to-profile").load_by_values(fields)

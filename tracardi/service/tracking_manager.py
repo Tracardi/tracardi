@@ -244,7 +244,7 @@ class TrackingManager(TrackingManagerBase):
                 flat_profile, profile_updated_flag = copy_default_event_to_profile(copy_schema, flat_profile,
                                                                                    flat_event)
 
-            # Custom event types coping
+            # Custom event types coping, filtered by event type
 
             coping_schemas = await cache.event_to_profile_coping(
                 event_type=event.type,

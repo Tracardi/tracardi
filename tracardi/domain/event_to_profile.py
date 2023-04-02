@@ -17,7 +17,7 @@ class EventToProfileMap(BaseModel):
 
 
 class EventToProfile(NamedEntity):
-    event_type: str
+    event_type: NamedEntity
     description: Optional[str] = "No description provided"
     enabled: Optional[bool] = False
     config: Optional[dict] = {}
