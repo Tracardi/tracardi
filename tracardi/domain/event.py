@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Any
 from uuid import uuid4
 
 from .entity import Entity
@@ -12,6 +12,7 @@ from .metadata import OS, Device, Application, Hit
 from .named_entity import NamedEntity
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
+from ..service.string_manager import capitalize_event_type_id
 
 
 class Tags(BaseModel):
@@ -66,6 +67,11 @@ class Event(NamedEntity):
     config: Optional[dict] = {}
     tags: Tags = Tags()
     aux: dict = {}
+
+    def __init__(self, **data: Any):
+        if 'name' not in data:
+            data['name'] = capitalize_event_type_id(data['type'])
+        super().__init__(**data)
 
     def replace(self, event):
         if isinstance(event, Event):

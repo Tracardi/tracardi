@@ -13,7 +13,6 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
-from tracardi.domain.type import Type
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.license import License, INDEXER
 
@@ -208,7 +207,8 @@ class TrackingManager(TrackingManagerBase):
                     Rule(
                         id=str(uuid4()),
                         name="@Internal route",
-                        event=Type(type=event.type),  # event type is equal to schedule node id
+                        # event type is equal to schedule node id
+                        event_type=NamedEntity(id=event.type, name=event.name),
                         flow=NamedEntity(id=self.tracker_payload.scheduled_event_config.flow_id, name="Scheduled"),
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
                         properties={},
@@ -241,7 +241,8 @@ class TrackingManager(TrackingManagerBase):
                 flat_event = flat_events[event.id]
 
                 # Copy default
-                flat_profile, profile_updated_flag = copy_default_event_to_profile(copy_schema, flat_profile, flat_event)
+                flat_profile, profile_updated_flag = copy_default_event_to_profile(copy_schema, flat_profile,
+                                                                                   flat_event)
 
             # Custom event types coping
 
