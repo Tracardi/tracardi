@@ -7,7 +7,7 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.event import EventSession
 from tracardi.domain.metadata import ProfileMetadata
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.time import ProfileTime, ProfileVisit
 from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
@@ -37,11 +37,7 @@ class AddEmptyProfileAction(ActionRunner):
 
         self.event.profile = profile
         self.event.metadata.profile_less = False
-        if self.debug is True:
-            self.console.warning(
-                "Your requested an update of event profile but events may not be updated in debug mode.")
-        else:
-            self.event.operation.update = True
+        self.event.operation.update = True
 
         self.execution_graph.set_profiles(profile)
 
@@ -50,7 +46,8 @@ class AddEmptyProfileAction(ActionRunner):
         session = Session(
             id=str(uuid4()),
             profile=Entity(id=profile.id),
-            metadata=SessionMetadata(),
+            metadata=SessionMetadata(
+                time=SessionTime(insert=datetime.utcnow(), timestamp=datetime.timestamp(datetime.utcnow()))),
             operation=Operation(update=True)
         )
 

@@ -5,6 +5,10 @@ from tracardi.service.plugin.runner import ActionRunner
 class UpdateProfileAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
+        if self.debug is True:
+            self.console.warning("Profile will not be updated in debug mode. "
+                                 "Debug only test workflow and does not run "
+                                 "the whole ingestion process.")
         self.update_profile()
 
 
