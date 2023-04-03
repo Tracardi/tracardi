@@ -250,7 +250,7 @@ class TrackingManager(TrackingManagerBase):
                 event_type=event.type,
                 ttl=memory_cache.event_to_profile_coping_ttl)
 
-            if coping_schemas.total > 0:
+            if self.profile is not None and coping_schemas.total > 0:
 
                 # Flat data can be already prepared in default coping
 
