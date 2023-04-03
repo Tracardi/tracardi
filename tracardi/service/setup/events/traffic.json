@@ -69,7 +69,9 @@
     "name": "Profile Inactive",
     "description": "Customer profile was marked as inactive.",
     "id": "profile-inactive",
-    "properties": {}
+    "properties": {
+      "reason": "string"
+    }
   },
   {
     "name": "Profile Archived",
