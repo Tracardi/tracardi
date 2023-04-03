@@ -230,7 +230,7 @@ class TrackingManager(TrackingManagerBase):
                 event_type=event.type,
                 ttl=memory_cache.event_to_profile_coping_ttl)
 
-            if coping_schemas.total > 0:
+            if self.profile is not None and coping_schemas.total > 0:
                 flat_profile = dotty(self.profile.dict())
                 flat_event = flat_events[event.id]
                 for coping_schema in coping_schemas:

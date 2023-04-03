@@ -5,6 +5,8 @@ from collections import defaultdict
 from time import time
 from typing import Dict, List, Tuple, Optional
 from pydantic import ValidationError
+from tracardi.service.license import License
+
 from tracardi.domain.event import Event
 
 from tracardi.service.wf.domain.debug_info import DebugInfo
@@ -94,12 +96,15 @@ class RulesEngine:
 
                 try:
                     rule = Rule(**rule)
-                    # Check consents
-                    if not rule.are_consents_met(self.profile.get_consent_ids()):
-                        # Consents disallow to run this rule
-                        continue
+
+                    # Can check consents only if there is profile
+                    if License.has_license() and self.profile is not None:
+                        # Check consents
+                        if not rule.are_consents_met(self.profile.get_consent_ids()):
+                            # Consents disallow to run this rule
+                            continue
                     invoked_flows.append(rule.flow.id)
-                except ValidationError as e:
+                except Exception as e:
                     console = Console(
                         origin="rule",
                         event_id=event.id,
