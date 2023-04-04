@@ -166,11 +166,16 @@ async def load_event_by_values(key_value_pairs: List[tuple], sort_by: Optional[L
 
 
 async def aggregate_profile_events_by_type(profile_id: str, bucket_name) -> StorageAggregateResult:
+    return await aggregate_profile_events_by_field(profile_id, field="name", bucket_name=bucket_name)
+
+
+async def aggregate_profile_events_by_field(profile_id: str, field: str, bucket_name: str,
+                                            size: int = 15) -> StorageAggregateResult:
     aggregate_query = {
         bucket_name: {
             "terms": {
-                "field": "type",
-                "size": 15,
+                "field": field,
+                "size": size,
             }
         }
     }
