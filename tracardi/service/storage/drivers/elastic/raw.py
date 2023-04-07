@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from elasticsearch import NotFoundError
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -145,7 +145,7 @@ async def remove_template(template_name):
     return True
 
 
-async def add_template(template_name, map) -> bool:
+async def add_template(template_name, map) -> Tuple[bool, dict]:
     es = ElasticClient.instance()
     result = await es.put_index_template(template_name, map)
     return _acknowledged(result), result
