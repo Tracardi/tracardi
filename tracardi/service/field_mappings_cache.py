@@ -12,6 +12,7 @@ field_mappings = defaultdict(set)
 redis_collections = {
     "profile": Collection.profile_fields,
     "event": Collection.event_fields,
+    "session": Collection.session_fields,
 }
 
 
@@ -23,7 +24,9 @@ class FieldMapper(metaclass=Singleton):
         self.redis = RedisClient()
 
     def get_field_mapping(self, type) -> Set[str]:
-        return {item.decode() for item in self.redis.client.smembers(redis_collections[type])}
+        if type in redis_collections:
+            return {item.decode() for item in self.redis.client.smembers(redis_collections[type])}
+        return set()
 
     def add_field_mappings(self, type, entities: List[Entity]):
         self.i += 1
@@ -47,8 +50,5 @@ class FieldMapper(metaclass=Singleton):
     def save_cache(self):
         self.i = 0
         for type, field_maps in field_mappings.items():
-            if len(field_maps) > 0:
+            if len(field_maps) > 0 and type in redis_collections:
                 self.redis.client.sadd(redis_collections[type], *list(field_maps))
-
-        # field_mappings['profile'] = set()
-        # field_mappings['event'] = set()

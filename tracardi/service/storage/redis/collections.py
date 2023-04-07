@@ -15,3 +15,4 @@ class Collection:
     profile: str = "profile:"
     profile_fields: str = "profile:fields"
     event_fields: str = "event:fields"
+    session_fields: str = "session:fields"
