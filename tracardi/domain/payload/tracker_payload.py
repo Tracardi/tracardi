@@ -49,6 +49,7 @@ class TrackerPayload(BaseModel):
     _make_static_profile_id: bool = PrivateAttr(False)
     _scheduled_flow_id: str = PrivateAttr(None)
     _scheduled_node_id: str = PrivateAttr(None)
+    _tracardi_referer: dict = PrivateAttr({})
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -76,7 +77,7 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
         self._id = str(uuid4())
-
+        self._tracardi_referer = self.get_tracardi_data_referer()
         if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
             if isinstance(self.options['scheduledFlowId'], str) and isinstance(self.options['scheduledNodeId'], str):
                 if len(self.events) > 1:
@@ -85,6 +86,11 @@ class TrackerPayload(BaseModel):
                     raise ValueError("Scheduled events must be send via internal scheduler event source.")
                 self._scheduled_flow_id = self.options['scheduledFlowId']
                 self._scheduled_node_id = self.options['scheduledNodeId']
+
+
+    @property
+    def tracardi_referer(self):
+        return self._tracardi_referer
 
     @property
     def scheduled_event_config(self) -> ScheduledEventConfig:
@@ -261,6 +267,25 @@ class TrackerPayload(BaseModel):
                 # cache.session_cache().delete(self.session.id)
 
         return profile, session
+
+    def get_tracardi_data_referer(self) -> dict:
+
+        try:
+            return self.context['tracardi']['pass']
+        except KeyError:
+            return {}
+
+    def get_referer_data(self, type: str) -> Optional[str]:
+        if self._tracardi_referer:
+            if type in self._tracardi_referer:
+                return self._tracardi_referer[type].strip()
+        return None
+
+    def has_referred_profile(self) -> bool:
+        refer_profile_id = self.get_referer_data('profile')
+        if refer_profile_id is None:
+            return False
+        return self.profile.id != refer_profile_id.strip()
 
     async def get_profile_and_session(self, session: Session,
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
@@ -489,3 +514,4 @@ class TrackerPayload(BaseModel):
             )
 
         return profile, session
+
