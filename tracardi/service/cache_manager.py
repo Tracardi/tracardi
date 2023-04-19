@@ -103,6 +103,14 @@ class CacheManager(metaclass=Singleton):
 
         return await storage.driver.session.load_by_id(session_id)
 
+    async def save_session(self, session: Session, ttl):
+        await MemoryCache.save(
+            self.session_cache(),
+            session.id,
+            session.dict(),
+            ttl
+        )
+
     async def event_source(self, event_source_id, ttl) -> Optional[EventSource]:
         """
         Event source cache
