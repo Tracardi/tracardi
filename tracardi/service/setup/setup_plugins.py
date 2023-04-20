@@ -712,6 +712,21 @@ if License.has_license():
             },
             resource=None)
     )
+    installed_plugins["com_tracardi.action.v1.ux.rating_popup.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "api_url": "http://localhost:8686",
+                "title": None,
+                "message": None,
+                "lifetime": "6",
+                "horizontal_position": "center",
+                "vertical_position": "bottom",
+                "event_type": "rate",
+                "save_event": True,
+                "dark_theme": False
+            },
+            resource=None)
+    )
     installed_plugins["com_tracardi.action.v1.sequencer.query.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
