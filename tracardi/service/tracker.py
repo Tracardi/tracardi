@@ -3,6 +3,7 @@ import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any, Optional
 
+from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
@@ -116,6 +117,8 @@ class Tracker:
             else:
                 source = await self.validate_source(tracker_payload)
 
+                # Referencing profile by __tr_pid
+                # ----------------------------------
                 # Validate tracardi referer. Tracardi referer is a data that has profile_id, session_id. source_id.
                 # It is used to keep the profile between jumps from domain to domain.
 
@@ -137,7 +140,10 @@ class Tracker:
                             cache.session_cache().delete(tracker_payload.session.id)
 
                             # Replace the profile id and invalidate session id in tracker payload
-                            tracker_payload.profile.id = referred_profile_id
+                            if tracker_payload.profile is None:
+                                tracker_payload.profile = Entity(id=referred_profile_id)
+                            else:
+                                tracker_payload.profile.id = referred_profile_id
                             # tracker_payload.session.id = str(uuid4())
 
                         else:

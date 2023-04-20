@@ -285,6 +285,8 @@ class TrackerPayload(BaseModel):
         refer_profile_id = self.get_referer_data('profile')
         if refer_profile_id is None:
             return False
+        if self.profile is None:
+            return True
         return self.profile.id != refer_profile_id.strip()
 
     async def get_profile_and_session(self, session: Session,
