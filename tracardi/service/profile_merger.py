@@ -222,8 +222,10 @@ class ProfileMerger:
            E.g. Name="bill" + Name="Wiliam"  = Name=['bill','wiliam']
         """
 
-        _traits = [profile.traits.dict() for profile in all_profiles]
+        _traits = [profile.traits for profile in all_profiles]
         _piis = [profile.pii.dict() for profile in all_profiles]
+
+        # TODO merge other data too
 
         old_value = {
             'traits': _traits,
@@ -246,8 +248,10 @@ class ProfileMerger:
 
         for profile in all_profiles:
             current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
-                                                               profile.traits.dict())
+                                                               profile.traits)
             current_profile_dict['pii'] = self._deep_update(current_profile_dict['pii'], profile.pii.dict())
+
+            # TODO merge other data too
 
         traits = current_profile_dict['traits']
         piis = current_profile_dict['pii']

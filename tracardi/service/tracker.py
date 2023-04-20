@@ -3,9 +3,12 @@ import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any, Optional
 
+from tracardi.service.profile_merger import ProfileMerger
+
 from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.exceptions.exception import UnauthorizedException
@@ -122,6 +125,8 @@ class Tracker:
                 # Validate tracardi referer. Tracardi referer is a data that has profile_id, session_id. source_id.
                 # It is used to keep the profile between jumps from domain to domain.
 
+                # At this stage the profile and session are not loaded and are only Entities
+
                 refer_source_id = tracker_payload.get_referer_data('source')
                 if refer_source_id is not None and tracker_payload.has_referred_profile():
                     # If referred source is different then local web page source saved in JS script
@@ -136,15 +141,31 @@ class Tracker:
 
                         if profile_record is not None:
 
+                            # Profile will be replaced. Merge old profile to new one.
+
+                            referred_profile = profile_record.to_entity(Profile)
+
+                            # Merges referred profile in __tr_pid with profile existing on visited page
+                            if tracker_payload.profile is not None:
+                                # Merge profiles
+                                merged_profile = await ProfileMerger.invoke_merge_profile(
+                                    referred_profile,
+                                    # Merge when id = tracker_payload.profile.id
+                                    # This basically loads the current profile.
+                                    merge_by=[('id', tracker_payload.profile.id)],
+                                    limit=2000)
+                                tracker_payload.profile = Entity(id=merged_profile.id)
+
+                            else:
+                                # Replace the profile in tracker payload with ref __tr_pid
+                                tracker_payload.profile = Entity(id=referred_profile_id)
+
                             # Invalidate session. It may have wrong profile id
                             cache.session_cache().delete(tracker_payload.session.id)
 
-                            # Replace the profile id and invalidate session id in tracker payload
-                            if tracker_payload.profile is None:
-                                tracker_payload.profile = Entity(id=referred_profile_id)
-                            else:
-                                tracker_payload.profile.id = referred_profile_id
-                            # tracker_payload.session.id = str(uuid4())
+                            # If no session create one
+                            if tracker_payload.session is None:
+                                tracker_payload.session = Session.new()
 
                         else:
                             logger.warning(f"Referred Tracardi Profile Id {referred_profile_id} is invalid.")
