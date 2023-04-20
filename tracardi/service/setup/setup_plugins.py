@@ -313,8 +313,17 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-
     "tracardi.process_engine.action.v1.events.event_discarder.plugin": PluginMetadata(
+        test=PluginTest(init={},
+                        resource=None)
+    ),
+
+    "tracardi.process_engine.action.v1.profiles.profile_discarder.plugin": PluginMetadata(
+        test=PluginTest(init={},
+                        resource=None)
+    ),
+
+    "tracardi.process_engine.action.v1.sessions.session_discarder.plugin": PluginMetadata(
         test=PluginTest(init={},
                         resource=None)
     ),
