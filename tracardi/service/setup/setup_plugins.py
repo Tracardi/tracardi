@@ -712,6 +712,13 @@ if License.has_license():
             },
             resource=None)
     )
+    installed_plugins["com_tracardi.action.v1.ux.generic.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "uix_source": "http://localhost/index.js"
+            },
+            resource=None)
+    )
     installed_plugins["com_tracardi.action.v1.ux.rating_popup.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
