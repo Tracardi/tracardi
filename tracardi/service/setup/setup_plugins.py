@@ -712,6 +712,17 @@ if License.has_license():
             },
             resource=None)
     )
+    installed_plugins["com_tracardi.action.v1.ux.demo_form.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "api_url": "http://localhost:8686",
+                "lifetime": "45",
+                "horizontal_position": "right",
+                "vertical_position": "bottom",
+                "event_type": "request-demo"
+            },
+            resource=None)
+    )
     installed_plugins["com_tracardi.action.v1.ux.generic.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
