@@ -712,6 +712,14 @@ if License.has_license():
             },
             resource=None)
     )
+    installed_plugins["com_tracardi.action.v1.ux.youtube_player.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "youtube_id": "",
+                "title": ""
+            },
+            resource=None)
+    )
     installed_plugins["com_tracardi.action.v1.ux.demo_form.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
