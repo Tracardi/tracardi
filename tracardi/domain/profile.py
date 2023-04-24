@@ -141,6 +141,18 @@ class Profile(Entity):
         self.stats.views += value
         self.operation.update = True
 
+    def increase_interest(self, interest, value=1):
+        if interest in self.interests:
+            self.interests[interest] += value
+        else:
+            self.interests[interest] = value
+        self.operation.update = True
+
+    def decrease_interest(self, interest, value=1):
+        if interest in self.interests:
+            self.interests[interest] -= value
+            self.operation.update = True
+
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
