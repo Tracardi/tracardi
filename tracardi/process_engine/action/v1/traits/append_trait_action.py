@@ -70,16 +70,11 @@ class AppendTraitAction(ActionRunner):
                     dot[destination].remove(value)
 
         if self.event.metadata.profile_less is False:
-            if not isinstance(dot.profile['traits']['private'], dict):
-                raise ValueError("Error when appending profile@traits.private to value `{}`. "
+            if not isinstance(dot.profile['traits'], dict):
+                raise ValueError("Error when appending profile@traits to value `{}`. "
                                  "Private must have key:value pair. "
-                                 "E.g. `name`: `{}`".format(dot.profile['traits']['private'],
-                                                            dot.profile['traits']['private']))
-
-            if not isinstance(dot.profile['traits']['public'], dict):
-                raise ValueError(
-                    "Error when appending profile@traits.public to value `{}`. Public must have key:value pair. "
-                    "E.g. `name`: `{}`".format(dot.profile['traits']['public'], dot.profile['traits']['public']))
+                                 "E.g. `name`: `{}`".format(dot.profile['traits'],
+                                                            dot.profile['traits']))
             try:
                 profile = Profile(**dot.profile)
             except ValidationError as e:
@@ -121,8 +116,8 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.traits.append_trait_action',
-            className='AppendTraitAction',
+            module=__name__,
+            className=AppendTraitAction.__name__,
             inputs=['payload'],
             outputs=["payload", "error"],
             init={

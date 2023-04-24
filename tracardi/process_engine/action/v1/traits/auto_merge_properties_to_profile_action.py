@@ -1,5 +1,4 @@
 from dotty_dict import dotty
-from pydantic import validator
 from tracardi.service.plugin.domain.result import Result
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -9,14 +8,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Configuration(PluginConfig):
-    traits_type: str = "public"
     sub_traits: str = ""
-
-    @validator("traits_type")
-    def must_be_private_or_public(cls, value):
-        if value not in ['private', 'public']:
-            raise ValueError("Only 'private', 'public' values are accepted, {} given".format(value))
-        return value
 
 
 def validate(config: dict):
@@ -24,7 +16,6 @@ def validate(config: dict):
 
 
 class AutoMergePropertiesToProfileAction(ActionRunner):
-
     config: Configuration
 
     async def set_up(self, init):
@@ -61,12 +52,8 @@ class AutoMergePropertiesToProfileAction(ActionRunner):
 
             self.update_profile()
 
-            if self.config.traits_type == 'private':
-                self.profile.traits.private = self._update(self.profile.traits.private, self.event.properties)
-                return Result(port="traits", value=self.profile.traits.private)
-            else:
-                self.profile.traits.public = self._update(self.profile.traits.public, self.event.properties)
-                return Result(port="traits", value=self.profile.traits.public)
+            self.profile.traits = self._update(self.profile.traits, self.event.properties)
+            return Result(port="traits", value=self.profile.traits)
 
         return Result(port="error", value={})
 
@@ -76,40 +63,29 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='AutoMergePropertiesToProfileAction',
+            className=AutoMergePropertiesToProfileAction.__name__,
             inputs=["payload"],
             outputs=["traits", "error"],
             init={
-                "traits_type": "public",
                 "sub_traits": ""
             },
             form=Form(groups=[
                 FormGroup(
-                    name="Define which traits to update",
+                    name="Define how to update traits",
                     fields=[
-                        FormField(
-                            id="traits_type",
-                            name="Define traits type",
-                            description="Please select which traits you would like to be updated with data form "
-                                        "event properties.",
-                            component=FormComponent(type="select", props={"label": "traits type", "items": {
-                                "private": "Private",
-                                "public": "Public"
-                            }})
-                        ),
                         FormField(
                             id="sub_traits",
                             name="Sub traits path",
                             description="Leave it empty if you want to merge data to the root of your profile traits."
                                         "Type sub-path only if you want to create or merge a part of the profile "
                                         "traits. This path will be appended to the main traits path. "
-                                        "e.g: profile@traits.public.[sub.path]",
+                                        "e.g: profile@traits[sub.path]",
                             component=FormComponent(type="text", props={"label": "Sub path"})
                         )
                     ]
                 ),
             ]),
-            version='0.6.2',
+            version='0.8.1',
             license="MIT",
             author="Risto Kowaczewski"
 
