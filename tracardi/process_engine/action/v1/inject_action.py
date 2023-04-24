@@ -80,8 +80,8 @@ def register() -> Plugin:
         start=True,
         debug=True,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.inject_action',
-            className='InjectAction',
+            module=__name__,
+            className=InjectAction.__name__,
             inputs=[],
             outputs=["payload"],
             init={"value": "{}", "destination": "payload"},
@@ -129,7 +129,7 @@ def register() -> Plugin:
             documentation=Documentation(
                 inputs={},
                 outputs={
-                    "payload": PortDoc(desc="This port returns object received by plugin in configuration.")
+                    "payload": PortDoc(desc="This port returns defined data if injected into payload or empty object.")
                 }
             )
         )
