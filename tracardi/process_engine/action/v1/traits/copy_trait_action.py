@@ -53,21 +53,10 @@ class CopyTraitAction(ActionRunner):
             if 'traits' not in dot.profile:
                 raise ValueError("Missing traits in profile.")
 
-            if 'private' not in dot.profile['traits']:
-                raise ValueError("Missing `traits.private` in profile.")
-
-            if 'public' not in dot.profile['traits']:
-                raise ValueError("Missing `traits.public` in profile.")
-
-            if not isinstance(dot.profile['traits']['private'], dict):
+            if not isinstance(dot.profile['traits'], dict):
                 raise ValueError(
-                    "Error when setting profile@traits.private to value `{}`. Private must have key:value pair. "
-                    "E.g. `name`: `{}`".format(dot.profile['traits']['private'], dot.profile['traits']['private']))
-
-            if not isinstance(dot.profile['traits']['public'], dict):
-                raise ValueError("Error when setting profile@traits.public to value `{}`. Public must have key:value pair. "
-                                 "E.g. `name`: `{}`".format(dot.profile['traits']['public'],
-                                                            dot.profile['traits']['public']))
+                    "Error when setting profile@traits to value `{}`. Traits must have key:value pair. "
+                    "E.g. `name`: `{}`".format(dot.profile['traits'], dot.profile['traits']))
 
             profile = Profile(**dot.profile)
 
@@ -131,7 +120,7 @@ def register() -> Plugin:
                     ]
                 ),
             ]),
-            version='0.6.0',
+            version='0.8.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
