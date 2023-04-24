@@ -486,6 +486,10 @@ installed_plugins: Dict[str, PluginMetadata] = {
         test=PluginTest(init={'interest': 'abc', 'value': '1.0'},
                         resource=None)
     ),
+    "tracardi.process_engine.action.v1.interest.decrease.plugin": PluginMetadata(
+        test=PluginTest(init={'interest': 'abc', 'value': '1.0'},
+                        resource=None)
+    ),
 
     "tracardi.process_engine.action.v1.converters.data_to_json.plugin": PluginMetadata(
         test=PluginTest(init={'to_json': "{}"},
