@@ -22,10 +22,10 @@ def make_fake_company():
 
 def make_fake_product():
     return {
-        "product": fake.ecommerce_name(),
+        "name": fake.ecommerce_name(),
         "category": fake.ecommerce_category(),
         "price": ecommerce_price(False),
-        "number": fake.bothify(text='????-########', letters='ABCDE')
+        "id": fake.bothify(text='????-########', letters='ABCDE')
     }
 
 
@@ -34,7 +34,7 @@ def add_to_basket():
         "name": fake.ecommerce_name(),
         "category": fake.ecommerce_category(),
         "price": ecommerce_price(False),
-        "quanity": randint(1, 3),
+        "quantity": randint(1, 3),
         "id": randint(1, 3349875),
         "sku": fake.bothify(text='????-########', letters='ABCDE')
     }
