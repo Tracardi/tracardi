@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from elasticsearch import NotFoundError
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -145,10 +145,10 @@ async def remove_template(template_name):
     return True
 
 
-async def add_template(template_name, map) -> bool:
+async def add_template(template_name, map) -> Tuple[bool, dict]:
     es = ElasticClient.instance()
     result = await es.put_index_template(template_name, map)
-    return _acknowledged(result)
+    return _acknowledged(result), result
 
 
 async def exists_template(template_name) -> bool:
@@ -240,15 +240,12 @@ async def get_unique_field_values(index, field, limit=100):
 
 
 async def get_mapping_fields(index) -> list:
-    print(index)
     memory_key = f"{index}-mapping-cache"
     if memory_key not in memory_cache:
         mapping = await storage_manager(index).get_mapping()
         fields = mapping.get_field_names()
         memory_cache[memory_key] = CacheItem(data=fields, ttl=5)  # result is cached for 5 seconds
     db_mappings = memory_cache[memory_key].data
-    print(FieldMapper().get_field_mapping(index))
     set_of_db_mappings = set(db_mappings)
     set_of_db_mappings.update(FieldMapper().get_field_mapping(index))
-    print(set_of_db_mappings)
     return sorted(list(set_of_db_mappings))

@@ -225,6 +225,8 @@ def test_template():
 
 
 def test_templated_index():
+    version = tracardi.version.get_version_prefix()
+    version_name = tracardi.version.name
     with ServerContext(Context(production=False)):
         with pytest.raises(AssertionError):
             index = Index(multi_index=True, static=True, index="index-name", mapping=mapping_mock)
@@ -232,13 +234,13 @@ def test_templated_index():
 
         index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
         pattern = index.get_templated_index_pattern()
-        assert pattern == "080.fa73a.index-name-*-*"
+        assert pattern == f"{version}.{version_name}.index-name-*-*"
 
         with ServerContext(Context(production=True, user=admin)):
             index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
             pattern = index.get_templated_index_pattern()
 
-    assert pattern == "prod-080.fa73a.index-name-*-*"
+    assert pattern == f"prod-{version}.{version_name}.index-name-*-*"
 
 
 def test_prod_static():

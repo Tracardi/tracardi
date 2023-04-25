@@ -1,6 +1,4 @@
-import asyncio
 import logging
-from asyncio import Task
 from typing import List, Tuple, Dict, Optional
 
 from tracardi.config import tracardi
@@ -33,7 +31,7 @@ async def _load_rule(event_type, source_id):
                 "must": [
                     {
                         "term": {
-                            "event.type": event_type.strip()
+                            "event_type.id": event_type.strip()
                         }
                     },
                     {
@@ -126,18 +124,5 @@ async def flush():
     return await storage_manager('rule').flush()
 
 
-# async def load_by_event_type(max_group: int = 20) -> StorageRecords:
-#     query = {
-#         "query": {"match_all": {}},
-#         "collapse": {
-#             "field": "event.type",
-#             "inner_hits": {
-#                 "name": "types",
-#                 "size": max_group
-#             }
-#         }
-#     }
-#     return await storage_manager('rule').query(query)
-
-async def load_by_event_type(event_type:str, limit: int = 100) -> StorageRecords:
-    return await storage_manager('rule').load_by('event.type', event_type, limit=limit)
+async def load_by_event_type(event_type: str, limit: int = 100) -> StorageRecords:
+    return await storage_manager('rule').load_by('event_type.id', event_type, limit=limit)

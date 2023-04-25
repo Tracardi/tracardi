@@ -1,0 +1,114 @@
+[
+  {
+    "name": "Sign-In",
+    "description": "User signs in.",
+    "id": "sign-in",
+    "properties": {
+      "email": "string",
+      "login": "string",
+      "firstname": "string",
+      "lastname": "string"
+    },
+    "event": {
+      "contact.email": "email",
+      "identifier.token": "login",
+      "pii.firstname": "firstname",
+      "pii.lastname": "lastname"
+    },
+    "profile": {
+      "data.contact.email": ["traits.contact.email", "equal"],
+      "data.identifier.token": ["traits.identifier.token", "equal"],
+      "data.pii.firstname": ["traits.pii.firstname", "equal"],
+      "data.pii.lastname": ["traits.pii.lastname", "equal"]
+    }
+  },
+  {
+    "name": "Sign-Up",
+    "description": "User signs up.",
+    "id": "sign-in",
+    "properties": {
+      "email": "string",
+      "login": "string",
+      "firstname": "string",
+      "lastname": "string",
+      "custom": "object"
+    },
+    "event": {
+      "contact.email": "email",
+      "pii.firstname": "firstname",
+      "pii.lastname": "lastname",
+      "identifier.token": "login"
+    },
+    "profile": {
+      "data.contact.email": ["traits.contact.email", "equal"],
+      "data.identifier.token": ["traits.identifier.token", "equal"],
+      "data.pii.firstname": ["traits.pii.firstname", "equal"],
+      "data.pii.lastname": ["traits.pii.lastname", "equal"]
+    }
+  },
+  {
+    "name": "Identification",
+    "description": "User sends PII data.",
+    "id": "identification",
+    "properties": {
+      "firstname": "string",
+      "lastname": "string",
+      "id": "string",
+      "passport": "string",
+      "email": "string",
+      "phone": "string",
+      "login": "string",
+      "credit_card": "string",
+      "coupon": "string",
+      "twitter": "string",
+      "whatsapp": "string",
+      "discord": "string",
+      "slack": "string",
+      "telegram": "string",
+      "wechat": "string",
+      "viber": "string",
+      "signal": "string",
+      "badge": "string"
+    },
+    "event": {
+      "contact.email": "email",
+      "contact.phone": "phone",
+      "pii.firstname": "firstname",
+      "pii.lastname": "lastname",
+      "identifier.token": "login",
+      "identifier.id": "id",
+      "identifier.passport": "passport",
+      "identifier.credit_card": "credit_card",
+      "identifier.coupon": "coupon",
+      "identifier.badge": "badge",
+      "app.twitter": "twitter",
+      "app.whatsapp": "whatsapp",
+      "app.discord": "discord",
+      "app.slack": "slack",
+      "app.telegram": "telegram",
+      "app.wechat": "wechat",
+      "app.viber": "viber",
+      "app.signal": "signal"
+    },
+    "profile": {
+      "data.pii.firstname": ["traits.pii.firstname", "equal"],
+      "data.pii.lastname": ["traits.pii.lastname", "equal"],
+      "data.contact.email": ["traits.contact.email", "equal"],
+      "data.contact.phone": ["traits.contact.phone", "equal"],
+      "data.identifier.token": ["traits.identifier.token", "equal"],
+      "data.identifier.id": ["traits.identifier.id", "equal"],
+      "data.identifier.passport": ["traits.identifier.passport", "equal"],
+      "data.identifier.credit_card": ["traits.identifier.credit_card", "equal"],
+      "data.identifier.coupon": ["traits.identifier.coupon", "equal"],
+      "data.identifier.badge": ["traits.identifier.badge", "equal"],
+      "data.contact.app.twitter": ["traits.app.twitter", "equal"],
+      "data.contact.app.whatsapp": ["traits.app.whatsapp", "equal"],
+      "data.contact.app.discord": ["traits.app.discord", "equal"],
+      "data.contact.app.slack": ["traits.app.slack", "equal"],
+      "data.contact.app.telegram": ["traits.app.telegram", "equal"],
+      "data.contact.app.wechat": ["traits.app.wechat", "equal"],
+      "data.contact.app.viber": ["traits.app.viber", "equal"],
+      "data.contact.app.signal": ["traits.app.signal", "equal"]
+    }
+  }
+]

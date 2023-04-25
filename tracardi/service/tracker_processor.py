@@ -86,6 +86,8 @@ class TrackerProcessor(TrackProcessorBase):
                 for tp_position, tracker_payload in enumerate(tracker_payloads):  # type: int, TrackerPayload
 
                     remove_event_list = []
+                    # TODO Maybe this should be moved after the full session is available
+                    # Event will not have os, device, page - no full session available
                     for ev_position, event in enumerate(tracker_payload.get_domain_events()):
                         reshaping_schemas = await EventsValidationHandler.get_reshape_schemas(event)
 

@@ -6,7 +6,6 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .metadata import ProfileMetadata
 from .pii import PII
-from .profile_traits import ProfileTraits
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
@@ -21,18 +20,156 @@ class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
 
 
+class ProfileEducation(BaseModel):
+    level: Optional[str] = None
+
+
+class ProfileCivilData(BaseModel):
+    status: Optional[str] = None
+
+
+class ProfileAttribute(BaseModel):
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    shoe_number: Optional[float] = None
+
+
+class ProfilePII(BaseModel):
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    name: Optional[str] = None
+    birthday: Optional[datetime] = None
+    language: Optional[str] = None
+    gender: Optional[str] = None
+    education: Optional[ProfileEducation] = ProfileEducation()
+    civil: Optional[ProfileCivilData] = ProfileCivilData()
+    attributes: Optional[ProfileAttribute] = ProfileAttribute()
+
+
+class ProfileContactApp(BaseModel):
+    whatsapp: Optional[str] = None
+    discord: Optional[str] = None
+    slack: Optional[str] = None
+    twitter: Optional[str] = None
+    telegram: Optional[str] = None
+    wechat: Optional[str] = None
+    viber: Optional[str] = None
+    signal: Optional[str] = None
+    other: Optional[dict] = {}
+
+
+class ProfileContactAddress(BaseModel):
+    town: Optional[str] = None
+    county: Optional[str] = None
+    country: Optional[str] = None
+    postcode: Optional[str] = None
+    street: Optional[str] = None
+    other: Optional[str] = None
+
+
+class ProfileContact(BaseModel):
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    app: Optional[ProfileContactApp] = ProfileContactApp()
+    address: Optional[ProfileContactAddress] = ProfileContactAddress()
+    confirmations: List[str] = []
+
+
+class ProfileIdentifier(BaseModel):
+    id: Optional[str] = None
+    badge: Optional[str] = None
+    passport: Optional[str] = None
+    credit_card: Optional[str] = None
+    token: Optional[str] = None
+
+
+class ProfileSocialMedia(BaseModel):
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    youtube: Optional[str] = None
+    instagram: Optional[str] = None
+    tiktok: Optional[str] = None
+    linkedin: Optional[str] = None
+    reddit: Optional[str] = None
+    other: Optional[dict] = {}
+
+
+class ProfileMedia(BaseModel):
+    image: Optional[str] = None
+    webpage: Optional[str] = None
+    social: Optional[ProfileSocialMedia] = ProfileSocialMedia()
+
+
+class ProfilePreference(BaseModel):
+    purchases: List[str] = []
+    colors: List[str] = []
+    sizes: List[str] = []
+    devices: List[str] = []
+    channels: List[str] = []
+    payments: List[str] = []
+    brands: List[str] = []
+    fragrances: List[str] = []
+    services: List[str] = []
+    other: List[str] = []
+
+
+class ProfileCompany(BaseModel):
+    name: Optional[str] = None
+    size: Optional[int] = None
+    segment: Optional[List[str]] = None
+    country: Optional[str] = None
+
+
+class ProfileJob(BaseModel):
+    position: Optional[str] = None
+    salary: Optional[float] = None
+    type: Optional[str] = None
+    company: Optional[ProfileCompany] = ProfileCompany()
+    department: Optional[str] = None
+
+
+class ProfileMetrics(BaseModel):
+    ltv: Optional[float] = None
+
+
+class ProfileLoyaltyCard(BaseModel):
+    id: Optional[str] = None
+    name: Optional[str] = None
+    issuer: Optional[str] = None
+    expires: Optional[datetime] = None
+    points: Optional[float] = 0
+
+
+class ProfileLoyalty(BaseModel):
+    codes: Optional[List[str]] = []
+    card: Optional[ProfileLoyaltyCard] = ProfileLoyaltyCard()
+
+
+class ProfileData(BaseModel):
+    pii: Optional[ProfilePII] = ProfilePII()
+    contact: Optional[ProfileContact] = ProfileContact()
+    identifier: Optional[ProfileIdentifier] = ProfileIdentifier()
+    devices: Optional[List[str]] = []
+    media: Optional[ProfileMedia] = ProfileMedia()
+    preferences: Optional[ProfilePreference] = ProfilePreference()
+    job: Optional[ProfileJob] = ProfileJob()
+    metrics: Optional[ProfileMetrics] = ProfileMetrics()
+    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty()
+
+
 class Profile(Entity):
     ids: Optional[List[str]] = []
     metadata: Optional[ProfileMetadata] = ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
     operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
-    traits: Optional[ProfileTraits] = ProfileTraits()
+    traits: Optional[dict] = {}
     pii: PII = PII()
     segments: Optional[List[str]] = []
     interests: Optional[dict] = {}
     consents: Optional[Dict[str, ConsentRevoke]] = {}
     active: bool = True
     aux: Optional[dict] = {}
+    data: Optional[ProfileData] = ProfileData()
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -140,6 +277,18 @@ class Profile(Entity):
     def increase_views(self, value=1):
         self.stats.views += value
         self.operation.update = True
+
+    def increase_interest(self, interest, value=1):
+        if interest in self.interests:
+            self.interests[interest] += value
+        else:
+            self.interests[interest] = value
+        self.operation.update = True
+
+    def decrease_interest(self, interest, value=1):
+        if interest in self.interests:
+            self.interests[interest] -= value
+            self.operation.update = True
 
     @staticmethod
     def storage_info() -> StorageInfo:

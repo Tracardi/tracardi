@@ -4,7 +4,7 @@ from hashlib import sha1
 from datetime import datetime
 from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
 from uuid import uuid4
-from pydantic import PrivateAttr, validator, BaseModel
+from pydantic import PrivateAttr, validator, BaseModel, ValidationError
 from tracardi.exceptions.exception_service import get_traceback
 
 from tracardi.service.utils.getters import get_entity_id
@@ -14,12 +14,16 @@ from ..console import Console
 from ..event import Event
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
+from ..geo import Geo
+from ..marketing import UTM
 from ..payload.event_payload import EventPayload
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
 from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
+from user_agents import parse
+
 # from ...service.storage.drivers.elastic.profile import *
 
 logger = logging.getLogger(__name__)
@@ -45,6 +49,7 @@ class TrackerPayload(BaseModel):
     _make_static_profile_id: bool = PrivateAttr(False)
     _scheduled_flow_id: str = PrivateAttr(None)
     _scheduled_node_id: str = PrivateAttr(None)
+    _tracardi_referer: dict = PrivateAttr({})
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -72,7 +77,7 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
         self._id = str(uuid4())
-
+        self._tracardi_referer = self.get_tracardi_data_referer()
         if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
             if isinstance(self.options['scheduledFlowId'], str) and isinstance(self.options['scheduledNodeId'], str):
                 if len(self.events) > 1:
@@ -81,6 +86,11 @@ class TrackerPayload(BaseModel):
                     raise ValueError("Scheduled events must be send via internal scheduler event source.")
                 self._scheduled_flow_id = self.options['scheduledFlowId']
                 self._scheduled_node_id = self.options['scheduledNodeId']
+
+
+    @property
+    def tracardi_referer(self):
+        return self._tracardi_referer
 
     @property
     def scheduled_event_config(self) -> ScheduledEventConfig:
@@ -224,7 +234,7 @@ class TrackerPayload(BaseModel):
             if not self.profile.id:
                 raise ValueError("Can not use static profile id without profile.id.")
 
-            profile = await profile_loader(self, True)   # is_static is set to true
+            profile = await profile_loader(self, True)  # is_static is set to true
             if not profile:
                 profile = Profile(
                     id=self.profile.id
@@ -257,6 +267,27 @@ class TrackerPayload(BaseModel):
                 # cache.session_cache().delete(self.session.id)
 
         return profile, session
+
+    def get_tracardi_data_referer(self) -> dict:
+
+        try:
+            return self.context['tracardi']['pass']
+        except KeyError:
+            return {}
+
+    def get_referer_data(self, type: str) -> Optional[str]:
+        if self._tracardi_referer:
+            if type in self._tracardi_referer:
+                return self._tracardi_referer[type].strip()
+        return None
+
+    def has_referred_profile(self) -> bool:
+        refer_profile_id = self.get_referer_data('profile')
+        if refer_profile_id is None:
+            return False
+        if self.profile is None:
+            return True
+        return self.profile.id != refer_profile_id.strip()
 
     async def get_profile_and_session(self, session: Session,
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
@@ -382,7 +413,107 @@ class TrackerPayload(BaseModel):
 
         session.operation.new = is_new_session
 
+        if session.operation.new:
+
+            # Add session created
+            self.events.append(
+                EventPayload(type='session-opened', properties={})
+            )
+
+            # Compute the User Agent data
+            try:
+                ua_string = session.context['browser']['local']['browser']['userAgent']
+                user_agent = parse(ua_string)
+
+                session.os.version = user_agent.os.version_string
+                session.os.name = user_agent.os.family
+
+                session.device.touch = user_agent.is_touch_capable
+                session.device.name = user_agent.device.family
+                session.device.brand = user_agent.device.brand
+                session.device.model = user_agent.device.model
+
+                if 'location' in self.context:
+                    try:
+                        session.device.geo = Geo(**self.context['location'])
+                        del self.context['location']
+                    except ValidationError:
+                        pass
+
+                session.device.type = 'mobile' if user_agent.is_mobile else \
+                    'pc' if user_agent.is_pc else \
+                        'tablet' if user_agent.is_tablet else \
+                            'email' if user_agent.is_email_client else None
+
+                try:
+                    session.device.resolution = f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"
+                except KeyError:
+                    pass
+
+                try:
+                    session.device.color_depth = int(self.context['screen']['local']['colorDepth'])
+                except KeyError:
+                    pass
+
+                try:
+                    session.device.orientation = self.context['screen']['local']['orientation']
+                except KeyError:
+                    pass
+
+                session.app.bot = user_agent.is_bot
+                session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
+                session.app.version = user_agent.browser.version_string
+                session.app.type = "browser"
+
+                if 'utm' in self.context:
+                    try:
+                        session.utm = UTM(**self.context['utm'])
+                        del self.context['utm']
+                    except ValidationError:
+                        pass
+
+                # session.app.resolution = session.context['screen']
+            except Exception as e:
+                pass
+
+            try:
+                session.device.ip = self.request['headers']['x-forwarded-for']
+            except Exception:
+                pass
+
+            try:
+                session.app.language = session.context['browser']['local']['browser']['language']
+            except Exception:
+                pass
+
+        # Updates on EXISTING Session
+
+        # If location is sent but not available in session - update session
+        if 'location' in self.context and session.device.geo.is_empty():
+            try:
+                session.device.geo = Geo(**self.context['location'])
+                session.operation.update = True
+                del self.context['location']
+            except ValidationError:
+                pass
+
+        # If UTM is sent but not available in session - update session
+        if 'utm' in self.context and session.utm.is_empty():
+            try:
+                session.utm = UTM(**self.context['utm'])
+                session.operation.update = True
+                del self.context['utm']
+            except ValidationError:
+                pass
+
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
 
+        if profile.operation.new:
+            # Add session created
+            self.events.append(
+                EventPayload(type='profile-created', properties={})
+            )
+
         return profile, session
+

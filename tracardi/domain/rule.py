@@ -6,15 +6,13 @@ from pydantic import validator, PrivateAttr
 from .metadata import Metadata
 from .named_entity import NamedEntity
 from .time import Time
-from .type import Type
 from .value_object.storage_info import StorageInfo
 
 
 class Rule(NamedEntity):
 
     _schedule_node_id: str = PrivateAttr(None)
-
-    event: Type
+    event_type: NamedEntity
     flow: NamedEntity
     source: NamedEntity
     enabled: Optional[bool] = True

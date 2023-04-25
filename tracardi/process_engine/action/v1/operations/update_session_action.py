@@ -8,7 +8,7 @@ class UpdateSessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         if self.debug is True:
-            self.console.warning("Session may not be updated in debug mode. "
+            self.console.warning("Session will not be updated in debug mode. "
                                  "Debug only test workflow and does not run "
                                  "the whole ingestion process.")
         elif isinstance(self.session, Session) and isinstance(self.session.operation, Operation):

@@ -7,7 +7,7 @@ with open("README.md", "r",encoding="utf-8") as fh:
 
 setup(
     name='tracardi',
-    version='0.8.0',
+    version='0.8.1',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -69,6 +69,9 @@ setup(
         'PyYAML==6.0',
         'telebot==0.0.4',
         'msgpack==1.0.5',
+        'user-agents==2.2.0',
+        'faker==18.4.0',
+        'faker-commerce==1.0.3',
         # Worker requirements
         'requests',
         'mysql-connector-python==8.0.29'

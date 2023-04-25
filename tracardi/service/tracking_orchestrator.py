@@ -80,6 +80,8 @@ class TrackingOrchestrator:
 
             # Loads session from ES if necessary
 
+            # TODO Possible error
+
             session = await cache.session(
                 session_id=tracker_payload.session.id,
                 ttl=memory_cache.session_cache_ttl

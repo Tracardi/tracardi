@@ -2,252 +2,32 @@
   "properties": {
     "data": {
       "properties": {
-        "media": {
+        "order": {
           "properties": {
-            "image": {
-              "type": "keyword"
+            "id": {
+              "type": "keyword",
+              "ignore_above": 64
             },
-            "webpage": {
-              "type": "keyword"
-            },
-            "social": {
-              "properties": {
-                "twitter": {
-                  "type": "keyword"
-                },
-                "facebook": {
-                  "type": "keyword"
-                },
-                "youtube": {
-                  "type": "keyword"
-                },
-                "instagram": {
-                  "type": "keyword"
-                },
-                "tiktok": {
-                  "type": "keyword"
-                },
-                "linkedin": {
-                  "type": "keyword"
-                },
-                "reddit": {
-                  "type": "keyword"
-                },
-                "other": {
-                  "type": "flattened"
-                }
-              }
-            }
-          }
-        },
-        "pii": {
-          "properties": {
-            "firstname": {
-              "type": "keyword"
-            },
-            "lastname": {
-              "type": "keyword"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "birthday": {
-              "type": "date"
-            },
-            "language": {
-              "properties": {
-                "native": {
-                  "type": "keyword"
-                },
-                "spoken": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "gender": {
-              "type": "keyword"
-            },
-            "education": {
-              "properties": {
-                "level": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "civil": {
-              "properties": {
-                "status": {
-                  "type": "keyword"
-                },
-                "id": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "attributes": {
-              "properties": {
-                "height": {
-                  "type": "float"
-                },
-                "weight": {
-                  "type": "float"
-                },
-                "shoe_number": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        },
-        "contact": {
-          "properties": {
-            "email": {
-              "type": "keyword"
-            },
-            "phone": {
-              "type": "keyword"
-            },
-            "app": {
-              "properties": {
-                "whatsapp": {
-                  "type": "keyword"
-                },
-                "discord": {
-                  "type": "keyword"
-                },
-                "slack": {
-                  "type": "keyword"
-                },
-                "telegram": {
-                  "type": "keyword"
-                },
-                "wechat": {
-                  "type": "keyword"
-                },
-                "viber": {
-                  "type": "keyword"
-                },
-                "signal": {
-                  "type": "keyword"
-                },
-                "other": {
-                  "type": "flattened"
-                }
-              }
-            },
-            "address": {
-              "properties": {
-                "town": {
-                  "type": "keyword"
-                },
-                "county": {
-                  "type": "keyword"
-                },
-                "country": {
-                  "type": "keyword"
-                },
-                "postcode": {
-                  "type": "keyword"
-                },
-                "street": {
-                  "type": "keyword"
-                },
-                "other": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "confirmations": {
-              "type": "keyword"
-            }
-          }
-        },
-        "job": {
-          "properties": {
-            "position": {
-              "type": "keyword"
-            },
-            "salary": {
+            "total": {
               "type": "float"
             },
-            "type": {
-              "type": "keyword"
-            },
-            "company": {
+            "product": {
               "properties": {
                 "name": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 128
                 },
-                "size": {
-                  "type": "keyword"
+                "category": {
+                  "type": "keyword",
+                  "ignore_above": 64
                 },
-                "segment": {
-                  "type": "keyword"
+                "brand": {
+                  "type": "keyword",
+                  "ignore_above": 64
                 },
-                "country": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "department": {
-              "type": "keyword"
-            }
-          }
-        },
-        "location": {
-          "properties": {
-            "last": {
-              "type": "float"
-            }
-          }
-        },
-        "preferences": {
-          "properties": {
-            "purchase": {
-              "type": "keyword"
-            },
-            "colors": {
-              "type": "keyword"
-            },
-            "sizes": {
-              "type": "keyword"
-            },
-            "device": {
-              "type": "keyword"
-            },
-            "channel": {
-              "type": "keyword"
-            },
-            "payment": {
-              "type": "keyword"
-            }
-          }
-        },
-        "devices": {
-          "type": "keyword"
-        },
-        "metrics": {
-          "properties": {
-            "ltv": {
-              "type": "float"
-            }
-          }
-        },
-        "loyalty": {
-          "properties": {
-            "codes": {
-              "type": "keyword"
-            },
-            "card": {
-              "properties": {
-                "id": {
-                  "type": "keyword"
-                },
-                "name": {
-                  "type": "keyword"
-                },
-                "issuer": {
-                  "type": "keyword"
+                "sku": {
+                  "type": "keyword",
+                  "ignore_above": 64
                 }
               }
             }

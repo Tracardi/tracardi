@@ -1,5 +1,6 @@
 import re
 from pprint import pprint
+from typing import Union
 
 from dotty_dict import dotty
 from pydantic import BaseModel
@@ -30,19 +31,25 @@ class DotAccessor:
                 label, type(data)
             ))
 
+    def convert_to_dict(self, object: Union[dict, dotty]) -> dict:
+        if isinstance(object, dict):
+            return object
+
+        return object.to_dict()
+
     def get_all(self, dot_notation):
         if dot_notation.startswith('flow@...'):
-            return self.flow
+            return self.convert_to_dict(self.flow)
         elif dot_notation.startswith('profile@...'):
-            return self.profile
+            return self.convert_to_dict(self.profile)
         elif dot_notation.startswith('session@...'):
-            return self.session
+            return self.convert_to_dict(self.session)
         elif dot_notation.startswith('payload@...'):
-            return self.payload
+            return self.convert_to_dict(self.payload)
         elif dot_notation.startswith('event@...'):
-            return self.event
+            return self.convert_to_dict(self.event)
         elif dot_notation.startswith('memory@...'):
-            return self.memory
+            return self.convert_to_dict(self.memory)
 
         return None
 

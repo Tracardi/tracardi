@@ -20,7 +20,14 @@
         "type": "keyword"
       },
       "event_type": {
-        "type": "keyword"
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
       },
       "tags": {
         "type": "keyword"

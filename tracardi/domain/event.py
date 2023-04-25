@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Any
 from uuid import uuid4
 
 from .entity import Entity
@@ -7,8 +7,12 @@ from .event_metadata import EventMetadata
 from pydantic import BaseModel, root_validator
 from typing import Tuple
 
+from .marketing import UTM
+from .metadata import OS, Device, Application, Hit
+from .named_entity import NamedEntity
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
+from ..service.string_manager import capitalize_event_type_id
 
 
 class Tags(BaseModel):
@@ -40,9 +44,17 @@ class EventSession(Entity):
     tz: Optional[str] = 'utc'
 
 
-class Event(Entity):
+class Event(NamedEntity):
     metadata: EventMetadata
     type: str
+
+    device: Optional[Device] = Device()
+    os: Optional[OS] = OS()
+    app: Optional[Application] = Application()
+    hit: Optional[Hit] = Hit()
+
+    utm: Optional[UTM] = UTM()
+
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     operation: RecordFlag = RecordFlag()
@@ -55,6 +67,11 @@ class Event(Entity):
     config: Optional[dict] = {}
     tags: Tags = Tags()
     aux: dict = {}
+
+    def __init__(self, **data: Any):
+        if 'name' not in data:
+            data['name'] = capitalize_event_type_id(data['type'])
+        super().__init__(**data)
 
     def replace(self, event):
         if isinstance(event, Event):
@@ -72,6 +89,14 @@ class Event(Entity):
             self.config = event.config
             self.tags = event.tags
             self.aux = event.aux
+            self.os = event.os
+            self.device = event.device
+            self.app = event.app
+
+    def get_ip(self):
+        if 'headers' in self.request and 'x-forwarded-for' in self.request['headers']:
+            return self.request['headers']['x-forwarded-for']
+        return None
 
     def is_persistent(self) -> bool:
         if 'save' in self.config and isinstance(self.config['save'], bool):

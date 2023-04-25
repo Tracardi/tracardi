@@ -313,8 +313,17 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-
     "tracardi.process_engine.action.v1.events.event_discarder.plugin": PluginMetadata(
+        test=PluginTest(init={},
+                        resource=None)
+    ),
+
+    "tracardi.process_engine.action.v1.profiles.profile_discarder.plugin": PluginMetadata(
+        test=PluginTest(init={},
+                        resource=None)
+    ),
+
+    "tracardi.process_engine.action.v1.sessions.session_discarder.plugin": PluginMetadata(
         test=PluginTest(init={},
                         resource=None)
     ),
@@ -469,6 +478,19 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
+    "tracardi.process_engine.action.v1.interest.add.plugin": PluginMetadata(
+        test=PluginTest(init={'interest': 'abc', 'value': '1.0'},
+                        resource=None)
+    ),
+    "tracardi.process_engine.action.v1.interest.increase.plugin": PluginMetadata(
+        test=PluginTest(init={'interest': 'abc', 'value': '1.0'},
+                        resource=None)
+    ),
+    "tracardi.process_engine.action.v1.interest.decrease.plugin": PluginMetadata(
+        test=PluginTest(init={'interest': 'abc', 'value': '1.0'},
+                        resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.converters.data_to_json.plugin": PluginMetadata(
         test=PluginTest(init={'to_json': "{}"},
                         resource=None)
@@ -481,9 +503,13 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.connectors.discord.push.plugin": PluginMetadata(
         test=PluginTest(
-            init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'message', 'timeout': 10, 'username': "test"},
+            init={'resource': {'id': 'id', 'name': 'name'},
+                  'message': 'message',
+                  'timeout': 10,
+                  'username': "test"
+                  },
             resource={
-                "url": "webhook_url"
+                "url": "http://webhook_url"
             })
     ),
 
@@ -605,8 +631,15 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.flow.postpone_event.plugin": PluginMetadata(
-        test=PluginTest(init={"event_type": 'test'},
-                        resource=None)
+        test=PluginTest(init={
+            'event_type': 'type',
+            'source': {
+                'id': 'x',
+                'name': 'x'
+            },
+            'event_properties': '{}',
+            'delay': 60},
+            resource=None)
     ),
 
     "tracardi.process_engine.action.v1.contains_string_action": PluginMetadata(
@@ -672,7 +705,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.connectors.elasticsearch.query_local.plugin": PluginMetadata(
         test=PluginTest(
-            init={'index': {'id': '1', 'name': 'Some value'}, 'query': '{"query":{"match_all":{}}}'},
+            init={'index': 'index', 'query': '{"query":{"match_all":{}}}'},
             resource=None)
     ),
 }
@@ -703,6 +736,47 @@ if License.has_license():
             },
             resource=None)
     )
+    installed_plugins["com_tracardi.action.v1.ux.youtube_player.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "youtube_id": "",
+                "title": ""
+            },
+            resource=None)
+    )
+    installed_plugins["com_tracardi.action.v1.ux.demo_form.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "api_url": "http://localhost:8686",
+                "lifetime": "45",
+                "horizontal_position": "right",
+                "vertical_position": "bottom",
+                "event_type": "request-demo"
+            },
+            resource=None)
+    )
+    installed_plugins["com_tracardi.action.v1.ux.generic.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "uix_source": "http://localhost/index.js"
+            },
+            resource=None)
+    )
+    installed_plugins["com_tracardi.action.v1.ux.rating_popup.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "api_url": "http://localhost:8686",
+                "title": None,
+                "message": None,
+                "lifetime": "6",
+                "horizontal_position": "center",
+                "vertical_position": "bottom",
+                "event_type": "rate",
+                "save_event": True,
+                "dark_theme": False
+            },
+            resource=None)
+    )
     installed_plugins["com_tracardi.action.v1.sequencer.query.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -722,12 +796,12 @@ if License.has_license():
 
     installed_plugins["com_tracardi.action.v1.openai.chatgpt.plugin"] = PluginMetadata(
         test=PluginTest(init={
-                "resource": {
-                    "name": "",
-                    "id": ""
-                },
-                "prompt": ""
-            }, resource={"api_key": "test"}),
+            "resource": {
+                "name": "",
+                "id": ""
+            },
+            "prompt": ""
+        }, resource={"api_key": "test"}),
     )
 
     installed_plugins["com_tracardi.action.v1.limiter.plugin"] = PluginMetadata(

@@ -40,6 +40,11 @@ class TrackerResultPersister:
     @staticmethod
     def get_profiles_to_save(tracker_results: List[TrackerResult]):
         for tracker_result in tracker_results:
+
+            persist_profile = tracker_result.tracker_payload.is_on('saveProfile', default=True)
+            if not persist_profile:
+                continue
+
             profile = tracker_result.profile
 
             if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):

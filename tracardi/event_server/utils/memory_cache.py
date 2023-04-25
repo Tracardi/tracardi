@@ -74,6 +74,10 @@ class MemoryCache:
                 del self.memory_buffer[key]
 
     @staticmethod
+    async def save(cache: 'MemoryCache', key, data, ttl):
+        cache[key] = CacheItem(data=data, ttl=ttl)
+
+    @staticmethod
     async def cache(cache: 'MemoryCache', key, ttl, load_callable, awaitable, *args):
         if key not in cache:
             result = load_callable(*args)
@@ -83,6 +87,6 @@ class MemoryCache:
             if result is None and not cache.allow_null_values:
                 return None
 
-            cache[key] = CacheItem(data=result, ttl=ttl)
+            await MemoryCache.save(cache, key, data=result, ttl=ttl)
 
         return cache[key].data

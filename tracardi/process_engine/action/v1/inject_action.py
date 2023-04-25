@@ -59,11 +59,9 @@ class InjectAction(ActionRunner):
         if self.config.destination == 'event-properties':
             self.event.properties = inject
         elif self.config.destination == 'profile-pii':
-            self.profile.pii = inject
-        elif self.config.destination == 'profile-traits-public':
-            self.profile.traits.public = inject
-        elif self.config.destination == 'profile-traits-private':
-            self.profile.traits.private = inject
+            self.profile.data.pii = inject
+        elif self.config.destination == 'profile-traits':
+            self.profile.traits = inject
         elif self.config.destination == 'profile-interests':
             self.profile.interests = inject
         elif self.config.destination == 'profile-counters':
@@ -82,8 +80,8 @@ def register() -> Plugin:
         start=True,
         debug=True,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.inject_action',
-            className='InjectAction',
+            module=__name__,
+            className=InjectAction.__name__,
             inputs=[],
             outputs=["payload"],
             init={"value": "{}", "destination": "payload"},
@@ -106,8 +104,7 @@ def register() -> Plugin:
                                 'event-properties': "Event Properties",
                                 'payload': "Payload",
                                 'profile-pii': "Profile PII",
-                                'profile-traits-public': "Public Profile Traits",
-                                'profile-traits-private': "Private Profile Traits",
+                                'profile-traits': "Profile Traits",
                                 'profile-interests': "Profile Interests",
                                 'profile-counters': "Profile Counters",
                                 'profile-consents': "Profile Consents",
@@ -118,7 +115,7 @@ def register() -> Plugin:
                 ),
             ]),
             manual='inject_action',
-            version='0.6.2',
+            version='0.8.1',
             license="MIT",
             author="Risto Kowaczewski"
         ),
@@ -132,7 +129,7 @@ def register() -> Plugin:
             documentation=Documentation(
                 inputs={},
                 outputs={
-                    "payload": PortDoc(desc="This port returns object received by plugin in configuration.")
+                    "payload": PortDoc(desc="This port returns defined data if injected into payload or empty object.")
                 }
             )
         )

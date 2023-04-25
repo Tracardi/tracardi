@@ -19,6 +19,12 @@ def test_should_validate_dot_notation():
     assert not DotAccessor.validate("invalid@dot.[0].notation")
 
 
+def test_dot_accessor_3_dots():
+    dot = DotAccessor(profile={"a": 1, "b": [1, 2]}, session={"b": 2}, event={"c": 1}, memory={"m": 0})
+    a = dot['profile@...']
+    assert isinstance(a, dict)
+
+
 def test_dot_accessor():
     dot = DotAccessor(profile={"a": 1, "b": [1, 2]}, session={"b": 2}, event={"c": 1}, memory={"m": 0})
     a = dot['profile@...']

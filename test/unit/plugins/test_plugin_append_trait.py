@@ -28,49 +28,49 @@ def test_plugin_append_trait():
             "profile@traits.public.value": 1
         }
     }, payload, profile=profile, event=event, session=session)
-    assert result.profile.traits.public['value'] == 1
+    assert result.profile.traits['public']['value'] == 1
 
     result = run_plugin(AppendTraitAction, {
         "append": {
             "profile@traits.public.value": 2
         }
     }, payload, profile=profile, event=event, session=session)
-    assert result.profile.traits.public['value'] == [1, 2]
+    assert result.profile.traits['public']['value'] == [1, 2]
 
     result = run_plugin(AppendTraitAction, {
         "remove": {
             "profile@traits.public.value": 2
         }
     }, payload, profile=profile, event=event, session=session)
-    assert result.profile.traits.public['value'] == [1]
+    assert result.profile.traits['public']['value'] == [1]
 
     result = run_plugin(AppendTraitAction, {
         "append": {
             "profile@traits.public.value": 3
         }
     }, payload, profile=profile, event=event, session=session)
-    assert result.profile.traits.public['value'] == [1, 3]
+    assert result.profile.traits['public']['value'] == [1, 3]
 
     result = run_plugin(AppendTraitAction, {
         "remove": {
             "profile@traits.public.value": [1, 3]
         }
     }, payload, profile=profile, event=event, session=session)
-    assert result.profile.traits.public['value'] == []
+    assert result.profile.traits['public']['value'] == []
 
     result = run_plugin(AppendTraitAction, {
         "append": {
             "profile@traits.public.objects": [{"A": 1}]
         }
     }, payload, profile=profile, event=event, session=session)
-    assert result.profile.traits.public['objects'] == [{"A": 1}]
+    assert result.profile.traits['public']['objects'] == [{"A": 1}]
 
     result = run_plugin(AppendTraitAction, {
         "remove": {
             "profile@traits.public.objects": [{"A": 1}]
         }
     }, payload, profile=profile, event=event, session=session)
-    assert result.profile.traits.public['objects'] == []
+    assert result.profile.traits['public']['objects'] == []
 
 
 def test_plugin_append_trait_fail():

@@ -1,7 +1,8 @@
-from pydantic import BaseModel, validator
+from dataclasses import dataclass, asdict
+
+from pydantic import validator
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, Union, Dict, Any
-import random
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -26,36 +27,37 @@ class Config(PluginConfig):
         return value
 
 
-class MatomoPayload(BaseModel):
-    cip: str
-    send_image: Optional[int] = 0
+@dataclass
+class MatomoPayload:
     idsite: int
-    rec: Optional[int] = 1
     action_name: str
-    url: str
     _id: str
-    rand: Optional[int] = random.randint(0, 1000)
+    url: str
+    rand: str
+    uid: Optional[str] = None
+    dimensions: Optional[Dict[str, Any]] = None
+    cip: Optional[str] = None
+    new_visit: Optional[int] = None
+    pv_id: Optional[str] = None
+    _idvc: Optional[int] = None
+    _idts: Optional[int] = None
+    _viewts: Optional[int] = None
+    send_image: Optional[int] = 0
+    rec: Optional[int] = 1
     apiv: Optional[int] = 1
     urlref: Optional[str] = None
-    _idvc: int
-    _viewts: int
-    _idts: int
     _rcn: Optional[str] = None
     _rck: Optional[str] = None
-    res: str
+    res: Optional[str] = None
     cookie: Optional[int] = 0
     ua: Optional[str] = None
     lang: Optional[str] = None
-    uid: str
-    new_visit: int
     search: Optional[str] = None
     search_cat: Optional[str] = None
     search_count: Optional[int] = None
-    pv_id: str
     idgoal: Optional[int] = None
     revenue: Optional[Union[float, int]] = None
     gt_ms: Optional[int] = None
-    dimensions: Optional[Dict[str, Any]]
     pf_net: Optional[int] = None
     pf_srv: Optional[int] = None
     pf_tfr: Optional[int] = None
@@ -63,14 +65,7 @@ class MatomoPayload(BaseModel):
     pf_dm2: Optional[int] = None
     pf_onl: Optional[int] = None
 
-    @validator("pf_net", "pf_srv", "pf_tfr", "pf_dm1", "pf_dm2", "pf_onl")
-    def validate_performance_values(cls, value):
-        if value == 0:
-            value = None
-        return value
-
     def to_dict(self):
         return {
-            key: value for key, value in {**self.dict(), **self.dimensions}.items()
-            if value is not None and key != "dimensions"
+            key: value for key, value in asdict(self).items() if value is not None and key != "dimensions"
         }

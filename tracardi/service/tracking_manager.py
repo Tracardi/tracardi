@@ -3,17 +3,16 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable
 from uuid import uuid4
-
 from dotty_dict import dotty
 from pydantic.error_wrappers import ValidationError
-from tracardi.domain.consent_field_compliance import ConsentFieldCompliance
+from tracardi.service.events import index_default_event_type, copy_default_event_to_profile, \
+    get_default_event_type_mapping
 
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
-from tracardi.domain.type import Type
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.license import License, INDEXER
 
@@ -175,6 +174,7 @@ class TrackingManager(TrackingManagerBase):
                     _event.request = self.tracker_payload.request
 
                 # Index event
+                _event = index_default_event_type(_event)
                 if License.has_service(INDEXER):
                     _event = await index_event_traits(_event, self.console_log)
 
@@ -207,7 +207,8 @@ class TrackingManager(TrackingManagerBase):
                     Rule(
                         id=str(uuid4()),
                         name="@Internal route",
-                        event=Type(type=event.type),  # event type is equal to schedule node id
+                        # event type is equal to schedule node id
+                        event_type=NamedEntity(id=event.type, name=event.name),
                         flow=NamedEntity(id=self.tracker_payload.scheduled_event_config.flow_id, name="Scheduled"),
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
                         properties={},
@@ -226,13 +227,38 @@ class TrackingManager(TrackingManagerBase):
         # Copy data from event to profile. This must be run just before processing.
 
         for event in events:
+
+            # Default event types coping
+
+            copy_schema = get_default_event_type_mapping(event.type, 'profile')
+
+            profile_updated_flag = False
+            flat_profile = None
+            flat_event = None
+
+            if copy_schema is not None:
+                flat_profile = dotty(self.profile.dict())
+                flat_event = flat_events[event.id]
+
+                # Copy default
+                flat_profile, profile_updated_flag = copy_default_event_to_profile(copy_schema, flat_profile,
+                                                                                   flat_event)
+
+            # Custom event types coping, filtered by event type
+
             coping_schemas = await cache.event_to_profile_coping(
                 event_type=event.type,
                 ttl=memory_cache.event_to_profile_coping_ttl)
 
-            if coping_schemas.total > 0:
-                flat_profile = dotty(self.profile.dict())
-                flat_event = flat_events[event.id]
+            if self.profile is not None and coping_schemas.total > 0:
+
+                # Flat data can be already prepared in default coping
+
+                if flat_event is None:
+                    flat_event = flat_events[event.id]
+                if flat_profile is None:
+                    flat_profile = dotty(self.profile.dict())
+
                 for coping_schema in coping_schemas:
                     coping_schema = coping_schema.to_entity(EventToProfile)
 
@@ -266,6 +292,7 @@ class TrackingManager(TrackingManagerBase):
                             continue
 
                     # Copy
+
                     if coping_schema.event_to_profile:
                         allowed_profile_fields = (
                             "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
@@ -309,6 +336,8 @@ class TrackingManager(TrackingManagerBase):
                                 else:
                                     flat_profile[profile_ref] = flat_event[event_ref]
 
+                                profile_updated_flag = True
+
                             except KeyError as e:
                                 if event_ref.startswith(("properties", "traits")):
                                     message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
@@ -332,6 +361,8 @@ class TrackingManager(TrackingManagerBase):
                                     )
                                 )
                                 logger.error(message)
+
+            if profile_updated_flag is True and flat_profile is not None:
                 try:
                     self.profile = Profile(**flat_profile)
                     self.profile.operation.update = True

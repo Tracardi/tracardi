@@ -30,9 +30,12 @@
           }
         }
       },
-      "event": {
+      "event_type": {
         "properties": {
-          "type": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
             "type": "keyword"
           }
         }
