@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class Queue:
     segmentation: str = "segmentation:live"
     copy: str = "event_to_profile_coping:worker"
+    event_props_to_event_traits: str = "event_props_to_event_traits:worker"
 
 
 @dataclass
