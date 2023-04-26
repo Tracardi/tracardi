@@ -24,7 +24,6 @@ from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 from user_agents import parse
 
-# from ...service.storage.drivers.elastic.profile import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
