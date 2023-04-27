@@ -188,7 +188,7 @@ class TrackerResultPersister:
             event.operation.update = False
 
             # Reset session id if session is not saved
-
+            # TODO ERROR - here
             if tracker_result.tracker_payload.is_on('saveSession', default=True) is False:
                 event.session = None
 
