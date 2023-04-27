@@ -1,8 +1,5 @@
 from datetime import datetime
 from uuid import uuid4
-
-import asyncio
-
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import EventSession
 from tracardi.domain.metadata import ProfileMetadata
@@ -13,7 +10,6 @@ from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
 
 
 class AddEmptyProfileAction(ActionRunner):
@@ -39,10 +35,6 @@ class AddEmptyProfileAction(ActionRunner):
         self.event.metadata.profile_less = False
         self.event.operation.update = True
 
-        self.execution_graph.set_profiles(profile)
-
-        coroutines = [storage.driver.profile.save(profile)]
-
         session = Session(
             id=str(uuid4()),
             profile=Entity(id=profile.id),
@@ -62,12 +54,13 @@ class AddEmptyProfileAction(ActionRunner):
             start=session.metadata.time.insert,
             duration=session.metadata.time.duration
         )
+
         self.execution_graph.set_sessions(session)
+        self.execution_graph.set_profiles(profile)
 
-        if self.tracker_payload is not None and not self.tracker_payload.is_on('saveSession', default=True):
-            coroutines.append(storage.driver.session.save(session))
-
-        await asyncio.gather(*coroutines)
+        self.tracker_payload.session.id = session.id
+        self.tracker_payload.profile_less = False
+        self.tracker_payload.options.update({"saveSession": True})
 
         return Result(port='payload', value=payload)
 
