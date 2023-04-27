@@ -51,6 +51,8 @@ class AddEmptyProfileAction(ActionRunner):
             operation=Operation(update=True)
         )
 
+        # todo set session in tracker payload
+
         if self.session is not None:
             self.console.warning(f"Old session {self.session.id} was replaced by new session {session.id}. "
                                  f"Replacing session is not a good practice if you already have a session.")

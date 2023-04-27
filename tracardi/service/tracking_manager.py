@@ -189,7 +189,8 @@ class TrackingManager(TrackingManagerBase):
 
         # Anonymize, data compliance
         if License.has_license():
-            events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
+            if self.profile is not None:
+                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
 
         debugger = None
         segmentation_result = None

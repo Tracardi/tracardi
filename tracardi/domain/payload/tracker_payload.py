@@ -508,11 +508,11 @@ class TrackerPayload(BaseModel):
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
 
-        if profile.operation.new:
-            # Add session created
-            self.events.append(
-                EventPayload(type='profile-created', properties={})
-            )
+            if profile.operation.new:
+                # Add session created
+                self.events.append(
+                    EventPayload(type='profile-created', properties={})
+                )
 
         return profile, session
 
