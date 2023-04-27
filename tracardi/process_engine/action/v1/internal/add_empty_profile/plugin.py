@@ -7,15 +7,24 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.time import ProfileTime, ProfileVisit
 from tracardi.domain.value_object.operation import Operation
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
+    FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from .config import Config
+
+
+def validate(config: dict) -> Config:
+    return Config(**config)
 
 
 class AddEmptyProfileAction(ActionRunner):
+    config: Config
+
+    async def set_up(self, init):
+        self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-
         now = datetime.utcnow()
         profile = Profile(
             id=str(uuid4()),
@@ -34,6 +43,18 @@ class AddEmptyProfileAction(ActionRunner):
         self.event.profile = profile
         self.event.metadata.profile_less = False
         self.event.operation.update = True
+        self.tracker_payload.profile_less = False
+
+        self.execution_graph.set_profiles(profile)
+
+        if self.config.session == 'never':
+            return Result(port='payload', value=payload)
+
+        if self.config.session == 'if-not-exists' and self.session is not None \
+                and self.tracker_payload.is_on('saveSession', default=True):
+            return Result(port='payload', value=payload)
+
+        # Create session
 
         session = Session(
             id=str(uuid4()),
@@ -56,10 +77,9 @@ class AddEmptyProfileAction(ActionRunner):
         )
 
         self.execution_graph.set_sessions(session)
-        self.execution_graph.set_profiles(profile)
 
         self.tracker_payload.session.id = session.id
-        self.tracker_payload.profile_less = False
+
         self.tracker_payload.options.update({"saveSession": True})
 
         return Result(port='payload', value=payload)
@@ -73,11 +93,34 @@ def register() -> Plugin:
             className='AddEmptyProfileAction',
             inputs=["payload"],
             outputs=['payload'],
-            version='0.7.0',
+            version='0.8.0',
             license="MIT",
             author="Risto Kowaczewski",
-            init=None,
-            form=None,
+            init={
+                "session": 'always'
+            },
+            form=Form(
+                groups=[
+                    FormGroup(
+                        name="New profile configuration",
+                        fields=[
+                            FormField(
+                                name="New session",
+                                id="session",
+                                description="Create new session for new profile.",
+                                component=FormComponent(type="select", props={
+                                    "label": "New session",
+                                    "items": {
+                                        "if-not-exists": "If not exists",
+                                        "always": "Always",
+                                        "never": "Never"
+                                    }
+                                })
+                            )
+                        ]
+                    )
+                ]
+            )
 
         ),
         metadata=MetaData(
