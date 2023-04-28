@@ -1,73 +1,5 @@
 [
   {
-    "name": "Product Search Result",
-    "description": "Customer viewed a product list or product category.",
-    "id": "product-search-result",
-    "properties": {
-      "type": "product",
-      "query": "string",
-      "filters": [
-        {
-          "key": "string",
-          "value": "string"
-        }
-      ],
-      "sorting": [
-        {
-          "key": "string",
-          "order": "string"
-        }
-      ],
-      "products": [
-        {
-          "id": "string",
-          "sku": "string",
-          "name": "string",
-          "category": "string",
-          "url": {
-            "image": "url",
-            "page": "url"
-          },
-          "price": "float"
-        }
-      ]
-    },
-    "event": {
-      "query.type": "type",
-      "query.name": "query"
-    }
-  },
-  {
-    "name": "Promotion Viewed",
-    "description": "Customer viewed promotion banner or text.",
-    "id": "promotion-viewed",
-    "properties": {
-      "id": "string",
-      "name": "string",
-      "media": {
-        "text": "string",
-        "image": "string"
-      }
-    },
-    "event": {
-      "promotion.id": "id",
-      "promotion.name": "name"
-    }
-  },
-  {
-    "name": "Promotion Clicked",
-    "description": "Customer clicked on promotion banner.",
-    "id": "promotion-clicked",
-    "properties": {
-      "id": "string",
-      "name": "string",
-      "url": {
-        "image": "url",
-        "page": "url"
-      }
-    }
-  },
-  {
     "name": "Product Clicked",
     "description": "Customer clicked on a product.",
     "id": "product-clicked",
@@ -90,16 +22,16 @@
         "page": "url"
       }
     },
-    "event": {
-      "product.id": "id",
-      "product.name": "name",
-      "product.sku": "sku",
-      "product.category": "category",
-      "product.brand": "brand",
-      "product.variant": "variant",
-      "product.price": "price",
-      "product.quantity": "quantity",
-      "product.position": "position"
+    "traits": {
+      "ec.product.id": "id",
+      "ec.product.name": "name",
+      "ec.product.sku": "sku",
+      "ec.product.category": "category",
+      "ec.product.brand": "brand",
+      "ec.product.variant": "variant",
+      "ec.product.price": "price",
+      "ec.product.quantity": "quantity",
+      "ec.product.position": "position"
     }
   },
   {
@@ -124,15 +56,15 @@
         "page": "url"
       }
     },
-    "event": {
-      "product.id": "id",
-      "product.name": "name",
-      "product.sku": "sku",
-      "product.category": "category",
-      "product.brand": "brand",
-      "product.variant": "variant",
-      "product.price": "price",
-      "product.quantity": "quantity"
+    "traits": {
+      "ec.product.id": "id",
+      "ec.product.name": "name",
+      "ec.product.sku": "sku",
+      "ec.product.category": "category",
+      "ec.product.brand": "brand",
+      "ec.product.variant": "variant",
+      "ec.product.price": "price",
+      "ec.product.quantity": "quantity"
     }
   },
   {
@@ -165,15 +97,15 @@
         "page": "url"
       }
     },
-    "event": {
-      "product.id": "id",
-      "product.name": "name",
-      "product.sku": "sku",
-      "product.category": "category",
-      "product.brand": "brand",
-      "product.variant": "variant",
-      "product.price": "price",
-      "product.quantity": "quantity"
+    "traits": {
+      "ec.product.id": "id",
+      "ec.product.name": "name",
+      "ec.product.sku": "sku",
+      "ec.product.category": "category",
+      "ec.product.brand": "brand",
+      "ec.product.variant": "variant",
+      "ec.product.price": "price",
+      "ec.product.quantity": "quantity"
     }
   },
   {
@@ -198,15 +130,15 @@
         "page": "url"
       }
     },
-    "event": {
-      "product.id": "id",
-      "product.name": "name",
-      "product.sku": "sku",
-      "product.category": "category",
-      "product.brand": "brand",
-      "product.variant": "variant",
-      "product.price": "price",
-      "product.quantity": "quantity"
+    "traits": {
+      "ec.product.id": "id",
+      "ec.product.name": "name",
+      "ec.product.sku": "sku",
+      "ec.product.category": "category",
+      "ec.product.brand": "brand",
+      "ec.product.variant": "variant",
+      "ec.product.price": "price",
+      "ec.product.quantity": "quantity"
     }
   },
   {
@@ -224,13 +156,13 @@
       "value": "string",
       "coupon": "string"
     },
-    "event": {
-      "checkout.id": "id",
-      "order.id": "order_id",
-      "checkout.status": "status",
-      "checkout.currency": "currency",
-      "checkout.value": "value",
-      "checkout.coupon": "coupon"
+    "traits": {
+      "ec.order.id": "order_id",
+      "ec.checkout.id": "id",
+      "ec.checkout.status": "status",
+      "ec.checkout.currency": "currency",
+      "ec.checkout.value": "value",
+      "marketing.coupon": "coupon"
     }
   },
   {
@@ -244,9 +176,9 @@
     "properties": {
       "id": "string"
     },
-    "event": {
-      "checkout.id": "id",
-      "checkout.status": "status"
+    "traits": {
+      "ec.checkout.id": "id",
+      "ec.checkout.status": "status"
     }
   },
   {
@@ -260,9 +192,9 @@
       "id": "string",
       "status": "string"
     },
-    "event": {
-      "checkout.id": "id",
-      "checkout.status": "status"
+    "traits": {
+      "ec.checkout.id": "id",
+      "ec.checkout.status": "status"
     }
   },
 
@@ -272,8 +204,6 @@
     "id": "delivery-info-entered",
     "properties": {
       "order_id": "string",
-      "method": "string",
-      "receiver": "string",
       "delivery": {
         "town": "string",
         "county": "string",
@@ -282,10 +212,8 @@
         "street": "string"
       }
     },
-    "event": {
-      "order.id": "id",
-      "payment.method": "method",
-      "order.receiver": "receiver",
+    "traits": {
+      "ec.order.id": "id",
       "contact.address.town": "delivery.town",
       "contact.address.county": "delivery.county",
       "contact.address.country": "delivery.country",
@@ -314,6 +242,13 @@
         "holder": "string",
         "cvv": ""
       }
+    },
+    "traits": {
+      "ec.order.id": "id",
+      "payment.method": "method",
+      "payment.credit_card.number": "delivery.town",
+      "payment.credit_card.expires": "delivery.county",
+      "payment.credit_card.holder": "delivery.country"
     }
   },
 
@@ -358,9 +293,11 @@
         }
       ]
     },
-    "event": {
-      "order.id": "id",
-      "order.status": "status"
+    "traits": {
+      "ec.order.id": "id",
+      "ec.order.status": "status",
+      "ec.order.income": "income",
+      "ec.order.cost": "cost"
     }
   },
   {
@@ -370,9 +307,9 @@
     "const": {
       "status": "completed"
     },
-    "event": {
-      "order.id": "id",
-      "order.status": "status"
+    "traits": {
+      "ec.order.id": "id",
+      "ec.order.status": "status"
     }
   },
   {
@@ -391,52 +328,12 @@
     "properties": {
       "id": "string",
       "review": "string",
-      "rate": "integer"
+      "rate": 0
     },
-    "event": {
-      "product.id": "id",
-      "product.review": "review",
-      "product.rate": "rate"
-    }
-  },
-  {
-    "id": "loyalty-card-added",
-    "name": "Loyalty Card Added",
-    "description": "Customer adds or receives loyalty card.",
-    "properties": {
-      "id": "string",
-      "name": "string",
-      "issuer": "string",
-      "expires": "datetime"
-    },
-    "event": {
-      "loyalty.card.id": "id",
-      "loyalty.card.name": "name",
-      "loyalty.card.issuer": "issuer",
-      "loyalty.card.expires": "expires"
-    },
-    "profile": {
-      "data.loyalty.card.id":  ["traits.loyalty.card.id", "equal"],
-      "data.loyalty.card.name": ["traits.loyalty.card.name", "equal"],
-      "data.loyalty.card.issuer": ["traits.loyalty.card.issuer", "equal"],
-      "data.loyalty.card.expires": ["traits.loyalty.card.expires", "equal"]
-    }
-  },
-  {
-    "id": "loyalty-card-removed",
-    "name": "Loyalty Card Removed",
-    "description": "Customer removes or loyalty card is deleted.",
-    "properties": {
-      "id": "string"
-    },
-    "event": {
-      "loyalty.card.id": "id"
-    },
-    "profile": {
-      "data.loyalty.card.id":  [null, "delete"],
-      "data.loyalty.card.name": [null, "delete"],
-      "data.loyalty.card.issuer": [null, "delete"],
-      "data.loyalty.card.expires": [null, "delete"]
+    "traits": {
+      "ec.product.id": "id",
+      "ec.product.review": "review",
+      "ec.product.rate": "rate"
     }
   }
 ]

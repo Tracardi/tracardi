@@ -9,14 +9,14 @@
       "firstname": "string",
       "lastname": "string"
     },
-    "event": {
-      "contact.email": "email",
+    "traits": {
+      "contact.app.email": "email",
       "identifier.token": "login",
       "pii.firstname": "firstname",
       "pii.lastname": "lastname"
     },
     "profile": {
-      "data.contact.email": ["traits.contact.email", "equal"],
+      "data.contact.email": ["traits.contact.app.email", "equal"],
       "data.identifier.token": ["traits.identifier.token", "equal"],
       "data.pii.firstname": ["traits.pii.firstname", "equal"],
       "data.pii.lastname": ["traits.pii.lastname", "equal"]
@@ -33,14 +33,14 @@
       "lastname": "string",
       "custom": "object"
     },
-    "event": {
-      "contact.email": "email",
+    "traits": {
+      "contact.app.email": "email",
       "pii.firstname": "firstname",
       "pii.lastname": "lastname",
       "identifier.token": "login"
     },
     "profile": {
-      "data.contact.email": ["traits.contact.email", "equal"],
+      "data.contact.email": ["traits.contact.app.email", "equal"],
       "data.identifier.token": ["traits.identifier.token", "equal"],
       "data.pii.firstname": ["traits.pii.firstname", "equal"],
       "data.pii.lastname": ["traits.pii.lastname", "equal"]
@@ -53,13 +53,18 @@
     "properties": {
       "firstname": "string",
       "lastname": "string",
-      "id": "string",
-      "passport": "string",
-      "email": "string",
+
       "phone": "string",
+
+      "id": "string",
+      "token": "string",
+      "passport": "string",
       "login": "string",
       "credit_card": "string",
       "coupon": "string",
+      "badge": "string",
+
+      "email": "string",
       "twitter": "string",
       "whatsapp": "string",
       "discord": "string",
@@ -67,48 +72,53 @@
       "telegram": "string",
       "wechat": "string",
       "viber": "string",
-      "signal": "string",
-      "badge": "string"
+      "signal": "string"
     },
-    "event": {
-      "contact.email": "email",
+    "traits": {
+      "contact.app.email": "email",
       "contact.phone": "phone",
+
       "pii.firstname": "firstname",
       "pii.lastname": "lastname",
-      "identifier.token": "login",
+
       "identifier.id": "id",
+      "identifier.token": "login",
       "identifier.passport": "passport",
       "identifier.credit_card": "credit_card",
       "identifier.coupon": "coupon",
       "identifier.badge": "badge",
-      "app.twitter": "twitter",
-      "app.whatsapp": "whatsapp",
-      "app.discord": "discord",
-      "app.slack": "slack",
-      "app.telegram": "telegram",
-      "app.wechat": "wechat",
-      "app.viber": "viber",
-      "app.signal": "signal"
+
+      "contact.app.twitter": "twitter",
+      "contact.app.whatsapp": "whatsapp",
+      "contact.app.discord": "discord",
+      "contact.app.slack": "slack",
+      "contact.app.telegram": "telegram",
+      "contact.app.wechat": "wechat",
+      "contact.app.viber": "viber",
+      "contact.app.signal": "signal"
     },
     "profile": {
       "data.pii.firstname": ["traits.pii.firstname", "equal"],
-      "data.pii.lastname": ["traits.pii.lastname", "equal"],
-      "data.contact.email": ["traits.contact.email", "equal"],
+      "data.pii.lastname":  ["traits.pii.lastname", "equal"],
+
       "data.contact.phone": ["traits.contact.phone", "equal"],
-      "data.identifier.token": ["traits.identifier.token", "equal"],
-      "data.identifier.id": ["traits.identifier.id", "equal"],
-      "data.identifier.passport": ["traits.identifier.passport", "equal"],
+
+      "data.identifier.id":          ["traits.identifier.id", "equal"],
+      "data.identifier.token":       ["traits.identifier.token", "equal"],
+      "data.identifier.passport":    ["traits.identifier.passport", "equal"],
       "data.identifier.credit_card": ["traits.identifier.credit_card", "equal"],
-      "data.identifier.coupon": ["traits.identifier.coupon", "equal"],
-      "data.identifier.badge": ["traits.identifier.badge", "equal"],
-      "data.contact.app.twitter": ["traits.app.twitter", "equal"],
-      "data.contact.app.whatsapp": ["traits.app.whatsapp", "equal"],
-      "data.contact.app.discord": ["traits.app.discord", "equal"],
-      "data.contact.app.slack": ["traits.app.slack", "equal"],
-      "data.contact.app.telegram": ["traits.app.telegram", "equal"],
-      "data.contact.app.wechat": ["traits.app.wechat", "equal"],
-      "data.contact.app.viber": ["traits.app.viber", "equal"],
-      "data.contact.app.signal": ["traits.app.signal", "equal"]
+      "data.identifier.coupon":      ["traits.identifier.coupon", "equal"],
+      "data.identifier.badge":       ["traits.identifier.badge", "equal"],
+
+      "data.contact.email":        ["traits.contact.app.email", "equal"],
+      "data.contact.app.twitter":  ["traits.contact.app.twitter", "equal"],
+      "data.contact.app.whatsapp": ["traits.contact.app.whatsapp", "equal"],
+      "data.contact.app.discord":  ["traits.contact.app.discord", "equal"],
+      "data.contact.app.slack":    ["traits.contact.app.slack", "equal"],
+      "data.contact.app.telegram": ["traits.contact.app.telegram", "equal"],
+      "data.contact.app.wechat":   ["traits.contact.app.wechat", "equal"],
+      "data.contact.app.viber":    ["traits.contact.app.viber", "equal"],
+      "data.contact.app.signal":   ["traits.contact.app.signal", "equal"]
     }
   }
 ]

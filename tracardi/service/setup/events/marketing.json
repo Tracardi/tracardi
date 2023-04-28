@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Promotion Viewed",
+    "description": "Customer viewed promotion banner or text.",
+    "id": "promotion-viewed",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "media": {
+        "text": "string",
+        "image": "string"
+      }
+    },
+    "traits": {
+      "marketing.promotion.id": "id",
+      "marketing.promotion.name": "name"
+    }
+  },
+    {
+    "name": "Promotion Clicked",
+    "description": "Customer clicked on promotion banner.",
+    "id": "promotion-clicked",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "traits": {
+      "marketing.promotion.id": "id",
+      "marketing.promotion.name": "name"
+    }
+  }
+]

@@ -102,7 +102,7 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
 
 
 def index_default_event_type(event: Event) -> Event:
-    index_schema = get_default_event_type_mapping(event.type, 'event')
+    index_schema = get_default_event_type_mapping(event.type, 'traits')
 
     if index_schema is not None:
 

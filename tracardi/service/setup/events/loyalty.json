@@ -1,0 +1,42 @@
+[
+  {
+    "id": "loyalty-card-added",
+    "name": "Loyalty Card Added",
+    "description": "Customer adds or receives loyalty card.",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "issuer": "string",
+      "expires": "datetime"
+    },
+    "traits": {
+      "loyalty.card.id": "id",
+      "loyalty.card.name": "name",
+      "loyalty.card.issuer": "issuer",
+      "loyalty.card.expires": "expires"
+    },
+    "profile": {
+      "data.loyalty.card.id":  ["traits.loyalty.card.id", "equal"],
+      "data.loyalty.card.name": ["traits.loyalty.card.name", "equal"],
+      "data.loyalty.card.issuer": ["traits.loyalty.card.issuer", "equal"],
+      "data.loyalty.card.expires": ["traits.loyalty.card.expires", "equal"]
+    }
+  },
+  {
+    "id": "loyalty-card-removed",
+    "name": "Loyalty Card Removed",
+    "description": "Customer removes or loyalty card is deleted.",
+    "properties": {
+      "id": "string"
+    },
+    "traits": {
+      "loyalty.card.id": "id"
+    },
+    "profile": {
+      "data.loyalty.card.id":  [null, "delete"],
+      "data.loyalty.card.name": [null, "delete"],
+      "data.loyalty.card.issuer": [null, "delete"],
+      "data.loyalty.card.expires": [null, "delete"]
+    }
+  }
+]
