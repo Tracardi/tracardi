@@ -47,3 +47,4 @@ class Hit(BaseModel):
     url: Optional[str] = None
     referer: Optional[str] = None
     query: Optional[str] = None
+    category: Optional[str] = None
