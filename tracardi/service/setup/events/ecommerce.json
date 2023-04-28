@@ -246,9 +246,9 @@
     "traits": {
       "ec.order.id": "id",
       "payment.method": "method",
-      "payment.credit_card.number": "delivery.town",
-      "payment.credit_card.expires": "delivery.county",
-      "payment.credit_card.holder": "delivery.country"
+      "payment.credit_card.number": "credit_card.number",
+      "payment.credit_card.expires": "credit_card.expires",
+      "payment.credit_card.holder": "credit_card.holder"
     }
   },
 
@@ -319,8 +319,12 @@
     "properties": {
       "id": "string",
       "media": "string"
-    }
-  },
+    },
+    "traits": {
+      "ec.product.id": "id",
+      "marketing.channel": "media"
+      }
+    },
   {
     "name": "Product Reviewed",
     "description": "Customer reviewed a product.",

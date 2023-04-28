@@ -1,19 +1,19 @@
 [
   {
-    "id": "report-sale-completed",
-    "name": "Report Sale Completed",
+    "id": "sale-completed",
+    "name": "Sale Completed",
     "description": "The sale process is completed. Meaning customer can not return the product.",
     "const": {
       "status": "sold"
     },
     "properties": {
       "order_id": "string",
-      "currency": "string",
       "value": 0
     },
     "traits": {
       "ec.order.id": "order_id",
-      "ec.order.status": "status"
+      "ec.order.status": "status",
+      "ec.order.income.revenue": "status"
     }
   }
 ]

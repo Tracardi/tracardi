@@ -25,7 +25,7 @@
   {
     "name": "Sign-Up",
     "description": "User signs up.",
-    "id": "sign-in",
+    "id": "sign-up",
     "properties": {
       "email": "string",
       "login": "string",
