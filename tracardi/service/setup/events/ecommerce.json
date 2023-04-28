@@ -364,9 +364,9 @@
     }
   },
   {
+    "id": "order-completed",
     "name": "Order Completed",
     "description": "Customer completed the order",
-    "id": "order-completed",
     "const": {
       "status": "completed"
     },
@@ -400,9 +400,9 @@
     }
   },
   {
+    "id": "loyalty-card-added",
     "name": "Loyalty Card Added",
     "description": "Customer adds or receives loyalty card.",
-    "id": "loyalty-card-added",
     "properties": {
       "id": "string",
       "name": "string",
@@ -423,9 +423,9 @@
     }
   },
   {
+    "id": "loyalty-card-removed",
     "name": "Loyalty Card Removed",
     "description": "Customer removes or loyalty card is deleted.",
-    "id": "loyalty-card-removed",
     "properties": {
       "id": "string"
     },
