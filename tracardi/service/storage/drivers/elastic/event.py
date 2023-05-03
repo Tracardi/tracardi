@@ -226,9 +226,9 @@ async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100)
     return await storage_manager(index="event").aggregate(query)
 
 
-async def aggregate_event_type() -> List[Dict[str, str]]:
+async def aggregate_event_type(bucket_size=100) -> List[Dict[str, str]]:
     bucket_name = "by_type"
-    result = await _aggregate_event(bucket_name, "type")
+    result = await _aggregate_event(bucket_name, "type", None, bucket_size)
 
     if bucket_name not in result.aggregations:
         return []

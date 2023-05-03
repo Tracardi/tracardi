@@ -13,7 +13,6 @@ from tracardi.domain.entity import Entity
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.factory import storage_manager
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
@@ -88,3 +87,53 @@ async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecor
 
 async def count(query: dict = None):
     return await storage_manager('session').count(query)
+
+
+async def count_online():
+    query = {
+        "size": 0,
+        "query": {
+            "range": {
+                "metadata.time.insert": {
+                    "gt": "now-15m"
+                }
+            }
+        },
+        "aggs": {
+            "sessions": {
+                "cardinality": {
+                    "field": "session.id",
+                    "precision_threshold": 100
+                }
+            }
+        }
+    }
+
+    return await storage_manager('event').query(query)
+
+
+async def count_online_by_location():
+    query = {
+        "size": 0,
+        "query": {
+            "range": {
+                "metadata.time.insert": {
+                    "gt": "now-15m"
+                }
+            }
+        },
+        "aggs": {
+            "tz": {
+                "terms": {
+                    "field": "session.tz"
+                }
+            },
+            "country": {
+                "terms": {
+                    "field": "device.name"
+                }
+            }
+        }
+    }
+
+    return await storage_manager('event').query(query)
