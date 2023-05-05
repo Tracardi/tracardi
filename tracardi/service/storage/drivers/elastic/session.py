@@ -89,6 +89,21 @@ async def count(query: dict = None):
     return await storage_manager('session').count(query)
 
 
+async def count_session_by_browser():
+    query = {
+        "size": 0,
+        "aggs": {
+            "browsers": {
+                "terms": {
+                    "field": "app.name"
+                }
+            }
+        }
+    }
+
+    return await storage_manager('session').query(query)
+
+
 async def count_online():
     query = {
         "size": 0,
