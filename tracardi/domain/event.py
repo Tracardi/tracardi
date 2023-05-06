@@ -104,6 +104,12 @@ class Event(NamedEntity):
         else:
             return True
 
+    def has_profile(self) -> bool:
+        return self.profile is not None
+
+    def has_session(self) -> bool:
+        return self.session is not None
+
     @staticmethod
     def new(data: dict) -> 'Event':
         data['id'] = str(uuid4())
