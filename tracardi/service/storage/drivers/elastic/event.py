@@ -45,7 +45,7 @@ async def search(query: dict):
     return await storage_manager("event").query({"query": query})
 
 
-async def query(query: dict):
+async def query(query: dict) -> StorageRecords:
     return await storage_manager("event").query(query)
 
 
