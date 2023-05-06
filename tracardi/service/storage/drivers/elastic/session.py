@@ -105,13 +105,30 @@ async def count_session_by_browser():
 
 
 async def count_online():
+
+    # Count except cardio event source
+
+    source_id = f"@{tracardi.cardio_source}"
     query = {
         "size": 0,
         "query": {
-            "range": {
-                "metadata.time.insert": {
-                    "gt": "now-15m"
-                }
+            "bool": {
+                "must": [
+                    {
+                        "range": {
+                            "metadata.time.insert": {
+                                "gt": "now-15m"
+                            }
+                        }
+                    }
+                ],
+                "must_not": [
+                    {
+                        "term": {
+                            "source.id": source_id
+                        }
+                    }
+                ]
             }
         },
         "aggs": {
