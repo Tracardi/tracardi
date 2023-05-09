@@ -1,9 +1,13 @@
+from tracardi.service.license import License
 from tracardi.domain.resource_settings import ResourceSettings, DestinationData
 from typing import List
 
+if License.has_license():
+    from com_tracardi.resource.resource_types import commercial_resource_types
+
 
 def get_resource_types() -> List[ResourceSettings]:
-    return [
+    os_resource_types = [
         ResourceSettings(
             id="api-key",
             name="Api Key",
@@ -20,19 +24,6 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=["web-page", "input", "output"],
             config={
                 "user": "<user>",
-                "password": "<password>"
-            }
-        ),
-        ResourceSettings(
-            id="kafka",
-            name="Kafka",
-            icon="kafka",
-            tags=["kafka"],
-            config={
-                "broker": "<broker>",
-                "security_protocol": "SASL_SSL",
-                "sasl_mechanism": "SCRAM-SHA-512",
-                "username": "<username>",
                 "password": "<password>"
             }
         ),
@@ -422,6 +413,11 @@ def get_resource_types() -> List[ResourceSettings]:
             manual='discord_resource',
         )
     ]
+
+    if License.has_license():
+        return commercial_resource_types + os_resource_types
+
+    return os_resource_types
 
 
 def get_destinations():

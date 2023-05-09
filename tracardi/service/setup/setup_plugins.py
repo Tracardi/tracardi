@@ -729,6 +729,54 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+    installed_plugins["com_tracardi.action.v1.ai.weaviate.get.plugin"] = PluginMetadata(
+        test=PluginTest(init={
+            "resource": {
+                "resource": {
+                    "name": "",
+                    "id": ""
+                },
+                "schema_class": "xxx",
+                "object_id": "xxx"
+            }
+        }, resource={
+            "url": "http://localhost",
+            "weaviate_api_key": "optional",
+            "username": "optional",
+            "password": "optional",
+            "scope": "optional",
+            "headers": {
+                "x_cohere_api_key": "optional",
+                "x_huggingface_api_key": "optional",
+                "x_openai_api_key": "optional",
+            }
+        }),
+    )
+    installed_plugins["com_tracardi.action.v1.ai.weaviate.save.plugin"] = PluginMetadata(
+        test=PluginTest(init={
+            "resource": {
+                "resource": {
+                    "name": "",
+                    "id": ""
+                },
+                "schema_class": "xxx",
+                "object": "[]",
+                "operation": "insert",
+                "object_id": ""
+            }
+        }, resource={
+            "url": "http://localhost",
+            "weaviate_api_key": "optional",
+            "username": "optional",
+            "password": "optional",
+            "scope": "optional",
+            "headers": {
+                "x_cohere_api_key": "optional",
+                "x_huggingface_api_key": "optional",
+                "x_openai_api_key": "optional",
+            }
+        }),
+    )
     installed_plugins["com_tracardi.action.v1.ux.open_replay.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -794,7 +842,7 @@ if License.has_license():
             resource=None)
     )
 
-    installed_plugins["com_tracardi.action.v1.openai.chatgpt.plugin"] = PluginMetadata(
+    installed_plugins["com_tracardi.action.v1.ai.openai.chatgpt.plugin"] = PluginMetadata(
         test=PluginTest(init={
             "resource": {
                 "name": "",
