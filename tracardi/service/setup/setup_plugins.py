@@ -718,6 +718,14 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+    installed_plugins["com_tracardi.action.v1.ux.generic.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "uix_source": None,
+                "props": {}
+            },
+            resource=None)
+    )
     installed_plugins["com_tracardi.action.v1.ux.open_replay.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
