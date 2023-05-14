@@ -32,66 +32,62 @@ class StartAction(ActionRunner):
 
         # Set debug event
 
-        session = Session(id=self.config.session_id if self.config.session_id else str(uuid4()),
-                          metadata=SessionMetadata())
-        profile = Profile(id=self.config.profile_id if self.config.profile_id else str(uuid4()))
+        properties = {}
+        event = self.event
+        session = self.session
+        profile = self.profile
+        source = self.tracker_payload.source
 
-        event_session = EventSession(id=session.id)
-        event_profile = Entity(id=profile.id)
+        # Replace source
 
-        source = Entity(id="@debug-event-source")
+        if not source:
+            source = Entity(id="@debug-event-source")
 
-        event_type = self.config.event_type.id if self.config.event_type and self.config.event_type.id else "@debug-event-type"
+        # Replace properties
 
-        event_id = self.config.event_id if self.config.event_id else str(uuid4())
+        if self.config.properties:
+            try:
+                properties = json.loads(self.config.properties)
+            except JSONDecodeError:
+                self.console.error("Could not decode properties as JSON in start node.")
 
-        try:
-            properties = json.loads(self.config.properties)
-        except JSONDecodeError:
-            self.console.error("Could not decode properties as JSON in start node.")
-            properties = {}
+        # Replace session
 
-        loaded_event = await storage.driver.event.load(event_id)
+        if self.config.session_id:
+            session = await storage.driver.session.load_by_id(self.config.session_id)
+            if not session:
+                raise ValueError(f"Can not load session with id {self.config.session_id}")
 
-        if loaded_event is None:
-            event = Event(
-                metadata=EventMetadata(time=EventTime(), debug=True),
-                id=event_id,
-                type=event_type,
-                source=source,
-                profile=event_profile,
-                session=event_session,
-                properties=properties,
-                context={
-                    "config": {
-                        "debugger": True
-                    },
-                    "params": {}
-                }
-            )
-        else:
+        # Replace profile
+
+        if self.config.profile_id:
+            _profile = await storage.driver.profile.load_by_id(self.config.profile_id)
+            if not _profile:
+                msg = f"Can not load session with id {self.config.profile_id}"
+                raise ValueError(msg)
+
+            profile = _profile.to_entity(Profile)
+
+        if self.config.event_id:
+            loaded_event = await storage.driver.event.load(self.config.event_id)
+            if loaded_event is None:
+                raise ValueError(f"Can not load event with id {self.config.event_id}")
             event = loaded_event.to_entity(Event)
-            event.properties = properties
-            if self.config.profile_id:
-                event.profile.id = self.config.profile_id
-            if self.config.session_id:
-                event.session.id = self.config.session_id
 
-        if profile:
-            _profile = await storage.driver.profile.load_by_id(profile.id)
-            if _profile:
-                profile = _profile.to_entity(Profile)
-
-        if session:
-            _session = await storage.driver.session.load_by_id(session.id)
-            if _session:
-                session = _session
+        event.profile = profile
+        if self.config.session_id != event.session.id:
+            event.session.id = EventSession(
+                id=session.id,
+                start=session.metadata.time.insert,
+                duration=session.metadata.time.duration
+            )
 
         try:
 
+            event.properties = properties
             self.event.replace(event)
-            self.event.session = session
             self.event.source = source
+            self.event.session = session
             self.event.profile = profile
 
             # Remove session in all nodes because the event is session less
