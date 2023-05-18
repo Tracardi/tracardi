@@ -119,6 +119,8 @@ class TrackingOrchestrator:
         # Load profile
         profile_loader = get_profile_loader()
 
+        # Force static profile id
+
         if self.tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id():
             # Get static profile - This is dangerous
             profile, session = await tracker_payload.get_static_profile_and_session(

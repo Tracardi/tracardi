@@ -145,7 +145,7 @@ class Tracker:
 
                             referred_profile = profile_record.to_entity(Profile)
 
-                            # Merges referred profile in __tr_pid with profile existing on visited page
+                            # Merges referred profile in __tr_pid with profile existing in local storage on visited page
                             if tracker_payload.profile is not None:
                                 # Merge profiles
                                 merged_profile = await ProfileMerger.invoke_merge_profile(
