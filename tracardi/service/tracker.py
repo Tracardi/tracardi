@@ -182,9 +182,14 @@ class Tracker:
 
         logger.debug(f"Source {source.id} validated.")
 
+        # Run only for webhooks
         # Check if we need to generate profile and session id. Used in webhooks
         if tracker_payload.generate_profile_and_session(self.console_log):
             # Returns true if source is a webhook with generate profile id set to true
+            self.tracker_config.static_profile_id = True
+
+        # If REST API is configured to have static Profile ID
+        if tracker_payload.source.config.get('static_profile_id', False):
             self.tracker_config.static_profile_id = True
 
         if self.on_source_ready is None:
