@@ -83,8 +83,8 @@ class StartAction(ActionRunner):
             )
 
         try:
-
-            event.properties = properties
+            if properties:
+                event.properties = properties
             self.event.replace(event)
             self.event.source = source
             self.event.session = session

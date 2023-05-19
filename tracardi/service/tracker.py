@@ -189,7 +189,7 @@ class Tracker:
             self.tracker_config.static_profile_id = True
 
         # If REST API is configured to have static Profile ID
-        if tracker_payload.source.config.get('static_profile_id', False):
+        if tracker_payload.source.config is not None and tracker_payload.source.config.get('static_profile_id', False):
             self.tracker_config.static_profile_id = True
 
         if self.on_source_ready is None:
