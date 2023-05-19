@@ -146,9 +146,10 @@ def get_resource_types() -> List[ResourceSettings]:
         ResourceSettings(
             id="twilio",
             name="Twilio",
-            tags=["token", "twilio"],
+            tags=["twilio"],
             config={
-                "token": "<token>"
+                "auth_token": "<token>",
+                "account_sid": "<sid>"
             }
         ),
         ResourceSettings(
