@@ -718,6 +718,22 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+    installed_plugins["com_tracardi.action.v1.sms.twilio.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "resource": {
+                    "name": "",
+                    "id": ""
+                },
+                "from_number": "xxx",
+                "to_number": "yyy",
+                "message": "zzz"
+            },
+            resource={
+                "auth_token": "<token>",
+                "account_sid": "<sid>"
+            })
+    )
     installed_plugins["com_tracardi.action.v1.ux.generic.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
