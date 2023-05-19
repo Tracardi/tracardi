@@ -50,7 +50,7 @@ class StartAction(ActionRunner):
         except JSONDecodeError:
             self.console.error("Could not decode properties as JSON in start node.")
             properties = {}
-
+        print(properties)
         loaded_event = await storage.driver.event.load(event_id)
 
         if loaded_event is None:
@@ -71,7 +71,8 @@ class StartAction(ActionRunner):
             )
         else:
             event = loaded_event.to_entity(Event)
-            event.properties = properties
+            if properties:
+                event.properties = properties
             if self.config.profile_id:
                 event.profile.id = self.config.profile_id
             if self.config.session_id:
