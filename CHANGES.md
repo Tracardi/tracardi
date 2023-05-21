@@ -1,6 +1,33 @@
 Version: 0.8.1
 ----------------------------------------------------------
-
+* New Dashboard
+* New Profile Details Page
+* Extended analytics
+* Debugging in context of event
+* Static Profile ID generator
+* Passing Profile ID between owned domains
+* Predefined events 
+* New Data Schema
+* Better Production/Testing switching
+* Tracardi now can handle coping event data to profiles and event indexing on historical data (pro)
+* Better autocomplete of event properties
+* Update documentation
+* Added or Modified Plugins
+  * Weaviate (Vector store for AI) (pro)
+    * Add
+    * Read
+    * Delete
+    * Exists
+  * Twilio plugin (pro)
+  * Rating Widget (pro)
+  * Youtube widget (pro)
+  * Demo widget (pro)
+  * Custom Javascript Widget (pro)
+  * Send tweet
+  * Google UA Events
+  * Event aggregator (pro)
+  * Event counter (pro)
+  * ChatGPT prompt (pro)
 
 Version 0.8.0
 ----------------------------------------------------------
