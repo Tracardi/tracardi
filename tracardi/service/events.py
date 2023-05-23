@@ -101,6 +101,17 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
     return flat_profile, profile_updated_flag
 
 
+def remove_empty_dicts(dictionary):
+    keys_to_remove = []
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            remove_empty_dicts(value)  # Recursively check nested dictionaries
+            if not value:  # Empty dictionary after recursive check
+                keys_to_remove.append(key)
+    for key in keys_to_remove:
+        del dictionary[key]
+
+
 def index_default_event_type(event: Event) -> Event:
     index_schema = get_default_event_type_mapping(event.type, 'traits')
 
@@ -119,5 +130,7 @@ def index_default_event_type(event: Event) -> Event:
                 pass
 
         event.properties = dot_event_properties.to_dict()
+        remove_empty_dicts(event.properties)
+        print(event.properties)
         event.traits = dot_event_traits.to_dict()
     return event

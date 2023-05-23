@@ -11,6 +11,7 @@ Version: 0.8.1
 * Better Production/Testing switching
 * Tracardi now can handle coping event data to profiles and event indexing on historical data (pro)
 * Better autocomplete of event properties
+* Session open, Session close, Internal events
 * Update documentation
 * Added or Modified Plugins
   * Weaviate (Vector store for AI) (pro)

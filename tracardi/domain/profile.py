@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List, Dict, Any, Set
+from typing import Optional, List, Dict, Any, Set, Union
 from pydantic import BaseModel
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
@@ -18,6 +18,11 @@ from ..process_engine.tql.condition import Condition
 
 class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
+
+
+class ProfileLanguage(BaseModel):
+    native: Optional[str] = None
+    spoken: Union[Optional[str], List[str]] = None
 
 
 class ProfileEducation(BaseModel):
@@ -39,7 +44,7 @@ class ProfilePII(BaseModel):
     lastname: Optional[str] = None
     name: Optional[str] = None
     birthday: Optional[datetime] = None
-    language: Optional[str] = None
+    language: Optional[ProfileLanguage] = ProfileLanguage()
     gender: Optional[str] = None
     education: Optional[ProfileEducation] = ProfileEducation()
     civil: Optional[ProfileCivilData] = ProfileCivilData()
@@ -116,7 +121,7 @@ class ProfilePreference(BaseModel):
 class ProfileCompany(BaseModel):
     name: Optional[str] = None
     size: Optional[int] = None
-    segment: Optional[List[str]] = None
+    segment: Union[Optional[str], List[str]] = None
     country: Optional[str] = None
 
 

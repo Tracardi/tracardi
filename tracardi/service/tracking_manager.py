@@ -296,7 +296,7 @@ class TrackingManager(TrackingManagerBase):
 
                     if coping_schema.event_to_profile:
                         allowed_profile_fields = (
-                            "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
+                            "data", "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
                         for event_ref, profile_ref, operation in coping_schema.items():
                             if not profile_ref.startswith(allowed_profile_fields):
                                 self.console_log.append(

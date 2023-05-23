@@ -31,7 +31,8 @@ def make_identification_data():
         "telegram": f"@{name[0]}",
         "phone": tn,
         "whatsapp": tn,
-        "email": fake_emails[randint(0, 1499)]
+        "email": fake_emails[randint(0, 1499)],
+        "birthday": fake.date_time_between(start_date='-75y', end_date='-18y').strftime("%Y:%m:%d")
     }
 
 
