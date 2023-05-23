@@ -5,15 +5,13 @@ from .generate_context import make_fake_session_context
 from .generate_interest import get_random_interest
 from .generate_pii import make_fake_login, fake_persons, fake_identity
 from .generate_products import make_fake_product, checkout_data, add_to_basket
+from .generate_profile_data import generate_profile_data
 
 sources = [str(uuid4()) for _ in range(0, 4)]
 profiles = [str(uuid4()) for _ in range(0, 10)]
 sessions_pool = [str(uuid4()) for _ in range(0, 200)]
 
 events = [
-    {"type": 'profile-created', "props": {}},
-    {"type": 'session-opened', "props": {}},
-    {"type": 'session-closed', "props": {}},
     {"type": 'profile-interest', "props": get_random_interest},
     {"type": 'page-view', "props": {}},
     {"type": 'search', "props": make_fake_product},
@@ -23,6 +21,7 @@ events = [
     {"type": 'sign-up', "props": lambda: fake_persons[randint(0, 499)]},
     {"type": 'sign-in', "props": make_fake_login},
     {"type": 'identification', "props": lambda: fake_identity[randint(0, 499)]},
+    {"type": 'profile-update', "props": generate_profile_data},
 ]
 
 

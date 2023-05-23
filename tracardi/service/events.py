@@ -131,6 +131,5 @@ def index_default_event_type(event: Event) -> Event:
 
         event.properties = dot_event_properties.to_dict()
         remove_empty_dicts(event.properties)
-        print(event.properties)
         event.traits = dot_event_traits.to_dict()
     return event
