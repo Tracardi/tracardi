@@ -1,3 +1,4 @@
+import random
 from random import randint
 from uuid import uuid4
 
@@ -22,11 +23,12 @@ events = [
     {"type": 'sign-in', "props": make_fake_login},
     {"type": 'identification', "props": lambda: fake_identity[randint(0, 499)]},
     {"type": 'profile-update', "props": generate_profile_data},
+    {"type": 'consent-update',
+     "props": {"consents": {random.choice(["marketing", "contact", "cookies"]): {"revoke": None}}}}
 ]
 
 
 def generate_payload(source):
-
     profile_id = profiles[randint(0, len(profiles) - 1)]
 
     def _get_event(event):
