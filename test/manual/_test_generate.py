@@ -1,7 +1,4 @@
 import asyncio
-from pprint import pprint
-
-from dotty_dict import dotty
 from faker import Faker
 
 from tracardi.domain.payload.tracker_payload import TrackerPayload

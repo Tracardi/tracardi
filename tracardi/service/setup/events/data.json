@@ -1,5 +1,23 @@
 [
   {
+    "name": "Consent Update",
+    "description": "User updates consents.",
+    "id": "consent-update",
+    "properties": {
+      "consents": {
+      }
+    },
+    "traits": {
+      "consents": "consents"
+    },
+    "profile": {
+      "consents": [
+        "traits.consents",
+        "equal"
+      ]
+    }
+  },
+  {
     "name": "Profile Update",
     "description": "User updates profile data.",
     "id": "profile-update",
@@ -327,7 +345,6 @@
         "traits.job.company.size",
         "equal"
       ],
-
       "data.job.company.country": [
         "traits.job.company.country",
         "equal"

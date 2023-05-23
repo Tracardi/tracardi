@@ -5,7 +5,14 @@ fake = Faker()
 
 
 def generate_profile_data():
-    name = fake.name().split()
+    sex = random.choice(['m', 'f'])
+
+    if sex == 'f':
+        name = f"{fake.first_name_female()} {fake.last_name_female()}"
+    else:
+        name = f"{fake.first_name_male()} {fake.last_name_male()}"
+
+    name = name.split()
     tn = fake.phone_number()
     return {
         "pii": {
@@ -13,8 +20,11 @@ def generate_profile_data():
             "lastname": name[1],
             "name": " ".join(name),
             "birthday": fake.date_time_between(start_date='-75y', end_date='-18y').strftime("%Y-%m-%d %H:%M:%S"),
-            "language": "string",
-            "gender": "string",
+            # "language": {
+            #     "native": fake.current_country_code(),
+            #     "spoken": fake.current_country_code()
+            # },
+            "gender": "male" if sex == 'm' else "female",
             "education": {
                 "level": random.choice(
                     ['Elementary school', "High school", 'University', 'Bachelor\'s Degree', 'Master\'s Degree',
@@ -39,12 +49,12 @@ def generate_profile_data():
             "address": {
                 "town": fake.city(),
                 "country": fake.country(),
-                "postcode":fake.postcode(),
+                "postcode": fake.postcode(),
                 "street": fake.street_address()
             }
         },
         "media": {
-            "image": f"http://tracardi.com/demo/image/profile_{random.randint(1, 75)}.JPG",
+            "image": f"http://tracardi.com/demo/image/female/profile_{random.randint(1, 50)}.JPG" if sex == "f" else  f"http://tracardi.com/demo/image/male/profile_{random.randint(1, 50)}.JPG",
             "webpage": "http://www.tracardi.com",
             "social": {
                 "twitter": "@tracardi",
