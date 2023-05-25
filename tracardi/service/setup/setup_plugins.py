@@ -718,6 +718,47 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+    installed_plugins["com_tracardi.action.v1.ux.open_replay.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "token": ""
+            },
+            resource=None)
+    )
+    installed_plugins["com_tracardi.action.v1.ux.youtube_player.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "youtube_id": "",
+                "title": ""
+            },
+            resource=None)
+    )
+    installed_plugins["com_tracardi.action.v1.ux.demo_form.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "api_url": "http://localhost:8686",
+                "lifetime": "45",
+                "horizontal_position": "right",
+                "vertical_position": "bottom",
+                "event_type": "request-demo"
+            },
+            resource=None)
+    )
+    installed_plugins["com_tracardi.action.v1.ux.rating_popup.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "api_url": "http://localhost:8686",
+                "title": None,
+                "message": None,
+                "lifetime": "6",
+                "horizontal_position": "center",
+                "vertical_position": "bottom",
+                "event_type": "rate",
+                "save_event": True,
+                "dark_theme": False
+            },
+            resource=None)
+    )
     installed_plugins["com_tracardi.action.v1.sms.twilio.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
