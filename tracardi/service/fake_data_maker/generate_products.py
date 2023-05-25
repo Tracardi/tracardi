@@ -35,7 +35,7 @@ def add_to_basket():
         "category": fake.ecommerce_category(),
         "price": ecommerce_price(False),
         "quantity": randint(1, 3),
-        "id": randint(1, 3349875),
+        "id": fake.bothify(text='????-########', letters='ABCDE'),
         "sku": fake.bothify(text='????-########', letters='ABCDE')
     }
 
