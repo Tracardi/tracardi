@@ -28,11 +28,11 @@ VALUE:      /[^\s\"]+|(?<!\\)[\"](.*?)(?<!\\)[\"]/
 FIELD:      /[a-zA-z_\.-0-9]+/
 SPACE:      /[\s]+/
 operator:   ":" 
-            | ">=" 
-            | "<=" 
-            | "<" 
-            | ">"
-OP: /(:|<=|>=|>|<)/
+            | ":>=" 
+            | ":<=" 
+            | ":<" 
+            | ":>"
+OP: /(:|:<=|:>=|:>|:<)/
 AND: /AND/i
 OR: /OR/i
 
@@ -95,17 +95,17 @@ class Values:
     async def _op_description(value):
         descriptions = {
             ":": "Equals",
-            ">=": "Greater or equal than",
-            "<=": "Lower or equal than",
-            "<": "Lower than",
-            ">": "Greater than",
+            ":>=": "Greater or equal than",
+            ":<=": "Lower or equal than",
+            ":<": "Lower than",
+            ":>": "Greater than",
         }
         return descriptions[value]
 
     @staticmethod
     async def _op(last: dict[str, Any], current: Value):
         current_value = current.value
-        operations = [':', '>=', '<=', '<', '>']
+        operations = [':', ':>=', ':<=', ':<', ':>']
         if current.token == "OP":
             return Values._filter(current_value, operations)
         return operations
