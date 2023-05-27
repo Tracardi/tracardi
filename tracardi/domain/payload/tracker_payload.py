@@ -427,10 +427,23 @@ class TrackerPayload(BaseModel):
                 session.os.version = user_agent.os.version_string
                 session.os.name = user_agent.os.family
 
-                session.device.touch = user_agent.is_touch_capable
-                session.device.name = user_agent.device.family
-                session.device.brand = user_agent.device.brand
-                session.device.model = user_agent.device.model
+                device_type = 'mobile' if user_agent.is_mobile else \
+                    'pc' if user_agent.is_pc else \
+                        'tablet' if user_agent.is_tablet else \
+                            'email' if user_agent.is_email_client else None
+
+                if 'device' in session.context:
+                    session.device.name = session.context['device'].get('name', user_agent.device.family)
+                    session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
+                    session.device.model = session.context['device'].get('model', user_agent.device.model)
+                    session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
+                    session.device.type = session.context['device'].get('type', device_type)
+                else:
+                    session.device.name = user_agent.device.family
+                    session.device.brand = user_agent.device.brand
+                    session.device.model = user_agent.device.model
+                    session.device.touch = user_agent.is_touch_capable
+                    session.device.type = device_type
 
                 if 'location' in self.context:
                     try:
@@ -438,11 +451,6 @@ class TrackerPayload(BaseModel):
                         del self.context['location']
                     except ValidationError:
                         pass
-
-                session.device.type = 'mobile' if user_agent.is_mobile else \
-                    'pc' if user_agent.is_pc else \
-                        'tablet' if user_agent.is_tablet else \
-                            'email' if user_agent.is_email_client else None
 
                 try:
                     session.device.resolution = f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"

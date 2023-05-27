@@ -34,6 +34,17 @@ def make_fake_session_context():
             "local": "8/26/2021, 9:36:13 PM",
             "tz": fake.timezone()
         },
+        "location": {
+            "country": {
+                "name": geo[4],
+                "code": geo[3]
+            },
+            "city": geo[2],
+            "county": geo[3],
+            "postal": None,
+            "latitude": geo[0],
+            "longitude": geo[1]
+        },
         "device": {
             "name": "Other",
             "brand": brand,
