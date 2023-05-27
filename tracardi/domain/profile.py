@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any, Set, Union
 from pydantic import BaseModel
 from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
+from .geo import Geo
 from .metadata import ProfileMetadata
 from .pii import PII
 from .storage_record import RecordMetadata
@@ -150,11 +151,20 @@ class ProfileLoyalty(BaseModel):
     card: Optional[ProfileLoyaltyCard] = ProfileLoyaltyCard()
 
 
+class LastGeo(BaseModel):
+    geo: Optional[Geo] = Geo()
+
+
+class ProfileDevices(BaseModel):
+    names: Optional[List[str]] = []
+    last: Optional[LastGeo] = LastGeo()
+
+
 class ProfileData(BaseModel):
     pii: Optional[ProfilePII] = ProfilePII()
     contact: Optional[ProfileContact] = ProfileContact()
     identifier: Optional[ProfileIdentifier] = ProfileIdentifier()
-    devices: Optional[List[str]] = []
+    devices: Optional[ProfileDevices] = ProfileDevices()
     media: Optional[ProfileMedia] = ProfileMedia()
     preferences: Optional[ProfilePreference] = ProfilePreference()
     job: Optional[ProfileJob] = ProfileJob()

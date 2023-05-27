@@ -523,11 +523,16 @@ class TrackerPayload(BaseModel):
 
         # Updates on EXISTING Session
 
-        # If location is sent but not available in session - update session
-        if 'location' in self.context and session.device.geo.is_empty():
+        if 'location' in self.context:
             try:
-                session.device.geo = Geo(**self.context['location'])
-                session.operation.update = True
+                # If location is sent but not available in session - update session
+                if session.device.geo.is_empty():
+                    session.device.geo = Geo(**self.context['location'])
+                    session.operation.update = True
+
+                # Add last geo to profile
+                profile.data.devices.last.geo = session.device.geo
+                profile.operation.update = True
                 del self.context['location']
             except ValidationError:
                 pass

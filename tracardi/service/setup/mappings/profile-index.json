@@ -299,7 +299,47 @@
               }
             },
             "devices": {
-              "type": "keyword"
+              "properties": {
+                "names": {"type": "keyword", "ignore_above": 32},
+                "last": {
+                  "properties": {
+                    "geo": {
+                      "properties": {
+                        "country": {
+                          "properties": {
+                            "name": {
+                              "type": "keyword",
+                              "ignore_above": 64
+                            },
+                            "code": {
+                              "type": "keyword",
+                              "ignore_above": 10
+                            }
+                          }
+                        },
+                        "county": {
+                          "type": "keyword",
+                          "ignore_above": 64
+                        },
+                        "city": {
+                          "type": "keyword",
+                          "ignore_above": 64
+                        },
+                        "latitude": {
+                          "type": "float"
+                        },
+                        "longitude": {
+                          "type": "float"
+                        },
+                        "postal": {
+                          "type": "keyword",
+                          "ignore_above": 24
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             },
             "metrics": {
               "properties": {
