@@ -241,6 +241,7 @@ def register() -> Plugin:
             name='Remote API call',
             desc='Sends request to remote API endpoint.',
             icon='globe',
-            group=["Connectors"]
+            group=["Connectors"],
+            purpose=['collection', 'segmentation']
         )
     )
