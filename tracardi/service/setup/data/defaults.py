@@ -41,7 +41,8 @@ open_webhook_source_bridge = Bridge(
     description="API Webhook collector",
     config={
         "generate_profile": False,
-        "replace_profile_id": ""
+        "replace_profile_id": "",
+        "replace_session_id": ""
     },
     form=Form(groups=[
         FormGroup(
@@ -53,20 +54,33 @@ open_webhook_source_bridge = Bridge(
                 FormField(
                     id="generate_profile",
                     name="Create profile and session for collected data.",
-                    description="If you this turn on system will create a profile and session and attach it to event. "
-                                "A profile and session are empty. You can add your own data to either "
-                                "of them in the workflow.",
+                    description="By default, webhook events do not include session or profile IDs. "
+                                "However, if you enable this settings, it will generate the profile and session "
+                                "ID for this event.",
+
                     component=FormComponent(type="bool", props={"label": "Create profile and session"})
                 ),
                 FormField(
                     id="replace_profile_id",
-                    name="Replace profile ID",
-                    description="If you intend to substitute the Profile ID with information from the payload, "
+                    name="Set profile ID",
+                    description="This setting will only work when `Create session and profile` is enabled. "
+                                "If you intend to substitute or set the Profile ID with information from the payload, "
                                 "you can either use the data provided below or leave it blank if you don't wish "
-                                "to generate a profile or want it to have a random ID. It is crucial to ensure "
+                                "to set any profile or want it to have a random ID. It is crucial to ensure "
                                 "that the Profile ID is secure and not easily predictable since simple Profile "
                                 "IDs may pose security threats.",
-                    component=FormComponent(type="text", props={"label": "Replace profile"})
+                    component=FormComponent(type="text", props={"label": "Set profile"})
+                ),
+                FormField(
+                    id="replace_session_id",
+                    name="Set session ID",
+                    description="This setting will only work when `Create session and profile` is enabled. "
+                                "If you intend to substitute or set the Session ID with information from the payload, "
+                                "you can either use the data provided below or leave it blank if you don't wish "
+                                "to set any session or want it to have a random ID. It is crucial to ensure "
+                                "that the Session ID is secure and not easily predictable since simple Session "
+                                "IDs may pose security threats.",
+                    component=FormComponent(type="text", props={"label": "Set session"})
                 )
             ])
     ])

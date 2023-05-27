@@ -100,6 +100,11 @@ class TrackerPayload(BaseModel):
         self.profile_less = False
         self.options.update({"saveProfile": True})
 
+    def _replace_session(self, session_id):
+        self.session = Entity(id=session_id)
+        self.profile_less = False
+        self.options.update({"saveSession": True})
+
     def generate_profile_and_session(self, console_log: list) -> bool:
 
         """
@@ -116,6 +121,31 @@ class TrackerPayload(BaseModel):
                 if self.source.config is not None:
                     if 'generate_profile' in self.source.config:
                         if self.source.config['generate_profile'] is True:
+
+                            if 'replace_session_id' in self.source.config:
+                                try:
+                                    session_id_ref = self.source.config['replace_session_id'].strip()
+                                    if bool(session_id_ref):
+                                        # Webhooks have only one event, so it is save to get it from self.events[0]
+                                        session_id = self.events[0].properties[session_id_ref]
+                                        self._replace_session(session_id)
+                                except KeyError as e:
+                                    message = f"Could not generate set session for a webhook. " \
+                                              f"Event stays session-less. " \
+                                              f"Probable reason: Missing data: {str(e)}"
+                                    logger.error(message)
+                                    console_log.append(Console(
+                                        flow_id=None,
+                                        node_id=None,
+                                        event_id=None,
+                                        profile_id=get_entity_id(self.profile),
+                                        origin='tracker',
+                                        class_name=__name__,
+                                        module=__name__,
+                                        type='error',
+                                        message=message,
+                                        traceback=get_traceback(e)
+                                    ))
 
                             if 'replace_profile_id' in self.source.config:
                                 try:
@@ -146,9 +176,7 @@ class TrackerPayload(BaseModel):
                                 self._replace_profile(str(uuid4()))
 
                             if not self.session:
-                                self.session = Entity(id=str(uuid4()))
-                                self.profile_less = False
-                                self.options.update({"saveSession": True})
+                                self._replace_session(str(uuid4()))
 
                             return True
         else:
