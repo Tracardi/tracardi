@@ -76,7 +76,7 @@ If you want to see Tracardi in action subscribe to our [:tv: Youtube channel](ht
 
 ## 👇 Installation and getting started
 
-The easiest way to run TRACARDI is to install a demo on our site. Visit [https://tracardi.com/index.php/about-tracardi/](https://tracardi.com/index.php/about-tracardi/) fill the form that pop-up and you will recievie a one day demo just for you. 
+The easiest way to run TRACARDI is to install a demo on our site. Visit [https://tracardi.com/index.php/about-tracardi/](https://tracardi.com/index.php/about-tracardi/) fill the form that pops-up and you will recievie a one day demo just for you. 
 
 I you would like to run it as a :whale: docker container on your laptop. Please install docker and docker-compose on your local machine 
 then clone [tracardi/tracardi-api](https://github.com/Tracardi/tracardi-api.git)
