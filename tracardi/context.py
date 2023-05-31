@@ -8,26 +8,29 @@ from tracardi.config import tracardi
 from tracardi.domain.user import User
 from tracardi.service.singleton import Singleton
 
-ctx_id: ContextVar[str] = ContextVar("request_id", default=None)
+ctx_id: ContextVar[str] = ContextVar("request_id", default="")
 
 
 class Context(BaseModel):
     production: bool = tracardi.version.production
     user: Optional[User] = None
+    tenant: str
 
     def is_production(self) -> bool:
         return self.production
 
-    def switch_context(self, production, user=None) -> 'Context':
+    def switch_context(self, production, user=None, tenant=None) -> 'Context':
         if user is None:
             user = self.user
-        return Context(production=production, user=user)
+        if tenant is None:
+            tenant = self.tenant
+        return Context(production=production, user=user, tenant=tenant)
 
     def __str__(self):
-        return f"Context(on {'production' if self.production else 'staging'} as user: {self.user.full_name if self.user else 'Unknown'})"
+        return f"Context(mode: {'production' if self.production else 'staging'}, user: {self.user.full_name if self.user else 'Unknown'}, tenant: {self.tenant if self.tenant else 'Default'})"
 
     def __repr__(self):
-        return f"Context(on {'production' if self.production else 'staging'} as user: {self.user.full_name if self.user else 'Unknown'})"
+        return f"Context(mode: {'production' if self.production else 'staging'}, user: {self.user.full_name if self.user else 'Unknown'}, tenant: {self.tenant if self.tenant else 'Default'})"
 
 
 class ContextManager(metaclass=Singleton):
@@ -39,12 +42,17 @@ class ContextManager(metaclass=Singleton):
         var = ctx_id.get()
         return var is None or var not in self._store
 
-    def get(self, var, default=None):
+    def get(self, var):
         if self._empty():
-            return default
+            raise ValueError("No context is set.")
         _request_id = ctx_id.get()
         store = self._store[_request_id]
-        return store.get(var, default)
+        context = store.get(var, None)
+
+        if not context:
+            raise ValueError("No context is set. Can't get context.")
+
+        return context
 
     def set(self, var, value):
         _request_id = ctx_id.get()
@@ -61,7 +69,7 @@ class ContextManager(metaclass=Singleton):
 
 def get_context() -> Context:
     cm = ContextManager()
-    return cm.get("request-context", Context())
+    return cm.get("request-context")
 
 
 class ServerContext:

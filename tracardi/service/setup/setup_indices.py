@@ -3,7 +3,7 @@ import os
 from typing import List, Tuple, Generator, Any
 
 from elasticsearch.exceptions import ConnectionTimeout, TransportError
-from tracardi.context import ServerContext, Context
+from tracardi.context import ServerContext, Context, get_context
 from tracardi.service.tracardi_http_client import HttpClient
 
 from tracardi.config import tracardi
@@ -229,11 +229,11 @@ async def remote_system_upgrade(version):
                 raise ValueError(f"No indices in release settings for version {version}.")
 
             # Install
-            with ServerContext(Context(production=True)):
+            with ServerContext(get_context().switch_context(production=True)):
                 await create_schema(get_index_mappings(version), update_mapping=False)
                 await install_default_data(version)
 
-            with ServerContext(Context(production=False)):
+            with ServerContext(get_context().switch_context(production=False)):
                 await create_schema(get_index_mappings(version), update_mapping=False)
                 await install_default_data(version)
 

@@ -8,7 +8,7 @@ from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 
 VERSION = os.environ.get('_DEBUG_VERSION', '0.8.1')
-NAME = os.environ.get('INSTANCE_PREFIX', None)
+TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
 
 def _get_logging_level(level: str) -> int:
@@ -150,7 +150,8 @@ class TracardiConfig:
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
-        self.version: Version = Version(version=VERSION, name=NAME, production=_production)
+        self.multi_tenant = env.get('MULTI_TENANT', "no") == 'yes'
+        self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{elastic.host}".encode()).hexdigest()
         self.cardio_source = md5(

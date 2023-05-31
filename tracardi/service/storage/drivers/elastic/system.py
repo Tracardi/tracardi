@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from tracardi.context import ServerContext, Context
+from tracardi.context import ServerContext, Context, get_context
 from tracardi.service.storage.indices_manager import get_indices_status
 
 
@@ -11,11 +11,13 @@ def get_missing(indices, type) -> list:
 async def is_schema_ok() -> Tuple[bool, list]:
 
     # Missing indices in staging
-    with ServerContext(Context(production=False)):
+    with ServerContext(get_context().switch_context(production=False)):
+        print('B123 install', get_context())
         _indices_staging = [item async for item in get_indices_status()]
 
     # Missing indices in production
-    with ServerContext(Context(production=True)):
+    with ServerContext(get_context().switch_context(production=True)):
+        print('B124 install', get_context())
         _indices_production = [item async for item in get_indices_status()]
 
     _indices = _indices_staging + _indices_production
