@@ -24,8 +24,10 @@ class MailChimpTransactionalSender:
         results = []
         for message in self._messages:
             try:
+                print(message)
                 results.append(self._client.messages.send({"message": message}))
             except mailchimp_transactional.api_client.ApiClientError as e:
+                print(e)
                 raise ValueError(e.text["message"])
         self._messages = []
         return results

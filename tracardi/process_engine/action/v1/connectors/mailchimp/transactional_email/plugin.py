@@ -23,6 +23,8 @@ class TransactionalMailSender(ActionRunner):
         config = validate(init)
         resource = await storage.driver.resource.load(config.source.id)
 
+        print(resource.credentials.get_credentials(self, output=Token).token)
+
         self.config = config
         self._client = MailChimpTransactionalSender(resource.credentials.get_credentials(self, output=Token).token)
         self._dot_template = DotTemplate()
