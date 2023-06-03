@@ -76,6 +76,7 @@ class Index:
         return self.get_index_alias()
 
     def get_index_alias(self) -> str:
+        print(get_context())
         """
         E.g. (prod|static)-fa73a.tracardi-event
         """

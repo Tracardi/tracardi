@@ -15,6 +15,7 @@ class Context(BaseModel):
     production: bool = tracardi.version.production
     user: Optional[User] = None
     tenant: str
+    host: Optional[str] = None
 
     def __init__(self, **data):
 
@@ -34,10 +35,16 @@ class Context(BaseModel):
         return Context(production=production, user=user, tenant=tenant)
 
     def __str__(self):
-        return f"Context(mode: {'production' if self.production else 'staging'}, user: {self.user.full_name if self.user else 'Unknown'}, tenant: {self.tenant if self.tenant else 'Default'})"
+        return f"Context(mode: {'production' if self.production else 'staging'}, " \
+               f"user: {self.user.full_name if self.user else 'Unknown'}, " \
+               f"tenant: {self.tenant if self.tenant else 'Default'}, " \
+               f"host: {self.host})"
 
     def __repr__(self):
-        return f"Context(mode: {'production' if self.production else 'staging'}, user: {self.user.full_name if self.user else 'Unknown'}, tenant: {self.tenant if self.tenant else 'Default'})"
+        return f"Context(mode: {'production' if self.production else 'staging'}, " \
+               f"user: {self.user.full_name if self.user else 'Unknown'}, " \
+               f"tenant: {self.tenant if self.tenant else 'Default'}, " \
+               f"host: {self.host})"
 
 
 class ContextManager(metaclass=Singleton):
