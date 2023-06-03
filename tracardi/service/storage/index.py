@@ -76,7 +76,6 @@ class Index:
         return self.get_index_alias()
 
     def get_index_alias(self) -> str:
-        print("get_alias", self._get_prefixed_index(), get_context())
         """
         E.g. (prod|static)-fa73a.tracardi-event
         """
@@ -95,7 +94,6 @@ class Index:
 
         version_prefix_index = f"{self._version_prefix}.{prefixed_index}"
 
-        print("get_write_index", version_prefix_index, get_context())
         return self._prod_or_static(version_prefix_index)
 
     def get_templated_index_pattern(self):
