@@ -13,7 +13,7 @@ from tracardi.service.module_loader import pip_install, load_callable, import_pa
 from tracardi.service.plugin.domain.register import Plugin
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.index import resources
+from tracardi.service.storage.index import Resource
 
 __local_dir = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ async def install_plugin(module):
 
 async def install_plugins(plugins_list: Dict[str, PluginMetadata]):
     result = defaultdict(list)
-    action_index = resources.get_index_constant('action')
+    action_index = Resource().get_index_constant('action')
     # Actions are in static indices
     action_index = action_index.get_write_index()
     tries = 0

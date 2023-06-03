@@ -11,7 +11,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.index import resources, Index
+from tracardi.service.storage.index import Resource, Index
 import logging
 
 __local_dir = os.path.dirname(__file__)
@@ -39,13 +39,13 @@ def add_ids(data):
 
 async def install_default_data():
     for index_name, data in default_db_data.items():
-        index = resources.get_index_constant(index_name)
+        index = Resource().get_index_constant(index_name)
         await storage.driver.raw.bulk_upsert(index.get_write_index(), list(add_ids(data)))
 
 
 # todo add to install
 async def update_mappings():
-    for key, index in resources.resources.items():
+    for key, index in Resource().resources.items():
         path = f"{__local_dir}/mappings/updates/{key}.json"
         if os.path.isfile(path):
             with open(path) as f:
@@ -166,7 +166,7 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
 
 
 async def run_on_start():
-    for key, _ in resources.resources.items():
+    for key, _ in Resource().resources.items():
         if key in index_mapping and 'on-start' in index_mapping[key]:
             if index_mapping[key]['on-start'] is not None:
                 logger.info(f"Running on start for index `{key}`.")

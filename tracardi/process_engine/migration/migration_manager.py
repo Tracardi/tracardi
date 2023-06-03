@@ -10,7 +10,7 @@ from hashlib import sha1
 from pathlib import Path
 from tracardi.domain.version import Version
 import re
-from tracardi.service.storage.index import resources
+from tracardi.service.storage.index import Resource
 from typing import Union
 
 
@@ -121,7 +121,7 @@ class MigrationManager:
         def add_to_celery(given_schemas: List, elastic: str, task_index_name: str):
             return run_migration_job.delay(given_schemas, elastic, task_index_name)
 
-        task_index = resources.get_index_constant("task").get_write_index()
+        task_index = Resource().get_index_constant("task").get_write_index()
 
         # Run in executor
 

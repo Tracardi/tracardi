@@ -1,12 +1,11 @@
 import json
 import os
 from datetime import datetime
-from typing import Optional, Generator, Any, Tuple
-
-from tracardi.domain.version import Version
+from typing import Generator, Any, Tuple
 
 from tracardi.config import tracardi, elastic
 from tracardi.context import get_context
+from tracardi.service.singleton import Singleton
 
 _local_dir = os.path.dirname(__file__)
 
@@ -15,7 +14,6 @@ class Index:
     def __init__(self, multi_index, index, mapping, staging=False, static=False):
         self.multi_index = multi_index
         self.index = index
-        self._tenant_prefix = f"{get_context().tenant}."
         self._version_prefix = tracardi.version.get_version_prefix()  # eg.080
         self.mapping = mapping
         self.staging = staging
@@ -52,9 +50,9 @@ class Index:
     def _get_prefixed_index(self) -> str:
         """
         Gets real prefixed - index
-        E.g. fa73a.tracardi-event
+        E.g. fa73a.tracardi-event or tenant.tracardi-event
         """
-        return self._tenant_prefix + self.index  # wygenerowany prefix
+        return f"{get_context().tenant}.{self.index}"
 
     def prepare_mappings(self, mapping, index) -> dict:
 
@@ -149,7 +147,7 @@ class Index:
         return self.get_index_alias()
 
 
-class Resource:
+class Resource(metaclass=Singleton):
 
     def __init__(self):
         self.resources = {
@@ -253,6 +251,3 @@ class Resource:
 
     def __contains__(self, item):
         return item in self.resources
-
-
-resources = Resource()

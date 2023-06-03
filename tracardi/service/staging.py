@@ -5,7 +5,7 @@ from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.config import tracardi
 from tracardi.service.storage.driver import storage
-from tracardi.service.storage.index import resources
+from tracardi.service.storage.index import Resource
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -13,7 +13,7 @@ logger.addHandler(log_handler)
 
 
 def get_staged_indices():
-    for name, index in resources.resources.items():
+    for name, index in Resource().resources.items():
         if index.staging:
             stage_index = index.get_single_storage_index()
             stage_alias = index.get_index_alias()

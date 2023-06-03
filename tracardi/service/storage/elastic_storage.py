@@ -1,4 +1,3 @@
-from asyncio import create_task, gather
 from collections import defaultdict
 from typing import List, Optional, Union, AsyncGenerator, Any, Dict
 
@@ -9,9 +8,8 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.service.storage import index
 from tracardi.service.storage.elastic_client import ElasticClient
-from tracardi.service.storage.index import Index
+from tracardi.service.storage.index import Index, Resource
 
 
 class ElasticFiledSort:
@@ -42,9 +40,10 @@ class ElasticStorage:
 
     def __init__(self, index_key):
         self.storage = ElasticClient.instance()
-        if index_key not in index.resources:
+        resource = Resource()
+        if index_key not in resource:
             raise ValueError("There is no index defined for `{}`.".format(index_key))
-        self.index = index.resources[index_key]  # type: Index
+        self.index = resource[index_key]  # type: Index
         self.index_key = index_key
 
     async def exists(self, id) -> bool:

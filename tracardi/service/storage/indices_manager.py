@@ -6,12 +6,12 @@ from elasticsearch import NotFoundError
 
 from tracardi.context import get_context
 from tracardi.service.storage.elastic_client import ElasticClient
-from tracardi.service.storage.index import resources, Index
+from tracardi.service.storage.index import Resource, Index
 
 
 async def get_indices_status():
     es = ElasticClient.instance()
-    for key, index in resources.resources.items():  # type: str, Index
+    for key, index in Resource().resources.items():  # type: str, Index
 
         if index.multi_index:
 
@@ -86,7 +86,7 @@ async def check_indices_mappings_consistency():
     result = {}
 
     es = ElasticClient.instance()
-    for key, index in resources.resources.items():  # type: str, Index
+    for key, index in Resource().resources.items():  # type: str, Index
         system_mapping_file = index.get_mapping()
 
         with open(system_mapping_file) as file:

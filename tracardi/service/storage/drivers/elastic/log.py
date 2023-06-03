@@ -1,7 +1,7 @@
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.factory import storage_manager
 from tracardi.domain.storage_record import StorageRecords
-from tracardi.service.storage.index import resources
+from tracardi.service.storage.index import Resource
 
 
 async def save(data):
@@ -32,7 +32,7 @@ async def load_by_query_string(query_string: str, start: int = 0, limit: int = 1
 
 async def exists():
     es = ElasticClient.instance()
-    index = resources.get_index_constant("log")
+    index = Resource().get_index_constant("log")
     # Check for template as index will be created with first insert. So there may not be an index but everything is ok
     # because template exists.
     return await es.exists_index_template(name=index.get_prefixed_template_name())
