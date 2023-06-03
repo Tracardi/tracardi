@@ -6,7 +6,7 @@ import elasticsearch
 from pydantic import BaseModel
 
 from tracardi.domain.entity import Entity
-from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage import index

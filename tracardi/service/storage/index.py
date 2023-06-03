@@ -41,9 +41,6 @@ class Index:
             return self._prefix_with_production(index)
         return index
 
-    def set_version(self, version):
-        self._version_prefix = Version.generate_prefix(version)  # 080 instead of 0.8.0
-
     def get_mapping(self):
         if self.mapping:
             mapping_file = self.mapping

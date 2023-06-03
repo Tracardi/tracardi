@@ -27,16 +27,6 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-def get_index(index, mapping_file, version):
-    if 'name' in index:
-        del index['name']
-    index['mapping'] = mapping_file
-    index = Index(**index)
-    index.set_version(version)
-
-    return index
-
-
 def acknowledged(result):
     return 'acknowledged' in result and result['acknowledged'] is True
 
@@ -47,11 +37,9 @@ def add_ids(data):
         yield record
 
 
-async def install_default_data(version=None):
+async def install_default_data():
     for index_name, data in default_db_data.items():
         index = resources.get_index_constant(index_name)
-        if version is not None:
-            index.set_version(version)
         await storage.driver.raw.bulk_upsert(index.get_write_index(), list(add_ids(data)))
 
 
@@ -206,39 +194,47 @@ async def create_schema(index_mappings: Generator[Tuple[Index, dict], Any, None]
 
     return output
 
-
-async def remote_system_upgrade(version):
-    def get_index_mappings(version) -> Generator[Tuple[Index, dict], Any, None]:
-        for mapping_file, index in data['indices'].items():
-
-            index = get_index(index, mapping_file, version)
-
-            if mapping_file not in data['mappings']:
-                raise ValueError(f"No mapping for {index.index} in release settings for version {version}.")
-            mapping = index.prepare_mappings(data['mappings'][mapping_file], index)
-
-            yield index, mapping
-
-    async with HttpClient(3, 200) as client:
-        async with client.get(f"http://localhost:11111/{version}", json={}) as response:
-            data = await response.json()
-            if 'mappings' not in data:
-                raise ValueError(f"No mappings in release settings for version {version}.")
-
-            if 'indices' not in data:
-                raise ValueError(f"No indices in release settings for version {version}.")
-
-            # Install
-            with ServerContext(get_context().switch_context(production=True)):
-                await create_schema(get_index_mappings(version), update_mapping=False)
-                await install_default_data(version)
-
-            with ServerContext(get_context().switch_context(production=False)):
-                await create_schema(get_index_mappings(version), update_mapping=False)
-                await install_default_data(version)
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(remote_system_upgrade('1.0.0'))
+# def get_index(index, mapping_file, version):
+#     if 'name' in index:
+#         del index['name']
+#     index['mapping'] = mapping_file
+#     index = Index(**index)
+#     index.set_version(version)
+#
+#     return index
+#
+# async def remote_system_upgrade(version):
+#     def get_index_mappings(version) -> Generator[Tuple[Index, dict], Any, None]:
+#         for mapping_file, index in data['indices'].items():
+#
+#             index = get_index(index, mapping_file, version)
+#
+#             if mapping_file not in data['mappings']:
+#                 raise ValueError(f"No mapping for {index.index} in release settings for version {version}.")
+#             mapping = index.prepare_mappings(data['mappings'][mapping_file], index)
+#
+#             yield index, mapping
+#
+#     async with HttpClient(3, 200) as client:
+#         async with client.get(f"http://localhost:11111/{version}", json={}) as response:
+#             data = await response.json()
+#             if 'mappings' not in data:
+#                 raise ValueError(f"No mappings in release settings for version {version}.")
+#
+#             if 'indices' not in data:
+#                 raise ValueError(f"No indices in release settings for version {version}.")
+#
+#             # Install
+#             with ServerContext(get_context().switch_context(production=True)):
+#                 await create_schema(get_index_mappings(version), update_mapping=False)
+#                 await install_default_data(version)
+#
+#             with ServerContext(get_context().switch_context(production=False)):
+#                 await create_schema(get_index_mappings(version), update_mapping=False)
+#                 await install_default_data(version)
+#
+#
+# if __name__ == "__main__":
+#     import asyncio
+#
+#     asyncio.run(remote_system_upgrade('1.0.0'))
