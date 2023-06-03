@@ -37,13 +37,13 @@ class Context(BaseModel):
     def __str__(self):
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
                f"user: {self.user.full_name if self.user else 'Unknown'}, " \
-               f"tenant: {self.tenant if self.tenant else 'Default'}, " \
+               f"tenant: {self.tenant}, " \
                f"host: {self.host})"
 
     def __repr__(self):
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
                f"user: {self.user.full_name if self.user else 'Unknown'}, " \
-               f"tenant: {self.tenant if self.tenant else 'Default'}, " \
+               f"tenant: {self.tenant}, " \
                f"host: {self.host})"
 
 
