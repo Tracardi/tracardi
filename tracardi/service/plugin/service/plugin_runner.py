@@ -3,6 +3,9 @@ from typing import Type
 from uuid import uuid4
 
 from tracardi.domain.event import Event
+from tracardi.domain.event_source import EventSource
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from ..domain.result import Result
@@ -27,7 +30,6 @@ class PluginTestResult:
 
 def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=None, event=None, flow=None,
                node=None, in_edge=None) -> PluginTestResult:
-
     async def main(plugin, init, payload):
         try:
 
@@ -42,6 +44,17 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
             plugin.console = console
             plugin.flow = flow
             plugin.node = node
+            plugin.tracker_payload = TrackerPayload(
+                source=EventSource(
+                    id="@test-resource",
+                    type=["web-page"],
+                    name="Test resource",
+                    bridge=NamedEntity(id="1", name="rest"),
+                    description="This resource is created for test purposes.",
+                    tags=['test']
+                ),
+                session=session
+            )
             plugin.execution_graph = GraphInvoker(graph=[], start_nodes=[])
 
             await plugin.set_up(init)
