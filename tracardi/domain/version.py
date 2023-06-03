@@ -13,7 +13,7 @@ class Version(BaseModel):
     def __init__(self, **data):
         if not data.get('name', None):
             if "version" in data:
-                data['name'] = Version.generate_name(data["version"])
+                data['name'] = Version._generate_name(data["version"])
         super().__init__(**data)
 
     @validator("name")
@@ -24,7 +24,7 @@ class Version(BaseModel):
         return value
 
     @staticmethod
-    def generate_name(version):
+    def _generate_name(version):
         """
         e.g. ask8d7
         """
