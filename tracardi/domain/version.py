@@ -17,8 +17,11 @@ class Version(BaseModel):
         super().__init__(**data)
 
     @validator("name")
-    def validate_prefix(cls, value, values):
-        return value if value is not None else Version.generate_name(values["version"])
+    def validate_prefix(cls, value):
+        if value is None:
+            raise ValueError("Version name can not be empty.")
+
+        return value
 
     @staticmethod
     def generate_name(version):
