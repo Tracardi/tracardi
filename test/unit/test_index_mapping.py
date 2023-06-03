@@ -1,7 +1,8 @@
-from tracardi.context import Context, ServerContext
+from tracardi.context import Context, ServerContext, get_context
 from tracardi.config import tracardi
 
-with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+namespace = "tenant"
+with ServerContext(Context(production=False, tenant=namespace)):
 
     from datetime import datetime
 
@@ -12,6 +13,7 @@ with ServerContext(Context(production=False, tenant=tracardi.version.name)):
     from tracardi.service.storage.index import Index
 
     admin = User(id="1", password="pass", full_name="test", email="none", roles=['admin'])
+    tenant = get_context().tenant
 
     mapping_mock = {
         "tracardi-event-2022-2": {
@@ -121,138 +123,137 @@ with ServerContext(Context(production=False, tenant=tracardi.version.name)):
 
 
     def test_index_prefixing():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=False, index="index-name", mapping=mapping_mock)
             alias = index.get_index_alias()
-            assert alias == f"{tracardi.version.name}.{index.index}"
+            assert alias == f"{tenant}.{index.index}"
 
 
     def test_write_index():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
             write_index = index.get_write_index()
             alias = index.get_index_alias()
 
             date = datetime.now()
-            assert write_index == f"{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name-{date.year}-{date.month}"
-            assert alias == f"{tracardi.version.name}.index-name"
-            with ServerContext(Context(production=True, user=admin, tenant=tracardi.version.name)):
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
+            assert alias == f"{tenant}.index-name"
+            with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_write_index()
                 alias = index.get_index_alias()
 
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name-{date.year}-{date.month}"
-                assert alias == f"prod-{tracardi.version.name}.index-name"
+                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
+                assert alias == f"prod-{tenant}.index-name"
 
 
     def test_static_index():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=False, static=True, index="index-name", mapping=mapping_mock)
             write_index = index.get_write_index()
             alias = index.get_index_alias()
 
-            assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
-            assert alias == f"static-{tracardi.version.name}.index-name"
+            assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
+            assert alias == f"static-{tenant}.index-name"
 
 
     def test_regular_index():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=False, static=False, index="index-name", mapping=mapping_mock)
             write_index = index.get_write_index()
             alias = index.get_index_alias()
 
-            assert write_index == f"{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
-            assert alias == f"{tracardi.version.name}.index-name"
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name"
+            assert alias == f"{tenant}.index-name"
 
-            with ServerContext(Context(production=True, user=admin, tenant=tracardi.version.name)):
+            with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_write_index()
                 alias = index.get_index_alias()
 
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
-                assert alias == f"prod-{tracardi.version.name}.index-name"
+                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
+                assert alias == f"prod-{tenant}.index-name"
 
 
     def test_single_storage_index():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=False, static=True, index="index-name", mapping=mapping_mock)
             write_index = index.get_single_storage_index()
-            assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
+            assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
 
     def test_multi_storage_index():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=True, static=True, index="index-name", mapping=mapping_mock)
             write_index = index.get_current_multi_storage_index()
             date = datetime.now()
-            assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name-{date.year}-{date.month}"
+            assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
 
-            with ServerContext(Context(production=True, user=admin, tenant=tracardi.version.name)):
+            with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 index.static = False
                 write_index = index.get_current_multi_storage_index()
                 date = datetime.now()
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name-{date.year}-{date.month}"
+                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
 
 
     def test_multi_storage_alias():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
             write_index = index.get_multi_storage_alias()
-            assert write_index == f"{tracardi.version.name}.index-name"
+            assert write_index == f"{tenant}.index-name"
 
-            with ServerContext(Context(production=True, user=admin, tenant=tracardi.version.name)):
+            with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_multi_storage_alias()
-                assert write_index == f"prod-{tracardi.version.name}.index-name"
+                assert write_index == f"prod-{tenant}.index-name"
 
 
     def test_template():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             with pytest.raises(AssertionError):
                 index = Index(multi_index=True, static=True, index="index-name", mapping=mapping_mock)
                 template = index.get_prefixed_template_name()
-                assert template == f"static-template.{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
+                assert template == f"static-template.{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
             index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
             template = index.get_prefixed_template_name()
-            assert template == f"template.{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
+            assert template == f"template.{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
-            with ServerContext(Context(production=True, user=admin, tenant=tracardi.version.name)):
+            with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
                 template = index.get_prefixed_template_name()
-                assert template == f"prod-template.{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
+                assert template == f"prod-template.{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
             with pytest.raises(AssertionError):
                 index = Index(multi_index=False, static=False, index="index-name", mapping=mapping_mock)
                 template = index.get_prefixed_template_name()
-                assert template == f"template.{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
+                assert template == f"template.{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
 
     def test_templated_index():
         version = tracardi.version.get_version_prefix()
-        version_name = tracardi.version.name
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             with pytest.raises(AssertionError):
                 index = Index(multi_index=True, static=True, index="index-name", mapping=mapping_mock)
                 pattern = index.get_templated_index_pattern()
 
             index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
             pattern = index.get_templated_index_pattern()
-            assert pattern == f"{version}.{version_name}.index-name-*-*"
+            assert pattern == f"{version}.{tenant}.index-name-*-*"
 
-            with ServerContext(Context(production=True, user=admin, tenant=tracardi.version.name)):
+            with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
                 pattern = index.get_templated_index_pattern()
 
-        assert pattern == f"prod-{version}.{version_name}.index-name-*-*"
+        assert pattern == f"prod-{version}.{tenant}.index-name-*-*"
 
 
     def test_prod_static():
-        with ServerContext(Context(production=False, tenant=tracardi.version.name)):
+        with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=False, static=True, index="index-name", mapping=mapping_mock)
 
             # Static is more important than production
-            with ServerContext(Context(production=True, user=admin, tenant=tracardi.version.name)):
+            with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_write_index()
-                assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
+                assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
                 index.static = False
                 write_index = index.get_write_index()
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tracardi.version.name}.index-name"
+                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name"

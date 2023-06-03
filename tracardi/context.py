@@ -16,6 +16,13 @@ class Context(BaseModel):
     user: Optional[User] = None
     tenant: str
 
+    def __init__(self, **data):
+
+        # This is every important: if not multi tenant replace tenant version by version name.
+        if not tracardi.multi_tenant:
+            data['tenant'] = tracardi.version.name
+        super().__init__(**data)
+
     def is_production(self) -> bool:
         return self.production
 

@@ -99,7 +99,7 @@ async def count_by_query(index: str, query: str, time_span: int) -> StorageRecor
     return result
 
 
-async def count_all_indices_by_alias(prefix: str = None):
+async def count_all_indices_by_alias():
     """
     Missing indices are returned as count = 0
     """
@@ -107,7 +107,7 @@ async def count_all_indices_by_alias(prefix: str = None):
     for name, index in resources.resources.items():
         try:
             sm = storage_manager(name)
-            count = await sm.storage.count(prefix=prefix)
+            count = await sm.storage.count()
             yield name, count['count']
         except NotFoundError:
             yield name, 0

@@ -10,12 +10,21 @@ class Version(BaseModel):
     production: bool = False
     config: Optional[dict] = {}
 
+    def __init__(self, **data):
+        if not data.get('name', None):
+            if "version" in data:
+                data['name'] = Version.generate_name(data["version"])
+        super().__init__(**data)
+
     @validator("name")
     def validate_prefix(cls, value, values):
         return value if value is not None else Version.generate_name(values["version"])
 
     @staticmethod
     def generate_name(version):
+        """
+        e.g. ask8d7
+        """
         return md5(version.encode('utf-8')).hexdigest()[:5]
 
     @staticmethod
