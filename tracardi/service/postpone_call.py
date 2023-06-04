@@ -5,14 +5,15 @@ from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.postpone_cache_multi_threaded import PostponeCache, InstanceCache
 from tracardi.service.singleton import Singleton
+from tracardi.service.storage.redis.collections import Collection
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
-global_schedule_flag = PostponeCache("schedule-flag")
-global_postpone_flag = PostponeCache("postpone-flag")
-instance_cache = InstanceCache("exec-instance-cache")
+global_schedule_flag = PostponeCache(Collection.postpone_schedule)
+global_postpone_flag = PostponeCache(Collection.postpone_flag)
+instance_cache = InstanceCache(Collection.exec_instance)
 
 
 class LockPool(metaclass=Singleton):
