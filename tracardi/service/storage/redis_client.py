@@ -4,6 +4,7 @@ from typing import Optional, Awaitable, Union, List
 import aioredis
 import redis
 
+from tracardi.context import get_context
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.singleton import Singleton
 from tracardi.config import redis_config, tracardi
@@ -33,13 +34,18 @@ class RedisClient(metaclass=Singleton):
         self.client = redis.from_url(uri)
         logger.info(f"Redis at {redis_config.redis_host} connected.")
 
+    @staticmethod
+    def get_tenant_prefix(name):
+        print(f"Redis namespace: {get_context().tenant}:{name}")
+        return f"{get_context().tenant}:{name}"
+
     def hexists(self, name: str, key: str) -> Union[Awaitable[bool], bool]:
         return self.client.hexists(name, key)
 
     def hget(
             self, name: str, key: str
     ):
-        return self.client.hget(name, key)
+        return self.client.hget(self.get_tenant_prefix(name), key)
 
     def hset(self,
              name: str,
@@ -47,25 +53,25 @@ class RedisClient(metaclass=Singleton):
              value: Optional[str] = None,
              mapping: Optional[dict] = None,
              items: Optional[list] = None) -> Union[Awaitable[int], int]:
-        return self.client.hset(name, key, value, mapping, items)
+        return self.client.hset(self.get_tenant_prefix(name), key, value, mapping, items)
 
     def hdel(self, name: str, *keys: List) -> Union[Awaitable[int], int]:
-        return self.client.hdel(name, *keys)
+        return self.client.hdel(self.get_tenant_prefix(name), *keys)
 
     def sadd(self, name: str, *values) -> Union[Awaitable[int], int]:
-        return self.client.sadd(name, *values)
+        return self.client.sadd(self.get_tenant_prefix(name), *values)
 
     def smembers(self, name: str) -> Union[Awaitable[list], list]:
-        return self.client.smembers(name)
+        return self.client.smembers(self.get_tenant_prefix(name))
 
     def ttl(self, name):
-        return self.client.ttl(name)
+        return self.client.ttl(self.get_tenant_prefix(name))
 
-    def exists(self, *names):
-        return self.client.exists(*names)
+    def exists(self, name):
+        return self.client.exists(self.get_tenant_prefix(name))
 
     def get(self, name):
-        return self.client.get(name)
+        return self.client.get(self.get_tenant_prefix(name))
 
     def set(
             self,
@@ -80,13 +86,13 @@ class RedisClient(metaclass=Singleton):
             exat=None,
             pxat=None,
     ):
-        return self.client.set(name, value, ex, px, nx, xx, keepttl, get, exat, pxat)
+        return self.client.set(self.get_tenant_prefix(name), value, ex, px, nx, xx, keepttl, get, exat, pxat)
 
-    def delete(self, *names):
-        return self.client.delete(*names)
+    def delete(self, name):
+        return self.client.delete(self.get_tenant_prefix(name))
 
     def incr(self, name, amount: int = 1):
-        return self.client.incr(name, amount)
+        return self.client.incr(self.get_tenant_prefix(name), amount)
 
     def expire(
             self,
@@ -97,10 +103,10 @@ class RedisClient(metaclass=Singleton):
             gt: bool = False,
             lt: bool = False,
     ):
-        return self.client.expire(name, time, nx, xx, gt, lt)
+        return self.client.expire(self.get_tenant_prefix(name), time, nx, xx, gt, lt)
 
     def ping(self, **kwargs):
-        return self.client.ping( **kwargs)
+        return self.client.ping(**kwargs)
 
     def pubsub(self, **kwargs):
         return self.client.pubsub(**kwargs)

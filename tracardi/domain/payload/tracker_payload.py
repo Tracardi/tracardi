@@ -258,7 +258,7 @@ class TrackerPayload(BaseModel):
         if profile_less:
             profile = None
         else:
-            if not self.profile.id:
+            if not self.profile or not self.profile.id:
                 raise ValueError("Can not use static profile id without profile.id.")
 
             profile = await profile_loader(self, True)  # is_static is set to true

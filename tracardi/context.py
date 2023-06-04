@@ -102,7 +102,7 @@ class ServerContext:
         self.cm.reset()
         ctx_id.reset(self.ctx_handler)
 
-    def get_context(self):
+    def get_context(self) -> Context:
         return self.cm.get("request-context")
 
     @staticmethod
