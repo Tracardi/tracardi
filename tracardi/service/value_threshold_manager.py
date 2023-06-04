@@ -40,13 +40,13 @@ class ValueThresholdManager:
         return True
 
     async def load_last_value(self) -> Optional[ValueThreshold]:
-        record = redis.client.get(self._get_key(self.id))
+        record = redis.get(self._get_key(self.id))
         if record is not None:
             return ValueThreshold.decode(record)
         return None
 
     async def delete(self):
-        return redis.client.delete(self._get_key(self.id))
+        return redis.delete(self._get_key(self.id))
 
     async def save_current_value(self, current_value):
         value = ValueThreshold(
@@ -61,4 +61,4 @@ class ValueThresholdManager:
         kwargs = {}
         if self.ttl > 0:
             kwargs['ex'] = self.ttl
-        return redis.client.set(self._get_key(self.id), record, **kwargs)
+        return redis.set(self._get_key(self.id), record, **kwargs)

@@ -15,11 +15,11 @@ class Limiter:
 
         key = f"{Collection.throttle}:{key}"
 
-        req = self._redis.client.incr(key)
+        req = self._redis.incr(key)
         if req == 1:
-            self._redis.client.expire(key, self._ttl)
+            self._redis.expire(key, self._ttl)
             ttl = self._ttl
         else:
-            ttl = self._redis.client.ttl(key)
+            ttl = self._redis.ttl(key)
 
         return req <= self._limit, ttl

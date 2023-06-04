@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 
 import redis
 
@@ -21,14 +21,14 @@ def validate(config: dict) -> Config:
 
 class WriteToMemoryAction(ActionRunner):
 
-    client: Any
+    client: Union[RedisClient, Any]
     config: Config
 
     async def set_up(self, init):
         self.config = validate(init)
 
         if self.config.resource.id == "":
-            self.client = RedisClient().client
+            self.client = RedisClient()
         else:
             resource = await storage.driver.resource.load(self.config.resource.id)
             credentials = resource.credentials.get_credentials(self, output=RedisCredentials)
