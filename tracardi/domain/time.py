@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class Time(BaseModel):
     insert: Optional[datetime]
     create: Optional[datetime] = None
+    update: Optional[datetime] = None
 
     def __init__(self, **data: Any):
         if 'insert' not in data:
@@ -29,6 +30,7 @@ class ProfileVisit(BaseModel):
 
 
 class ProfileTime(Time):
+    # Inherits from Time
     visit: ProfileVisit = ProfileVisit()
 
 

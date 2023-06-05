@@ -31,6 +31,9 @@
                 "insert": {
                   "type": "date"
                 },
+                "update": {
+                  "type": "date"
+                },
                 "visit": {
                   "properties": {
                     "last": {

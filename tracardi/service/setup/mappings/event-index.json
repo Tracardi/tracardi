@@ -303,6 +303,14 @@
             }
           }
         },
+        "entity": {
+          "dynamic": "false",
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
         "aux": {
           "type": "flattened"
         },
