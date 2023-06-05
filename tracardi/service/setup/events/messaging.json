@@ -5,7 +5,8 @@
     "id": "message-sent",
     "properties": {
       "type": "string",
-      "message": "string"
+      "message": "string",
+      "recipient": "string"
     },
     "traits": {
       "message.type": "type"
@@ -17,7 +18,8 @@
     "id": "message-received",
     "properties": {
       "type": "string",
-      "message": "string"
+      "message": "string",
+      "recipient": "string"
     },
     "traits": {
       "message.type": "type"
@@ -29,7 +31,8 @@
     "id": "message-opened",
     "properties": {
       "type": "string",
-      "message": "string"
+      "message": "string",
+      "recipient": "string"
     },
     "traits": {
       "message.type": "type"
