@@ -10,10 +10,14 @@ class Queue:
 
 @dataclass
 class Collection:
-    throttle: str = "throttle:"
-    token: str = "token:"
+    throttle: str = "throttle:"  # Cache for limiter plugin
+    token: str = "token:"  # Cache for token memory/db for authentication
     plugin_memory: str = "plugin-memory:"
     profile: str = "profile:"
-    profile_fields: str = "profile:fields"
-    event_fields: str = "event:fields"
-    session_fields: str = "session:fields"
+    profile_fields: str = "profile:fields"  # Cache profile fields, properties for auto completion
+    event_fields: str = "event:fields"  # Cache event fields, properties for auto completion
+    session_fields: str = "session:fields"  # Cache session fields, properties for auto completion
+    postpone_schedule: str = "delay:schedule-flag"  # Cache postponed execution (call)
+    postpone_flag: str = "delay:postpone-flag"  # Cache postponed execution (call)
+    exec_instance: str = "delay:exec-instance"  # Cache postponed execution (call)
+    value_threshold: str = "value-threshold:"  # Cache for WF value threshold

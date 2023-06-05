@@ -31,10 +31,10 @@ class ProfileTracksSynchronizer:
             break
 
     def expires_in(self, key: str):
-        return self.redis.client.ttl(self._get_key(key))
+        return self.redis.ttl(self._get_key(key))
 
     def is_locked(self, key: str):
-        return self.redis.client.exists(self._get_key(key))
+        return self.redis.exists(self._get_key(key))
 
     def unlock_entities(self, keys: str):
         for key in keys:
@@ -42,13 +42,13 @@ class ProfileTracksSynchronizer:
 
     def lock_entity(self, key: str):
         key = self._get_key(key)
-        result = self.redis.client.set(key, '1', ex=self.ttl)
+        result = self.redis.set(key, '1', ex=self.ttl)
         if result is True:
             logger.debug(f"Locking key {key} {result}")
 
     def unlock_entity(self, key: str):
         key = self._get_key(key)
-        result = self.redis.client.delete(key)
+        result = self.redis.delete(key)
         logger.debug(f"UnLocking key {key} {result}")
 
 

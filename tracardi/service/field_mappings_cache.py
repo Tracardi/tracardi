@@ -18,28 +18,31 @@ redis_collections = {
 
 class FieldMapper(metaclass=Singleton):
 
+    """
+    Saves added fields for session, profile, event.
+    """
+
     def __init__(self):
         self.i = 0
-        self.batch = 3
+        self.batch = 5
         self.redis = RedisClient()
 
     def get_field_mapping(self, type) -> Set[str]:
         if type in redis_collections:
-            return {item.decode() for item in self.redis.client.smembers(redis_collections[type])}
+            return {item.decode() for item in self.redis.smembers(redis_collections[type])}
         return set()
 
-    def add_field_mappings(self, type, entities: List[Entity]):
-        self.i += 1
-
+    def add_field_mappings(self, type, entities: List[Entity]) -> bool:
         new_props = set()
         for entity in entities:
+            self.i += 1
             new_props.update(entity.get_dotted_properties())
 
         diff = new_props.difference(field_mappings[type])
 
         if not bool(diff):
             # No changes
-            return
+            return False
 
         # Update in memory cache
         field_mappings[type].update(new_props)
@@ -47,8 +50,10 @@ class FieldMapper(metaclass=Singleton):
         if self.i > self.batch:
             self.save_cache()
 
+        return True
+
     def save_cache(self):
         self.i = 0
         for type, field_maps in field_mappings.items():
             if len(field_maps) > 0 and type in redis_collections:
-                self.redis.client.sadd(redis_collections[type], *list(field_maps))
+                self.redis.sadd(redis_collections[type], *list(field_maps))

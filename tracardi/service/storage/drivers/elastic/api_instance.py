@@ -1,6 +1,6 @@
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.factory import storage_manager
-from tracardi.service.storage.index import resources
+from tracardi.service.storage.index import Resource
 
 
 async def count(query: dict = None):
@@ -23,7 +23,7 @@ async def remove_dead_instances():
 
 async def exists():
     es = ElasticClient.instance()
-    index = resources.get_index_constant("api-instance")
+    index = Resource().get_index_constant("api-instance")
     index = index.get_write_index()
     return await es.exists_index(index)
 

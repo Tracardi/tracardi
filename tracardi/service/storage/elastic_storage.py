@@ -1,4 +1,3 @@
-from asyncio import create_task, gather
 from collections import defaultdict
 from typing import List, Optional, Union, AsyncGenerator, Any, Dict
 
@@ -6,12 +5,11 @@ import elasticsearch
 from pydantic import BaseModel
 
 from tracardi.domain.entity import Entity
-from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.service.storage import index
 from tracardi.service.storage.elastic_client import ElasticClient
-from tracardi.service.storage.index import Index
+from tracardi.service.storage.index import Index, Resource
 
 
 class ElasticFiledSort:
@@ -42,9 +40,10 @@ class ElasticStorage:
 
     def __init__(self, index_key):
         self.storage = ElasticClient.instance()
-        if index_key not in index.resources:
+        resource = Resource()
+        if index_key not in resource:
             raise ValueError("There is no index defined for `{}`.".format(index_key))
-        self.index = index.resources[index_key]  # type: Index
+        self.index = resource[index_key]  # type: Index
         self.index_key = index_key
 
     async def exists(self, id) -> bool:
@@ -52,15 +51,12 @@ class ElasticStorage:
             return await self.load(id) is not None
         return await self.storage.exists(self.index.get_index_alias(), id)
 
-    async def count(self, query: Optional[dict] = None, prefix: Optional[str] = None) -> dict:
+    async def count(self, query: Optional[dict] = None) -> dict:
         """
         It counts by alias
         """
 
-        if prefix is None:
-            index = self.index.get_index_alias()
-        else:
-            index = self.index.get_index_alias(prefix)
+        index = self.index.get_index_alias()
 
         return await self.storage.count(index, query)
 

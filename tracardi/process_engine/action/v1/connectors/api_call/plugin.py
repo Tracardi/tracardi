@@ -1,6 +1,5 @@
-import asyncio
 import aiohttp
-from aiohttp import ClientConnectorError, ContentTypeError
+from aiohttp import ContentTypeError
 
 from tracardi.service.notation.dict_traverser import DictTraverser
 from json import JSONDecodeError

@@ -1,12 +1,11 @@
 import json
 import os
 from datetime import datetime
-from typing import Optional, Generator, Any, Tuple
-
-from tracardi.domain.version import Version
+from typing import Generator, Any, Tuple
 
 from tracardi.config import tracardi, elastic
 from tracardi.context import get_context
+from tracardi.service.singleton import Singleton
 
 _local_dir = os.path.dirname(__file__)
 
@@ -15,8 +14,7 @@ class Index:
     def __init__(self, multi_index, index, mapping, staging=False, static=False):
         self.multi_index = multi_index
         self.index = index
-        self.prefix = "{}.".format(tracardi.version.name)
-        self.version_prefix = tracardi.version.get_version_prefix()
+        self._version_prefix = tracardi.version.get_version_prefix()  # eg.080
         self.mapping = mapping
         self.staging = staging
         self.static = static
@@ -41,10 +39,6 @@ class Index:
             return self._prefix_with_production(index)
         return index
 
-    def set_version(self, version):
-        self.prefix = f"{Version.generate_name(version)}."
-        self.version_prefix = Version.generate_prefix(version)
-
     def get_mapping(self):
         if self.mapping:
             mapping_file = self.mapping
@@ -53,23 +47,18 @@ class Index:
 
         return os.path.join(f"{_local_dir}/../setup", mapping_file)
 
-    def _get_prefixed_index(self, prefix: Optional[str] = None) -> str:
+    def _get_prefixed_index(self) -> str:
         """
         Gets real prefixed - index
-        E.g. fa73a.tracardi-event
+        E.g. fa73a.tracardi-event or tenant.tracardi-event
         """
-        if prefix is not None:
-            prefixed_index = prefix + "." + self.index
-        else:
-            prefixed_index = self.prefix + self.index  # wygenerowany prefix
-
-        return prefixed_index
+        return f"{get_context().tenant}.{self.index}"
 
     def prepare_mappings(self, mapping, index) -> dict:
 
         json_map = mapping.replace("%%PREFIX%%", tracardi.version.name)
         json_map = json_map.replace("%%ALIAS%%", self.get_index_alias())
-        json_map = json_map.replace("%%VERSION%%", self.version_prefix)
+        json_map = json_map.replace("%%VERSION%%", self._version_prefix)
         json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)
         json_map = json_map.replace("%%SHARDS%%", elastic.shards)
         json_map = json_map.replace("%%CONF_SHARDS%%", elastic.conf_shards)
@@ -79,18 +68,19 @@ class Index:
 
         return json.loads(json_map)
 
-    def get_static_alias(self, prefix: Optional[str] = None) -> str:
+    # ToDo find occurrences and replace with get_index_alias
+    def get_static_alias(self) -> str:
         """
         E.g. static-fa73a.tracardi-event
         """
-        return self.get_index_alias(prefix)
+        return self.get_index_alias()
 
-    def get_index_alias(self, prefix: Optional[str] = None) -> str:
-
+    def get_index_alias(self) -> str:
+        print(get_context())
         """
         E.g. (prod|static)-fa73a.tracardi-event
         """
-        prefixed_index = self._get_prefixed_index(prefix)
+        prefixed_index = self._get_prefixed_index()
         return self._prod_or_static(prefixed_index)
 
     def get_write_index(self):
@@ -103,7 +93,7 @@ class Index:
         else:
             prefixed_index = self._get_prefixed_index()
 
-        version_prefix_index = f"{self.version_prefix}.{prefixed_index}"
+        version_prefix_index = f"{self._version_prefix}.{prefixed_index}"
 
         return self._prod_or_static(version_prefix_index)
 
@@ -119,7 +109,7 @@ class Index:
             raise ValueError(f"Index {self._get_prefixed_index()} is not multi index.")
 
         # (prod|static) 070 . fa73a.tracardi-event - * - *
-        index = f"{self.version_prefix}.{self._get_prefixed_index()}-*-*"
+        index = f"{self._version_prefix}.{self._get_prefixed_index()}-*-*"
 
         return self._prod_or_static(index)
 
@@ -129,7 +119,7 @@ class Index:
         if self.static is True:
             raise AssertionError("Static index should not be a multi data index.")
 
-        prefixed_template = f"template.{self.version_prefix}.{tracardi.version.name}.{self.index}"
+        prefixed_template = f"template.{self._version_prefix}.{self._get_prefixed_index()}"
         # (prods | static) template . 070 . fa73a . tracardi-event
         return self._prod_or_static(prefixed_template)
 
@@ -156,7 +146,7 @@ class Index:
         return self.get_index_alias()
 
 
-class Resource:
+class Resource(metaclass=Singleton):
 
     def __init__(self):
         self.resources = {
@@ -260,6 +250,3 @@ class Resource:
 
     def __contains__(self, item):
         return item in self.resources
-
-
-resources = Resource()

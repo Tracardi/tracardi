@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from tracardi.domain.value_threshold import ValueThreshold
+from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 
 redis = RedisClient()
@@ -24,7 +25,7 @@ class ValueThresholdManager:
 
     @staticmethod
     def _get_key(key):
-        return f"value-threshold:{key}"
+        return f"{Collection.value_threshold}{key}"
 
     async def pass_threshold(self, current_value):
         value = await self.load_last_value()
@@ -40,13 +41,13 @@ class ValueThresholdManager:
         return True
 
     async def load_last_value(self) -> Optional[ValueThreshold]:
-        record = redis.client.get(self._get_key(self.id))
+        record = redis.get(self._get_key(self.id))
         if record is not None:
             return ValueThreshold.decode(record)
         return None
 
     async def delete(self):
-        return redis.client.delete(self._get_key(self.id))
+        return redis.delete(self._get_key(self.id))
 
     async def save_current_value(self, current_value):
         value = ValueThreshold(
@@ -61,4 +62,4 @@ class ValueThresholdManager:
         kwargs = {}
         if self.ttl > 0:
             kwargs['ex'] = self.ttl
-        return redis.client.set(self._get_key(self.id), record, **kwargs)
+        return redis.set(self._get_key(self.id), record, **kwargs)

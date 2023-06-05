@@ -1,13 +1,13 @@
 from typing import List, Optional, Tuple
 from elasticsearch import NotFoundError
-from tracardi.domain.storage_record import StorageRecords, StorageRecord
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.event_server.utils.memory_cache import CacheItem, MemoryCache
 from tracardi.service.field_mappings_cache import FieldMapper
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
-from tracardi.service.storage.index import resources
+from tracardi.service.storage.index import Resource
 from tracardi.service.storage.persistence_service import PersistenceService
 
 memory_cache = MemoryCache("index-mapping")
@@ -99,15 +99,15 @@ async def count_by_query(index: str, query: str, time_span: int) -> StorageRecor
     return result
 
 
-async def count_all_indices_by_alias(prefix: str = None):
+async def count_all_indices_by_alias():
     """
     Missing indices are returned as count = 0
     """
 
-    for name, index in resources.resources.items():
+    for name, index in Resource().resources.items():
         try:
             sm = storage_manager(name)
-            count = await sm.storage.count(prefix=prefix)
+            count = await sm.storage.count()
             yield name, count['count']
         except NotFoundError:
             yield name, 0
@@ -235,7 +235,7 @@ async def get_unique_field_values(index, field, limit=100):
                 "terms": {"field": field, "size": limit}
             }
         }}
-    index = resources[index]
+    index = Resource()[index]
     return StorageRecords.build_from_elastic(await es.search(index.get_index_alias(), query))
 
 
