@@ -197,7 +197,6 @@
       "ec.checkout.status": "status"
     }
   },
-
   {
     "name": "Delivery Info Entered",
     "description": "Customer added delivery information",
@@ -221,14 +220,28 @@
       "contact.address.street": "delivery.street"
     },
     "profile": {
-      "data.contact.address.town": ["traits.contact.address.town", "equals"],
-      "data.contact.address.county": ["traits.contact.address.county", "equals"],
-      "data.contact.address.country": ["traits.contact.address.country","equals"],
-      "data.contact.address.postcode": ["traits.contact.address.postcode","equals"],
-      "data.contact.address.street": ["traits.contact.address.street","equals"]
+      "data.contact.address.town": [
+        "traits.contact.address.town",
+        "equals"
+      ],
+      "data.contact.address.county": [
+        "traits.contact.address.county",
+        "equals"
+      ],
+      "data.contact.address.country": [
+        "traits.contact.address.country",
+        "equals"
+      ],
+      "data.contact.address.postcode": [
+        "traits.contact.address.postcode",
+        "equals"
+      ],
+      "data.contact.address.street": [
+        "traits.contact.address.street",
+        "equals"
+      ]
     }
   },
-
   {
     "name": "Payment Info Entered",
     "description": "Customer added payment information",
@@ -251,7 +264,6 @@
       "payment.credit_card.holder": "credit_card.holder"
     }
   },
-
   {
     "name": "Order Started",
     "description": "Customer completed the order",
@@ -307,9 +319,58 @@
     "const": {
       "status": "completed"
     },
+        "properties": {
+      "id": "string",
+      "status": "string"
+    },
     "traits": {
       "ec.order.id": "id",
       "ec.order.status": "status"
+    }
+  },
+  {
+    "id": "order-dispatched",
+    "name": "Order Dispatched",
+    "description": "Order dispatched from warehouse",
+    "const": {
+      "status": "dispatched"
+    },
+        "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "traits": {
+      "ec.order.id": "id",
+      "ec.order.status": "status"
+    }
+  },
+    {
+    "id": "order-delivered",
+    "name": "Order Delivered",
+    "description": "Order delivered to customer",
+    "const": {
+      "status": "delivered"
+    },
+          "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "traits": {
+      "ec.order.id": "id",
+      "ec.order.status": "status"
+    }
+  },
+  {
+    "id": "order-status-change",
+    "name": "Order Status Change",
+    "description": "Order changed status",
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "traits": {
+      "ec.order.id": "id",
+      "ec.order.status": "string"
     }
   },
   {
@@ -323,8 +384,8 @@
     "traits": {
       "ec.product.id": "id",
       "marketing.channel": "media"
-      }
-    },
+    }
+  },
   {
     "name": "Product Reviewed",
     "description": "Customer reviewed a product.",
@@ -338,6 +399,17 @@
       "ec.product.id": "id",
       "ec.product.review": "review",
       "ec.product.rate": "rate"
+    }
+  },
+  {
+    "name": "Product Returned",
+    "description": "Customer returned a product.",
+    "id": "product-returned",
+    "properties": {
+      "id": "string"
+    },
+    "traits": {
+      "ec.product.id": "id"
     }
   }
 ]

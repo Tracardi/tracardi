@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Message Sent",
+    "description": "Message was sent to the customer.",
+    "id": "message-sent",
+    "properties": {
+      "type": "string",
+      "message": "string"
+    },
+    "traits": {
+      "message.type": "type"
+    }
+  },
+  {
+    "name": "Message Received",
+    "description": "Customer received message.",
+    "id": "message-received",
+    "properties": {
+      "type": "string",
+      "message": "string"
+    },
+    "traits": {
+      "message.type": "type"
+    }
+  },
+  {
+    "name": "Message Opened",
+    "description": "Customer opened message.",
+    "id": "message-opened",
+    "properties": {
+      "type": "string",
+      "message": "string"
+    },
+    "traits": {
+      "message.type": "type"
+    }
+  }
+]

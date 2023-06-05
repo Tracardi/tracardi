@@ -1,0 +1,17 @@
+[
+    {
+    "name": "Rating",
+    "description": "Customer rated something.",
+    "id": "rating",
+    "properties": {
+      "id": "string",
+      "review": "string",
+      "rate": 0,
+      "state": "string"
+    },
+    "traits": {
+      "journey.state": "state",
+      "journey.rate": "rate"
+    }
+  }
+]
