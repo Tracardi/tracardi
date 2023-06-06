@@ -38,7 +38,8 @@ class MigrationManager:
         ("0.7.1", "0.7.2"): "071_to_072",
         ("0.7.2", "0.7.3"): "072_to_073",
         ("0.7.3", "0.7.4"): "072_to_073",
-        ("0.7.4", "0.8.0"): "074_to_080"
+        ("0.7.4", "0.8.0"): "074_to_080",
+        ("0.8.0", "0.8.1"): "080_to_081"
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
@@ -98,8 +99,14 @@ class MigrationManager:
                                                f"{self.from_version.name}.{schema.copy_index.from_index}"
                 schema.copy_index.to_index = f"{self.to_version.get_version_prefix()}." \
                                              f"{self.to_version.name}.{schema.copy_index.to_index}"
+                print(self.from_version.get_version_prefix(),
+                      self.from_version.name,
+                      schema.copy_index.from_index,
+                      await es.exists_index(schema.copy_index.from_index))
                 if await es.exists_index(schema.copy_index.from_index):
                     customized_schemas.append(schema)
+                # else:
+                #     print(f"Can't find the index {schema.copy_index.from_index}")
 
         if tracardi.version != Version(version=self.to_version.version, name=self.to_version.name):
             raise ValueError(f"Installed system version is {tracardi.version.version}, "
