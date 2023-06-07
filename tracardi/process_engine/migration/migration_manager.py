@@ -99,14 +99,11 @@ class MigrationManager:
                                                f"{self.from_version.name}.{schema.copy_index.from_index}"
                 schema.copy_index.to_index = f"{self.to_version.get_version_prefix()}." \
                                              f"{self.to_version.name}.{schema.copy_index.to_index}"
-                print(self.from_version.get_version_prefix(),
-                      self.from_version.name,
-                      schema.copy_index.from_index,
-                      await es.exists_index(schema.copy_index.from_index))
+
                 if await es.exists_index(schema.copy_index.from_index):
                     customized_schemas.append(schema)
-                # else:
-                #     print(f"Can't find the index {schema.copy_index.from_index}")
+                else:
+                    print(f"Can't find the index {schema.copy_index.from_index}")
 
         if tracardi.version != Version(version=self.to_version.version, name=self.to_version.name):
             raise ValueError(f"Installed system version is {tracardi.version.version}, "
