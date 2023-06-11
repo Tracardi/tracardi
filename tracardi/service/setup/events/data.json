@@ -7,12 +7,12 @@
       "consents": {
       }
     },
-    "traits": {
-      "consents": "consents"
+    "copy": {
+      "data.marketing.consents": "properties.consents"
     },
     "profile": {
       "consents": [
-        "traits.consents",
+        "data.marketing.consents",
         "equal"
       ]
     }
@@ -114,307 +114,299 @@
         }
       }
     },
-    "traits": {
-      "pii.firstname": "pii.firstname",
-      "pii.lastname": "pii.lastname",
-      "pii.name": "pii.name",
-      "pii.birthday": "pii.birthday",
-      "pii.language.native": "pii.language.native",
-      "pii.language.spoken": "pii.language.spoken",
-      "pii.gender": "pii.gender",
-      "pii.education.level": "pii.education.level",
-      "pii.civil.status": "pii.civil.status",
-      "pii.attributes.height": "pii.attributes.height",
-      "pii.attributes.weight": "pii.attributes.weight",
-      "pii.attributes.shoe_number": "pii.attributes.shoe_number",
-      "contact.email": "contact.email",
-      "contact.phone": "contact.phone",
-      "contact.app.whatsapp": "contact.app.whatsapp",
-      "contact.app.discord": "contact.app.discord",
-      "contact.app.slack": "contact.app.slack",
-      "contact.app.twitter": "contact.app.twitter",
-      "contact.app.telegram": "contact.app.telegram",
-      "contact.app.wechat": "contact.app.wechat",
-      "contact.app.viber": "contact.app.viber",
-      "contact.app.signal": "contact.app.signal",
-      "contact.address.town": "contact.address.town",
-      "contact.address.county": "contact.address.county",
-      "contact.address.country": "contact.address.country",
-      "contact.address.postcode": "contact.address.postcode",
-      "contact.address.street": "contact.address.street",
-      "contact.address.other": "contact.address.other",
-      "media.image": "media.image",
-      "media.webpage": "media.webpage",
-      "media.social.twitter": "media.social.twitter",
-      "media.social.facebook": "media.social.facebook",
-      "media.social.youtube": "media.social.youtube",
-      "media.social.instagram": "media.social.instagram",
-      "media.social.tiktok": "media.social.tiktok",
-      "media.social.linkedin": "media.social.linkedin",
-      "media.social.reddit": "media.social.reddit",
-      "job.position": "job.position",
-      "job.salary": "job.salary",
-      "job.type": "job.type",
-      "job.company.name": "job.company.name",
-      "job.company.size": "job.company.size",
-      "job.company.country": "job.company.country",
-      "job.department": "job.department",
-      "preferences.purchases": "preferences.purchases",
-      "preferences.colors": "preferences.colors",
-      "preferences.sizes": "preferences.sizes",
-      "preferences.devices": "preferences.devices",
-      "preferences.channels": "preferences.channels",
-      "preferences.payments": "preferences.payments",
-      "preferences.brands": "preferences.brands",
-      "preferences.fragrances": "preferences.fragrances",
-      "preferences.services": "preferences.services",
-      "preferences.other": "preferences.other",
-      "loyalty.codes": "loyalty.codes",
-      "loyalty.card.id": "loyalty.card.id",
-      "loyalty.card.name": "loyalty.card.name",
-      "loyalty.card.issuer": "loyalty.card.issuer",
-      "loyalty.card.expires": "loyalty.card.expires",
-      "loyalty.card.points": "loyalty.card.points"
+    "copy": {
+      "data.pii.firstname":               "properties.pii.firstname",
+      "data.pii.lastname":                "properties.pii.lastname",
+      "data.pii.name":                    "properties.pii.name",
+      "data.pii.birthday":                "properties.pii.birthday",
+      "data.pii.language.native":         "properties.pii.language.native",
+      "data.pii.language.spoken":         "properties.pii.language.spoken",
+      "data.pii.gender":                  "properties.pii.gender",
+      "data.pii.education.level":         "properties.pii.education.level",
+      "data.pii.civil.status":            "properties.pii.civil.status",
+      "data.pii.attributes.height":       "properties.pii.attributes.height",
+      "data.pii.attributes.weight":       "properties.pii.attributes.weight",
+      "data.pii.attributes.shoe_number":  "properties.pii.attributes.shoe_number",
+      "data.contact.email":               "properties.contact.email",
+      "data.contact.phone":               "properties.contact.phone",
+      "data.contact.app.whatsapp":        "properties.contact.app.whatsapp",
+      "data.contact.app.discord":         "properties.contact.app.discord",
+      "data.contact.app.slack":           "properties.contact.app.slack",
+      "data.contact.app.twitter":         "properties.contact.app.twitter",
+      "data.contact.app.telegram":        "properties.contact.app.telegram",
+      "data.contact.app.wechat":          "properties.contact.app.wechat",
+      "data.contact.app.viber":           "properties.contact.app.viber",
+      "data.contact.app.signal":          "properties.contact.app.signal",
+      "data.contact.address.town":        "properties.contact.address.town",
+      "data.contact.address.county":      "properties.contact.address.county",
+      "data.contact.address.country":     "properties.contact.address.country",
+      "data.contact.address.postcode":    "properties.contact.address.postcode",
+      "data.contact.address.street":      "properties.contact.address.street",
+      "data.contact.address.other":       "properties.contact.address.other",
+      "data.media.image":                 "properties.media.image",
+      "data.media.webpage":               "properties.media.webpage",
+      "data.media.social.twitter":        "properties.media.social.twitter",
+      "data.media.social.facebook":       "properties.media.social.facebook",
+      "data.media.social.youtube":        "properties.media.social.youtube",
+      "data.media.social.instagram":      "properties.media.social.instagram",
+      "data.media.social.tiktok":         "properties.media.social.tiktok",
+      "data.media.social.linkedin":       "properties.media.social.linkedin",
+      "data.media.social.reddit":         "properties.media.social.reddit",
+      "data.job.position":                "properties.job.position",
+      "data.job.salary":                  "properties.job.salary",
+      "data.job.type":                    "properties.job.type",
+      "data.job.company.name":            "properties.job.company.name",
+      "data.job.company.size":            "properties.job.company.size",
+      "data.job.company.country":         "properties.job.company.country",
+      "data.job.department":              "properties.job.department",
+      "data.preferences.purchases":       "properties.preferences.purchases",
+      "data.preferences.colors":          "properties.preferences.colors",
+      "data.preferences.sizes":           "properties.preferences.sizes",
+      "data.preferences.devices":         "properties.preferences.devices",
+      "data.preferences.channels":        "properties.preferences.channels",
+      "data.preferences.payments":        "properties.preferences.payments",
+      "data.preferences.brands":          "properties.preferences.brands",
+      "data.preferences.fragrances":      "properties.preferences.fragrances",
+      "data.preferences.services":        "properties.preferences.services",
+      "data.preferences.other":           "properties.preferences.other",
+      "data.loyalty.codes":               "properties.loyalty.codes",
+      "data.loyalty.card.id":             "properties.loyalty.card.id",
+      "data.loyalty.card.name":           "properties.loyalty.card.name",
+      "data.loyalty.card.issuer":         "properties.loyalty.card.issuer",
+      "data.loyalty.card.expires":        "properties.loyalty.card.expires",
+      "data.loyalty.card.points":         "properties.loyalty.card.points"
     },
     "profile": {
       "data.pii.firstname": [
-        "traits.pii.firstname",
+        "data.pii.firstname",
         "equal"
       ],
       "data.pii.lastname": [
-        "traits.pii.lastname",
+        "data.pii.lastname",
         "equal"
       ],
       "data.pii.name": [
-        "traits.pii.name",
+        "data.pii.name",
         "equal"
       ],
       "data.pii.birthday": [
-        "traits.pii.birthday",
+        "data.pii.birthday",
         "equal"
       ],
       "data.pii.language.native": [
-        "traits.pii.language.native",
+        "data.pii.language.native",
         "equal"
       ],
       "data.pii.language.spoken": [
-        "traits.pii.language.spoken",
+        "data.pii.language.spoken",
         "append"
       ],
       "data.pii.gender": [
-        "traits.pii.gender",
+        "data.pii.gender",
         "equal"
       ],
       "data.pii.education.level": [
-        "traits.pii.education.level",
+        "data.pii.education.level",
         "equal"
       ],
       "data.pii.civil.status": [
-        "traits.pii.civil.status",
+        "data.pii.civil.status",
         "equal"
       ],
       "data.pii.attributes.height": [
-        "traits.pii.attributes.height",
+        "data.pii.attributes.height",
         "equal"
       ],
       "data.pii.attributes.weight": [
-        "traits.pii.attributes.weight",
+        "data.pii.attributes.weight",
         "equal"
       ],
       "data.pii.attributes.shoe_number": [
-        "traits.pii.attributes.shoe_number",
-        "equal"
-      ],
-      "data.contact.email": [
-        "traits.contact.email",
-        "equal"
-      ],
-      "data.contact.phone": [
-        "traits.contact.phone",
+        "data.contact.phone",
         "equal"
       ],
       "data.contact.app.whatsapp": [
-        "traits.contact.app.whatsapp",
+        "data.contact.app.whatsapp",
         "equal"
       ],
       "data.contact.app.discord": [
-        "traits.contact.app.discord",
+        "data.contact.app.discord",
         "equal"
       ],
       "data.contact.app.slack": [
-        "traits.contact.app.slack",
+        "data.contact.app.slack",
         "equal"
       ],
       "data.contact.app.twitter": [
-        "traits.contact.app.twitter",
+        "data.contact.app.twitter",
         "equal"
       ],
       "data.contact.app.telegram": [
-        "traits.contact.app.telegram",
+        "data.contact.app.telegram",
         "equal"
       ],
       "data.contact.app.wechat": [
-        "traits.contact.app.wechat",
+        "data.contact.app.wechat",
         "equal"
       ],
       "data.contact.app.viber": [
-        "traits.contact.app.viber",
+        "data.contact.app.viber",
         "equal"
       ],
       "data.contact.app.signal": [
-        "traits.contact.app.signal",
+        "data.contact.app.signal",
         "equal"
       ],
       "data.contact.address.town": [
-        "traits.contact.address.town",
+        "data.contact.address.town",
         "equal"
       ],
       "data.contact.address.county": [
-        "traits.contact.address.county",
+        "data.contact.address.county",
         "equal"
       ],
       "data.contact.address.country": [
-        "traits.contact.address.country",
+        "data.contact.address.country",
         "equal"
       ],
       "data.contact.address.postcode": [
-        "traits.contact.address.postcode",
+        "data.contact.address.postcode",
         "equal"
       ],
       "data.contact.address.street": [
-        "traits.contact.address.street",
+        "data.contact.address.street",
         "equal"
       ],
       "data.contact.address.other": [
-        "traits.contact.address.other",
+        "data.contact.address.other",
         "equal"
       ],
       "data.media.image": [
-        "traits.media.image",
+        "data.media.image",
         "equal"
       ],
       "data.media.webpage": [
-        "traits.media.webpage",
+        "data.media.webpage",
         "equal"
       ],
       "data.media.social.twitter": [
-        "traits.media.social.twitter",
+        "data.media.social.twitter",
         "equal"
       ],
       "data.media.social.facebook": [
-        "traits.media.social.facebook",
+        "data.media.social.facebook",
         "equal"
       ],
       "data.media.social.youtube": [
-        "traits.media.social.youtube",
+        "data.media.social.youtube",
         "equal"
       ],
       "data.media.social.instagram": [
-        "traits.media.social.instagram",
+        "data.media.social.instagram",
         "equal"
       ],
       "data.media.social.tiktok": [
-        "traits.media.social.tiktok",
+        "data.media.social.tiktok",
         "equal"
       ],
       "data.media.social.linkedin": [
-        "traits.media.social.linkedin",
+        "data.media.social.linkedin",
         "equal"
       ],
       "data.media.social.reddit": [
-        "traits.media.social.reddit",
+        "data.media.social.reddit",
         "equal"
       ],
       "data.job.position": [
-        "traits.job.position",
+        "data.job.position",
         "equal"
       ],
       "data.job.salary": [
-        "traits.job.salary",
+        "data.job.salary",
         "equal"
       ],
       "data.job.type": [
-        "traits.job.type",
+        "data.job.type",
         "equal"
       ],
       "data.job.company.name": [
-        "traits.job.company.name",
+        "data.job.company.name",
         "equal"
       ],
       "data.job.company.size": [
-        "traits.job.company.size",
+        "data.job.company.size",
         "equal"
       ],
       "data.job.company.country": [
-        "traits.job.company.country",
+        "data.job.company.country",
         "equal"
       ],
       "data.job.department": [
-        "traits.job.department",
+        "data.job.department",
         "equal"
       ],
       "data.preferences.purchases": [
-        "traits.preferences.purchases",
+        "data.preferences.purchases",
         "append"
       ],
       "data.preferences.colors": [
-        "traits.preferences.colors",
+        "data.preferences.colors",
         "append"
       ],
       "data.preferences.sizes": [
-        "traits.preferences.sizes",
+        "data.preferences.sizes",
         "append"
       ],
       "data.preferences.devices": [
-        "traits.preferences.devices",
+        "data.preferences.devices",
         "append"
       ],
       "data.preferences.channels": [
-        "traits.preferences.channels",
+        "data.preferences.channels",
         "append"
       ],
       "data.preferences.payments": [
-        "traits.preferences.payments",
-        "append"
+        "data.preferences.payments",
+        "append"           data
       ],
       "data.preferences.brands": [
-        "traits.preferences.brands",
+        "data.preferences.brands",
         "append"
       ],
       "data.preferences.fragrances": [
-        "traits.preferences.fragrances",
+        "data.preferences.fragrances",
         "append"
       ],
       "data.preferences.services": [
-        "traits.preferences.services",
+        "data.preferences.services",
         "append"
       ],
       "data.preferences.other": [
-        "traits.preferences.other",
+        "data.preferences.other",
         "append"
       ],
       "data.loyalty.codes": [
-        "traits.loyalty.codes",
+        "data.loyalty.codes",
         "append"
       ],
       "data.loyalty.card.id": [
-        "traits.loyalty.card.id",
+        "data.loyalty.card.id",
         "equal"
       ],
       "data.loyalty.card.name": [
-        "traits.loyalty.card.name",
+        "data.loyalty.card.name",
         "equal"
       ],
       "data.loyalty.card.issuer": [
-        "traits.loyalty.card.issuer",
+        "data.loyalty.card.issuer",
         "equal"
       ],
       "data.loyalty.card.expires": [
-        "traits.loyalty.card.expires",
+        "data.loyalty.card.expires",
         "equal"
       ],
       "data.loyalty.card.points": [
-        "traits.loyalty.card.points",
+        "data.loyalty.card.points",
         "equal"
       ]
     }

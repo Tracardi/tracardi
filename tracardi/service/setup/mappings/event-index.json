@@ -812,6 +812,28 @@
                   "type": "half_float"
                 }
               }
+            },
+            "marketing": {
+              "properties": {
+                "contents": {
+                  "type": "keyword"
+                },
+                "coupon": {
+                  "type": "keyword"
+                },
+                "promotion": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    }
+                  }
+                }
+              }
             }
           }
         },

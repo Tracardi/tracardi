@@ -22,16 +22,16 @@
         "page": "url"
       }
     },
-    "traits": {
-      "ec.product.id": "id",
-      "ec.product.name": "name",
-      "ec.product.sku": "sku",
-      "ec.product.category": "category",
-      "ec.product.brand": "brand",
-      "ec.product.variant": "variant",
-      "ec.product.price": "price",
-      "ec.product.quantity": "quantity",
-      "ec.product.position": "position"
+    "copy": {
+      "data.ec.product.id":       "properties.id",
+      "data.ec.product.name":     "properties.name",
+      "data.ec.product.sku":      "properties.sku",
+      "data.ec.product.category": "properties.category",
+      "data.ec.product.brand":    "properties.brand",
+      "data.ec.product.variant":  "properties.variant",
+      "data.ec.product.price":    "properties.price",
+      "data.ec.product.quantity": "properties.quantity",
+      "data.ec.product.position": "properties.position"
     }
   },
   {
@@ -56,15 +56,15 @@
         "page": "url"
       }
     },
-    "traits": {
-      "ec.product.id": "id",
-      "ec.product.name": "name",
-      "ec.product.sku": "sku",
-      "ec.product.category": "category",
-      "ec.product.brand": "brand",
-      "ec.product.variant": "variant",
-      "ec.product.price": "price",
-      "ec.product.quantity": "quantity"
+    "copy": {
+      "data.ec.product.id":        "properties.id",
+      "data.ec.product.name":      "properties.name",
+      "data.ec.product.sku":       "properties.sku",
+      "data.ec.product.category":  "properties.category",
+      "data.ec.product.brand":     "properties.brand",
+      "data.ec.product.variant":   "properties.variant",
+      "data.ec.product.price":     "properties.price",
+      "data.ec.product.quantity":  "properties.quantity"
     }
   },
   {
@@ -97,15 +97,15 @@
         "page": "url"
       }
     },
-    "traits": {
-      "ec.product.id": "id",
-      "ec.product.name": "name",
-      "ec.product.sku": "sku",
-      "ec.product.category": "category",
-      "ec.product.brand": "brand",
-      "ec.product.variant": "variant",
-      "ec.product.price": "price",
-      "ec.product.quantity": "quantity"
+    "copy": {
+      "data.ec.product.id":       "properties.id",
+      "data.ec.product.name":     "properties.name",
+      "data.ec.product.sku":      "properties.sku",
+      "data.ec.product.category": "properties.category",
+      "data.ec.product.brand":    "properties.brand",
+      "data.ec.product.variant":  "properties.variant",
+      "data.ec.product.price":    "properties.price",
+      "data.ec.product.quantity": "properties.quantity"
     }
   },
   {
@@ -130,15 +130,15 @@
         "page": "url"
       }
     },
-    "traits": {
-      "ec.product.id": "id",
-      "ec.product.name": "name",
-      "ec.product.sku": "sku",
-      "ec.product.category": "category",
-      "ec.product.brand": "brand",
-      "ec.product.variant": "variant",
-      "ec.product.price": "price",
-      "ec.product.quantity": "quantity"
+    "copy": {
+      "data.ec.product.id":        "properties.id",
+      "data.ec.product.name":      "properties.name",
+      "data.ec.product.sku":       "properties.sku",
+      "data.ec.product.category":  "properties.category",
+      "data.ec.product.brand":     "properties.brand",
+      "data.ec.product.variant":   "properties.variant",
+      "data.ec.product.price":     "properties.price",
+      "data.ec.product.quantity":  "properties.quantity"
     }
   },
   {
@@ -156,13 +156,13 @@
       "value": "string",
       "coupon": "string"
     },
-    "traits": {
-      "ec.order.id": "order_id",
-      "ec.checkout.id": "id",
-      "ec.checkout.status": "status",
-      "ec.checkout.currency": "currency",
-      "ec.checkout.value": "value",
-      "marketing.coupon": "coupon"
+    "copy": {
+      "data.ec.order.id":          "properties.order_id",
+      "data.ec.checkout.id":       "properties.id",
+      "data.ec.checkout.status":   "properties.status",
+      "data.ec.checkout.currency": "properties.currency",
+      "data.ec.checkout.value":    "properties.value",
+      "data.marketing.coupon":     "properties.coupon"
     }
   },
   {
@@ -176,9 +176,9 @@
     "properties": {
       "id": "string"
     },
-    "traits": {
-      "ec.checkout.id": "id",
-      "ec.checkout.status": "status"
+    "copy": {
+      "data.ec.checkout.id":     "properties.id",
+      "data.ec.checkout.status": "properties.status"
     }
   },
   {
@@ -192,9 +192,9 @@
       "id": "string",
       "status": "string"
     },
-    "traits": {
-      "ec.checkout.id": "id",
-      "ec.checkout.status": "status"
+    "copy": {
+      "data.ec.checkout.id":     "properties.id",
+      "data.ec.checkout.status": "properties.status"
     }
   },
   {
@@ -211,33 +211,33 @@
         "street": "string"
       }
     },
-    "traits": {
-      "ec.order.id": "id",
-      "contact.address.town": "delivery.town",
-      "contact.address.county": "delivery.county",
-      "contact.address.country": "delivery.country",
-      "contact.address.postcode": "delivery.postcode",
-      "contact.address.street": "delivery.street"
+    "copy": {
+      "data.ec.order.id":              "properties.id",
+      "data.contact.address.town":     "properties.delivery.town",
+      "data.contact.address.county":   "properties.delivery.county",
+      "data.contact.address.country":  "properties.delivery.country",
+      "data.contact.address.postcode": "properties.delivery.postcode",
+      "data.contact.address.street":   "properties.delivery.street"
     },
     "profile": {
       "data.contact.address.town": [
-        "traits.contact.address.town",
+        "data.contact.address.town",
         "equals"
       ],
       "data.contact.address.county": [
-        "traits.contact.address.county",
+        "data.contact.address.county",
         "equals"
       ],
       "data.contact.address.country": [
-        "traits.contact.address.country",
+        "data.contact.address.country",
         "equals"
       ],
       "data.contact.address.postcode": [
-        "traits.contact.address.postcode",
+        "data.contact.address.postcode",
         "equals"
       ],
       "data.contact.address.street": [
-        "traits.contact.address.street",
+        "data.contact.address.street",
         "equals"
       ]
     }
@@ -256,12 +256,12 @@
         "cvv": ""
       }
     },
-    "traits": {
-      "ec.order.id": "id",
-      "payment.method": "method",
-      "payment.credit_card.number": "credit_card.number",
-      "payment.credit_card.expires": "credit_card.expires",
-      "payment.credit_card.holder": "credit_card.holder"
+    "copy": {
+      "data.ec.order.id":                  "properties.id",
+      "data.payment.method":               "properties.method",
+      "data.payment.credit_card.number":   "properties.credit_card.number",
+      "data.payment.credit_card.expires":  "properties.credit_card.expires",
+      "data.payment.credit_card.holder":   "properties.credit_card.holder"
     }
   },
   {
@@ -305,11 +305,11 @@
         }
       ]
     },
-    "traits": {
-      "ec.order.id": "id",
-      "ec.order.status": "status",
-      "ec.order.income": "income",
-      "ec.order.cost": "cost"
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status",
+      "data.ec.order.income":  "properties.income",
+      "data.ec.order.cost":    "properties.cost"
     }
   },
   {
@@ -319,13 +319,13 @@
     "const": {
       "status": "completed"
     },
-        "properties": {
+    "properties": {
       "id": "string",
       "status": "string"
     },
-    "traits": {
-      "ec.order.id": "id",
-      "ec.order.status": "status"
+    "copy": {
+      "data.ec.order.id":     "properties.id",
+      "data.ec.order.status": "properties.status"
     }
   },
   {
@@ -335,13 +335,13 @@
     "const": {
       "status": "dispatched"
     },
-        "properties": {
+    "properties": {
       "id": "string",
       "status": "string"
     },
-    "traits": {
-      "ec.order.id": "id",
-      "ec.order.status": "status"
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
     }
   },
     {
@@ -351,13 +351,13 @@
     "const": {
       "status": "delivered"
     },
-          "properties": {
+    "properties": {
       "id": "string",
       "status": "string"
     },
-    "traits": {
-      "ec.order.id": "id",
-      "ec.order.status": "status"
+    "copy": {
+      "data.ec.order.id":     "properties.id",
+      "data.ec.order.status": "properties.status"
     }
   },
   {
@@ -368,9 +368,9 @@
       "id": "string",
       "status": "string"
     },
-    "traits": {
-      "ec.order.id": "id",
-      "ec.order.status": "string"
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.string"
     }
   },
   {
@@ -381,9 +381,9 @@
       "id": "string",
       "media": "string"
     },
-    "traits": {
-      "ec.product.id": "id",
-      "marketing.channel": "media"
+    "copy": {
+      "data.ec.product.id":      "properties.id",
+      "data.marketing.channel":  "properties.media"
     }
   },
   {
@@ -395,10 +395,10 @@
       "review": "string",
       "rate": 0
     },
-    "traits": {
-      "ec.product.id": "id",
-      "ec.product.review": "review",
-      "ec.product.rate": "rate"
+    "copy": {
+      "data.ec.product.id":     "properties.id",
+      "data.ec.product.review": "properties.review",
+      "data.ec.product.rate":   "properties.rate"
     }
   },
   {
@@ -408,8 +408,8 @@
     "properties": {
       "id": "string"
     },
-    "traits": {
-      "ec.product.id": "id"
+    "copy": {
+      "data.ec.product.id": "properties.id"
     }
   }
 ]

@@ -9,17 +9,17 @@
       "issuer": "string",
       "expires": "datetime"
     },
-    "traits": {
-      "loyalty.card.id": "id",
-      "loyalty.card.name": "name",
-      "loyalty.card.issuer": "issuer",
-      "loyalty.card.expires": "expires"
+    "copy": {
+      "data.loyalty.card.id":       "properties.id",
+      "data.loyalty.card.name":     "properties.name",
+      "data.loyalty.card.issuer":   "properties.issuer",
+      "data.loyalty.card.expires":  "properties.expires"
     },
     "profile": {
-      "data.loyalty.card.id":  ["traits.loyalty.card.id", "equal"],
-      "data.loyalty.card.name": ["traits.loyalty.card.name", "equal"],
-      "data.loyalty.card.issuer": ["traits.loyalty.card.issuer", "equal"],
-      "data.loyalty.card.expires": ["traits.loyalty.card.expires", "equal"]
+      "data.loyalty.card.id":       ["data.loyalty.card.id", "equal"],
+      "data.loyalty.card.name":     ["data.loyalty.card.name", "equal"],
+      "data.loyalty.card.issuer":   ["data.loyalty.card.issuer", "equal"],
+      "data.loyalty.card.expires":  ["data.loyalty.card.expires", "equal"]
     }
   },
   {
@@ -29,14 +29,14 @@
     "properties": {
       "id": "string"
     },
-    "traits": {
-      "loyalty.card.id": "id"
+    "copy": {
+      "data.loyalty.card.id": "properties.id"
     },
     "profile": {
-      "data.loyalty.card.id":  [null, "delete"],
-      "data.loyalty.card.name": [null, "delete"],
-      "data.loyalty.card.issuer": [null, "delete"],
-      "data.loyalty.card.expires": [null, "delete"]
+      "data.loyalty.card.id":       [null, "delete"],
+      "data.loyalty.card.name":     [null, "delete"],
+      "data.loyalty.card.issuer":   [null, "delete"],
+      "data.loyalty.card.expires":  [null, "delete"]
     }
   }
 ]

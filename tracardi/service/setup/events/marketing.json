@@ -11,9 +11,9 @@
         "image": "string"
       }
     },
-    "traits": {
-      "marketing.promotion.id": "id",
-      "marketing.promotion.name": "name"
+    "copy": {
+      "data.marketing.promotion.id":   "properties.id",
+      "data.marketing.promotion.name": "properties.name"
     }
   },
     {
@@ -28,9 +28,9 @@
         "page": "url"
       }
     },
-    "traits": {
-      "marketing.promotion.id": "id",
-      "marketing.promotion.name": "name"
+    "copy": {
+      "data.marketing.promotion.id":    "properties.id",
+      "data.marketing.promotion.name":  "properties.name"
     }
   }
 ]

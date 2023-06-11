@@ -9,17 +9,17 @@
       "firstname": "string",
       "lastname": "string"
     },
-    "traits": {
-      "contact.app.email": "email",
-      "identifier.token": "login",
-      "pii.firstname": "firstname",
-      "pii.lastname": "lastname"
+    "copy": {
+      "data.contact.app.email":  "properties.email",
+      "data.identifier.token":   "properties.login",
+      "data.pii.firstname":      "properties.firstname",
+      "data.pii.lastname":       "properties.lastname"
     },
     "profile": {
-      "data.contact.email": ["traits.contact.app.email", "equal"],
-      "data.identifier.token": ["traits.identifier.token", "equal"],
-      "data.pii.firstname": ["traits.pii.firstname", "equal"],
-      "data.pii.lastname": ["traits.pii.lastname", "equal"]
+      "data.contact.email":     ["data.contact.app.email", "equal"],
+      "data.identifier.token":  ["data.identifier.token", "equal"],
+      "data.pii.firstname":     ["data.pii.firstname", "equal"],
+      "data.pii.lastname":      ["data.pii.lastname", "equal"]
     }
   },
   {
@@ -33,17 +33,17 @@
       "lastname": "string",
       "custom": "object"
     },
-    "traits": {
-      "contact.app.email": "email",
-      "pii.firstname": "firstname",
-      "pii.lastname": "lastname",
-      "identifier.token": "login"
+    "copy": {
+      "data.contact.app.email":  "properties.email",
+      "data.pii.firstname":      "properties.firstname",
+      "data.pii.lastname":       "properties.lastname",
+      "data.identifier.token":   "properties.login"
     },
     "profile": {
-      "data.contact.email": ["traits.contact.app.email", "equal"],
-      "data.identifier.token": ["traits.identifier.token", "equal"],
-      "data.pii.firstname": ["traits.pii.firstname", "equal"],
-      "data.pii.lastname": ["traits.pii.lastname", "equal"]
+      "data.contact.email":     ["data.contact.app.email", "equal"],
+      "data.identifier.token":  ["data.identifier.token", "equal"],
+      "data.pii.firstname":     ["data.pii.firstname", "equal"],
+      "data.pii.lastname":      ["data.pii.lastname", "equal"]
     }
   },
   {
@@ -74,51 +74,45 @@
       "viber": "string",
       "signal": "string"
     },
-    "traits": {
-      "contact.app.email": "email",
-      "contact.phone": "phone",
-
-      "pii.firstname": "firstname",
-      "pii.lastname": "lastname",
-
-      "identifier.id": "id",
-      "identifier.token": "login",
-      "identifier.passport": "passport",
-      "identifier.credit_card": "credit_card",
-      "identifier.coupon": "coupon",
-      "identifier.badge": "badge",
-
-      "contact.app.twitter": "twitter",
-      "contact.app.whatsapp": "whatsapp",
-      "contact.app.discord": "discord",
-      "contact.app.slack": "slack",
-      "contact.app.telegram": "telegram",
-      "contact.app.wechat": "wechat",
-      "contact.app.viber": "viber",
-      "contact.app.signal": "signal"
+    "copy": {
+      "data.contact.app.email":      "properties.email",
+      "data.contact.phone":          "properties.phone",
+      "data.pii.firstname":          "properties.firstname",
+      "data.pii.lastname":           "properties.lastname",
+      "data.identifier.id":          "properties.id",
+      "data.identifier.token":       "properties.login",
+      "data.identifier.passport":    "properties.passport",
+      "data.identifier.credit_card": "properties.credit_card",
+      "data.identifier.coupon":      "properties.coupon",
+      "data.identifier.badge":       "properties.badge",
+      "data.contact.app.twitter":    "properties.twitter",
+      "data.contact.app.whatsapp":   "properties.whatsapp",
+      "data.contact.app.discord":    "properties.discord",
+      "data.contact.app.slack":      "properties.slack",
+      "data.contact.app.telegram":   "properties.telegram",
+      "data.contact.app.wechat":     "properties.wechat",
+      "data.contact.app.viber":      "properties.viber",
+      "data.contact.app.signal":     "properties.signal"
     },
     "profile": {
-      "data.pii.firstname": ["traits.pii.firstname", "equal"],
-      "data.pii.lastname":  ["traits.pii.lastname", "equal"],
-
-      "data.contact.phone": ["traits.contact.phone", "equal"],
-
-      "data.identifier.id":          ["traits.identifier.id", "equal"],
-      "data.identifier.token":       ["traits.identifier.token", "equal"],
-      "data.identifier.passport":    ["traits.identifier.passport", "equal"],
-      "data.identifier.credit_card": ["traits.identifier.credit_card", "equal"],
-      "data.identifier.coupon":      ["traits.identifier.coupon", "equal"],
-      "data.identifier.badge":       ["traits.identifier.badge", "equal"],
-
-      "data.contact.email":        ["traits.contact.app.email", "equal"],
-      "data.contact.app.twitter":  ["traits.contact.app.twitter", "equal"],
-      "data.contact.app.whatsapp": ["traits.contact.app.whatsapp", "equal"],
-      "data.contact.app.discord":  ["traits.contact.app.discord", "equal"],
-      "data.contact.app.slack":    ["traits.contact.app.slack", "equal"],
-      "data.contact.app.telegram": ["traits.contact.app.telegram", "equal"],
-      "data.contact.app.wechat":   ["traits.contact.app.wechat", "equal"],
-      "data.contact.app.viber":    ["traits.contact.app.viber", "equal"],
-      "data.contact.app.signal":   ["traits.contact.app.signal", "equal"]
+      "data.pii.firstname":           ["data.pii.firstname", "equal"],
+      "data.pii.lastname":            ["data.pii.lastname", "equal"],
+      "data.contact.phone":           ["data.contact.phone", "equal"],
+      "data.identifier.id":           ["data.identifier.id", "equal"],
+      "data.identifier.token":        ["data.identifier.token", "equal"],
+      "data.identifier.passport":     ["data.identifier.passport", "equal"],
+      "data.identifier.credit_card":  ["data.identifier.credit_card", "equal"],
+      "data.identifier.coupon":       ["data.identifier.coupon", "equal"],
+      "data.identifier.badge":        ["data.identifier.badge", "equal"],
+      "data.contact.email":           ["data.contact.app.email", "equal"],
+      "data.contact.app.twitter":     ["data.contact.app.twitter", "equal"],
+      "data.contact.app.whatsapp":    ["data.contact.app.whatsapp", "equal"],
+      "data.contact.app.discord":     ["data.contact.app.discord", "equal"],
+      "data.contact.app.slack":       ["data.contact.app.slack", "equal"],
+      "data.contact.app.telegram":    ["data.contact.app.telegram", "equal"],
+      "data.contact.app.wechat":      ["data.contact.app.wechat", "equal"],
+      "data.contact.app.viber":       ["data.contact.app.viber", "equal"],
+      "data.contact.app.signal":      ["data.contact.app.signal", "equal"]
     }
   }
 ]
