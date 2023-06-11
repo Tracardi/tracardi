@@ -169,6 +169,8 @@ class Resource(metaclass=Singleton):
                              mapping="mappings/session-index.json"),
             "profile": Index(staging=False, multi_index=True, index="tracardi-profile",
                              mapping="mappings/profile-index.json"),
+            "item": Index(staging=False, multi_index=True, index="tracardi-item",
+                          mapping="mappings/item-index.json"),
             "console-log": Index(staging=False, multi_index=False, index="tracardi-console-log",
                                  mapping="mappings/console-log-index.json"),
             "user": Index(staging=False,

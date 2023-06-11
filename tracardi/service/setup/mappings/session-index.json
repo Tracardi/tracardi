@@ -16,7 +16,7 @@
       "dynamic": "strict",
       "properties": {
         "id": {
-          "type": "keyword"
+          "type": "keyword", "ignore_above": 64
         },
         "metadata": {
           "properties": {
@@ -47,7 +47,7 @@
         "profile": {
           "properties": {
             "id": {
-              "type": "keyword"
+              "type": "keyword", "ignore_above": 64
             }
           }
         },

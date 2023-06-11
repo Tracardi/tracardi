@@ -17,7 +17,7 @@
         "type": "date"
       },
       "id": {
-        "type": "keyword"
+        "type": "keyword", "ignore_above": 64
       },
       "name": {
         "type": "keyword"

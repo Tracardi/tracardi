@@ -11,7 +11,7 @@
     "dynamic": "strict",
     "properties": {
       "event_id": {
-        "type": "keyword"
+        "type": "keyword", "ignore_above": 64
       },
       "profile_id": {
         "type": "keyword"

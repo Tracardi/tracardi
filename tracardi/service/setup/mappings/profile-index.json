@@ -16,7 +16,7 @@
       "date_detection": false,
       "properties": {
         "id": {
-          "type": "keyword"
+          "type": "keyword", "ignore_above": 64
         },
         "ids": {
           "type": "keyword"
@@ -153,7 +153,7 @@
             "identifier": {
               "properties": {
                 "id": {
-                  "type": "keyword"
+                  "type": "keyword", "ignore_above": 64
                 },
                 "badge": {
                   "type": "keyword"
@@ -359,7 +359,7 @@
                 "card": {
                   "properties": {
                     "id": {
-                      "type": "keyword"
+                      "type": "keyword", "ignore_above": 64
                     },
                     "name": {
                       "type": "keyword"
