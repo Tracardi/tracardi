@@ -112,24 +112,24 @@ def remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def index_default_event_type(event: Event) -> Event:
-    index_schema = get_default_event_type_mapping(event.type, 'traits')
+def auto_index_default_event_type(event: Event) -> Event:
+    index_schema = get_default_event_type_mapping(event.type, 'copy')
 
     if index_schema is not None:
 
-        dot_event_properties = dotty(event.properties)
-        dot_event_traits = dotty(event.traits)
+        dot_event = dotty(event.dict())
 
-        for trait, property in index_schema.items():  # type: str, str
+        for destination, source in index_schema.items():  # type: str, str
             try:
                 # Skip none existing event properties.
-                if property in dot_event_properties:
-                    dot_event_traits[trait] = dot_event_properties[property]
-                    del dot_event_properties[property]
+                if source in dot_event:
+                    dot_event[destination] = dot_event[source]
+                    del dot_event[source]
             except KeyError:
                 pass
 
-        event.properties = dot_event_properties.to_dict()
-        remove_empty_dicts(event.properties)
-        event.traits = dot_event_traits.to_dict()
+        event_dict = dot_event.to_dict()
+        remove_empty_dicts(event_dict)
+        event = Event(**event_dict)
+
     return event

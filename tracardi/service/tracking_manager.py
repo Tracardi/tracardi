@@ -5,7 +5,7 @@ from typing import List, Optional, Callable
 from uuid import uuid4
 from dotty_dict import dotty
 from pydantic.error_wrappers import ValidationError
-from tracardi.service.events import index_default_event_type, copy_default_event_to_profile, \
+from tracardi.service.events import auto_index_default_event_type, copy_default_event_to_profile, \
     get_default_event_type_mapping
 
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -173,8 +173,8 @@ class TrackingManager(TrackingManagerBase):
                 else:
                     _event.request = self.tracker_payload.request
 
-                # Index event
-                _event = index_default_event_type(_event)
+                # Auto index event
+                _event = auto_index_default_event_type(_event)
                 if License.has_service(INDEXER):
                     _event = await index_event_traits(_event, self.console_log)
 
