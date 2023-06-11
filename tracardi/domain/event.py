@@ -10,6 +10,8 @@ from typing import Tuple
 from .marketing import UTM
 from .metadata import OS, Device, Application, Hit
 from .named_entity import NamedEntity
+from .profile import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
+    ProfileIdentifier, ProfileContact, ProfilePII
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 from ..service.string_manager import capitalize_event_type_id
@@ -44,6 +46,16 @@ class EventSession(Entity):
     tz: Optional[str] = 'utc'
 
 
+class EventData(BaseModel):
+    pii: Optional[ProfilePII] = ProfilePII()
+    contact: Optional[ProfileContact] = ProfileContact()
+    identifier: Optional[ProfileIdentifier] = ProfileIdentifier()
+    media: Optional[ProfileMedia] = ProfileMedia()
+    preferences: Optional[ProfilePreference] = ProfilePreference()
+    job: Optional[ProfileJob] = ProfileJob()
+    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty()
+
+
 class Event(NamedEntity):
     metadata: EventMetadata
     type: str
@@ -67,6 +79,8 @@ class Event(NamedEntity):
     config: Optional[dict] = {}
     tags: Tags = Tags()
     aux: dict = {}
+
+    data: Optional[EventData] = EventData()
 
     def __init__(self, **data: Any):
         if 'name' not in data:

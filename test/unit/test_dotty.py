@@ -8,3 +8,11 @@ def test_spaces():
 
     b = dotty(a)
     assert b["A.a b c"] == 1
+
+
+def test_none_existent_value():
+    a = {
+        "A": None
+    }
+    a = dotty(a)
+    assert not "A.c.d" in a

@@ -29,7 +29,7 @@
         "birthday": "2010-01-01 00:00:00",
         "language": {
           "native": "string",
-          "spoken": "string"
+          "spoken": ["string"]
         },
         "gender": "string",
         "education": {
@@ -43,6 +43,14 @@
           "weight": 0.0,
           "shoe_number": 0.0
         }
+      },
+      "identifier": {
+        "id": "string",
+        "token": "string",
+        "passport": "string",
+        "credit_card": "string",
+        "coupon": "string",
+        "badge": "string"
       },
       "contact": {
         "email": "string",
@@ -92,19 +100,19 @@
         "department": "string"
       },
       "preferences": {
-        "purchases": "string",
-        "colors": "string",
-        "sizes": "string",
-        "devices": "string",
-        "channels": "string",
-        "payments": "string",
-        "brands": "string",
-        "fragrances": "string",
-        "services": "string",
-        "other": "string"
+        "purchases": ["string"],
+        "colors": ["string"],
+        "sizes": ["string"],
+        "devices": ["string"],
+        "channels": ["string"],
+        "payments": ["string"],
+        "brands": ["string"],
+        "fragrances": ["string"],
+        "services": ["string"],
+        "other": ["string"]
       },
       "loyalty": {
-        "codes": "string",
+        "codes": ["string"],
         "card": {
           "id": "string",
           "name": "string",
@@ -127,6 +135,12 @@
       "data.pii.attributes.height":       "properties.pii.attributes.height",
       "data.pii.attributes.weight":       "properties.pii.attributes.weight",
       "data.pii.attributes.shoe_number":  "properties.pii.attributes.shoe_number",
+      "data.identifier.id":               "properties.identifier.id",
+      "data.identifier.token":            "properties.identifier.token",
+      "data.identifier.passport":         "properties.identifier.passport",
+      "data.identifier.credit_card":      "properties.identifier.credit_card",
+      "data.identifier.coupon":           "properties.identifier.coupon",
+      "data.identifier.badge":            "properties.identifier.badge",
       "data.contact.email":               "properties.contact.email",
       "data.contact.phone":               "properties.contact.phone",
       "data.contact.app.whatsapp":        "properties.contact.app.whatsapp",
@@ -158,6 +172,7 @@
       "data.job.company.name":            "properties.job.company.name",
       "data.job.company.size":            "properties.job.company.size",
       "data.job.company.country":         "properties.job.company.country",
+      "data.job.company.segment":         "properties.job.company.segment",
       "data.job.department":              "properties.job.department",
       "data.preferences.purchases":       "properties.preferences.purchases",
       "data.preferences.colors":          "properties.preferences.colors",
@@ -199,7 +214,7 @@
       ],
       "data.pii.language.spoken": [
         "data.pii.language.spoken",
-        "append"
+        "equal"
       ],
       "data.pii.gender": [
         "data.pii.gender",
@@ -222,11 +237,25 @@
         "equal"
       ],
       "data.pii.attributes.shoe_number": [
-        "data.contact.phone",
+        "data.pii.attributes.shoe_number",
         "equal"
       ],
+      "data.identifier.id":           ["data.identifier.id", "equal"],
+      "data.identifier.token":        ["data.identifier.token", "equal"],
+      "data.identifier.passport":     ["data.identifier.passport", "equal"],
+      "data.identifier.credit_card":  ["data.identifier.credit_card", "equal"],
+      "data.identifier.coupon":       ["data.identifier.coupon", "equal"],
+      "data.identifier.badge":        ["data.identifier.badge", "equal"],
       "data.contact.app.whatsapp": [
         "data.contact.app.whatsapp",
+        "equal"
+      ],
+      "data.contact.email": [
+        "data.contact.email",
+        "equal"
+      ],
+      "data.contact.phone": [
+        "data.contact.phone",
         "equal"
       ],
       "data.contact.app.discord": [
@@ -341,53 +370,57 @@
         "data.job.company.country",
         "equal"
       ],
+      "data.job.company.segment": [
+        "data.job.company.segment",
+        "equal"
+      ],
       "data.job.department": [
         "data.job.department",
         "equal"
       ],
       "data.preferences.purchases": [
         "data.preferences.purchases",
-        "append"
+        "equal"
       ],
       "data.preferences.colors": [
         "data.preferences.colors",
-        "append"
+        "equal"
       ],
       "data.preferences.sizes": [
         "data.preferences.sizes",
-        "append"
+        "equal"
       ],
       "data.preferences.devices": [
         "data.preferences.devices",
-        "append"
+        "equal"
       ],
       "data.preferences.channels": [
         "data.preferences.channels",
-        "append"
+        "equal"
       ],
       "data.preferences.payments": [
         "data.preferences.payments",
-        "append"           data
+        "equal"
       ],
       "data.preferences.brands": [
         "data.preferences.brands",
-        "append"
+        "equal"
       ],
       "data.preferences.fragrances": [
         "data.preferences.fragrances",
-        "append"
+        "equal"
       ],
       "data.preferences.services": [
         "data.preferences.services",
-        "append"
+        "equal"
       ],
       "data.preferences.other": [
         "data.preferences.other",
-        "append"
+        "equal"
       ],
       "data.loyalty.codes": [
         "data.loyalty.codes",
-        "append"
+        "equal"
       ],
       "data.loyalty.card.id": [
         "data.loyalty.card.id",

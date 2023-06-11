@@ -23,7 +23,7 @@ class ConsentRevoke(BaseModel):
 
 class ProfileLanguage(BaseModel):
     native: Optional[str] = None
-    spoken: Union[Optional[str], List[str]] = None
+    spoken: Union[Optional[str], Optional[List[str]]] = None
 
 
 class ProfileEducation(BaseModel):
@@ -107,16 +107,16 @@ class ProfileMedia(BaseModel):
 
 
 class ProfilePreference(BaseModel):
-    purchases: List[str] = []
-    colors: List[str] = []
-    sizes: List[str] = []
-    devices: List[str] = []
-    channels: List[str] = []
-    payments: List[str] = []
-    brands: List[str] = []
-    fragrances: List[str] = []
-    services: List[str] = []
-    other: List[str] = []
+    purchases: Union[Optional[str], Optional[List[str]]] = None
+    colors: Optional[List[str]] = []
+    sizes: Optional[List[str]] = []
+    devices: Optional[List[str]] = []
+    channels: Optional[List[str]] = []
+    payments: Optional[List[str]] = []
+    brands: Optional[List[str]] = []
+    fragrances: Optional[List[str]] = []
+    services: Optional[List[str]] = []
+    other: Optional[List[str]] = []
 
 
 class ProfileCompany(BaseModel):
