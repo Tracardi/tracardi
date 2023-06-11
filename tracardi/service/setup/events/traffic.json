@@ -32,9 +32,8 @@
         }
       ]
     },
-    "traits": {
-      "query.type": "type",
-      "query.string": "query"
+    "copy": {
+      "hit.query":   "properties.query"
     }
   },
   {
@@ -45,9 +44,9 @@
       "category": "string",
       "query": "string"
     },
-    "traits": {
-      "hit.page.search.category": "category",
-      "hit.page.search.query": "query"
+    "copy": {
+      "hit.page.search.category":  "properties.category",
+      "hit.page.search.query":     "properties.query"
     }
   },
   {
@@ -57,8 +56,8 @@
     "properties": {
       "category": "string"
     },
-    "traits": {
-      "hit.page.category": "category"
+    "copy": {
+      "hit.page.category": "properties.category"
     }
   },
   {
@@ -69,7 +68,7 @@
       "category": "string"
     },
     "traits": {
-      "hit.page.category": "category"
+      "hit.page.category": "properties.category"
     }
   },
   {
@@ -81,8 +80,8 @@
       "category": "string"
     },
     "traits": {
-      "hit.page.name": "name",
-      "hit.page.category": "category"
+      "hit.page.name":      "properties.name",
+      "hit.page.category":  "properties.category"
     }
   }
 ]

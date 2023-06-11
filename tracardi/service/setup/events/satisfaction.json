@@ -9,9 +9,9 @@
       "rate": 0,
       "state": "string"
     },
-    "traits": {
-      "journey.state": "state",
-      "journey.rate": "rate"
+    "copy": {
+      "data.journey.state": "properties.state",
+      "data.journey.rate":  "properties.rate"
     }
   }
 ]

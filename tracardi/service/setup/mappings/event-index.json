@@ -4,18 +4,8 @@
   ],
   "template": {
     "settings": {
-      "number_of_shards":
-      %
-      %
-      SHARDS
-      %
-      %,
-      "number_of_replicas":
-      %
-      %
-      REPLICAS
-      %
-      %,
+      "number_of_shards": %%SHARDS%%,
+      "number_of_replicas": %%REPLICAS%%,
       "index.mapping.total_fields.limit": 2000,
       "index.refresh_interval": "10s"
     },
@@ -671,10 +661,13 @@
             "message": {
               "properties": {
                 "type": {
-                  "type": "keyword"
+                  "type": "keyword", "ignore_above": 32
                 },
                 "text": {
                   "type": "text"
+                },
+                "recipient": {
+                  "type": "keyword",  "ignore_above": 96
                 }
               }
             },

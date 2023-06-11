@@ -8,8 +8,10 @@
       "message": "string",
       "recipient": "string"
     },
-    "traits": {
-      "message.type": "type"
+    "copy": {
+      "data.message.type": "properties.type",
+      "data.message.text": "properties.message",
+      "data.message.recipient": "properties.recipient"
     }
   },
   {
@@ -21,8 +23,10 @@
       "message": "string",
       "recipient": "string"
     },
-    "traits": {
-      "message.type": "type"
+    "copy": {
+      "data.message.type": "properties.type",
+      "data.message.text": "properties.message",
+      "data.message.recipient": "properties.recipient"
     }
   },
   {
@@ -34,8 +38,10 @@
       "message": "string",
       "recipient": "string"
     },
-    "traits": {
-      "message.type": "type"
+    "copy": {
+      "data.message.type": "properties.type",
+      "data.message.text": "properties.message",
+      "data.message.recipient": "properties.recipient"
     }
   }
 ]

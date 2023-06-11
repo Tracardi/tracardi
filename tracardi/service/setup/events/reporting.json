@@ -10,10 +10,10 @@
       "order_id": "string",
       "value": 0
     },
-    "traits": {
-      "ec.order.id": "order_id",
-      "ec.order.status": "status",
-      "ec.order.income.revenue": "status"
+    "copy": {
+      "data.ec.order.id":              "properties.order_id",
+      "data.ec.order.status":          "properties.status",
+      "data.ec.order.income.revenue":  "properties.value"
     }
   }
 ]
