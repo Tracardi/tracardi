@@ -1,4 +1,5 @@
 from tracardi.config import tracardi
+from tracardi.context import get_context
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
@@ -72,10 +73,15 @@ class MigrationManager:
         return [index for index in await es.list_indices() if re.fullmatch(template, index)]
 
     async def get_customized_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
+
+        if Version(version=tracardi.version.version, name=get_context().tenant) != Version(version=self.to_version.version, name=self.to_version.name):
+            raise ValueError(f"Installed system version is {tracardi.version}, "
+                             f"but migration migrated to version {self.to_version}.")
+
         general_schemas = self.get_schemas()
 
         customized_schemas = []
-        es = ElasticClient.instance()
+
         for schema in general_schemas:
             if schema.copy_index.multi is True:
                 from_indices = await self.get_multi_indices(template_name=schema.copy_index.from_index)
@@ -100,14 +106,11 @@ class MigrationManager:
                 schema.copy_index.to_index = f"{self.to_version.get_version_prefix()}." \
                                              f"{self.to_version.name}.{schema.copy_index.to_index}"
 
+                es = ElasticClient.instance()
                 if await es.exists_index(schema.copy_index.from_index):
                     customized_schemas.append(schema)
                 else:
                     print(f"Can't find the index {schema.copy_index.from_index}")
-
-        if tracardi.version != Version(version=self.to_version.version, name=self.to_version.name):
-            raise ValueError(f"Installed system version is {tracardi.version.version}, "
-                             f"but migration migrated to version {self.to_version.version}.")
 
         # TODO Warning disabled - save installation info in redis.
         warn = self.from_version.get_version_prefix() in tracardi.version.upgrades

@@ -372,7 +372,7 @@
       "from_index": "tracardi-event",
       "to_index": "tracardi-event",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.device = {};\nrow.history = {};\nrow.os = {};\nrow.app = {};\nrow.entity = {};\nrow.utm = {};\nrow.hit = {};\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": null
     },
     "worker": "reindex",
     "conflicts": null,
