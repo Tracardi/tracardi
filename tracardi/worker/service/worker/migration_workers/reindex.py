@@ -8,7 +8,6 @@ from tracardi.worker.service.worker.migration_workers.utils.client import Elasti
 
 
 def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):
-
     add_task(
         url,
         task_index,
@@ -34,7 +33,7 @@ def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):
         response = client.reindex(body=body, wait_for_completion=schema.wait_for_completion)
         logging.info(f"Reindexing with\n{body}\nResponse:\n{response}")
 
-        if not isinstance(response, dict) :
+        if not isinstance(response, dict):
             raise MigrationError(str(response))
 
         if schema.wait_for_completion is True:
@@ -51,13 +50,21 @@ def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):
 
             while True:
                 task_response = client.get_task(task_id)
-                if task_response is None or task_response["completed"] is True:
+                if task_response is None:
                     break
+
+                if task_response["completed"] is True:
+                    if 'error' in task_response:
+                        error = f"Migration task {task_response['task']['node']}:{task_response['task']['id']} " \
+                                f"from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` " \
+                                f"FAILED due to {task_response}. "
+                        raise MigrationError(error)
+                    break
+
                 status = task_response["task"]["status"]
                 update_progress(celery_job, status["updated"] + status["created"], status["total"])
                 sleep(3)
 
-            logging.info(f"Migration from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` complete.")
+            logging.info(f"Migration from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` COMPLETED.")
 
             update_progress(celery_job, 100)
-
