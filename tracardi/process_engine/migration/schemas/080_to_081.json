@@ -6,7 +6,7 @@
       "from_index": "tracardi-rule",
       "to_index": "tracardi-rule",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.event_type = {};\nrow.event_type.name = ctx._source.event.type;\nrow.event_type.id = ctx._source.event.type;\nrow.remove(\"event\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.event_type = new HashMap();\nrow.event_type.name = ctx._source.event.type;\nrow.event_type.id = ctx._source.event.type;\nrow.remove(\"event\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -138,7 +138,7 @@
       "from_index": "tracardi-event_to_profile",
       "to_index": "tracardi-event_to_profile",
       "multi": false,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.event_type = {};\nrow.event_type.name = ctx._source.event_type;\nrow.event_type.id = ctx._source.event_type;\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.event_type = new HashMap();\nrow.event_type.name = ctx._source.event_type;\nrow.event_type.id = ctx._source.event_type;\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": [
@@ -204,7 +204,7 @@
       "from_index": "tracardi-profile",
       "to_index": "tracardi-profile",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.data = {};\nrow.data.contact = {};\nrow.data.pii = {};\nrow.data.devices = {};\nrow.data.job = {};\nrow.data.identifier = {};\nrow.data.loyalty = {};\nrow.data.media = {};\nrow.data.pii.firstname = ctx._source.pii.name;\nrow.data.contact.app = {};\nrow.data.contact.address = {};\nrow.data.pii.lastname = ctx._source.pii.surname;\nrow.data.pii.name = ctx._source.pii.surname;\nrow.data.media.social = {};\nrow.data.contact.email = ctx._source.pii.email;\nrow.data.media.social.facebook = ctx._source.pii.facebook;\nrow.data.contact.app.twitter = ctx._source.pii.twitter;\nrow.data.media.social.twitter = ctx._source.pii.twitter;\nrow.data.contact.app.whatsapp = ctx._source.pii.whatsapp;\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.data = new HashMap();\nrow.data.contact = new HashMap();\nrow.data.contact.app = new HashMap();\nrow.data.pii = new HashMap();\nrow.data.devices = new HashMap();\nrow.data.media = new HashMap();\nrow.data.identifier = new HashMap();\nrow.data.loyalty = new HashMap();\nrow.data.media = new HashMap();\nrow.data.pii.firstname = ctx._source.pii.name;\nrow.data.contact.app = new HashMap();\nrow.data.contact.address = new HashMap();\nrow.data.pii.lastname = ctx._source.pii.surname;\nrow.data.pii.name = ctx._source.pii.surname;\nrow.data.media.social = new HashMap();\nrow.data.contact.email = ctx._source.pii.email;\nrow.data.media.social.facebook = ctx._source.pii.facebook;\nrow.data.contact.app.twitter = ctx._source.pii.twitter;\nrow.data.media.social.twitter = ctx._source.pii.twitter;\nrow.data.contact.app.whatsapp = ctx._source.pii.whatsapp;\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -288,7 +288,7 @@
       "from_index": "tracardi-session",
       "to_index": "tracardi-session",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.device = {};\nrow.os = {};\nrow.app = {};\nrow.utm = {};\n//row.device.name = <type keyword>;\n//row.os.version = <type keyword>;\n//row.app.name = <type keyword>;\n//row.app.language = <type keyword>;\n//row.app.type = <type keyword>;\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.device = new HashMap();\nrow.os = new HashMap();\nrow.app = new HashMap();\nrow.utm = new HashMap();\n//row.device.name = <type keyword>;\n//row.os.version = <type keyword>;\n//row.app.name = <type keyword>;\n//row.app.language = <type keyword>;\n//row.app.type = <type keyword>;\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
