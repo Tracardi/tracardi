@@ -28,6 +28,10 @@
       "query": {
         "index": false,
         "type": "text"
+      },
+      "enabled": {
+        "type": "boolean",
+        "null_value": true
       }
     }
   },
