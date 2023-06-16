@@ -12,12 +12,10 @@ async def is_schema_ok() -> Tuple[bool, list]:
 
     # Missing indices in staging
     with ServerContext(get_context().switch_context(production=False)):
-        print('B123 install', get_context())
         _indices_staging = [item async for item in get_indices_status()]
 
     # Missing indices in production
     with ServerContext(get_context().switch_context(production=True)):
-        print('B124 install', get_context())
         _indices_production = [item async for item in get_indices_status()]
 
     _indices = _indices_staging + _indices_production
