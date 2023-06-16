@@ -315,6 +315,9 @@
         "aux": {
           "type": "flattened"
         },
+        "trash": {
+          "type": "flattened"
+        },
         "config": {
           "dynamic": "true",
           "type": "object",
