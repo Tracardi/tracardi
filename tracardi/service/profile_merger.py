@@ -83,6 +83,15 @@ class ProfileMerger:
                 await storage.driver.session.refresh()
 
     @staticmethod
+    def add_keywords(merge_by):
+        _merge_by_keyword = []
+        for name, value in merge_by:
+            if name.startswith('traits.'):
+                name = f"{name}.keyword"
+            _merge_by_keyword.append((name, value))
+        return _merge_by_keyword
+
+    @staticmethod
     async def invoke_merge_profile(profile: Optional[Profile],
                                    merge_by: List[Tuple[str, str]],  # Field: value
                                    conflict_aux_key: str = "conflicts",
