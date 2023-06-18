@@ -6,6 +6,8 @@ from typing import Optional, Tuple
 from dotty_dict import dotty
 
 from tracardi.domain.event import Event, Tags
+from tracardi.domain.profile import Profile
+from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.storage.driver import storage
 from tracardi.service.string_manager import capitalize_event_type_id
 
@@ -112,7 +114,7 @@ def remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def auto_index_default_event_type(event: Event) -> Event:
+def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
     index_schema = get_default_event_type_mapping(event.type, 'copy')
 
     if index_schema is not None:
@@ -135,7 +137,17 @@ def auto_index_default_event_type(event: Event) -> Event:
         state = get_default_event_type_mapping(event.type, 'state')
 
         if state:
-            event.journey.state = state
+            if isinstance(state, str):
+                if state.startswith("call:"):
+                    state = state[5:]
+                    module, function = state.split(',')
+                    module = import_package(module)
+                    state_function = load_callable(module, function)
+
+                    event.journey.state = state_function(event, profile)
+                else:
+                    event.journey.state = state
+
 
         tags = get_default_event_type_mapping(event.type, 'tags')
         if tags:

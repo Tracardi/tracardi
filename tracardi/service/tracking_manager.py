@@ -174,7 +174,7 @@ class TrackingManager(TrackingManagerBase):
                     _event.request = self.tracker_payload.request
 
                 # Auto index event
-                _event = auto_index_default_event_type(_event)
+                _event = auto_index_default_event_type(_event, self.profile)
                 if License.has_service(INDEXER):
                     _event = await index_event_traits(_event, self.console_log)
 
