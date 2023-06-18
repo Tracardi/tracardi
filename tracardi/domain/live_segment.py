@@ -7,6 +7,10 @@ class LiveSegment(NamedEntity):
     description: Optional[str] = ""
     enabled: bool = True
     workflow: NamedEntity
+    type: Optional[str] = 'workflow'
+    operation: Optional[str] = None
+    condition: Optional[str] = None
+    segment: Optional[str] = None
 
     @staticmethod
     def storage_info() -> StorageInfo:

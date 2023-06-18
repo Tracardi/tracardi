@@ -17,6 +17,13 @@ from .segment import Segment
 from ..process_engine.tql.condition import Condition
 
 
+def force_lists(props: List[str], data):
+    for prop in props:
+        if prop in data and data[prop] is not None and not isinstance(data[prop], list):
+            data[prop] = [str(data[prop])]
+    return data
+
+
 class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
 
@@ -107,7 +114,13 @@ class ProfileMedia(BaseModel):
 
 
 class ProfilePreference(BaseModel):
-    purchases: Union[Optional[str], Optional[List[str]]] = None
+
+    def __init__(self, **data: Any):
+        data = force_lists(['purchases', 'colors', 'sizes', 'devices', 'channels', 'payments', 'brands', 'fragrances',
+                            'services', 'other'], data)
+        super().__init__(**data)
+
+    purchases: Optional[List[str]] = []
     colors: Optional[List[str]] = []
     sizes: Optional[List[str]] = []
     devices: Optional[List[str]] = []
@@ -147,6 +160,11 @@ class ProfileLoyaltyCard(BaseModel):
 
 
 class ProfileLoyalty(BaseModel):
+
+    def __init__(self, **data: Any):
+        data = force_lists(['codes'], data)
+        super().__init__(**data)
+
     codes: Optional[List[str]] = []
     card: Optional[ProfileLoyaltyCard] = ProfileLoyaltyCard()
 

@@ -83,6 +83,8 @@ class Event(NamedEntity):
     data: Optional[EventData] = EventData()
 
     def __init__(self, **data: Any):
+        if 'type' in data and isinstance(data['type'], str):
+            data['type'] = data['type'].lower().replace(' ', '-')
         if 'name' not in data:
             data['name'] = capitalize_event_type_id(data['type'])
         super().__init__(**data)
