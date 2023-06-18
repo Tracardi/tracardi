@@ -104,6 +104,13 @@ class ProfileMerger:
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
 
+            # CAUTION! Traits are indexed as text and keyword. So loading it by trains.name will not work
+            # we need to load it by traits.name.keyword.
+
+            # Here we are appending keyword for each trait.
+
+            merge_by = ProfileMerger.add_keywords(merge_by)
+
             similar_profiles = await storage.driver.profile.load_profiles_to_merge(
                 merge_by,
                 limit=limit
