@@ -34,7 +34,9 @@
     },
     "copy": {
       "hit.query":   "properties.query"
-    }
+    },
+    "tags": ["browsing", "search", "product"],
+    "state": "consideration"
   },
   {
     "name": "Search",
@@ -47,7 +49,8 @@
     "copy": {
       "hit.page.search.category":  "properties.category",
       "hit.page.search.query":     "properties.query"
-    }
+    },
+    "tags": ["browsing", "search"]
   },
   {
     "name": "Page View",
@@ -58,7 +61,9 @@
     },
     "copy": {
       "hit.page.category": "properties.category"
-    }
+    },
+    "tags": ["browsing"],
+     "state": "awareness"
   },
   {
     "name": "Page Print",
@@ -69,7 +74,9 @@
     },
     "traits": {
       "hit.page.category": "properties.category"
-    }
+    },
+    "tags": ["printing"],
+    "state": "awareness"
   },
   {
     "name": "Screen View",
@@ -82,6 +89,7 @@
     "traits": {
       "hit.page.name":      "properties.name",
       "hit.page.category":  "properties.category"
-    }
+    },
+    "tags": ["browsing"]
   }
 ]

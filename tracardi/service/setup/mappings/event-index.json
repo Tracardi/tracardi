@@ -802,6 +802,14 @@
               "type": "double"
             }
           }
+        },
+        "journey": {
+          "properties": {
+            "state": {
+              "type": "keyword",
+              "ignore_above": 32
+            }
+          }
         }
       }
     },

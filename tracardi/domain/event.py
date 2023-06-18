@@ -46,6 +46,10 @@ class EventSession(Entity):
     tz: Optional[str] = 'utc'
 
 
+class EventJourney(BaseModel):
+    state: Optional[str] = None
+
+
 class EventData(BaseModel):
     pii: Optional[ProfilePII] = ProfilePII()
     contact: Optional[ProfileContact] = ProfileContact()
@@ -78,6 +82,7 @@ class Event(NamedEntity):
     request: Optional[dict] = {}
     config: Optional[dict] = {}
     tags: Tags = Tags()
+    journey: EventJourney = EventJourney()
     aux: dict = {}
 
     data: Optional[EventData] = EventData()

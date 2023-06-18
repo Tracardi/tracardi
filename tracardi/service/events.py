@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 
 from dotty_dict import dotty
 
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, Tags
 from tracardi.service.storage.driver import storage
 from tracardi.service.string_manager import capitalize_event_type_id
 
@@ -131,5 +131,14 @@ def auto_index_default_event_type(event: Event) -> Event:
         event_dict = dot_event.to_dict()
         remove_empty_dicts(event_dict)
         event = Event(**event_dict)
+
+        state = get_default_event_type_mapping(event.type, 'state')
+
+        if state:
+            event.journey.state = state
+
+        tags = get_default_event_type_mapping(event.type, 'tags')
+        if tags:
+            event.tags = Tags(values=tuple(tags), count=len(tags))
 
     return event
