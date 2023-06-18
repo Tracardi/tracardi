@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import validator
 
 from tracardi.domain.profile import Profile
@@ -46,6 +48,7 @@ class MoveSegmentAction(ActionRunner):
             if self.config.to_segment not in profile.segments:
                 profile.segments.append(self.config.to_segment)
             profile.operation.update = True
+            profile.metadata.time.segmentation = datetime.utcnow()
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:

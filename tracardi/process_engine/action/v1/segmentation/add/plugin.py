@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Union
 
 from pydantic import validator
@@ -38,6 +39,7 @@ class AddSegmentAction(ActionRunner):
             profile = Profile(**dot.profile)
             if self.config.segment not in self.profile.segments:
                 profile.operation.update = True
+                profile.metadata.time.segmentation = datetime.utcnow()
 
                 try:
                     dot = self._get_dot_accessor(payload)

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import validator
 
 from tracardi.domain.profile import Profile
@@ -35,6 +37,8 @@ class DeleteSegmentAction(ActionRunner):
             profile = Profile(**dot.profile)
             if self.config.segment in self.profile.segments:
                 profile.operation.update = True
+                profile.metadata.time.segmentation = datetime.utcnow()
+
                 profile.segments = list(set(profile.segments))
                 profile.segments.remove(self.config.segment)
             self.profile.replace(profile)

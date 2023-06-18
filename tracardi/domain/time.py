@@ -30,6 +30,7 @@ class ProfileVisit(BaseModel):
 
 
 class ProfileTime(Time):
+    segmentation: Optional[datetime] = None
     # Inherits from Time
     visit: ProfileVisit = ProfileVisit()
 

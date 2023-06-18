@@ -34,6 +34,9 @@
                 "update": {
                   "type": "date"
                 },
+                "segmentation": {
+                  "type": "date"
+                },
                 "visit": {
                   "properties": {
                     "last": {

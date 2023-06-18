@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -28,7 +30,8 @@ class ProfileSegmentAction(ActionRunner):
             if segment in profile.segments:
                 profile.segments = list(set(profile.segments))
                 profile.segments.remove(segment)
-
+        profile.metadata.time.segmentation = datetime.utcnow()
+        profile.operation.update = True
         self.profile.replace(profile)
 
     async def run(self, payload: dict, in_edge=None) -> Result:

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from tracardi.domain.profile import Profile
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
@@ -10,6 +12,7 @@ class SegmentProfileAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
             self.profile.operation.segment = True
+            self.profile.metadata.time.segmentation = datetime.utcnow()
         else:
             if self.event.metadata.profile_less is True:
                 self.console.warning("Can not segment profile when processing profile less events.")
