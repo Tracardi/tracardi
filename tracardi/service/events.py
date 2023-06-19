@@ -76,7 +76,7 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
         for profile_path, (event_path, operation) in copy_schema.items():  # type: str, tuple(str, str)
 
             # Skip none existing event properties.
-            if event_path in flat_event:
+            if event_path is not None and event_path in flat_event:
                 profile_updated_flag = True
                 if operation == 'append':
                     if profile_path not in flat_profile:
