@@ -15,7 +15,9 @@
         "data.marketing.consents",
         "equal"
       ]
-    }
+    },
+    "tags": ["marketing", "consent"],
+    "state": "awareness"
   },
   {
     "name": "Profile Update",
@@ -442,6 +444,8 @@
         "data.loyalty.card.points",
         "equal"
       ]
-    }
+    },
+    "tags": ["profile", "data-update"],
+    "state": "awareness"
   }
 ]

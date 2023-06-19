@@ -32,7 +32,9 @@
       "data.ec.product.price":    "properties.price",
       "data.ec.product.quantity": "properties.quantity",
       "data.ec.product.position": "properties.position"
-    }
+    },
+    "tags": ["browsing", "product"],
+    "state": "awareness"
   },
   {
     "name": "Product Details Page View",
@@ -65,7 +67,9 @@
       "data.ec.product.variant":   "properties.variant",
       "data.ec.product.price":     "properties.price",
       "data.ec.product.quantity":  "properties.quantity"
-    }
+    },
+    "tags": ["browsing", "product"],
+    "state": "awareness"
   },
   {
     "name": "Basket Viewed",
@@ -73,7 +77,9 @@
     "id": "basket-viewed",
     "properties": {
       "id": "string"
-    }
+    },
+    "tags": ["browsing", "basket"],
+    "state": "consideration"
   },
   {
     "name": "Product Added To Basket",
@@ -106,7 +112,9 @@
       "data.ec.product.variant":  "properties.variant",
       "data.ec.product.price":    "properties.price",
       "data.ec.product.quantity": "properties.quantity"
-    }
+    },
+    "tags": ["browsing", "basket"],
+    "state": "consideration"
   },
   {
     "name": "Product Removed From Basket",

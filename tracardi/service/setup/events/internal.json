@@ -3,19 +3,24 @@
     "name": "Session Opened",
     "description": "Customer visit starts.",
     "id": "session-opened",
-    "properties": {}
-  },
+    "properties": {},
+      "tags": ["event:internal"],
+      "state": "call:tracardi.service.setup.events.journey.logic,session_opened"
+    },
   {
     "name": "Session Closed",
     "description": "Customer visit ends.",
     "id": "session-closed",
-    "properties": {}
+    "properties": {},
+    "tags": ["event:internal"]
   },
   {
     "name": "Profile Created",
     "description": "Customer profile was created.",
     "id": "profile-created",
-    "properties": {}
+    "properties": {},
+    "tags": ["event:internal"],
+    "state": "awareness"
   },
   {
     "name": "Profile Inactive",
@@ -23,12 +28,14 @@
     "id": "profile-inactive",
     "properties": {
       "reason": "string"
-    }
+    },
+    "tags": ["event:internal"]
   },
   {
     "name": "Profile Archived",
     "description": "Customer profile was archived.",
     "id": "profile-archived",
-    "properties": {}
+    "properties": {},
+    "tags": ["event:internal"]
   }
 ]

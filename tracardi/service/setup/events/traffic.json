@@ -36,7 +36,7 @@
       "hit.query":   "properties.query"
     },
     "tags": ["browsing", "search", "product"],
-    "state": "consideration"
+    "state": "awareness"
   },
   {
     "name": "Search",
@@ -63,7 +63,7 @@
       "hit.page.category": "properties.category"
     },
     "tags": ["browsing"],
-     "state": "awareness"
+    "state": "call:tracardi.service.setup.events.journey.logic,page_view"
   },
   {
     "name": "Page Print",
@@ -90,6 +90,7 @@
       "hit.page.name":      "properties.name",
       "hit.page.category":  "properties.category"
     },
-    "tags": ["browsing"]
+    "tags": ["browsing"],
+    "state": "awareness"
   }
 ]
