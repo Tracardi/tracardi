@@ -286,7 +286,6 @@ class ElasticStorage:
                     sort_by_query.append(field.to_query())
             if sort_by_query:
                 query['sort'] = sort_by_query
-        print(query)
         result = await self.search(query)
         return result
 

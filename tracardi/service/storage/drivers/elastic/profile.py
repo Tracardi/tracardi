@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple
 
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import *

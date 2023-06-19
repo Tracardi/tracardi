@@ -4,7 +4,10 @@ from hashlib import sha1
 from datetime import datetime
 from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
 from uuid import uuid4
+
+from dotty_dict import dotty
 from pydantic import PrivateAttr, validator, BaseModel, ValidationError
+
 from tracardi.exceptions.exception_service import get_traceback
 
 from tracardi.service.utils.getters import get_entity_id
@@ -15,6 +18,7 @@ from ..event import Event
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..geo import Geo
+from ..identification_point import IdentificationPoint
 from ..marketing import UTM
 from ..payload.event_payload import EventPayload
 from ..session import Session, SessionMetadata, SessionTime
@@ -24,6 +28,7 @@ from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 from user_agents import parse
 
+from ...service.storage.drivers.elastic import identification
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -44,6 +49,7 @@ class ScheduledEventConfig:
 
 
 class TrackerPayload(BaseModel):
+
     _id: str = PrivateAttr(None)
     _make_static_profile_id: bool = PrivateAttr(False)
     _scheduled_flow_id: str = PrivateAttr(None)
@@ -316,6 +322,34 @@ class TrackerPayload(BaseModel):
             return True
         return self.profile.id != refer_profile_id.strip()
 
+    async def list_identification_points(self):
+        return list(await self.get_identification_points())
+
+    def get_profile_attributes_via_identification_data(self, valid_identification_points) -> Optional[List[Tuple[str, str]]]:
+        try:
+            # Get first event type and match identification point for it
+            _identification = valid_identification_points[0]
+            properties = dotty(next(self.get_event_properties(_identification.event_type.id)))
+            find_profile_by_fields = []
+            for field in _identification.fields:
+                if field.event_property.ref and field.profile_trait.ref:
+                    if field.event_property.value not in properties:
+                        raise AssertionError(f"While creating new profile Tracardi was forced to load data by merging "
+                                             f"key because identification must be performed on new profile. "
+                                             f"We encountered missing data issue for property "
+                                             f"[{field.event_property.value}] in the event property. "
+                                             f"Identification point [{_identification.name}] has it defined as customer "
+                                             f"merging key but the event has only the properties {properties}.")
+                        # error
+                    find_profile_by_fields.append((field.profile_trait.value, properties[field.event_property.value]))
+            if find_profile_by_fields:
+                # load profile
+                return find_profile_by_fields
+            return None
+        except AssertionError as e:
+            logger.error(f"Can not find property to load profile by identification data: {str(e)}")
+            return None
+
     async def get_profile_and_session(self, session: Session,
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
                                       profile_less) -> Tuple[Optional[Profile], Session]:
@@ -348,14 +382,54 @@ class TrackerPayload(BaseModel):
                 # Bind profile
                 if self.profile is None:
 
-                    # Create empty default profile generate profile_id
-                    profile = Profile.new()
+                    # First, check if the tracker_payload does not have events that need merging because
+                    # the identification point is defined. In such case we need to try to load profile with
+                    # data defined in identification point.
 
-                    # Create new profile
-                    is_new_profile = True
 
-                    logger.info(
-                        "New profile created at UTC {} with id {}".format(profile.metadata.time.insert, profile.id))
+                    # todo Rafael we need to check if there is identification point for this event and maybe we
+                    # todo should merge/load the profile
+
+                    valid_identification_points = await self.list_identification_points()
+
+                    # Has identification points?
+                    if valid_identification_points:
+                        # We have new profile and identification point.
+                        profile_fields = self.get_profile_attributes_via_identification_data(valid_identification_points)
+
+                        # We have fields that identify profile according to identification point
+
+                        from ...service.profile_merger import ProfileMerger
+
+                        profile = await ProfileMerger.invoke_merge_profile(
+                            Profile.new(),
+                            merge_by=profile_fields,
+                            limit=1000)
+
+                        # profiles = await profile_driver.load_profiles_to_merge(merge_key_values=profile_fields)
+                        print("profiles", profile)
+                        print(profile_fields)
+
+                    # If there is still no profile that means that it could not be loaded. It can happen if
+                    # event properties did not have all necessary data or the is no profile with defined
+                    # attributes.
+
+                    # Then create new profile.
+
+                    if profile is None:
+
+                        # Create empty default profile generate profile_id
+                        profile = Profile.new()
+
+                        # Create new profile
+                        is_new_profile = True
+
+                        logger.info(
+                            "New profile created at UTC {} with id {}".format(profile.metadata.time.insert, profile.id))
+
+                    # if True:  # has identification point
+                    #     self.profile = profile
+                    #     # load profile by identification data
 
                 else:
 
@@ -557,3 +631,21 @@ class TrackerPayload(BaseModel):
 
         return profile, session
 
+    @staticmethod
+    async def _load_identification_points():
+        identification_points = await identification.load_enabled(limit=200)
+        return identification_points.to_domain_objects(IdentificationPoint)
+
+    def _get_valid_identification_points(self,
+                                         identification_points: List[IdentificationPoint]):
+        for identification_point in identification_points:
+            if identification_point.source.id != "" and identification_point.source.id != self.source.id:
+                continue
+
+            if not self.has_type(identification_point.event_type.id):
+                continue
+
+            yield identification_point
+
+    async def get_identification_points(self):
+        return self._get_valid_identification_points(await self._load_identification_points())

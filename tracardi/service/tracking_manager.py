@@ -463,6 +463,7 @@ class TrackingManager(TrackingManagerBase):
                     )
                     logger.error(message)
 
+                # TODO Does profile need rules to merge?
                 # Profile merge
                 try:
                     if self.profile is not None:  # Profile can be None if profile_less event is processed
