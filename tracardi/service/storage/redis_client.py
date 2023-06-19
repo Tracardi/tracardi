@@ -36,7 +36,6 @@ class RedisClient(metaclass=Singleton):
 
     @staticmethod
     def get_tenant_prefix(name):
-        print(f"Redis namespace: {get_context().tenant}:{name}")
         return f"{get_context().tenant}:{name}"
 
     def hexists(self, name: str, key: str) -> Union[Awaitable[bool], bool]:
