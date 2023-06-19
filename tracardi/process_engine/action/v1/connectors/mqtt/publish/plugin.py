@@ -6,7 +6,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from asyncio_mqtt import Client
 
 from .model.config import Configuration
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 
 
 def validate(config: dict):
@@ -19,7 +19,7 @@ class MqttPublishAction(ActionRunner):
 
     async def set_up(self, init):
         configuration = validate(init)
-        resource = await storage.driver.resource.load(configuration.source.id)
+        resource = await resource_db.load(configuration.source.id)
 
         self.config = configuration
         self.credentials = resource.credentials.get_credentials(self, output=MqttResourceCredentials)

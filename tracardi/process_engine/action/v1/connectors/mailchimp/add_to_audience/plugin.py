@@ -6,7 +6,7 @@ from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
 from tracardi.process_engine.action.v1.connectors.mailchimp.service.mailchimp_audience_editor import MailChimpAudienceEditor
 from tracardi.service.notation.dict_traverser import DictTraverser
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 
 
 def validate(config: dict):
@@ -20,7 +20,7 @@ class MailChimpAudienceAdder(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self._client = MailChimpAudienceEditor(

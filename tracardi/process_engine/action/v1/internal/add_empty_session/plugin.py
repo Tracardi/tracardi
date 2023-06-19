@@ -6,7 +6,7 @@ from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import session as session_db
 
 
 class AddEmptySessionAction(ActionRunner):
@@ -27,7 +27,7 @@ class AddEmptySessionAction(ActionRunner):
             )
         self.event.operation.update = True
         self.execution_graph.set_sessions(session)
-        await storage.driver.session.save(session)
+        await session_db.save(session)
 
         self.set_tracker_option("saveSession", True)
 

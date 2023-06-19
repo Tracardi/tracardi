@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta, datetime
 from typing import List, Optional, Dict, Any, Callable, Tuple
@@ -9,7 +9,7 @@ from dotty_dict import dotty
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import event as event_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -229,7 +229,7 @@ async def main():
         )
 
     fields = ['context.page.history.length']
-    result = storage.driver.event.get_all_events_by_fields(search_by, fields + ["metadata.time.insert"])
+    result = event_db.get_all_events_by_fields(search_by, fields + ["metadata.time.insert"])
     transformers = {
         # 'context.page.history.length': lambda row: "a" if row.value > 5 else "b"
     }

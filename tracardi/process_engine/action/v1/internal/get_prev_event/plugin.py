@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import event as event_db
 from tracardi.service.plugin.domain.result import Result
 
 
@@ -22,7 +22,7 @@ class PreviousEventGetter(ActionRunner):
         event_type = self.event.type if self.config.event_type.id == "@current" else self.config.event_type.id
 
         if self.event.metadata.profile_less is False:
-            result = await storage.driver.event.get_nth_last_event(
+            result = await event_db.get_nth_last_event(
                 profile_id=self.profile.id,
                 event_type=event_type,
                 n=(-1) * self.config.offset
@@ -33,7 +33,7 @@ class PreviousEventGetter(ActionRunner):
             return Result(port="found", value=result)
 
         else:
-            result = await storage.driver.event.get_nth_last_event(
+            result = await event_db.get_nth_last_event(
                 event_type=event_type,
                 n=(-1) * self.config.offset
             )

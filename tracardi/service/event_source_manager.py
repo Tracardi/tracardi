@@ -1,5 +1,5 @@
 from tracardi.domain.event_source import EventSource
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import event_source as event_source_db
 
 
 def event_source_types():
@@ -40,10 +40,10 @@ def event_source_types():
 async def save_source(event_source: EventSource):
     types = event_source_types()
     if event_source.is_allowed(types):
-        result = await storage.driver.event_source.save(event_source)
+        result = await event_source_db.save(event_source)
         if result is None or result.is_nothing_saved():
             raise OSError("Could not save event source.")
-        await storage.driver.event_source.refresh()
+        await event_source_db.refresh()
         return result
     else:
         raise ValueError(f"Unknown event source types {event_source.type}. Available {types}.")

@@ -5,7 +5,7 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.mailchimp_sender import MailChimpTransactionalSender
 from tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.model.config import Config, Token
 from tracardi.service.notation.dot_template import DotTemplate
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from email_validator import validate_email, EmailNotValidError
 
 
@@ -21,7 +21,7 @@ class TransactionalMailSender(ActionRunner):
     async def set_up(self, init):
 
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         print(resource.credentials.get_credentials(self, output=Token).token)
 

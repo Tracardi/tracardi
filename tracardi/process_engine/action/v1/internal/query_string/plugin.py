@@ -1,7 +1,7 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import raw as raw_db
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 from elasticsearch import ElasticsearchException
@@ -27,7 +27,7 @@ class CountRecordsAction(ActionRunner):
 
         try:
 
-            result = await storage.driver.raw.count_by_query(
+            result = await raw_db.count_by_query(
                 index=self.config.index,
                 query=query,
                 time_span=parse_time(self.config.time_range)

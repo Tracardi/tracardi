@@ -1,4 +1,4 @@
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
 from ...domain.event import Event
@@ -37,7 +37,7 @@ class MauticConnector(DestinationInterface):
             else:
                 self.resource.credentials.production = client.credentials
 
-            await storage.driver.resource.save_record(self.resource)
+            await resource_db.save_record(self.resource)
 
     async def dispatch_profile(self, data, profile: Profile, session: Session):
         await self._dispatch(data)

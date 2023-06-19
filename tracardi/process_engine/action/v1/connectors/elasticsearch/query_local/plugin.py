@@ -7,7 +7,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import raw as raw_db
 
 
 def validate(config: dict):
@@ -46,7 +46,7 @@ class QueryLocalDatabase(ActionRunner):
             if self.config.log:
                 self.console.log(f"Executed query {query}")
 
-            result = await storage.driver.raw.query_by_index(
+            result = await raw_db.query_by_index(
                 index=self.config.index,
                 query=query
             )

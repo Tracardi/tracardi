@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.dot_notation_validator import is_dot_notation_valid
 from tracardi.service.plugin.domain.config import PluginConfig

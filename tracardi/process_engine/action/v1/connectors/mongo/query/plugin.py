@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 from tracardi.domain.resource_config import ResourceConfig
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
@@ -27,7 +27,7 @@ class MongoConnectorAction(ActionRunner):
 
     async def set_up(self, init):
         config = PluginConfiguration(**init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         mongo_config = resource.credentials.get_credentials(self, output=MongoConfiguration)  # type: MongoConfiguration
         self.client = MongoClient(mongo_config)
@@ -51,7 +51,7 @@ class Endpoint(PluginEndpoint):
     @staticmethod
     async def fetch_databases(config):
         config = ResourceConfig(**config)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
         mongo_config = MongoConfiguration(**resource.credentials.production)
         client = MongoClient(mongo_config)
         databases = await client.dbs()
@@ -63,7 +63,7 @@ class Endpoint(PluginEndpoint):
     @staticmethod
     async def fetch_collections(config):
         config = DatabaseConfig(**config)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
         mongo_config = MongoConfiguration(**resource.credentials.production)
         client = MongoClient(mongo_config)
         collections = await client.collections(config.database.id)

@@ -1,16 +1,13 @@
 import json
 from json import JSONDecodeError
-from uuid import uuid4
-
-from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata
-from tracardi.domain.time import EventTime
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import event as event_db
+from tracardi.service.storage.driver.storage.driver import session as session_db
+from tracardi.service.storage.driver.storage.driver import profile as profile_db
 from .model.configuration import Configuration
 from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from typing import Optional
@@ -54,14 +51,14 @@ class StartAction(ActionRunner):
         # Replace session
 
         if self.config.session_id:
-            session = await storage.driver.session.load_by_id(self.config.session_id)
+            session = await session_db.load_by_id(self.config.session_id)
             if not session:
                 raise ValueError(f"Can not load session with id {self.config.session_id}")
 
         # Replace profile
 
         if self.config.profile_id:
-            _profile = await storage.driver.profile.load_by_id(self.config.profile_id)
+            _profile = await profile_db.load_by_id(self.config.profile_id)
             if not _profile:
                 msg = f"Can not load session with id {self.config.profile_id}"
                 raise ValueError(msg)
@@ -69,7 +66,7 @@ class StartAction(ActionRunner):
             profile = _profile.to_entity(Profile)
 
         if self.config.event_id:
-            loaded_event = await storage.driver.event.load(self.config.event_id)
+            loaded_event = await event_db.load(self.config.event_id)
             if loaded_event is None:
                 raise ValueError(f"Can not load event with id {self.config.event_id}")
             event = loaded_event.to_entity(Event)

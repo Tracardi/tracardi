@@ -1,7 +1,4 @@
-from typing import Optional
-
 from tracardi.domain.entity import Entity
-from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.domain.value_object.storage_info import StorageInfo
 

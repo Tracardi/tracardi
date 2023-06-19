@@ -1,7 +1,5 @@
 from typing import List
 
-from pydantic import BaseModel
-
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session

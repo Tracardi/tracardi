@@ -8,7 +8,7 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.storage.elastic_client import ElasticClient
 from .model.config import Config
 from elasticsearch import ElasticsearchException
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 
 
@@ -39,7 +39,7 @@ class ElasticSearchFetcher(ActionRunner):
 
     async def set_up(self, init):
         config = Config(**init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         credentials = resource.credentials.get_credentials(self, ElasticCredentials)

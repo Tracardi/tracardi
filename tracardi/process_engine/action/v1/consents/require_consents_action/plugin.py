@@ -3,7 +3,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import consent_type as consent_type_db
 from tracardi.domain.consent_type import ConsentType
 
 
@@ -32,7 +32,7 @@ class RequireConsentsAction(ActionRunner):
                 self.profile.consents.pop(consent_id)
 
         for consent_id in consent_ids:
-            consent_type = await storage.driver.consent_type.get_by_id(consent_id)
+            consent_type = await consent_type_db.get_by_id(consent_id)
 
             if consent_type is None:
                 raise ValueError(f"There is no consent type with ID {consent_id}")

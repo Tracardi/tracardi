@@ -4,7 +4,6 @@ from asyncio import Task
 from collections import defaultdict
 from time import time
 from typing import Dict, List, Tuple, Optional
-from pydantic import ValidationError
 from tracardi.service.license import License
 
 from tracardi.domain.event import Event

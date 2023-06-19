@@ -4,7 +4,7 @@ from typing import Any
 import aiomysql
 from datetime import datetime, date
 from tracardi.service.notation.dict_traverser import DictTraverser
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -26,7 +26,7 @@ class MysqlConnectorAction(ActionRunner):
     async def set_up(self, init):
 
         configuration = validate(init)
-        resource = await storage.driver.resource.load(configuration.source.id)
+        resource = await resource_db.load(configuration.source.id)
 
         self.config = configuration
         self.connection = resource.credentials.get_credentials(self, output=Connection)

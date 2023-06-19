@@ -8,7 +8,7 @@ from dotty_dict import dotty
 from tracardi.domain.event import Event, Tags
 from tracardi.domain.profile import Profile
 from tracardi.service.module_loader import load_callable, import_package
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import event as event_db
 from tracardi.service.string_manager import capitalize_event_type_id
 
 _local_dir = os.path.dirname(__file__)
@@ -38,7 +38,7 @@ def get_event_type_names():
 async def get_event_types(query: str = None, limit: int = 1000):
     pre_defined = list(get_event_type_names())
     pre_defined_ids = [item[0] for item in pre_defined]
-    result = await storage.driver.event.unique_field_value(query, limit)
+    result = await event_db.unique_field_value(query, limit)
     for item in result:
         if item not in pre_defined_ids:
             pre_defined.append((item, capitalize_event_type_id(item)))

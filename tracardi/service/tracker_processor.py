@@ -8,7 +8,8 @@ from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import profile as profile_db
+from tracardi.service.storage.driver.storage.driver import session as session_db
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import tracardi
@@ -160,8 +161,8 @@ class TrackerProcessor(TrackProcessorBase):
 
                 if orchestrator.locked and source.synchronize_profiles:
                     profile_synchronizer.unlock_entities(orchestrator.locked)
-                    await storage.driver.profile.refresh()
-                    await storage.driver.session.refresh()
+                    await profile_db.refresh()
+                    await session_db.refresh()
 
                 logger.debug(f"Invoke save results {save_results} tracker payloads.")
 

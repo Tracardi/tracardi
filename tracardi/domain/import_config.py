@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, AnyHttpUrl
+from pydantic import validator, AnyHttpUrl
 from typing import Optional
 from tracardi.service.secrets import encrypt, decrypt
 from tracardi.domain.named_entity import NamedEntity

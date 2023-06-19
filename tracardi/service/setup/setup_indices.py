@@ -3,14 +3,12 @@ import os
 from typing import List, Tuple, Generator, Any
 
 from elasticsearch.exceptions import ConnectionTimeout, TransportError
-from tracardi.context import ServerContext, Context, get_context
-from tracardi.service.tracardi_http_client import HttpClient
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.data.defaults import default_db_data
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
 import logging
 
@@ -40,7 +38,7 @@ def add_ids(data):
 async def install_default_data():
     for index_name, data in default_db_data.items():
         index = Resource().get_index_constant(index_name)
-        await storage.driver.raw.bulk_upsert(index.get_write_index(), list(add_ids(data)))
+        await raw_db.bulk_upsert(index.get_write_index(), list(add_ids(data)))
 
 
 # todo add to install
@@ -52,12 +50,12 @@ async def update_mappings():
                 update_mappings = json.load(f)
                 print(update_mappings)
                 if index.multi_index:
-                    current_indices = await storage.driver.raw.indices(index.get_templated_index_pattern())
+                    current_indices = await raw_db.indices(index.get_templated_index_pattern())
                     for idx, idx_data in current_indices.items():
                         print(idx)
                         from pprint import pprint
-                        pprint(await storage.driver.raw.set_mapping(idx, update_mappings))
-                        pprint(await storage.driver.raw.get_mapping(idx))
+                        pprint(await raw_db.set_mapping(idx, update_mappings))
+                        pprint(await raw_db.get_mapping(idx))
 
 
 async def create_index_and_template(index, index_map, update_mapping) -> Tuple[List[str], List[str], List[str]]:
@@ -74,9 +72,9 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
 
         template_name = index.get_prefixed_template_name()
 
-        if not await storage.driver.raw.exists_template(template_name):
+        if not await raw_db.exists_template(template_name):
             # Multi indices need templates. Index will be created automatically on first insert
-            ack, result = await storage.driver.raw.add_template(template_name, index_map)
+            ack, result = await raw_db.add_template(template_name, index_map)
 
             if not ack:
                 raise ConnectionError(
@@ -94,10 +92,10 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
 
     # -------- INDEX --------
 
-    if not await storage.driver.raw.exists_index(target_index):
+    if not await raw_db.exists_index(target_index):
 
         # There is no index but the alias may exist
-        exists_index_with_alias_name = await storage.driver.raw.exists_index(alias_index)
+        exists_index_with_alias_name = await raw_db.exists_index(alias_index)
 
         # Skip this error if the index is static. With static indexes there must be one alias to two indices.
         if not index.static:
@@ -114,7 +112,7 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
         result = None
         for attempt in range(0, 3):
             try:
-                result = await storage.driver.raw.create_index(target_index, mapping)
+                result = await raw_db.create_index(target_index, mapping)
                 break
             except ConnectionTimeout as e:
                 raise ConnectionError(
@@ -137,7 +135,7 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
         try:
             logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
             mapping = index_map['template'] if index.multi_index else index_map
-            update_result = await storage.driver.raw.set_mapping(target_index, mapping['mappings'])
+            update_result = await raw_db.set_mapping(target_index, mapping['mappings'])
             logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
         except TransportError as e:
             message = f"Update of index {target_index} mapping failed with error {repr(e)}"
@@ -147,12 +145,12 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
                 logger.error(message)
 
     # Check if alias exists
-    if not await storage.driver.raw.exists_alias(alias_index, index=None):
+    if not await raw_db.exists_alias(alias_index, index=None):
         # Check if it points to target index
-        existing_aliases_setup = await storage.driver.raw.get_alias(alias_index)
+        existing_aliases_setup = await raw_db.get_alias(alias_index)
         if target_index not in existing_aliases_setup:
 
-            result = await storage.driver.raw.update_aliases({
+            result = await raw_db.update_aliases({
                 "actions": [{"add": {"index": target_index, "alias": alias_index}}]
             })
             if acknowledged(result):

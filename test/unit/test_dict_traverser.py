@@ -1,5 +1,3 @@
-import pytest
-
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.notation.dot_accessor import DotAccessor
 

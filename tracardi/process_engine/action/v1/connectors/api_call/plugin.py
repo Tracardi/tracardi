@@ -10,7 +10,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.service.wf.domain.node import Node
 from .model.configuration import RemoteCallConfiguration
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from tracardi.service.url_constructor import ApiCredentials
 
 
@@ -25,7 +25,7 @@ class RemoteCallAction(ActionRunner):
 
     async def set_up(self, init):
         config = RemoteCallConfiguration(**init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, ApiCredentials)

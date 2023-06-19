@@ -1,9 +1,7 @@
 import asyncio
 from collections import defaultdict
 from datetime import timedelta
-from typing import Tuple, List
-
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import event as event_db
 
 
 async def get_min_max(train, tlv_id, plc="a", metric="Metric", unit=None):
@@ -72,7 +70,7 @@ async def get_min_max(train, tlv_id, plc="a", metric="Metric", unit=None):
         }
     })
 
-    result = await storage.driver.event.query(
+    result = await event_db.query(
         query
     )
 

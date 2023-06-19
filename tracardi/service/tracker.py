@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any, Optional
@@ -15,7 +14,7 @@ from tracardi.exceptions.exception import UnauthorizedException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
 from tracardi.service.setup.data.defaults import open_rest_source_bridge
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import profile as profile_db
 from tracardi.service.storage.drivers.elastic.operations.console_log import save_console_log
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
@@ -137,7 +136,7 @@ class Tracker:
                         referred_profile_id = tracker_payload.get_referer_data('profile')
 
                         # Check if profile id exists
-                        profile_record = await storage.driver.profile.load_by_id(referred_profile_id)
+                        profile_record = await profile_db.load_by_id(referred_profile_id)
 
                         if profile_record is not None:
 

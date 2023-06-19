@@ -4,7 +4,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.slack.slack_client import SlackClient
 from tracardi.service.notation.dot_template import DotTemplate
 
@@ -20,7 +20,7 @@ class SlackPoster(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self._client = SlackClient(resource.credentials.get_credentials(self, Token).token)

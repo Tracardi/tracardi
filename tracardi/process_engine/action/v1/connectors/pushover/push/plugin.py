@@ -1,5 +1,5 @@
 import urllib.parse
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
@@ -19,7 +19,7 @@ class PushoverAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        source = await storage.driver.resource.load(config.source.id)
+        source = await resource_db.load(config.source.id)
 
         self.pushover_config = config
         self.credentials = source.credentials.get_credentials(self, output=PushOverAuth)

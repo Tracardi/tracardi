@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.client import MarketingCloudClient, \
     MarketingCloudClientException, MarketingCloudAuthException
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -20,7 +20,7 @@ class DataExtensionSender(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self.client = MarketingCloudClient(**resource.credentials.get_credentials(self))
@@ -41,13 +41,13 @@ class DataExtensionSender(ActionRunner):
             try:
                 await self.client.add_record(mapping, self.config.extension_id, self.config.update)
 
-                resource = await storage.driver.resource.load(self.config.source.id)
+                resource = await resource_db.load(self.config.source.id)
                 if self.debug:
                     resource.credentials.test = self.client.credentials
                 else:
                     resource.credentials.production = self.client.credentials
 
-                await storage.driver.resource.save_record(resource)
+                await resource_db.save_record(resource)
                 return Result(port="success", value=payload)
 
             except (MarketingCloudClientException, MarketingCloudAuthException) as e:

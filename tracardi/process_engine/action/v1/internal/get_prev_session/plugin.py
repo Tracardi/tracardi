@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.storage.driver import session as session_db
 from tracardi.service.plugin.domain.result import Result
 
 
@@ -19,7 +19,7 @@ class PreviousSessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is False:
-            result = await storage.driver.session.get_nth_last_session(
+            result = await session_db.get_nth_last_session(
                 profile_id=self.profile.id,
                 n=(-1) * self.config.offset
             )
