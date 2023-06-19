@@ -387,8 +387,7 @@ class TrackerPayload(BaseModel):
                     # data defined in identification point.
 
 
-                    # todo Rafael we need to check if there is identification point for this event and maybe we
-                    # todo should merge/load the profile
+                    # todo Rafael Bug
 
                     valid_identification_points = await self.list_identification_points()
 
@@ -399,12 +398,13 @@ class TrackerPayload(BaseModel):
 
                         # We have fields that identify profile according to identification point
 
-                        from ...service.profile_merger import ProfileMerger
+                        if profile_fields:
+                            from ...service.profile_merger import ProfileMerger
 
-                        profile = await ProfileMerger.invoke_merge_profile(
-                            Profile.new(),
-                            merge_by=profile_fields,
-                            limit=1000)
+                            profile = await ProfileMerger.invoke_merge_profile(
+                                Profile.new(),
+                                merge_by=profile_fields,
+                                limit=1000)
 
                         # profiles = await profile_driver.load_profiles_to_merge(merge_key_values=profile_fields)
                         print("profiles", profile)
