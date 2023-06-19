@@ -253,8 +253,14 @@ class ElasticStorage:
 
         return await self.storage.delete_by_query(index, query)
 
-    async def load_by_values(self, fields_and_values: List[tuple], sort_by: Optional[List[ElasticFiledSort]] = None,
-                             limit=1000) -> StorageRecords:
+    async def load_by_values(self, fields_and_values: List[tuple],
+                             sort_by: Optional[List[ElasticFiledSort]] = None,
+                             limit=1000,
+                             condition='must'
+                             ) -> StorageRecords:
+
+        if condition not in ['must', 'should']:
+            raise AssertionError(f"Can not use {condition} for querying elasticsearch.")
 
         terms = []
         for field, value in fields_and_values:
@@ -268,7 +274,7 @@ class ElasticStorage:
             "size": limit,
             "query": {
                 "bool": {
-                    "must": terms
+                    condition: terms
                 }
             }
         }
@@ -280,7 +286,7 @@ class ElasticStorage:
                     sort_by_query.append(field.to_query())
             if sort_by_query:
                 query['sort'] = sort_by_query
-
+        print(query)
         result = await self.search(query)
         return result
 
