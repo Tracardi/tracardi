@@ -9,10 +9,10 @@ from dotty_dict import dotty
 from pydantic import PrivateAttr, validator, BaseModel, ValidationError
 
 from tracardi.exceptions.exception_service import get_traceback
-
 from tracardi.service.utils.getters import get_entity_id
 
 from tracardi.config import tracardi
+from ...service.profile_merger import ProfileMerger
 from ..console import Console
 from ..event import Event
 from ..event_metadata import EventPayloadMetadata
@@ -399,7 +399,7 @@ class TrackerPayload(BaseModel):
                         # We have fields that identify profile according to identification point
 
                         if profile_fields:
-                            from ...service.profile_merger import ProfileMerger
+
 
                             profile = await ProfileMerger.invoke_merge_profile(
                                 Profile.new(),
