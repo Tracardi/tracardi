@@ -7,7 +7,7 @@ import aiohttp
 from tracardi.domain.resources.token import Token
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.tracardi_http_client import HttpClient
-from tracardi.service.storage.driver.storage.driver import resource as resource_db
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.result import Result

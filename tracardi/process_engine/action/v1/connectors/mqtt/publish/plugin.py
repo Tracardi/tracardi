@@ -6,7 +6,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from asyncio_mqtt import Client
 
 from .model.config import Configuration
-from tracardi.service.storage.driver.storage.driver import resource as resource_db
+from tracardi.service.storage.driver.elastic import resource as resource_db
 
 
 def validate(config: dict):

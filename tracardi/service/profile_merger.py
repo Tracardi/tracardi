@@ -3,10 +3,10 @@ import logging
 
 from ..context import get_context
 from ..domain.storage_record import RecordMetadata
-from tracardi.service.storage.driver.storage.driver import event as event_db
-from tracardi.service.storage.driver.storage.driver import session as session_db
-from tracardi.service.storage.driver.storage.driver import profile as profile_db
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
+from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import session as session_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
 from collections import defaultdict
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple, Any

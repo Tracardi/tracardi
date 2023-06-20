@@ -4,7 +4,7 @@ from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
 

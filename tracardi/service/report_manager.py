@@ -1,6 +1,6 @@
 from tracardi.domain.report import Report
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
-from tracardi.service.storage.driver.storage.driver import report as report_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.driver.elastic import report as report_db
 
 
 class ReportManagerException(Exception):

@@ -7,7 +7,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver.storage.driver import profile as profile_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
 from .model.configuration import Configuration
 from typing import Optional
 from tracardi.domain.event import Event

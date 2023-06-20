@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, Dict, Any, Callable
 from lark import Lark, Token
 from lark.lexer import TerminalDef
 
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
 
 schema = r"""
 ?start: multi_expr

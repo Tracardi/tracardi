@@ -3,7 +3,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.driver.storage.driver import consent_type as consent_type_db
+from tracardi.service.storage.driver.elastic import consent_type as consent_type_db
 from tracardi.domain.consent_type import ConsentType
 
 

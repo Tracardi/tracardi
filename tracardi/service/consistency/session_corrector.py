@@ -7,8 +7,8 @@ from pydantic import ValidationError
 from tracardi.config import tracardi
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver.storage.driver import event as event_db
-from tracardi.service.storage.driver.storage.driver import session as session_db
+from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import session as session_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

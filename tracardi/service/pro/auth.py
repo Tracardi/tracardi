@@ -3,7 +3,7 @@ import os
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver.storage.driver import pro as pro_db
+from tracardi.service.storage.driver.elastic import pro as pro_db
 
 _local_path = os.path.dirname(__file__)
 logging.basicConfig(level=logging.ERROR)

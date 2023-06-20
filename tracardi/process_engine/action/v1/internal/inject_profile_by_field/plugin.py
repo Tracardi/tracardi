@@ -1,6 +1,6 @@
 from tracardi.domain.profile import Profile
 
-from tracardi.service.storage.driver.storage.driver import profile as profile_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc

@@ -20,7 +20,7 @@ from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.destination_orchestrator import DestinationOrchestrator
-from tracardi.service.storage.driver.storage.driver import debug_info as debug_info_db
+from tracardi.service.storage.driver.elastic import debug_info as debug_info_db
 from tracardi.service.storage.loaders import get_profile_loader
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig

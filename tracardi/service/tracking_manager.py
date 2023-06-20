@@ -33,9 +33,9 @@ from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
-from tracardi.service.storage.driver.storage.driver import segment as segment_db
-from tracardi.service.storage.driver.storage.driver import rule as rule_db
-from tracardi.service.storage.driver.storage.driver import flow as flow_db
+from tracardi.service.storage.driver.elastic import segment as segment_db
+from tracardi.service.storage.driver.elastic import rule as rule_db
+from tracardi.service.storage.driver.elastic import flow as flow_db
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 

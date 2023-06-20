@@ -8,7 +8,7 @@ from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.data.defaults import default_db_data
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
 import logging
 

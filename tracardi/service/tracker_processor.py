@@ -8,8 +8,8 @@ from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.storage.driver.storage.driver import profile as profile_db
-from tracardi.service.storage.driver.storage.driver import session as session_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import tracardi

@@ -12,8 +12,8 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.plugin.domain.register import Plugin
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata
-from tracardi.service.storage.driver.storage.driver import action as action_db
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
+from tracardi.service.storage.driver.elastic import action as action_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource
 
 __local_dir = os.path.dirname(__file__)

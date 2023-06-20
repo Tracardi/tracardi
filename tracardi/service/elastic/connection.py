@@ -5,9 +5,9 @@ import elasticsearch
 
 from tracardi.config import tracardi, elastic
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver.storage.driver import system as system_db
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
-from tracardi.service.storage.driver.storage.driver import bridge as bridge_db
+from tracardi.service.storage.driver.elastic import system as system_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.driver.elastic import bridge as bridge_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

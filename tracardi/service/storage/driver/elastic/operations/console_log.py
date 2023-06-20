@@ -1,7 +1,7 @@
 import asyncio
 
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.storage.driver.storage.driver import console_log as console_log_db
+from tracardi.service.storage.driver.elastic import console_log as console_log_db
 
 
 def save_console_log(console_log: ConsoleLog):

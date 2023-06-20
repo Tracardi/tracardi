@@ -8,7 +8,7 @@ from dotty_dict import dotty
 from tracardi.domain.event import Event, Tags
 from tracardi.domain.profile import Profile
 from tracardi.service.module_loader import load_callable, import_package
-from tracardi.service.storage.driver.storage.driver import event as event_db
+from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.string_manager import capitalize_event_type_id
 
 _local_dir = os.path.dirname(__file__)

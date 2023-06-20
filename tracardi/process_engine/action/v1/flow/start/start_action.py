@@ -5,9 +5,9 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver.storage.driver import event as event_db
-from tracardi.service.storage.driver.storage.driver import session as session_db
-from tracardi.service.storage.driver.storage.driver import profile as profile_db
+from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import session as session_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
 from .model.configuration import Configuration
 from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from typing import Optional

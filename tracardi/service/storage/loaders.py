@@ -1,5 +1,5 @@
 from tracardi.service.license import License, IDENTIFICATION
-from tracardi.service.storage.driver.storage.driver import profile as profile_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
 
 if License.has_service(IDENTIFICATION):
     from com_tracardi.service.identification_point_service import *

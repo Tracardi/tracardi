@@ -4,7 +4,7 @@ from tracardi.context import get_context
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.config import tracardi
-from tracardi.service.storage.driver.storage.driver import raw as raw_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource
 
 logger = logging.getLogger(__name__)

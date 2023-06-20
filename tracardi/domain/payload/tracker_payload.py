@@ -28,7 +28,7 @@ from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 from user_agents import parse
 
-from ...service.storage.driver.storage.driver import identification as identification_db
+from tracardi.service.storage.driver.elastic import identification as identification_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

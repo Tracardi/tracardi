@@ -1,5 +1,5 @@
 from tracardi.domain.event_source import EventSource
-from tracardi.service.storage.driver.storage.driver import event_source as event_source_db
+from tracardi.service.storage.driver.elastic import event_source as event_source_db
 
 
 def event_source_types():

@@ -1,6 +1,6 @@
 import asyncio
 
-from tracardi.service.storage.driver.storage.driver import event as event_db
+from tracardi.service.storage.driver.elastic import event as event_db
 
 
 async def get_min_max(search_by=None, time_range=None):

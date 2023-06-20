@@ -1,4 +1,4 @@
-from tracardi.service.storage.driver.storage.driver import event as event_db
+from tracardi.service.storage.driver.elastic import event as event_db
 
 
 class EventContextFetcher:

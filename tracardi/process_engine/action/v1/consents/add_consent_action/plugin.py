@@ -4,7 +4,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from .model.payload import Consents, Configuration
-from tracardi.service.storage.driver.storage.driver import consent_type as consent_type_db
+from tracardi.service.storage.driver.elastic import consent_type as consent_type_db
 from pytimeparse import parse
 from datetime import datetime
 from tracardi.domain.profile import ConsentRevoke

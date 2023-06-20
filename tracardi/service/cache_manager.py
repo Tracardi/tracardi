@@ -6,14 +6,14 @@ from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
-from tracardi.service.storage.driver.storage.driver import event_source as event_source_db
-from tracardi.service.storage.driver.storage.driver import destination as destination_db
-from tracardi.service.storage.driver.storage.driver import session as session_db
-from tracardi.service.storage.driver.storage.driver import event_to_profile as event_to_profile_db
-from tracardi.service.storage.driver.storage.driver import event_management as event_management_db
-from tracardi.service.storage.driver.storage.driver import event_validation as event_validation_db
-from tracardi.service.storage.driver.storage.driver import data_compliance as data_compliance_db
-from tracardi.service.storage.driver.storage.driver import event_reshaping as event_reshaping_db
+from tracardi.service.storage.driver.elastic import event_source as event_source_db
+from tracardi.service.storage.driver.elastic import destination as destination_db
+from tracardi.service.storage.driver.elastic import session as session_db
+from tracardi.service.storage.driver.elastic import event_to_profile as event_to_profile_db
+from tracardi.service.storage.driver.elastic import event_management as event_management_db
+from tracardi.service.storage.driver.elastic import event_validation as event_validation_db
+from tracardi.service.storage.driver.elastic import data_compliance as data_compliance_db
+from tracardi.service.storage.driver.elastic import event_reshaping as event_reshaping_db
 
 
 class CacheManager(metaclass=Singleton):

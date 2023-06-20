@@ -4,7 +4,7 @@ from pydantic import BaseModel, validator
 
 from tracardi.config import ElasticConfig
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.storage.driver.storage.driver import resource as resource_db
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.storage.elastic_client import ElasticClient
 
 

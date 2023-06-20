@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
-from tracardi.service.storage.driver.storage.driver import session as session_db
+from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.plugin.domain.result import Result
 
 

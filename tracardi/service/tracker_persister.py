@@ -21,9 +21,9 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.field_mappings_cache import FieldMapper
-from tracardi.service.storage.driver.storage.driver import event as event_db
-from tracardi.service.storage.driver.storage.driver import profile as profile_db
-from tracardi.service.storage.driver.storage.driver import session as session_db
+from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.tracking_manager import TrackerResult
 
 logger = logging.getLogger(__name__)
