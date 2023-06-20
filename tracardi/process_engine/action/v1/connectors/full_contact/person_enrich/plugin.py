@@ -3,12 +3,12 @@ from typing import Tuple
 import aiohttp
 import asyncio
 from aiohttp import ClientConnectorError
-from tracardi.domain.resource import Resource, ResourceCredentials
+from tracardi.domain.resource import Resource
 from tracardi.domain.settings import Settings
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.tracardi_http_client import HttpClient
 
@@ -27,7 +27,7 @@ class FullContactAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)  # type: Resource
+        resource = await resource_db.load(config.source.id)  # type: Resource
 
         self.credentials = resource.credentials.get_credentials(self, output=FullContactSourceConfiguration)
         self.config = config

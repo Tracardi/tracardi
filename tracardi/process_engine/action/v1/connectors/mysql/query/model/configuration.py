@@ -1,5 +1,5 @@
 from typing import List, Any
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 

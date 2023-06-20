@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.tracardi_http_client import HttpClient
 from .models.configuration import Configuration
 from tracardi.domain.resources.google_analytics_v4 import GoogleAnalyticsV4Credentials
@@ -19,7 +19,7 @@ class GoogleAnalyticsV4EventTrackerAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=GoogleAnalyticsV4Credentials)

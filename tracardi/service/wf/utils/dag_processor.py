@@ -1,6 +1,6 @@
 from typing import List, Union, Tuple
 
-from .dag_error import DagError, DagGraphError
+from .dag_error import DagGraphError
 from ..domain.edge import Edge
 from ..domain.edges import Edges
 from ..domain.graph_invoker import GraphInvoker

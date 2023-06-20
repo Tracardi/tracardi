@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, List, Optional
+from typing import List, Optional
 
 from tracardi.config import tracardi
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult

@@ -4,7 +4,7 @@ from tracardi.context import get_context
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.config import tracardi
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ async def check_if_production_db_exists():
         raise ValueError("Can not deploy in production server.")
 
     for _, stage_alias, _, production_alias in get_staged_indices():
-        if not await storage.driver.raw.exists_alias(production_alias, index=None):
+        if not raw_db.exists_alias(production_alias, index=None):
             return False
     return True
 
@@ -44,7 +44,7 @@ async def add_alias_staging_to_production():
         action = {"remove": {"index": production_index, "alias": production_alias}}
         actions.append(action)
     if actions:
-        return await storage.driver.raw.update_aliases({
+        return raw_db.update_aliases({
             "actions": actions
         })
 
@@ -59,7 +59,7 @@ async def remove_alias_staging_to_production():
         action = {"add": {"index": production_index, "alias": production_alias}}
         actions.append(action)
     if actions:
-        return await storage.driver.raw.update_aliases({
+        return raw_db.update_aliases({
             "actions": actions
         })
 
@@ -92,7 +92,7 @@ async def move_from_staging_to_production():
     for stage_index, _, production_index, _ in get_staged_indices():
         logger.info(f"Coping data from {stage_index} to {production_index}")
         # Delete data in index
-        result = await storage.driver.raw.delete_by_query(index=production_index, query={
+        result = await raw_db.delete_by_query(index=production_index, query={
             "query": {
                 "match_all": {}
             }
@@ -101,10 +101,10 @@ async def move_from_staging_to_production():
         logger.info(f"Deleted data from {production_index}, {result.get('deleted', None)}")
 
         # Refresh
-        await storage.driver.raw.refresh(index=production_index)
+        await raw_db.refresh(index=production_index)
 
         # Reindex
-        result = await storage.driver.raw.reindex(source=stage_index, destination=production_index)
+        result = await raw_db.reindex(source=stage_index, destination=production_index)
         for key in result_sum.keys():
             result_sum = add_up(key, result, result_sum)
         result["index"] = production_index

@@ -7,7 +7,7 @@ from tracardi.domain.resources.redis_resource import RedisCredentials
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormField, \
     FormGroup, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.storage.redis.collections import Collection
 from .model.config import Config
 from tracardi.service.storage.redis_client import RedisClient
@@ -29,7 +29,7 @@ class ReadFromMemoryAction(ActionRunner):
         if self.config.resource.id == "":
             self.client = RedisClient()
         else:
-            resource = await storage.driver.resource.load(self.config.resource.id)
+            resource = await resource_db.load(self.config.resource.id)
             credentials = resource.credentials.get_credentials(self, output=RedisCredentials)
 
             uri = RedisConfig.get_redis_uri(

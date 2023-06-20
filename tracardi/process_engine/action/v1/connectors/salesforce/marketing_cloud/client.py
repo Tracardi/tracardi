@@ -1,4 +1,3 @@
-import aiohttp
 from typing import Optional, Dict, Any
 from tracardi.service.tracardi_http_client import HttpClient
 

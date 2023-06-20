@@ -1,4 +1,4 @@
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormGroup, FormField, FormComponent, Form, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -19,7 +19,7 @@ class GeoIPAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(id=config.source.id)  # type: Resource
+        resource = await resource_db.load(id=config.source.id)  # type: Resource
 
         geoip2_config = GeoIpConfiguration(
             webservice=resource.credentials.get_credentials(self, output=GeoLiteCredentials)

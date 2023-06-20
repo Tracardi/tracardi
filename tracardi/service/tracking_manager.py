@@ -33,7 +33,9 @@ from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.segmentation import segment
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import segment as segment_db
+from tracardi.service.storage.driver.elastic import rule as rule_db
+from tracardi.service.storage.driver.elastic import flow as flow_db
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
@@ -223,7 +225,7 @@ class TrackingManager(TrackingManagerBase):
                 f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
         else:
             # Routing rules are subject to caching
-            event_rules = await storage.driver.rule.load_rules(self.tracker_payload.source, events)
+            event_rules = await rule_db.load_rules(self.tracker_payload.source, events)
 
         # Copy data from event to profile. This must be run just before processing.
 
@@ -412,7 +414,7 @@ class TrackingManager(TrackingManagerBase):
                 # Invoke rules engine
                 try:
                     rule_invoke_result = await rules_engine.invoke(
-                        storage.driver.flow.load_production_flow,
+                        flow_db.load_production_flow,
                         ux,
                         self.tracker_payload
                     )
@@ -443,7 +445,7 @@ class TrackingManager(TrackingManagerBase):
                         # Segment
                         segmentation_result = await segment(self.profile,
                                                             rule_invoke_result.ran_event_types,
-                                                            storage.driver.segment.load_segments)
+                                                            segment_db.load_segments)
 
                 except Exception as e:
                     message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))

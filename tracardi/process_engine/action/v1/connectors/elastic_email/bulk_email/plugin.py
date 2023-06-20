@@ -7,7 +7,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from ..add_contact.model.config import Connection
 from ..client import ElasticEmailClient
 
@@ -25,7 +25,7 @@ class ElasticEmailBulkMailSender(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=Connection)

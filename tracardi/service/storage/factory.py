@@ -1,5 +1,5 @@
 import elasticsearch
-from typing import Union, List, Optional, TypeVar
+from typing import Union, List, Optional
 from tracardi.service.storage.elastic_storage import ElasticStorage, ElasticFiledSort
 from tracardi.service.storage.persistence_service import PersistenceService
 from tracardi.domain.entity import Entity

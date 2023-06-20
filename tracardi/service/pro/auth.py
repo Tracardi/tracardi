@@ -3,7 +3,7 @@ import os
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import pro as pro_db
 
 _local_path = os.path.dirname(__file__)
 logging.basicConfig(level=logging.ERROR)
@@ -18,7 +18,7 @@ async def get_tpro_token():
     """
     try:
         # todo add cache
-        result = await storage.driver.pro.read_pro_service_endpoint()
+        result = await pro_db.read_pro_service_endpoint()
     except Exception as e:
         logger.error(f"Exception when reading pro service user data: {str(e)}")
         result = None

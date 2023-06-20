@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.process_engine.debugger import Debugger

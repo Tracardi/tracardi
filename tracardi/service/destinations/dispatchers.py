@@ -15,7 +15,7 @@ from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.cache_manager import CacheManager
 from tracardi.domain.destination import DestinationRecord, Destination
 from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -43,7 +43,7 @@ async def _get_destination_dispatchers(destinations, dot, template):
             continue
 
         # Load resource
-        resource = await storage.driver.resource.load(destination.resource.id)
+        resource = await resource_db.load(destination.resource.id)
 
         if resource.enabled is False:
             raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")

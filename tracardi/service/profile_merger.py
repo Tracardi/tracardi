@@ -3,7 +3,10 @@ import logging
 
 from ..context import get_context
 from ..domain.storage_record import RecordMetadata
-from ..service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import session as session_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
 from collections import defaultdict
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple, Any
@@ -39,7 +42,7 @@ class ProfileMerger:
         # Todo maybe some bulk delete
         for _, dup_profile_bulk in profile_by_index.items():
             for dup_profile in dup_profile_bulk:
-                await storage.driver.profile.delete_by_id(dup_profile.id, dup_profile.get_meta_data().index)
+                await profile_db.delete_by_id(dup_profile.id, dup_profile.get_meta_data().index)
 
     @staticmethod
     async def _save_mark_duplicates_as_inactive_profiles(duplicate_profiles: List[Profile]):
@@ -48,7 +51,7 @@ class ProfileMerger:
             profile_by_index[dup_profile.get_meta_data().index].append(dup_profile)
 
         for _, dup_profile_bulk in profile_by_index.items():
-            await storage.driver.profile.save_all(dup_profile_bulk)
+            await profile_db.save_all(dup_profile_bulk)
 
     @staticmethod
     async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
@@ -64,12 +67,12 @@ class ProfileMerger:
 
     @staticmethod
     async def _save_profile(profile):
-        await storage.driver.profile.save(profile, refresh_after_save=False)
-        await storage.driver.profile.refresh()
+        await profile_db.save(profile, refresh_after_save=False)
+        await profile_db.refresh()
 
     @staticmethod
     async def _delete_profile(profile_ids: List[Tuple[str, RecordMetadata]]):
-        tasks = [asyncio.create_task(storage.driver.profile.delete_by_id(profile_id, metadata.index))
+        tasks = [asyncio.create_task(profile_db.delete_by_id(profile_id, metadata.index))
                  for profile_id, metadata in profile_ids]
         return await asyncio.gather(*tasks)
 
@@ -77,10 +80,10 @@ class ProfileMerger:
     async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
         for old_profile in duplicate_profiles:
             if old_profile.id != merged_profile.id:
-                await storage.driver.raw.update_profile_ids('event', old_profile.id, merged_profile.id)
-                await storage.driver.event.refresh()
-                await storage.driver.raw.update_profile_ids('session', old_profile.id, merged_profile.id)
-                await storage.driver.session.refresh()
+                await raw_db.update_profile_ids('event', old_profile.id, merged_profile.id)
+                await event_db.refresh()
+                await raw_db.update_profile_ids('session', old_profile.id, merged_profile.id)
+                await session_db.refresh()
 
     @staticmethod
     def add_keywords(merge_by):
@@ -111,7 +114,7 @@ class ProfileMerger:
 
             merge_by = ProfileMerger.add_keywords(merge_by)
 
-            similar_profiles = await storage.driver.profile.load_profiles_to_merge(
+            similar_profiles = await profile_db.load_profiles_to_merge(
                 merge_by,
                 limit=limit
             )
@@ -170,7 +173,7 @@ class ProfileMerger:
                                          limit: int = 2000) -> Optional[Profile]:
         if len(merge_by) > 0:
             # Load all profiles that match merging criteria
-            similar_profiles = await storage.driver.profile.load_profiles_to_merge(
+            similar_profiles = await profile_db.load_profiles_to_merge(
                 merge_by,
                 limit=limit
             )

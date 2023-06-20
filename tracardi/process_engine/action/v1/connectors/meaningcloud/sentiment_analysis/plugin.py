@@ -1,6 +1,6 @@
 from tracardi.domain.resources.token import Token
 
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -20,7 +20,7 @@ class SentimentAnalysisAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.credentials = resource.credentials.get_credentials(self, output=Token)
         self.config = config

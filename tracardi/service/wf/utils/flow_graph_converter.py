@@ -1,6 +1,4 @@
-import importlib
-
-from ..domain.flow_graph_data import FlowGraphData, EdgeData
+from ..domain.flow_graph_data import FlowGraphData
 from ..domain.connection import Connection
 from ..domain.edge import Edge
 from ..domain.dag_graph import DagGraph

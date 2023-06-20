@@ -3,7 +3,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormGroup, FormComponent
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from .model.config import Config
 from tracardi.process_engine.action.v1.connectors.civi_crm.client import CiviCRMClient, CiviCRMClientException, \
     CiviClientCredentials
@@ -22,7 +22,7 @@ class AddCiviContactAction(ActionRunner):
 
     async def set_up(self, init):
         config = Config(**init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self.client = CiviCRMClient(**resource.credentials.get_credentials(self, CiviClientCredentials).dict())
@@ -52,7 +52,7 @@ class Endpoint(PluginEndpoint):
     @staticmethod
     async def get_custom_fields(config: dict) -> list:
         config = ResourceConfig(**config)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
         client = CiviCRMClient(**resource.credentials.production)
         return await client.get_custom_fields()
 

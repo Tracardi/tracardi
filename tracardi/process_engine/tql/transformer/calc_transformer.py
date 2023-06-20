@@ -1,6 +1,6 @@
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.process_engine.tql.transformer.transformer_namespace import TransformerNamespace
-from lark import v_args, Token
+from lark import v_args
 
 
 @v_args(inline=True)

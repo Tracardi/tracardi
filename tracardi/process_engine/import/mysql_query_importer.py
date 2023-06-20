@@ -12,7 +12,8 @@ from .importer import Importer
 from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.storage.driver.elastic import task as task_db
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.worker.celery_worker import run_mysql_query_import_job
@@ -53,7 +54,7 @@ class Endpoint(PluginEndpoint):
     @staticmethod
     async def fetch_databases(config: dict):
         config = DatabaseFetcherConfig(**config)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
         credentials = resource.credentials.production
         pool = await Connection(**credentials).connect()
         async with pool.acquire() as conn:
@@ -127,7 +128,7 @@ class MySQLQueryImporter(Importer):
             )
 
         config = MySQLQueryImportConfig(**import_config.config)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
 
         executor = ThreadPoolExecutor(
@@ -147,6 +148,6 @@ class MySQLQueryImporter(Importer):
             task_id=celery_task.id
         )
 
-        await storage.driver.task.upsert_task(task)
+        await task_db.upsert_task(task)
 
         return task.id, celery_task.id

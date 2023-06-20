@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
-from typing import Dict, Any, List
+from typing import Dict, Any
 from typing import Optional
 
 

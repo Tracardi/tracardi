@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.exceptions.log_handler import log_handler

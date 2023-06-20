@@ -1,6 +1,3 @@
-import aiohttp
-import json
-
 from tracardi.service.tracardi_http_client import HttpClient
 
 

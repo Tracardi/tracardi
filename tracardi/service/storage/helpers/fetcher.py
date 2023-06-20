@@ -1,4 +1,4 @@
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import event as event_db
 
 
 class EventContextFetcher:
@@ -53,4 +53,4 @@ class EventContextFetcher:
 
     @staticmethod
     async def fetch(query: dict):
-        return await storage.driver.event.query(query)
+        return await event_db.query(query)

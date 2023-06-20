@@ -8,9 +8,8 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dot_template import DotTemplate
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
-from pydantic import BaseModel, validator
 from tracardi.domain.named_entity import NamedEntity
-from pydantic import AnyHttpUrl, BaseModel, validator
+from pydantic import BaseModel, validator
 from tracardi.service.plugin.domain.config import PluginConfig
 
 

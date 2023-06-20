@@ -4,7 +4,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from .model.payload import Consents, Configuration
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import consent_type as consent_type_db
 from pytimeparse import parse
 from datetime import datetime
 from tracardi.domain.profile import ConsentRevoke
@@ -36,7 +36,7 @@ class ConsentAdder(ActionRunner):
             consents = Consents(__root__=consents_data)
             for consent_id, granted in consents:
                 if granted is True:
-                    consent_type_data = await storage.driver.consent_type.get_by_id(consent_id)
+                    consent_type_data = await consent_type_db.get_by_id(consent_id)
 
                     if consent_type_data is not None:
                         consent_type = ConsentType(**consent_type_data)

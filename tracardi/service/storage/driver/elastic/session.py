@@ -1,15 +1,10 @@
 import logging
-from datetime import datetime
 from typing import Optional, List, Union
 
-import elasticsearch
-
 from tracardi.config import tracardi
-from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.domain.entity import Entity
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.factory import storage_manager
 

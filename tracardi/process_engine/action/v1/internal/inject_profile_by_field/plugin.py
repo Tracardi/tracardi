@@ -1,6 +1,6 @@
 from tracardi.domain.profile import Profile
 
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
@@ -26,14 +26,14 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
-            profile_records = await storage.driver.profile.load_by_id(profile_id=value)
+            profile_records = await profile_db.load_by_id(profile_id=value)
             profile = Profile.create(profile_records)
 
             if not profile:
                 return Result(port="error", value={"message": "Could not find profile."})
 
         else:
-            result = await storage.driver.profile.load_active_profile_by_field(self.config.field, value, start=0, limit=2)
+            result = await profile_db.load_active_profile_by_field(self.config.field, value, start=0, limit=2)
 
             if result.total != 1:
                 message = "Found {} records for {} = {}.".format(result.total, self.config.field, value)

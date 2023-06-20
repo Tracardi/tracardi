@@ -3,7 +3,7 @@ from typing import Optional
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import log as log_db
 
 
 async def save_logs() -> Optional[bool]:
@@ -12,12 +12,12 @@ async def save_logs() -> Optional[bool]:
     """
     Saves errors caught by logger
     """
-    if not await storage.driver.log.exists():
+    if not await log_db.exists():
         return False
 
     if log_handler.has_logs():
         # do not await
-        asyncio.create_task(storage.driver.log.save(log_handler.collection))
+        asyncio.create_task(log_db.save(log_handler.collection))
         log_handler.reset()
         return True
 

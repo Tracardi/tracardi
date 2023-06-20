@@ -1,9 +1,9 @@
 import json
 
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, \
     Documentation, PortDoc
 from .model.model import AwsSqsConfiguration, AwsIamAuth, MessageAttributes
 from aiobotocore.session import get_session
@@ -20,7 +20,7 @@ class AwsSqsAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.aws_config = config
         self.credentials = resource.credentials.get_credentials(self, output=AwsIamAuth)

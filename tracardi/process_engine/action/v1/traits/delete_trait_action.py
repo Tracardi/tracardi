@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel, validator
+from pydantic import validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result

@@ -21,7 +21,9 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.field_mappings_cache import FieldMapper
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.tracking_manager import TrackerResult
 
 logger = logging.getLogger(__name__)
@@ -75,7 +77,7 @@ class TrackerResultPersister:
         results = []
         try:
             if profiles_to_save:
-                result = await storage.driver.profile.save(profiles_to_save)
+                result = await profile_db.save(profiles_to_save)
                 if result.has_errors():
                     for id in result.ids:
                         self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
@@ -109,7 +111,7 @@ class TrackerResultPersister:
                         for session in sessions_to_add:
                             session.operation = Operation()
 
-                        result = await storage.driver.session.save(sessions_to_add)
+                        result = await session_db.save(sessions_to_add)
 
                         if result.has_errors():
                             for id in result.ids:
@@ -126,7 +128,7 @@ class TrackerResultPersister:
                         If session is new we will refresh the session in ES.
                         """
 
-                        await storage.driver.session.refresh()
+                        await session_db.refresh()
                         yield result
 
                     # Do not update session duration. It should be calculated on the front end
@@ -134,7 +136,7 @@ class TrackerResultPersister:
                     # sessions_to_update = [session for session, save in sessions if save is False]
                     # # Update session duration
                     # for session in sessions_to_update:
-                    #     await storage.driver.session.update_session_duration(session)
+                    #     await session_db.update_session_duration(session)
         except StorageException as e:
             raise FieldTypeConflictException("Could not save session. Error: {}".format(str(e)), rows=e.details)
 
@@ -168,7 +170,7 @@ class TrackerResultPersister:
                                                                                                     BulkInsertResult]:
 
         tagged_events = [event async for event in self.__tag_events(self.__get_persistent_events_without_source(events))]
-        event_result = await storage.driver.event.save(tagged_events, exclude={"operation": ...})
+        event_result = await event_db.save(tagged_events, exclude={"operation": ...})
         event_result = SaveResult(**event_result.dict())
 
         # Add event types

@@ -2,7 +2,7 @@ from tracardi.domain.content import Content
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.domain.resource import Resource
 from tracardi.service.notation.dot_template import DotTemplate
 
@@ -20,7 +20,7 @@ class SmtpDispatcherAction(ActionRunner):
 
     async def set_up(self, init):
         config = await validate(init)
-        resource = await storage.driver.resource.load(config.resource.id)  # type: Resource
+        resource = await resource_db.load(config.resource.id)  # type: Resource
 
         smtp_config = resource.credentials.get_credentials(self, SmtpConfiguration)  # type: SmtpConfiguration
         self.config = config

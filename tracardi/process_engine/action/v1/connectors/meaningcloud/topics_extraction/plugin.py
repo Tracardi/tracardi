@@ -1,10 +1,9 @@
 from tracardi.exceptions.exception import TracardiException
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
-    FormField, FormComponent
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, Token
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.meaningcloud.client import MeaningCloudClient
 
 
@@ -19,7 +18,7 @@ class TopicsExtractionPlugin(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self.client = MeaningCloudClient(resource.credentials.get_credentials(self, Token).token)

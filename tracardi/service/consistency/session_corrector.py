@@ -7,7 +7,8 @@ from pydantic import ValidationError
 from tracardi.config import tracardi
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import session as session_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -25,13 +26,13 @@ async def correct_session(session_id) -> List[str]:
     """
 
     referenced_profiles_ids = []
-    for _session_record in await storage.driver.session.load_duplicates(session_id):
+    for _session_record in await session_db.load_duplicates(session_id):
         try:
             _session_profile_id = _session_record['profile']['id']
         except KeyError:
             # This is corrupted session. Session must have profile id
-            await storage.driver.session.delete_by_id(_session_record['id'], index=_session_record.get_meta_data().index),
-            await storage.driver.session.refresh()
+            await session_db.delete_by_id(_session_record['id'], index=_session_record.get_meta_data().index),
+            await session_db.refresh()
             continue
 
         if _session_profile_id not in referenced_profiles_ids:
@@ -44,17 +45,17 @@ async def correct_session(session_id) -> List[str]:
                 _session = Session(**_session_record)
                 _session.id = str(uuid4())
 
-                result = await storage.driver.session.save(_session)
+                result = await session_db.save(_session)
                 if result.saved != 1:
                     raise RuntimeError(f"Could not recreate session {_session_record['id']}")
                 else:
                     logger.warning(f"Session {_session_record['id']} recreated with new id {_session.id}")
-                await storage.driver.session.refresh()
+                await session_db.refresh()
 
                 # Find all events with old session and current profile id and
                 # change session id to new session
 
-                await storage.driver.event.reassign_session(
+                await event_db.reassign_session(
                     old_session_id=_session_record['id'],
                     new_session_id=_session.id,
                     profile_id=_session_profile_id
@@ -62,8 +63,8 @@ async def correct_session(session_id) -> List[str]:
 
                 # Delete conflicting session from all indices
 
-                await storage.driver.session.delete_by_id(_session_record['id'], _session_record.get_meta_data().index),
-                await storage.driver.session.refresh()
+                await session_db.delete_by_id(_session_record['id'], _session_record.get_meta_data().index),
+                await session_db.refresh()
                 logger.warning(f"Session {_session_record['id']} deleted. It was recreated as {_session.id}")
 
             except ValidationError as e:

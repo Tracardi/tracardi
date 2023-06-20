@@ -1,5 +1,6 @@
 from tracardi.domain.report import Report
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.driver.elastic import report as report_db
 
 
 class ReportManagerException(Exception):
@@ -10,7 +11,7 @@ class ReportManager:
 
     @staticmethod
     async def build(report_id: str) -> 'ReportManager':
-        report = await storage.driver.report.load(report_id)
+        report = await report_db.load(report_id)
         if report is None:
             raise ReportManagerException(f"Report with ID `{report_id}` does not exist.")
 
@@ -24,7 +25,7 @@ class ReportManager:
 
     async def get_report(self, params: dict) -> dict:
         built_query = self.report.get_built_query(**params)
-        result = await storage.driver.raw.query_by_index(self.report.index, built_query)
+        result = await raw_db.query_by_index(self.report.index, built_query)
         aggregations = result.aggregations()
         result = result.dict()
         if aggregations is not None:

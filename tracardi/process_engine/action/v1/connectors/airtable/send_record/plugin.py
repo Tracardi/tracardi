@@ -2,9 +2,8 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from .model.config import Config, APIKey
-from tracardi.domain.resource import ResourceCredentials
 from ..client import AirtableClient, AirtableClientException
 from tracardi.service.notation.dict_traverser import DictTraverser
 
@@ -20,7 +19,7 @@ class SendToAirtableAction(ActionRunner):
 
     async def set_up(self, init):
         config = Config(**init)
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.config = config
         self.client = AirtableClient(token=resource.credentials.get_credentials(self, APIKey).api_key)

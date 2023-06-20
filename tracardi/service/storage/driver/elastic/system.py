@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from tracardi.context import ServerContext, Context, get_context
+from tracardi.context import ServerContext, get_context
 from tracardi.service.storage.indices_manager import get_indices_status
 
 

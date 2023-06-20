@@ -1,11 +1,10 @@
 import asyncio
 
-from tracardi.service.storage.driver import storage
-from tracardi.worker.domain.storage_record import StorageAggregates
+from tracardi.service.storage.driver.elastic import event as event_db
 
 
 async def main():
-    result = await storage.driver.event.aggregate_events_by_type_and_source()
+    result = await event_db.aggregate_events_by_type_and_source()
 
     for x in result.aggregations('by_type').buckets():
         print("x", x, type(x))

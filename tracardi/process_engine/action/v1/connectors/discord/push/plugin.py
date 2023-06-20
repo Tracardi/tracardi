@@ -5,7 +5,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.notation.dot_template import DotTemplate
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.domain.resources.discord_resource import DiscordCredentials
 from .model.configuration import DiscordWebHookConfiguration
@@ -21,7 +21,7 @@ class DiscordWebHookAction(ActionRunner):
 
     async def set_up(self, init):
         config = validate(init)
-        resource = await storage.driver.resource.load(config.resource.id)
+        resource = await resource_db.load(config.resource.id)
 
         self.config = config
         self.credentials = resource.credentials.get_credentials(self, output=DiscordCredentials)

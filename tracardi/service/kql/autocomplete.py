@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, Dict, Any, Callable
 from lark import Lark, Token
 from lark.lexer import TerminalDef
 
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import raw as raw_db
 
 schema = r"""
 ?start: multi_expr
@@ -116,7 +116,7 @@ class Values:
 
     async def _field(self, last: dict[str, Any], current: Value):
         current_value = current.value
-        fields = await storage.driver.raw.get_mapping_fields(self.index)
+        fields = await raw_db.get_mapping_fields(self.index)
         if current_value.strip() == "":
             return fields
         if current.token == "FIELD":
@@ -162,7 +162,7 @@ class Values:
 
     async def _value(self, last: dict[str, Any], current: Value):
         field = last['FIELD']
-        result = await storage.driver.raw.get_unique_field_values(self.index, field)
+        result = await raw_db.get_unique_field_values(self.index, field)
         values = [item.get("key_as_string", item.get("key", None)) for item in result.aggregations("fields").buckets()]
         if current.token == "VALUE":
             return self._filter(current.value, values)

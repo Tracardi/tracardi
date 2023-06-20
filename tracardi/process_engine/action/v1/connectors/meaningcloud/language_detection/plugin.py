@@ -7,7 +7,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import resource as resource_db
 from .service.http_client import HttpClient
 
 
@@ -26,7 +26,7 @@ class LanguageDetectAction(ActionRunner):
         config = validate(init)
 
         # This reads resource
-        resource = await storage.driver.resource.load(config.source.id)
+        resource = await resource_db.load(config.source.id)
 
         self.message = config.message
         self.client = HttpClient(

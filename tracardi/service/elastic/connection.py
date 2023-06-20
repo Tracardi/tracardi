@@ -5,8 +5,9 @@ import elasticsearch
 
 from tracardi.config import tracardi, elastic
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.driver import storage
-from tracardi.service.storage.drivers.elastic.bridge import install_bridge
+from tracardi.service.storage.driver.elastic import system as system_db
+from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.driver.elastic import bridge as bridge_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -23,7 +24,7 @@ def _is_elastic_on_localhost():
 async def wait_for_installation(no_of_tries: int = 10):
     success = False
     while True:
-        is_installed, indices = await storage.driver.system.is_schema_ok()
+        is_installed, indices = await system_db.is_schema_ok()
 
         if is_installed:
             success = True
@@ -52,8 +53,8 @@ async def wait_for_connection(no_of_tries=10):
             if no_of_tries < 0:
                 break
 
-            health = await storage.driver.raw.health()
-            for key, value in health.items():
+            _health = await raw_db.health()
+            for key, value in _health.items():
                 key = key.replace("_", " ")
                 logger.info(f"Elasticsearch {key}: {value}")
             logger.info(f"Elasticsearch query timeout: {elastic.query_timeout}s")
@@ -96,7 +97,7 @@ async def wait_for_bridge_install(bridge) -> bool:
             break
 
         try:
-            await install_bridge(bridge)
+            await bridge_db.install_bridge(bridge)
             success = True
             break
         except Exception as e:

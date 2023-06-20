@@ -1,4 +1,3 @@
-import asyncio
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.process_engine.action.v1.strings.url_parser.plugin import ParseURLParameters
 from tracardi.service.plugin.service.plugin_runner import run_plugin

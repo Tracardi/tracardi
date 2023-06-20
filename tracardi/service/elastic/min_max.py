@@ -1,7 +1,6 @@
 import asyncio
-from typing import Tuple, List
 
-from tracardi.service.storage.driver import storage
+from tracardi.service.storage.driver.elastic import event as event_db
 
 
 async def get_min_max(search_by=None, time_range=None):
@@ -40,7 +39,7 @@ async def get_min_max(search_by=None, time_range=None):
             }
         )
     print(query)
-    result = await storage.driver.event.query(
+    result = await event_db.query(
         query
     )
     print(result)

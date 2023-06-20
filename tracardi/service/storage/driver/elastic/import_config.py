@@ -1,5 +1,4 @@
 from tracardi.domain.import_config import ImportConfig, ImportConfigRecord
-from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.factory import storage_manager
 from typing import Optional
 

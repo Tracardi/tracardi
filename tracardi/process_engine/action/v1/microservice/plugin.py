@@ -1,10 +1,9 @@
 import json
-from pprint import pprint
 
 import aiohttp
 from pydantic import BaseModel
 
-from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, MicroserviceConfig
+from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.service import plugin_context
