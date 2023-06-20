@@ -6,8 +6,8 @@ import elasticsearch
 from tracardi.config import tracardi, elastic
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.driver.storage.driver import system as system_db
-from tracardi.service.storage.driver.storage.driver.raw import health
-from tracardi.service.storage.drivers.elastic.bridge import install_bridge
+from tracardi.service.storage.driver.storage.driver import raw as raw_db
+from tracardi.service.storage.driver.storage.driver import bridge as bridge_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -53,7 +53,7 @@ async def wait_for_connection(no_of_tries=10):
             if no_of_tries < 0:
                 break
 
-            _health = await health()
+            _health = await raw_db.health()
             for key, value in _health.items():
                 key = key.replace("_", " ")
                 logger.info(f"Elasticsearch {key}: {value}")
@@ -97,7 +97,7 @@ async def wait_for_bridge_install(bridge) -> bool:
             break
 
         try:
-            await install_bridge(bridge)
+            await bridge_db.install_bridge(bridge)
             success = True
             break
         except Exception as e:

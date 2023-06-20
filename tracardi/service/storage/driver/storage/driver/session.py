@@ -1,5 +1,6 @@
 import logging
 from typing import Optional, List, Union
+
 from tracardi.config import tracardi
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecord

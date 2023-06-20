@@ -15,7 +15,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
 from tracardi.service.setup.data.defaults import open_rest_source_bridge
 from tracardi.service.storage.driver.storage.driver import profile as profile_db
-from tracardi.service.storage.drivers.elastic.operations.console_log import save_console_log
+from tracardi.service.storage.driver.storage.driver.operations.console_log import save_console_log
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource

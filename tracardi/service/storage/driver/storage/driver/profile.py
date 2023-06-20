@@ -1,11 +1,10 @@
 from typing import Tuple
 
-from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.service.storage.drivers.elastic.raw import load_by_key_value_pairs
+from tracardi.service.storage.driver.storage.driver import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
 
@@ -69,7 +68,7 @@ async def deduplicate_profile(profile_id):
     return profile
 
 
-async def load_profile_without_identification(tracker_payload: TrackerPayload, is_static=False) -> Optional[Profile]:
+async def load_profile_without_identification(tracker_payload, is_static=False) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     @throws DuplicatedRecordException
@@ -155,7 +154,7 @@ async def count(query: dict = None):
 async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],
                                  sort_by: Optional[List[ElasticFiledSort]] = None,
                                  limit: int = 20) -> StorageRecords:
-    return await load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
+    return await raw_db.load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
 
 
 async def load_duplicates(id: str):

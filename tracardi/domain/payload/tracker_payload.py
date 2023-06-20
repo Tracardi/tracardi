@@ -28,7 +28,7 @@ from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 from user_agents import parse
 
-from ...service.storage.drivers.elastic import identification
+from ...service.storage.driver.storage.driver import identification as identification_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -633,7 +633,7 @@ class TrackerPayload(BaseModel):
 
     @staticmethod
     async def _load_identification_points():
-        identification_points = await identification.load_enabled(limit=200)
+        identification_points = await identification_db.load_enabled(limit=200)
         return identification_points.to_domain_objects(IdentificationPoint)
 
     def _get_valid_identification_points(self,
