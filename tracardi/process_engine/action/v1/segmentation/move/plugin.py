@@ -47,7 +47,6 @@ class MoveSegmentAction(ActionRunner):
                 profile.segments.remove(self.config.from_segment)
             if self.config.to_segment not in profile.segments:
                 profile.segments.append(self.config.to_segment)
-            profile.operation.update = True
             profile.metadata.time.segmentation = datetime.utcnow()
             self.profile.replace(profile)
         else:
@@ -67,8 +66,9 @@ def register() -> Plugin:
             className=MoveSegmentAction.__name__,
             inputs=["payload"],
             outputs=["payload"],
-            version="0.7.3",
+            version="0.8.1",
             author="Risto Kowaczewski",
+            manual="segmentation/move_segment_action",
             init={
                 "from_segment": "",
                 "to_segment": ""

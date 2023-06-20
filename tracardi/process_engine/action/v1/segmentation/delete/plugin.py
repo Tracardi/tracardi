@@ -36,7 +36,6 @@ class DeleteSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             if self.config.segment in self.profile.segments:
-                profile.operation.update = True
                 profile.metadata.time.segmentation = datetime.utcnow()
 
                 profile.segments = list(set(profile.segments))
@@ -59,8 +58,9 @@ def register() -> Plugin:
             className='DeleteSegmentAction',
             inputs=["payload"],
             outputs=["payload"],
-            version="0.7.3",
+            version="0.8.1",
             author="Risto Kowaczewski",
+            manual="segmentation/delete_segment_action",
             init={
                 "segment": ""
             },

@@ -38,7 +38,6 @@ class AddSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             if self.config.segment not in self.profile.segments:
-                profile.operation.update = True
                 profile.metadata.time.segmentation = datetime.utcnow()
 
                 try:
@@ -75,8 +74,9 @@ def register() -> Plugin:
             className='AddSegmentAction',
             inputs=["payload"],
             outputs=["payload", "error"],
-            version="0.7.3",
+            version="0.8.1",
             author="Risto Kowaczewski",
+            manual="segmentation/add_segment_action",
             init={
                 "segment": ""
             },

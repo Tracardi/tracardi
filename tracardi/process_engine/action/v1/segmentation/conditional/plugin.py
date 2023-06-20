@@ -31,7 +31,6 @@ class ProfileSegmentAction(ActionRunner):
                 profile.segments = list(set(profile.segments))
                 profile.segments.remove(segment)
         profile.metadata.time.segmentation = datetime.utcnow()
-        profile.operation.update = True
         self.profile.replace(profile)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -65,7 +64,7 @@ def register() -> Plugin:
             version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="profile_segment",
+            manual="segmentation/profile_segment",
             init={
                 "condition": "",
                 "true_segment": "",
