@@ -132,7 +132,8 @@ def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
             try:
 
                 if destination not in dot_event:
-                    logger.warning(f"While event indexing destination {destination} could not be found in event schema.")
+                    logger.warning(f"While indexing type {event.type}. "
+                                   f"Property destination {destination} could not be found in event schema.")
 
                 # Skip none existing event properties.
                 if source in dot_event:

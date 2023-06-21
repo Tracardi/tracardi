@@ -10,13 +10,13 @@
       "lastname": "string"
     },
     "copy": {
-      "data.contact.app.email":  "properties.email",
+      "data.contact.email":  "properties.email",
       "data.identifier.token":   "properties.login",
       "data.pii.firstname":      "properties.firstname",
       "data.pii.lastname":       "properties.lastname"
     },
     "profile": {
-      "data.contact.email":     ["data.contact.app.email", "equal"],
+      "data.contact.email":     ["data.contact.email", "equal"],
       "data.identifier.token":  ["data.identifier.token", "equal"],
       "data.pii.firstname":     ["data.pii.firstname", "equal"],
       "data.pii.lastname":      ["data.pii.lastname", "equal"]
@@ -36,13 +36,13 @@
       "custom": "object"
     },
     "copy": {
-      "data.contact.app.email":  "properties.email",
+      "data.contact.email":  "properties.email",
       "data.pii.firstname":      "properties.firstname",
       "data.pii.lastname":       "properties.lastname",
       "data.identifier.token":   "properties.login"
     },
     "profile": {
-      "data.contact.email":     ["data.contact.app.email", "equal"],
+      "data.contact.email":     ["data.contact.email", "equal"],
       "data.identifier.token":  ["data.identifier.token", "equal"],
       "data.pii.firstname":     ["data.pii.firstname", "equal"],
       "data.pii.lastname":      ["data.pii.lastname", "equal"]
@@ -90,7 +90,7 @@
       "signal": "string"
     },
     "copy": {
-      "data.contact.app.email":      "properties.email",
+      "data.contact.email":          "properties.email",
       "data.contact.phone":          "properties.phone",
       "data.pii.firstname":          "properties.firstname",
       "data.pii.lastname":           "properties.lastname",
@@ -119,7 +119,7 @@
       "data.identifier.credit_card":  ["data.identifier.credit_card", "equal"],
       "data.identifier.coupon":       ["data.identifier.coupon", "equal"],
       "data.identifier.badge":        ["data.identifier.badge", "equal"],
-      "data.contact.email":           ["data.contact.app.email", "equal"],
+      "data.contact.email":           ["data.contact.email", "equal"],
       "data.contact.app.twitter":     ["data.contact.app.twitter", "equal"],
       "data.contact.app.whatsapp":    ["data.contact.app.whatsapp", "equal"],
       "data.contact.app.discord":     ["data.contact.app.discord", "equal"],
