@@ -4,15 +4,11 @@
     "description": "User updates consents.",
     "id": "consent-update",
     "properties": {
-      "consents": {
-      }
-    },
-    "copy": {
-      "data.marketing.consents": "properties.consents"
+      "consents": {"consents": ["marketing", "contact", "cookies"], "revoke": null}
     },
     "profile": {
       "consents": [
-        "data.marketing.consents",
+        "properties.consents",
         "equal"
       ]
     },
@@ -51,7 +47,7 @@
         "token": "string",
         "passport": "string",
         "credit_card": "string",
-        "coupon": "string",
+        "coupons": ["string"],
         "badge": "string"
       },
       "contact": {
@@ -141,7 +137,7 @@
       "data.identifier.token":            "properties.identifier.token",
       "data.identifier.passport":         "properties.identifier.passport",
       "data.identifier.credit_card":      "properties.identifier.credit_card",
-      "data.identifier.coupon":           "properties.identifier.coupon",
+      "data.identifier.coupons":          "properties.identifier.coupons",
       "data.identifier.badge":            "properties.identifier.badge",
       "data.contact.email":               "properties.contact.email",
       "data.contact.phone":               "properties.contact.phone",
@@ -246,7 +242,7 @@
       "data.identifier.token":        ["data.identifier.token", "equal"],
       "data.identifier.passport":     ["data.identifier.passport", "equal"],
       "data.identifier.credit_card":  ["data.identifier.credit_card", "equal"],
-      "data.identifier.coupon":       ["data.identifier.coupon", "equal"],
+      "data.identifier.coupons":      ["data.identifier.coupons", "equal"],
       "data.identifier.badge":        ["data.identifier.badge", "equal"],
       "data.contact.app.whatsapp": [
         "data.contact.app.whatsapp",

@@ -172,8 +172,7 @@
       "data.ec.checkout.id":       "properties.id",
       "data.ec.checkout.status":   "properties.status",
       "data.ec.checkout.currency": "properties.currency",
-      "data.ec.checkout.value":    "properties.value",
-      "data.marketing.coupon":     "properties.coupon"
+      "data.ec.checkout.value":    "properties.value"
     },
     "tags": ["entity:order"],
     "state": "purchase"

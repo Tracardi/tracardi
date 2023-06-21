@@ -156,19 +156,28 @@
             "identifier": {
               "properties": {
                 "id": {
-                  "type": "keyword", "ignore_above": 64
+                  "type": "keyword",
+                  "ignore_above": 64
                 },
                 "badge": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 64
                 },
                 "passport": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 32
                 },
                 "credit_card": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 24
                 },
                 "token": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 96
+                },
+                "coupons": {
+                  "type": "keyword",
+                  "ignore_above": 32
                 }
               }
             },

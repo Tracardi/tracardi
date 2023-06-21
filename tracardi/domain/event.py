@@ -127,7 +127,6 @@ class EventPromotion(BaseModel):
 
 
 class EventMarketing(BaseModel):
-    contents: Optional[List[str]] = []
     coupon: Optional[str] = None
     promotion: Optional[EventPromotion] = EventPromotion()
 
