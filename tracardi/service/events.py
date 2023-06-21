@@ -1,18 +1,25 @@
 import glob
 import json
+import logging
 import os
 from typing import Optional, Tuple
 
 from dotty_dict import dotty
 
+from tracardi.config import tracardi
 from tracardi.domain.event import Event, Tags
 from tracardi.domain.profile import Profile
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.string_manager import capitalize_event_type_id
 
 _local_dir = os.path.dirname(__file__)
 _predefined_event_types = {}
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 def cache_predefined_event_types():
@@ -123,6 +130,10 @@ def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
 
         for destination, source in index_schema.items():  # type: str, str
             try:
+
+                if destination not in dot_event:
+                    logger.warning(f"While event indexing destination {destination} could not be found in event schema.")
+
                 # Skip none existing event properties.
                 if source in dot_event:
                     dot_event[destination] = dot_event[source]

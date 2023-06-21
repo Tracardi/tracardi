@@ -47,8 +47,8 @@
       "query": "string"
     },
     "copy": {
-      "hit.page.search.category":  "properties.category",
-      "hit.page.search.query":     "properties.query"
+      "hit.category":  "properties.category",
+      "hit.query":     "properties.query"
     },
     "tags": ["browsing", "search"]
   },
@@ -60,7 +60,7 @@
       "category": "string"
     },
     "copy": {
-      "hit.page.category": "properties.category"
+      "hit.category": "properties.category"
     },
     "tags": ["browsing"],
     "state": "call:tracardi.service.setup.events.journey.logic,page_view"
@@ -73,7 +73,7 @@
       "category": "string"
     },
     "traits": {
-      "hit.page.category": "properties.category"
+      "hit.category": "properties.category"
     },
     "tags": ["printing"],
     "state": "awareness"
@@ -87,8 +87,8 @@
       "category": "string"
     },
     "traits": {
-      "hit.page.name":      "properties.name",
-      "hit.page.category":  "properties.category"
+      "hit.name":      "properties.name",
+      "hit.category":  "properties.category"
     },
     "tags": ["browsing"],
     "state": "awareness"
