@@ -6,6 +6,7 @@ import yaml
 
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
+from tracardi.service.utils.validators import is_valid_url
 
 VERSION = os.environ.get('_DEBUG_VERSION', '0.8.1')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
@@ -151,6 +152,8 @@ class TracardiConfig:
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.multi_tenant = env.get('MULTI_TENANT', "no") == 'yes'
+        self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)
+        self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{elastic.host}".encode()).hexdigest()
@@ -158,6 +161,18 @@ class TracardiConfig:
             f"akkdskjd-askmdj-jdff{self.installation_token}-3039djn-{elastic.host}".encode()).hexdigest()
         self._config = None
         self._unset_secrets()
+
+        if self.multi_tenant and (self.multi_tenant_manager_url is None or self.multi_tenant_manager_api_key is None):
+            if self.multi_tenant_manager_url is None:
+                raise AssertionError('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
+                                     'the MULTI_TENANT_MANAGER_URL or set MULTI_TENANT to "no"')
+
+            if self.multi_tenant_manager_api_key is None:
+                raise AssertionError('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
+                                     'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"')
+
+        if not is_valid_url(self.multi_tenant_manager_url):
+            raise AssertionError('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
 
     @property
     def config(self) -> YamlConfig:
