@@ -16,7 +16,7 @@
         "equal"
       ]
     },
-    "tags": ["marketing", "consent"],
+    "tags": ["entity:profile", "activity:consent"],
     "state": "awareness"
   },
   {
@@ -445,7 +445,7 @@
         "equal"
       ]
     },
-    "tags": ["profile", "data-update"],
+    "tags": ["entity:profile"],
     "state": "awareness"
   }
 ]

@@ -33,7 +33,7 @@
       "data.ec.product.quantity": "properties.quantity",
       "data.ec.product.position": "properties.position"
     },
-    "tags": ["browsing", "product"],
+    "tags": ["activity:browsing", "entity:product"],
     "state": "awareness"
   },
   {
@@ -68,7 +68,7 @@
       "data.ec.product.price":     "properties.price",
       "data.ec.product.quantity":  "properties.quantity"
     },
-    "tags": ["browsing", "product"],
+    "tags": ["activity:browsing", "entity:product"],
     "state": "awareness"
   },
   {
@@ -78,7 +78,7 @@
     "properties": {
       "id": "string"
     },
-    "tags": ["browsing", "basket"],
+    "tags": ["activity:browsing"],
     "state": "consideration"
   },
   {
@@ -113,7 +113,7 @@
       "data.ec.product.price":    "properties.price",
       "data.ec.product.quantity": "properties.quantity"
     },
-    "tags": ["browsing", "basket"],
+    "tags": ["entity:product"],
     "state": "consideration"
   },
   {
@@ -147,7 +147,10 @@
       "data.ec.product.variant":   "properties.variant",
       "data.ec.product.price":     "properties.price",
       "data.ec.product.quantity":  "properties.quantity"
-    }
+    },
+    "tags": ["entity:product"],
+    "state": "consideration"
+
   },
   {
     "name": "Checkout Started",
@@ -171,7 +174,9 @@
       "data.ec.checkout.currency": "properties.currency",
       "data.ec.checkout.value":    "properties.value",
       "data.marketing.coupon":     "properties.coupon"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "name": "Checkout Completed",
@@ -187,7 +192,9 @@
     "copy": {
       "data.ec.checkout.id":     "properties.id",
       "data.ec.checkout.status": "properties.status"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "name": "Checkout Status",
@@ -203,7 +210,9 @@
     "copy": {
       "data.ec.checkout.id":     "properties.id",
       "data.ec.checkout.status": "properties.status"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "name": "Delivery Info Entered",
@@ -248,7 +257,9 @@
         "data.contact.address.street",
         "equals"
       ]
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "name": "Payment Info Entered",
@@ -270,7 +281,9 @@
       "data.payment.credit_card.number":   "properties.credit_card.number",
       "data.payment.credit_card.expires":  "properties.credit_card.expires",
       "data.payment.credit_card.holder":   "properties.credit_card.holder"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "name": "Order Started",
@@ -318,7 +331,9 @@
       "data.ec.order.status":  "properties.status",
       "data.ec.order.income":  "properties.income",
       "data.ec.order.cost":    "properties.cost"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "id": "order-completed",
@@ -334,7 +349,9 @@
     "copy": {
       "data.ec.order.id":     "properties.id",
       "data.ec.order.status": "properties.status"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "id": "order-dispatched",
@@ -350,7 +367,9 @@
     "copy": {
       "data.ec.order.id":      "properties.id",
       "data.ec.order.status":  "properties.status"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
     {
     "id": "order-delivered",
@@ -366,7 +385,9 @@
     "copy": {
       "data.ec.order.id":     "properties.id",
       "data.ec.order.status": "properties.status"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "id": "order-status-change",
@@ -379,7 +400,9 @@
     "copy": {
       "data.ec.order.id":      "properties.id",
       "data.ec.order.status":  "properties.string"
-    }
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   },
   {
     "name": "Product Shared",
@@ -392,7 +415,9 @@
     "copy": {
       "data.ec.product.id":      "properties.id",
       "data.marketing.channel":  "properties.media"
-    }
+    },
+    "tags": ["entity:product"],
+    "state": "advocacy"
   },
   {
     "name": "Product Reviewed",
@@ -407,7 +432,9 @@
       "data.ec.product.id":     "properties.id",
       "data.ec.product.review": "properties.review",
       "data.ec.product.rate":   "properties.rate"
-    }
+    },
+    "tags": ["entity:product"],
+    "state": "retention"
   },
   {
     "name": "Product Returned",
@@ -418,6 +445,27 @@
     },
     "copy": {
       "data.ec.product.id": "properties.id"
-    }
+    },
+    "tags": ["entity:product"],
+    "state": "retention"
+  },
+  {
+    "id": "sale-completed",
+    "name": "Sale Completed",
+    "description": "The sale process is completed. Meaning customer can not return the product.",
+    "const": {
+      "status": "sold"
+    },
+    "properties": {
+      "order_id": "string",
+      "value": 0
+    },
+    "copy": {
+      "data.ec.order.id":              "properties.order_id",
+      "data.ec.order.status":          "properties.status",
+      "data.ec.order.income.revenue":  "properties.value"
+    },
+    "tags": ["entity:order"],
+    "state": "purchase"
   }
 ]

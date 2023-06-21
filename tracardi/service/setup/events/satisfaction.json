@@ -12,6 +12,7 @@
     "copy": {
       "data.journey.state": "properties.state",
       "data.journey.rate":  "properties.rate"
-    }
+    },
+    "state": "retention"
   }
 ]

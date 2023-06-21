@@ -14,7 +14,9 @@
     "copy": {
       "data.marketing.promotion.id":   "properties.id",
       "data.marketing.promotion.name": "properties.name"
-    }
+    },
+    "tags": [],
+    "state": "awareness"
   },
     {
     "name": "Promotion Clicked",
@@ -31,6 +33,8 @@
     "copy": {
       "data.marketing.promotion.id":    "properties.id",
       "data.marketing.promotion.name":  "properties.name"
-    }
+    },
+    "tags": [],
+    "state": "awareness"
   }
 ]

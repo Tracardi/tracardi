@@ -35,7 +35,7 @@
     "copy": {
       "hit.query":   "properties.query"
     },
-    "tags": ["browsing", "search", "product"],
+    "tags": ["activity:browsing", "activity:search", "entity:product"],
     "state": "awareness"
   },
   {
@@ -50,7 +50,7 @@
       "hit.category":  "properties.category",
       "hit.query":     "properties.query"
     },
-    "tags": ["browsing", "search"]
+    "tags": ["activity:browsing", "activity:search"]
   },
   {
     "name": "Page View",
@@ -62,7 +62,7 @@
     "copy": {
       "hit.category": "properties.category"
     },
-    "tags": ["browsing"],
+    "tags": ["activity:browsing"],
     "state": "call:tracardi.service.setup.events.journey.logic,page_view"
   },
   {
@@ -75,7 +75,7 @@
     "traits": {
       "hit.category": "properties.category"
     },
-    "tags": ["printing"],
+    "tags": ["activity:printing"],
     "state": "awareness"
   },
   {
@@ -90,7 +90,7 @@
       "hit.name":      "properties.name",
       "hit.category":  "properties.category"
     },
-    "tags": ["browsing"],
+    "tags": ["activity:browsing"],
     "state": "awareness"
   }
 ]
