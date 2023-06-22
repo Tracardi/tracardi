@@ -13,7 +13,7 @@ from tracardi.service.cache_manager import CacheManager
 
 from tracardi.service.console_log import ConsoleLog, StatusLog
 from tracardi.exceptions.log_handler import log_handler
-
+from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -21,10 +21,13 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.field_mappings_cache import FieldMapper
-from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.tracking_manager import TrackerResult
+from tracardi.service.license import License
+if License.has_license():
+    from com_tracardi.service import event_pool
+    from com_tracardi.config import com_tracardi_settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -166,10 +169,9 @@ class TrackerResultPersister:
 
             yield event
 
-    async def __save_events(self, events: Union[List[Event], Generator[Event, Any, None]]) -> Union[SaveResult,
-                                                                                                    BulkInsertResult]:
-
-        tagged_events = [event async for event in self.__tag_events(self.__get_persistent_events_without_source(events))]
+    async def __standard_event_save(self, events):
+        tagged_events = [event async for event in
+                         self.__tag_events(self.__get_persistent_events_without_source(events))]
         event_result = await event_db.save(tagged_events, exclude={"operation": ...})
         event_result = SaveResult(**event_result.dict())
 
@@ -178,6 +180,19 @@ class TrackerResultPersister:
             event_result.types.append(event.type)
 
         return event_result
+
+    async def __save_events(self, events: Union[List[Event], Generator[Event, Any, None]]) -> Union[SaveResult,
+                                                                                                    BulkInsertResult]:
+        if License.has_license():
+            if com_tracardi_settings.event_pool > 0:
+                # Watcher runs only once.
+                event_pool.watcher()
+                # Add event to the pool
+                async for event in self.__tag_events(self.__get_persistent_events_without_source(events)):
+                    event_pool.add(event)
+                return SaveResult()
+        # Standard
+        return await self.__standard_event_save(events)
 
     async def _modify_events(self, tracker_result: TrackerResult, log_event_journal: Dict[str, StatusLog]) -> List[Event]:
         for event in tracker_result.events:

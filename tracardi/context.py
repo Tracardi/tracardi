@@ -46,6 +46,14 @@ class Context(BaseModel):
                f"tenant: {self.tenant}, " \
                f"host: {self.host})"
 
+    def __hash__(self):
+        return hash((self.production, self.tenant))
+
+    def __eq__(self, other):
+        if isinstance(other, Context):
+            return (self.production, self.tenant) == (other.production, other.tenant)
+        return False
+
 
 class ContextManager(metaclass=Singleton):
 
