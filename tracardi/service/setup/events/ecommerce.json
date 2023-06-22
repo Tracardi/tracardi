@@ -164,7 +164,7 @@
       "id": "string",
       "order_id": "string",
       "currency": "string",
-      "value": "string",
+      "value": 10,
       "coupon": "string"
     },
     "copy": {
