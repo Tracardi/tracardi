@@ -189,7 +189,7 @@ class TrackerResultPersister:
                 event_pool.watcher()
                 # Add event to the pool
                 async for event in self.__tag_events(self.__get_persistent_events_without_source(events)):
-                    event_pool.add(event)
+                    await event_pool.add(event)
                 return SaveResult()
         # Standard
         return await self.__standard_event_save(events)
