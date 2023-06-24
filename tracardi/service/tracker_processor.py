@@ -85,12 +85,14 @@ class TrackerProcessor(TrackProcessorBase):
                 # Get events to be reshaped
                 tracker_payloads_per_profile = []
                 for tp_position, tracker_payload in enumerate(tracker_payloads):  # type: int, TrackerPayload
-
                     remove_event_list = []
                     # TODO Maybe this should be moved after the full session is available
                     # Event will not have os, device, page - no full session available
-                    for ev_position, event in enumerate(tracker_payload.get_domain_events()):
-                        reshaping_schemas = await EventsValidationHandler.get_reshape_schemas(event)
+                    for ev_position, event_payload in enumerate(tracker_payload.events):
+
+                        reshaping_schemas = await EventsValidationHandler.get_reshape_schemas(
+                            event_payload.type,
+                            is_valid_event=True)
 
                         if reshaping_schemas is not None:
 
@@ -102,7 +104,7 @@ class TrackerProcessor(TrackProcessorBase):
 
                             if must_be_reshaped:
                                 tp = tracker_payload.copy(exclude={"events": ...})
-                                tp.events = [EventPayload.from_event(event)]
+                                tp.events = [event_payload]
                                 tracker_payloads_per_profile.append(tp)
                                 remove_event_list.append(ev_position)
 
@@ -135,6 +137,9 @@ class TrackerProcessor(TrackProcessorBase):
             tracker_results: List[TrackerResult] = []
             debugging: List[TrackerPayload] = []
 
+            # Todo Performance
+            print(len(tracker_payloads))
+
             for tracker_payload in tracker_payloads:
 
                 # Validation and reshaping
@@ -142,8 +147,11 @@ class TrackerProcessor(TrackProcessorBase):
                 if License.has_license():
                     # Index traits, validate and reshape
                     evh = EventsValidationHandler(dot, self.console_log)
+                    # Todo Performance
                     tracker_payload = await evh.validate_reshape_index_events(tracker_payload)
 
+                # Todo Performance
+                continue
                 # Locks for processing each profile
                 result = await orchestrator.invoke(tracker_payload, self.console_log)
                 tracker_results.append(result)

@@ -90,6 +90,7 @@ async def profile_destination_dispatch(load_destination_task: Callable,
                                        session,
                                        debug):
     logger.info("Dispatching profile via profile destination.")
+
     dot = DotAccessor(profile, session)
     template = DictTraverser(dot, default=None)
 

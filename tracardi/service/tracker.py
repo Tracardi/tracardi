@@ -45,6 +45,7 @@ async def track_event(tracker_payload: TrackerPayload,
                           [List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None
                       ):
     console_log = ConsoleLog()
+
     try:
 
         tr = Tracker(
@@ -183,7 +184,7 @@ class Tracker:
 
         # Run only for webhooks
         # Check if we need to generate profile and session id. Used in webhooks
-        if tracker_payload.generate_profile_and_session(self.console_log):
+        if tracker_payload.generate_profile_and_session_for_webhook(self.console_log):
             # Returns true if source is a webhook with generate profile id set to true
             self.tracker_config.static_profile_id = True
 

@@ -171,7 +171,7 @@ class TracardiConfig:
                 raise AssertionError('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
                                      'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"')
 
-        if not is_valid_url(self.multi_tenant_manager_url):
+        if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
             raise AssertionError('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
 
     @property

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
@@ -132,27 +133,50 @@ class EventMarketing(BaseModel):
 
 
 class EventData(BaseModel):
-    pii: Optional[ProfilePII] = ProfilePII()
-    contact: Optional[ProfileContact] = ProfileContact()
-    identifier: Optional[ProfileIdentifier] = ProfileIdentifier()
-    media: Optional[ProfileMedia] = ProfileMedia()
-    preferences: Optional[ProfilePreference] = ProfilePreference()
-    job: Optional[ProfileJob] = ProfileJob()
-    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty()
-    ec: Optional[EventEc] = EventEc()
-    message: Optional[EventMessage] = EventMessage()
-    payment: Optional[EventPayment] = EventPayment()
-    marketing: Optional[EventMarketing] = EventMarketing()
+    pii: Optional[ProfilePII] = ProfilePII.construct()
+    contact: Optional[ProfileContact] = ProfileContact.construct()
+    identifier: Optional[ProfileIdentifier] = ProfileIdentifier.construct()
+    media: Optional[ProfileMedia] = ProfileMedia.construct()
+    preferences: Optional[ProfilePreference] = ProfilePreference.construct()
+    job: Optional[ProfileJob] = ProfileJob.construct()
+    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty.construct()
+    ec: Optional[EventEc] = EventEc.construct()
+    message: Optional[EventMessage] = EventMessage.construct()
+    payment: Optional[EventPayment] = EventPayment.construct()
+    marketing: Optional[EventMarketing] = EventMarketing.construct()
+
+
+@dataclass
+class EventDataClass:
+    metadata: EventMetadata
+    type: str
+
+    device: Optional[dict]
+    os: Optional[dict]
+    app: Optional[dict]
+    hit: Optional[dict]
+
+    utm: Optional[dict]
+
+    properties: Optional[dict]
+    traits: Optional[dict]
+    operation: Optional[dict]
+
+    source: Entity
+    session: Optional[EventSession]
+    profile: Optional[Entity]
+    context: Optional[dict]
+    request: Optional[dict]
+    config: Optional[dict]
+    tags: Optional[dict]
+    journey: Optional[dict]
+    aux: dict
+    data: Optional[dict]
 
 
 class Event(NamedEntity):
     metadata: EventMetadata
     type: str
-
-    device: Optional[Device] = Device()
-    os: Optional[OS] = OS()
-    app: Optional[Application] = Application()
-    hit: Optional[Hit] = Hit()
 
     utm: Optional[UTM] = UTM()
 
@@ -167,10 +191,22 @@ class Event(NamedEntity):
     request: Optional[dict] = {}
     config: Optional[dict] = {}
     tags: Tags = Tags()
-    journey: EventJourney = EventJourney()
     aux: dict = {}
 
-    data: Optional[EventData] = EventData()
+    # device: Optional[dict] = {}
+    # os: Optional[dict] = {}
+    # app: Optional[dict] = {}
+    # hit: Optional[dict] = {}
+    # journey: Optional[dict] = {}
+    data: Optional[dict] = {}
+
+    device: Optional[Device] = Device.construct()
+    os: Optional[OS] = OS.construct()
+    app: Optional[Application] = Application.construct()
+    hit: Optional[Hit] = Hit.construct()
+    journey: EventJourney = EventJourney.construct()
+
+    # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
         if 'type' in data and isinstance(data['type'], str):
@@ -228,3 +264,139 @@ class Event(NamedEntity):
             Event,
             multi=True
         )
+
+    @staticmethod
+    def dictionary(id: str = None, type: str = None, session_id: str = None, profile_id=None,
+                   properties: dict = None, context=None) -> dict:
+        if context is None:
+            context = {}
+        if properties is None:
+            properties = {}
+        return {
+            "id": id,
+            "type": type,
+            "name": capitalize_event_type_id(type),
+            "metadata": {
+                "aux": {},
+                "time": {
+                    "insert": None,
+                    "create": None,
+                    "update": None,
+                    "process_time": 0
+                },
+                "ip": None,
+                "status": None,
+                "channel": None,
+                "processed_by": {
+                    "rules": [],
+                    "flows": [],
+                    "third_party": []
+                },
+                "profile_less": False,
+                "debug": False,
+                "valid": True,
+                "error": False,
+                "warning": False,
+                "instance": {
+                    "id": None
+                }
+            },
+            "utm": {
+                "source": None,
+                "medium": None,
+                "campaign": None,
+                "term": None,
+                "content": None
+            },
+            "properties": properties,
+            "traits": {},
+            "operation": {
+                "new": False,
+                "update": False
+            },
+            "source": {
+                "id": None,
+                "type": [],
+                "bridge": {
+                    "id": None,
+                    "name": None
+                },
+                "timestamp": None,
+                "name": None,
+                "description": None,
+                "channel": None,
+                "enabled": True,
+                "transitional": False,
+                "tags": [],
+                "groups": [],
+                "returns_profile": False,
+                "permanent_profile_id": False,
+                "requires_consent": False,
+                "manual": None,
+                "locked": False,
+                "synchronize_profiles": True,
+                "config": None
+            },
+            "session": {
+                "id": session_id,
+                "start": None,
+                "duration": 0,
+                "tz": "utc"
+            },
+            "profile": {
+                "id": profile_id
+            },
+            "context": context,
+            "request": {},
+            "config": {},
+            "tags": {
+                "values": (),
+                "count": 0
+            },
+            "aux": {},
+            "data": {},
+            "device": {
+                "name": None,
+                "brand": None,
+                "model": None,
+                "type": None,
+                "touch": False,
+                "ip": None,
+                "resolution": None,
+                "geo": {
+                    "country": {
+                        "name": None,
+                        "code": None
+                    },
+                    "city": None,
+                    "county": None,
+                    "postal": None,
+                    "latitude": None,
+                    "longitude": None
+                },
+                "color_depth": None,
+                "orientation": None
+            },
+            "os": {
+                "name": None,
+                "version": None
+            },
+            "app": {
+                "type": None,
+                "name": None,
+                "version": None,
+                "language": None,
+                "bot": False,
+                "resolution": None
+            },
+            "hit": {
+                "name": None,
+                "url": None,
+                "referer": None,
+                "query": None,
+                "category": None
+            },
+            "journey": {
+                "state": None
+            }
+        }

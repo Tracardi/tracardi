@@ -11,18 +11,28 @@ from tracardi.service.singleton import Singleton
 ctx_id: ContextVar[str] = ContextVar("request_id", default="")
 
 
-class Context(BaseModel):
+class Context:
+
     production: bool = tracardi.version.production
     user: Optional[User] = None
     tenant: str
     host: Optional[str] = None
 
-    def __init__(self, **data):
+    def __init__(self,
+                 production:bool = None,
+                 user: Optional[User] = None,
+                 tenant: str = None,
+                 host: Optional[str] = None):
 
         # This is every important: if not multi tenant replace tenant version by version name.
         if not tracardi.multi_tenant:
-            data['tenant'] = tracardi.version.name
-        super().__init__(**data)
+            self.tenant = tracardi.version.name
+        else:
+            self.tenant = tenant
+
+        self.user = user
+        self.production = tracardi.version.production if production is None else production
+        self.host = host
 
     def is_production(self) -> bool:
         return self.production

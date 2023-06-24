@@ -6,7 +6,7 @@ from pydantic import BaseModel, validator
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
-from ..event import Event, EventSession, Tags
+from ..event import Event, EventSession, Tags, EventDataClass
 from ..event_metadata import EventMetadata
 from ..event_metadata import EventPayloadMetadata
 from ..metadata import Hit
@@ -40,6 +40,100 @@ class EventPayload(BaseModel):
     @staticmethod
     def from_event(event: Event) -> 'EventPayload':
         return EventPayload(type=event.type, properties=event.properties, context=event.context)
+
+    def to_event_data_class(self, metadata: EventPayloadMetadata, source: Entity,
+                            session: Union[Optional[Entity], Optional[Session]],
+                            profile: Optional[Entity],
+                            has_profile: bool) -> EventDataClass:
+
+        meta = EventMetadata(**metadata.dict())
+
+        edc = EventDataClass(
+            metadata=meta,
+            type="",
+
+            device={},
+            os={},
+            app={},
+            hit={},
+
+            utm={},
+
+            properties={},
+            traits={},
+            operation={},
+
+            source=source,
+            session=session,
+            profile=profile,
+            context={},
+            request={},
+            config={},
+            tags={},
+            journey={},
+            aux={},
+            data={}
+        )
+        return edc
+
+    def to_event_dict(self,
+                      source: Entity,
+                      session: Union[Optional[Entity], Optional[Session]],
+                      profile: Optional[Entity],
+                      has_profile: bool) -> dict:
+
+        event_type = self.type.strip()
+        event = Event.dictionary(
+            id=str(uuid4()),
+            profile_id=profile.id,
+            type=event_type,
+            properties=self.properties,
+            context=self.context)
+        event['profile_less'] = not has_profile
+        event['metadata']['instance']['id'] = ApiInstance().id
+        if self.time.insert:
+            event['metadata']['time']['insert'] = self.time.insert
+        else:
+            event['metadata']['time']['insert'] = datetime.utcnow()
+
+        if self.time.create:
+            event['metadata']['time']['create'] = self.time.create
+
+        #TOdo bottleneck
+        # event["session"] = self._get_event_session(session)
+        event['source']['id'] = source.id
+        event['config'] = self.options
+        event['operation']['update'] = False
+        event['operation']['new'] = True
+        event['tags']['values'] = tuple(self.tags)
+        event['tags']['count'] = len(self.tags)
+
+        if isinstance(session, Session):
+            try:
+                title = self.context['page']['title']
+            except KeyError:
+                title = None
+
+            try:
+                url = self.context['page']['url']
+            except KeyError:
+                url = None
+
+            try:
+                referer = self.context['page']['referer']['host']
+            except KeyError:
+                referer = None
+
+            event["os"] = session.os
+            event["app"] = session.app
+            event["device"] = session.device
+
+            event["hit"]['title'] = title
+            event["hit"]['url'] = url
+            event["hit"]['referer'] = referer
+            event["utm"] = session.utm
+
+        return event
 
     def to_event(self, metadata: EventPayloadMetadata, source: Entity,
                  session: Union[Optional[Entity], Optional[Session]],
