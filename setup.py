@@ -61,7 +61,6 @@ setup(
         'random-password-generator==2.2.0',
         'asyncio-mqtt==0.12.1',
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
-        'googletrans==3.1.0a0',
         'tweepy==4.10.1',
         'strsimpy==0.2.1',
         'python-whois==0.8.0',
