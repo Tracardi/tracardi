@@ -132,5 +132,3 @@ def make_fake_event_context():
         }
     }
 
-
-pprint(make_fake_event_context())

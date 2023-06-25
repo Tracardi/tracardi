@@ -117,13 +117,13 @@ class TrackerProcessor(TrackProcessorBase):
             #
             # [{profile, events[]}, ..]
             #
-            # Each payload if for one profile. If there is a reshape that has profile ID or session ID mapping
+            # Each payload is for one profile. If there is a reshape that has profile ID or session ID mapping
             # that means that this payload could be reassigned to different profile. Therefore it is another
             # tracker_payload tracker_payloads:
             #
             # [{profile, events[]}, {profile, events[]} <- THIS ONE]
             #
-            # Most of the time there will be only tracker_payload in tracker_payloads
+            # Most of the time there will be only one tracker_payload in tracker_payloads
 
             # Uses redis to lock profile
 

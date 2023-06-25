@@ -48,11 +48,9 @@ async def update_mappings():
         if os.path.isfile(path):
             with open(path) as f:
                 update_mappings = json.load(f)
-                print(update_mappings)
                 if index.multi_index:
                     current_indices = await raw_db.indices(index.get_templated_index_pattern())
                     for idx, idx_data in current_indices.items():
-                        print(idx)
                         from pprint import pprint
                         pprint(await raw_db.set_mapping(idx, update_mappings))
                         pprint(await raw_db.get_mapping(idx))
