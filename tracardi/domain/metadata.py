@@ -28,7 +28,7 @@ class Device(BaseModel):
     touch: Optional[bool] = False
     ip: Optional[str] = None
     resolution: Optional[str] = None
-    geo: Optional[Geo] = Geo()
+    geo: Optional[Geo] = Geo.construct()
     color_depth: Optional[int] = None
     orientation: Optional[str] = None
 

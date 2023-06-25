@@ -69,12 +69,6 @@ class TrackerPayload(BaseModel):
     profile_less: bool = False
     debug: Optional[bool] = False
 
-    @validator("events")
-    def events_must_not_be_empty(cls, value):
-        if len(value) == 0:
-            raise ValueError("Tracker payload must not have empty events.")
-        return value
-
     def __init__(self, **data: Any):
         data['metadata'] = EventPayloadMetadata(
             time=Time(
@@ -111,7 +105,7 @@ class TrackerPayload(BaseModel):
         self.profile_less = False
         self.options.update({"saveSession": True})
 
-    def generate_profile_and_session(self, console_log: list) -> bool:
+    def generate_profile_and_session_for_webhook(self, console_log: list) -> bool:
 
         """
 
@@ -208,13 +202,25 @@ class TrackerPayload(BaseModel):
     def has_static_profile_id(self) -> bool:
         return self._make_static_profile_id
 
-    def get_domain_events(self) -> List[Event]:
+    def get_events_dict(self) -> List[dict]:
+        # Todo Cache in property - this is expensive
         for event_payload in self.events:
-            yield event_payload.to_event(self.metadata,
-                                         self.source,
-                                         self.session,
-                                         self.profile,
-                                         self.profile_less)
+            # Todo PErformance
+            yield event_payload.to_event_dict(
+                self.source,
+                self.session,
+                self.profile,
+                self.profile_less)
+            # yield event_payload.to_event(self.metadata,
+            #                              self.source,
+            #                              self.session,
+            #                              self.profile,
+            #                              self.profile_less)
+            # yield event_payload.to_event_data_class(self.metadata,
+            #                                         self.source,
+            #                                         self.session,
+            #                                         self.profile,
+            #                                         self.profile_less)
 
     def set_headers(self, headers: dict):
         if 'authorization' in headers:

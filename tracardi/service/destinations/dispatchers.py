@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections import Callable
+from collections.abc import Callable
 from typing import Any
 
 from tracardi.domain.api_instance import ApiInstance
@@ -90,6 +90,7 @@ async def profile_destination_dispatch(load_destination_task: Callable,
                                        session,
                                        debug):
     logger.info("Dispatching profile via profile destination.")
+
     dot = DotAccessor(profile, session)
     template = DictTraverser(dot, default=None)
 

@@ -122,6 +122,7 @@ class CacheManager(metaclass=Singleton):
         """
         Event source cache
         """
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_source_cache(),

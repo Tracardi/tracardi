@@ -61,11 +61,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.connectors.google.translate.plugin": PluginMetadata(
-        test=PluginTest(init={"text_to_translate": "Hello", "source_language": "en", "destination_language": "en"},
-                        resource=None)
-    ),
-
     "tracardi.process_engine.action.v1.memory.collect.plugin": PluginMetadata(
         test=PluginTest(init={'name': 'Test name', 'type': 'list'},
                         resource=None)

@@ -45,6 +45,7 @@ async def track_event(tracker_payload: TrackerPayload,
                           [List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None
                       ):
     console_log = ConsoleLog()
+
     try:
 
         tr = Tracker(
@@ -75,8 +76,10 @@ async def track_event(tracker_payload: TrackerPayload,
         console_log_db.save_console_log(console_log)
 
         # Save log
-        if await save_logs() is False:
-            logger.warning("Log index still not created. Saving logs postponed.")
+        try:
+            await save_logs()
+        except Exception as e:
+            logger.warning(f"Could not save logs. Error: {str(e)} ")
 
 
 class Tracker:
@@ -183,7 +186,7 @@ class Tracker:
 
         # Run only for webhooks
         # Check if we need to generate profile and session id. Used in webhooks
-        if tracker_payload.generate_profile_and_session(self.console_log):
+        if tracker_payload.generate_profile_and_session_for_webhook(self.console_log):
             # Returns true if source is a webhook with generate profile id set to true
             self.tracker_config.static_profile_id = True
 

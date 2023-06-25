@@ -1,6 +1,6 @@
 git+https://github.com/elasticemail/elasticemail-python.git@4.0.20
 
-pydantic>=1.10.2
+pydantic
 aiohttp[speedups]
 redis
 aioredis
@@ -45,7 +45,6 @@ certifi==2022.9.24
 celery==5.2.6
 random-password-generator==2.2.0
 asyncio-mqtt==0.12.1
-googletrans==3.1.0a0
 tweepy==4.10.1
 strsimpy==0.2.1
 python-whois==0.8.0
