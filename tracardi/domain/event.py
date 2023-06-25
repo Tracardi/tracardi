@@ -193,19 +193,18 @@ class Event(NamedEntity):
     tags: Tags = Tags()
     aux: dict = {}
 
-    # device: Optional[dict] = {}
-    # os: Optional[dict] = {}
-    # app: Optional[dict] = {}
-    # hit: Optional[dict] = {}
+    device: Optional[dict] = {}
+    os: Optional[dict] = {}
+    app: Optional[dict] = {}
+    hit: Optional[dict] = {}
     # journey: Optional[dict] = {}
     data: Optional[dict] = {}
 
-    device: Optional[Device] = Device.construct()
-    os: Optional[OS] = OS.construct()
-    app: Optional[Application] = Application.construct()
-    hit: Optional[Hit] = Hit.construct()
+    # device: Optional[Device] = Device.construct()
+    # os: Optional[OS] = OS.construct()
+    # app: Optional[Application] = Application.construct()
+    # hit: Optional[Hit] = Hit.construct()
     journey: EventJourney = EventJourney.construct()
-
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
