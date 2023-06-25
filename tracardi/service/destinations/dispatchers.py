@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections import Callable
+from collections.abc import Callable
 from typing import Any
 
 from tracardi.domain.api_instance import ApiInstance

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections import Callable
+from collections.abc import Callable
 from datetime import datetime
 from typing import Type
 from uuid import uuid4

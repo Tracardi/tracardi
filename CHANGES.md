@@ -29,6 +29,9 @@ Version: 0.8.1
   * Event aggregator (pro)
   * Event counter (pro)
   * ChatGPT prompt (pro)
+* Misc
+  * Upgrade to python 3.9
+  * Performance tweaks
 
 Version 0.8.0
 ----------------------------------------------------------
