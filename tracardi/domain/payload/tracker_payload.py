@@ -69,12 +69,6 @@ class TrackerPayload(BaseModel):
     profile_less: bool = False
     debug: Optional[bool] = False
 
-    @validator("events")
-    def events_must_not_be_empty(cls, value):
-        if len(value) == 0:
-            raise ValueError("Tracker payload must not have empty events.")
-        return value
-
     def __init__(self, **data: Any):
         data['metadata'] = EventPayloadMetadata(
             time=Time(

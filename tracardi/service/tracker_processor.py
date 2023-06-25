@@ -83,7 +83,9 @@ class TrackerProcessor(TrackProcessorBase):
             if License.has_license():
 
                 # Get events to be reshaped
-                tracker_payloads_per_profile = []
+                # Separated tracker payload into items to must be reshaped separately
+
+                separated_tracker_payloads_for_profile_mapping = []
                 for tp_position, tracker_payload in enumerate(tracker_payloads):  # type: int, TrackerPayload
                     remove_event_list = []
                     # TODO Maybe this should be moved after the full session is available
@@ -99,19 +101,26 @@ class TrackerProcessor(TrackProcessorBase):
                             # Check if we have to reshape the tracker_payload and it has mapped
                             # profile ID and session ID
 
-                            must_be_reshaped = reshaping_schemas.has_profile_or_session_mapping() \
-                                if reshaping_schemas is not None else False
+                            must_be_reshaped = reshaping_schemas.has_profile_or_session_mapping()
+
+                            # Zdarzenia które maja zmappowane Profile ID lub Session ID muszą być wyodrębnione z
+                            # pozostałych zdarzeń które są w tracker_payload. Tracker payload może miec wiele zdarzeń
+                            # sposód których tylko niektóre mogą być przeznaczone do reshape.
 
                             if must_be_reshaped:
                                 tp = tracker_payload.copy(exclude={"events": ...})
                                 tp.events = [event_payload]
-                                tracker_payloads_per_profile.append(tp)
+                                separated_tracker_payloads_for_profile_mapping.append(tp)
                                 remove_event_list.append(ev_position)
+
+                    # wyłącz z obecnego tracker payload zdarzenia które będą reshapowane
 
                     tracker_payload.events = [event for pos, event in enumerate(tracker_payload.events)
                                               if pos not in remove_event_list]
 
-                tracker_payloads += tracker_payloads_per_profile
+                # Dodaj listy payloadów te które mają być reshaped.
+                if separated_tracker_payloads_for_profile_mapping:
+                    tracker_payloads += separated_tracker_payloads_for_profile_mapping
 
             # Variable tracker_payloads has a list of tracker payloads
             #
@@ -139,10 +148,15 @@ class TrackerProcessor(TrackProcessorBase):
 
             for tracker_payload in tracker_payloads:
 
+                # if no events in payload continue
+
+                if not tracker_payload.events:
+                    continue
+
                 # Validation and reshaping
 
                 if License.has_license():
-                    # Index traits, validate and reshape
+                    # Index traits, validate and reshape, oly if license and there are event to reshape
                     evh = EventsValidationHandler(dot, self.console_log)
                     tracker_payload = await evh.validate_reshape_index_events(tracker_payload)
 
