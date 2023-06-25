@@ -137,9 +137,6 @@ class TrackerProcessor(TrackProcessorBase):
             tracker_results: List[TrackerResult] = []
             debugging: List[TrackerPayload] = []
 
-            # Todo Performance
-            print(len(tracker_payloads))
-
             for tracker_payload in tracker_payloads:
 
                 # Validation and reshaping
@@ -147,11 +144,8 @@ class TrackerProcessor(TrackProcessorBase):
                 if License.has_license():
                     # Index traits, validate and reshape
                     evh = EventsValidationHandler(dot, self.console_log)
-                    # Todo Performance
                     tracker_payload = await evh.validate_reshape_index_events(tracker_payload)
 
-                # Todo Performance
-                continue
                 # Locks for processing each profile
                 result = await orchestrator.invoke(tracker_payload, self.console_log)
                 tracker_results.append(result)

@@ -76,8 +76,10 @@ async def track_event(tracker_payload: TrackerPayload,
         console_log_db.save_console_log(console_log)
 
         # Save log
-        if await save_logs() is False:
-            logger.warning("Log index still not created. Saving logs postponed.")
+        try:
+            await save_logs()
+        except Exception as e:
+            logger.warning(f"Could not save logs. Error: {str(e)} ")
 
 
 class Tracker:

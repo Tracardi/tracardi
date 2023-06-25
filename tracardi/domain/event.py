@@ -266,8 +266,12 @@ class Event(NamedEntity):
         )
 
     @staticmethod
-    def dictionary(id: str = None, type: str = None, session_id: str = None, profile_id=None,
-                   properties: dict = None, context=None) -> dict:
+    def dictionary(id: str = None,
+                   type: str = None,
+                   session_id: str = None,
+                   profile_id=None,
+                   properties: dict = None,
+                   context=None) -> dict:
         if context is None:
             context = {}
         if properties is None:

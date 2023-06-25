@@ -41,41 +41,6 @@ class EventPayload(BaseModel):
     def from_event(event: Event) -> 'EventPayload':
         return EventPayload(type=event.type, properties=event.properties, context=event.context)
 
-    def to_event_data_class(self, metadata: EventPayloadMetadata, source: Entity,
-                            session: Union[Optional[Entity], Optional[Session]],
-                            profile: Optional[Entity],
-                            has_profile: bool) -> EventDataClass:
-
-        meta = EventMetadata(**metadata.dict())
-
-        edc = EventDataClass(
-            metadata=meta,
-            type="",
-
-            device={},
-            os={},
-            app={},
-            hit={},
-
-            utm={},
-
-            properties={},
-            traits={},
-            operation={},
-
-            source=source,
-            session=session,
-            profile=profile,
-            context={},
-            request={},
-            config={},
-            tags={},
-            journey={},
-            aux={},
-            data={}
-        )
-        return edc
-
     def to_event_dict(self,
                       source: Entity,
                       session: Union[Optional[Entity], Optional[Session]],
@@ -86,6 +51,7 @@ class EventPayload(BaseModel):
         event = Event.dictionary(
             id=str(uuid4()),
             profile_id=profile.id,
+            session_id=session.id,
             type=event_type,
             properties=self.properties,
             context=self.context)
@@ -99,7 +65,7 @@ class EventPayload(BaseModel):
         if self.time.create:
             event['metadata']['time']['create'] = self.time.create
 
-        #TOdo bottleneck
+        # To prevent performance bottleneck do not create full event session
         # event["session"] = self._get_event_session(session)
         event['source']['id'] = source.id
         event['config'] = self.options

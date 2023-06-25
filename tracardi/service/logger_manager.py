@@ -9,11 +9,6 @@ from tracardi.service.storage.driver.elastic import log as log_db
 async def save_logs() -> Optional[bool]:
     if not tracardi.save_logs:
         return None
-    """
-    Saves errors caught by logger
-    """
-    if not await log_db.exists():
-        return False
 
     if log_handler.has_logs():
         # do not await
@@ -21,4 +16,4 @@ async def save_logs() -> Optional[bool]:
         log_handler.reset()
         return True
 
-    return None
+    return False
