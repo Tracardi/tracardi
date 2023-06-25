@@ -1,6 +1,6 @@
 git+https://github.com/elasticemail/elasticemail-python.git@4.0.20
 
-pydantic
+pydantic==1.10.9
 aiohttp[speedups]
 redis
 aioredis
