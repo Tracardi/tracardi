@@ -27,15 +27,15 @@
         "type": "keyword"
       },
       "draft": {
-        "type": "keyword",
+        "type": "binary",
         "index": false
       },
       "production": {
-        "type": "keyword",
+        "type": "binary",
         "index": false
       },
       "backup": {
-        "type": "keyword",
+        "type": "binary",
         "index": false
       },
       "lock": {

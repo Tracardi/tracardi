@@ -36,6 +36,10 @@
       "segment": {
         "type": "keyword"
       },
+      "code": {
+        "type": "binary",
+        "index": false
+      },
       "workflow": {
         "properties": {
           "id": {
