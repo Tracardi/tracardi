@@ -13,6 +13,13 @@ async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
     return await storage_manager('live-segment').load_all(start, limit)
 
 
+async def load_live_segments_by(type: str, limit: int = 1000) -> StorageRecords:
+    return await storage_manager('live-segment').load_by_values(
+        [('type', type)],
+        limit=limit
+    )
+
+
 async def refresh():
     return await storage_manager('live-segment').refresh()
 

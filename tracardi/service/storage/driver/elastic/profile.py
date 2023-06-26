@@ -147,6 +147,14 @@ def query(query: dict = None):
     return storage_manager('profile').query(query)
 
 
+async def load_by_query_string(query: str):
+    return await storage_manager('profile').load_by_query_string(query)
+
+
+async def update_by_query(query):
+    return await storage_manager('profile').update_by_query(query=query)
+
+
 async def count(query: dict = None):
     return await storage_manager('profile').count(query)
 
