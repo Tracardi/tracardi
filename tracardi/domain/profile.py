@@ -6,7 +6,6 @@ from tracardi.service.notation.dot_accessor import DotAccessor
 from .entity import Entity
 from .geo import Geo
 from .metadata import ProfileMetadata
-from .pii import PII
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
@@ -202,7 +201,6 @@ class Profile(Entity):
     operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[dict] = {}
-    pii: PII = PII()
     segments: Optional[List[str]] = []
     interests: Optional[dict] = {}
     consents: Optional[Dict[str, ConsentRevoke]] = {}

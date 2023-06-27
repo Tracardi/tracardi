@@ -31,10 +31,12 @@
             "time": {
               "properties": {
                 "insert": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "create": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "process_time": {
                   "type": "float"
@@ -284,7 +286,8 @@
               "ignore_above": 64
             },
             "start": {
-              "type": "date"
+              "type": "date",
+              "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
             },
             "duration": {
               "type": "float"
@@ -385,7 +388,8 @@
                   "type": "keyword"
                 },
                 "birthday": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "language": {
                   "properties": {
@@ -610,7 +614,8 @@
                       "type": "float"
                     },
                     "expires": {
-                      "type": "date"
+                      "type": "date",
+                      "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                     }
                   }
                 }
@@ -759,7 +764,8 @@
                       "ignore_above": 24
                     },
                     "expires": {
-                      "type": "date"
+                      "type": "date",
+                      "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                     },
                     "holder": {
                       "type": "keyword",

@@ -33,7 +33,7 @@ def make_identification_data():
         "phone": tn,
         "whatsapp": tn,
         "email": fake_emails[randint(0, 1499)],
-        "birthday": fake.date_time_between(start_date='-75y', end_date='-18y').strftime("%Y-%m-%d %H:%M:%S")
+        "birthday": fake.date_time_between(start_date='-75y', end_date='-18y').strftime("%Y-%m-%dT%H:%M:%S")
     }
 
 

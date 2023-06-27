@@ -29,21 +29,26 @@
             "time": {
               "properties": {
                 "insert": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "update": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "segmentation": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "visit": {
                   "properties": {
                     "last": {
-                      "type": "date"
+                      "type": "date",
+                      "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                     },
                     "current": {
-                      "type": "date"
+                      "type": "date",
+                      "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                     },
                     "count": {
                       "type": "integer"
@@ -109,7 +114,8 @@
                   "type": "keyword"
                 },
                 "birthday": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "language": {
                   "properties": {
@@ -398,7 +404,8 @@
                       "type": "float"
                     },
                     "expires": {
-                      "type": "date"
+                      "type": "date",
+                      "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                     }
                   }
                 }
@@ -413,37 +420,6 @@
         "traits": {
             "dynamic": "true",
             "type": "object"
-        },
-        "pii": {
-          "properties": {
-            "name": {
-              "type": "text"
-            },
-            "surname": {
-              "type": "text"
-            },
-            "birthDate": {
-              "type": "date"
-            },
-            "email": {
-              "type": "keyword"
-            },
-            "telephone": {
-              "type": "keyword"
-            },
-            "twitter": {
-              "type": "keyword"
-            },
-            "facebook": {
-              "type": "keyword"
-            },
-            "whatsapp": {
-              "type": "keyword"
-            },
-            "other": {
-              "type": "flattened"
-            }
-          }
         },
         "collections": {
           "type": "nested"
