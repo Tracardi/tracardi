@@ -149,7 +149,12 @@ class ProfileJob(BaseModel):
 
 
 class ProfileMetrics(BaseModel):
-    ltv: Optional[float] = None
+    ltv: Optional[float] = 0
+    ltcosc: Optional[int] = 0   # Live Time Check-Out Started Counter
+    ltcocc: Optional[int] = 0  # Live Time Check-Out Completed Counter
+    ltcop: Optional[float] = 0  # Live Time Check-Out Percentage
+    ltcosv: Optional[float] = 0  # Live Time Check-Out Started Value
+    ltcocv: Optional[float] = 0  # Live Time Check-Out Completed Value
 
 
 class ProfileLoyaltyCard(BaseModel):

@@ -6,7 +6,7 @@ from uuid import uuid4
 from dotty_dict import dotty
 from pydantic.error_wrappers import ValidationError
 from tracardi.service.events import auto_index_default_event_type, copy_default_event_to_profile, \
-    get_default_event_type_mapping
+    get_default_event_type_mapping, call_function
 
 from tracardi.service.notation.dot_accessor import DotAccessor
 
@@ -294,7 +294,7 @@ class TrackingManager(TrackingManagerBase):
                             ))
                             continue
 
-                    # Copy
+                    # Custom Copy
 
                     if coping_schema.event_to_profile:
                         allowed_profile_fields = (
@@ -366,6 +366,16 @@ class TrackingManager(TrackingManagerBase):
                                 logger.error(message)
 
             if profile_updated_flag is True and flat_profile is not None:
+
+                # Compute values
+
+                compute_schema = get_default_event_type_mapping(event.type, 'compute')
+                if compute_schema:
+                    for profile_property, compute_string in compute_schema:
+                        if not compute_string.startswith("call:"):
+                            continue
+                        flat_profile[profile_property] = call_function(compute_string, event=event, profile=flat_profile)
+
                 try:
                     self.profile = Profile(**flat_profile)
                     self.profile.operation.update = True
@@ -393,6 +403,8 @@ class TrackingManager(TrackingManagerBase):
                         )
                     )
                     logger.error(message)
+
+
 
         ux = []
         post_invoke_events = None

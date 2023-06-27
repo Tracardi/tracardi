@@ -164,7 +164,7 @@
       "id": "string",
       "order_id": "string",
       "currency": "string",
-      "value": 10,
+      "value": 0.0,
       "coupon": "string"
     },
     "copy": {
@@ -174,6 +174,19 @@
       "data.ec.checkout.currency": "properties.currency",
       "data.ec.checkout.value":    "properties.value"
     },
+    "profile": {
+      "data.metrics.ltcosv": [
+        "data.ec.checkout.value",
+        "+"
+      ],
+      "data.metrics.ltcosc": [
+        1,
+        "increment"
+      ]
+    },
+    "compute": [
+      ["data.metrics.ltcop" ,"call:tracardi.service.setup.events.computations.checkout,compute_ltcop"]
+    ],
     "tags": ["entity:order"],
     "state": "purchase"
   },
@@ -186,12 +199,26 @@
       "status": "completed"
     },
     "properties": {
-      "id": "string"
+      "id": "string",
+      "value": 0.0
     },
     "copy": {
       "data.ec.checkout.id":     "properties.id",
       "data.ec.checkout.status": "properties.status"
     },
+    "profile": {
+      "data.metrics.ltcocv": [
+        "properties.value",
+        "+"
+      ],
+      "data.metrics.ltcocc": [
+        1,
+        "increment"
+      ]
+    },
+    "compute": [
+      ["data.metrics.ltcop" ,"call:tracardi.service.setup.events.computations.checkout,compute_ltcop"]
+    ],
     "tags": ["entity:order"],
     "state": "purchase"
   },

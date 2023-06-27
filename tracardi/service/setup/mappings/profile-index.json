@@ -360,6 +360,21 @@
               "properties": {
                 "ltv": {
                   "type": "float"
+                },
+                "ltcosc": {
+                  "type": "integer"
+                },
+                "ltcocc": {
+                  "type": "integer"
+                },
+                "ltcop": {
+                  "type": "float"
+                },
+                "ltcosv": {
+                  "type": "float"
+                },
+                "ltcocv": {
+                  "type": "float"
                 }
               }
             },
