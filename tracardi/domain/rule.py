@@ -13,6 +13,7 @@ class Rule(NamedEntity):
 
     _schedule_node_id: str = PrivateAttr(None)
     event_type: NamedEntity
+    type: Optional[str] = 'workflow'
     flow: NamedEntity
     source: NamedEntity
     enabled: Optional[bool] = True

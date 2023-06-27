@@ -14,10 +14,13 @@
         "type": "keyword", "ignore_above": 64
       },
       "name": {
-        "type": "text"
+        "type": "text", "ignore_above": 150
       },
       "description": {
-        "type": "text"
+        "type": "text", "ignore_above": 512
+      },
+      "type": {
+        "type": "keyword"
       },
       "metadata": {
         "properties": {

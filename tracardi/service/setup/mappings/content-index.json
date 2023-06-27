@@ -43,6 +43,9 @@
       "content": {
         "type": "binary"
       },
+      "text": {
+        "type": "text"
+      },
       "properties": {
         "type": "flattened"
       },
