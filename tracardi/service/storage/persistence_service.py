@@ -595,9 +595,13 @@ class PersistenceService:
         engine = SqlSearchQueryEngine(self)
         return await engine.histogram(query, query_type, group_by)
 
-    async def update_by_query(self, query: dict):
+    async def update_by_query(self, query: dict, conflicts: str = 'abort', wait_for_completion:bool = None):
         try:
-            return await self.storage.update_by_query(query=query)
+            return await self.storage.update_by_query(
+                query=query,
+                conflicts=conflicts,
+                wait_for_completion=wait_for_completion
+            )
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

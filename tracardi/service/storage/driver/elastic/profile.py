@@ -151,8 +151,12 @@ async def load_by_query_string(query: str):
     return await storage_manager('profile').load_by_query_string(query)
 
 
-async def update_by_query(query):
-    return await storage_manager('profile').update_by_query(query=query)
+async def update_by_query(query, conflicts: str = 'proceed', wait_for_completion: bool = False):
+    return await storage_manager('profile').update_by_query(
+        query=query,
+        conflicts=conflicts,
+        wait_for_completion=wait_for_completion
+    )
 
 
 async def count(query: dict = None):

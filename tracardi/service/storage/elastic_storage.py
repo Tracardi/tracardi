@@ -292,8 +292,13 @@ class ElasticStorage:
     async def flush(self, params, headers):
         return await self.storage.flush(self.index.get_write_index(), params, headers)
 
-    async def update_by_query(self, query):
-        return await self.storage.update_by_query(index=self.index.get_index_alias(), query=query)
+    async def update_by_query(self, query, conflicts: str = 'abort', wait_for_completion: bool = None):
+        return await self.storage.update_by_query(
+            index=self.index.get_index_alias(),
+            query=query,
+            conflicts=conflicts,
+            wait_for_completion=wait_for_completion
+        )
 
     async def update(self, id, record, index, retry_on_conflict=3):
         return await self.storage.update(index=index,
