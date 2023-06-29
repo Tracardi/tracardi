@@ -15,6 +15,7 @@ class SessionTime(BaseModel):
     update: Optional[datetime] = None
     timestamp: Optional[int] = 0
     duration: float = 0
+    weekday: Optional[int] = None
 
     def __init__(self, **data: Any):
 
@@ -30,6 +31,8 @@ class SessionTime(BaseModel):
             data['duration'] = 0
 
         super().__init__(**data)
+
+        self.weekday = self.insert.weekday()
 
 
 class SessionMetadata(BaseModel):

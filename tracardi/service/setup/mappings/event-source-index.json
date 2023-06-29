@@ -11,7 +11,8 @@
     "dynamic": "strict",
     "properties": {
       "id": {
-        "type": "keyword", "ignore_above": 64
+        "type": "keyword",
+        "ignore_above": 64
       },
       "timestamp": {
         "type": "date"
@@ -20,7 +21,8 @@
         "type": "date"
       },
       "type": {
-        "type": "keyword"
+        "type": "keyword",
+        "ignore_above": 32
       },
       "bridge": {
         "properties": {
@@ -39,7 +41,8 @@
         "type": "text"
       },
       "channel": {
-        "type": "keyword"
+        "type": "keyword",
+        "ignore_above": 32
       },
       "url": {
         "type": "keyword"

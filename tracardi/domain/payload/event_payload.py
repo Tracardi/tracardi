@@ -185,15 +185,9 @@ class EventPayload(BaseModel):
                 session.context = SessionContext(session.context)
 
                 tz = session.context.get_time_zone()
-                if tz and tz.lower() != 'utc':
-                    continent = tz.split('/')[0]
-                else:
-                    continent = 'n/a'
-
                 event_session = EventSession(
                     id=session.id,
-                    tz=tz,
-                    continent=continent
+                    tz=tz
                 )
 
             else:

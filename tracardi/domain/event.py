@@ -45,8 +45,6 @@ class EventSession(Entity):
     start: datetime = datetime.utcnow()
     duration: float = 0
     tz: Optional[str] = 'utc'
-    continent: Optional[str] = 'n/a'
-    language: Optional[str] = 'n/a'
 
 
 class EventJourney(BaseModel):

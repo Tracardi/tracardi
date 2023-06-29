@@ -394,8 +394,7 @@ class TrackerPayload(BaseModel):
                     # the identification point is defined. In such case we need to try to load profile with
                     # data defined in identification point.
 
-
-                    # todo Rafael Bug
+                    # Rafael Bug fixed
 
                     valid_identification_points = await self.list_identification_points()
 
@@ -585,6 +584,22 @@ class TrackerPayload(BaseModel):
                     session.context['language'] = list(set(spoken_languages))
                     profile.data.pii.language.spoken = session.context['language']
 
+                if 'geo' not in profile.aux:
+                    profile.aux['geo'] = {}
+
+                # Continent
+
+                if 'time' in self.context:
+                    tz = self.context['time'].get('tz', 'utc')
+
+                    if tz.lower() != 'utc':
+                        continent = tz.split('/')[0]
+                    else:
+                        continent = 'n/a'
+
+                    profile.aux['geo']['continent'] = continent
+
+
                 # Aux markets
 
                 markets = []
@@ -593,7 +608,7 @@ class TrackerPayload(BaseModel):
                         markets += language_countries_dict[lang_code]
 
                 if markets:
-                    profile.aux['geo_markets'] = markets
+                    profile.aux['geo']['markets'] = markets
 
                 # Screen
 
@@ -625,6 +640,7 @@ class TrackerPayload(BaseModel):
                         pass
 
                 # session.app.resolution = session.context['screen']
+
             except Exception as e:
                 pass
 
@@ -662,6 +678,9 @@ class TrackerPayload(BaseModel):
                 del self.context['utm']
             except ValidationError:
                 pass
+
+        if isinstance(self.source, EventSource):
+            session.metadata.channel = self.source.channel
 
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile

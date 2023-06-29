@@ -28,6 +28,9 @@
                 "update": {
                   "type": "date"
                 },
+                "weekday": {
+                  "type": "byte"
+                },
                 "timestamp": {
                   "type": "integer"
                 },

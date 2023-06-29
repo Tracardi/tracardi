@@ -296,14 +296,6 @@
             "tz": {
               "type": "keyword",
               "ignore_above": 64
-            },
-            "continent": {
-              "type": "keyword",
-              "ignore_above": 32
-            },
-            "language": {
-              "type": "keyword",
-              "ignore_above": 16
             }
           }
         },

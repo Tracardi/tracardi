@@ -136,12 +136,7 @@ class TrackingOrchestrator:
                 tracker_payload.profile_less
             )
 
-            session.context['ip'] = self.tracker_config.ip
-
-        # Add channel
-
-        if isinstance(tracker_payload.source, EventSource) and isinstance(session, Session):
-            session.metadata.channel = tracker_payload.source.channel
+        session.context['ip'] = self.tracker_config.ip
 
         # Make profile copy
         has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
