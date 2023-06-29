@@ -260,7 +260,8 @@
             "page": {
               "properties": {
                 "name": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 64
                 },
                 "url": {
                   "type": "keyword"
@@ -293,7 +294,16 @@
               "type": "float"
             },
             "tz": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "continent": {
+              "type": "keyword",
+              "ignore_above": 32
+            },
+            "language": {
+              "type": "keyword",
+              "ignore_above": 16
             }
           }
         },

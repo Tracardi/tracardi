@@ -84,6 +84,20 @@ def get_default_event_type_schema(event_type) -> Optional[dict]:
     return schema
 
 
+def _append_value(values, value):
+    # Append list to list
+    if isinstance(values, list):
+        values += value
+        # make it unique
+        values = list(set(values))
+    else:
+        # Add value if not exists
+        if value not in values:
+            values.append(value)
+
+    return values
+
+
 def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: dotty) -> Tuple[dotty, bool]:
     profile_updated_flag = False
 
@@ -96,10 +110,12 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
                 if event_path in flat_event:
                     profile_updated_flag = True
                     if operation == 'append':
-                        if profile_path not in flat_profile:
-                            flat_profile[profile_path] = [flat_event[event_path]]
+                        if profile_path not in flat_profile or flat_profile[profile_path] is None:
+                            flat_profile[profile_path] = _append_value(values=[],
+                                                                       value=flat_event[event_path])
                         elif isinstance(flat_profile[profile_path], list):
-                            flat_profile[profile_path].append(flat_event[event_path])
+                            flat_profile[profile_path] = _append_value(values=flat_profile[profile_path],
+                                                                       value=flat_event[event_path])
                         elif not isinstance(flat_profile[profile_path], dict):
                             # data in profile exists but is not dict, list. It can be a string ot int.
                             flat_profile[profile_path] = [flat_profile[profile_path]]

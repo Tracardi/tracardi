@@ -29,6 +29,8 @@ from ...exceptions.log_handler import log_handler
 from user_agents import parse
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
+from ...service.utils.languages import language_codes_dict, language_countries_dict
+from ...service.utils.parser import parse_accept_language
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -559,6 +561,41 @@ class TrackerPayload(BaseModel):
                         del self.context['location']
                     except ValidationError:
                         pass
+
+                # Get Language from request and geo
+
+                spoken_languages = []
+                language_codes = []
+                if 'headers' in self.request and 'accept-language' in self.request['headers']:
+                    languages = parse_accept_language(self.request['headers']['accept-language'])
+                    if languages:
+                        spoken_lang_codes = [language for (language, _) in languages if len(language) == 2]
+                        for lang_code in spoken_lang_codes:
+                            if lang_code in language_codes_dict:
+                                spoken_languages += language_codes_dict[lang_code]
+                                language_codes.append(lang_code)
+
+                if session.device.geo.country.code:
+                    lang_code = session.device.geo.country.code.lower()
+                    if lang_code in language_codes_dict:
+                        spoken_languages += language_codes_dict[lang_code]
+                        language_codes.append(lang_code)
+
+                if spoken_languages:
+                    session.context['language'] = list(set(spoken_languages))
+                    profile.data.pii.language.spoken = session.context['language']
+
+                # Aux markets
+
+                markets = []
+                for lang_code in language_codes:
+                    if lang_code in language_countries_dict:
+                        markets += language_countries_dict[lang_code]
+
+                if markets:
+                    profile.aux['geo_markets'] = markets
+
+                # Screen
 
                 try:
                     session.device.resolution = f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"

@@ -45,6 +45,8 @@ class EventSession(Entity):
     start: datetime = datetime.utcnow()
     duration: float = 0
     tz: Optional[str] = 'utc'
+    continent: Optional[str] = 'n/a'
+    language: Optional[str] = 'n/a'
 
 
 class EventJourney(BaseModel):
@@ -144,34 +146,6 @@ class EventData(BaseModel):
     message: Optional[EventMessage] = EventMessage.construct()
     payment: Optional[EventPayment] = EventPayment.construct()
     marketing: Optional[EventMarketing] = EventMarketing.construct()
-
-
-@dataclass
-class EventDataClass:
-    metadata: EventMetadata
-    type: str
-
-    device: Optional[dict]
-    os: Optional[dict]
-    app: Optional[dict]
-    hit: Optional[dict]
-
-    utm: Optional[dict]
-
-    properties: Optional[dict]
-    traits: Optional[dict]
-    operation: Optional[dict]
-
-    source: Entity
-    session: Optional[EventSession]
-    profile: Optional[Entity]
-    context: Optional[dict]
-    request: Optional[dict]
-    config: Optional[dict]
-    tags: Optional[dict]
-    journey: Optional[dict]
-    aux: dict
-    data: Optional[dict]
 
 
 class Event(NamedEntity):

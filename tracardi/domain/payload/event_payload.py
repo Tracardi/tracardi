@@ -6,7 +6,7 @@ from pydantic import BaseModel, validator
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
-from ..event import Event, EventSession, Tags, EventDataClass
+from ..event import Event, EventSession, Tags
 from ..event_metadata import EventMetadata
 from ..event_metadata import EventPayloadMetadata
 from ..metadata import Hit
@@ -14,7 +14,7 @@ from ..session import Session, SessionContext
 from ..time import Time
 from ..value_object.operation import RecordFlag
 from ...service.string_manager import capitalize_event_type_id
-from ...service.utils.getters import get_entity
+from ...service.utils.getters import get_entity, get_entity_id
 
 
 class EventPayload(BaseModel):
@@ -50,8 +50,8 @@ class EventPayload(BaseModel):
         event_type = self.type.strip()
         event = Event.dictionary(
             id=str(uuid4()),
-            profile_id=profile.id,
-            session_id=session.id,
+            profile_id=get_entity_id(profile),
+            session_id=get_entity_id(session),
             type=event_type,
             properties=self.properties,
             context=self.context)
@@ -184,9 +184,16 @@ class EventPayload(BaseModel):
             if isinstance(session, Session) and isinstance(session.context, dict):
                 session.context = SessionContext(session.context)
 
+                tz = session.context.get_time_zone()
+                if tz and tz.lower() != 'utc':
+                    continent = tz.split('/')[0]
+                else:
+                    continent = 'n/a'
+
                 event_session = EventSession(
                     id=session.id,
-                    tz=session.context.get_time_zone()
+                    tz=tz,
+                    continent=continent
                 )
 
             else:

@@ -1,25 +1,34 @@
 [
-    {
+  {
     "name": "Session Opened",
     "description": "Customer visit starts.",
     "id": "session-opened",
     "properties": {},
-      "tags": ["event:internal", "entity:session"],
-      "state": "call:tracardi.service.setup.events.journey.logic,session_opened"
-    },
+    "tags": [
+      "event:internal",
+      "entity:session"
+    ],
+    "state": "call:tracardi.service.setup.events.journey.logic,session_opened"
+  },
   {
     "name": "Session Closed",
     "description": "Customer visit ends.",
     "id": "session-closed",
     "properties": {},
-    "tags": ["event:internal", "entity:session"]
+    "tags": [
+      "event:internal",
+      "entity:session"
+    ]
   },
   {
     "name": "Profile Created",
     "description": "Customer profile was created.",
     "id": "profile-created",
     "properties": {},
-    "tags": ["event:internal", "entity:profile"],
+    "tags": [
+      "event:internal",
+      "entity:profile"
+    ],
     "state": "awareness"
   },
   {
@@ -29,13 +38,19 @@
     "properties": {
       "reason": "string"
     },
-    "tags": ["event:internal", "entity:profile"]
+    "tags": [
+      "event:internal",
+      "entity:profile"
+    ]
   },
   {
     "name": "Profile Archived",
     "description": "Customer profile was archived.",
     "id": "profile-archived",
     "properties": {},
-    "tags": ["event:internal", "entity:profile"]
+    "tags": [
+      "event:internal",
+      "entity:profile"
+    ]
   }
 ]

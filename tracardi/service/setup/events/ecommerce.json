@@ -51,8 +51,7 @@
         "color": "string",
         "size": "string"
       },
-      "price": "float",
-      "quantity": "int",
+      "price": 0,
       "url": {
         "image": "url",
         "page": "url"
@@ -65,8 +64,7 @@
       "data.ec.product.category":  "properties.category",
       "data.ec.product.brand":     "properties.brand",
       "data.ec.product.variant":   "properties.variant",
-      "data.ec.product.price":     "properties.price",
-      "data.ec.product.quantity":  "properties.quantity"
+      "data.ec.product.price":     "properties.price"
     },
     "tags": ["activity:browsing", "entity:product"],
     "state": "awareness"
