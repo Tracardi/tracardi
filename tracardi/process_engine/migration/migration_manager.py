@@ -35,28 +35,34 @@ class MigrationManager:
     """
 
     available_migrations = {
-        ("0.7.0", "0.7.1"): "070_to_071",
-        ("0.7.1", "0.7.2"): "071_to_072",
-        ("0.7.2", "0.7.3"): "072_to_073",
-        ("0.7.3", "0.7.4"): "072_to_073",
-        ("0.7.4", "0.8.0"): "074_to_080",
-        ("0.8.0", "0.8.1"): "080_to_081"
+        ("070", "071"): "070_to_071",
+        ("071", "072"): "071_to_072",
+        ("072", "073"): "072_to_073",
+        ("073", "074"): "072_to_073",
+        ("074", "080"): "074_to_080",
+        ("080", "08x"): "080_to_08x"
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
                  to_prefix: Optional[str] = None):
-        self.from_version = Version(version=from_version, name=from_prefix)
-        self.to_version = Version(version=to_version, name=to_prefix)
+        self.from_version = from_version
+        self.from_tenant = from_prefix
+        self.to_version = to_version
+        self.to_tenant = to_prefix
+
+    @staticmethod
+    def get_current_db_version_prefix(version: Version):
+        return version.db_version.replace(".", "")
 
     def get_schemas(self):
         try:
             filename = self.available_migrations[
-                (self.from_version.version, self.to_version.version)
+                (self.from_version, self.to_version)
             ]
 
         except KeyError:
             raise MigrationNotFoundException(
-                f"Migration from {self.from_version.version} to {self.to_version.version} "
+                f"Migration from {self.from_version} to {self.to_version} "
                 f"not found."
             )
 
@@ -67,16 +73,19 @@ class MigrationManager:
             return [MigrationSchema(**schema) for schema in json.load(f) if isinstance(schema, dict)]  # avoid comments
 
     async def get_multi_indices(self, template_name):
-        template = fr"{self.from_version.get_version_prefix()}." \
-                   fr"{self.from_version.name}.{template_name}-[0-9]{'{4}'}-[0-9]+"
+        template = fr"{self.from_version}." \
+                   fr"{self.from_tenant}.{template_name}-[0-9]{'{4}'}-[0-9]+"
         es = ElasticClient.instance()
         return [index for index in await es.list_indices() if re.fullmatch(template, index)]
 
     async def get_customized_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
 
-        if Version(version=tracardi.version.version, name=get_context().tenant) != Version(version=self.to_version.version, name=self.to_version.name):
-            raise ValueError(f"Installed system version is {tracardi.version}, "
-                             f"but migration migrated to version {self.to_version}.")
+        tenant = get_context().tenant
+
+        if self.get_current_db_version_prefix(tracardi.version) != self.to_version or tenant != self.to_tenant:
+            raise ValueError(f"Installed system version is {tracardi.version.db_version} for tenant {tenant}, "
+                             f"but migration script is for version {self.to_version} for "
+                             f"tenant {self.to_tenant}.")
 
         general_schemas = self.get_schemas()
 
@@ -91,7 +100,7 @@ class MigrationManager:
                         id=sha1(f"{from_index}{to_index}".encode("utf-8")).hexdigest(),
                         copy_index=CopyIndex(
                             from_index=from_index,
-                            to_index=f"{self.to_version.get_version_prefix()}.{self.to_version.name}.{to_index}",
+                            to_index=f"{self.to_version}.{self.to_tenant}.{to_index}",
                             multi=schema.copy_index.multi,
                             script=schema.copy_index.script
                         ),
@@ -101,10 +110,10 @@ class MigrationManager:
                     ))
 
             else:
-                schema.copy_index.from_index = f"{self.from_version.get_version_prefix()}." \
-                                               f"{self.from_version.name}.{schema.copy_index.from_index}"
-                schema.copy_index.to_index = f"{self.to_version.get_version_prefix()}." \
-                                             f"{self.to_version.name}.{schema.copy_index.to_index}"
+                schema.copy_index.from_index = f"{self.from_version}." \
+                                               f"{self.from_tenant}.{schema.copy_index.from_index}"
+                schema.copy_index.to_index = f"{self.to_version}." \
+                                             f"{self.to_tenant}.{schema.copy_index.to_index}"
 
                 es = ElasticClient.instance()
                 if await es.exists_index(schema.copy_index.from_index):
@@ -113,7 +122,7 @@ class MigrationManager:
                     print(f"Can't find the index {schema.copy_index.from_index}")
 
         # TODO Warning disabled - save installation info in redis.
-        warn = self.from_version.get_version_prefix() in tracardi.version.upgrades
+        warn = self.from_version in tracardi.version.upgrades
 
         return {"warn": warn, "schemas": customized_schemas}
 
@@ -146,10 +155,11 @@ class MigrationManager:
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
-        return [migration[0] for migration in cls.available_migrations if migration[1] == version.version]
+        return [migration[0] for migration in cls.available_migrations
+                if migration[1] == MigrationManager.get_current_db_version_prefix(version)]
 
     async def save_version_update(self):
         # TODO Warning disabled - save installation info in redis. Now it is saved only in 1 instance memory
-        tracardi.version.add_upgrade(self.from_version.get_version_prefix())
+        tracardi.version.add_upgrade(self.from_version)
 
 

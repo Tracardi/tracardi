@@ -235,12 +235,12 @@ class Profile(Entity):
             self.operation = profile.operation
             self.stats = profile.stats
             self.traits = profile.traits
-            self.pii = profile.pii
             self.segments = profile.segments
             self.consents = profile.consents
             self.active = profile.active
             self.interests = profile.interests
             self.aux = profile.aux
+            self.data = profile.data
 
     def get_merge_key_values(self) -> List[tuple]:
         converter = DotNotationConverter(self)

@@ -9,19 +9,12 @@ class Version(BaseModel):
     upgrades: List[str] = []
     production: bool = False
     config: Optional[dict] = {}
+    db_version: str = '08x'
 
     def __init__(self, **data):
-        if not data.get('name', None):
-            if "version" in data:
-                data['name'] = Version._generate_name(data["version"])
         super().__init__(**data)
-
-    @validator("name")
-    def validate_prefix(cls, value):
-        if value is None:
-            raise ValueError("Version name can not be empty.")
-
-        return value
+        if not self.name:
+            self.name = Version._generate_name(self.db_version)
 
     @staticmethod
     def _generate_name(version):
@@ -38,14 +31,14 @@ class Version(BaseModel):
         """
         e.g. 070
         """
-        version_prefix = Version.generate_prefix(self.version)
+        version_prefix = Version.generate_prefix(self.db_version)
         return version_prefix
 
     def __eq__(self, other: 'Version') -> bool:
         return other and self.version == other.version and self.name == other.name
 
     def __str__(self):
-        return f"Version {self.version}.{self.name}"
+        return f"Version {self.version}.{self.name} (db: {self.db_version})"
 
     def add_upgrade(self, name: str) -> None:
         upgrades = set(self.upgrades)
