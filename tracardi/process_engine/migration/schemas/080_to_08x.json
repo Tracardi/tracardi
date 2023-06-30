@@ -389,17 +389,5 @@
     "worker": "reindex",
     "conflicts": null,
     "asynchronous": true
-  },
-  {
-    "id": "b0ce09529369d7955f37ed42bbf36cf926e14e2e",
-    "copy_index": {
-      "from_index": "tracardi-api-instance",
-      "to_index": "tracardi-api-instance",
-      "multi": false,
-      "script": null
-    },
-    "worker": "reindex",
-    "conflicts": null,
-    "asynchronous": true
   }
 ]

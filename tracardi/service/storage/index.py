@@ -207,8 +207,6 @@ class Resource(metaclass=Singleton):
                                 multi_index=False,
                                 index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json"),
-            "api-instance": Index(staging=False, multi_index=False, index="tracardi-api-instance",
-                                  mapping="mappings/api-instance-index.json"),
             "heartbeats": Index(staging=True, multi_index=False, index="tracardi-heartbeats",
                                 mapping="mappings/heartbeats-index.json"),
             "event-tags": Index(staging=True, multi_index=False, index="tracardi-events-tags",

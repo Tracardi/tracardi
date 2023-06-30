@@ -1,6 +1,5 @@
 __all__ = [
     "action",
-    "api_instance",
     "bridge",
     "consent_type",
     "console_log",
