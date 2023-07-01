@@ -2,6 +2,7 @@
   {
     "name": "Sign-In",
     "description": "User signs in.",
+    "explain": "When a user signs in for a service, this event should be used to track it. This could also be an identification point for profile merging.",
     "id": "sign-in",
     "properties": {
       "email": "string",
@@ -27,6 +28,7 @@
   {
     "name": "Sign-Up",
     "description": "User signs up.",
+    "explain": "When a user signs up for a service, this event should be used to track it. This could also be an identification point for profile merging.",
     "id": "sign-up",
     "properties": {
       "email": "string",

@@ -2,6 +2,7 @@
   {
     "name": "Consent Update",
     "description": "User updates consents.",
+    "explain": "Use this event when user delivers marketing consents, etc.",
     "id": "consent-update",
     "properties": {
       "consents": {"consents": ["marketing", "contact", "cookies"], "revoke": null}

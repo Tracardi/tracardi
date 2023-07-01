@@ -57,3 +57,7 @@ async def refresh():
 
 async def flush():
     return await storage_manager('entity').flush()
+
+
+async def count(query: dict = None):
+    return await storage_manager('entity').count(query)

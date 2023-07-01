@@ -43,6 +43,13 @@ def cache_predefined_event_types():
                 raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
 
 
+def get_predefined_event_types():
+    if not _predefined_event_types:
+        cache_predefined_event_types()
+
+    return _predefined_event_types.items()
+
+
 def get_event_type_names():
     if not _predefined_event_types:
         cache_predefined_event_types()
