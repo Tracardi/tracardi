@@ -72,6 +72,7 @@
   {
     "name": "Basket Viewed",
     "description": "Customer viewed their shopping cart",
+    "explain": "This event should be used when a customer has viewed their shopping cart. An example usage would be when a user logs into their account and clicks on the shopping cart icon to view the items in their cart.",
     "id": "basket-viewed",
     "properties": {
       "id": "string"
@@ -82,6 +83,7 @@
   {
     "name": "Product Added To Basket",
     "description": "Customer added a product to their shopping cart",
+    "explain": "This event should be used when a customer adds a product to their shopping cart.",
     "id": "product-added-to-basket",
     "properties": {
       "id": "string",
@@ -117,6 +119,7 @@
   {
     "name": "Product Removed From Basket",
     "description": "Customer removed a product from their shopping cart",
+    "explain": "This event should be used when a customer removes a product from their shopping cart. Example Usage: A customer has added a pair of shoes to their shopping cart but decides to remove it before completing the purchase.",
     "id": "product-removed-from-basket",
     "properties": {
       "id": "string",
@@ -148,11 +151,11 @@
     },
     "tags": ["entity:product"],
     "state": "consideration"
-
   },
   {
     "name": "Checkout Started",
     "description": "Customer initiated the checkout process.",
+    "explain": "This event should be used when a customer initiates the checkout process. Example usage: User clicks on \"Checkout\" button in their shopping cart. User selects \"Checkout\" option after adding items to their cart. User manually navigates to the checkout page",
     "id": "checkout-started",
     "const": {
       "id": "[local.storage:set,__tr_checkout_id]",
@@ -183,14 +186,20 @@
       ]
     },
     "compute": [
-      ["data.metrics.ltcop" ,"call:tracardi.service.setup.events.computations.checkout,compute_ltcop"]
+      [
+        "data.metrics.ltcop",
+        "call:tracardi.service.setup.events.computations.checkout,compute_ltcop"
+      ]
     ],
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
     "name": "Checkout Completed",
     "description": "Customer completed the check-out process.",
+    "explain": "This event should be used when a customer has completed the check-out process. An example usage would be when a user adds items to their cart, enters their payment and shipping information, and clicks \"Submit Order.\"",
     "id": "checkout-completed",
     "const": {
       "id": "[local.storage:read,__tr_checkout_id]",
@@ -215,14 +224,20 @@
       ]
     },
     "compute": [
-      ["data.metrics.ltcop" ,"call:tracardi.service.setup.events.computations.checkout,compute_ltcop"]
+      [
+        "data.metrics.ltcop",
+        "call:tracardi.service.setup.events.computations.checkout,compute_ltcop"
+      ]
     ],
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
     "name": "Checkout Status",
     "description": "Customer completed a checkout step. Status changed.",
+    "explain": "This event should be used when a customer completes a checkout step and the status changes. An example usage of this event is when a customer has completed the payment process and the status of the checkout changes from \"pending\" to \" paid\".",
     "id": "checkout-status",
     "const": {
       "id": "[local.storage:read,__tr_checkout_id]"
@@ -235,12 +250,15 @@
       "data.ec.checkout.id":     "properties.id",
       "data.ec.checkout.status": "properties.status"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
     "name": "Delivery Info Entered",
     "description": "Customer added delivery information",
+    "explain": "This event should be used when the customer adds delivery information. Great example is the address.",
     "id": "delivery-info-entered",
     "properties": {
       "order_id": "string",
@@ -282,7 +300,9 @@
         "equals"
       ]
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
@@ -306,7 +326,9 @@
       "data.payment.credit_card.expires":  "properties.credit_card.expires",
       "data.payment.credit_card.holder":   "properties.credit_card.holder"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
@@ -356,7 +378,9 @@
       "data.ec.order.income":  "properties.income",
       "data.ec.order.cost":    "properties.cost"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
@@ -374,7 +398,9 @@
       "data.ec.order.id":     "properties.id",
       "data.ec.order.status": "properties.status"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
@@ -392,10 +418,12 @@
       "data.ec.order.id":      "properties.id",
       "data.ec.order.status":  "properties.status"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
-    {
+  {
     "id": "order-delivered",
     "name": "Order Delivered",
     "description": "Order delivered to customer",
@@ -410,7 +438,9 @@
       "data.ec.order.id":     "properties.id",
       "data.ec.order.status": "properties.status"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
@@ -425,7 +455,9 @@
       "data.ec.order.id":      "properties.id",
       "data.ec.order.status":  "properties.string"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   },
   {
@@ -440,7 +472,9 @@
       "data.ec.product.id":      "properties.id",
       "data.marketing.channel":  "properties.media"
     },
-    "tags": ["entity:product"],
+    "tags": [
+      "entity:product"
+    ],
     "state": "advocacy"
   },
   {
@@ -457,7 +491,9 @@
       "data.ec.product.review": "properties.review",
       "data.ec.product.rate":   "properties.rate"
     },
-    "tags": ["entity:product"],
+    "tags": [
+      "entity:product"
+    ],
     "state": "retention"
   },
   {
@@ -470,7 +506,9 @@
     "copy": {
       "data.ec.product.id": "properties.id"
     },
-    "tags": ["entity:product"],
+    "tags": [
+      "entity:product"
+    ],
     "state": "retention"
   },
   {
@@ -489,7 +527,9 @@
       "data.ec.order.status":          "properties.status",
       "data.ec.order.income.revenue":  "properties.value"
     },
-    "tags": ["entity:order"],
+    "tags": [
+      "entity:order"
+    ],
     "state": "purchase"
   }
 ]

@@ -25,7 +25,7 @@
       "tags": {
         "type": "keyword"
       },
-      "index_enabled": {
+      "enabled": {
         "type": "boolean"
       },
       "index_schema": {
