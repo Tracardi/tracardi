@@ -10,7 +10,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "845b5f68937e3ef90fa03aa803bacffa140540ac",
@@ -22,7 +23,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "8f3f63049796d77506d36e55018867d5cd97b544",
@@ -34,7 +36,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "35b07d876399d4e7462371da350fb4930dd4c182",
@@ -46,7 +49,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "1c2a2f84e8b8feee6bd32a482744ace25ada09ff",
@@ -58,7 +62,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "823004bd21807676d2bbed8ea54e1e271ff54040",
@@ -70,7 +75,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "644178dbc088c3ca1e705967e644355684cb0459",
@@ -82,7 +88,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6defe76099caedd215aac522913ee3da216c6015",
@@ -94,7 +101,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "5425c363afa8f668b504b8e0e5c8fe96fd617089",
@@ -106,7 +114,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "0fd59b15e03c17702a3d1704ccb8d1087a063ac3",
@@ -118,7 +127,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "48a98d455698082470d0887fa77dd8fa7779a4de",
@@ -130,7 +140,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "cae81d4f031d68c46cc28e287892973af99f2c20",
@@ -148,7 +159,8 @@
         "new_type": "_complex"
       }
     ],
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "3ee469711148d582eea28a49dbcd1e3d3cd9f28a",
@@ -160,7 +172,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "a567b8eae5a59fa8c5cbf2414e934c2f02aac810",
@@ -172,7 +185,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "5bd3f891da70ecbb66d3611a927b9f639abb6193",
@@ -184,7 +198,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "880ac2abe6092aa94881b4d46fda2dae875059ed",
@@ -196,7 +211,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "864d5521dc24b2064ded7efb8c7585d347912d13",
@@ -208,7 +224,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6cb382a86778e6b4fcc6819297bb95b4fae7ffb1",
@@ -220,7 +237,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "174d1de1e5a81e35bab05cd9bcca8354a3f5ca2e",
@@ -232,7 +250,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "b3a6edcfccd727f7392f87fd0c2476a2b85a3d4f",
@@ -244,7 +263,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "23a50c2a87657ea6216cfd8f27a22d07447c5115",
@@ -256,7 +276,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "39f3030c3d8ec09d13a510c7b1748a2e45a9fe6d",
@@ -268,7 +289,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "40ac8499751b4dc22a3fea426bd962c6611a8272",
@@ -280,7 +302,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "67ffc4208b8e52cac124962528ade4b55659531a",
@@ -292,7 +315,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6826bbda13e802ed938420585a47aeee503c6b94",
@@ -304,7 +328,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "a842a75768fe52aa24a589321b3fb1ad9b26e4c1",
@@ -316,7 +341,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "7549aaa6c69601f2a199f52233da9fb0349b2786",
@@ -328,7 +354,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "d8cb5b95bef59e1da2b753eb9b707aeefa75c867",
@@ -340,7 +367,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "984df00daa0c5109cea1df3619d4841a224316cb",
@@ -352,7 +380,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "855b6ac1ba9369289be86f63403c9ac8b3adc90e",
@@ -364,7 +393,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "3eb061ed56a10a6c8cc98eead9da258cd6b775fa",
@@ -376,7 +406,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "627af261e45e464c3f2044d15878cf3bcc0b2b4b",
@@ -388,7 +419,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   "Production",
   {
@@ -402,7 +434,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "845b5f68937e3ef90fa03aa803bacffa140540ac",
@@ -415,7 +448,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "8f3f63049796d77506d36e55018867d5cd97b544",
@@ -428,7 +462,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "35b07d876399d4e7462371da350fb4930dd4c182",
@@ -441,7 +476,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "1c2a2f84e8b8feee6bd32a482744ace25ada09ff",
@@ -454,7 +490,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "823004bd21807676d2bbed8ea54e1e271ff54040",
@@ -467,7 +504,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "644178dbc088c3ca1e705967e644355684cb0459",
@@ -480,7 +518,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6defe76099caedd215aac522913ee3da216c6015",
@@ -493,7 +532,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "5425c363afa8f668b504b8e0e5c8fe96fd617089",
@@ -506,7 +546,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "0fd59b15e03c17702a3d1704ccb8d1087a063ac3",
@@ -519,7 +560,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "48a98d455698082470d0887fa77dd8fa7779a4de",
@@ -532,7 +574,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "cae81d4f031d68c46cc28e287892973af99f2c20",
@@ -551,7 +594,8 @@
         "new_type": "_complex"
       }
     ],
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "3ee469711148d582eea28a49dbcd1e3d3cd9f28a",
@@ -564,7 +608,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "a567b8eae5a59fa8c5cbf2414e934c2f02aac810",
@@ -577,7 +622,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "5bd3f891da70ecbb66d3611a927b9f639abb6193",
@@ -590,7 +636,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "880ac2abe6092aa94881b4d46fda2dae875059ed",
@@ -603,7 +650,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "864d5521dc24b2064ded7efb8c7585d347912d13",
@@ -616,7 +664,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6cb382a86778e6b4fcc6819297bb95b4fae7ffb1",
@@ -629,7 +678,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "174d1de1e5a81e35bab05cd9bcca8354a3f5ca2e",
@@ -642,7 +692,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "b3a6edcfccd727f7392f87fd0c2476a2b85a3d4f",
@@ -655,7 +706,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "23a50c2a87657ea6216cfd8f27a22d07447c5115",
@@ -668,7 +720,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "39f3030c3d8ec09d13a510c7b1748a2e45a9fe6d",
@@ -681,7 +734,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "40ac8499751b4dc22a3fea426bd962c6611a8272",
@@ -694,7 +748,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "67ffc4208b8e52cac124962528ade4b55659531a",
@@ -707,7 +762,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "6826bbda13e802ed938420585a47aeee503c6b94",
@@ -720,7 +776,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "a842a75768fe52aa24a589321b3fb1ad9b26e4c1",
@@ -733,7 +790,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "7549aaa6c69601f2a199f52233da9fb0349b2786",
@@ -746,7 +804,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "d8cb5b95bef59e1da2b753eb9b707aeefa75c867",
@@ -759,7 +818,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "984df00daa0c5109cea1df3619d4841a224316cb",
@@ -772,7 +832,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "855b6ac1ba9369289be86f63403c9ac8b3adc90e",
@@ -785,7 +846,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "3eb061ed56a10a6c8cc98eead9da258cd6b775fa",
@@ -798,7 +860,8 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   },
   {
     "id": "627af261e45e464c3f2044d15878cf3bcc0b2b4b",
@@ -811,6 +874,7 @@
     },
     "worker": "reindex",
     "conflicts": null,
-    "asynchronous": true
+    "asynchronous": true,
+    "wait_for_completion": true
   }
 ]
