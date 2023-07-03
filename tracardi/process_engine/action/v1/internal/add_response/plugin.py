@@ -7,7 +7,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.wf.domain.flow import Flow
+from tracardi.service.wf.domain.flow_graph import FlowGraph
 
 
 class Configuration(PluginConfig):
@@ -65,7 +65,7 @@ class CreateResponseAction(ActionRunner):
         output = json.loads(self.config.body)
         result = template.reshape(reshape_template=output)
 
-        flow = self.flow  # type: Flow
+        flow = self.flow  # type: FlowGraph
         flow.response[self.config.key] = result
 
         return Result(port="payload", value=result)

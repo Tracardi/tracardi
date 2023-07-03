@@ -1,5 +1,5 @@
 import uuid
-from tracardi.service.wf.domain.flow import Flow as GraphFlow
+from tracardi.service.wf.domain.flow_graph import FlowGraph
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
 from typing import Optional, List, Any
@@ -25,7 +25,7 @@ class FlowSchema(BaseModel):
         self.server_version = tracardi.version.version
 
 
-class Flow(GraphFlow):
+class Flow(FlowGraph):
     projects: Optional[List[str]] = ["General"]
     lock: bool = False
     type: str

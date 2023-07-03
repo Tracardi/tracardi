@@ -5,12 +5,12 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.console import Log
 from tracardi.service.wf.domain.debug_info import DebugInfo
-from tracardi.service.wf.domain.flow import Flow
+from tracardi.service.wf.domain.flow_graph import FlowGraph
 
 
 class FlowInvokeResult:
 
-    def __init__(self, debug_info: DebugInfo, log_list: List[Log], flow: Flow, event: Event,
+    def __init__(self, debug_info: DebugInfo, log_list: List[Log], flow: FlowGraph, event: Event,
                  profile: Optional[Profile] = None,
                  session: Optional[Session] = None):
         self.debug_info = debug_info
