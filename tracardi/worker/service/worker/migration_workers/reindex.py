@@ -31,7 +31,7 @@ def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):
     with ElasticClient(hosts=[url]) as client:
 
         response = client.reindex(body=body, wait_for_completion=schema.wait_for_completion)
-        logging.info(f"Reindexing with\n{body}\nResponse:\n{response}")
+        print(f"Reindexing with\n{body}\nResponse:\n{response}")
 
         if not isinstance(response, dict):
             raise MigrationError(str(response))
