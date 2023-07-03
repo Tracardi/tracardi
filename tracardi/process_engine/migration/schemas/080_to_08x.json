@@ -300,7 +300,7 @@
       "from_index": "tracardi-event-management",
       "to_index": "tracardi-event-management",
       "multi": false,
-      "script": null
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.enabled=ctx._source.index_enabled;\nrow.remove(\"index_enabled\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
@@ -716,7 +716,7 @@
       "to_index": "tracardi-event-management",
       "multi": false,
       "production": true,
-      "script": null
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.enabled=ctx._source.index_enabled;\nrow.remove(\"index_enabled\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,
