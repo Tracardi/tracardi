@@ -29,9 +29,9 @@ def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):
         body["script"] = {"lang": "painless", "source": schema.copy_index.script}
 
     with ElasticClient(hosts=[url]) as client:
-
+        print(f"Reindexing with\n{body}")
         response = client.reindex(body=body, wait_for_completion=schema.wait_for_completion)
-        print(f"Reindexing with\n{body}\nResponse:\n{response}")
+        print(f"Response:\n{response}")
 
         if not isinstance(response, dict):
             raise MigrationError(str(response))
