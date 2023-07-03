@@ -103,9 +103,11 @@ class MigrationManager:
 
         for schema in general_schemas:
             if schema.copy_index.multi is True:
+
                 from_indices = await self._get_multi_indices(
                     template_name=schema.copy_index.from_index,
                     production=schema.copy_index.production)
+
                 for from_index in from_indices:
                     to_index = f"{schema.copy_index.to_index}{re.findall(r'-[0-9]{4}-[0-9]+', from_index)[0]}"
                     customized_schemas.append(MigrationSchema(
