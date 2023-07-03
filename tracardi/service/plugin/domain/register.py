@@ -19,7 +19,7 @@ class FormComponent(BaseModel):
 class FormField(BaseModel):
     id: str
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     component: FormComponent
     validation: Optional[FormFieldValidation]
     required: bool = False
@@ -27,14 +27,14 @@ class FormField(BaseModel):
 
 class FormGroup(BaseModel):
     name: Optional[str]
-    description: Optional[str]
+    description: Optional[str] = None
     fields: List[FormField]
 
 
 class Form(BaseModel):
     submit: Optional[str] = None
     default: Optional[dict] = {}
-    title: Optional[str]
+    title: Optional[str] = None
     groups: Optional[List[FormGroup]] = []
 
 
@@ -51,7 +51,7 @@ class NodeEvents(BaseModel):
 
 
 class MicroservicePlugin(NamedEntity):
-    resource: Optional[dict]  # Additional resources needed for microservice plugin
+    resource: Optional[dict] = {} # Additional resources needed for microservice plugin
 
 
 class MicroserviceServer(BaseModel):

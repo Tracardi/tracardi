@@ -25,7 +25,7 @@ class Tags(BaseModel):
     class Config:
         validate_assignment = True
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def total_tags(cls, values):
         values["count"] = len(values.get("values"))
         return values

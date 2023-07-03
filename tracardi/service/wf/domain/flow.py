@@ -8,3 +8,6 @@ class Flow(NamedEntity):
     description: Optional[str] = None
     flowGraph: Optional[FlowGraphData] = None
     response: Optional[FlowResponse] = FlowResponse()
+
+    class Config:
+        arbitrary_types_allowed = True

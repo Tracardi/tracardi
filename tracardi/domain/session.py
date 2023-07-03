@@ -13,7 +13,7 @@ from .value_object.storage_info import StorageInfo
 class SessionTime(BaseModel):
     insert: Optional[datetime]
     update: Optional[datetime] = None
-    timestamp: Optional[int] = 0
+    timestamp: Optional[float] = 0
     duration: float = 0
     weekday: Optional[int] = None
 
