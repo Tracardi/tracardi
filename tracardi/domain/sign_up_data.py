@@ -1,8 +1,10 @@
+from typing import Optional
+
 from tracardi.domain.entity import NullableEntity
 
 
 class SignUpRecord(NullableEntity):
-    token: str = None
+    token: Optional[str] = None
 
 
 class SignUpData(NullableEntity):

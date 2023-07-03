@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.process_engine.debugger import Debugger
@@ -8,7 +8,7 @@ from tracardi.service.secrets import b64_encoder, b64_decoder
 
 
 class EventDebugRecord(Entity):
-    content: str = None
+    content: Optional[str] = None
 
     @staticmethod
     def encode(stat: Debugger) -> List['EventDebugRecord']:

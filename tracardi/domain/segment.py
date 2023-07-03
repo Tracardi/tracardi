@@ -7,8 +7,8 @@ class Segment(NamedEntity):
     description: Optional[str] = ""
     eventType: Optional[List[str]] = []
     condition: str
-    enabled: bool = True
-    machine_name: str = None
+    enabled: Optional[bool] = True
+    machine_name: Optional[str] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)

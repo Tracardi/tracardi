@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from uuid import uuid4
 
 from tracardi.domain.event import Event
@@ -9,7 +9,7 @@ from tracardi.domain.entity import Entity
 
 
 class SchedulerJob(Entity):
-    id: str = None
+    id: Optional[str] = None
     timestamp: float
     event: Event
     status: str = 'pending'

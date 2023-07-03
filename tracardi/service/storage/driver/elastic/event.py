@@ -463,13 +463,16 @@ async def aggregate_events_by_type_and_source() -> StorageRecords:
             "by_type": {
                 "terms": {
                     "field": "type",
-                    "size": 100
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
                 },
                 "aggs": {
                     "by_source": {
                         "terms": {
                             "field": "source.id",
-                            "size": 10
+                            "size": 20
                         },
                         # "aggs": {
                         #     "last": {

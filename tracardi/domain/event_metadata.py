@@ -15,19 +15,19 @@ class EventProcessors(BaseModel):
 class EventMetadata(BaseModel):
     aux: Optional[dict] = {}
     time: EventTime
-    ip: str = None
-    status: str = None
+    ip: Optional[str] = None
+    status: Optional[str] = None
     channel: Optional[str] = None
     processed_by: EventProcessors = EventProcessors()
-    profile_less: bool = False
-    debug: bool = False
-    valid: bool = True
-    error: bool = False
-    warning: bool = False
+    profile_less: Optional[bool] = False
+    debug: Optional[bool] = False
+    valid: Optional[bool] = True
+    error: Optional[bool] = False
+    warning: Optional[bool] = False
     instance: Optional[Entity] = None
 
 
 class EventPayloadMetadata(BaseModel):
     time: Time
-    ip: str = None
-    status: str = None
+    ip: Optional[str] = None
+    status: Optional[str] = None

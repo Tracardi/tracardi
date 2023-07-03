@@ -47,13 +47,13 @@ class DateDeltaPayload(BaseModel):
 
 
 class DatetimePayload(BaseModel):
-    second: int = None
-    minute: int = None
-    hour: int = None
-    date: int = None
-    month: int = None
-    year: int = None
-    meridiem: str = None
+    second: Optional[int] = None
+    minute: Optional[int] = None
+    hour: Optional[int] = None
+    date: Optional[int] = None
+    month: Optional[int] = None
+    year: Optional[int] = None
+    meridiem: Optional[str] = None
     timeZone: int = 0
 
     @staticmethod

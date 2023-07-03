@@ -36,7 +36,7 @@ class Resource(Entity):
     credentials: ResourceCredentials = ResourceCredentials()
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
-    icon: str = None
+    icon: Optional[str] = None
     destination: Optional[DestinationConfig] = None
     enabled: Optional[bool] = True
 
@@ -83,7 +83,7 @@ class ResourceRecord(Entity):
     enabled: Optional[bool] = True
     tags: Union[List[str], str] = ["general"]
     groups: Union[List[str], str] = []
-    icon: str = None
+    icon: Optional[str] = None
     destination: Optional[str] = None
 
     def __init__(self, **data: Any):
