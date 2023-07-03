@@ -37,8 +37,7 @@
         "type": "keyword"
       },
       "code": {
-        "type": "binary",
-        "index": false
+        "type": "binary"
       },
       "workflow": {
         "properties": {
