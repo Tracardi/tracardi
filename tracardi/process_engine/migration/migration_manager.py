@@ -72,9 +72,19 @@ class MigrationManager:
         ) as f:
             return [MigrationSchema(**schema) for schema in json.load(f) if isinstance(schema, dict)]  # avoid comments
 
-    async def get_multi_indices(self, template_name):
+    @staticmethod
+    def _get_single_indices(version: str, tenant: str, index: str, production: bool) -> str:
+        index = f"{version}.{tenant}.{index}"
+        if production:
+            index = f"prod-{index}"
+        return index
+
+    async def _get_multi_indices(self, template_name, production: bool):
         template = fr"{self.from_version}." \
                    fr"{self.from_tenant}.{template_name}-[0-9]{'{4}'}-[0-9]+"
+        if production:
+            template = f"prod-{template}"
+
         es = ElasticClient.instance()
         return [index for index in await es.list_indices() if re.fullmatch(template, index)]
 
@@ -93,7 +103,8 @@ class MigrationManager:
 
         for schema in general_schemas:
             if schema.copy_index.multi is True:
-                from_indices = await self.get_multi_indices(template_name=schema.copy_index.from_index)
+                from_indices = await self._get_multi_indices(template_name=schema.copy_index.from_index,
+                                                            production=schema.copy_index.production)
                 for from_index in from_indices:
                     to_index = f"{schema.copy_index.to_index}{re.findall(r'-[0-9]{4}-[0-9]+', from_index)[0]}"
                     customized_schemas.append(MigrationSchema(
@@ -111,10 +122,16 @@ class MigrationManager:
                     ))
 
             else:
-                schema.copy_index.from_index = f"{self.from_version}." \
-                                               f"{self.from_tenant}.{schema.copy_index.from_index}"
-                schema.copy_index.to_index = f"{self.to_version}." \
-                                             f"{self.to_tenant}.{schema.copy_index.to_index}"
+                schema.copy_index.from_index = self._get_single_indices(
+                    self.from_version,
+                    self.from_tenant,
+                    schema.copy_index.from_index,
+                    production=schema.copy_index.production)
+                schema.copy_index.to_index = self._get_single_indices(
+                    self.to_version,
+                    self.to_tenant,
+                    schema.copy_index.to_index,
+                    production=schema.copy_index.production)
 
                 es = ElasticClient.instance()
                 if await es.exists_index(schema.copy_index.from_index):
