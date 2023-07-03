@@ -78,6 +78,9 @@ class Session(Entity):
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
 
+    class Config:
+        arbitrary_types_allowed = True
+
     def __init__(self, **data: Any):
 
         if 'context' in data and not isinstance(data['context'], SessionContext):
