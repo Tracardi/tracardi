@@ -54,7 +54,7 @@ class MigrationManager:
     def get_current_db_version_prefix(version: Version):
         return version.db_version.replace(".", "")
 
-    def get_schemas(self):
+    def _get_schemas(self):
         try:
             filename = self.available_migrations[
                 (self.from_version, self.to_version)
@@ -87,7 +87,7 @@ class MigrationManager:
                              f"but migration script is for version {self.to_version} for "
                              f"tenant {self.to_tenant}.")
 
-        general_schemas = self.get_schemas()
+        general_schemas = self._get_schemas()
 
         customized_schemas = []
 
@@ -101,6 +101,7 @@ class MigrationManager:
                         copy_index=CopyIndex(
                             from_index=from_index,
                             to_index=f"{self.to_version}.{self.to_tenant}.{to_index}",
+                            production=schema.copy_index.production,
                             multi=schema.copy_index.multi,
                             script=schema.copy_index.script
                         ),

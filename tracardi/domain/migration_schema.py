@@ -6,6 +6,7 @@ class CopyIndex(BaseModel):
     from_index: str
     to_index: str
     multi: bool
+    production: Optional[bool] = False
     script: Optional[str] = None
 
 
