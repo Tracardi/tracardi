@@ -242,18 +242,15 @@ class ProfileMerger:
         """
 
         _traits = [profile.traits for profile in all_profiles]
-        _piis = [profile.pii.dict() for profile in all_profiles]
         _data = [profile.data.dict() for profile in all_profiles]
 
         old_value = {
             'traits': _traits,
-            'piis': _piis,
             "data": _data
         }
 
         new_value = {
             'traits': dict_merge({}, _traits),
-            'piis': dict_merge({}, _piis),
             'data': dict_merge({}, _data)
         }
 
@@ -269,11 +266,9 @@ class ProfileMerger:
         for profile in all_profiles:
             current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
                                                                profile.traits)
-            current_profile_dict['pii'] = self._deep_update(current_profile_dict['pii'], profile.pii.dict())
             current_profile_dict['data'] = self._deep_update(current_profile_dict['data'], profile.data.dict())
 
         traits = current_profile_dict['traits']
-        piis = current_profile_dict['pii']
         data = current_profile_dict['data']
 
         # Merge stats, consents, segments, etc.
@@ -341,7 +336,6 @@ class ProfileMerger:
             ids=self.current_profile.ids,
             stats=stats if merge_stats else self.current_profile.stats,
             traits=traits,
-            pii=piis,
             data=data,
             segments=segments,
             consents=consents,
