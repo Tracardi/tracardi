@@ -64,6 +64,14 @@ class Context:
             return (self.production, self.tenant) == (other.production, other.tenant)
         return False
 
+    def dict(self) -> dict:
+        return {
+            "production": self.production,
+            "user": self.user,
+            "tenant": self.tenant,
+            "host": self.host
+        }
+
 
 class ContextManager(metaclass=Singleton):
 
