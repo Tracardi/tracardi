@@ -156,7 +156,7 @@ class TracardiConfig:
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
-        self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{elastic.host}".encode()).hexdigest()
+        self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{self.version}".encode()).hexdigest()
         self.cardio_source = md5(
             f"akkdskjd-askmdj-jdff{self.installation_token}-3039djn-{elastic.host}".encode()).hexdigest()
         self._config = None
