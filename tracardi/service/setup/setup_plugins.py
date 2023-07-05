@@ -711,16 +711,27 @@ if License.has_service(VALIDATOR):
     )
 
 if License.has_service(SCHEDULER):
-    installed_plugins["com_tracardi.action.v1.wait.plugin"] = PluginMetadata(
+    installed_plugins["com_tracardi.action.v1.background.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
-                "resource": {
+                "event_type": {
                     "id": "",
                     "name": ""
                 },
-                "postpone": 60
-            },
-            resource={"callback_host": "http://localhost"})
+                "properties": "{}"
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.wait.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "wait": 60,
+                "event_type": {
+                    "id": "",
+                    "name": ""
+                },
+                "properties": "{}"
+            })
     )
 
 if License.has_license():
