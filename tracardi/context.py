@@ -17,12 +17,17 @@ class Context:
     user: Optional[User] = None
     tenant: str
     host: Optional[str] = None
+    version: Optional[str] = None
 
     def __init__(self,
                  production:bool = None,
                  user: Optional[User] = None,
                  tenant: str = None,
-                 host: Optional[str] = None):
+                 host: Optional[str] = None,
+                 version: Optional[str] = None
+                 ):
+
+        self.version = version if version else tracardi.version.version
 
         # This is every important: if not multi tenant replace tenant version by version name.
         if not tracardi.multi_tenant:
@@ -48,12 +53,14 @@ class Context:
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
                f"user: {self.user.full_name if self.user else 'Unknown'}, " \
                f"tenant: {self.tenant}, " \
+               f"version: {self.version}, " \
                f"host: {self.host})"
 
     def __repr__(self):
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
                f"user: {self.user.full_name if self.user else 'Unknown'}, " \
                f"tenant: {self.tenant}, " \
+               f"version: {self.version}, " \
                f"host: {self.host})"
 
     def __hash__(self):
@@ -69,7 +76,8 @@ class Context:
             "production": self.production,
             "user": self.user,
             "tenant": self.tenant,
-            "host": self.host
+            "host": self.host,
+            "version": self.version
         }
 
 

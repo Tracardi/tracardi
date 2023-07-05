@@ -65,7 +65,6 @@ class ElasticStorage:
             index = self.index.get_index_alias()
             if not self.index.multi_index:
                 result = await self.storage.get(index, id)
-
                 output = StorageRecord.build_from_elastic(result)
                 output['id'] = result['_id']
 
