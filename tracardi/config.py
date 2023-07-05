@@ -110,6 +110,10 @@ class RedisConfig:
         if self.host.startswith("rediss://"):
             self.host = self.host[9:]
 
+        if ":" in self.host:
+            self.host = self.host.split(":")[0]
+
+
     def get_redis_with_password(self):
         return self.get_redis_uri(self.redis_host, password=self.redis_password)
 
