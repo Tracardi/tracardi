@@ -65,15 +65,7 @@ async def track_event(tracker_payload: TrackerPayload,
         )
 
         result = await tr.track_event(tracker_payload)
-        return result
 
-    except Exception as e:
-        traceback.print_exc()
-        logger.error(str(e))
-        raise e
-
-    finally:
-        print(get_context())
         try:
             # Save console log
             console_log_db.save_console_log(console_log)
@@ -81,6 +73,23 @@ async def track_event(tracker_payload: TrackerPayload,
             await save_logs()
         except Exception as e:
             logger.warning(f"Could not save logs. Error: {str(e)} ")
+
+        return result
+
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(str(e))
+        raise e
+
+    # finally:
+    #     print(get_context())
+    #     try:
+    #         # Save console log
+    #         console_log_db.save_console_log(console_log)
+    #         # Save log
+    #         await save_logs()
+    #     except Exception as e:
+    #         logger.warning(f"Could not save logs. Error: {str(e)} ")
 
 
 class Tracker:
