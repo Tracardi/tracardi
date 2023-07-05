@@ -2,6 +2,7 @@ import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any, Optional
 
+from tracardi.context import get_context
 from tracardi.service.profile_merger import ProfileMerger
 
 from tracardi.domain.entity import Entity
@@ -72,11 +73,11 @@ async def track_event(tracker_payload: TrackerPayload,
         raise e
 
     finally:
-        # Save console log
-        console_log_db.save_console_log(console_log)
-
-        # Save log
+        print(get_context())
         try:
+            # Save console log
+            console_log_db.save_console_log(console_log)
+            # Save log
             await save_logs()
         except Exception as e:
             logger.warning(f"Could not save logs. Error: {str(e)} ")
