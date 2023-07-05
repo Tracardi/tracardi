@@ -162,6 +162,7 @@ class MigrationManager:
             return
 
         def add_to_celery(given_schemas: List, elastic: str, task_index_name: str):
+            # todo replace celery
             return run_migration_job.delay(given_schemas, elastic, task_index_name)
 
         task_index = Resource().get_index_constant("task").get_write_index()

@@ -151,6 +151,7 @@ class MySQLTableImporter(Importer):
     async def run(self, task_name, import_config: ImportConfig) -> Tuple[str, str]:
 
         def add_to_celery(import_config, credentials):
+            # todo replace celery
             return run_mysql_import_job.delay(
                 import_config.dict(),
                 credentials
