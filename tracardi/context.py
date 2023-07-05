@@ -133,7 +133,6 @@ class ServerContext:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        print("Context ends")
         self.cm.reset()
         ctx_id.reset(self.ctx_handler)
 
