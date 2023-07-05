@@ -103,7 +103,12 @@ class RedisConfig:
         self.port = int(env.get('REDIS_PORT', '6379'))
         self.redis_host = env.get('REDIS_HOST', 'redis://localhost:6379')
         self.redis_password = env.get('REDIS_PASSWORD', None)
-        # self._unset_credentials()
+
+        if self.host.startswith("redis://"):
+            self.host = self.host[8:]
+
+        if self.host.startswith("rediss://"):
+            self.host = self.host[9:]
 
     def get_redis_with_password(self):
         return self.get_redis_uri(self.redis_host, password=self.redis_password)
@@ -117,13 +122,6 @@ class RedisConfig:
         elif password:
             return f"{protocol}://:{password}@{host[8:]}/{database}"
         return host
-
-    # Tych danych potrebuje jeszcze worker moze tam można je wykasować
-    # def _unset_credentials(self):
-    #     if 'REDIS_HOST' in self.env:
-    #         del self.env['REDIS_HOST']
-    #     if 'REDIS_PASSWORD' in self.env:
-    #         del self.env['REDIS_PASSWORD']
 
 
 redis_config = RedisConfig(os.environ)
