@@ -9,6 +9,7 @@ async def save_logs() -> Optional[bool]:
     if not tracardi.save_logs:
         return None
 
+    print(log_handler.has_logs())
     if log_handler.has_logs():
         # do not await
         await log_db.save(log_handler.collection)
