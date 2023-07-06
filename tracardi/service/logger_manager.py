@@ -9,7 +9,7 @@ async def save_logs() -> Optional[bool]:
     if not tracardi.save_logs:
         return None
 
-    print(log_handler.has_logs())
+    # Will run one every 30s or 100 logs
     if log_handler.has_logs():
         # do not await
         await log_db.save(log_handler.collection)
