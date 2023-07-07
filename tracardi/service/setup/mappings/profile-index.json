@@ -414,8 +414,7 @@
           }
         },
         "stats": {
-          "dynamic": "true",
-          "type": "object"
+          "type": "flattened"
         },
         "traits": {
             "dynamic": "true",
@@ -442,6 +441,10 @@
         },
         "trash": {
           "type": "flattened"
+        },
+        "misc": {
+          "type": "object",
+          "enabled": false
         }
       }
     },
