@@ -45,7 +45,7 @@ def register() -> Plugin:
             version='0.7.0',
             license="MIT",
             author="Risto Kowaczewski",
-            manual="interal/add_empty_session",
+            manual="internal/add_empty_session",
             init=None,
             form=None
         ),
