@@ -59,7 +59,7 @@ setup(
         'certifi==2022.9.24',
         'celery==5.2.6',
         'random-password-generator==2.2.0',
-        'asyncio-mqtt==0.12.1',
+        'asyncio-mqtt==0.16.2',
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
         'tweepy==4.10.1',
         'strsimpy==0.2.1',

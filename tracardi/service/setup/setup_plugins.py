@@ -12,15 +12,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
         test=PluginTest(init=None, resource=None),
     ),
 
-    # "tracardi.process_engine.action.v1.internal.limiter.plugin": PluginMetadata(
-    #     test=PluginTest(init={
-    #         "keys": [],
-    #         "limit": 10,
-    #         "ttl": 60
-    #     },
-    #         resource=None)
-    # ),
-
     "tracardi.process_engine.action.v1.connectors.telegram.post.plugin": PluginMetadata(
         test=PluginTest(
             init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},
