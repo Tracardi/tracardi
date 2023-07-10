@@ -45,9 +45,9 @@ def register() -> Plugin:
             version='0.7.0',
             license="MIT",
             author="Risto Kowaczewski",
+            manual="interal/add_empty_session",
             init=None,
-            form=None,
-
+            form=None
         ),
         metadata=MetaData(
             name='Create empty session',

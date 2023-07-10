@@ -98,6 +98,7 @@ def register() -> Plugin:
             version='0.8.0',
             license="MIT",
             author="Risto Kowaczewski",
+            manual="internal/add_empty_profile",
             init={
                 "session": 'always'
             },
