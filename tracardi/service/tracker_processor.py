@@ -80,7 +80,7 @@ class TrackerProcessor(TrackProcessorBase):
                 memory=None
             )
 
-            if License.has_license():
+            if License.has_service(VALIDATOR):
 
                 # Get events to be reshaped
                 # Separated tracker payload into items to must be reshaped separately
@@ -155,7 +155,7 @@ class TrackerProcessor(TrackProcessorBase):
 
                 # Validation and reshaping
 
-                if License.has_license():
+                if License.has_service(VALIDATOR):
                     # Index traits, validate and reshape, oly if license and there are event to reshape
                     evh = EventsValidationHandler(dot, self.console_log)
                     tracker_payload = await evh.validate_reshape_index_events(tracker_payload)
