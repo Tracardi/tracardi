@@ -16,7 +16,7 @@ setup(
     packages=['tracardi'],
     install_requires=[
         'pip>=21.2.4',
-        'pydantic',
+        'pydantic==1.10.11',
         'aiohttp[speedups]',
         'redis',
         'aioredis',
@@ -59,7 +59,7 @@ setup(
         'certifi==2022.9.24',
         'celery==5.2.6',
         'random-password-generator==2.2.0',
-        'asyncio-mqtt==0.16.2',
+        'aiomqtt==1.0.0',
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
         'tweepy==4.10.1',
         'strsimpy==0.2.1',

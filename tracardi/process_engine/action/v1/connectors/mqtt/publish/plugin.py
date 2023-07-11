@@ -3,7 +3,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from asyncio_mqtt import Client
+import aiomqtt
 
 from .model.config import Configuration
 from tracardi.service.storage.driver.elastic import resource as resource_db
@@ -26,10 +26,10 @@ class MqttPublishAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         try:
-            async with Client(self.credentials.url,
-                              port=self.credentials.port,
-                              username=self.credentials.username,
-                              password=self.credentials.password) as client:
+            async with aiomqtt.Client(self.credentials.url,
+                                      port=self.credentials.port,
+                                      username=self.credentials.username,
+                                      password=self.credentials.password) as client:
 
                 await client.publish(
                     self.config.topic,
@@ -53,7 +53,7 @@ def register() -> Plugin:
             className='MqttPublishAction',
             inputs=["payload"],
             outputs=["payload", "error"],
-            version='0.7.2',
+            version='0.8.1',
             license="MIT",
             author="Risto Kowaczewski",
             init={

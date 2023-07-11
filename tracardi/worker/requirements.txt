@@ -1,6 +1,6 @@
 celery==5.2.6
 redis
 mysql-connector-python==8.0.29
-pydantic==1.10.9
+pydantic==1.10.11
 requests
 elasticsearch==7.10.1
