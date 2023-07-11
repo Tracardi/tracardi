@@ -377,7 +377,11 @@ class TrackingManager(TrackingManagerBase):
                         flat_profile[profile_property] = call_function(compute_string, event=event, profile=flat_profile)
 
                 try:
+                    metadata = self.profile.get_meta_data()
                     self.profile = Profile(**flat_profile)
+                    # New profile was created but not metadata is saved. We need to pass metadata with current index
+                    self.profile.set_meta_data(metadata)
+                    # Mark to update the profile
                     self.profile.operation.update = True
                 except ValidationError as e:
                     message = f"It seems that there was an error when trying to add or update some information to " \

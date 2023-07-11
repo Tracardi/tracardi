@@ -477,7 +477,7 @@ class TrackerPayload(BaseModel):
                 if session.profile is not None:
                     # Loaded session has profile
 
-                    # Load profile based on profile id saved in session
+                    # Load profile on profile id saved in session
                     copy_of_tracker_payload = TrackerPayload(**self.dict())
                     copy_of_tracker_payload.profile = Entity(id=session.profile.id)
 
