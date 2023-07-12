@@ -32,6 +32,7 @@ RESHAPING = "resha-9ds"
 REDIRECTS = "redir-atr"
 INDEXER = "indxs4k1"
 LICENSE = "lice12d4"
+MULTI_TENANT = "multen9ck6"
 
 
 class Service(BaseModel):
