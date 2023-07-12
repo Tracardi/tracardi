@@ -112,9 +112,10 @@ async def create_index_and_template(index, index_map, update_mapping) -> Tuple[L
             try:
                 result = await raw_db.create_index(target_index, mapping)
                 break
-            except ConnectionTimeout as e:
+            except Exception as e:
                 raise ConnectionError(
-                    f"Index `{target_index}` was NOT CREATED at attempt {attempt} due to an error: {str(e)}"
+                    f"Index `{target_index}` was NOT CREATED at attempt {attempt} due to an error: {str(e)}. "
+                    f"If you install for the second time please check if there are no left, incompatible templates."
                 )
 
         if not result:
