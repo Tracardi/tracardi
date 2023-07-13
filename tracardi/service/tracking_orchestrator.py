@@ -33,6 +33,8 @@ from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking_manager import TrackingManager, TrackerResult, TrackingManagerBase
 from tracardi.service.utils.getters import get_entity_id
 from user_agents import parse
+
+from .utils.domains import free_email_domains
 from .utils.languages import language_codes_dict, language_countries_dict
 from .utils.parser import parse_accept_language
 from ..domain.geo import Geo
@@ -134,7 +136,6 @@ class TrackingOrchestrator:
         # Force static profile id
 
         if self.tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id():
-            print('static')
             # Get static profile - This is dangerous
             profile, session = await tracker_payload.get_static_profile_and_session(
                 session,
@@ -142,7 +143,6 @@ class TrackingOrchestrator:
                 tracker_payload.profile_less
             )
         else:
-            print('generated')
             profile, session = await tracker_payload.get_profile_and_session(
                 session,
                 profile_loader,
@@ -344,6 +344,18 @@ class TrackingOrchestrator:
                     await client.close()
                 except Exception as e:
                     logger.error(f"Could not fetch GEO location. Error: {str(e)}")
+
+        # Add email type
+        if profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
+            email_parts = profile.data.contact.email.split('@')
+            if len(email_parts) > 1:
+                email_domain = email_parts[1]
+
+                if 'email' not in profile.aux:
+                    profile.aux['email'] = {}
+
+                profile.aux['email']['free'] = email_domain in free_email_domains
+                profile.operation.update = True
 
         # If UTM is sent but not available in session - update session
         if 'utm' in tracker_payload.context and session.utm.is_empty():
