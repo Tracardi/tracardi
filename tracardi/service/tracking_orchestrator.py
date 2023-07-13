@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from collections.abc import Callable
 from datetime import datetime
 from typing import Type
@@ -35,6 +36,8 @@ from user_agents import parse
 from .utils.languages import language_codes_dict, language_countries_dict
 from .utils.parser import parse_accept_language
 from ..domain.geo import Geo
+from ..process_engine.action.v1.connectors.maxmind.geoip.model.maxmind_geolite2_client import MaxMindGeoLite2Client, \
+    GeoLiteCredentials
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -284,8 +287,6 @@ class TrackingOrchestrator:
 
         # Updates on EXISTING Session
 
-        print('Location in context', 'location' in tracker_payload.context)
-
         if 'location' in tracker_payload.context:
 
             try:
@@ -294,19 +295,52 @@ class TrackingOrchestrator:
                 del tracker_payload.context['location']
 
                 # If location is sent but not available in session - update session
-                print('Session geo is empty', session.device.geo.is_empty())
+
                 if session.device.geo.is_empty():
                     session.device.geo = _geo
                     session.operation.update = True
 
-                    # Add last geo to profile
-                print('profile geo is empty', profile.data.devices.last.geo.is_empty())
+                # Add last geo to profile
                 if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
                     profile.data.devices.last.geo = _geo
                     profile.operation.update = True
 
             except ValidationError as e:
                 logger.error(str(e))
+
+        # Still no geo location
+        if session.operation.new and session.device.ip:
+
+            # Check if no MAXMIND_API_KEY
+            maxmind_license_key = os.environ.get('MAXMIND_LICENSE_KEY', None)
+            maxmind_account_id = int(os.environ.get('MAXMIND_ACCOUNT_ID', 0))
+            if maxmind_license_key and maxmind_account_id > 0:
+
+                logger.info(f"Fetching GEO location for {session.device.ip}")
+
+                client = MaxMindGeoLite2Client(credentials=GeoLiteCredentials(
+                    license=maxmind_license_key,
+                    accountId=maxmind_account_id))
+
+                _geo = await client.read(ip=session.device.ip)
+                _geo = Geo(**{
+                    "city": _geo.city.name,
+                    "country": {
+                        "name": _geo.country.name,
+                        "code": _geo.country.iso_code
+                    },
+                    "county": _geo.subdivisions.most_specific.name,
+                    "postal": _geo.postal.code,
+                    "latitude": _geo.location.latitude,
+                    "longitude": _geo.location.longitude
+                })
+                session.device.geo = _geo
+
+                if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
+                    profile.data.devices.last.geo = _geo
+                    profile.operation.update = True
+
+                await client.close()
 
         # If UTM is sent but not available in session - update session
         if 'utm' in tracker_payload.context and session.utm.is_empty():
@@ -316,9 +350,6 @@ class TrackingOrchestrator:
                 del tracker_payload.context['utm']
             except ValidationError:
                 pass
-
-        print("Profile update", profile.operation.update)
-        print("Profile data", profile.data)
 
         session.context['ip'] = self.tracker_config.ip
 
