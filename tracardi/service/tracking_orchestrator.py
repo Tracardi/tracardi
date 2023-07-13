@@ -317,6 +317,9 @@ class TrackingOrchestrator:
             except ValidationError:
                 pass
 
+        print("Profile update", profile.operation.update)
+        print("Profile data", profile.data)
+
         session.context['ip'] = self.tracker_config.ip
 
         # ------------------------------
