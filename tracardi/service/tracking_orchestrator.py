@@ -318,29 +318,32 @@ class TrackingOrchestrator:
 
                 logger.info(f"Fetching GEO location for {session.device.ip}")
 
-                client = MaxMindGeoLite2Client(credentials=GeoLiteCredentials(
-                    license=maxmind_license_key,
-                    accountId=maxmind_account_id))
+                try:
+                    client = MaxMindGeoLite2Client(credentials=GeoLiteCredentials(
+                        license=maxmind_license_key,
+                        accountId=maxmind_account_id))
 
-                _geo = await client.read(ip=session.device.ip)
-                _geo = Geo(**{
-                    "city": _geo.city.name,
-                    "country": {
-                        "name": _geo.country.name,
-                        "code": _geo.country.iso_code
-                    },
-                    "county": _geo.subdivisions.most_specific.name,
-                    "postal": _geo.postal.code,
-                    "latitude": _geo.location.latitude,
-                    "longitude": _geo.location.longitude
-                })
-                session.device.geo = _geo
+                    _geo = await client.read(ip=session.device.ip)
+                    _geo = Geo(**{
+                        "city": _geo.city.name,
+                        "country": {
+                            "name": _geo.country.name,
+                            "code": _geo.country.iso_code
+                        },
+                        "county": _geo.subdivisions.most_specific.name,
+                        "postal": _geo.postal.code,
+                        "latitude": _geo.location.latitude,
+                        "longitude": _geo.location.longitude
+                    })
+                    session.device.geo = _geo
 
-                if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
-                    profile.data.devices.last.geo = _geo
-                    profile.operation.update = True
+                    if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
+                        profile.data.devices.last.geo = _geo
+                        profile.operation.update = True
 
-                await client.close()
+                    await client.close()
+                except Exception as e:
+                    logger.error(f"Could not fetch GEO location. Error: {str(e)}")
 
         # If UTM is sent but not available in session - update session
         if 'utm' in tracker_payload.context and session.utm.is_empty():
