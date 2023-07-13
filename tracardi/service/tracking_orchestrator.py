@@ -190,13 +190,6 @@ class TrackingOrchestrator:
                     session.device.touch = user_agent.is_touch_capable
                     session.device.type = device_type
 
-                if 'location' in tracker_payload.context:
-                    try:
-                        session.device.geo = Geo(**tracker_payload.context['location'])
-                        del tracker_payload.context['location']
-                    except ValidationError:
-                        pass
-
                 # Get Language from request and geo
 
                 spoken_languages = []
@@ -294,7 +287,7 @@ class TrackingOrchestrator:
         print('Location in context', 'location' in tracker_payload.context)
 
         if 'location' in tracker_payload.context:
-            print(tracker_payload.context['location'])
+
             try:
                 _geo = Geo(**tracker_payload.context['location'])
 
