@@ -148,6 +148,15 @@ class TrackingOrchestrator:
 
         # Append context data
 
+        if profile.operation.new:
+            # Add session created
+            tracker_payload.events.append(
+                EventPayload(type='profile-created', properties={})
+            )
+
+        if isinstance(tracker_payload.source, EventSource):
+            session.metadata.channel = tracker_payload.source.channel
+
         if session.operation.new:
 
             # Add session created

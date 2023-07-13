@@ -75,6 +75,9 @@ class TrackerResultPersister:
 
     async def _save_profile(self, tracker_results: List[TrackerResult]):
         profiles_to_save = list(self.get_profiles_to_save(tracker_results))
+
+        print(profiles_to_save)
+
         FieldMapper().add_field_mappings('profile', profiles_to_save)
 
         results = []
