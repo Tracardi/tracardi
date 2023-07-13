@@ -296,15 +296,22 @@ class TrackingOrchestrator:
         if 'location' in tracker_payload.context:
             print(tracker_payload.context['location'])
             try:
+                _geo = Geo(**tracker_payload.context['location'])
+
+                del tracker_payload.context['location']
+
                 # If location is sent but not available in session - update session
+                print('Session geo is empty', session.device.geo.is_empty())
                 if session.device.geo.is_empty():
-                    session.device.geo = Geo(**tracker_payload.context['location'])
+                    session.device.geo = _geo
                     session.operation.update = True
 
-                # Add last geo to profile
-                profile.data.devices.last.geo = session.device.geo
-                profile.operation.update = True
-                del tracker_payload.context['location']
+                    # Add last geo to profile
+                print('profile geo is empty', profile.data.devices.last.geo.is_empty())
+                if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
+                    profile.data.devices.last.geo = _geo
+                    profile.operation.update = True
+
             except ValidationError as e:
                 logger.error(str(e))
 
