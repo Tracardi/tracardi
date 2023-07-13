@@ -667,8 +667,8 @@ class TrackerPayload(BaseModel):
                 profile.data.devices.last.geo = session.device.geo
                 profile.operation.update = True
                 del self.context['location']
-            except ValidationError:
-                pass
+            except ValidationError as e:
+                logger.error(str(e))
 
         # If UTM is sent but not available in session - update session
         if 'utm' in self.context and session.utm.is_empty():
