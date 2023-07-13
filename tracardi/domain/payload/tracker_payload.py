@@ -6,7 +6,7 @@ from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
 from uuid import uuid4
 
 from dotty_dict import dotty
-from pydantic import PrivateAttr, validator, BaseModel, ValidationError
+from pydantic import PrivateAttr, BaseModel
 
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.utils.getters import get_entity_id
@@ -14,23 +14,19 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.config import tracardi
 from ...service.profile_merger import ProfileMerger
 from ..console import Console
-from ..event import Event
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
-from ..geo import Geo
 from ..identification_point import IdentificationPoint
-from ..marketing import UTM
 from ..payload.event_payload import EventPayload
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
 from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
-from user_agents import parse
+
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
-from ...service.utils.languages import language_codes_dict, language_countries_dict
-from ...service.utils.parser import parse_accept_language
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -520,164 +516,6 @@ class TrackerPayload(BaseModel):
             session.properties = self.properties
 
         session.operation.new = is_new_session
-
-        if session.operation.new:
-
-            # Add session created
-            self.events.append(
-                EventPayload(type='session-opened', properties={})
-            )
-
-            # Compute the User Agent data
-            try:
-                ua_string = session.context['browser']['local']['browser']['userAgent']
-                user_agent = parse(ua_string)
-
-                session.os.version = user_agent.os.version_string
-                session.os.name = user_agent.os.family
-
-                device_type = 'mobile' if user_agent.is_mobile else \
-                    'pc' if user_agent.is_pc else \
-                        'tablet' if user_agent.is_tablet else \
-                            'email' if user_agent.is_email_client else None
-
-                if 'device' in session.context:
-                    session.device.name = session.context['device'].get('name', user_agent.device.family)
-                    session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
-                    session.device.model = session.context['device'].get('model', user_agent.device.model)
-                    session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
-                    session.device.type = session.context['device'].get('type', device_type)
-                else:
-                    session.device.name = user_agent.device.family
-                    session.device.brand = user_agent.device.brand
-                    session.device.model = user_agent.device.model
-                    session.device.touch = user_agent.is_touch_capable
-                    session.device.type = device_type
-
-                if 'location' in self.context:
-                    try:
-                        session.device.geo = Geo(**self.context['location'])
-                        del self.context['location']
-                    except ValidationError:
-                        pass
-
-                # Get Language from request and geo
-
-                spoken_languages = []
-                language_codes = []
-                if 'headers' in self.request and 'accept-language' in self.request['headers']:
-                    languages = parse_accept_language(self.request['headers']['accept-language'])
-                    if languages:
-                        spoken_lang_codes = [language for (language, _) in languages if len(language) == 2]
-                        for lang_code in spoken_lang_codes:
-                            if lang_code in language_codes_dict:
-                                spoken_languages += language_codes_dict[lang_code]
-                                language_codes.append(lang_code)
-
-                if session.device.geo.country.code:
-                    lang_code = session.device.geo.country.code.lower()
-                    if lang_code in language_codes_dict:
-                        spoken_languages += language_codes_dict[lang_code]
-                        language_codes.append(lang_code)
-
-                if spoken_languages:
-                    session.context['language'] = list(set(spoken_languages))
-                    profile.data.pii.language.spoken = session.context['language']
-
-                if 'geo' not in profile.aux:
-                    profile.aux['geo'] = {}
-
-                # Continent
-
-                if 'time' in self.context:
-                    tz = self.context['time'].get('tz', 'utc')
-
-                    if tz.lower() != 'utc':
-                        continent = tz.split('/')[0]
-                    else:
-                        continent = 'n/a'
-
-                    profile.aux['geo']['continent'] = continent
-
-
-                # Aux markets
-
-                markets = []
-                for lang_code in language_codes:
-                    if lang_code in language_countries_dict:
-                        markets += language_countries_dict[lang_code]
-
-                if markets:
-                    profile.aux['geo']['markets'] = markets
-
-                # Screen
-
-                try:
-                    session.device.resolution = f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"
-                except KeyError:
-                    pass
-
-                try:
-                    session.device.color_depth = int(self.context['screen']['local']['colorDepth'])
-                except KeyError:
-                    pass
-
-                try:
-                    session.device.orientation = self.context['screen']['local']['orientation']
-                except KeyError:
-                    pass
-
-                session.app.bot = user_agent.is_bot
-                session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
-                session.app.version = user_agent.browser.version_string
-                session.app.type = "browser"
-
-                if 'utm' in self.context:
-                    try:
-                        session.utm = UTM(**self.context['utm'])
-                        del self.context['utm']
-                    except ValidationError:
-                        pass
-
-                # session.app.resolution = session.context['screen']
-
-            except Exception as e:
-                pass
-
-            try:
-                session.device.ip = self.request['headers']['x-forwarded-for']
-            except Exception:
-                pass
-
-            try:
-                session.app.language = session.context['browser']['local']['browser']['language']
-            except Exception:
-                pass
-
-        # Updates on EXISTING Session
-
-        if 'location' in self.context:
-            try:
-                # If location is sent but not available in session - update session
-                if session.device.geo.is_empty():
-                    session.device.geo = Geo(**self.context['location'])
-                    session.operation.update = True
-
-                # Add last geo to profile
-                profile.data.devices.last.geo = session.device.geo
-                profile.operation.update = True
-                del self.context['location']
-            except ValidationError as e:
-                logger.error(str(e))
-
-        # If UTM is sent but not available in session - update session
-        if 'utm' in self.context and session.utm.is_empty():
-            try:
-                session.utm = UTM(**self.context['utm'])
-                session.operation.update = True
-                del self.context['utm']
-            except ValidationError:
-                pass
 
         if isinstance(self.source, EventSource):
             session.metadata.channel = self.source.channel

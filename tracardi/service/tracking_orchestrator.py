@@ -4,9 +4,14 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Type
 from uuid import uuid4
+
+from pydantic import ValidationError
+
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.entity import Entity
 from tracardi.domain.event_source import EventSource
+from tracardi.domain.marketing import UTM
+from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.value_object.operation import Operation
 from tracardi.process_engine.debugger import Debugger
 from tracardi.service.cache_manager import CacheManager
@@ -26,6 +31,10 @@ from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking_manager import TrackingManager, TrackerResult, TrackingManagerBase
 from tracardi.service.utils.getters import get_entity_id
+from user_agents import parse
+from .utils.languages import language_codes_dict, language_countries_dict
+from .utils.parser import parse_accept_language
+from ..domain.geo import Geo
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -122,6 +131,7 @@ class TrackingOrchestrator:
         # Force static profile id
 
         if self.tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id():
+            print('static')
             # Get static profile - This is dangerous
             profile, session = await tracker_payload.get_static_profile_and_session(
                 session,
@@ -129,14 +139,178 @@ class TrackingOrchestrator:
                 tracker_payload.profile_less
             )
         else:
-
+            print('generated')
             profile, session = await tracker_payload.get_profile_and_session(
                 session,
                 profile_loader,
                 tracker_payload.profile_less
             )
 
+        # Append context data
+
+        if session.operation.new:
+
+            # Add session created
+            tracker_payload.events.append(
+                EventPayload(type='session-opened', properties={})
+            )
+
+            # Compute the User Agent data
+            try:
+                ua_string = session.context['browser']['local']['browser']['userAgent']
+                user_agent = parse(ua_string)
+
+                session.os.version = user_agent.os.version_string
+                session.os.name = user_agent.os.family
+
+                device_type = 'mobile' if user_agent.is_mobile else \
+                    'pc' if user_agent.is_pc else \
+                        'tablet' if user_agent.is_tablet else \
+                            'email' if user_agent.is_email_client else None
+
+                if 'device' in session.context:
+                    session.device.name = session.context['device'].get('name', user_agent.device.family)
+                    session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
+                    session.device.model = session.context['device'].get('model', user_agent.device.model)
+                    session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
+                    session.device.type = session.context['device'].get('type', device_type)
+                else:
+                    session.device.name = user_agent.device.family
+                    session.device.brand = user_agent.device.brand
+                    session.device.model = user_agent.device.model
+                    session.device.touch = user_agent.is_touch_capable
+                    session.device.type = device_type
+
+                if 'location' in tracker_payload.context:
+                    try:
+                        session.device.geo = Geo(**tracker_payload.context['location'])
+                        del tracker_payload.context['location']
+                    except ValidationError:
+                        pass
+
+                # Get Language from request and geo
+
+                spoken_languages = []
+                language_codes = []
+                if 'headers' in tracker_payload.request and 'accept-language' in tracker_payload.request['headers']:
+                    languages = parse_accept_language(tracker_payload.request['headers']['accept-language'])
+                    if languages:
+                        spoken_lang_codes = [language for (language, _) in languages if len(language) == 2]
+                        for lang_code in spoken_lang_codes:
+                            if lang_code in language_codes_dict:
+                                spoken_languages += language_codes_dict[lang_code]
+                                language_codes.append(lang_code)
+
+                if session.device.geo.country.code:
+                    lang_code = session.device.geo.country.code.lower()
+                    if lang_code in language_codes_dict:
+                        spoken_languages += language_codes_dict[lang_code]
+                        language_codes.append(lang_code)
+
+                if spoken_languages:
+                    session.context['language'] = list(set(spoken_languages))
+                    profile.data.pii.language.spoken = session.context['language']
+
+                if 'geo' not in profile.aux:
+                    profile.aux['geo'] = {}
+
+                # Continent
+
+                if 'time' in tracker_payload.context:
+                    tz = tracker_payload.context['time'].get('tz', 'utc')
+
+                    if tz.lower() != 'utc':
+                        continent = tz.split('/')[0]
+                    else:
+                        continent = 'n/a'
+
+                    profile.aux['geo']['continent'] = continent
+
+                # Aux markets
+
+                markets = []
+                for lang_code in language_codes:
+                    if lang_code in language_countries_dict:
+                        markets += language_countries_dict[lang_code]
+
+                if markets:
+                    profile.aux['geo']['markets'] = markets
+
+                # Screen
+
+                try:
+                    session.device.resolution = f"{tracker_payload.context['screen']['local']['width']}x{tracker_payload.context['screen']['local']['height']}"
+                except KeyError:
+                    pass
+
+                try:
+                    session.device.color_depth = int(tracker_payload.context['screen']['local']['colorDepth'])
+                except KeyError:
+                    pass
+
+                try:
+                    session.device.orientation = tracker_payload.context['screen']['local']['orientation']
+                except KeyError:
+                    pass
+
+                session.app.bot = user_agent.is_bot
+                session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
+                session.app.version = user_agent.browser.version_string
+                session.app.type = "browser"
+
+                if 'utm' in tracker_payload.context:
+                    try:
+                        session.utm = UTM(**tracker_payload.context['utm'])
+                        del tracker_payload.context['utm']
+                    except ValidationError:
+                        pass
+
+                # session.app.resolution = session.context['screen']
+
+            except Exception as e:
+                pass
+
+            try:
+                session.device.ip = tracker_payload.request['headers']['x-forwarded-for']
+            except Exception:
+                pass
+
+            try:
+                session.app.language = session.context['browser']['local']['browser']['language']
+            except Exception:
+                pass
+
+        # Updates on EXISTING Session
+
+        print('Location in context', 'location' in tracker_payload.context)
+
+        if 'location' in tracker_payload.context:
+            print(tracker_payload.context['location'])
+            try:
+                # If location is sent but not available in session - update session
+                if session.device.geo.is_empty():
+                    session.device.geo = Geo(**tracker_payload.context['location'])
+                    session.operation.update = True
+
+                # Add last geo to profile
+                profile.data.devices.last.geo = session.device.geo
+                profile.operation.update = True
+                del tracker_payload.context['location']
+            except ValidationError as e:
+                logger.error(str(e))
+
+        # If UTM is sent but not available in session - update session
+        if 'utm' in tracker_payload.context and session.utm.is_empty():
+            try:
+                session.utm = UTM(**tracker_payload.context['utm'])
+                session.operation.update = True
+                del tracker_payload.context['utm']
+            except ValidationError:
+                pass
+
         session.context['ip'] = self.tracker_config.ip
+
+        # ------------------------------
 
         # Make profile copy
         has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
