@@ -228,6 +228,10 @@
             "category": {
               "type": "keyword",
               "ignore_above": 64
+            },
+            "id": {
+              "type": "keyword",
+              "ignore_above": 32
             }
           }
         },
