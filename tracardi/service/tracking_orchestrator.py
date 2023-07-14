@@ -34,6 +34,7 @@ from tracardi.service.tracking_manager import TrackingManager, TrackerResult, Tr
 from tracardi.service.utils.getters import get_entity_id
 from user_agents import parse
 
+from .maxmind_geo import get_geo_location
 from .utils.domains import free_email_domains
 from .utils.languages import language_codes_dict, language_countries_dict
 from .utils.parser import parse_accept_language
@@ -81,7 +82,6 @@ class TrackingOrchestrator:
         # Load session from storage
         try:
             if tracker_payload.session is None:
-
                 # If no session in tracker payload this means that we do not need session.
                 # But we may need an artificial session for workflow handling. We create
                 # one but will not save it.
@@ -160,9 +160,10 @@ class TrackingOrchestrator:
         if isinstance(tracker_payload.source, EventSource):
             session.metadata.channel = tracker_payload.source.channel
 
+        # Is new session
         if session.operation.new:
 
-            # Add session created
+            # Add session created event to the registered events
             tracker_payload.events.append(
                 EventPayload(type='session-opened', properties={})
             )
@@ -285,9 +286,10 @@ class TrackingOrchestrator:
             except Exception:
                 pass
 
-        # Updates on EXISTING Session
+        # Try to get location from tracker context.
 
-        if 'location' in tracker_payload.context:
+        if 'location' in tracker_payload.context and \
+                (session.device.geo.is_empty() or profile.data.devices.last.geo.is_empty()):
 
             try:
                 _geo = Geo(**tracker_payload.context['location'])
@@ -308,42 +310,26 @@ class TrackingOrchestrator:
             except ValidationError as e:
                 logger.error(str(e))
 
-        # Still no geo location
-        if session.operation.new and session.device.ip:
+        # Still no geo location. That means there was no 'location' sent in tracker context or it failed parsing the
+        # data. But we have device IP. If the profile geo is empty the we need to make another try.
+        if session.device.ip and profile.data.devices.last.geo.is_empty():
 
-            # Check if no MAXMIND_API_KEY
+            # Check if max mind configured
             maxmind_license_key = os.environ.get('MAXMIND_LICENSE_KEY', None)
             maxmind_account_id = int(os.environ.get('MAXMIND_ACCOUNT_ID', 0))
             if maxmind_license_key and maxmind_account_id > 0:
 
-                logger.info(f"Fetching GEO location for {session.device.ip}")
-
-                try:
-                    client = MaxMindGeoLite2Client(credentials=GeoLiteCredentials(
+                # The code checks if the profile's geo location has been assigned. If it hasn't been assigned yet,
+                # it means that the profile does not have a geo location, which could be because the session is not
+                # new. In this case, regardless of whether the session is new or not, the code checks if the profile's
+                # geo location is empty. If it is empty, the code proceeds to fetch the geo location and assigns
+                # it to the profile.
+                _geo = await get_geo_location(GeoLiteCredentials(
                         license=maxmind_license_key,
-                        accountId=maxmind_account_id))
+                        accountId=maxmind_account_id), ip=session.device.ip)
 
-                    _geo = await client.read(ip=session.device.ip)
-                    _geo = Geo(**{
-                        "city": _geo.city.name,
-                        "country": {
-                            "name": _geo.country.name,
-                            "code": _geo.country.iso_code
-                        },
-                        "county": _geo.subdivisions.most_specific.name,
-                        "postal": _geo.postal.code,
-                        "latitude": _geo.location.latitude,
-                        "longitude": _geo.location.longitude
-                    })
-                    session.device.geo = _geo
-
-                    if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
-                        profile.data.devices.last.geo = _geo
-                        profile.operation.update = True
-
-                    await client.close()
-                except Exception as e:
-                    logger.error(f"Could not fetch GEO location. Error: {str(e)}")
+                profile.data.devices.last.geo = _geo
+                profile.operation.update = True
 
         # Add email type
         if profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
@@ -396,12 +382,12 @@ class TrackingOrchestrator:
                 raise AssertionError("Callable self.on_profile_ready should be a subtype of TrackingManagerBase.")
 
             tracking_manager = self.on_profile_ready(
-                    self.console_log,
-                    tracker_payload,
-                    profile,
-                    session,
-                    self.on_profile_merge
-                )
+                self.console_log,
+                tracker_payload,
+                profile,
+                session,
+                self.on_profile_merge
+            )
 
             tracker_result = await tracking_manager.invoke_track_process()
 
