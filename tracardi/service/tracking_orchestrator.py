@@ -312,7 +312,7 @@ class TrackingOrchestrator:
 
         # Still no geo location. That means there was no 'location' sent in tracker context or it failed parsing the
         # data. But we have device IP. If the profile geo is empty the we need to make another try.
-        if session.device.ip and profile.data.devices.last.geo.is_empty():
+        if session.device.ip and (session.device.geo.is_empty() or profile.data.devices.last.geo.is_empty()):
 
             # Check if max mind configured
             maxmind_license_key = os.environ.get('MAXMIND_LICENSE_KEY', None)
@@ -328,8 +328,15 @@ class TrackingOrchestrator:
                         license=maxmind_license_key,
                         accountId=maxmind_account_id), ip=session.device.ip)
 
-                profile.data.devices.last.geo = _geo
-                profile.operation.update = True
+                if _geo:
+
+                    if profile.data.devices.last.geo.is_empty():
+                        profile.data.devices.last.geo = _geo
+                        profile.operation.update = True
+
+                    if session.device.geo.is_empty():
+                        session.device.geo = _geo
+                        session.operation.update = True
 
         # Add email type
         if profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
