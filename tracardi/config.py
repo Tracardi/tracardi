@@ -161,7 +161,7 @@ class TracardiConfig:
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{self.version}".encode()).hexdigest()
         self.cardio_source = md5(
-            f"akkdskjd-askmdj-jdff{self.installation_token}-3039djn-{self.version}".encode()).hexdigest()
+            f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
         self._config = None
         self._unset_secrets()
 
