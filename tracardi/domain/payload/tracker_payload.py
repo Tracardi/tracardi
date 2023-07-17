@@ -406,12 +406,12 @@ class TrackerPayload(BaseModel):
 
                         if profile_fields:
 
-
                             profile = await ProfileMerger.invoke_merge_profile(
                                 Profile.new(),
                                 merge_by=profile_fields,
                                 limit=1000)
 
+                        # todo remove after 2023-11
                         # profiles = await profile_driver.load_profiles_to_merge(merge_key_values=profile_fields)
                         print("profiles", profile)
                         print(profile_fields)

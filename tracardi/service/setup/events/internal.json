@@ -11,9 +11,19 @@
     "state": "call:tracardi.service.setup.events.journey.logic,session_opened"
   },
   {
-    "name": "Session Closed",
-    "description": "Customer visit ends.",
-    "id": "session-closed",
+    "name": "Visit Started",
+    "description": "Customer have started visit.",
+    "id": "visit-started",
+    "properties": {},
+    "tags": [
+      "event:internal",
+      "entity:session"
+    ]
+  },
+    {
+    "name": "Visit Ended",
+    "description": "Customer have ended visit.",
+    "id": "visit-ended",
     "properties": {},
     "tags": [
       "event:internal",
