@@ -26,8 +26,16 @@ class EventPayload(BaseModel):
     tags: Optional[list] = []
 
     def __init__(self, **data: Any):
-        if 'time' not in data or 'insert' not in data['time']:
+        if 'time' not in data:
             data['time'] = Time(insert=datetime.utcnow())
+        else:
+            if isinstance(data['time'], Time):
+                if not data['time'].insert:
+                    data['time'].insert = datetime.utcnow()
+            elif isinstance(data['time'], dict):
+                if 'insert' not in data['time']:
+                    data['time']['insert'] = datetime.utcnow()
+
         super().__init__(**data)
 
     @validator("type")

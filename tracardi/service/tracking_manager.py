@@ -152,6 +152,7 @@ class TrackingManager(TrackingManagerBase):
         if self.tracker_payload.events:
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
+                from datetime import datetime
                 _event = event.to_event(
                     self.tracker_payload.metadata,
                     self.tracker_payload.source,
