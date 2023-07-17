@@ -272,12 +272,15 @@ class TrackerPayload(BaseModel):
                 raise ValueError("Can not use static profile id without profile.id.")
 
             profile = await profile_loader(self, True)  # is_static is set to true
+
+            # Create empty profile if the profile id does nto point to any profile in database.
             if not profile:
                 profile = Profile(
                     id=self.profile.id
                 )
                 profile.operation.new = True
 
+            # Create empty session if the session id does nto point to any session in database.
             if session is None:
                 session = Session(
                     id=self.session.id,
