@@ -61,7 +61,7 @@ class TrackerResultPersister:
     def get_sessions_to_save(tracker_results: List[TrackerResult]) -> Generator[Session, Any, None]:
         for tracker_result in tracker_results:
             if isinstance(tracker_result.session, Session):
-                if tracker_result.session.operation.new or tracker_result.session.operation.needs_update():
+                if tracker_result.session.is_new() or tracker_result.session.operation.needs_update():
                     # Session to add. Add new profile id to session if it does not exist,
                     # or profile id in session is different from the real profile id.
                     if tracker_result.session.profile is None or (

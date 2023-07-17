@@ -161,7 +161,7 @@ class TrackingOrchestrator:
             session.metadata.channel = tracker_payload.source.channel
 
         # Is new session
-        if session.operation.new:
+        if session.is_new():
 
             # Add session created event to the registered events
             tracker_payload.events.append(

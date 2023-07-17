@@ -102,6 +102,9 @@ class Session(Entity):
             self.os = session.os
             self.app = session.app
 
+    def is_new(self):
+        return self.operation.new
+
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
