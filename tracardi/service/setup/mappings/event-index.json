@@ -45,7 +45,8 @@
             },
             "status": {
               "type": "keyword",
-              "null_value": "NULL"
+              "null_value": "NULL",
+              "ignore_above": 32
             },
             "channel": {
               "type": "keyword"

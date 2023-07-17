@@ -20,6 +20,11 @@
         },
         "metadata": {
           "properties": {
+            "status": {
+              "type": "keyword",
+              "null_value": "NULL",
+              "ignore_above": 32
+            },
             "time": {
               "properties": {
                 "insert": {

@@ -13,6 +13,7 @@ class Metadata(BaseModel):
 class ProfileMetadata(BaseModel):
     time: ProfileTime
     aux: Optional[dict] = {}
+    status: Optional[str] = None
 
 
 class OS(BaseModel):
