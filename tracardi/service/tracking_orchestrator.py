@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Type
 from uuid import uuid4
 
@@ -39,6 +39,7 @@ from .utils.domains import free_email_domains
 from .utils.languages import language_codes_dict, language_countries_dict
 from .utils.parser import parse_accept_language
 from ..domain.geo import Geo
+from ..domain.time import Time
 from ..process_engine.action.v1.connectors.maxmind.geoip.model.maxmind_geolite2_client import MaxMindGeoLite2Client, \
     GeoLiteCredentials
 
@@ -154,18 +155,29 @@ class TrackingOrchestrator:
         if profile.operation.new:
             # Add session created
             tracker_payload.events.append(
-                EventPayload(type='profile-created', properties={})
+                EventPayload(type='profile-created',
+                             time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
+                             properties={})
             )
 
         if isinstance(tracker_payload.source, EventSource):
             session.metadata.channel = tracker_payload.source.channel
+
+        if session.is_reopened():
+            tracker_payload.events.append(
+                EventPayload(type='visit-started',
+                             time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
+                             properties={})
+            )
 
         # Is new session
         if session.is_new():
 
             # Add session created event to the registered events
             tracker_payload.events.append(
-                EventPayload(type='session-opened', properties={})
+                EventPayload(type='session-opened',
+                             time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
+                             properties={})
             )
 
             # Compute the User Agent data

@@ -165,6 +165,16 @@ class TrackingManager(TrackingManagerBase):
 
                 # Append session data
                 if isinstance(self.session, Session):
+
+                    # Add session status
+                    if _event.type == 'visit-started':
+                        self.session.metadata.status = 'started'
+                        self.session.operation.update = True
+
+                    if _event.type == 'visit-ended':
+                        self.session.metadata.status = 'ended'
+                        self.session.operation.update = True
+
                     _event.session.start = self.session.metadata.time.insert
                     _event.session.duration = self.session.metadata.time.duration
 

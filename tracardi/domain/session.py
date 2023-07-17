@@ -103,8 +103,11 @@ class Session(Entity):
             self.os = session.os
             self.app = session.app
 
-    def is_new(self):
+    def is_new(self) -> bool:
         return self.operation.new
+
+    def is_reopened(self) -> bool:
+        return self.operation.new or self.metadata.status == 'ended'
 
     @staticmethod
     def storage_info() -> StorageInfo:
