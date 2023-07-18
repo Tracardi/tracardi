@@ -226,9 +226,23 @@ async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100)
     return await storage_manager(index="event").aggregate(query)
 
 
-async def aggregate_event_type(bucket_size=100) -> List[Dict[str, str]]:
+async def aggregate_event_type() -> List[Dict[str, str]]:
     bucket_name = "by_type"
-    result = await _aggregate_event(bucket_name, "type", None, bucket_size)
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "type", query, buckets_size=15)
 
     if bucket_name not in result.aggregations:
         return []
@@ -238,7 +252,21 @@ async def aggregate_event_type(bucket_size=100) -> List[Dict[str, str]]:
 
 async def aggregate_event_tag() -> List[Dict[str, str]]:
     bucket_name = "by_tag"
-    result = await _aggregate_event(bucket_name, "tags.values")
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "tags.values", filter_query=query, buckets_size=20)
 
     if bucket_name not in result.aggregations:
         return []
@@ -248,7 +276,117 @@ async def aggregate_event_tag() -> List[Dict[str, str]]:
 
 async def aggregate_event_status() -> List[Dict[str, str]]:
     bucket_name = "by_status"
-    result = await _aggregate_event(bucket_name, "metadata.status")
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "metadata.status", filter_query=query, buckets_size=20)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_device_geo() -> List[Dict[str, str]]:
+    bucket_name = "by_device_geo"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "device.geo.country.name", filter_query=query, buckets_size=15)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_os_name() -> List[Dict[str, str]]:
+    bucket_name = "by_os_name"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "os.name", filter_query=query, buckets_size=20)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_channels() -> List[Dict[str, str]]:
+    bucket_name = "by_channel"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "metadata.channel", filter_query=query, buckets_size=20)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_resolution() -> List[Dict[str, str]]:
+    bucket_name = "by_resolution"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "device.resolution", filter_query=query, buckets_size=20)
 
     if bucket_name not in result.aggregations:
         return []
@@ -257,7 +395,21 @@ async def aggregate_event_status() -> List[Dict[str, str]]:
 
 
 async def aggregate_events_by_source(buckets_size):
-    result = await _aggregate_event(bucket_name='by_source', by="source.id", buckets_size=buckets_size)
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name='by_source', by="source.id", filter_query=query,
+                                    buckets_size=buckets_size)
 
     if 'by_source' not in result.aggregations:
         return []
