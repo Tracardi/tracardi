@@ -156,7 +156,7 @@ class TrackingOrchestrator:
             # Add session created
             tracker_payload.events.append(
                 EventPayload(type='profile-created',
-                             time=Time(insert=datetime.utcnow() - timedelta(seconds=.3)),
+                             time=Time(insert=datetime.utcnow() - timedelta(seconds=3)),
                              properties={})
             )
 
@@ -166,7 +166,7 @@ class TrackingOrchestrator:
         if session.is_reopened():
             tracker_payload.events.append(
                 EventPayload(type='visit-started',
-                             time=Time(insert=datetime.utcnow() - timedelta(seconds=.1)),
+                             time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
                              properties={})
             )
 
@@ -175,7 +175,7 @@ class TrackingOrchestrator:
             # Add session created event to the registered events
             tracker_payload.events.append(
                 EventPayload(type='session-opened',
-                             time=Time(insert=datetime.utcnow() - timedelta(seconds=.2)),
+                             time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
                              properties={})
             )
 
