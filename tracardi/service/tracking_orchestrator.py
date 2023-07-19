@@ -143,6 +143,21 @@ class TrackingOrchestrator:
                 profile_loader,
                 tracker_payload.profile_less
             )
+
+            # Profile exists but was merged
+            if profile is not None and profile.is_merged(tracker_payload.profile.id):
+                _forced_events = [ev.type for ev in tracker_payload.events]
+                err_msg = f"Profile ID {tracker_payload.profile.id} was merged with {profile.id}, " \
+                          f"but the old ID {tracker_payload.profile.id} was forced to be used. " \
+                          f" As a result, events of type {_forced_events} will continue to be saved using the old " \
+                          "profile ID. This is acceptable for the 'visit-ended' event type since it ensures the " \
+                          "closure of the previous profile visit. However, for other event types, it may suggest " \
+                          "that the client failed to switch or update the profile ID appropriately."
+                if 'visit-ended' in _forced_events:
+                    logger.info(err_msg)
+                else:
+                    logger.warning(err_msg)
+                profile.id = tracker_payload.profile.id
         else:
             profile, session = await tracker_payload.get_profile_and_session(
                 session,

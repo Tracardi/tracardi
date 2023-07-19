@@ -218,6 +218,9 @@ class Profile(Entity):
             "storage": self.get_meta_data().dict()
         }
 
+    def is_merged(self, profile_id) -> bool:
+        return profile_id != self.id and profile_id in self.ids
+
     @staticmethod
     def deserialize(serialized_profile: dict) -> 'Profile':
         profile = Profile(**serialized_profile['profile'])
