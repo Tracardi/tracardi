@@ -6,6 +6,7 @@ import yaml
 
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
+from tracardi.service.singleton import Singleton
 from tracardi.service.utils.validators import is_valid_url
 
 VERSION = os.environ.get('_DEBUG_VERSION', '0.8.1')
@@ -132,7 +133,8 @@ elastic = ElasticConfig(os.environ)
 memory_cache = MemoryCacheConfig(os.environ)
 
 
-class TracardiConfig:
+class TracardiConfig(metaclass=Singleton):
+
     def __init__(self, env):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
@@ -159,9 +161,10 @@ class TracardiConfig:
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
-        self.fingerprint = md5(f"aks843jfd8trn{self.installation_token}-{self.version}".encode()).hexdigest()
-        self.cardio_source = md5(
-            f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
+        random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
+        self.internal_source = f"@internal-{random_hash}"
+        self.cardio_source = f"@heartbeats-{random_hash}"
+        self.segmentation_source = f"@segmentation-{random_hash}"
         self._config = None
         self._unset_secrets()
 
