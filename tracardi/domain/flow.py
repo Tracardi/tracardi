@@ -31,6 +31,7 @@ class Flow(FlowGraph):
     projects: Optional[List[str]] = ["General"]
     lock: bool = False
     type: str
+    timestamp: Optional[datetime] = None
     wf_schema: FlowSchema = FlowSchema()
 
     def arrange_nodes(self):
@@ -56,7 +57,7 @@ class Flow(FlowGraph):
                     nodes = [self.flowGraph.get_node_by_id(node_id) for node_id in node_ids]
                     row_center = start_at[0] - 200 * len(nodes) + 250
                     for node in nodes:
-                        node.position.x = row_center - node.data.metadata.width//2
+                        node.position.x = row_center - node.data.metadata.width // 2
                         row_center += node.data.metadata.width
 
                 start_at[0] += len(max(distance_to_nodes_map.values(), key=len)) * 200
@@ -67,6 +68,7 @@ class Flow(FlowGraph):
 
         return FlowRecord(
             id=self.id,
+            timestamp=self.timestamp,
             description=self.description,
             name=self.name,
             projects=self.projects,
@@ -80,6 +82,7 @@ class Flow(FlowGraph):
 
         return FlowRecord(
             id=self.id,
+            timestamp=datetime.utcnow(),
             description=self.description,
             name=self.name,
             projects=self.projects,
@@ -98,12 +101,21 @@ class Flow(FlowGraph):
         if 'type' not in decrypted:
             decrypted['type'] = record.type
 
-        return Flow(**decrypted)
+        flow = Flow(**decrypted)
+
+        if not flow.timestamp:
+            if record.timestamp:
+                flow.timestamp = record.timestamp
+            else:
+                flow.timestamp = datetime.utcnow()
+
+        return flow
 
     @staticmethod
     def new(id: str = None) -> 'Flow':
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
+            timestamp=datetime.utcnow(),
             name="Empty",
             wf_schema=FlowSchema(version=str(tracardi.version)),
             flowGraph=FlowGraphData(nodes=[], edges=[]),
@@ -117,6 +129,7 @@ class Flow(FlowGraph):
 
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
+            timestamp=datetime.utcnow(),
             name=name,
             wf_schema=FlowSchema(version=str(tracardi.version)),
             description=description,
@@ -283,7 +296,7 @@ class PluginRecord(BaseModel):
 
 
 class FlowRecord(NamedEntity):
-    timestamp: Optional[datetime] = datetime.utcnow()
+    timestamp: Optional[datetime] = None
     description: Optional[str] = None
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''

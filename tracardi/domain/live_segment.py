@@ -5,7 +5,7 @@ from tracardi.domain.value_object.storage_info import StorageInfo
 
 
 class LiveSegment(NamedEntity):
-    timestamp: Optional[datetime] = datetime.utcnow()
+    timestamp: Optional[datetime] = None
     description: Optional[str] = ""
     enabled: bool = True
     workflow: NamedEntity
