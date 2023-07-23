@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+
 from tracardi.service.wf.domain.flow_graph import FlowGraph
 from .named_entity import NamedEntity
 from .value_object.storage_info import StorageInfo
@@ -281,6 +283,7 @@ class PluginRecord(BaseModel):
 
 
 class FlowRecord(NamedEntity):
+    timestamp: Optional[datetime] = datetime.utcnow()
     description: Optional[str] = None
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
