@@ -32,6 +32,7 @@ class Flow(FlowGraph):
     lock: bool = False
     type: str
     timestamp: Optional[datetime] = None
+    deploy_timestamp: Optional[datetime] = None
     wf_schema: FlowSchema = FlowSchema()
 
     def arrange_nodes(self):
@@ -69,6 +70,7 @@ class Flow(FlowGraph):
         return FlowRecord(
             id=self.id,
             timestamp=self.timestamp,
+            deploy_timestamp=self.deploy_timestamp,
             description=self.description,
             name=self.name,
             projects=self.projects,
@@ -102,12 +104,11 @@ class Flow(FlowGraph):
             decrypted['type'] = record.type
 
         flow = Flow(**decrypted)
+        flow.deploy_timestamp = record.deploy_timestamp
+        flow.timestamp = record.timestamp
 
         if not flow.timestamp:
-            if record.timestamp:
-                flow.timestamp = record.timestamp
-            else:
-                flow.timestamp = datetime.utcnow()
+            flow.timestamp = datetime.utcnow()
 
         return flow
 
@@ -297,6 +298,7 @@ class PluginRecord(BaseModel):
 
 class FlowRecord(NamedEntity):
     timestamp: Optional[datetime] = None
+    deploy_timestamp: Optional[datetime] = None
     description: Optional[str] = None
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
