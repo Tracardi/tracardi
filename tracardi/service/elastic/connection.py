@@ -21,7 +21,7 @@ def _is_elastic_on_localhost():
     return elastic.host in local_hosts
 
 
-async def wait_for_installation(no_of_tries: int = 10):
+async def is_system_installed(no_of_tries: int = 10, pause: int = 15) -> bool:
     success = False
     while True:
         is_installed, indices = await system_db.is_schema_ok()
@@ -38,11 +38,9 @@ async def wait_for_installation(no_of_tries: int = 10):
         logger.warning(f"Missing indices {[idx[1] for idx in indices if idx[0] in ['missing_alias', 'missing_index']]}")
 
         no_of_tries -= 1
-        await asyncio.sleep(15)
+        await asyncio.sleep(pause)
 
-    if not success:
-        logger.error(f"System v{tracardi.version.version} not installed. Exiting...")
-        exit()
+    return success
 
 
 async def wait_for_connection(no_of_tries=10):
