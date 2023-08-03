@@ -167,7 +167,7 @@ class TrackingOrchestrator:
 
         # Append context data
 
-        if profile.operation.new:
+        if profile and profile.operation.new:
             # Add session created
             tracker_payload.events.append(
                 EventPayload(type='profile-created',
