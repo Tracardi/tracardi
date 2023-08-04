@@ -203,7 +203,7 @@ class TrackerPayload(BaseModel):
     def get_events_dict(self) -> List[dict]:
         # Todo Cache in property - this is expensive
         for event_payload in self.events:
-            # Todo PErformance
+            # Todo Performance
             yield event_payload.to_event_dict(
                 self.source,
                 self.session,

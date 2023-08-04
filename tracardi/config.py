@@ -139,7 +139,8 @@ class TracardiConfig(metaclass=Singleton):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
-        self.save_logs = (env['SAVE_LOGS'].lower() == 'yes') if 'SAVE_LOGS' in env else True
+        self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
+        self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks_max_repeats = int(
             env['SYNC_PROFILE_TRACKS_MAX_REPEATS']) if 'SYNC_PROFILE_TRACKS_MAX_REPEATS' in env else 10

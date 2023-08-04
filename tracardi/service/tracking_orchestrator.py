@@ -165,34 +165,47 @@ class TrackingOrchestrator:
                 tracker_payload.profile_less
             )
 
-        # Append context data
-
-        if profile and profile.operation.new:
-            # Add session created
-            tracker_payload.events.append(
-                EventPayload(type='profile-created',
-                             time=Time(insert=datetime.utcnow() - timedelta(seconds=3)),
-                             properties={})
-            )
-
         if isinstance(tracker_payload.source, EventSource):
             session.metadata.channel = tracker_payload.source.channel
 
-        if session.is_reopened():
-            tracker_payload.events.append(
-                EventPayload(type='visit-started',
-                             time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
-                             properties={})
-            )
+        # Append context data
+
+        if tracardi.system_events:
+
+            if profile and profile.operation.new:
+                # Add session created
+                tracker_payload.events.append(
+                    EventPayload(
+                        type='profile-created',
+                        time=Time(insert=datetime.utcnow() - timedelta(seconds=3)),
+                        properties={},
+                        options={"source_id": tracardi.internal_source}
+                    )
+                )
+
+            if session.is_reopened():
+                tracker_payload.events.append(
+                    EventPayload(
+                        type='visit-started',
+                        time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
+                        properties={},
+                        options={"source_id": tracardi.internal_source}
+                    )
+                )
+
+            if session.is_new():
+                # Add session created event to the registered events
+                tracker_payload.events.append(
+                    EventPayload(
+                        type='session-opened',
+                        time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
+                        properties={},
+                        options={"source_id": tracardi.internal_source}
+                    )
+                )
 
         # Is new session
         if session.is_new():
-            # Add session created event to the registered events
-            tracker_payload.events.append(
-                EventPayload(type='session-opened',
-                             time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
-                             properties={})
-            )
 
             # Compute the User Agent data
             try:
