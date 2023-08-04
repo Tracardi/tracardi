@@ -309,9 +309,14 @@ class TrackingManager(TrackingManagerBase):
 
                     if coping_schema.event_to_profile:
                         allowed_profile_fields = (
-                            "data", "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
+                            "data", "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux", "misc", "trash")
                         for event_ref, profile_ref, operation in coping_schema.items():
                             if not profile_ref.startswith(allowed_profile_fields):
+                                message = f"You are trying to copy the data to unknown field in profile. " \
+                                          f"Your profile reference `{profile_ref}` does not start with typical " \
+                                          f"fields that are {allowed_profile_fields}. Please check if there isn't " \
+                                          f"an error in your copy schema. Data will not be copied if it does not " \
+                                          f"match Profile schema."
                                 self.console_log.append(
                                     Console(
                                         flow_id=None,
@@ -322,16 +327,33 @@ class TrackingManager(TrackingManagerBase):
                                         class_name=TrackingManager.__name__,
                                         module=__name__,
                                         type='warning',
-                                        message=f"You are trying to copy the data to unknown field in profile. "
-                                                f"Your profile reference `{profile_ref}` does not start with typical "
-                                                f"fields that are {allowed_profile_fields}. Please check if there isn't "
-                                                f"an error in your copy schema. Data will not be copied if it does not "
-                                                f"match Profile schema.",
+                                        message=message,
                                         traceback=[]
                                     )
                                 )
+                                logger.warning(message)
+                                continue
 
                             try:
+                                if not flat_event[event_ref]:
+                                    message = f"Value of event@{event_ref} is None or empty. " \
+                                              f"No data has been assigned to profile@{profile_ref}"
+                                    self.console_log.append(
+                                        Console(
+                                            flow_id=None,
+                                            node_id=None,
+                                            event_id=event.id,
+                                            profile_id=get_entity_id(self.profile),
+                                            origin='event',
+                                            class_name=TrackingManager.__name__,
+                                            module=__name__,
+                                            type='warning',
+                                            message=message
+                                        )
+                                    )
+                                    logger.warning(message)
+                                    continue
+
                                 if operation == APPEND:
                                     if profile_ref not in flat_profile:
                                         flat_profile[profile_ref] = [flat_event[event_ref]]
@@ -385,7 +407,8 @@ class TrackingManager(TrackingManagerBase):
                     for profile_property, compute_string in compute_schema:
                         if not compute_string.startswith("call:"):
                             continue
-                        flat_profile[profile_property] = call_function(compute_string, event=event, profile=flat_profile)
+                        flat_profile[profile_property] = call_function(compute_string, event=event,
+                                                                       profile=flat_profile)
 
                 try:
                     metadata = self.profile.get_meta_data()
@@ -418,8 +441,6 @@ class TrackingManager(TrackingManagerBase):
                         )
                     )
                     logger.error(message)
-
-
 
         ux = []
         post_invoke_events = None
