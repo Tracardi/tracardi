@@ -7,6 +7,7 @@ from typing import Optional, Tuple, Union
 from dotty_dict import dotty
 
 from tracardi.config import tracardi
+from tracardi.context import ServerContext, get_context
 from tracardi.domain.event import Event, Tags
 from tracardi.domain.profile import Profile
 from tracardi.exceptions.log_handler import log_handler
@@ -61,10 +62,23 @@ def get_event_type_names():
 async def get_event_types(query: str = None, limit: int = 1000):
     pre_defined = list(get_event_type_names())
     pre_defined_ids = [item[0] for item in pre_defined]
-    result = await event_db.unique_field_value(query, limit)
-    for item in result:
-        if item not in pre_defined_ids:
-            pre_defined.append((item, capitalize_event_type_id(item)))
+
+    context = get_context()
+
+    with ServerContext(context.switch_context(production=True)):
+        production_event_types = await event_db.unique_field_value(query, limit)
+
+        for item in production_event_types:
+            if item not in pre_defined_ids:
+                pre_defined.append((item, capitalize_event_type_id(item)))
+                pre_defined_ids.append(item)
+
+    with ServerContext(context.switch_context(production=False)):
+        test_event_types = await event_db.unique_field_value(query, limit)
+
+        for item in test_event_types:
+            if item not in pre_defined_ids:
+                pre_defined.append((item, capitalize_event_type_id(item)))
 
     events_types = [{"id": item[0], "name": item[1]} for item in sorted(pre_defined)]
     return {
