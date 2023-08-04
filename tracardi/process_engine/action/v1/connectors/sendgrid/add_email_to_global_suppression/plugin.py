@@ -77,7 +77,7 @@ def register() -> Plugin:
                                 description="Please type in the path to the email address for your Suppressed Contact.",
                                 component=FormComponent(type="dotPath", props={"label": "Email",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "pii.email"
+                                                                               "defaultPathValue": "data.contact.email"
                                                                                })
                             ),
 
