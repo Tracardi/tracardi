@@ -186,7 +186,7 @@ class EventPayload(BaseModel):
                           profile=get_entity(profile),  # profile can be None when profile_less event.
                           type=event_type,
                           properties=self.properties,
-                          source=source,  # Entity
+                          source=source if not self._source_id else Entity(id=self._source_id),  # Entity
                           config=self.options,
                           context=self.context,
                           operation=RecordFlag(new=True),
