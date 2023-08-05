@@ -140,19 +140,16 @@ class TracardiConfig(metaclass=Singleton):
         self.disable_profile_destinations = env.get('DISABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
         self.disable_workflow = env.get('DISABLE_WORKFLOW', 'no').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
-        self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
-        self.sync_profile_tracks_max_repeats = int(
-            env['SYNC_PROFILE_TRACKS_MAX_REPEATS']) if 'SYNC_PROFILE_TRACKS_MAX_REPEATS' in env else 10
-        self.sync_profile_tracks_wait = int(
-            env['SYNC_PROFILE_TRACKS_WAIT']) if 'SYNC_PROFILE_TRACKS_WAIT' in env else 1
-        self.postpone_destination_sync = int(
-            env['POSTPONE_DESTINATION_SYNC']) if 'POSTPONE_DESTINATION_SYNC' in env else 20
-        self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
-        self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
-        self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
-        self.tracardi_pro_port = int(env['TRACARDI_PRO_PORT']) if 'TRACARDI_PRO_PORT' in env else 40000
-        self.tracardi_scheduler_host = env[
-            'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
+        # Not used now
+        self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
+        self.sync_profile_tracks_max_repeats = int(env.get('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10))
+        self.sync_profile_tracks_wait = int(env.get('SYNC_PROFILE_TRACKS_WAIT', 1))
+        self.postpone_destination_sync = int(env.get('POSTPONE_DESTINATION_SYNC', 20))
+        self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
+        self.query_language = env.get('QUERY_LANGUAGE', 'kql')
+        self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
+        self.tracardi_pro_port = int(env.get('TRACARDI_PRO_PORT', 40000))
+        self.tracardi_scheduler_host = env.get('TRACARDI_SCHEDULER_HOST', 'scheduler.tracardi.com')
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
