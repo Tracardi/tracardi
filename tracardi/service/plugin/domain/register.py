@@ -21,7 +21,7 @@ class FormField(BaseModel):
     name: str
     description: Optional[str] = None
     component: FormComponent
-    validation: Optional[FormFieldValidation]
+    validation: Optional[FormFieldValidation] = None
     required: bool = False
 
 
