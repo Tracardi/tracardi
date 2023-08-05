@@ -195,19 +195,7 @@ class TrackingManager(TrackingManagerBase):
                 event_list.append(_event)
         return event_list
 
-    async def invoke_track_process(self) -> TrackerResult:
-
-        # Get events
-        events = await self.get_events()
-        flat_events = {event.id: dotty(event.dict()) for event in events}
-
-        # Anonymize, data compliance
-        if License.has_license():
-            if self.profile is not None:
-                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
-
-        debugger = None
-        segmentation_result = None
+    async def get_routing_rules(self, events):
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
@@ -238,6 +226,25 @@ class TrackingManager(TrackingManagerBase):
         else:
             # Routing rules are subject to caching
             event_rules = await rule_db.load_rules(self.tracker_payload.source, events)
+
+        return event_rules
+
+    async def invoke_track_process(self) -> TrackerResult:
+
+        # Get events
+        events = await self.get_events()
+        flat_events = {event.id: dotty(event.dict()) for event in events}
+
+        # Anonymize, data compliance
+        if License.has_license():
+            if self.profile is not None:
+                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
+
+        debugger = None
+
+        # Get routing rules if workflow is not disabled
+
+        event_rules = await self.get_routing_rules(events) if not tracardi.disable_workflow else None
 
         # Copy data from event to profile. This must be run just before processing.
 
@@ -447,10 +454,12 @@ class TrackingManager(TrackingManagerBase):
         post_invoke_events = None
         flow_responses = FlowResponses([])
 
+        # Workflow
+
         try:
             #  If no event_rules for delivered event then no need to run rule invoke
             #  and no need for profile merging
-            if event_rules is not None:
+            if not tracardi.disable_workflow and event_rules is not None:
 
                 # Skips INVALID events in invoke method
                 rules_engine = RulesEngine(

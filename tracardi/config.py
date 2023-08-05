@@ -138,6 +138,7 @@ class TracardiConfig(metaclass=Singleton):
         self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
         self.disable_event_destinations = env.get('DISABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
         self.disable_profile_destinations = env.get('DISABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
+        self.disable_workflow = env.get('DISABLE_WORKFLOW', 'no').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks_max_repeats = int(
