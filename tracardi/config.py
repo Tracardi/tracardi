@@ -29,13 +29,13 @@ def _get_logging_level(level: str) -> int:
 
 class MemoryCacheConfig:
     def __init__(self, env):
-        self.event_to_profile_coping_ttl = int(env.get('EVENT_TO_PROFILE_COPY_CACHE_TTL', 20))
-        self.source_ttl = int(env.get('SOURCE_CACHE_TTL', 20))
-        self.session_cache_ttl = int(env.get('SESSION_CACHE_TTL', 20))
-        self.event_validation_cache_ttl = int(env.get('EVENT_VALIDATION_CACHE_TTL', 20))
-        self.event_metadata_cache_ttl = int(env.get('EVENT_METADATA_CACHE_TTL', 20))
-        self.event_destination_cache_ttl = int(env.get('EVENT_DESTINATION_CACHE_TTL', 20))
-        self.profile_destination_cache_ttl = int(env.get('PROFILE_DESTINATION_CACHE_TTL', 20))
+        self.event_to_profile_coping_ttl = int(env.get('EVENT_TO_PROFILE_COPY_CACHE_TTL', 2))
+        self.source_ttl = int(env.get('SOURCE_CACHE_TTL', 2))
+        self.session_cache_ttl = int(env.get('SESSION_CACHE_TTL', 2))
+        self.event_validation_cache_ttl = int(env.get('EVENT_VALIDATION_CACHE_TTL', 2))
+        self.event_metadata_cache_ttl = int(env.get('EVENT_METADATA_CACHE_TTL', 2))
+        self.event_destination_cache_ttl = int(env.get('EVENT_DESTINATION_CACHE_TTL', 2))
+        self.profile_destination_cache_ttl = int(env.get('PROFILE_DESTINATION_CACHE_TTL', 2))
 
 
 class ElasticConfig:
