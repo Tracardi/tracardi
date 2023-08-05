@@ -8,6 +8,7 @@ class Result(BaseModel):
 
     class Config:
         allow_mutation = False
+        # frozen = True   # pydatnic v2.0
 
     @staticmethod
     def append_input(result: Union['Result', Tuple['Result', ...]], payload) -> Optional[Union['Result', Tuple['Result', ...]]]:

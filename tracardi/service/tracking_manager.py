@@ -5,6 +5,7 @@ from typing import List, Optional, Callable
 from uuid import uuid4
 from dotty_dict import dotty
 from pydantic.error_wrappers import ValidationError
+# from pydantic import ValidationError   # pydatnic v2.0
 from tracardi.service.events import auto_index_default_event_type, copy_default_event_to_profile, \
     get_default_event_type_mapping, call_function
 
