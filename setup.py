@@ -16,7 +16,7 @@ setup(
     packages=['tracardi'],
     install_requires=[
         'pip>=21.2.4',
-        'pydantic==1.10.11',
+        'pydantic>=2.1.1',
         'aiohttp[speedups]',
         'redis',
         'aioredis',
