@@ -10,8 +10,7 @@ from tracardi.service.storage.driver.elastic import raw as raw_db
 from collections import defaultdict
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
-from pydantic.utils import deep_update
-# from pydantic.v1.utils import deep_update
+from pydantic.v1.utils import deep_update
 
 from ..config import tracardi
 from ..domain.metadata import ProfileMetadata
