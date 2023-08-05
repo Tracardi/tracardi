@@ -82,12 +82,11 @@ class ElasticConfig:
         return hosts.split(",")
 
     def _unset_credentials(self):
-        pass
-        # self.env['ELASTIC_HOST'] = ""
-        # if 'ELASTIC_HTTP_AUTH_USERNAME' in self.env:
-        #     del self.env['ELASTIC_HTTP_AUTH_USERNAME']
-        # if 'ELASTIC_HTTP_AUTH_PASSWORD' in self.env:
-        #     del self.env['ELASTIC_HTTP_AUTH_PASSWORD']
+        self.env['ELASTIC_HOST'] = ""
+        if 'ELASTIC_HTTP_AUTH_USERNAME' in self.env:
+            del self.env['ELASTIC_HTTP_AUTH_USERNAME']
+        if 'ELASTIC_HTTP_AUTH_PASSWORD' in self.env:
+            del self.env['ELASTIC_HTTP_AUTH_PASSWORD']
 
     def has(self, prop):
         return "Set" if getattr(self, prop, None) else "Unset"
