@@ -173,7 +173,7 @@ async def install_system(credentials: Credentials, update_plugins_on_start_up):
             id=open_rest_source_bridge.id,
             type=["internal"],
             name="Test random data",
-            channel="System",
+            channel="Internal",
             description="Internal event source for random data.",
             bridge=NamedEntity(**open_rest_source_bridge.dict()),
             timestamp=datetime.datetime.utcnow(),
