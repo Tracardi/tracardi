@@ -61,7 +61,7 @@ class RedisClient(metaclass=Singleton):
     def sadd(self, name: str, *values) -> Union[Awaitable[int], int]:
         return self.client.sadd(self.get_tenant_prefix(name), *values)
 
-    def smembers(self, name: str) -> Union[Awaitable[list], list]:
+    def smembers(self, name: str) -> Union[Awaitable[set], list]:
         return self.client.smembers(self.get_tenant_prefix(name))
 
     def ttl(self, name):
