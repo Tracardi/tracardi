@@ -571,12 +571,13 @@ class TrackingManager(TrackingManagerBase):
                 events = synced_events
 
             # Run event destination
-            load_destination_task = cache.event_destination
-            await event_destination_dispatch(load_destination_task,
-                                             self.profile,
-                                             self.session,
-                                             events,
-                                             self.tracker_payload.debug)
+            if not tracardi.disable_event_destinations:
+                load_destination_task = cache.event_destination
+                await event_destination_dispatch(load_destination_task,
+                                                 self.profile,
+                                                 self.session,
+                                                 events,
+                                                 self.tracker_payload.debug)
 
             return TrackerResult(
                 session=self.session,

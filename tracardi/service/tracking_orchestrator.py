@@ -442,30 +442,31 @@ class TrackingOrchestrator:
         profile = tracker_result.profile
         session = tracker_result.session
 
+        # Dave debug data
         debug = tracker_payload.is_on('debugger', default=False)
-        await self.save_debug_data(tracker_result.debugger, debug, get_entity_id(tracker_result.profile))
+        if tracardi.track_debug or debug:
+            await self.save_debug_data(tracker_result.debugger, get_entity_id(tracker_result.profile))
 
         # Send to destination
-        do = DestinationOrchestrator(
-            tracker_result.profile,
-            tracker_result.session,
-            tracker_result.events,
-            self.console_log
-        )
-        await do.sync_destination(
-            has_profile,
-            profile_copy,
-        )
+        if not tracardi.disable_profile_destinations:
+            do = DestinationOrchestrator(
+                tracker_result.profile,
+                tracker_result.session,
+                tracker_result.events,
+                self.console_log
+            )
+            await do.sync_destination(
+                has_profile,
+                profile_copy,
+            )
 
         return tracker_result
 
-    async def save_debug_data(self, debugger, debug: bool, profile_id):
+    async def save_debug_data(self, debugger, profile_id):
         try:
-            if tracardi.track_debug or debug:
-                if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
-                    # Save debug info in background
-                    asyncio.create_task(debug_info_db.save_debug_info(debugger))
-
+            if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
+                # Save debug info in background
+                asyncio.create_task(debug_info_db.save_debug_info(debugger))
         except Exception as e:
             message = "Error during saving debug info: `{}`".format(str(e))
             logger.error(message)

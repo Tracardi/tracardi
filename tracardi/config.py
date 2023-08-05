@@ -29,16 +29,13 @@ def _get_logging_level(level: str) -> int:
 
 class MemoryCacheConfig:
     def __init__(self, env):
-        self.event_to_profile_coping_ttl = int(env['EVENT_TO_PROFILE_COPY_CACHE_TTL']) if 'EVENT_TO_PROFILE_COPY_CACHE_TTL' in env else 2
-        self.source_ttl = int(env['SOURCE_CACHE_TTL']) if 'SOURCE_CACHE_TTL' in env else 2
-        self.session_cache_ttl = int(env['SESSION_CACHE_TTL']) if 'SESSION_CACHE_TTL' in env else 2
-        self.event_validation_cache_ttl = int(
-            env['EVENT_VALIDATION_CACHE_TTL']) if 'EVENT_VALIDATION_CACHE_TTL' in env else 2
-        self.event_metadata_cache_ttl = int(env['EVENT_METADATA_CACHE_TTL']) if 'EVENT_METADATA_CACHE_TTL' in env else 2
-        self.event_destination_cache_ttl = int(
-            env['EVENT_DESTINATION_CACHE_TTL']) if 'EVENT_DESTINATION_CACHE_TTL' in env else 2
-        self.profile_destination_cache_ttl = int(
-            env['PROFILE_DESTINATION_CACHE_TTL']) if 'PROFILE_DESTINATION_CACHE_TTL' in env else 2
+        self.event_to_profile_coping_ttl = int(env.get('EVENT_TO_PROFILE_COPY_CACHE_TTL', 20))
+        self.source_ttl = int(env.get('SOURCE_CACHE_TTL', 20))
+        self.session_cache_ttl = int(env.get('SESSION_CACHE_TTL', 20))
+        self.event_validation_cache_ttl = int(env.get('EVENT_VALIDATION_CACHE_TTL', 20))
+        self.event_metadata_cache_ttl = int(env.get('EVENT_METADATA_CACHE_TTL', 20))
+        self.event_destination_cache_ttl = int(env.get('EVENT_DESTINATION_CACHE_TTL', 20))
+        self.profile_destination_cache_ttl = int(env.get('PROFILE_DESTINATION_CACHE_TTL', 20))
 
 
 class ElasticConfig:
@@ -140,6 +137,8 @@ class TracardiConfig(metaclass=Singleton):
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
+        self.disable_event_destinations = env.get('DISABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
+        self.disable_profile_destinations = env.get('DISABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
         self.sync_profile_tracks_max_repeats = int(
