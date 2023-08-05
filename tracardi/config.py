@@ -42,19 +42,18 @@ class ElasticConfig:
 
     def __init__(self, env):
         self.env = env
-        self.replicas = env['ELASTIC_INDEX_REPLICAS'] if 'ELASTIC_INDEX_REPLICAS' in env else "1"
-        self.shards = env['ELASTIC_INDEX_SHARDS'] if 'ELASTIC_INDEX_SHARDS' in env else "3"
-        self.conf_shards = env['ELASTIC_CONF_INDEX_SHARDS'] if 'ELASTIC_CONF_INDEX_SHARDS' in env else "1"
-        self.sniff_on_start = env['ELASTIC_SNIFF_ON_START'] if 'ELASTIC_SNIFF_ON_START' in env else None
-        self.sniff_on_connection_fail = env[
-            'ELASTIC_SNIFF_ON_CONNECTION_FAIL'] if 'ELASTIC_SNIFF_ON_CONNECTION_FAIL' in env else None
-        self.sniffer_timeout = env['ELASTIC_SNIFFER_TIMEOUT'] if 'ELASTIC_SNIFFER_TIMEOUT' in env else None
-        self.ca_file = env['ELASTIC_CA_FILE'] if 'ELASTIC_CA_FILE' in env else None
-        self.api_key_id = env['ELASTIC_API_KEY_ID'] if 'ELASTIC_API_KEY_ID' in env else None
-        self.api_key = env['ELASTIC_API_KEY'] if 'ELASTIC_API_KEY' in env else None
+        self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
+        self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
+        self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
+        self.sniff_on_start = env.get('ELASTIC_SNIFF_ON_START', None)
+        self.sniff_on_connection_fail = env.get('ELASTIC_SNIFF_ON_CONNECTION_FAIL', None)
+        self.sniffer_timeout = env.get('ELASTIC_SNIFFER_TIMEOUT', None)
+        self.ca_file = env.get('ELASTIC_CA_FILE', None)
+        self.api_key_id = env.get('ELASTIC_API_KEY_ID', None)
+        self.api_key = env.get('ELASTIC_API_KEY', None)
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None
-        self.maxsize = env['ELASTIC_MAX_CONN'] if 'ELASTIC_MAX_CONN' in env else None
-        self.http_compress = env['ELASTIC_HTTP_COMPRESS'] if 'ELASTIC_HTTP_COMPRESS' in env else None
+        self.maxsize = int(env.get('ELASTIC_MAX_CONN', 25))
+        self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
         self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
 
         self.refresh_profiles_after_save = (env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'].lower() == 'yes') \
@@ -64,9 +63,9 @@ class ElasticConfig:
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
-        self.query_timeout = int(env['ELASTIC_QUERY_TIMEOUT']) if 'ELASTIC_QUERY_TIMEOUT' in env else 12
-        self.save_pool = int(env['ELASTIC_SAVE_POOL']) if 'ELASTIC_SAVE_POOL' in env else 0
-        self.save_pool_ttl = int(env['ELASTIC_SAVE_POOL_TTL']) if 'ELASTIC_SAVE_POOL_TTL' in env else 5
+        self.query_timeout = int(env.get('ELASTIC_QUERY_TIMEOUT', 12))
+        self.save_pool = int(env.get('ELASTIC_SAVE_POOL', 0))
+        self.save_pool_ttl = int(env.get('ELASTIC_SAVE_POOL_TTL', 5))
         self.logging_level = _get_logging_level(
             env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 

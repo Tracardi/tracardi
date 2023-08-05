@@ -28,7 +28,7 @@ class ElasticClient:
             pool = PoolManager("es-bulk-save", max_pool=elastic.save_pool, on_pool_purge=self._bulk_save)
             self.pool = pool
 
-    async def _bulk_save(self, bulk):
+    async def _bulk_save(self, bulk, attr):
         success, errors = await helpers.async_bulk(self._client, bulk)
         if errors:
             logger.error(f"Errors from pool {errors}")
