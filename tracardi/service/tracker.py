@@ -249,7 +249,7 @@ class Tracker:
         if source_id == tracardi.internal_source:
             return EventSource(
                 id=source_id,
-                type=['rest', 'internal'],
+                type=['internal'],
                 bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
                 name="Internal event source",
                 description="This is internal event source for internal events.",
