@@ -81,17 +81,19 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "bot_token": "<bot-token>",
                 "chat_id": "<chat-id>"
-            }
+            },
+            manual='telegram_resource'
         ),
         ResourceSettings(
             id="ip-geo-locator",
-            name="MaxMing Geo-Location",
+            name="MaxMind Geo-Location",
             tags=["api", "geo-locator"],
             config={
                 "host": "geolite.info",
                 "license": "<license-key>",
                 "accountId": "<accound-id>"
-            }
+            },
+            manual="max_mind_resource"
         ),
         ResourceSettings(
             id="postgresql",
@@ -141,15 +143,6 @@ def get_resource_types() -> List[ResourceSettings]:
                 "port": 1883,
                 "username": "<username>",
                 "password": "<password>"
-            }
-        ),
-        ResourceSettings(
-            id="twilio",
-            name="Twilio",
-            tags=["twilio"],
-            config={
-                "auth_token": "<token>",
-                "account_sid": "<sid>"
             }
         ),
         ResourceSettings(
@@ -287,7 +280,8 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "token": "<your-project-token>",
                 "server_prefix": "US | EU"
-            }
+            },
+            manual="mixpanel_resource"
         ),
         ResourceSettings(
             id="mautic",
