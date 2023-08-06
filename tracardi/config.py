@@ -159,9 +159,9 @@ class TracardiConfig(metaclass=Singleton):
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
-        self.internal_source = f"@internal-{random_hash}"
-        self.cardio_source = f"@heartbeats-{random_hash}"
-        self.segmentation_source = f"@segmentation-{random_hash}"
+        self.internal_source = f"@internal-{random_hash[:20]}"
+        self.cardio_source = f"@heartbeats-{random_hash[:20]}"
+        self.segmentation_source = f"@segmentation-{random_hash[:20]}"
         self._config = None
         self._unset_secrets()
 
