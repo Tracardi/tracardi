@@ -252,7 +252,7 @@ class Tracker:
                 type=['internal'],
                 bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
                 name="Internal event source",
-                description="This is internal event source for internal events.",
+                description="This is event source for internal events.",
                 channel="Internal",
                 transitional=False,  # ephemeral
                 tags=['internal']

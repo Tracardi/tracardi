@@ -325,6 +325,8 @@ class TrackingOrchestrator:
             except Exception:
                 pass
 
+        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
+
         # Try to get location from tracker context.
 
         if 'location' in tracker_payload.context and \
@@ -378,7 +380,7 @@ class TrackingOrchestrator:
                         session.operation.update = True
 
         # Add email type
-        if profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
+        if has_profile and profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
             email_parts = profile.data.contact.email.split('@')
             if len(email_parts) > 1:
                 email_domain = email_parts[1]
@@ -403,7 +405,7 @@ class TrackingOrchestrator:
         # ------------------------------
 
         # Make profile copy
-        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
+
         profile_copy = profile.dict(exclude={"operation": ...}) if has_profile else None
 
         # Lock
