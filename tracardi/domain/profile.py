@@ -340,11 +340,11 @@ class Profile(Entity):
         )
 
     @staticmethod
-    def new() -> 'Profile':
+    def new(id: Optional[id] = None) -> 'Profile':
         """
         @return Profile
         """
         return Profile(
-            id=str(uuid.uuid4()),
+            id=str(uuid.uuid4()) if not id else id,
             metadata=ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
         )

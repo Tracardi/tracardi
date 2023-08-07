@@ -1,7 +1,7 @@
 import json
 import logging
 from hashlib import sha1
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
 from uuid import uuid4
 
@@ -12,6 +12,7 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.utils.getters import get_entity_id
 
 from tracardi.config import tracardi
+from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..console import Console
 from ..event_metadata import EventPayloadMetadata
@@ -24,9 +25,11 @@ from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 
-
 from tracardi.service.storage.driver.elastic import identification as identification_db
 
+if License.has_service(LICENSE):
+    from com_tracardi.bridge.bridges import javascript_bridge
+    from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -244,6 +247,42 @@ class TrackerPayload(BaseModel):
             "saveEvents": not flag
         })
 
+    def get_browser_agent(self) -> Optional[str]:
+        try:
+            return self.context['browser']['local']['browser']['userAgent']
+        except KeyError:
+            return None
+
+    def get_browser_language(self) -> Optional[str]:
+        try:
+            return self.context['browser']['local']['browser']['language']
+        except KeyError:
+            return None
+
+    def get_ip(self) -> Optional[str]:
+        try:
+            return self.request['headers']['x-forwarded-for']
+        except KeyError:
+            return None
+
+    def get_resolution(self) -> Optional[str]:
+        try:
+            return f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"
+        except KeyError:
+            pass
+
+    def get_color_depth(self) -> Optional[int]:
+        try:
+            return int(self.context['screen']['local']['colorDepth'])
+        except KeyError:
+            return None
+
+    def get_screen_orientation(self) -> Optional[str]:
+        try:
+            return self.context['screen']['local']['orientation']
+        except KeyError:
+            return None
+
     def force_session(self, session):
         # Get session
         if self.session is None or self.session.id is None:
@@ -357,6 +396,12 @@ class TrackerPayload(BaseModel):
             logger.error(f"Can not find property to load profile by identification data: {str(e)}")
             return None
 
+    def finger_printing_enabled(self):
+        if License.has_service(LICENSE) and self.source.bridge.id == javascript_bridge.id:
+            ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
+            return ttl > 0
+        return False
+
     async def get_profile_and_session(self, session: Session,
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
                                       profile_less) -> Tuple[Optional[Profile], Session]:
@@ -364,6 +409,17 @@ class TrackerPayload(BaseModel):
         """
         Returns session. Creates profile if it does not exist.If it exists connects session with profile.
         """
+
+        # Fingerprinting.
+
+        fp_profile_id = None
+        if self.finger_printing_enabled():
+            device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
+            ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
+            fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
+            fp_profile_id = fp.get_profile_id_by_device_finger_print()
+
+        print("Finger printed profile", fp_profile_id)
 
         is_new_profile = False
         is_new_session = False
@@ -386,7 +442,7 @@ class TrackerPayload(BaseModel):
 
             if profile_less is False:
 
-                # Bind profile
+                # No profile in tracker payload
                 if self.profile is None:
 
                     # First, check if the tracker_payload does not have events that need merging because
@@ -477,7 +533,8 @@ class TrackerPayload(BaseModel):
                     # Loaded session has profile
 
                     # Load profile on profile id saved in session
-                    copy_of_tracker_payload = TrackerPayload(**self.dict())
+                    # todo pydantic v2 TrackerPayload.model_construct(**self.dict())
+                    copy_of_tracker_payload = TrackerPayload.construct(**self.dict())
                     copy_of_tracker_payload.profile = Entity(id=session.profile.id)
 
                     profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
@@ -522,6 +579,30 @@ class TrackerPayload(BaseModel):
 
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
+
+        if profile:
+            # If there is fingerprinted profile and we just created new profile then load fingerprinted profile.
+            if fp_profile_id:
+                # If new profile then check if there is fingerprinted profile
+                if is_new_profile and profile.id != fp_profile_id:
+                    print("Loading FP profile")
+                    # Load profile with finger printed profile id
+                    # todo pydantic v2 TrackerPayload.model_construct(**self.dict())
+                    copy_of_tracker_payload = TrackerPayload.construct(**self.dict())
+                    copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
+
+                    fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
+
+                    if fp_profile:
+                        profile = fp_profile
+                    else:
+                        fp.save_browser_finger_print(profile.id)
+
+            elif self.finger_printing_enabled():
+                # Does not have fingerprinted profile
+                fp.save_browser_finger_print(profile.id)
+
+        print("Loaded profile", profile.id, is_new_profile)
 
         return profile, session
 

@@ -1,8 +1,6 @@
 import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any, Optional
-
-from tracardi.context import get_context
 from tracardi.service.profile_merger import ProfileMerger
 
 from tracardi.domain.entity import Entity

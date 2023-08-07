@@ -168,6 +168,8 @@ class TrackingOrchestrator:
         if isinstance(tracker_payload.source, EventSource):
             session.metadata.channel = tracker_payload.source.channel
 
+        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
+
         # Append context data
 
         if tracardi.system_events:
@@ -254,9 +256,10 @@ class TrackingOrchestrator:
 
                 if spoken_languages:
                     session.context['language'] = list(set(spoken_languages))
-                    profile.data.pii.language.spoken = session.context['language']
+                    if has_profile:
+                        profile.data.pii.language.spoken = session.context['language']
 
-                if 'geo' not in profile.aux:
+                if has_profile and 'geo' not in profile.aux:
                     profile.aux['geo'] = {}
 
                 # Continent
@@ -283,20 +286,17 @@ class TrackingOrchestrator:
 
                 # Screen
 
-                try:
-                    session.device.resolution = f"{tracker_payload.context['screen']['local']['width']}x{tracker_payload.context['screen']['local']['height']}"
-                except KeyError:
-                    pass
+                _value = tracker_payload.get_resolution()
+                if _value:
+                    session.device.resolution = _value
 
-                try:
-                    session.device.color_depth = int(tracker_payload.context['screen']['local']['colorDepth'])
-                except KeyError:
-                    pass
+                _value = tracker_payload.get_color_depth()
+                if _value:
+                    session.device.color_depth = _value
 
-                try:
-                    session.device.orientation = tracker_payload.context['screen']['local']['orientation']
-                except KeyError:
-                    pass
+                _value = tracker_payload.get_screen_orientation()
+                if _value:
+                    session.device.orientation = _value
 
                 session.app.bot = user_agent.is_bot
                 session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
@@ -310,22 +310,17 @@ class TrackingOrchestrator:
                     except ValidationError:
                         pass
 
-                # session.app.resolution = session.context['screen']
-
             except Exception as e:
                 pass
 
-            try:
-                session.device.ip = tracker_payload.request['headers']['x-forwarded-for']
-            except Exception:
-                pass
+            _value = tracker_payload.get_ip()
+            if _value:
+                session.device.ip = _value
 
             try:
                 session.app.language = session.context['browser']['local']['browser']['language']
             except Exception:
                 pass
-
-        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
 
         # Try to get location from tracker context.
 
