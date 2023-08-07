@@ -195,14 +195,17 @@ async def create_schema(index_mappings: Generator[Tuple[Index, dict], Any, None]
     }
 
     for index, map in index_mappings:
-        created_indices, created_templates, create_aliases = await create_index_and_template(
-            index,
-            map,
-            update_mapping)
+        try:
+            created_indices, created_templates, create_aliases = await create_index_and_template(
+                index,
+                map,
+                update_mapping)
 
-        output['indices'] += created_indices
-        output['templates'] += created_templates
-        output['aliases'] += create_aliases
+            output['indices'] += created_indices
+            output['templates'] += created_templates
+            output['aliases'] += create_aliases
+        except Exception as e:
+            logger.error(str(e))
 
     return output
 

@@ -584,19 +584,23 @@ class TrackerPayload(BaseModel):
             # If there is fingerprinted profile and we just created new profile then load fingerprinted profile.
             if fp_profile_id:
                 # If new profile then check if there is fingerprinted profile
-                if is_new_profile and profile.id != fp_profile_id:
-                    print("Loading FP profile")
-                    # Load profile with finger printed profile id
-                    # todo pydantic v2 TrackerPayload.model_construct(**self.dict())
-                    copy_of_tracker_payload = TrackerPayload.construct(**self.dict())
-                    copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
+                if is_new_profile:
+                    if profile.id != fp_profile_id:
+                        print("Loading FP profile")
+                        # Load profile with finger printed profile id
+                        # todo pydantic v2 TrackerPayload.model_construct(**self.dict())
+                        copy_of_tracker_payload = TrackerPayload.construct(**self.dict())
+                        copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
 
-                    fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
+                        fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
 
-                    if fp_profile:
-                        profile = fp_profile
-                    else:
-                        fp.save_browser_finger_print(profile.id)
+                        if fp_profile:
+                            profile = fp_profile
+                        elif self.finger_printing_enabled():
+                            fp.save_browser_finger_print(profile.id)
+                else:
+                    pass
+                    # Todo merge with fingerprint as merge key. Do not know if I want to do this.
 
             elif self.finger_printing_enabled():
                 # Does not have fingerprinted profile
