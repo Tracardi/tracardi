@@ -533,8 +533,7 @@ class TrackerPayload(BaseModel):
                     # Loaded session has profile
 
                     # Load profile on profile id saved in session
-                    # todo pydantic v2 TrackerPayload.model_construct(**self.dict())
-                    copy_of_tracker_payload = TrackerPayload.construct(**self.dict())
+                    copy_of_tracker_payload = TrackerPayload(**self.dict())
                     copy_of_tracker_payload.profile = Entity(id=session.profile.id)
 
                     profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
@@ -588,8 +587,7 @@ class TrackerPayload(BaseModel):
                     if profile.id != fp_profile_id:
                         print("Loading FP profile")
                         # Load profile with finger printed profile id
-                        # todo pydantic v2 TrackerPayload.model_construct(**self.dict())
-                        copy_of_tracker_payload = TrackerPayload.construct(**self.dict())
+                        copy_of_tracker_payload = TrackerPayload(**self.dict())
                         copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
 
                         fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
