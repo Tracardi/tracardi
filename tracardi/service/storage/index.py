@@ -11,16 +11,21 @@ _local_dir = os.path.dirname(__file__)
 
 
 class Index:
-    def __init__(self, multi_index, index, mapping, staging=False, static=False):
+    def __init__(self, multi_index, index, mapping, staging=False, static=False, single=False):
         self.multi_index = multi_index
         self.index = index
         self._version_prefix = tracardi.version.get_version_prefix()  # eg.080
         self.mapping = mapping
         self.staging = staging
         self.static = static
+        self.single = single
 
     @staticmethod
-    def _multi_index_suffix():
+    def _multi_index_suffix() -> str:
+        """
+        Current date suffix
+        """
+
         date = datetime.now()
         return f"{date.year}-{date.month}"
 
@@ -51,7 +56,12 @@ class Index:
         """
         Gets real prefixed - index
         E.g. fa73a.tracardi-event or tenant.tracardi-event
+        or tracardi-event if single index
         """
+
+        if self.single is True:
+            return self.index
+
         return f"{get_context().tenant}.{self.index}"
 
     def prepare_mappings(self, mapping, index) -> dict:
@@ -68,18 +78,16 @@ class Index:
 
         return json.loads(json_map)
 
-    # ToDo find occurrences and replace with get_index_alias
-    def get_static_alias(self) -> str:
-        """
-        E.g. static-fa73a.tracardi-event
-        """
-        return self.get_index_alias()
-
     def get_index_alias(self) -> str:
         """
         E.g. (prod|static)-fa73a.tracardi-event
         """
         prefixed_index = self._get_prefixed_index()
+
+        if self.single is True:
+            # Eg. fa73a.tracardi-license
+            return f"{get_context().tenant}.{prefixed_index}"
+
         return self._prod_or_static(prefixed_index)
 
     def get_write_index(self):
@@ -91,6 +99,10 @@ class Index:
             prefixed_index = f"{self._get_prefixed_index()}-{self._multi_index_suffix()}"
         else:
             prefixed_index = self._get_prefixed_index()
+
+        if self.single is True:
+            # Eg. tracardi-license
+            return prefixed_index
 
         version_prefix_index = f"{self._version_prefix}.{prefixed_index}"
 
@@ -104,11 +116,19 @@ class Index:
         if self.static is True:
             raise AssertionError("Static index should not be a multi data index.")
 
+        prefixed_index = self._get_prefixed_index()
+
         if self.multi_index is False:
-            raise ValueError(f"Index {self._get_prefixed_index()} is not multi index.")
+            raise ValueError(f"Index {prefixed_index} is not multi index.")
+
+        multi_index_pattern = f"{prefixed_index}-*-*"
+
+        if self.single is True:
+            # Eg. tracardi-license-*-*
+            return multi_index_pattern
 
         # (prod|static) 070 . fa73a.tracardi-event - * - *
-        index = f"{self._version_prefix}.{self._get_prefixed_index()}-*-*"
+        index = f"{self._version_prefix}.{multi_index_pattern}"
 
         return self._prod_or_static(index)
 
@@ -118,7 +138,13 @@ class Index:
         if self.static is True:
             raise AssertionError("Static index should not be a multi data index.")
 
-        prefixed_template = f"template.{self._version_prefix}.{self._get_prefixed_index()}"
+        prefixed_index = self._get_prefixed_index()
+
+        if self.single is True:
+            # Eg. template.tracardi-license
+            return f"template.{prefixed_index}"
+
+        prefixed_template = f"template.{self._version_prefix}.{prefixed_index}"
         # (prods | static) template . 070 . fa73a . tracardi-event
         return self._prod_or_static(prefixed_template)
 
@@ -231,7 +257,7 @@ class Resource(metaclass=Singleton):
             "identification-point": Index(staging=True, multi_index=False, index="tracardi-identification-point",
                                           mapping="mappings/identification-point-index.json"),
             "version": Index(staging=False, multi_index=False, index="tracardi-version",
-                             mapping="mappings/version-index.json"),
+                             mapping="mappings/version-index.json")
         }
 
     def list_aliases(self) -> set:
