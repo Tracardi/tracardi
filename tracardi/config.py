@@ -140,6 +140,7 @@ class TracardiConfig(metaclass=Singleton):
         self.disable_profile_destinations = env.get('DISABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
         self.disable_workflow = env.get('DISABLE_WORKFLOW', 'no').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
+        self.disable_segmentation_wf_triggers = env.get('DISABLE_SEGMENTATION_WF_TRIGGERS', 'yes').lower() == 'yes'
         # Not used now
         self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
         self.sync_profile_tracks_max_repeats = int(env.get('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10))

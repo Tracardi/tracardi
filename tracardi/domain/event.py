@@ -9,9 +9,9 @@ from pydantic import BaseModel, root_validator
 from typing import Tuple
 
 from .marketing import UTM
-from .metadata import OS, Device, Application, Hit
+# from .metadata import OS, Device, Application, Hit
 from .named_entity import NamedEntity
-from .profile import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
+from .profile_data import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
     ProfileIdentifier, ProfileContact, ProfilePII
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo

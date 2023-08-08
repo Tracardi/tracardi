@@ -33,7 +33,7 @@ from tracardi.domain.session import Session
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
-from tracardi.service.segmentation import segment
+from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.service.storage.driver.elastic import segment as segment_db
 from tracardi.service.storage.driver.elastic import rule as rule_db
 from tracardi.service.storage.driver.elastic import flow as flow_db
@@ -497,14 +497,6 @@ class TrackingManager(TrackingManagerBase):
                         event.metadata.processed_by.rules = invoked_rules[event.id]
                         event.metadata.processed_by.flows = rule_invoke_result.invoked_flows
 
-                    # Segment only if there is profile
-
-                    if isinstance(self.profile, Profile):
-                        # Segment
-                        segmentation_result = await segment(self.profile,
-                                                            rule_invoke_result.ran_event_types,
-                                                            segment_db.load_segments)
-
                 except Exception as e:
                     message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
                     self.console_log.append(
@@ -568,6 +560,16 @@ class TrackingManager(TrackingManagerBase):
                 logger.debug(f"No routing rules found for workflow.")
 
         finally:
+
+            # Segment only if there is profile
+
+            if isinstance(self.profile, Profile):
+                # Post Event Segmentation
+                await post_ev_segment(self.profile,
+                                      self.session,
+                                      [event.type for event in events],
+                                      segment_db.load_segments)
+
             # Synchronize post invoke events. Replace events with events changed by WF.
             # Events are saved only if marked in event.operation.update==true
             if post_invoke_events is not None:
