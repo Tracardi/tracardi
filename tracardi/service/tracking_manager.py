@@ -244,7 +244,7 @@ class TrackingManager(TrackingManagerBase):
 
         # Get routing rules if workflow is not disabled
 
-        event_rules = await self.get_routing_rules(events) if not tracardi.disable_workflow else None
+        event_rules = await self.get_routing_rules(events) if tracardi.enable_workflow else None
 
         # Copy data from event to profile. This must be run just before processing.
 
@@ -459,7 +459,7 @@ class TrackingManager(TrackingManagerBase):
         try:
             #  If no event_rules for delivered event then no need to run rule invoke
             #  and no need for profile merging
-            if not tracardi.disable_workflow and event_rules is not None:
+            if tracardi.enable_workflow and event_rules is not None:
 
                 # Skips INVALID events in invoke method
                 rules_engine = RulesEngine(
@@ -583,7 +583,7 @@ class TrackingManager(TrackingManagerBase):
                 events = synced_events
 
             # Run event destination
-            if not tracardi.disable_event_destinations:
+            if tracardi.enable_event_destinations:
                 load_destination_task = cache.event_destination
                 await event_destination_dispatch(load_destination_task,
                                                  self.profile,

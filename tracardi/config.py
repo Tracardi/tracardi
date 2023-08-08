@@ -136,11 +136,12 @@ class TracardiConfig(metaclass=Singleton):
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
-        self.disable_event_destinations = env.get('DISABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
-        self.disable_profile_destinations = env.get('DISABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
-        self.disable_workflow = env.get('DISABLE_WORKFLOW', 'no').lower() == 'yes'
+        self.enable_event_destinations = env.get('ENABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
+        self.enable_profile_destinations = env.get('ENABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
+        self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
+        self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
-        self.disable_segmentation_wf_triggers = env.get('DISABLE_SEGMENTATION_WF_TRIGGERS', 'yes').lower() == 'yes'
+
         # Not used now
         self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
         self.sync_profile_tracks_max_repeats = int(env.get('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10))

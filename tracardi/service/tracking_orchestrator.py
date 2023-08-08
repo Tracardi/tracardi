@@ -445,7 +445,7 @@ class TrackingOrchestrator:
             await self.save_debug_data(tracker_result.debugger, get_entity_id(tracker_result.profile))
 
         # Send to destination
-        if not tracardi.disable_profile_destinations:
+        if tracardi.enable_profile_destinations:
             do = DestinationOrchestrator(
                 tracker_result.profile,
                 tracker_result.session,
