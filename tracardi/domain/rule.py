@@ -16,6 +16,7 @@ class Rule(NamedEntity):
     type: Optional[str] = 'workflow'
     flow: NamedEntity
     source: NamedEntity
+    segment: NamedEntity
     enabled: Optional[bool] = True
     description: Optional[str] = "No description provided"
     properties: Optional[dict] = None

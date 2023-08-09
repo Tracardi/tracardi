@@ -20,6 +20,11 @@ async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:
     return await storage_manager('segment').load_all(start, limit)
 
 
+async def load_by_name(name, limit=50) -> StorageRecords:
+    return await storage_manager(index="segment"). \
+        load_by_query_string(f"name: \"{name}*\"", limit=limit)
+
+
 async def refresh():
     return await storage_manager('segment').refresh()
 
