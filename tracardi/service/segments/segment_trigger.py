@@ -12,7 +12,10 @@ def _add_segment(profile: Profile, session: Session, segment: str):
     profile.segments.append(segment)
     if License.has_service(LICENSE) and tracardi.enable_segmentation_wf_triggers:
         context = get_context()
-        trigger_workflow_with_added_segment(context.dict(), profile.dict(), session.dict(), segment)
+        trigger_workflow_with_added_segment(context.dict(),
+                                            profile.dict(exclude={"operation": ...}),
+                                            session.dict(exclude={"operation": ...}),
+                                            segment)
         print("Trigger by segmentation")
 
 
