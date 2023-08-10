@@ -126,3 +126,7 @@ async def flush():
 
 async def load_by_event_type(event_type: str, limit: int = 100) -> StorageRecords:
     return await storage_manager('rule').load_by('event_type.id', event_type, limit=limit)
+
+
+async def load_by_segment(segment: str, limit: int = 100) -> StorageRecords:
+    return await storage_manager('rule').load_by('segment.id', segment, limit=limit)
