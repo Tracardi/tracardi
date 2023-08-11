@@ -657,6 +657,9 @@
                       "type": "keyword",  "ignore_above": 256
                     }
                   }
+                },
+                "aux": {
+                  "type": "flattened"
                 }
               }
             },
