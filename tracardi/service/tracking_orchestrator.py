@@ -3,6 +3,7 @@ import logging
 import os
 from collections.abc import Callable
 from datetime import datetime, timedelta
+from inspect import trace
 from typing import Type
 from uuid import uuid4
 
@@ -190,7 +191,9 @@ class TrackingOrchestrator:
                     EventPayload(
                         type='visit-started',
                         time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
-                        properties={},
+                        properties={
+                            'trigger-event-types': [_ev.type for _ev in tracker_payload.events]
+                        },
                         options={"source_id": tracardi.internal_source}
                     )
                 )
