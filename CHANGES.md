@@ -12,7 +12,9 @@ Version: 0.8.1
 * Tracardi now can handle coping event data to profiles and event indexing on historical data (pro)
 * Better autocomplete of event properties
 * Session open, Session close, Internal events
-* Update documentation
+* Device fingerprinting
+* New bridge for Javascript integration with the web page
+* Updated documentation
 * Added or Modified Plugins
   * Weaviate (Vector store for AI) (pro)
     * Add
@@ -30,8 +32,9 @@ Version: 0.8.1
   * Event counter (pro)
   * ChatGPT prompt (pro)
 * Misc
-  * Upgrade to python 3.9
+  * Upgrade to python 3.10
   * Performance tweaks
+  * More configuration flags for better configuration
 
 Version 0.8.0
 ----------------------------------------------------------
