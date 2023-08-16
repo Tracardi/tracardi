@@ -1,8 +1,13 @@
+Version: 0.8.2
+----------------------------------------------------------
+* Upgrade to pytantic v2
+
 Version: 0.8.1
 ----------------------------------------------------------
 * New Dashboard
 * New Profile Details Page
 * Extended analytics
+* Multi-tenant setup available (pro)
 * Debugging in context of event
 * Static Profile ID generator
 * Passing Profile ID between owned domains
@@ -12,8 +17,9 @@ Version: 0.8.1
 * Tracardi now can handle coping event data to profiles and event indexing on historical data (pro)
 * Better autocomplete of event properties
 * Session open, Session close, Internal events
-* Device fingerprinting
-* New bridge for Javascript integration with the web page
+* Device fingerprinting (pro)
+* New bridge for Javascript integration with the web page (pro)
+* New workflow triggers (pro)
 * Updated documentation
 * Added or Modified Plugins
   * Weaviate (Vector store for AI) (pro)
