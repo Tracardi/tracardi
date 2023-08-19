@@ -41,7 +41,7 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
 if License.has_service(INDEXER):
-    from com_tracardi.service.event_indexer import index_event_traits
+    from com_tracardi.service.event_traits_mapper import map_event_props_to_traits
 
 if License.has_license():
     from com_tracardi.service.data_compliance import DataComplianceHandler
@@ -190,7 +190,7 @@ class TrackingManager(TrackingManagerBase):
                 # Auto index event
                 _event = auto_index_default_event_type(_event, self.profile)
                 if License.has_service(INDEXER):
-                    _event = await index_event_traits(_event, self.console_log)
+                    _event = await map_event_props_to_traits(_event, self.console_log)
 
                 event_list.append(_event)
         return event_list
