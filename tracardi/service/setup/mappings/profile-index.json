@@ -386,6 +386,9 @@
                 },
                 "ltcocv": {
                   "type": "float"
+                },
+                "custom": {
+                  "type": "flattened"
                 }
               }
             },
