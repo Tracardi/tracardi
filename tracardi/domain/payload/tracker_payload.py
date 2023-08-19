@@ -604,8 +604,6 @@ class TrackerPayload(BaseModel):
                 # Does not have fingerprinted profile
                 fp.save_browser_finger_print(profile.id)
 
-        print("Loaded profile", profile.id, is_new_profile)
-
         return profile, session
 
     @staticmethod
