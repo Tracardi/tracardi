@@ -25,6 +25,9 @@
       "tags": {
         "type": "keyword"
       },
+      "journey": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
