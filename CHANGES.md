@@ -13,6 +13,7 @@ Version: 0.8.1
 * Passing Profile ID between owned domains
 * Predefined events 
 * New Data Schema
+* Customer journey mapping
 * Better Production/Testing switching
 * Tracardi now can handle coping event data to profiles and event indexing on historical data (pro)
 * Better autocomplete of event properties
