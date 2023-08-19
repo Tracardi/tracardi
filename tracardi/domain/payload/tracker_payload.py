@@ -419,8 +419,6 @@ class TrackerPayload(BaseModel):
             fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
             fp_profile_id = fp.get_profile_id_by_device_finger_print()
 
-        print("Finger printed profile", fp_profile_id)
-
         is_new_profile = False
         is_new_session = False
         profile = None
@@ -469,8 +467,6 @@ class TrackerPayload(BaseModel):
 
                         # todo remove after 2023-11
                         # profiles = await profile_driver.load_profiles_to_merge(merge_key_values=profile_fields)
-                        print("profiles", profile)
-                        print(profile_fields)
 
                     # If there is still no profile that means that it could not be loaded. It can happen if
                     # event properties did not have all necessary data or the is no profile with defined
@@ -585,7 +581,6 @@ class TrackerPayload(BaseModel):
                 # If new profile then check if there is fingerprinted profile
                 if is_new_profile:
                     if profile.id != fp_profile_id:
-                        print("Loading FP profile")
                         # Load profile with finger printed profile id
                         copy_of_tracker_payload = TrackerPayload(**self.dict())
                         copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
