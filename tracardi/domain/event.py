@@ -50,6 +50,9 @@ class EventSession(Entity):
 class EventJourney(BaseModel):
     state: Optional[str] = None
 
+    def is_empty(self) -> bool:
+        return self.state is None or self.state == ""
+
 
 class EventProductVariant(BaseModel):
     name: Optional[str] = None

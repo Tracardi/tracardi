@@ -178,17 +178,17 @@ class CacheManager(metaclass=Singleton):
             )
         return await event_to_profile_db.get_event_to_profile(event_type)
 
-    async def event_metadata(self, event_type, ttl):
+    async def event_mapping(self, event_type, ttl):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_metadata_cache(),
                 event_type,
                 ttl,
-                event_management_db.get_event_type_metadata,
+                event_management_db.get_event_type_mapping,
                 True,
                 event_type)
 
-        return await event_management_db.get_event_type_metadata(event_type)
+        return await event_management_db.get_event_type_mapping(event_type)
 
     @staticmethod
     async def _load_and_convert_reshaping(event_type) -> Optional[List[EventReshapingSchema]]:
