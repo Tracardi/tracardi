@@ -1,11 +1,11 @@
 from typing import List, Union
-
-from com_worker.trigger.worker import trigger_workflow_with_added_segment
 from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.license import License, LICENSE
+if License.has_service(LICENSE) and tracardi.enable_segmentation_wf_triggers:
+    from com_worker.trigger.worker import trigger_workflow_with_added_segment
 
 
 def _add_segment(profile: Profile, session: Session, segment: str):
