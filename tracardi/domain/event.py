@@ -204,10 +204,14 @@ class Event(NamedEntity):
             self.request = event.request
             self.config = event.config
             self.tags = event.tags
+            self.utm = event.utm
             self.aux = event.aux
-            self.os = event.os
             self.device = event.device
+            self.os = event.os
             self.app = event.app
+            self.hit = event.hit
+            self.data = event.data
+            self.journey = event.journey
 
     def get_ip(self):
         if 'headers' in self.request and 'x-forwarded-for' in self.request['headers']:
