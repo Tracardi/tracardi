@@ -398,6 +398,7 @@ class TrackerPayload(BaseModel):
 
     def finger_printing_enabled(self):
         if License.has_service(LICENSE) and self.source.bridge.id == javascript_bridge.id:
+            print(self.source.bridge)
             ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
             return ttl > 0
         return False
@@ -415,7 +416,10 @@ class TrackerPayload(BaseModel):
         fp_profile_id = None
         if self.finger_printing_enabled():
             device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
-            ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
+            if not self.source.config:
+                ttl = 30
+            else:
+                ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
             fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
             fp_profile_id = fp.get_profile_id_by_device_finger_print()
 
