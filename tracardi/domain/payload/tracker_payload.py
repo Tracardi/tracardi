@@ -398,7 +398,7 @@ class TrackerPayload(BaseModel):
 
     def finger_printing_enabled(self):
         if License.has_service(LICENSE) and self.source.bridge.id == javascript_bridge.id:
-            print(self.source.bridge)
+            print("FP enabled")
             ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
             return ttl > 0
         return False
@@ -417,9 +417,9 @@ class TrackerPayload(BaseModel):
         if self.finger_printing_enabled():
             device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
             if not self.source.config:
-                ttl = 30
+                ttl = 15*60
             else:
-                ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
+                ttl = int(self.source.config.get('device_fingerprint_ttl', 15*60))
             fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
             fp_profile_id = fp.get_profile_id_by_device_finger_print()
 
@@ -595,6 +595,8 @@ class TrackerPayload(BaseModel):
                             profile = fp_profile
                         elif self.finger_printing_enabled():
                             fp.save_browser_finger_print(profile.id)
+
+                        print("Loading profile by FP")
                 else:
                     pass
                     # Todo merge with fingerprint as merge key. Do not know if I want to do this.
