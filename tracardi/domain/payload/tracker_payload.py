@@ -415,10 +415,9 @@ class TrackerPayload(BaseModel):
 
         fp_profile_id = None
         if self.finger_printing_enabled():
+            ttl = 15 * 60
             device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
-            if not self.source.config:
-                ttl = 15*60
-            else:
+            if self.source.config:
                 ttl = int(self.source.config.get('device_fingerprint_ttl', 15*60))
             fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
             fp_profile_id = fp.get_profile_id_by_device_finger_print()
