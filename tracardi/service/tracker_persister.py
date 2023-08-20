@@ -112,7 +112,7 @@ class TrackerResultPersister:
                         Remove session new. Add empty operation.
                         """
                         for session in sessions_to_add:
-                            if session.context is None:
+                            if not isinstance(session.context, dict):
                                 session.context = {}
                             session.operation = Operation()
 
