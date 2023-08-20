@@ -112,6 +112,8 @@ class TrackerResultPersister:
                         Remove session new. Add empty operation.
                         """
                         for session in sessions_to_add:
+                            if session.context is None:
+                                session.context = {}
                             session.operation = Operation()
 
                         result = await session_db.save(sessions_to_add)
