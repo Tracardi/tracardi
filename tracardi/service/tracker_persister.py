@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime
 from typing import List, Union, Generator, AsyncGenerator, Any, Dict
@@ -112,6 +113,15 @@ class TrackerResultPersister:
                         Remove session new. Add empty operation.
                         """
                         for session in sessions_to_add:
+
+                            # This is a hack. Storage has dynamic content and sometimes can not be stored.
+                            # Saves it as json and removes storage
+
+                            if 'storage' in session.context:
+                                session.context['local_storage'] = json.dumps(session.context['storage'])
+                                del(session.context['storage'])
+
+                            # session.context = {}
                             if not isinstance(session.context, dict):
                                 session.context = {}
                             session.operation = Operation()
