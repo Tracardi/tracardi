@@ -30,6 +30,9 @@
         "type": "object",
         "dynamic": "true",
         "enabled": false
+      },
+      "config": {
+        "type": "flattened"
       }
     }
   },
