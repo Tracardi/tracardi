@@ -65,3 +65,8 @@ async def load_for_grouping(type: str, name: Optional[str] = None) -> StorageRec
     result = await storage_manager("setting").query(query)
     result.transform_hits(lambda hit: Setting(**hit).dict())
     return result
+
+
+async def query(query: dict) -> List[Setting]:
+    result = await storage_manager("setting").query(query)
+    return [Setting(**record) for record in result]
