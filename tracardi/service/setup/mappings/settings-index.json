@@ -26,6 +26,9 @@
       "type": {
         "type": "keyword"
       },
+      "enabled": {
+        "type": "boolean"
+      },
       "content": {
         "type": "object",
         "dynamic": "true",
