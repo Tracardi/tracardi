@@ -8,7 +8,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.segments.segment_trigger import trigger_segment_add
+from tracardi.service.segments.segment_trigger import trigger_segment_workflow
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -48,8 +48,9 @@ async def _segment(profile, session, event_types, load_segments):
                 if await condition.evaluate(segment.condition, flat_profile):
                     segments = set(profile.segments)
                     segments.add(segment_id)
-                    trigger_segment_add(profile, session, segment_id)
                     profile.segments = list(segments)
+                    # This needs to be done to trigger workflow. Segment is already added to the profile
+                    trigger_segment_workflow(profile, session, segment_id)
 
                     # Yield only if segmentation triggered
                     yield event_type, segment_id, None

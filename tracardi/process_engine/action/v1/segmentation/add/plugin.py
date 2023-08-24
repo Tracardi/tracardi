@@ -46,13 +46,12 @@ class AddSegmentAction(ActionRunner):
                     if isinstance(self.config.segment, list):
                         converter = DictTraverser(dot, include_none=False)
                         segments = converter.reshape(self.config.segment)
-                        for segment in segments:
-                            # Add segment is important here as if can trigger other workflows
-                            trigger_segment_add(self.profile, self.session, segment)
+                        # Add segment is important here as if can trigger other workflows
+                        profile = trigger_segment_add(profile, self.session, segments)
 
                     elif isinstance(self.config.segment, str):
                         # Add segment is important here as if can trigger other workflows
-                        trigger_segment_add(self.profile, self.session, dot[self.config.segment])
+                        profile = trigger_segment_add(profile, self.session, dot[self.config.segment])
 
                     else:
                         return Result(value={"message": "Not acceptable segmentation type. "
