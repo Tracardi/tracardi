@@ -72,7 +72,7 @@ class StartAction(ActionRunner):
             event = loaded_event.to_entity(Event)
 
         event.profile = profile
-        if self.config.session_id != event.session.id:
+        if event.has_session() and self.config.session_id != event.session.id:
             event.session.id = EventSession(
                 id=session.id,
                 start=session.metadata.time.insert,
