@@ -31,6 +31,7 @@ class StartAction(ActionRunner):
 
         properties = {}
         event = self.event
+        # Session can be None
         session = self.session
         profile = self.profile
         source = self.tracker_payload.source
@@ -54,6 +55,12 @@ class StartAction(ActionRunner):
             session = await session_db.load_by_id(self.config.session_id)
             if not session:
                 raise ValueError(f"Can not load session with id {self.config.session_id}")
+            # replace session in event
+            event.session = EventSession(
+                id=session.id,
+                start=session.metadata.time.insert,
+                duration=session.metadata.time.duration
+            )
 
         # Replace profile
 
@@ -65,6 +72,8 @@ class StartAction(ActionRunner):
 
             profile = _profile.to_entity(Profile)
 
+        # Replace event
+
         if self.config.event_id:
             loaded_event = await event_db.load(self.config.event_id)
             if loaded_event is None:
@@ -72,12 +81,7 @@ class StartAction(ActionRunner):
             event = loaded_event.to_entity(Event)
 
         event.profile = profile
-        if event.has_session() and self.config.session_id != event.session.id:
-            event.session.id = EventSession(
-                id=session.id,
-                start=session.metadata.time.insert,
-                duration=session.metadata.time.duration
-            )
+
 
         try:
             if properties:
