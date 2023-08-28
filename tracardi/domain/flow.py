@@ -170,7 +170,7 @@ class SpecRecord(BaseModel):
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.8.1'
+    version: Optional[str] = '0.8.2-dev'
 
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':
