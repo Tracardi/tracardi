@@ -29,32 +29,31 @@ def _get_logging_level(level: str) -> int:
 
 class MemoryCacheConfig:
     def __init__(self, env):
-        self.event_to_profile_coping_ttl = int(env.get('EVENT_TO_PROFILE_COPY_CACHE_TTL', 20))
-        self.source_ttl = int(env.get('SOURCE_CACHE_TTL', 20))
-        self.session_cache_ttl = int(env.get('SESSION_CACHE_TTL', 20))
-        self.event_validation_cache_ttl = int(env.get('EVENT_VALIDATION_CACHE_TTL', 20))
-        self.event_metadata_cache_ttl = int(env.get('EVENT_METADATA_CACHE_TTL', 20))
-        self.event_destination_cache_ttl = int(env.get('EVENT_DESTINATION_CACHE_TTL', 20))
-        self.profile_destination_cache_ttl = int(env.get('PROFILE_DESTINATION_CACHE_TTL', 20))
+        self.event_to_profile_coping_ttl = int(env.get('EVENT_TO_PROFILE_COPY_CACHE_TTL', 2))
+        self.source_ttl = int(env.get('SOURCE_CACHE_TTL', 2))
+        self.session_cache_ttl = int(env.get('SESSION_CACHE_TTL', 2))
+        self.event_validation_cache_ttl = int(env.get('EVENT_VALIDATION_CACHE_TTL', 2))
+        self.event_metadata_cache_ttl = int(env.get('EVENT_METADATA_CACHE_TTL', 2))
+        self.event_destination_cache_ttl = int(env.get('EVENT_DESTINATION_CACHE_TTL', 2))
+        self.profile_destination_cache_ttl = int(env.get('PROFILE_DESTINATION_CACHE_TTL', 2))
 
 
 class ElasticConfig:
 
     def __init__(self, env):
         self.env = env
-        self.replicas = env['ELASTIC_INDEX_REPLICAS'] if 'ELASTIC_INDEX_REPLICAS' in env else "1"
-        self.shards = env['ELASTIC_INDEX_SHARDS'] if 'ELASTIC_INDEX_SHARDS' in env else "3"
-        self.conf_shards = env['ELASTIC_CONF_INDEX_SHARDS'] if 'ELASTIC_CONF_INDEX_SHARDS' in env else "1"
-        self.sniff_on_start = env['ELASTIC_SNIFF_ON_START'] if 'ELASTIC_SNIFF_ON_START' in env else None
-        self.sniff_on_connection_fail = env[
-            'ELASTIC_SNIFF_ON_CONNECTION_FAIL'] if 'ELASTIC_SNIFF_ON_CONNECTION_FAIL' in env else None
-        self.sniffer_timeout = env['ELASTIC_SNIFFER_TIMEOUT'] if 'ELASTIC_SNIFFER_TIMEOUT' in env else None
-        self.ca_file = env['ELASTIC_CA_FILE'] if 'ELASTIC_CA_FILE' in env else None
-        self.api_key_id = env['ELASTIC_API_KEY_ID'] if 'ELASTIC_API_KEY_ID' in env else None
-        self.api_key = env['ELASTIC_API_KEY'] if 'ELASTIC_API_KEY' in env else None
+        self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
+        self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
+        self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
+        self.sniff_on_start = env.get('ELASTIC_SNIFF_ON_START', None)
+        self.sniff_on_connection_fail = env.get('ELASTIC_SNIFF_ON_CONNECTION_FAIL', None)
+        self.sniffer_timeout = env.get('ELASTIC_SNIFFER_TIMEOUT', None)
+        self.ca_file = env.get('ELASTIC_CA_FILE', None)
+        self.api_key_id = env.get('ELASTIC_API_KEY_ID', None)
+        self.api_key = env.get('ELASTIC_API_KEY', None)
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None
-        self.maxsize = env['ELASTIC_MAX_CONN'] if 'ELASTIC_MAX_CONN' in env else None
-        self.http_compress = env['ELASTIC_HTTP_COMPRESS'] if 'ELASTIC_HTTP_COMPRESS' in env else None
+        self.maxsize = int(env.get('ELASTIC_MAX_CONN', 25))
+        self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
         self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
 
         self.refresh_profiles_after_save = (env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'].lower() == 'yes') \
@@ -64,9 +63,9 @@ class ElasticConfig:
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
-        self.query_timeout = int(env['ELASTIC_QUERY_TIMEOUT']) if 'ELASTIC_QUERY_TIMEOUT' in env else 12
-        self.save_pool = int(env['ELASTIC_SAVE_POOL']) if 'ELASTIC_SAVE_POOL' in env else 0
-        self.save_pool_ttl = int(env['ELASTIC_SAVE_POOL_TTL']) if 'ELASTIC_SAVE_POOL_TTL' in env else 5
+        self.query_timeout = int(env.get('ELASTIC_QUERY_TIMEOUT', 12))
+        self.save_pool = int(env.get('ELASTIC_SAVE_POOL', 0))
+        self.save_pool_ttl = int(env.get('ELASTIC_SAVE_POOL_TTL', 5))
         self.logging_level = _get_logging_level(
             env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 
@@ -137,22 +136,22 @@ class TracardiConfig(metaclass=Singleton):
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
         self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
-        self.disable_event_destinations = env.get('DISABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
-        self.disable_profile_destinations = env.get('DISABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
+        self.enable_event_destinations = env.get('ENABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
+        self.enable_profile_destinations = env.get('ENABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
+        self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
+        self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
-        self.cache_profiles = (env['CACHE_PROFILE'].lower() == 'yes') if 'CACHE_PROFILE' in env else False
-        self.sync_profile_tracks_max_repeats = int(
-            env['SYNC_PROFILE_TRACKS_MAX_REPEATS']) if 'SYNC_PROFILE_TRACKS_MAX_REPEATS' in env else 10
-        self.sync_profile_tracks_wait = int(
-            env['SYNC_PROFILE_TRACKS_WAIT']) if 'SYNC_PROFILE_TRACKS_WAIT' in env else 1
-        self.postpone_destination_sync = int(
-            env['POSTPONE_DESTINATION_SYNC']) if 'POSTPONE_DESTINATION_SYNC' in env else 20
-        self.storage_driver = env['STORAGE_DRIVER'] if 'STORAGE_DRIVER' in env else 'elastic'
-        self.query_language = env['QUERY_LANGUAGE'] if 'QUERY_LANGUAGE' in env else 'kql'
-        self.tracardi_pro_host = env['TRACARDI_PRO_HOST'] if 'TRACARDI_PRO_HOST' in env else 'pro.tracardi.com'
-        self.tracardi_pro_port = int(env['TRACARDI_PRO_PORT']) if 'TRACARDI_PRO_PORT' in env else 40000
-        self.tracardi_scheduler_host = env[
-            'TRACARDI_SCHEDULER_HOST'] if 'TRACARDI_SCHEDULER_HOST' in env else 'scheduler.tracardi.com'
+
+        # Not used now
+        self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
+        self.sync_profile_tracks_max_repeats = int(env.get('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10))
+        self.sync_profile_tracks_wait = int(env.get('SYNC_PROFILE_TRACKS_WAIT', 1))
+        self.postpone_destination_sync = int(env.get('POSTPONE_DESTINATION_SYNC', 20))
+        self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
+        self.query_language = env.get('QUERY_LANGUAGE', 'kql')
+        self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
+        self.tracardi_pro_port = int(env.get('TRACARDI_PRO_PORT', 40000))
+        self.tracardi_scheduler_host = env.get('TRACARDI_SCHEDULER_HOST', 'scheduler.tracardi.com')
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
@@ -162,9 +161,9 @@ class TracardiConfig(metaclass=Singleton):
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
-        self.internal_source = f"@internal-{random_hash}"
-        self.cardio_source = f"@heartbeats-{random_hash}"
-        self.segmentation_source = f"@segmentation-{random_hash}"
+        self.internal_source = f"@internal-{random_hash[:20]}"
+        self.cardio_source = f"@heartbeats-{random_hash[:20]}"
+        self.segmentation_source = f"@segmentation-{random_hash[:20]}"
         self._config = None
         self._unset_secrets()
 

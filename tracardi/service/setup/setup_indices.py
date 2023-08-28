@@ -6,11 +6,15 @@ from elasticsearch.exceptions import TransportError, NotFoundError
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
+from tracardi.service.license import LICENSE, License
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
 import logging
+
+if License.has_service(LICENSE):
+    from com_tracardi.bridge.bridges import bridges_db
 
 __local_dir = os.path.dirname(__file__)
 
@@ -39,6 +43,11 @@ async def install_default_data():
     for index_name, data in default_db_data.items():
         index = Resource().get_index_constant(index_name)
         await raw_db.bulk_upsert(index.get_write_index(), list(add_ids(data)))
+
+    if License.has_service(LICENSE):
+        for index_name, data in bridges_db.items():
+            index = Resource().get_index_constant(index_name)
+            await raw_db.bulk_upsert(index.get_write_index(), list(add_ids(data)))
 
 
 # todo add to install
@@ -186,14 +195,17 @@ async def create_schema(index_mappings: Generator[Tuple[Index, dict], Any, None]
     }
 
     for index, map in index_mappings:
-        created_indices, created_templates, create_aliases = await create_index_and_template(
-            index,
-            map,
-            update_mapping)
+        try:
+            created_indices, created_templates, create_aliases = await create_index_and_template(
+                index,
+                map,
+                update_mapping)
 
-        output['indices'] += created_indices
-        output['templates'] += created_templates
-        output['aliases'] += create_aliases
+            output['indices'] += created_indices
+            output['templates'] += created_templates
+            output['aliases'] += create_aliases
+        except Exception as e:
+            logger.error(str(e))
 
     return output
 

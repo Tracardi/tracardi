@@ -3,6 +3,7 @@ free_email_domains = {
     'outlook.com': None,
     'yahoo.com': None,
     'protonmail.com': None,
+    'kkoup.com': None,
     'mail.com': None,
     'zoho.com': None,
     'aol.com': None,

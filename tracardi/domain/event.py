@@ -9,9 +9,9 @@ from pydantic import BaseModel, root_validator
 from typing import Tuple
 
 from .marketing import UTM
-from .metadata import OS, Device, Application, Hit
+# from .metadata import OS, Device, Application, Hit
 from .named_entity import NamedEntity
-from .profile import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
+from .profile_data import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
     ProfileIdentifier, ProfileContact, ProfilePII
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
@@ -49,6 +49,9 @@ class EventSession(Entity):
 
 class EventJourney(BaseModel):
     state: Optional[str] = None
+
+    def is_empty(self) -> bool:
+        return self.state is None or self.state == ""
 
 
 class EventProductVariant(BaseModel):
@@ -201,10 +204,14 @@ class Event(NamedEntity):
             self.request = event.request
             self.config = event.config
             self.tags = event.tags
+            self.utm = event.utm
             self.aux = event.aux
-            self.os = event.os
             self.device = event.device
+            self.os = event.os
             self.app = event.app
+            self.hit = event.hit
+            self.data = event.data
+            self.journey = event.journey
 
     def get_ip(self):
         if 'headers' in self.request and 'x-forwarded-for' in self.request['headers']:

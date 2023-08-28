@@ -1,7 +1,7 @@
 import json
 import logging
 from hashlib import sha1
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
 from uuid import uuid4
 
@@ -12,6 +12,7 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.utils.getters import get_entity_id
 
 from tracardi.config import tracardi
+from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..console import Console
 from ..event_metadata import EventPayloadMetadata
@@ -24,9 +25,11 @@ from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 
-
 from tracardi.service.storage.driver.elastic import identification as identification_db
 
+if License.has_service(LICENSE):
+    from com_tracardi.bridge.bridges import javascript_bridge
+    from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -244,6 +247,42 @@ class TrackerPayload(BaseModel):
             "saveEvents": not flag
         })
 
+    def get_browser_agent(self) -> Optional[str]:
+        try:
+            return self.context['browser']['local']['browser']['userAgent']
+        except KeyError:
+            return None
+
+    def get_browser_language(self) -> Optional[str]:
+        try:
+            return self.context['browser']['local']['browser']['language']
+        except KeyError:
+            return None
+
+    def get_ip(self) -> Optional[str]:
+        try:
+            return self.request['headers']['x-forwarded-for']
+        except KeyError:
+            return None
+
+    def get_resolution(self) -> Optional[str]:
+        try:
+            return f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"
+        except KeyError:
+            pass
+
+    def get_color_depth(self) -> Optional[int]:
+        try:
+            return int(self.context['screen']['local']['colorDepth'])
+        except KeyError:
+            return None
+
+    def get_screen_orientation(self) -> Optional[str]:
+        try:
+            return self.context['screen']['local']['orientation']
+        except KeyError:
+            return None
+
     def force_session(self, session):
         # Get session
         if self.session is None or self.session.id is None:
@@ -357,6 +396,13 @@ class TrackerPayload(BaseModel):
             logger.error(f"Can not find property to load profile by identification data: {str(e)}")
             return None
 
+    def finger_printing_enabled(self):
+        if License.has_service(LICENSE) and self.source.bridge.id == javascript_bridge.id:
+            print("FP enabled")
+            ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
+            return ttl > 0
+        return False
+
     async def get_profile_and_session(self, session: Session,
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
                                       profile_less) -> Tuple[Optional[Profile], Session]:
@@ -364,6 +410,17 @@ class TrackerPayload(BaseModel):
         """
         Returns session. Creates profile if it does not exist.If it exists connects session with profile.
         """
+
+        # Fingerprinting.
+
+        fp_profile_id = None
+        if self.finger_printing_enabled():
+            ttl = 15 * 60
+            device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
+            if self.source.config:
+                ttl = int(self.source.config.get('device_fingerprint_ttl', 15*60))
+            fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
+            fp_profile_id = fp.get_profile_id_by_device_finger_print()
 
         is_new_profile = False
         is_new_session = False
@@ -386,7 +443,7 @@ class TrackerPayload(BaseModel):
 
             if profile_less is False:
 
-                # Bind profile
+                # No profile in tracker payload
                 if self.profile is None:
 
                     # First, check if the tracker_payload does not have events that need merging because
@@ -413,8 +470,6 @@ class TrackerPayload(BaseModel):
 
                         # todo remove after 2023-11
                         # profiles = await profile_driver.load_profiles_to_merge(merge_key_values=profile_fields)
-                        print("profiles", profile)
-                        print(profile_fields)
 
                     # If there is still no profile that means that it could not be loaded. It can happen if
                     # event properties did not have all necessary data or the is no profile with defined
@@ -522,6 +577,32 @@ class TrackerPayload(BaseModel):
 
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
+
+        if profile:
+            # If there is fingerprinted profile and we just created new profile then load fingerprinted profile.
+            if fp_profile_id:
+                # If new profile then check if there is fingerprinted profile
+                if is_new_profile:
+                    if profile.id != fp_profile_id:
+                        # Load profile with finger printed profile id
+                        copy_of_tracker_payload = TrackerPayload(**self.dict())
+                        copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
+
+                        fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
+
+                        if fp_profile:
+                            profile = fp_profile
+                        elif self.finger_printing_enabled():
+                            fp.save_browser_finger_print(profile.id)
+
+                        print("Loading profile by FP")
+                else:
+                    pass
+                    # Todo merge with fingerprint as merge key. Do not know if I want to do this.
+
+            elif self.finger_printing_enabled():
+                # Does not have fingerprinted profile
+                fp.save_browser_finger_print(profile.id)
 
         return profile, session
 

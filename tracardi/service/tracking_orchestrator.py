@@ -3,6 +3,7 @@ import logging
 import os
 from collections.abc import Callable
 from datetime import datetime, timedelta
+from inspect import trace
 from typing import Type
 from uuid import uuid4
 
@@ -168,6 +169,8 @@ class TrackingOrchestrator:
         if isinstance(tracker_payload.source, EventSource):
             session.metadata.channel = tracker_payload.source.channel
 
+        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
+
         # Append context data
 
         if tracardi.system_events:
@@ -188,7 +191,9 @@ class TrackingOrchestrator:
                     EventPayload(
                         type='visit-started',
                         time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
-                        properties={},
+                        properties={
+                            'trigger-event-types': [_ev.type for _ev in tracker_payload.events]
+                        },
                         options={"source_id": tracardi.internal_source}
                     )
                 )
@@ -254,9 +259,10 @@ class TrackingOrchestrator:
 
                 if spoken_languages:
                     session.context['language'] = list(set(spoken_languages))
-                    profile.data.pii.language.spoken = session.context['language']
+                    if has_profile:
+                        profile.data.pii.language.spoken = session.context['language']
 
-                if 'geo' not in profile.aux:
+                if has_profile and 'geo' not in profile.aux:
                     profile.aux['geo'] = {}
 
                 # Continent
@@ -283,20 +289,17 @@ class TrackingOrchestrator:
 
                 # Screen
 
-                try:
-                    session.device.resolution = f"{tracker_payload.context['screen']['local']['width']}x{tracker_payload.context['screen']['local']['height']}"
-                except KeyError:
-                    pass
+                _value = tracker_payload.get_resolution()
+                if _value:
+                    session.device.resolution = _value
 
-                try:
-                    session.device.color_depth = int(tracker_payload.context['screen']['local']['colorDepth'])
-                except KeyError:
-                    pass
+                _value = tracker_payload.get_color_depth()
+                if _value:
+                    session.device.color_depth = _value
 
-                try:
-                    session.device.orientation = tracker_payload.context['screen']['local']['orientation']
-                except KeyError:
-                    pass
+                _value = tracker_payload.get_screen_orientation()
+                if _value:
+                    session.device.orientation = _value
 
                 session.app.bot = user_agent.is_bot
                 session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
@@ -310,15 +313,12 @@ class TrackingOrchestrator:
                     except ValidationError:
                         pass
 
-                # session.app.resolution = session.context['screen']
-
             except Exception as e:
                 pass
 
-            try:
-                session.device.ip = tracker_payload.request['headers']['x-forwarded-for']
-            except Exception:
-                pass
+            _value = tracker_payload.get_ip()
+            if _value:
+                session.device.ip = _value
 
             try:
                 session.app.language = session.context['browser']['local']['browser']['language']
@@ -351,7 +351,7 @@ class TrackingOrchestrator:
 
         # Still no geo location. That means there was no 'location' sent in tracker context or it failed parsing the
         # data. But we have device IP. If the profile geo is empty the we need to make another try.
-        if session.device.ip and (session.device.geo.is_empty() or profile.data.devices.last.geo.is_empty()):
+        if session.device.ip and (session.device.geo.is_empty() or (has_profile and profile.data.devices.last.geo.is_empty())):
 
             # Check if max mind configured
             maxmind_license_key = os.environ.get('MAXMIND_LICENSE_KEY', None)
@@ -369,16 +369,16 @@ class TrackingOrchestrator:
 
                 if _geo:
 
-                    if profile.data.devices.last.geo.is_empty():
+                    if has_profile and profile.data.devices.last.geo.is_empty():
                         profile.data.devices.last.geo = _geo
                         profile.operation.update = True
 
-                    if session.device.geo.is_empty():
+                    if session and session.device.geo.is_empty():
                         session.device.geo = _geo
                         session.operation.update = True
 
         # Add email type
-        if profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
+        if has_profile and profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
             email_parts = profile.data.contact.email.split('@')
             if len(email_parts) > 1:
                 email_domain = email_parts[1]
@@ -403,7 +403,7 @@ class TrackingOrchestrator:
         # ------------------------------
 
         # Make profile copy
-        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
+
         profile_copy = profile.dict(exclude={"operation": ...}) if has_profile else None
 
         # Lock
@@ -448,7 +448,7 @@ class TrackingOrchestrator:
             await self.save_debug_data(tracker_result.debugger, get_entity_id(tracker_result.profile))
 
         # Send to destination
-        if not tracardi.disable_profile_destinations:
+        if tracardi.enable_profile_destinations:
             do = DestinationOrchestrator(
                 tracker_result.profile,
                 tracker_result.session,

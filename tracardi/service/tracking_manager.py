@@ -32,7 +32,7 @@ from tracardi.domain.session import Session
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
-from tracardi.service.segmentation import segment
+from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.service.storage.driver.elastic import segment as segment_db
 from tracardi.service.storage.driver.elastic import rule as rule_db
 from tracardi.service.storage.driver.elastic import flow as flow_db
@@ -40,7 +40,7 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
 if License.has_service(INDEXER):
-    from com_tracardi.service.event_indexer import index_event_traits
+    from com_tracardi.service.event_traits_mapper import map_event_props_to_traits
 
 if License.has_license():
     from com_tracardi.service.data_compliance import DataComplianceHandler
@@ -189,24 +189,12 @@ class TrackingManager(TrackingManagerBase):
                 # Auto index event
                 _event = auto_index_default_event_type(_event, self.profile)
                 if License.has_service(INDEXER):
-                    _event = await index_event_traits(_event, self.console_log)
+                    _event = await map_event_props_to_traits(_event, self.console_log)
 
                 event_list.append(_event)
         return event_list
 
-    async def invoke_track_process(self) -> TrackerResult:
-
-        # Get events
-        events = await self.get_events()
-        flat_events = {event.id: dotty(event.dict()) for event in events}
-
-        # Anonymize, data compliance
-        if License.has_license():
-            if self.profile is not None:
-                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
-
-        debugger = None
-        segmentation_result = None
+    async def get_routing_rules(self, events):
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
@@ -237,6 +225,25 @@ class TrackingManager(TrackingManagerBase):
         else:
             # Routing rules are subject to caching
             event_rules = await rule_db.load_rules(self.tracker_payload.source, events)
+
+        return event_rules
+
+    async def invoke_track_process(self) -> TrackerResult:
+
+        # Get events
+        events = await self.get_events()
+        flat_events = {event.id: dotty(event.dict()) for event in events}
+
+        # Anonymize, data compliance
+        if License.has_license():
+            if self.profile is not None:
+                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
+
+        debugger = None
+
+        # Get routing rules if workflow is not disabled
+
+        event_rules = await self.get_routing_rules(events) if tracardi.enable_workflow else None
 
         # Copy data from event to profile. This must be run just before processing.
 
@@ -446,10 +453,12 @@ class TrackingManager(TrackingManagerBase):
         post_invoke_events = None
         flow_responses = FlowResponses([])
 
+        # Workflow
+
         try:
             #  If no event_rules for delivered event then no need to run rule invoke
             #  and no need for profile merging
-            if event_rules is not None:
+            if tracardi.enable_workflow and event_rules is not None:
 
                 # Skips INVALID events in invoke method
                 rules_engine = RulesEngine(
@@ -486,14 +495,6 @@ class TrackingManager(TrackingManagerBase):
                     for event in events:
                         event.metadata.processed_by.rules = invoked_rules[event.id]
                         event.metadata.processed_by.flows = rule_invoke_result.invoked_flows
-
-                    # Segment only if there is profile
-
-                    if isinstance(self.profile, Profile):
-                        # Segment
-                        segmentation_result = await segment(self.profile,
-                                                            rule_invoke_result.ran_event_types,
-                                                            segment_db.load_segments)
 
                 except Exception as e:
                     message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
@@ -558,6 +559,16 @@ class TrackingManager(TrackingManagerBase):
                 logger.debug(f"No routing rules found for workflow.")
 
         finally:
+
+            # Segment only if there is profile
+
+            if isinstance(self.profile, Profile):
+                # Post Event Segmentation
+                await post_ev_segment(self.profile,
+                                      self.session,
+                                      [event.type for event in events],
+                                      segment_db.load_segments)
+
             # Synchronize post invoke events. Replace events with events changed by WF.
             # Events are saved only if marked in event.operation.update==true
             if post_invoke_events is not None:
@@ -571,7 +582,7 @@ class TrackingManager(TrackingManagerBase):
                 events = synced_events
 
             # Run event destination
-            if not tracardi.disable_event_destinations:
+            if tracardi.enable_event_destinations:
                 load_destination_task = cache.event_destination
                 await event_destination_dispatch(load_destination_task,
                                                  self.profile,

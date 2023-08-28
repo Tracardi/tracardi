@@ -21,3 +21,4 @@ class Collection:
     postpone_flag: str = "delay:postpone-flag"  # Cache postponed execution (call)
     exec_instance: str = "delay:exec-instance"  # Cache postponed execution (call)
     value_threshold: str = "value-threshold:"  # Cache for WF value threshold
+    browser_finger_print: str = 'profile:finger:browser'  # Cache for profile by browser fingerprint

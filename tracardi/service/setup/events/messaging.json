@@ -1,17 +1,94 @@
 [
   {
+    "name": "Messaging Started",
+    "description": "Customer starts conversation/messaging. Deliver a conversation id to track the whole conversation session.",
+    "id": "Messaging-started",
+    "properties": {
+      "conversation": "string",
+      "type": "string",
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": "string",
+        "email": "string"
+      }
+    },
+    "copy": {
+      "data.contact.email": "properties.identity.email",
+      "data.contact.phone": "properties.identity.phone",
+      "data.message.conversation": "properties.conversation",
+      "data.message.type": "properties.type",
+      "data.message.sender": "properties.sender",
+      "data.message.recipient": "properties.recipient"
+    },
+    "profile": {
+      "data.contact.email": [
+        "data.contact.email",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone": [
+        "data.contact.phone",
+        "equals_if_not_exists"
+      ]
+    }
+  },
+  {
     "name": "Message Sent",
     "description": "Message was sent to the customer.",
     "id": "message-sent",
     "properties": {
+      "id": "string",
+      "conversation": "string",
       "type": "string",
       "message": "string",
-      "recipient": "string"
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": "string",
+        "email": "string"
+      }
     },
     "copy": {
+      "data.contact.email": "properties.identity.email",
+      "data.contact.phone": "properties.identity.phone",
+      "data.message.id": "properties.id",
+      "data.message.conversation": "properties.conversation",
       "data.message.type": "properties.type",
       "data.message.text": "properties.message",
-      "data.message.recipient": "properties.recipient"
+      "data.message.recipient": "properties.recipient",
+      "data.message.sender": "properties.sender"
+    },
+    "profile": {
+      "data.contact.email": [
+        "data.contact.email",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone": [
+        "data.contact.phone",
+        "equals_if_not_exists"
+      ]
+    }
+  },
+  {
+    "name": "Message Status",
+    "description": "Message status update. Use to set status. e.g. message bounced, with error message if needed.",
+    "id": "message-status",
+    "properties": {
+      "id": "string",
+      "conversation": "string",
+      "type": "string",
+      "status": "string",
+      "error": {
+        "message": "string",
+        "reason": "string"
+      }
+    },
+    "copy": {
+      "data.message.id": "properties.id",
+      "data.message.conversation": "properties.conversation",
+      "data.message.type": "properties.type",
+      "data.message.status": "properties.status",
+      "data.message.error.reason": "properties.error.reason"
     }
   },
   {
@@ -19,14 +96,36 @@
     "description": "Customer received message.",
     "id": "message-received",
     "properties": {
+      "id": "string",
+      "conversation": "string",
       "type": "string",
       "message": "string",
-      "recipient": "string"
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": "string",
+        "email": "string"
+      }
     },
     "copy": {
+      "data.contact.email": "properties.identity.email",
+      "data.contact.phone": "properties.identity.phone",
+      "data.message.id": "properties.id",
+      "data.message.conversation": "properties.conversation",
       "data.message.type": "properties.type",
       "data.message.text": "properties.message",
-      "data.message.recipient": "properties.recipient"
+      "data.message.recipient": "properties.recipient",
+      "data.message.sender": "properties.sender"
+    },
+    "profile": {
+      "data.contact.email": [
+        "data.contact.email",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone": [
+        "data.contact.phone",
+        "equals_if_not_exists"
+      ]
     }
   },
   {
@@ -34,14 +133,71 @@
     "description": "Customer opened message.",
     "id": "message-opened",
     "properties": {
+      "id": "string",
+      "conversation": "string",
       "type": "string",
       "message": "string",
-      "recipient": "string"
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": "string",
+        "email": "string"
+      }
     },
     "copy": {
+      "data.message.id": "properties.id",
+      "data.message.conversation": "properties.conversation",
+      "data.contact.email": "properties.identity.email",
+      "data.contact.phone": "properties.identity.phone",
       "data.message.type": "properties.type",
       "data.message.text": "properties.message",
-      "data.message.recipient": "properties.recipient"
+      "data.message.recipient": "properties.recipient",
+      "data.message.sender": "properties.sender"
+    },
+    "profile": {
+      "data.contact.email": [
+        "data.contact.email",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone": [
+        "data.contact.phone",
+        "equals_if_not_exists"
+      ]
+    }
+  },
+  {
+    "name": "Messaging Ended",
+    "description": "Customer ended conversation/messaging. Deliver a conversation id to track the whole conversation session.",
+    "id": "Messaging-ended",
+    "properties": {
+      "conversation": "string",
+      "type": "string",
+      "message": "string",
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": "string",
+        "email": "string"
+      }
+    },
+    "copy": {
+      "data.message.conversation": "properties.conversation",
+      "data.contact.email": "properties.identity.email",
+      "data.contact.phone": "properties.identity.phone",
+      "data.message.type": "properties.type",
+      "data.message.text": "properties.message",
+      "data.message.recipient": "properties.recipient",
+      "data.message.sender": "properties.sender"
+    },
+    "profile": {
+      "data.contact.email": [
+        "data.contact.email",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone": [
+        "data.contact.phone",
+        "equals_if_not_exists"
+      ]
     }
   }
 ]

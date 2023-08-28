@@ -264,7 +264,7 @@ async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100)
         "query": filter_query,
         "aggs": aggregate_query
     }
-    print(query)
+
     return await storage_manager(index="event").aggregate(query)
 
 

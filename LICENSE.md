@@ -2,7 +2,7 @@ Tracardi is available under MIT with Common Clause.
 
 # MIT License
 
-Copyright 2021 Risto Kowaczewski
+Copyright 2021 Tracardi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -21,6 +21,4 @@ For purposes of the foregoing, “Sell” means practicing any or all of the rig
 
 Software: Tracardi
 
-License: MIT
-
-Licensor: Risto Kowaczewski
+License: MIT + CC
