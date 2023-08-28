@@ -63,7 +63,6 @@ setup(
         'asyncio-mqtt==0.12.1',
         'worker @ git+https://github.com/Tracardi/worker.git@master#egg=worker',  # Change to 0.8.0-dev
         'ElasticEmail @ git+https://github.com/elasticemail/elasticemail-python.git@4.0.20#ElasticEmail',
-        'googletrans==3.1.0a0',
         'tweepy==4.10.1',
         'strsimpy==0.2.1',
         'python-whois==0.8.0',
