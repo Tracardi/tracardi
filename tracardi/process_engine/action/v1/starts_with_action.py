@@ -32,6 +32,12 @@ class StartsWithAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         dot = self._get_dot_accessor(payload)
+
+        if self.config.field not in dot:
+            self.console.warning(f"Field {self.config.field} does not exist.")
+
+            return Result(port="false", value=payload)
+
         if dot[self.config.field].startswith(self.config.prefix):
             return Result(port="true", value=payload)
         else:
