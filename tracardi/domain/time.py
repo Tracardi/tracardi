@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Time(BaseModel):
-    insert: Optional[datetime]
+    insert: Optional[datetime] = None
     create: Optional[datetime] = None
     update: Optional[datetime] = None
 

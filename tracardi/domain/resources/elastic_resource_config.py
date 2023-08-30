@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 from tracardi.config import ElasticConfig
 from tracardi.domain.named_entity import NamedEntity
@@ -31,7 +31,8 @@ class ElasticCredentials(BaseModel):
 class ElasticResourceConfig(BaseModel):
     source: NamedEntity
 
-    @validator("source")
+    @field_validator("source")
+    @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
             raise ValueError(f"This field cannot be empty.")

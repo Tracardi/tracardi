@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel, validator
 from typing import List, Optional
 from pytimeparse import parse
 
@@ -13,12 +13,15 @@ class ConsentType(BaseModel):
     required: bool = False
     auto_revoke: Optional[str] = None
 
-    @validator("default_value")
+    @field_validator("default_value")
+    @classmethod
     def default_value_validator(cls, value):
         if value not in ("grant", "deny"):
             raise ValueError("'default_value' must be either 'grant' or 'deny'")
         return value
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator('auto_revoke')
     def auto_revoke_validator(cls, value, values):
         if (value is not None and value != "") and (parse(value) is None or parse(value) < 0):

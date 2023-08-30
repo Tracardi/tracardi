@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
 
 from .entity import Entity
 from .event_metadata import EventMetadata
-from pydantic import BaseModel, root_validator
+from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
 
 from .marketing import UTM
@@ -21,11 +20,10 @@ from ..service.string_manager import capitalize_event_type_id
 class Tags(BaseModel):
     values: Tuple['str', ...] = ()
     count: int = 0
+    model_config = ConfigDict(validate_assignment=True)
 
-    class Config:
-        validate_assignment = True
-
-    @root_validator(skip_on_failure=True)
+    @model_validator(skip_on_failure=True)
+    @classmethod
     def total_tags(cls, values):
         values["count"] = len(values.get("values"))
         return values
@@ -136,17 +134,17 @@ class EventMarketing(BaseModel):
 
 
 class EventData(BaseModel):
-    pii: Optional[ProfilePII] = ProfilePII.construct()
-    contact: Optional[ProfileContact] = ProfileContact.construct()
-    identifier: Optional[ProfileIdentifier] = ProfileIdentifier.construct()
-    media: Optional[ProfileMedia] = ProfileMedia.construct()
-    preferences: Optional[ProfilePreference] = ProfilePreference.construct()
-    job: Optional[ProfileJob] = ProfileJob.construct()
-    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty.construct()
-    ec: Optional[EventEc] = EventEc.construct()
-    message: Optional[EventMessage] = EventMessage.construct()
-    payment: Optional[EventPayment] = EventPayment.construct()
-    marketing: Optional[EventMarketing] = EventMarketing.construct()
+    pii: Optional[ProfilePII] = ProfilePII.model_construct()
+    contact: Optional[ProfileContact] = ProfileContact.model_construct()
+    identifier: Optional[ProfileIdentifier] = ProfileIdentifier.model_construct()
+    media: Optional[ProfileMedia] = ProfileMedia.model_construct()
+    preferences: Optional[ProfilePreference] = ProfilePreference.model_construct()
+    job: Optional[ProfileJob] = ProfileJob.model_construct()
+    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty.model_construct()
+    ec: Optional[EventEc] = EventEc.model_construct()
+    message: Optional[EventMessage] = EventMessage.model_construct()
+    payment: Optional[EventPayment] = EventPayment.model_construct()
+    marketing: Optional[EventMarketing] = EventMarketing.model_construct()
 
 
 class Event(NamedEntity):

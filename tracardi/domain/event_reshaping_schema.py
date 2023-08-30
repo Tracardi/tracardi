@@ -1,6 +1,6 @@
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, List
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 from tracardi.domain.ref_value import RefValue
 from tracardi.process_engine.tql.condition import Condition
@@ -35,7 +35,8 @@ class ReshapeSchema(BaseModel):
     mapping: Optional[EntityMapping] = None
     condition: Optional[str] = None
 
-    @validator("condition")
+    @field_validator("condition")
+    @classmethod
     def check_if_condition_valid(cls, value):
         if value:
             try:

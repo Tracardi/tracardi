@@ -15,7 +15,7 @@ class FlowActionPlugin(Entity):
     Load it as FlowActionPluginRecord and then decode.
     """
 
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = None
     plugin: Plugin
     settings: Optional[Settings] = Settings()
 

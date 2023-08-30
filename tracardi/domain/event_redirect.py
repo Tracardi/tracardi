@@ -1,7 +1,7 @@
 from typing import Optional, Any, List
 from uuid import uuid4
 
-from pydantic import AnyHttpUrl, validator
+from pydantic import field_validator, AnyHttpUrl
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.value_object.storage_info import StorageInfo
@@ -20,20 +20,23 @@ class EventRedirect(NamedEntity):
             data['id'] = str(uuid4())
         super().__init__(**data)
 
-    @validator("source")
+    @field_validator("source")
+    @classmethod
     def source_is_not_empty(cls, value):
         if not value.id.strip():
             raise ValueError("Source cannot be empty")
         return value
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def name_is_not_empty(cls, value):
         value = value.strip()
         if not value:
             raise ValueError("Name cannot be empty")
         return value
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def event_type_is_not_empty(cls, value):
         value = value.strip()
         if not value:

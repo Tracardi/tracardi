@@ -21,7 +21,7 @@ class ConsentRevoke(BaseModel):
 class CustomMetric(BaseModel):
     next: datetime
     timestamp: datetime
-    value: Any
+    value: Any = None
 
     def expired(self) -> bool:
         return datetime.utcnow() > self.next

@@ -60,7 +60,7 @@ class TrackerPayload(BaseModel):
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
 
-    metadata: Optional[EventPayloadMetadata]
+    metadata: Optional[EventPayloadMetadata] = None
     profile: Optional[Entity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}

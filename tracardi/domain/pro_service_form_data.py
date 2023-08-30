@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from tracardi.domain.named_entity import NamedEntity
 
 
@@ -35,7 +35,8 @@ class ResourceMetadata(BaseModel):
     context: Optional[dict] = {}
     documentation: Optional[DocumentationMetadata] = None
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def name_can_not_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Name can not be empty")
@@ -47,7 +48,8 @@ class ProServiceFormMetaData(BaseModel):
     description: Optional[str] = None
     tags: List[str] = []
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def name_can_not_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Name can not be empty")
@@ -77,4 +79,4 @@ class ProService(BaseModel):
 
 
 class ProMicroService(ProService):
-    microservice: Optional[TProMicroserviceResource]
+    microservice: Optional[TProMicroserviceResource] = None

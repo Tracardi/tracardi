@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, Any, List, Set
 
-from pydantic import validator, PrivateAttr
+from pydantic import field_validator, PrivateAttr
 
 from .metadata import Metadata
 from .named_entity import NamedEntity
@@ -20,10 +20,11 @@ class Rule(NamedEntity):
     enabled: Optional[bool] = True
     description: Optional[str] = "No description provided"
     properties: Optional[dict] = None
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = None
     tags: Optional[List[str]] = ["General"]
 
-    @validator("tags")
+    @field_validator("tags")
+    @classmethod
     def tags_can_not_be_empty(cls, value):
         if len(value) == 0:
             value = ["General"]

@@ -8,7 +8,7 @@ class ProfileConfig(BaseModel):
 
 
 class EventConfig(BaseModel):
-    profile: Optional[ProfileConfig]
+    profile: Optional[ProfileConfig] = None
     context: Optional[bool] = True
     request: Optional[bool] = True
     tags: Optional[bool] = True
@@ -16,4 +16,4 @@ class EventConfig(BaseModel):
 
 
 class YamlConfig(BaseModel):
-    event: Optional[EventConfig]
+    event: Optional[EventConfig] = None

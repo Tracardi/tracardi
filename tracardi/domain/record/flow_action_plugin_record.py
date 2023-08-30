@@ -11,7 +11,7 @@ from tracardi.domain.flow import PluginRecord
 
 
 class FlowActionPluginRecord(Entity):
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = None
     plugin: PluginRecord
     settings: Optional[Settings] = Settings()
 

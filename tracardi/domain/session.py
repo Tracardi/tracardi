@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, Any
 
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 from .entity import Entity
 from .marketing import UTM
@@ -11,7 +11,7 @@ from .value_object.storage_info import StorageInfo
 
 
 class SessionTime(BaseModel):
-    insert: Optional[datetime]
+    insert: Optional[datetime] = None
     update: Optional[datetime] = None
     timestamp: Optional[float] = 0
     duration: float = 0
@@ -78,9 +78,7 @@ class Session(Entity):
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, **data: Any):
 

@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import validator, BaseModel
+from pydantic import field_validator, BaseModel
 from tracardi.domain.entity import Entity
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.domain.named_entity import NamedEntity
@@ -12,7 +12,8 @@ class DestinationConfig(BaseModel):
     init: dict = {}
     form: dict = {}
 
-    @validator("package")
+    @field_validator("package")
+    @classmethod
     def package_not_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Destination package cannot be empty")
@@ -40,13 +41,15 @@ class Destination(NamedEntity):
     event_type: NamedEntity
     source: NamedEntity
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def name_not_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Name cannot be empty")
         return value
 
-    @validator("condition")
+    @field_validator("condition")
+    @classmethod
     def is_valid_condition(cls, value):
         if value:
             _condition = Condition()
@@ -71,7 +74,8 @@ class DestinationRecord(NamedEntity):
     event_type: NamedEntity
     source: NamedEntity
 
-    @validator("destination")
+    @field_validator("destination")
+    @classmethod
     def destination_not_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Destination cannot be empty")

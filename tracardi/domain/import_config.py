@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator, AnyHttpUrl
 from typing import Optional
 from tracardi.service.secrets import encrypt, decrypt
 from tracardi.domain.named_entity import NamedEntity
@@ -23,19 +23,22 @@ class ImportConfig(NamedEntity):
     event_source: NamedEntity
     event_type: str
 
-    @validator("event_source")
+    @field_validator("event_source")
+    @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
             raise ValueError(f"This field cannot be empty.")
         return value
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, value):
         if len(value) == 0:
             raise ValueError("Name cannot be empty.")
         return value
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def validate_event_type(cls, value):
         if len(value) == 0:
             raise ValueError("Event type cannot be empty.")
