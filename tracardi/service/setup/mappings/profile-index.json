@@ -388,7 +388,8 @@
                   "type": "float"
                 },
                 "custom": {
-                  "type": "flattened"
+                  "type": "object",
+                  "dynamic": "true"
                 }
               }
             },
