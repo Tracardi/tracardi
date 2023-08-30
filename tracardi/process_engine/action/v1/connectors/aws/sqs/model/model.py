@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator, AnyHttpUrl
 from pydantic.main import BaseModel
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.named_entity import NamedEntity
@@ -13,7 +13,8 @@ class Content(BaseModel):
     content: str
     type: str
 
-    @validator('content')
+    @field_validator('content')
+    @classmethod
     def must_have_2_letters(cls, v):
         if len(v) < 2:
             raise ValueError('String is too short. String must be at least two letters long.')

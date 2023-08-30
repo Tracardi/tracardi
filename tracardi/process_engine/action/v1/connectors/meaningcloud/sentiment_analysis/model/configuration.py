@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -8,7 +8,8 @@ class Configuration(PluginConfig):
     language: str = 'en'
     text: str
 
-    @validator("language")
+    @field_validator("language")
+    @classmethod
     def correct_lang(cls, value):
         langs = ["en", "sp", "fr", "it", "pt", "ct"]
         if value not in langs:
