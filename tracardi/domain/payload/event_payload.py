@@ -3,7 +3,7 @@ from typing import Optional, Any, Union
 from uuid import uuid4
 
 import tracardi.config
-from pydantic import BaseModel, validator, PrivateAttr
+from pydantic import BaseModel, field_validator, PrivateAttr
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
@@ -47,7 +47,7 @@ class EventPayload(BaseModel):
                 self._source_id = self.options['source_id']
             del(self.options['source_id'])
 
-    @validator("type")
+    @field_validator("type")
     def event_type_can_not_be_empty(cls, value):
         value = value.strip()
         if value == "":
@@ -123,7 +123,7 @@ class EventPayload(BaseModel):
                  profile: Optional[Entity],
                  has_profile: bool) -> Event:
 
-        meta = EventMetadata(**metadata.dict())
+        meta = EventMetadata(**metadata.model_dump())
         meta.profile_less = not has_profile
         meta.instance = Entity(id=ApiInstance().id)
 
@@ -162,10 +162,10 @@ class EventPayload(BaseModel):
                           profile=get_entity(profile),  # profile can be None when profile_less event.
                           type=event_type,
 
-                          os=session.os,
-                          app=session.app,
-                          device=session.device,
-                          hit=hit,
+                          os=session.os.model_dump(),
+                          app=session.app.model_dump(),
+                          device=session.device.model_dump(),
+                          hit=hit.model_dump(),
 
                           utm=session.utm,
 

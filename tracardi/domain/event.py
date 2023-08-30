@@ -179,7 +179,7 @@ class Event(NamedEntity):
     # os: Optional[OS] = OS.construct()
     # app: Optional[Application] = Application.construct()
     # hit: Optional[Hit] = Hit.construct()
-    journey: EventJourney = EventJourney.construct()
+    journey: EventJourney = EventJourney.model_construct()
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):

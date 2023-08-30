@@ -175,7 +175,7 @@ async def install_system(credentials: Credentials, update_plugins_on_start_up):
             name="Test random data",
             channel="Internal",
             description="Internal event source for random data.",
-            bridge=NamedEntity(**open_rest_source_bridge.dict()),
+            bridge=NamedEntity(**open_rest_source_bridge.model_dump()),
             timestamp=datetime.datetime.utcnow(),
             tags=["internal"],
             groups=["Internal"]
@@ -183,7 +183,7 @@ async def install_system(credentials: Credentials, update_plugins_on_start_up):
 
         await raw_db.bulk_upsert(
             Resource().get_index_constant('event-source').get_write_index(),
-            list(add_ids([event_source.dict()])))
+            list(add_ids([event_source.model_dump()])))
 
         await event_source_db.refresh()
 

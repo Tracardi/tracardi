@@ -60,8 +60,8 @@ class CopyTraitAction(ActionRunner):
 
             profile = Profile(**dot.profile)
 
-            flat_profile = flatten(profile.dict())
-            flat_dot_profile = flatten(Profile(**dot.profile).dict())
+            flat_profile = flatten(profile.model_dump())
+            flat_dot_profile = flatten(Profile(**dot.profile).model_dump())
             diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
 
             if diff_result and 'dictionary_item_removed' in diff_result:

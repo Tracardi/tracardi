@@ -24,7 +24,7 @@ class MixPanelSender(ActionRunner):
 
         self.config = config
         self.client = MixPanelAPIClient(
-            **resource.credentials.get_credentials(self, MixPanelCredentials).dict()
+            **resource.credentials.get_credentials(self, MixPanelCredentials).model_dump()
         )
         self.client.set_retries(self.node.on_connection_error_repeat)
 

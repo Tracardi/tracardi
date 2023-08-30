@@ -3,7 +3,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
-from .model.payload import Consents, Configuration
+from .model.payload import Configuration
 from tracardi.service.storage.driver.elastic import consent_type as consent_type_db
 from pytimeparse import parse
 from datetime import datetime
@@ -33,8 +33,8 @@ class ConsentAdder(ActionRunner):
                 raise ValueError(
                     "Consents must be defined as object, with keys as consent-id and value as bool.")
 
-            consents = Consents(__root__=consents_data)
-            for consent_id, granted in consents:
+            # consents = Consents(__root__=)
+            for consent_id, granted in consents_data.items():
                 if granted is True:
                     consent_type_data = await consent_type_db.get_by_id(consent_id)
 

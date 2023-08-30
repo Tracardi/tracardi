@@ -189,7 +189,7 @@ class TrackerResultPersister:
         tagged_events = [event async for event in
                          self.__map_events_tags_and_journey(self.__get_persistent_events_without_source(events))]
         event_result = await event_db.save(tagged_events, exclude={"operation": ...})
-        event_result = SaveResult(**event_result.dict())
+        event_result = SaveResult(**event_result.model_dump())
 
         # Add event types
         for event in events:

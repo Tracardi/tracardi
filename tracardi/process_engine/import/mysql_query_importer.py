@@ -121,10 +121,10 @@ class MySQLQueryImporter(Importer):
 
     async def run(self, task_name, import_config: ImportConfig) -> Tuple[str, str]:
 
-        def add_to_celery(import_config, credentials):
+        def add_to_celery(import_config: ImportConfig, credentials):
             # todo replace celery
             return run_mysql_query_import_job.delay(
-                import_config.dict(),
+                import_config.model_dump(),
                 credentials
             )
 
@@ -145,7 +145,7 @@ class MySQLQueryImporter(Importer):
             id=str(uuid4()),
             name=task_name if task_name else import_config.name,
             type="import",
-            params=import_config.dict(),
+            params=import_config.model_dump(),
             task_id=celery_task.id
         )
 

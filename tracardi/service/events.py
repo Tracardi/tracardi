@@ -209,7 +209,7 @@ def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
 
     if index_schema is not None:
 
-        dot_event = dotty(event.dict())
+        dot_event = dotty(event.model_dump())
 
         for destination, source in index_schema.items():  # type: str, str
             try:

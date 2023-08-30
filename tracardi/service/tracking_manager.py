@@ -232,7 +232,7 @@ class TrackingManager(TrackingManagerBase):
 
         # Get events
         events = await self.get_events()
-        flat_events = {event.id: dotty(event.dict()) for event in events}
+        flat_events = {event.id: dotty(event.model_dump()) for event in events}
 
         # Anonymize, data compliance
         if License.has_license():
@@ -258,7 +258,7 @@ class TrackingManager(TrackingManagerBase):
             flat_event = None
 
             if copy_schema is not None:
-                flat_profile = dotty(self.profile.dict())
+                flat_profile = dotty(self.profile.model_dump())
                 flat_event = flat_events[event.id]
 
                 # Copy default

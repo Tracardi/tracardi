@@ -404,7 +404,7 @@ class TrackingOrchestrator:
 
         # Make profile copy
 
-        profile_copy = profile.dict(exclude={"operation": ...}) if has_profile else None
+        profile_copy = profile.model_dump(exclude={"operation": ...}) if has_profile else None
 
         # Lock
         if has_profile and self.source.synchronize_profiles:

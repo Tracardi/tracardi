@@ -175,7 +175,7 @@ class MySQLTableImporter(Importer):
             id=str(uuid4()),
             name=task_name if task_name else import_config.name,
             type="import",
-            params=import_config.dict(),
+            params=import_config.model_dump(),
             task_id=celery_task.id
         )
 

@@ -532,7 +532,7 @@ class TrackerPayload(BaseModel):
                     # Loaded session has profile
 
                     # Load profile on profile id saved in session
-                    copy_of_tracker_payload = TrackerPayload(**self.dict())
+                    copy_of_tracker_payload = TrackerPayload(**self.model_dump())
                     copy_of_tracker_payload.profile = Entity(id=session.profile.id)
 
                     profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)

@@ -46,7 +46,7 @@ class MessageAttribute:
             self.key = "StringValue"
             self.value = str(value)
 
-    def dict(self):
+    def as_dict(self) -> dict:
         return {
             "DataType": self.type,
             self.key: self.value
@@ -63,5 +63,5 @@ class MessageAttributes:
                                  "numbers")
             self._value[key] = MessageAttribute(value)
 
-    def dict(self):
-        return {key: value.dict() for key, value in self._value.items()}
+    def as_dict(self):
+        return {key: value.as_dict() for key, value in self._value.items()}

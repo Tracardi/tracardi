@@ -24,7 +24,7 @@ class DotAccessor:
         elif isinstance(data, dict):
             return dotty(data)
         elif isinstance(data, BaseModel):
-            return dotty(data.dict())
+            return dotty(data.model_dump())
         else:
             raise ValueError("Could not convert {} to dict. Expected: None, dict or BaseModel got {}.".format(
                 label, type(data)
