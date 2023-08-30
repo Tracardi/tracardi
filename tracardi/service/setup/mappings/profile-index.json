@@ -387,6 +387,10 @@
                 "ltcocv": {
                   "type": "float"
                 },
+                "next": {
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                },
                 "custom": {
                   "type": "object",
                   "dynamic": "true"
