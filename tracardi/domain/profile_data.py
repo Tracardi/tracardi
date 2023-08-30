@@ -138,6 +138,7 @@ class ProfileMetrics(BaseModel):
     ltcop: Optional[float] = 0  # Live Time Check-Out Percentage
     ltcosv: Optional[float] = 0  # Live Time Check-Out Started Value
     ltcocv: Optional[float] = 0  # Live Time Check-Out Completed Value
+    next: Optional[datetime] = None
     custom: Optional[dict] = {}
 
 

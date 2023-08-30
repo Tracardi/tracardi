@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from .entity import Entity
 from .metadata import ProfileMetadata
@@ -16,6 +16,18 @@ from .profile_stats import ProfileStats
 
 class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
+
+
+class CustomMetric(BaseModel):
+    next: datetime
+    timestamp: datetime
+    value: Any
+
+    def expired(self) -> bool:
+        return datetime.utcnow() > self.next
+
+    def changed(self, value) -> bool:
+        return value != self.value
 
 
 class Profile(Entity):
@@ -40,6 +52,28 @@ class Profile(Entity):
             "profile": self.dict(),
             "storage": self.get_meta_data().dict()
         }
+
+    def has_metric(self, metric_name) -> bool:
+        return metric_name in self.data.metrics.custom
+
+    def need_metric_computation(self, metric_name) -> bool:
+        if not self.has_metric(metric_name):
+            return True
+
+        if 'next' not in self.data.metrics.custom[metric_name]:
+            return True
+
+        if not isinstance(self.data.metrics.custom[metric_name], dict):
+            print(f"ERROR: Metric {metric_name} is not dict.")
+            return False
+
+        try:
+            metric = CustomMetric(**self.data.metrics.custom[metric_name])
+        except ValidationError as e:
+            print(str(e))
+            return False
+
+        return metric.expired()
 
     def is_merged(self, profile_id) -> bool:
         return profile_id != self.id and profile_id in self.ids
