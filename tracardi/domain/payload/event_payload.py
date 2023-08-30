@@ -48,6 +48,7 @@ class EventPayload(BaseModel):
             del(self.options['source_id'])
 
     @field_validator("type")
+    @classmethod
     def event_type_can_not_be_empty(cls, value):
         value = value.strip()
         if value == "":
