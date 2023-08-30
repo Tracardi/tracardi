@@ -9,7 +9,7 @@ import aiomysql
 from tracardi.domain.import_config import ImportConfig
 from tracardi.domain.task import Task
 from .importer import Importer
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver.elastic import resource as resource_db
@@ -25,14 +25,16 @@ class MySQLQueryImportConfig(BaseModel):
     query: str
     batch: int = 100
 
-    @validator('query')
+    @field_validator('query')
+    @classmethod
     def validate_query(cls, value):
         if (not value.lower().startswith("select")) or "limit" in value.lower():
             raise ValueError("Provided query cannot contain LIMIT keyword and has to start with SELECT keyword. "
                              "Limit is used to batch the data during import.")
         return value
 
-    @validator("source", "database_name")
+    @field_validator("source", "database_name")
+    @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
             raise ValueError(f"This field cannot be empty.")
@@ -42,7 +44,8 @@ class MySQLQueryImportConfig(BaseModel):
 class DatabaseFetcherConfig(BaseModel):
     source: NamedEntity
 
-    @validator("source")
+    @field_validator("source")
+    @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
             raise ValueError(f"This field cannot be empty.")
