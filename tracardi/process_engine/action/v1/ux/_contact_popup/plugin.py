@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.notation.dot_template import DotTemplate
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -18,25 +18,29 @@ class Config(PluginConfig):
     save_event: bool
     dark_theme: bool
 
-    @validator("uix_source")
+    @field_validator("uix_source")
+    @classmethod
     def validate_uix_source(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("api_url")
+    @field_validator("api_url")
+    @classmethod
     def validate_api_url(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("content")
+    @field_validator("content")
+    @classmethod
     def validate_content(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def validate_event_type(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")

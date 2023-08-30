@@ -1,7 +1,7 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from device_detector import DeviceDetector
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -12,7 +12,8 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class AgentConfiguration(PluginConfig):
     agent: str
 
-    @validator("agent")
+    @field_validator("agent")
+    @classmethod
     def is_valid_dot_path(cls, value):
         if len(value) < 1:
             raise ValueError("Event type can not be empty.")

@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.domain.profile import Profile
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -13,7 +13,8 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class MergeProfileConfiguration(PluginConfig):
     mergeBy: List[str]
 
-    @validator("mergeBy")
+    @field_validator("mergeBy")
+    @classmethod
     def list_must_not_be_empty(cls, value):
         if not len(value) > 0:
             raise ValueError("Field mergeBy is empty and has no effect on merging. "

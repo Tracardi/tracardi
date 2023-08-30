@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -10,13 +10,15 @@ class SortConfig(PluginConfig):
     data: str
     direction: str
 
-    @validator("data")
+    @field_validator("data")
+    @classmethod
     def must_not_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("data is empty")
         return value
 
-    @validator("direction")
+    @field_validator("direction")
+    @classmethod
     def has_correct_direction(cls, value):
         if value not in ("asc", "desc"):
             raise ValueError("direction is not \"asc\" or \"desc\"")

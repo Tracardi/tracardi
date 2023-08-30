@@ -2,7 +2,7 @@ from typing import Union
 
 import pytz
 from datetime import datetime
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -11,14 +11,16 @@ class TimeSpanConfiguration(PluginConfig):
     start: Union[str, datetime]
     end: Union[str, datetime]
 
-    @validator("start")
+    @field_validator("start")
+    @classmethod
     def validate_start_time(cls, value):
         try:
             return datetime.strptime(value, '%H:%M:%S')
         except ValueError as e:
             raise e
 
-    @validator("end")
+    @field_validator("end")
+    @classmethod
     def validate_end_time(cls, value):
         try:
             return datetime.strptime(value, '%H:%M:%S')

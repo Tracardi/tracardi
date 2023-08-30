@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator, AnyHttpUrl
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -14,25 +14,29 @@ class Configuration(PluginConfig):
     expand_height: int = 400
     enabled: bool = True
 
-    @validator("uix_source")
+    @field_validator("uix_source")
+    @classmethod
     def uix_source_should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("This field should not be empty")
         return value
 
-    @validator("endpoint")
+    @field_validator("endpoint")
+    @classmethod
     def endpoint_should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("This field should not be empty")
         return value
 
-    @validator("position")
+    @field_validator("position")
+    @classmethod
     def position_enum(cls, value):
         if len(value) == 0:
             raise ValueError("This field should be either [top] or [bottom]")
         return value
 
-    @validator("expand_height")
+    @field_validator("expand_height")
+    @classmethod
     def height_enum(cls, value: str):
         if isinstance(value, str) and not value.isnumeric():
             raise ValueError("This field must be a number")

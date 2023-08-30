@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -12,7 +12,8 @@ from tracardi.service.plugin.domain.result import Result
 class Configuration(PluginConfig):
     segment: str
 
-    @validator("segment")
+    @field_validator("segment")
+    @classmethod
     def is_not_empty(cls, value):
         if value == "":
             raise ValueError("Segment cannot be empty")

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Union
 
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.domain.profile import Profile
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -17,7 +17,8 @@ from tracardi.service.segments.segment_trigger import trigger_segment_add
 class Configuration(PluginConfig):
     segment: Union[str, List[str]]
 
-    @validator("segment")
+    @field_validator("segment")
+    @classmethod
     def is_not_empty(cls, value):
         if not value:
             raise ValueError("Segment cannot be empty")

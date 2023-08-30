@@ -1,6 +1,6 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -11,7 +11,8 @@ class Config(PluginConfig):
     uix_source: str
     props: dict
 
-    @validator("uix_source")
+    @field_validator("uix_source")
+    @classmethod
     def validate_file_path(cls, value):
         if isinstance(value, str) and not value.endswith(".js"):
             raise ValueError("Widget file has to be .js file.")

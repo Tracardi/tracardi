@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import validator
+from pydantic import field_validator
 import json
 
 from tracardi.domain.named_entity import NamedEntity
@@ -15,7 +15,8 @@ class Configuration(PluginConfig):
     session_id: Optional[str] = None
     properties: Optional[str] = "{}"
 
-    @validator("properties")
+    @field_validator("properties")
+    @classmethod
     def convert_to_json_id_dict(cls, value):
         if isinstance(value, dict):
             value = json.dumps(value)
@@ -24,25 +25,29 @@ class Configuration(PluginConfig):
     def get_allowed_event_types(self) -> List[str]:
         return [event.id for event in self.event_types]
 
-    @validator("event_id")
+    @field_validator("event_id")
+    @classmethod
     def remove_whitespaces_from_event_id(cls, value):
         if isinstance(value, str):
             value = value.strip()
         return value
 
-    @validator("profile_id")
+    @field_validator("profile_id")
+    @classmethod
     def remove_whitespaces_from_profile_id(cls, value):
         if isinstance(value, str):
             value = value.strip()
         return value
 
-    @validator("session_id")
+    @field_validator("session_id")
+    @classmethod
     def remove_whitespaces_from_session_id(cls, value):
         if isinstance(value, str):
             value = value.strip()
         return value
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def remove_whitespaces_from_event_type_id(cls, value):
         if isinstance(value, NamedEntity):
             value.id = value.id.strip()

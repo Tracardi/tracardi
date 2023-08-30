@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.event import Event
 from tracardi.domain.session import Session
@@ -13,7 +13,8 @@ from tracardi.process_engine.tql.equation import MathEquation
 class CalculatorConfig(PluginConfig):
     calc_dsl: str
 
-    @validator("calc_dsl")
+    @field_validator("calc_dsl")
+    @classmethod
     def must_not_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Calculations are empty.")

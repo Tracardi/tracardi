@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -14,7 +14,8 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class DeleteTraitConfiguration(PluginConfig):
     delete: List[str]
 
-    @validator("delete")
+    @field_validator("delete")
+    @classmethod
     def list_must_not_be_empty(cls, value):
         if not len(value) > 0:
             raise ValueError("List to delete must not be empty.")

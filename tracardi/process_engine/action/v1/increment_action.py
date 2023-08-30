@@ -1,6 +1,6 @@
 from typing import Union
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -13,7 +13,8 @@ class IncrementConfig(PluginConfig):
     field: str
     increment: Union[int, float]
 
-    @validator('field')
+    @field_validator('field')
+    @classmethod
     def field_must_match(cls, value):
         if not value.startswith('profile@stats.counters'):
             raise ValueError(f"Only fields inside `profile@stats.counters` can be incremented. Field `{value}` given.")

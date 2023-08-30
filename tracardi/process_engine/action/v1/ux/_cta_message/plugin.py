@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator, AnyHttpUrl
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -22,13 +22,15 @@ class Configuration(PluginConfig):
     position_x: str = "right"
     position_y: str = "bottom"
 
-    @validator("message")
+    @field_validator("message")
+    @classmethod
     def should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Message should not be empty")
         return value
 
-    @validator("cta_button")
+    @field_validator("cta_button")
+    @classmethod
     def cta_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("CTA should not be empty")

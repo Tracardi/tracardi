@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -24,13 +24,15 @@ class Configuration(PluginConfig):
     class SearchAlgorithmConfig:
         use_enum_values = True
 
-    @validator("first_string", "second_string")
+    @field_validator("first_string", "second_string")
+    @classmethod
     def validate_field(cls, value):
         if not value:
             raise ValueError("Field cannot be empty")
         return value
 
-    @validator("algorithm")
+    @field_validator("algorithm")
+    @classmethod
     def validate_algo(cls, value):
         if not value:
             raise ValueError("You have to choose one of searching algorithms")

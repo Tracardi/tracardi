@@ -1,13 +1,11 @@
 from typing import Any, Optional, Tuple, Union
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 
 class Result(BaseModel):
     port: str
     value: Any = None
-
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
     @staticmethod
     def append_input(result: Union['Result', Tuple['Result', ...]], payload) -> Optional[Union['Result', Tuple['Result', ...]]]:
