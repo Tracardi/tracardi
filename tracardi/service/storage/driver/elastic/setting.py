@@ -18,6 +18,10 @@ async def upsert(setting: Setting):
     return await storage_manager("setting").upsert(setting)
 
 
+async def save_all(settings: List[Setting]):
+    return await storage_manager("setting").upsert(settings)
+
+
 async def load_all(type: str, start: int = 0, limit: int = 100) -> List[Setting]:
     query = {
         "from": start,
