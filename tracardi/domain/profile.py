@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
 from pydantic import BaseModel, ValidationError
+from dateutil import parser
 
 from .entity import Entity
 from .metadata import ProfileMetadata
@@ -58,7 +59,7 @@ class Profile(Entity):
 
     def need_metric_computation(self, metric_name) -> bool:
         if not self.has_metric(metric_name):
-            return True
+            return False
 
         if 'next' not in self.data.metrics.custom[metric_name]:
             return True
@@ -74,6 +75,24 @@ class Profile(Entity):
             return False
 
         return metric.expired()
+
+    def get_next_metric_computation_date(self) -> Optional[datetime]:
+
+        if not self.data.metrics.custom:
+            return None
+
+        all_next_dates = []
+        for _, _metric_data in self.data.metrics.custom.items():
+            if 'next' in _metric_data:
+                _next = _metric_data['next']
+                if isinstance(_next, str):
+                    _next = parser.parse(_next)
+
+                if not isinstance(_next, datetime):
+                    print("err")
+
+                all_next_dates.append(_next)
+        return min(all_next_dates)
 
     def is_merged(self, profile_id) -> bool:
         return profile_id != self.id and profile_id in self.ids
