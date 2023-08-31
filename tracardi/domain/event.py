@@ -22,10 +22,10 @@ class Tags(BaseModel):
     count: int = 0
     model_config = ConfigDict(validate_assignment=True)
 
-    @model_validator(skip_on_failure=True)
+    @model_validator(mode="before")
     @classmethod
     def total_tags(cls, values):
-        values["count"] = len(values.get("values"))
+        values["count"] = len(values.get("values", []))
         return values
 
     def add(self, tag: Union[str, List[str]]):
