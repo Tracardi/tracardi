@@ -1,5 +1,5 @@
 from time import time
-from tracardi.domain.entity import Entity
+from tracardi.service.wf.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
 from tracardi.domain.flow_invoke_result import FlowInvokeResult

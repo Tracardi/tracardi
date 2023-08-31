@@ -105,11 +105,6 @@ class Flow(FlowGraph):
         if 'type' not in decrypted:
             decrypted['type'] = record.type
 
-        # pydantic v2 change
-
-        if 'response' in decrypted and isinstance(decrypted['response'], dict):
-            decrypted['response'] = FlowResponse(decrypted['response'])
-
         flow = Flow(**decrypted)
         flow.deploy_timestamp = record.deploy_timestamp
         flow.timestamp = record.timestamp

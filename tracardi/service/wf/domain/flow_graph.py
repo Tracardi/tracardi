@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 from .flow_graph_data import FlowGraphData
 from .flow_response import FlowResponse
 from .named_entity import NamedEntity
@@ -11,3 +11,8 @@ class FlowGraph(NamedEntity):
     response: Optional[FlowResponse] = FlowResponse()
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def __init__(self, **data: Any):
+        if 'response' in data and isinstance(data['response'], dict):
+            data['response'] = FlowResponse(data['response'])
+        super().__init__(**data)
