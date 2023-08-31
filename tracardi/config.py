@@ -42,6 +42,7 @@ class ElasticConfig:
 
     def __init__(self, env):
         self.env = env
+        self.unset_credentials = env.get('UNSET_CREDENTIALS', "yes") == 'yes'
         self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
         self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
         self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
@@ -68,7 +69,8 @@ class ElasticConfig:
         self.logging_level = _get_logging_level(
             env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 
-        self._unset_credentials()
+        if self.unset_credentials:
+            self._unset_credentials()
 
     def get_host(self):
         hosts = self.env.get('ELASTIC_HOST', 'http://localhost:9200')
