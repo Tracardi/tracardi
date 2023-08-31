@@ -403,8 +403,8 @@ class TrackingOrchestrator:
         # ------------------------------
 
         # Make profile copy
-
-        profile_copy = profile.model_dump(exclude={"operation": ...}) if has_profile else None
+        if tracardi.enable_profile_destinations:
+            profile_copy = profile.model_dump(exclude={"operation": ...}) if has_profile else None
 
         # Lock
         if has_profile and self.source.synchronize_profiles:

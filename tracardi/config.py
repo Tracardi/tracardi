@@ -56,8 +56,7 @@ class ElasticConfig:
         self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
         self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
 
-        self.refresh_profiles_after_save = (env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'].lower() == 'yes') \
-            if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
+        self.refresh_profiles_after_save = env.get('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'no').lower() == 'yes'
 
         self.host = self.get_host()
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
@@ -134,12 +133,17 @@ class TracardiConfig(metaclass=Singleton):
     def __init__(self, env):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
-        self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
+        self.track_debug = env.get('TRACK_DEBUG', 'no').lower() == 'yes'
         self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
         self.enable_event_destinations = env.get('ENABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
         self.enable_profile_destinations = env.get('ENABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
         self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
         self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
+        self.enable_event_validation = env.get('ENABLE_EVENT_VALIDATION', 'yes').lower() == 'yes'
+        self.enable_event_source_check = env.get('ENABLE_EVENT_SOURCE_CHECK', 'yes').lower() == 'yes'
+        self.enable_profile_immediate_flush = env.get('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes').lower() == 'yes'
+        self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
+        self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
 
         # Not used now

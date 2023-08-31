@@ -22,7 +22,7 @@ from tracardi.service.tracker_persister import TrackerResultPersister
 from tracardi.service.tracking_manager import TrackerResult, TrackingManagerBase
 from tracardi.service.tracking_orchestrator import TrackingOrchestrator
 
-if License.has_service(VALIDATOR):
+if tracardi.enable_event_validation and License.has_service(VALIDATOR):
     from com_tracardi.service.tracker_event_validator import EventsValidationHandler
 
 
@@ -80,7 +80,7 @@ class TrackerProcessor(TrackProcessorBase):
                 memory=None
             )
 
-            if License.has_service(VALIDATOR):
+            if tracardi.enable_event_validation and License.has_service(VALIDATOR):
 
                 # Get events to be reshaped
                 # Separated tracker payload into items to must be reshaped separately
@@ -108,6 +108,7 @@ class TrackerProcessor(TrackProcessorBase):
                             # sposód których tylko niektóre mogą być przeznaczone do reshape.
 
                             if must_be_reshaped:
+                                # todo pydantic v2
                                 tp = tracker_payload.copy(exclude={"events": ...})
                                 tp.events = [event_payload]
                                 separated_tracker_payloads_for_profile_mapping.append(tp)
@@ -155,7 +156,7 @@ class TrackerProcessor(TrackProcessorBase):
 
                 # Validation and reshaping
 
-                if License.has_service(VALIDATOR):
+                if tracardi.enable_event_validation and License.has_service(VALIDATOR):
                     # Index traits, validate and reshape, oly if license and there are event to reshape
                     evh = EventsValidationHandler(dot, self.console_log)
                     tracker_payload = await evh.validate_reshape_index_events(tracker_payload)
@@ -177,8 +178,9 @@ class TrackerProcessor(TrackProcessorBase):
 
                 if orchestrator.locked and source.synchronize_profiles:
                     profile_synchronizer.unlock_entities(orchestrator.locked)
-                    await profile_db.refresh()
-                    await session_db.refresh()
+                    if tracardi.enable_profile_immediate_flush:
+                        await profile_db.refresh()
+                        await session_db.refresh()
 
                 logger.debug(f"Invoke save results {save_results} tracker payloads.")
 

@@ -223,6 +223,18 @@ class Tracker:
         )
 
     async def check_source_id(self, source_id) -> Optional[EventSource]:
+
+        if not tracardi.enable_event_source_check:
+            return EventSource(
+                id=source_id,
+                type=['rest'],
+                bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
+                name="Static event source",
+                description="This event source is prepared because of ENABLE_EVENT_SOURCE_CHECK==no.",
+                channel="Web",
+                transitional=False  # ephemeral
+            )
+
         source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
 
         if source is not None:

@@ -562,7 +562,7 @@ class TrackingManager(TrackingManagerBase):
 
             # Segment only if there is profile
 
-            if isinstance(self.profile, Profile):
+            if tracardi.enable_post_event_segmentation and isinstance(self.profile, Profile):
                 # Post Event Segmentation
                 await post_ev_segment(self.profile,
                                       self.session,
