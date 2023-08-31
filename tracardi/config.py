@@ -42,7 +42,7 @@ class ElasticConfig:
 
     def __init__(self, env):
         self.env = env
-        self.unset_credentials = env.get('UNSET_CREDENTIALS', "yes") == 'yes'
+        self.unset_credentials = env.get('UNSET_CREDENTIALS', "no") == 'yes'
         self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
         self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
         self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
