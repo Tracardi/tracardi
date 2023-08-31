@@ -13,6 +13,8 @@ from ..config import tracardi
 from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 import logging
 
+from ..service.wf.domain.flow_response import FlowResponse
+
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 
@@ -102,6 +104,11 @@ class Flow(FlowGraph):
 
         if 'type' not in decrypted:
             decrypted['type'] = record.type
+
+        # pydantic v2 change
+
+        if 'response' in decrypted and isinstance(decrypted['response'], dict):
+            decrypted['response'] = FlowResponse(decrypted['response'])
 
         flow = Flow(**decrypted)
         flow.deploy_timestamp = record.deploy_timestamp

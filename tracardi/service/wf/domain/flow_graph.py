@@ -9,4 +9,5 @@ class FlowGraph(NamedEntity):
     description: Optional[str] = None
     flowGraph: Optional[FlowGraphData] = None
     response: Optional[FlowResponse] = FlowResponse()
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
