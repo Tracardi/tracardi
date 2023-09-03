@@ -24,6 +24,8 @@ from typing import List
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_processor import TrackerProcessor, TrackProcessorBase
 from tracardi.service.tracking_manager import TrackingManagerBase, TrackerResult
+from tracardi.service.storage.cache.model import load as cache_load
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -137,6 +139,7 @@ class Tracker:
                         referred_profile_id = tracker_payload.get_referer_data('profile')
 
                         # Check if profile id exists
+                        cache_load(model=Profile, id=referred_profile_id)
                         profile_record = await profile_db.load_by_id(referred_profile_id)
 
                         if profile_record is not None:

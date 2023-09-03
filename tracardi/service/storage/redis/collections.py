@@ -14,6 +14,7 @@ class Collection:
     token: str = "token:"  # Cache for token memory/db for authentication
     plugin_memory: str = "plugin-memory:"
     profile: str = "profile:"
+    session: str = "session"
     profile_fields: str = "profile:fields"  # Cache profile fields, properties for auto completion
     event_fields: str = "event:fields"  # Cache event fields, properties for auto completion
     session_fields: str = "session:fields"  # Cache session fields, properties for auto completion

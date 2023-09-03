@@ -5,6 +5,8 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.storage.cache.model import load as cache_load
+
 
 from .model.configuration import Configuration
 
@@ -26,6 +28,7 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
+            cache_load(model=Profile, id=value)
             profile_records = await profile_db.load_by_id(profile_id=value)
             profile = Profile.create(profile_records)
 

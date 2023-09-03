@@ -13,6 +13,8 @@ from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from typing import Optional
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity
+from tracardi.service.storage.cache.model import load as cache_load
+
 
 
 def validate(config: dict):
@@ -65,6 +67,7 @@ class StartAction(ActionRunner):
         # Replace profile
 
         if self.config.profile_id:
+            cache_load(model=Profile, id=self.config.profile_id)
             _profile = await profile_db.load_by_id(self.config.profile_id)
             if not _profile:
                 msg = f"Can not load session with id {self.config.profile_id}"

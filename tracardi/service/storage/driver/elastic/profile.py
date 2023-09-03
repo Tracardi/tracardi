@@ -7,6 +7,7 @@ from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.cache.model import load as cache_load
 
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
@@ -107,6 +108,7 @@ async def load_profile_without_identification(tracker_payload, is_static=False) 
     profile_id = tracker_payload.profile.id
 
     try:
+        cache_load(model=Profile, id=profile_id)
         profile_record = await load_by_id(profile_id)
 
         if profile_record is None:
