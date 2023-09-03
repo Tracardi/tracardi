@@ -242,7 +242,7 @@ class ProfileMerger:
         """
 
         _traits = [profile.traits for profile in all_profiles]
-        _data = [profile.data.model_dict() for profile in all_profiles]
+        _data = [profile.data.model_dump() for profile in all_profiles]
 
         old_value = {
             'traits': _traits,
@@ -261,12 +261,12 @@ class ProfileMerger:
             E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
         """
 
-        current_profile_dict = self.current_profile.model_dict()
+        current_profile_dict = self.current_profile.model_dump()
 
         for profile in all_profiles:
             current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
                                                                profile.traits)
-            current_profile_dict['data'] = self._deep_update(current_profile_dict['data'], profile.data.model_dict())
+            current_profile_dict['data'] = self._deep_update(current_profile_dict['data'], profile.data.model_dump())
 
         traits = current_profile_dict['traits']
         data = current_profile_dict['data']
@@ -277,7 +277,7 @@ class ProfileMerger:
         segments = []
         interests = {}
         stats = ProfileStats()
-        time = ProfileTime(**self.current_profile.metadata.time.model_dict())
+        time = ProfileTime(**self.current_profile.metadata.time.model_dump())
         time.visit.count = 0  # Reset counter - it sums all the visits
 
         for profile in all_profiles:  # Type: Profile

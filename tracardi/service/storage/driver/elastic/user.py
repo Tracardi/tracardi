@@ -33,7 +33,7 @@ async def search_by_name(start: int, limit: int, name: str):
 
     for record in (await storage_manager("user").query(query=query)):
         user = User(**record)
-        result.append({**user.model_dict(
+        result.append({**user.model_dump(
             exclude={"token"}), "expired": user.is_expired()})
 
     return result

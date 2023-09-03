@@ -67,7 +67,7 @@ async def load_for_grouping(type: str, name: Optional[str] = None) -> StorageRec
         }
     }
     result = await storage_manager("setting").query(query)
-    result.transform_hits(lambda hit: Setting(**hit).model_dict())
+    result.transform_hits(lambda hit: Setting(**hit).model_dump())
     return result
 
 

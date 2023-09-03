@@ -50,5 +50,5 @@ async def load_for_grouping(name: Optional[str] = None) -> StorageRecords:
         }
     }
     result = await storage_manager("report").query(query)
-    result.transform_hits(lambda hit: Report.decode(ReportRecord(**hit)).model_dict())
+    result.transform_hits(lambda hit: Report.decode(ReportRecord(**hit)).model_dump())
     return result

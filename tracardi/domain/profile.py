@@ -50,8 +50,8 @@ class Profile(Entity):
 
     def serialize(self):
         return {
-            "profile": self.model_dict(),
-            "storage": self.get_meta_data().model_dict()
+            "profile": self.model_dump(),
+            "storage": self.get_meta_data().model_dump()
         }
 
     def has_metric(self, metric_name) -> bool:
