@@ -19,5 +19,5 @@ class ResourceSettings(NamedEntity):
     pro: Optional[dict] = None
 
     def dict(self, *args, **kwargs) -> dict:
-        return {key: value for key, value in super().dict(*args, **kwargs).items() if value is not None}
+        return {key: value for key, value in super().model_dict(*args, **kwargs).items() if value is not None}
 

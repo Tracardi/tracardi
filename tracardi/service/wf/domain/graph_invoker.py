@@ -268,7 +268,7 @@ class GraphInvoker(BaseModel):
 
                     else:
 
-                        upstream_result_copy = upstream_result.copy(deep=True)
+                        upstream_result_copy = upstream_result.model_copy(deep=True)
 
                         # Do not trigger for None values
 
@@ -434,7 +434,7 @@ class GraphInvoker(BaseModel):
     @staticmethod
     def _add_results(task_results: ActionsResults, node: Node, result: Result) -> ActionsResults:
         for _, edge, _ in node.graph.out_edges:
-            result_copy = result.copy(deep=True)
+            result_copy = result.model_copy(deep=True)
             task_results.add(edge.id, result_copy)
         return task_results
 
@@ -731,7 +731,7 @@ class GraphInvoker(BaseModel):
         return debug_info, log_list, profile, session
 
     def serialize(self):
-        return self.dict()
+        return self.model_dump()
 
     def get_node_by_id(self, node_id) -> Node:
         for node in self.graph:

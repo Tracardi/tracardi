@@ -1,4 +1,3 @@
-from pprint import pprint
 from random import randint, choice
 from urllib import parse
 

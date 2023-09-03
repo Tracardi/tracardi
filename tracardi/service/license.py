@@ -155,6 +155,6 @@ class License(BaseModel):
                            services={
                                key: Service(id=service['i']) for key, service in license['s'].items()
                            })
-        except ValueError as e:
+        except ValueError:
             raise ValueError("License incorrect. Please check if you paste everything form the license key.")
 

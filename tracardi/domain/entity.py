@@ -79,4 +79,4 @@ class Entity(Creatable):
         return None
 
     def get_dotted_properties(self) -> Set[str]:
-        return dotter(self.dict())
+        return dotter(self.model_dump())

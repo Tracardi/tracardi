@@ -78,10 +78,10 @@ class RulesEngine:
                         module=__name__,
                         class_name=RulesEngine.__name__,
                         type="error",
-                        message=f"Rule to workflow does not exist. This may happen when you debug a workflow that "
-                                f"has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
-                                f"that gets rescheduled and it could not find the routing to the workflow. "
-                                f"Set a routing rule and this error will be solved automatically."
+                        message="Rule to workflow does not exist. This may happen when you debug a workflow that "
+                                "has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
+                                "that gets rescheduled and it could not find the routing to the workflow. "
+                                "Set a routing rule and this error will be solved automatically."
                     )
                     self.console_log.append(console)
                     continue

@@ -1,7 +1,5 @@
 import re
 
-from pydantic.class_validators import validator
-
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 from pydantic import field_validator

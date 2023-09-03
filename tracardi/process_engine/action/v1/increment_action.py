@@ -46,7 +46,7 @@ class IncrementAction(ActionRunner):
         except KeyError:
             value = 0
 
-        if type(value) != int:
+        if not isinstance(value, int):
             raise ValueError("Filed `{}` value is not numeric.".format(self.config.field))
 
         value += self.config.increment

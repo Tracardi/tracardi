@@ -114,7 +114,7 @@ class CacheManager(metaclass=Singleton):
         await MemoryCache.save(
             self.session_cache(),
             session.id,
-            session.dict(),
+            session.model_dump(),
             ttl
         )
 

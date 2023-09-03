@@ -234,7 +234,7 @@ class TrackerPayload(BaseModel):
         return self._id
 
     def get_finger_print(self) -> str:
-        jdump = json.dumps(self.dict(exclude={'events': ..., 'metadata': ...}), sort_keys=True, default=str)
+        jdump = json.dumps(self.model_dict(exclude={'events': ..., 'metadata': ...}), sort_keys=True, default=str)
         props_hash = sha1(jdump.encode())
         return props_hash.hexdigest()
 
@@ -585,7 +585,7 @@ class TrackerPayload(BaseModel):
                 if is_new_profile:
                     if profile.id != fp_profile_id:
                         # Load profile with finger printed profile id
-                        copy_of_tracker_payload = TrackerPayload(**self.dict())
+                        copy_of_tracker_payload = TrackerPayload(**self.model_dict())
                         copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
 
                         fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)

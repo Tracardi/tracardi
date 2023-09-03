@@ -42,7 +42,6 @@ fake_identity = [make_identification_data() for _ in range(0, 500)]
 
 
 def make_fake_login():
-    name = fake.name().split()
     return {
         "email": fake_emails[randint(0, 1499)]
     }

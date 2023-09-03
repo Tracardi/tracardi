@@ -10,12 +10,12 @@ class Config(PluginConfig):
     @classmethod
     def validate_now(cls, value):
         if len(value) == 0:
-            raise ValueError(f"Date can not not be empty")
+            raise ValueError("Date can not not be empty")
         return value
 
     @field_validator("reference_date")
     @classmethod
     def validate_reference_date(cls, value):
         if len(value) == 0:
-            raise ValueError(f"Date can not not be empty")
+            raise ValueError("Date can not not be empty")
         return value

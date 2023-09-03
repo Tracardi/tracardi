@@ -21,7 +21,7 @@ class WorkFlow:
 
     def _make_dag(self, flow: Flow, debug: bool) -> GraphInvoker:
         # Convert Editor graph to exec graph
-        converter = FlowGraphConverter(flow.flowGraph.dict())
+        converter = FlowGraphConverter(flow.flowGraph.model_dict())
         dag_graph = converter.convert_to_dag_graph()
         dag = DagProcessor(dag_graph)
 

@@ -14,7 +14,7 @@ def reindex_with_operation(func):
             task_index,
             f"Migration of \"{schema.copy_index.from_index}\"",
             celery_job,
-            schema.dict()
+            schema.model_dict()
         )
 
         def transform_func(data):

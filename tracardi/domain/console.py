@@ -51,7 +51,7 @@ class Console(BaseModel):
             self.metadata = Metadata(timestamp=datetime.utcnow())
 
     def encode_record(self) -> ConsoleRecord:
-        data = self.dict()
+        data = self.model_dump()
         data['traceback'] = encrypt(data['traceback'])
         return ConsoleRecord(**data)
 

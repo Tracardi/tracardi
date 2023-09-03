@@ -122,7 +122,7 @@ class CollectionCrud:
         data = []
         for row in self.payload:
             if isinstance(row, BaseModel):
-                data.append(row.dict(exclude=exclude))
+                data.append(row.model_dump(exclude=exclude))
             elif isinstance(row, dict):
                 data.append(row)
 

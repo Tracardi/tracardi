@@ -19,7 +19,7 @@ async def load_tasks(query, start: int = 0, limit: int = 100) -> StorageRecords:
 
 
 async def upsert_task(task: Task) -> BulkInsertResult:
-    return await storage_manager('task').upsert(task.dict(), replace_id=True)
+    return await storage_manager('task').upsert(task.model_dict(), replace_id=True)
 
 
 async def delete_task(id: str) -> dict:

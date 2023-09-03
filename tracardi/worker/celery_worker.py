@@ -78,11 +78,11 @@ def migrate_data(celery_job, schemas, elastic_host, task_index):
     for schema in schemas:
 
         if schema.asynchronous is True:
-            result = run_migration_worker.delay(schema.worker, schema.dict(), elastic_host, task_index)
+            result = run_migration_worker.delay(schema.worker, schema.model_dump(), elastic_host, task_index)
             logger.info(f"Running worker {schema.worker} as job {result}")
         else:
-            sync_chain = run_migration_worker.s(schema.worker, schema.dict(), elastic_host, task_index) if sync_chain \
-                is None else sync_chain | run_migration_worker.s(schema.worker, schema.dict(), elastic_host, task_index)
+            sync_chain = run_migration_worker.s(schema.worker, schema.model_dump(), elastic_host, task_index) if sync_chain \
+                is None else sync_chain | run_migration_worker.s(schema.worker, schema.model_dump(), elastic_host, task_index)
 
         progress += 1
         if celery_job:

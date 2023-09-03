@@ -157,7 +157,7 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
                                 if flat_profile[profile_path] is None:
                                     flat_profile[profile_path] = 0
                                 flat_profile[profile_path] += float(flat_event[event_path])
-                            except Exception as e:
+                            except Exception:
                                 raise AssertionError(
                                     f"Can not add data {flat_event[event_path]} to {flat_profile[profile_path]} at profile@{profile_path}")
                     elif operation == '-':
@@ -166,7 +166,7 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
                                 if flat_profile[profile_path] is None:
                                     flat_profile[profile_path] = 0
                                 flat_profile[profile_path] -= float(flat_event[event_path])
-                            except Exception as e:
+                            except Exception:
                                 raise AssertionError(
                                     f"Can not add subtract {flat_event[event_path]} to {flat_profile[profile_path]} at profile@{profile_path}")
 
@@ -186,9 +186,10 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
 
                             profile_updated_flag = True
 
-                        except Exception as e:
+                        except Exception:
                             raise AssertionError(
-                                f"Can not add increment/decrement {flat_event[event_path]} to {flat_profile[profile_path]} at profile@{profile_path}")
+                                f"Can not add increment/decrement {flat_event[event_path]} "
+                                f"to {flat_profile[profile_path]} at profile@{profile_path}")
 
     return flat_profile, profile_updated_flag
 

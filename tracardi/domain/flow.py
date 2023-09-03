@@ -13,8 +13,6 @@ from ..config import tracardi
 from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 import logging
 
-from ..service.wf.domain.flow_response import FlowResponse
-
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 
@@ -67,7 +65,7 @@ class Flow(FlowGraph):
 
     def get_production_workflow_record(self) -> 'FlowRecord':
 
-        production = encrypt(self.dict())
+        production = encrypt(self.model_dump())
 
         return FlowRecord(
             id=self.id,
@@ -295,7 +293,7 @@ class PluginRecord(BaseModel):
             "spec": self.spec.decode(),
             "metadata": self.metadata.decode()
         }
-        return Plugin.construct(_fields_set=self.__fields_set__, **data)
+        return Plugin.model_construct(_fields_set=self.model_fields_set, **data)
 
 
 class FlowRecord(NamedEntity):
@@ -343,7 +341,7 @@ class FlowRecord(NamedEntity):
         self.lock = lock
         production_flow = self.get_production_workflow()
         production_flow.lock = lock
-        self.production = encrypt(production_flow.dict())
+        self.production = encrypt(production_flow.model_dump())
         draft_flow = self.get_draft_workflow()
         draft_flow.lock = lock
-        self.draft = encrypt(draft_flow.dict())
+        self.draft = encrypt(draft_flow.model_dump())

@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional, List, Dict
 
 from tracardi.domain.profile import *
 from tracardi.config import elastic

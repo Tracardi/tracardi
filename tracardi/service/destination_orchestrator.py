@@ -31,7 +31,7 @@ class DestinationOrchestrator:
 
     async def sync_destination(self, has_profile, profile_copy):
         if has_profile and profile_copy is not None:
-            new_profile = self.profile.dict(exclude={"operation": ...})
+            new_profile = self.profile.model_dump(exclude={"operation": ...})
 
             if profile_copy != new_profile:
                 profile_delta = DeepDiff(profile_copy, new_profile, ignore_order=True)

@@ -206,6 +206,6 @@ class DatetimeRangePayload(BaseModel):
             local_tz = pytz.timezone(timezone)
             local_dt = utc_datetime.replace(tzinfo=pytz.utc).astimezone(local_tz)
             return local_tz.normalize(local_dt), timezone  # .normalize might be unnecessary
-        except pytz.exceptions.UnknownTimeZoneError as e:
+        except pytz.exceptions.UnknownTimeZoneError:
             # todo log error
             return utc_datetime, None

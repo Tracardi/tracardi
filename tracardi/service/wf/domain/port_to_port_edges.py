@@ -33,7 +33,7 @@ class PortToPortEdges(BaseModel):
     def dict(self, **kwargs):
         for key, edge in self.edges.items():  # type: Edge
             self.edges[key] = list(self.edges[key])
-        return super().dict(**kwargs)
+        return super().model_dict(**kwargs)
 
     def get_start_ports(self):
         return self.edges.keys()

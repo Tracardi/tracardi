@@ -27,7 +27,7 @@ class ImportConfig(NamedEntity):
     @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
-            raise ValueError(f"This field cannot be empty.")
+            raise ValueError("This field cannot be empty.")
         return value
 
     @field_validator("name")

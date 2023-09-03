@@ -215,7 +215,7 @@ class TrackingManager(TrackingManagerBase):
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
                         properties={},
                         enabled=True,
-                    ).dict()
+                    ).model_dict()
                 ],
                 event
             ) for event in events]
@@ -278,7 +278,7 @@ class TrackingManager(TrackingManagerBase):
                 if flat_event is None:
                     flat_event = flat_events[event.id]
                 if flat_profile is None:
-                    flat_profile = dotty(self.profile.dict())
+                    flat_profile = dotty(self.profile.model_dict())
 
                 for coping_schema in coping_schemas:
                     coping_schema = coping_schema.to_entity(EventToProfile)
