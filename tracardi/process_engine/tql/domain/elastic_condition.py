@@ -36,7 +36,7 @@ class ElasticFieldCondition:
                         "bool": {
                             "must_not": {
                                 "exists": {
-                                    self.field: other
+                                    "field": self.field
                                 }
                             }
                         }
@@ -70,7 +70,16 @@ class ElasticFieldCondition:
                     }
                 }
 
-            raise ValueError(f"Value is incorrect. Expected type: string, list, Null, or True/False,"
+            if isinstance(other, (int, float)):
+                return {
+                    "term": {
+                        self.field: {
+                            "value": other
+                        }
+                    }
+                }
+
+            raise ValueError(f"Value is incorrect. Expected type: string, list, Null, or True/False, int, float"
                              f"got {type(other)}.")
 
     def __ne__(self, other):
@@ -91,7 +100,7 @@ class ElasticFieldCondition:
                     "bool": {
                         "must": {
                             "exists": {
-                                self.field: other
+                                "field": self.field
                             }
                         }
                     }

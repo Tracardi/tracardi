@@ -2,7 +2,7 @@ import dateparser
 from ..domain.elastic_condition import ElasticFieldCondition
 from .function_transformer import FunctionTransformer
 from .transformer_namespace import TransformerNamespace
-from ..domain.operations import OrOperation
+from ..domain.operations import OrOperation, AndOperation
 from ..utils.value_compressions import Values
 
 
@@ -41,10 +41,10 @@ class FilterTransformer(TransformerNamespace):
         # return args
         value1, _, value2 = args
 
-        values.append_or_value(value1)
-        values.append_or_value(value2)
+        values.append_and_value(value1)
+        values.append_and_value(value2)
 
-        return OrOperation({
+        return AndOperation({
             "bool": {
                 "must": values.values
             }
@@ -56,8 +56,8 @@ class FilterTransformer(TransformerNamespace):
         # return args
         value1, _, value2 = args
 
-        values.append_and_value(value1)
-        values.append_and_value(value2)
+        values.append_or_value(value1)
+        values.append_or_value(value2)
 
         return OrOperation({
             "bool": {
