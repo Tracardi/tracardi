@@ -58,3 +58,9 @@ faker-commerce==1.0.3
 # Worker requirements
 mysql-connector-python
 requests
+
+
+# Com requirements
+weaviate-client>=3.16.2
+twilio==8.2.1
+huey

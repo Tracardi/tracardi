@@ -73,7 +73,10 @@ setup(
         # Worker requirements
         'requests',
         'mysql-connector-python==8.0.29',
-        'huey'
+        # Com requirements
+        'weaviate-client>=3.16.2',
+        'twilio==8.2.1',
+        'huey',
 
     ],
     classifiers=[
