@@ -79,7 +79,7 @@ class FilterTransformer(TransformerNamespace):
 
     @staticmethod
     def _compare(operation, value1, value2):
-        if operation == '=':
+        if operation == '=' or operation == '==':
             if isinstance(value1, list) and not isinstance(value2, list):
                 return value2 in value1
             return value1 == value2
