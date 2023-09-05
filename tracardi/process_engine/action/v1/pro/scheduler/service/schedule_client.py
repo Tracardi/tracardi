@@ -72,4 +72,3 @@ if __name__ == '__main__':
         context={"c": 3},
         request={"request": 1}
     )
-    print(f'{result}')

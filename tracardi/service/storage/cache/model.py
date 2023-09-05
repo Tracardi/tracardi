@@ -6,7 +6,6 @@ from tracardi.service.storage.redis.collections import Collection
 
 
 def load(model: Type[BaseModel], id: str):
-    print(Collection.profile)
     pass
 
 
