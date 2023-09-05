@@ -339,7 +339,7 @@ class SqlSearchQueryEngine:
 
                 return QueryResult(**qs)
 
-            except KeyError as e:
+            except KeyError:
                 # When no result
                 qs = {
                     'total': 0,

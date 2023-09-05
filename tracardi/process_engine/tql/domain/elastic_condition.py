@@ -23,7 +23,7 @@ class ElasticFieldCondition:
                     "bool": {
                         "must_not": {
                             "exists": {
-                                self.field: other
+                                "field": self.field
                             }
                         }
                     }
@@ -97,12 +97,8 @@ class ElasticFieldCondition:
 
             if isinstance(other, NoneType):
                 return {
-                    "bool": {
-                        "must": {
-                            "exists": {
-                                "field": self.field
-                            }
-                        }
+                    "exists": {
+                        "field": self.field
                     }
                 }
 
