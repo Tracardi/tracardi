@@ -72,7 +72,8 @@ setup(
         'faker-commerce==1.0.3',
         # Worker requirements
         'requests',
-        'mysql-connector-python==8.0.29'
+        'mysql-connector-python==8.0.29',
+        'huey'
 
     ],
     classifiers=[
