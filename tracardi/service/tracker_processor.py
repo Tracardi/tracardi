@@ -135,7 +135,7 @@ class TrackerProcessor(TrackProcessorBase):
             #
             # Most of the time there will be only one tracker_payload in tracker_payloads
 
-            # Uses redis to lock profile
+            # Use redis to lock profile
 
             orchestrator = TrackingOrchestrator(
                 source,
