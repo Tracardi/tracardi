@@ -50,12 +50,12 @@ class SocialMedia:
         return False
 
     def filter_social_urls(self, url_list) -> List:
-        filtered_urls = []
+        filtered_urls = set()
         for url in url_list:
             social_name = self._has_social_string(url)
             if social_name:
-                filtered_urls.append((url, social_name))
-        return filtered_urls
+                filtered_urls.add((url, social_name))
+        return list(filtered_urls)
 
     def has_social_media_string(self, data) -> Union[Optional[Tuple[str, str]], List[Tuple[str, str]]]:
         if isinstance(data, list):

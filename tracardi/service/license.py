@@ -41,7 +41,7 @@ class Service(BaseModel):
 
 class License(BaseModel):
     owner: str
-    expires: int = 60 * 60 * 24
+    expires: int = time() + 60 * 60 * 24
     services: Dict[str, Service]
 
     def is_expired(self):

@@ -4,8 +4,10 @@ from tracardi.service.utils.social_media import SocialMedia
 def test_filter_social_urls_valid_urls():
     social_media = SocialMedia()
     url_list = ['https://www.facebook.com', 'https://www.twitter.com', 'https://www.instagram.com']
-    expected_result = [('https://www.facebook.com', 'facebook'), ('https://www.twitter.com', 'twitter'), ('https://www.instagram.com', 'instagram')]
-    assert social_media.filter_social_urls(url_list) == expected_result
+    l = social_media.filter_social_urls(url_list)
+    assert ('https://www.facebook.com', 'facebook') in l
+    assert ('https://www.twitter.com', 'twitter') in l
+    assert ('https://www.instagram.com', 'instagram') in l
 
 
 def test_has_social_media_string_valid_url_string():
