@@ -38,7 +38,6 @@ class FilterTransformer(TransformerNamespace):
     def and_expr(self, args):
         values = Values()
 
-        # return args
         value1, _, value2 = args
 
         values.append_and_value(value1)
@@ -53,7 +52,6 @@ class FilterTransformer(TransformerNamespace):
     def or_expr(self, args):
         values = Values()
 
-        # return args
         value1, _, value2 = args
 
         values.append_or_value(value1)
@@ -93,6 +91,8 @@ class FilterTransformer(TransformerNamespace):
             return value1 < value2
         elif operation == '<=':
             return value1 <= value2
+        else:
+            raise ValueError(f"Unexpected operation: {operation}")
 
     def op_condition(self, args):
         value1, operation, value2 = args
@@ -124,7 +124,6 @@ class FilterTransformer(TransformerNamespace):
                 }
             }
         }
-        # return value1 <= field <= value2
 
     def op_field_eq_field(self, args):
         value1, operation, value2 = args

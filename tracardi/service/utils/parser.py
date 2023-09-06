@@ -15,6 +15,12 @@ def parse_accept_language(accept_language_header):
                 if part.startswith("q="):
                     quality = float(part[2:])
 
+            if quality > 1:
+                quality = 1
+
+            if quality < 0:
+                quality = 0
+
             parsed_languages.append((language, quality))
 
     return parsed_languages

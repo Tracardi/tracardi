@@ -6,7 +6,9 @@ class SocialMedia:
     def __init__(self):
         self.social_media_list = [('//www.facebook.com', 'facebook'), ('//facebook.com', 'facebook'),
                                   ('//twitter.com', 'twitter'), ('//www.twitter.com', 'twitter'),
-                                  ('instagram', 'instagram'), ('linkedin', 'linkedin'), ('pinterest', 'pinterest'),
+                                  ('//instagram.com', 'instagram'), ('//www.instagram.com', 'instagram'),
+                                  ('//www.linkedin.com', 'linkedin'), ('//linkedin.com', 'linkedin'),
+                                  ('pinterest', 'pinterest'),
                                   ('snapchat', 'snapchat'), ('youtube', 'youtube'), ('tiktok', 'tiktok'),
                                   ('//whatsapp.com', 'whatsapp'), ('//api.whatsapp.com', 'whatsapp'),
                                   ('//www.whatsapp.com', 'whatsapp'), ('messenger', 'messenger'), ('reddit', 'reddit'),
