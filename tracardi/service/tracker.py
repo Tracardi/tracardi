@@ -262,6 +262,10 @@ class Tracker:
         if tracker_payload.source.config is not None and tracker_payload.source.config.get('static_profile_id', False):
             self.tracker_config.static_profile_id = True
 
+        # Is source ephemeral
+        if tracker_payload.source.transitional is True:
+            tracker_payload.set_ephemeral()
+
         if self.on_source_ready is None:
             tp = TrackerProcessor(
                 self.console_log,

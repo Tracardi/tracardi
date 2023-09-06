@@ -11,7 +11,9 @@ from pydantic import PrivateAttr, BaseModel
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.utils.getters import get_entity_id
 
-from tracardi.config import tracardi
+from tracardi.config import tracardi, memory_cache
+from ..storage_record import StorageRecords
+from ...service.cache_manager import CacheManager
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..console import Console
@@ -26,6 +28,7 @@ from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
+from ...service.tracking.event_validation import get_event_validation_result
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
@@ -34,7 +37,7 @@ if License.has_service(LICENSE):
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
-
+cache = CacheManager()
 
 class ScheduledEventConfig:
 
@@ -50,7 +53,6 @@ class ScheduledEventConfig:
 
 
 class TrackerPayload(BaseModel):
-
     _id: str = PrivateAttr(None)
     _make_static_profile_id: bool = PrivateAttr(False)
     _scheduled_flow_id: str = PrivateAttr(None)
@@ -87,6 +89,7 @@ class TrackerPayload(BaseModel):
                 self._scheduled_flow_id = self.options['scheduledFlowId']
                 self._scheduled_node_id = self.options['scheduledNodeId']
 
+        self._cached_events_as_dicts: Optional[List[dict]] = None
 
     @property
     def tracardi_referer(self):
@@ -204,24 +207,35 @@ class TrackerPayload(BaseModel):
         return self._make_static_profile_id
 
     def get_events_dict(self) -> List[dict]:
-        # Todo Cache in property - this is expensive
-        for event_payload in self.events:
-            # Todo Performance
-            yield event_payload.to_event_dict(
-                self.source,
-                self.session,
-                self.profile,
-                self.profile_less)
-            # yield event_payload.to_event(self.metadata,
-            #                              self.source,
-            #                              self.session,
-            #                              self.profile,
-            #                              self.profile_less)
-            # yield event_payload.to_event_data_class(self.metadata,
-            #                                         self.source,
-            #                                         self.session,
-            #                                         self.profile,
-            #                                         self.profile_less)
+        if self._cached_events_as_dicts is None:
+            self._cached_events_as_dicts = []
+            for event_payload in self.events:
+                self._cached_events_as_dicts.append(
+                    event_payload.to_event_dict(
+                        self.source,
+                        self.session,
+                        self.profile,
+                        self.profile_less)
+                )
+        return self._cached_events_as_dicts
+        # yield event_payload.to_event(self.metadata,
+        #                              self.source,
+        #                              self.session,
+        #                              self.profile,
+        #                              self.profile_less)
+        # yield event_payload.to_event_data_class(self.metadata,
+        #                                         self.source,
+        #                                         self.session,
+        #                                         self.profile,
+        #                                         self.profile_less)
+
+    async def validate_events(self):
+        for event_dict in self.get_events_dict():
+            validation_schemas = await cache.event_validation(
+                event_type=event_dict['type'],
+                ttl=memory_cache.event_validation_cache_ttl)
+            error, message = await get_event_validation_result(event_dict, validation_schemas)
+            print(error, message)
 
     def set_headers(self, headers: dict):
         if 'authorization' in headers:
@@ -371,7 +385,8 @@ class TrackerPayload(BaseModel):
     async def list_identification_points(self):
         return list(await self.get_identification_points())
 
-    def get_profile_attributes_via_identification_data(self, valid_identification_points) -> Optional[List[Tuple[str, str]]]:
+    def get_profile_attributes_via_identification_data(self, valid_identification_points) -> Optional[
+        List[Tuple[str, str]]]:
         try:
             # Get first event type and match identification point for it
             _identification = valid_identification_points[0]
@@ -418,7 +433,7 @@ class TrackerPayload(BaseModel):
             ttl = 15 * 60
             device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
             if self.source.config:
-                ttl = int(self.source.config.get('device_fingerprint_ttl', 15*60))
+                ttl = int(self.source.config.get('device_fingerprint_ttl', 15 * 60))
             fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
             fp_profile_id = fp.get_profile_id_by_device_finger_print()
 
@@ -457,12 +472,12 @@ class TrackerPayload(BaseModel):
                     # Has identification points?
                     if valid_identification_points:
                         # We have new profile and identification point.
-                        profile_fields = self.get_profile_attributes_via_identification_data(valid_identification_points)
+                        profile_fields = self.get_profile_attributes_via_identification_data(
+                            valid_identification_points)
 
                         # We have fields that identify profile according to identification point
 
                         if profile_fields:
-
                             profile = await ProfileMerger.invoke_merge_profile(
                                 Profile.new(),
                                 merge_by=profile_fields,
@@ -478,7 +493,6 @@ class TrackerPayload(BaseModel):
                     # Then create new profile.
 
                     if profile is None:
-
                         # Create empty default profile generate profile_id
                         profile = Profile.new()
 

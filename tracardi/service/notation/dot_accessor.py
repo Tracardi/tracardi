@@ -15,7 +15,7 @@ class NotDotNotation:
 class DotAccessor:
 
     @staticmethod
-    def validate(dot_notation: str):
+    def validate(dot_notation: str) -> bool:
         return dot_notation_regex.match(dot_notation) is not None
 
     def _convert(self, data, label):
