@@ -255,6 +255,9 @@ class TrackerPayload(BaseModel):
     def has_events(self):
         return len(self.events) > 0
 
+    def has_profile(self) -> bool:
+        return isinstance(self.profile, Entity)
+
     def set_ephemeral(self, flag=True):
         self.options.update({
             "saveSession": not flag,

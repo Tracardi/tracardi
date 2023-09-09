@@ -107,10 +107,15 @@ class Tracker:
         if refer_source_id is not None and tracker_payload.has_referred_profile():
             # If referred source is different then local web page source saved in JS script
             try:
-                # Check again if it is correct source. It will throw exception if incorrect
-                await self.check_source_id(refer_source_id)
 
                 referred_profile_id = tracker_payload.get_referer_data('profile')
+
+                # Referred profile ID is the same as tracker profile ID
+                if tracker_payload.has_profile() and referred_profile_id == tracker_payload.profile.id:
+                    return tracker_payload
+
+                # Check again if it is correct source. It will throw exception if incorrect
+                await self.check_source_id(refer_source_id)
 
                 # Check if profile id exists
                 cache_load(model=Profile, id=referred_profile_id)

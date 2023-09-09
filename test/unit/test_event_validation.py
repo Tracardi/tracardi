@@ -9,7 +9,7 @@ async def test_validate_event_with_single_validation_schema():
     # Create a mock event
     event = {
         "properties": {
-            "test": "string"
+            "test": "ala"
         }
     }
 
