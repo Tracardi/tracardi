@@ -1,7 +1,7 @@
 import logging
 import redis
 from abc import ABC, abstractmethod
-from tracardi.domain.payload.event_payload import EventPayload
+
 from tracardi.service.license import License, VALIDATOR
 from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
@@ -19,11 +19,12 @@ from typing import List, Callable, Coroutine, Any, Type
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_persister import TrackerResultPersister
+from tracardi.service.tracking.event_validation import validate_events
 from tracardi.service.tracking_manager import TrackerResult, TrackingManagerBase
 from tracardi.service.tracking_orchestrator import TrackingOrchestrator
 
 if tracardi.enable_event_validation and License.has_service(VALIDATOR):
-    from com_tracardi.service.tracker_event_validator import EventsValidationHandler
+    from com_tracardi.service.tracker_event_reshaper import EventsReshaper
 
 
 logger = logging.getLogger(__name__)
@@ -80,20 +81,6 @@ class TrackerProcessor(TrackProcessorBase):
                 memory=None
             )
 
-            # -------------
-
-            # Variable tracker_payloads has a list of tracker payloads
-            #
-            # [{profile, events[]}, ..]
-            #
-            # Each payload is for one profile. If there is a reshape that has profile ID or session ID mapping
-            # that means that this payload could be reassigned to different profile. Therefore, it is another
-            # tracker_payload tracker_payloads:
-            #
-            # [{profile, events[]}, {profile, events[]} <- THIS ONE]
-            #
-            # Most of the time there will be only one tracker_payload in tracker_payloads
-
             # Use redis to lock profile
 
             orchestrator = TrackingOrchestrator(
@@ -113,16 +100,16 @@ class TrackerProcessor(TrackProcessorBase):
                 if not tracker_payload.events:
                     continue
 
-                # Validation and reshaping
-                print(tracardi.enable_event_validation and License.has_service(VALIDATOR))
                 if tracardi.enable_event_validation and License.has_service(VALIDATOR):
-                    # Index traits, validate and reshape, oly if license and there are event to reshape
-                    evh = EventsValidationHandler(dot, self.console_log)
-                    tracker_payload = await evh.validate_reshape_index_events(tracker_payload)
+                    # Validate events. Checks validators and its conditions and sets validation status.
 
-                    # todo other way of validation
+                    # Event payload will be filled with validation status. Mutates tracker_payload
+                    tracker_payload = await validate_events(tracker_payload)
 
-                    await tracker_payload.validate_events()
+                    # Reshape valid events
+
+                    evh = EventsReshaper(dot, self.console_log)
+                    tracker_payload = await evh.reshape_events(tracker_payload)
 
                 # Locks for processing each profile
                 result = await orchestrator.invoke(tracker_payload, self.console_log)

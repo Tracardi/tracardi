@@ -18,17 +18,28 @@ from ...service.string_manager import capitalize_event_type_id
 from ...service.utils.getters import get_entity, get_entity_id
 
 
+class ProcessStatus(BaseModel):
+    error: bool
+    message: Optional[str] = None
+
+
 class EventPayload(BaseModel):
+    id: str
     time: Optional[Time] = Time()
     type: str
     properties: Optional[dict] = {}
     options: Optional[dict] = {}
     context: Optional[dict] = {}
     tags: Optional[list] = []
+    validation: Optional[ProcessStatus] = None
+    reshaping: Optional[ProcessStatus] = None
 
     _source_id: str = PrivateAttr(None)
 
     def __init__(self, **data: Any):
+
+        if 'id' not in data:
+            data['id'] = str(uuid4())
 
         if 'time' not in data:
             data['time'] = Time(insert=datetime.utcnow())

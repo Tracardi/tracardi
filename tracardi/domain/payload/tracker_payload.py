@@ -11,8 +11,7 @@ from pydantic import PrivateAttr, BaseModel
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.utils.getters import get_entity_id
 
-from tracardi.config import tracardi, memory_cache
-from ..storage_record import StorageRecords
+from tracardi.config import tracardi
 from ...service.cache_manager import CacheManager
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
@@ -28,7 +27,6 @@ from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
-from ...service.tracking.event_validation import get_event_validation_result
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
@@ -38,6 +36,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = CacheManager()
+
 
 class ScheduledEventConfig:
 
@@ -228,14 +227,6 @@ class TrackerPayload(BaseModel):
         #                                         self.session,
         #                                         self.profile,
         #                                         self.profile_less)
-
-    async def validate_events(self):
-        for event_dict in self.get_events_dict():
-            validation_schemas = await cache.event_validation(
-                event_type=event_dict['type'],
-                ttl=memory_cache.event_validation_cache_ttl)
-            error, message = await get_event_validation_result(event_dict, validation_schemas)
-            print(error, message)
 
     def set_headers(self, headers: dict):
         if 'authorization' in headers:

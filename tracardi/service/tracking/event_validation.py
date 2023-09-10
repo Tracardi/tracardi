@@ -1,4 +1,7 @@
 import jsonschema
+
+from tracardi.domain.payload.event_payload import ProcessStatus
+from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -7,7 +10,8 @@ from tracardi.exceptions.exception import EventValidationException
 from dotty_dict import Dotty
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.parser import Parser
-from typing import List, Tuple, Optional
+from typing import Tuple, Optional
+from tracardi.config import memory_cache
 
 parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
 cache = CacheManager()
@@ -48,26 +52,48 @@ def _get_validators_that_meet_condition(validators, dot: DotAccessor):
     return validators_to_use
 
 
-def _validate_with_multiple_schemas(event: dict, validators: List[EventValidator]) -> Tuple[bool, Optional[str]]:
-    dot = DotAccessor(
-        profile=None,
-        session=None,
-        payload=None,
-        event=event,
-        flow=None,
-        memory=None
-    )
-
-    validators_to_use = _get_validators_that_meet_condition(validators, dot)
-
-    for validator in validators_to_use:
-        error, message = _validate(validator, dot)
-        if error:
-            return error, message
-    return False, None
-
-
-async def get_event_validation_result(event: dict, validation_schemas: StorageRecords) -> Tuple[bool, Optional[str]]:
+async def _get_event_validation_result(event: dict, validation_schemas: StorageRecords) -> Tuple[bool, Optional[str]]:
     if validation_schemas:
-        return _validate_with_multiple_schemas(event, validation_schemas.to_domain_objects(EventValidator))
+
+        dot = DotAccessor(
+            profile=None,
+            session=None,
+            payload=None,
+            event=event,
+            flow=None,
+            memory=None
+        )
+
+        validators = validation_schemas.to_domain_objects(EventValidator)
+
+        validators_to_use = _get_validators_that_meet_condition(validators, dot)
+
+        for validator in validators_to_use:
+            error, message = _validate(validator, dot)
+            if error:
+                return error, message
+        return False, None
+
     return False, None
+
+
+async def validate_events(tracker_payload: TrackerPayload) -> TrackerPayload:
+
+    """
+    Mutates the tracker payload and ads ProcessStatus to events.
+    """
+
+    for event_payload in tracker_payload.events:
+        validation_schemas = await cache.event_validation(
+            event_type=event_payload.type,
+            ttl=memory_cache.event_validation_cache_ttl)
+        validation_error, error_message = await _get_event_validation_result(event_payload.to_event_dict(
+            tracker_payload.source,
+            tracker_payload.session,
+            tracker_payload.profile,
+            not tracker_payload.profile_less
+        ), validation_schemas)
+
+        event_payload.validation = ProcessStatus(error=validation_error, message=error_message)
+
+    return tracker_payload
