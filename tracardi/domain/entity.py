@@ -24,7 +24,7 @@ class Creatable(BaseModel):
         if not record:
             return None
 
-        obj = cls(**record)
+        obj = cls(**dict(record))
 
         if hasattr(obj, 'set_meta_data'):
             obj.set_meta_data(record.get_meta_data())

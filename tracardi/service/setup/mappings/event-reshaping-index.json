@@ -24,11 +24,6 @@
         "dynamic": "true",
         "type": "object"
       },
-      "mapping": {
-        "enabled": false,
-        "dynamic": "true",
-        "type": "object"
-      },
       "tags": {
         "type": "keyword"
       },

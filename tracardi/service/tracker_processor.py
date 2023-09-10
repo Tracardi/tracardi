@@ -80,48 +80,7 @@ class TrackerProcessor(TrackProcessorBase):
                 memory=None
             )
 
-            if tracardi.enable_event_validation and License.has_service(VALIDATOR):
-
-                # Get events to be reshaped
-                # Separated tracker payload into items to must be reshaped separately
-
-                separated_tracker_payloads_for_profile_mapping = []
-                for tp_position, tracker_payload in enumerate(tracker_payloads):  # type: int, TrackerPayload
-                    remove_event_list = []
-                    # TODO Maybe this should be moved after the full session is available
-                    # Event will not have os, device, page - no full session available
-                    for ev_position, event_payload in enumerate(tracker_payload.events):
-
-                        reshaping_schemas = await EventsValidationHandler.get_reshape_schemas(
-                            event_payload.type,
-                            is_valid_event=True)
-
-                        if reshaping_schemas is not None:
-
-                            # Check if we have to reshape the tracker_payload and it has mapped
-                            # profile ID and session ID
-
-                            must_be_reshaped = reshaping_schemas.has_profile_or_session_mapping()
-
-                            # Zdarzenia które maja zmappowane Profile ID lub Session ID muszą być wyodrębnione z
-                            # pozostałych zdarzeń które są w tracker_payload. Tracker payload może miec wiele zdarzeń
-                            # sposód których tylko niektóre mogą być przeznaczone do reshape.
-
-                            if must_be_reshaped:
-                                # todo pydantic v2
-                                tp = tracker_payload.copy(exclude={"events": ...})
-                                tp.events = [event_payload]
-                                separated_tracker_payloads_for_profile_mapping.append(tp)
-                                remove_event_list.append(ev_position)
-
-                    # wyłącz z obecnego tracker payload zdarzenia które będą reshapowane
-
-                    tracker_payload.events = [event for pos, event in enumerate(tracker_payload.events)
-                                              if pos not in remove_event_list]
-
-                # Dodaj listy payloadów te które mają być reshaped.
-                if separated_tracker_payloads_for_profile_mapping:
-                    tracker_payloads += separated_tracker_payloads_for_profile_mapping
+            # -------------
 
             # Variable tracker_payloads has a list of tracker payloads
             #
