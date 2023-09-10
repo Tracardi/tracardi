@@ -72,15 +72,6 @@ class TrackerProcessor(TrackProcessorBase):
 
         try:
 
-            dot = DotAccessor(
-                profile=None,
-                session=None,
-                payload=None,
-                event=None,
-                flow=None,
-                memory=None
-            )
-
             # Use redis to lock profile
 
             orchestrator = TrackingOrchestrator(
@@ -108,8 +99,8 @@ class TrackerProcessor(TrackProcessorBase):
 
                     # Reshape valid events
 
-                    evh = EventsReshaper(dot, self.console_log)
-                    tracker_payload = await evh.reshape_events(tracker_payload)
+                    evh = EventsReshaper(tracker_payload)
+                    tracker_payload = await evh.reshape_events()
 
                 # Locks for processing each profile
                 result = await orchestrator.invoke(tracker_payload, self.console_log)

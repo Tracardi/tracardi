@@ -19,20 +19,6 @@ class EventReshapeDefinition(BaseModel):
 
 class ReshapeSchema(BaseModel):
     reshape_schema: EventReshapeDefinition
-    condition: Optional[str] = None
-
-    @field_validator("condition")
-    @classmethod
-    def check_if_condition_valid(cls, value):
-        if value:
-            try:
-                condition = Condition()
-                condition.parse(value)
-            except Exception as _:
-                raise ValueError("Condition expression could not be parsed. It seems to be invalid.")
-            return value
-        else:
-            return None
 
 
 class EventReshapingSchema(NamedEntity):
