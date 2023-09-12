@@ -142,6 +142,7 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
         self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
         self.enable_event_validation = env.get('ENABLE_EVENT_VALIDATION', 'yes').lower() == 'yes'
+        self.enable_event_reshaping = env.get('ENABLE_EVENT_RESHAPING', 'yes').lower() == 'yes'
         self.enable_event_source_check = env.get('ENABLE_EVENT_SOURCE_CHECK', 'yes').lower() == 'yes'
         self.enable_profile_immediate_flush = env.get('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes').lower() == 'yes'
         self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
