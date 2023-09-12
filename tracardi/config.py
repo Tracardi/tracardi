@@ -147,6 +147,7 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
         self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
+        self.async_tracking = env.get('ASYNC_TRACKING', 'yes').lower() == 'yes'
 
         # Not used now
         self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'

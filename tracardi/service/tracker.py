@@ -280,7 +280,7 @@ class Tracker:
             )
 
             return await tp.handle(
-                TrackerPayloads([tracker_payload]),
+                tracker_payload,
                 source,
                 self.tracker_config
             )

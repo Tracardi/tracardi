@@ -2,12 +2,12 @@ import logging
 import redis
 from abc import ABC, abstractmethod
 
-from tracardi.service.license import License, VALIDATOR
+from com_tracardi.service.tracking.track_async import track_async
+from tracardi.service.license import License
 from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import TracardiException
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.synchronizer import profile_synchronizer
@@ -19,12 +19,9 @@ from typing import List, Callable, Coroutine, Any, Type
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_persister import TrackerResultPersister
-from tracardi.service.tracking.event_validation import validate_events
+
 from tracardi.service.tracking_manager import TrackerResult, TrackingManagerBase
 from tracardi.service.tracking_orchestrator import TrackingOrchestrator
-
-if tracardi.enable_event_validation and License.has_service(VALIDATOR):
-    from com_tracardi.service.tracker_event_reshaper import EventsReshaper
 
 
 logger = logging.getLogger(__name__)
@@ -38,8 +35,8 @@ class TrackProcessorBase(ABC):
                  console_log: ConsoleLog,
                  on_profile_merge: Callable[[Profile], Profile] = None,
                  on_profile_ready: Type[TrackingManagerBase] = None,
-                 on_result_ready: Callable[[List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None):
-
+                 on_result_ready: Callable[
+                     [List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None):
         self.on_profile_ready = on_profile_ready
         self.on_profile_merge = on_profile_merge
         self.console_log = console_log
@@ -61,79 +58,89 @@ class TrackerProcessor(TrackProcessorBase):
         return await tp.persist(tracker_results)
 
     async def handle(self,
-                     tracker_payloads: TrackerPayloads,
+                     tracker_payload: TrackerPayload,
                      source: EventSource,
-                     tracker_config: TrackerConfig) -> List[CollectResult]:
+                     tracker_config: TrackerConfig):
 
         """
         Starts collecting data and process it.
         """
-        responses = []
 
-        try:
+        if tracardi.async_tracking and License.has_license():
 
-            # Use redis to lock profile
+            # This is a commercial way of tracking
 
-            orchestrator = TrackingOrchestrator(
-                source,
-                tracker_config,
-                on_profile_merge=self.on_profile_merge,
-                on_profile_ready=self.on_profile_ready
-            )
+            return await track_async(source, tracker_payload, tracker_config)
 
-            tracker_results: List[TrackerResult] = []
-            debugging: List[TrackerPayload] = []
+        else:
 
-            for tracker_payload in tracker_payloads:
+            responses = []
+            try:
 
-                # if no events in payload continue
+                # Use redis to lock profile
 
-                if not tracker_payload.events:
-                    continue
+                orchestrator = TrackingOrchestrator(
+                    source,
+                    tracker_config,
+                    on_profile_merge=self.on_profile_merge,
+                    on_profile_ready=self.on_profile_ready
+                )
 
-                if tracardi.enable_event_validation and License.has_service(VALIDATOR):
-                    # Validate events. Checks validators and its conditions and sets validation status.
+                tracker_results: List[TrackerResult] = []
+                debugging: List[TrackerPayload] = []
 
-                    # Event payload will be filled with validation status. Mutates tracker_payload
-                    tracker_payload = await validate_events(tracker_payload)
+                # todo artificially made payloads probably do not need this
 
-                    # Reshape valid events
+                for tracker_payload in TrackerPayloads([tracker_payload]):
 
-                    evh = EventsReshaper(tracker_payload)
-                    tracker_payload = await evh.reshape_events()
+                    # if no events in payload continue
 
-                # Locks for processing each profile
-                result = await orchestrator.invoke(tracker_payload, self.console_log)
-                tracker_results.append(result)
-                responses.append(result.get_response_body(tracker_payload.get_id()))
-                debugging.append(tracker_payload)
+                    if not tracker_payload.events:
+                        continue
 
-                # Save bulk
+                    # if tracardi.enable_event_validation and License.has_service(VALIDATOR):
+                    #     # Validate events. Checks validators and its conditions and sets validation status.
+                    #
+                    #     # Event payload will be filled with validation status. Mutates tracker_payload
+                    #     tracker_payload = await validate_events(tracker_payload)
+                    #
+                    #     # Reshape valid events
+                    #
+                    #     evh = EventsReshaper(tracker_payload)
+                    #     tracker_payload = await evh.reshape_events()
 
-                if self.on_result_ready is None:
-                    save_results = await self._handle_on_result_ready(tracker_results, self.console_log)
-                else:
-                    save_results = await self.on_result_ready(tracker_results, self.console_log)
+                    # Locks for processing each profile
+                    result = await orchestrator.invoke(tracker_payload, self.console_log)
+                    tracker_results.append(result)
+                    responses.append(result.get_response_body(tracker_payload.get_id()))
+                    debugging.append(tracker_payload)
 
-                # UnLock profile
+                    # Save bulk
 
-                if orchestrator.locked and source.synchronize_profiles:
-                    profile_synchronizer.unlock_entities(orchestrator.locked)
-                    if tracardi.enable_profile_immediate_flush:
-                        await profile_db.refresh()
-                        await session_db.refresh()
+                    if self.on_result_ready is None:
+                        save_results = await self._handle_on_result_ready(tracker_results, self.console_log)
+                    else:
+                        save_results = await self.on_result_ready(tracker_results, self.console_log)
 
-                logger.debug(f"Invoke save results {save_results} tracker payloads.")
+                    # UnLock profile
 
-                # Debugging rest
+                    if orchestrator.locked and source.synchronize_profiles:
+                        profile_synchronizer.unlock_entities(orchestrator.locked)
+                        if tracardi.enable_profile_immediate_flush:
+                            await profile_db.refresh()
+                            await session_db.refresh()
 
-                if tracardi.track_debug:
-                    responses = save_results.get_debugging_info(responses, debugging)
+                    logger.debug(f"Invoke save results {save_results} tracker payloads.")
 
-        except redis.exceptions.ConnectionError as e:
-            raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
+                    # Debugging rest
 
-        logger.info(f"Track responses {responses}.")
-        if len(responses) == 1:
-            return responses[0]
-        return responses
+                    if tracardi.track_debug:
+                        responses = save_results.get_debugging_info(responses, debugging)
+
+            except redis.exceptions.ConnectionError as e:
+                raise TracardiException(f"Could not connect to Redis server. Connection returned error {str(e)}")
+
+            logger.info(f"Track responses {responses}.")
+            if len(responses) == 1:
+                return responses[0]
+            return responses

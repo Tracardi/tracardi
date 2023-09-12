@@ -3,7 +3,6 @@ import logging
 import os
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from inspect import trace
 from typing import Type
 from uuid import uuid4
 
@@ -41,8 +40,7 @@ from .utils.languages import language_codes_dict, language_countries_dict
 from .utils.parser import parse_accept_language
 from ..domain.geo import Geo
 from ..domain.time import Time
-from ..process_engine.action.v1.connectors.maxmind.geoip.model.maxmind_geolite2_client import MaxMindGeoLite2Client, \
-    GeoLiteCredentials
+from ..process_engine.action.v1.connectors.maxmind.geoip.model.maxmind_geolite2_client import GeoLiteCredentials
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

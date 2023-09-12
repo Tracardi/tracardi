@@ -412,7 +412,7 @@ class TrackerPayload(BaseModel):
             return ttl > 0
         return False
 
-    async def get_profile_and_session(self, session: Session,
+    async def get_profile_and_session(self, session: Optional[Session],
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
                                       profile_less) -> Tuple[Optional[Profile], Session]:
 

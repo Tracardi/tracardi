@@ -242,7 +242,7 @@ class TrackingManager(TrackingManagerBase):
         debugger = None
 
         # Get routing rules if workflow is not disabled
-
+        return None
         event_rules = await self.get_routing_rules(events) if tracardi.enable_workflow else None
 
         # Copy data from event to profile. This must be run just before processing.
@@ -250,6 +250,8 @@ class TrackingManager(TrackingManagerBase):
         for event in events:
 
             # Default event types coping
+
+            # todo this should be moved up in the process.
 
             copy_schema = get_default_event_type_mapping(event.type, 'profile')
 
