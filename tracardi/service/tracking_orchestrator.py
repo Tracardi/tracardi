@@ -415,8 +415,8 @@ class TrackingOrchestrator:
                 session,
                 self.on_profile_merge
             )
-
-            tracker_result = await tracking_manager.invoke_track_process()
+            events = tracking_manager.get_events()
+            tracker_result = await tracking_manager.invoke_track_process(events)
         else:
             if not issubclass(self.on_profile_ready, TrackingManagerBase):
                 raise AssertionError("Callable self.on_profile_ready should be a subtype of TrackingManagerBase.")
@@ -429,7 +429,8 @@ class TrackingOrchestrator:
                 self.on_profile_merge
             )
 
-            tracker_result = await tracking_manager.invoke_track_process()
+            events = tracking_manager.get_events()
+            tracker_result = await tracking_manager.invoke_track_process(events)
 
         # From now on do not use profile or session, use tracker_result.profile, tracker_result.session
         # For security we override old values

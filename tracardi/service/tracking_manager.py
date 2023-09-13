@@ -94,7 +94,11 @@ class TrackingManagerBase(ABC):
         pass
 
     @abstractmethod
-    async def invoke_track_process(self) -> TrackerResult:
+    async def get_events(self):
+        pass
+
+    @abstractmethod
+    async def invoke_track_process(self, events) -> TrackerResult:
         pass
 
 
@@ -228,10 +232,8 @@ class TrackingManager(TrackingManagerBase):
 
         return event_rules
 
-    async def invoke_track_process(self) -> TrackerResult:
+    async def invoke_track_process(self, events) -> TrackerResult:
 
-        # Get events
-        events = await self.get_events()
         flat_events = {event.id: dotty(event.model_dump()) for event in events}
 
         # Anonymize, data compliance

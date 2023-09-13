@@ -66,7 +66,7 @@ class TrackerProcessor(TrackProcessorBase):
         Starts collecting data and process it.
         """
 
-        if tracardi.async_tracking and License.has_license():
+        if License.has_license():
 
             # This is a commercial way of tracking
 

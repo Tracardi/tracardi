@@ -78,7 +78,7 @@ class EventPayload(BaseModel):
 
         event_type = self.type.strip()
         event = Event.dictionary(
-            id=str(uuid4()),
+            id=str(uuid4()) if not self.id else self.id,
             profile_id=get_entity_id(profile),
             session_id=get_entity_id(session),
             type=event_type,
