@@ -120,6 +120,7 @@ class TrackingManager(TrackingManagerBase):
         self.profile_copy = None
         self.has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
 
+        # This is already done in track_async
         if self.has_profile:
             # Calculate only on first click in visit
             if session.is_new():

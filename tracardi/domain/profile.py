@@ -179,3 +179,10 @@ class Profile(Entity):
             id=str(uuid.uuid4()) if not id else id,
             metadata=ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
         )
+
+    def get_savable_profile(self) -> Optional['Profile']:
+        if self.operation.new or self.operation.needs_update():
+            # Clean operations
+            self.operation = Operation()
+            return self
+        return None

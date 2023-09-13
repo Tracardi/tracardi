@@ -144,54 +144,53 @@ class EventPayload(BaseModel):
 
         if self.time.create:
             meta.time.create = self.time.create
+
         if isinstance(session, Session):
 
-            try:
-                title = self.context['page']['title']
-            except KeyError:
-                title = None
+            hit = Hit()
 
             try:
-                url = self.context['page']['url']
+                hit.title = self.context['page']['title']
             except KeyError:
-                url = None
+                pass
 
             try:
-                referer = self.context['page']['referer']['host']
+                hit.url = self.context['page']['url']
             except KeyError:
-                referer = None
+                pass
 
-            hit = Hit(
-                name=title,
-                url=url,
-                referer=referer
-            )
+            try:
+                hit.referer = self.context['page']['referer']['host']
+            except KeyError:
+                pass
+
             event_type = self.type.strip()
-            event = Event(id=str(uuid4()),
-                          name=capitalize_event_type_id(event_type),
-                          metadata=meta,
-                          session=self._get_event_session(session),
-                          profile=get_entity(profile),  # profile can be None when profile_less event.
-                          type=event_type,
+            event = Event(
+                id=str(uuid4()) if not self.id else self.id,
+                name=capitalize_event_type_id(event_type),
+                metadata=meta,
+                session=self._get_event_session(session),
+                profile=get_entity(profile),  # profile can be None when profile_less event.
+                type=event_type,
 
-                          os=session.os.model_dump(),
-                          app=session.app.model_dump(),
-                          device=session.device.model_dump(),
-                          hit=hit.model_dump(),
+                os=session.os.model_dump(exclude_unset=True),
+                app=session.app.model_dump(exclude_unset=True),
+                device=session.device.model_dump(exclude_unset=True),
+                hit=hit.model_dump(exclude_unset=True),
 
-                          utm=session.utm,
+                utm=session.utm,
 
-                          properties=self.properties,
-                          source=source if not self._source_id else Entity(id=self._source_id),  # Entity
-                          config=self.options,
-                          context=self.context,
-                          operation=RecordFlag(new=True),
-                          tags=Tags(values=tuple(self.tags), count=len(self.tags))
-                          )
+                properties=self.properties,
+                source=source if not self._source_id else Entity(id=self._source_id),  # Entity
+                config=self.options,
+                context=self.context,
+                operation=RecordFlag(new=True),
+                tags=Tags(values=tuple(self.tags), count=len(self.tags))
+            )
 
         else:
             event_type = self.type.strip()
-            event = Event(id=str(uuid4()),
+            event = Event(id=str(uuid4()) if not self.id else self.id,
                           name=capitalize_event_type_id(event_type),
                           metadata=meta,
                           session=self._get_event_session(session),

@@ -34,7 +34,7 @@ from tracardi.service.tracking_manager import TrackingManager, TrackerResult, Tr
 from tracardi.service.utils.getters import get_entity_id
 from user_agents import parse
 
-from .maxmind_geo import get_geo_location
+from .maxmind_geo import get_geo_maxmind_location
 from .utils.domains import free_email_domains
 from .utils.languages import language_codes_dict, language_countries_dict
 from .utils.parser import parse_accept_language
@@ -357,7 +357,7 @@ class TrackingOrchestrator:
                 # new. In this case, regardless of whether the session is new or not, the code checks if the profile's
                 # geo location is empty. If it is empty, the code proceeds to fetch the geo location and assigns
                 # it to the profile.
-                _geo = await get_geo_location(GeoLiteCredentials(
+                _geo = await get_geo_maxmind_location(GeoLiteCredentials(
                         license=maxmind_license_key,
                         accountId=maxmind_account_id), ip=session.device.ip)
 
