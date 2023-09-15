@@ -415,7 +415,7 @@ class TrackingOrchestrator:
                 session,
                 self.on_profile_merge
             )
-            events = tracking_manager.get_events()
+            events = await tracking_manager.get_events()
             tracker_result = await tracking_manager.invoke_track_process(events)
         else:
             if not issubclass(self.on_profile_ready, TrackingManagerBase):

@@ -21,6 +21,7 @@ from ...service.utils.getters import get_entity, get_entity_id
 class ProcessStatus(BaseModel):
     error: bool
     message: Optional[str] = None
+    trace: Optional[list] = []
 
 
 class EventPayload(BaseModel):

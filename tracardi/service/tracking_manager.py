@@ -220,7 +220,7 @@ class TrackingManager(TrackingManagerBase):
                     ).model_dump()
                 ],
                 event
-            ) for event in events]
+            ) for event in events if event.metadata.valid]
 
             logger.debug(
                 f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
@@ -232,7 +232,7 @@ class TrackingManager(TrackingManagerBase):
 
     async def invoke_track_process(self, events) -> TrackerResult:
 
-        # flat_events = {event.id: dotty(event.model_dump()) for event in events}
+        flat_events = {event.id: dotty(event.model_dump()) for event in events}
         #
         # # Anonymize, data compliance
         # if License.has_license():

@@ -53,7 +53,10 @@ async def _load_rule(event_type, source_id):
 
 async def _get_rules_for_source_and_event_type(source: Entity, events: List[Event]) -> Tuple[
     Dict[str, List[Dict]], bool]:
-    event_types = {event.type for event in events}
+
+    # Get event types for valid events
+
+    event_types = {event.type for event in events if event.metadata.valid}
 
     # Cache rules per event types
 
