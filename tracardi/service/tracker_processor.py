@@ -70,7 +70,7 @@ class TrackerProcessor(TrackProcessorBase):
 
             # This is a commercial way of tracking
 
-            return await track_async(source, tracker_payload, tracker_config)
+            return await track_async(source, tracker_payload, tracker_config, self.console_log)
 
         else:
 

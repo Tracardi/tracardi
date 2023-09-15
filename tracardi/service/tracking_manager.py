@@ -6,7 +6,7 @@ from uuid import uuid4
 from dotty_dict import dotty
 from pydantic import ValidationError
 from tracardi.service.events import auto_index_default_event_type, copy_default_event_to_profile, \
-    get_default_event_type_mapping, call_function
+    get_default_mappings_for, call_function
 
 from tracardi.service.notation.dot_accessor import DotAccessor
 
@@ -41,9 +41,6 @@ from tracardi.service.wf.domain.flow_response import FlowResponses
 
 if License.has_service(INDEXER):
     from com_tracardi.service.event_traits_mapper import map_event_props_to_traits
-
-if License.has_license():
-    from com_tracardi.service.data_compliance import DataComplianceHandler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -235,12 +232,12 @@ class TrackingManager(TrackingManagerBase):
 
     async def invoke_track_process(self, events) -> TrackerResult:
 
-        flat_events = {event.id: dotty(event.model_dump()) for event in events}
-
-        # Anonymize, data compliance
-        if License.has_license():
-            if self.profile is not None:
-                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
+        # flat_events = {event.id: dotty(event.model_dump()) for event in events}
+        #
+        # # Anonymize, data compliance
+        # if License.has_license():
+        #     if self.profile is not None:
+        #         events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
 
         debugger = None
 
@@ -256,7 +253,7 @@ class TrackingManager(TrackingManagerBase):
 
             # todo this should be moved up in the process.
 
-            copy_schema = get_default_event_type_mapping(event.type, 'profile')
+            copy_schema = get_default_mappings_for(event.type, 'profile')
 
             profile_updated_flag = False
             flat_profile = None
@@ -414,7 +411,7 @@ class TrackingManager(TrackingManagerBase):
 
                 # Compute values
 
-                compute_schema = get_default_event_type_mapping(event.type, 'compute')
+                compute_schema = get_default_mappings_for(event.type, 'compute')
                 if compute_schema:
                     for profile_property, compute_string in compute_schema:
                         if not compute_string.startswith("call:"):
