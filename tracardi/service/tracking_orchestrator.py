@@ -27,7 +27,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.destination_orchestrator import DestinationOrchestrator
 from tracardi.service.storage.driver.elastic import debug_info as debug_info_db
-from tracardi.service.storage.loaders import get_profile_loader
+from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking_manager import TrackingManager, TrackerResult, TrackingManagerBase
@@ -127,7 +127,7 @@ class TrackingOrchestrator:
                 session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
 
         # Load profile
-        profile_loader = get_profile_loader()
+        profile_loader = profile_db.load_profile_without_identification
 
         # Force static profile id
 
