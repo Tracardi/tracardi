@@ -3,7 +3,7 @@ from typing import Optional, List
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.session import Session
-from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.driver.elastic import event_source as event_source_db
@@ -178,7 +178,7 @@ class CacheManager(metaclass=Singleton):
             )
         return await event_to_profile_db.get_event_to_profile(event_type)
 
-    async def event_mapping(self, event_type, ttl):
+    async def event_mapping(self, event_type, ttl) -> Optional[StorageRecord]:
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_metadata_cache(),

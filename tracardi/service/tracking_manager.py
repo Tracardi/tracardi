@@ -40,7 +40,7 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
 if License.has_service(INDEXER):
-    from com_tracardi.service.event_traits_mapper import map_event_props_to_traits
+    from com_tracardi.service.event_mapper import map_event_props_to_traits
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -190,10 +190,8 @@ class TrackingManager(TrackingManagerBase):
 
                 # Auto index event
                 _event = auto_index_default_event_type(_event, self.profile)
-                if License.has_service(INDEXER):
-                    _event = await map_event_props_to_traits(_event, self.console_log)
-
                 event_list.append(_event)
+
         return event_list
 
     async def get_routing_rules(self, events):
