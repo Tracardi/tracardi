@@ -98,17 +98,6 @@ class TrackerProcessor(TrackProcessorBase):
                     if not tracker_payload.events:
                         continue
 
-                    # if tracardi.enable_event_validation and License.has_service(VALIDATOR):
-                    #     # Validate events. Checks validators and its conditions and sets validation status.
-                    #
-                    #     # Event payload will be filled with validation status. Mutates tracker_payload
-                    #     tracker_payload = await validate_events(tracker_payload)
-                    #
-                    #     # Reshape valid events
-                    #
-                    #     evh = EventsReshaper(tracker_payload)
-                    #     tracker_payload = await evh.reshape_events()
-
                     # Locks for processing each profile
                     result = await orchestrator.invoke(tracker_payload, self.console_log)
                     tracker_results.append(result)

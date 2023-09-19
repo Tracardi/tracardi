@@ -152,7 +152,7 @@ class TracardiConfig(metaclass=Singleton):
         self.async_storing = env.get('ASYNC_STORING', 'yes').lower() == 'yes'
         self.bulk_storing = env.get('BULK_STORING', 'yes').lower() == 'yes'
         self.bulk_pool = int(env.get('BULK_POOL', 100))
-        self.bulk_pool_timeout = int(env.get('BULK_POOL_TIMEOUT', 1))
+        self.bulk_pool_timeout = int(env.get('BULK_POOL_TIMEOUT', 5))
         self.async_workflow = env.get('ASYNC_WORKFLOW', 'yes').lower() == 'yes'
 
         # Not used now

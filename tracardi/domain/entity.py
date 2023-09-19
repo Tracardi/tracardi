@@ -64,7 +64,7 @@ class Entity(Creatable):
             storage_info = self.storage_info()  # type: Optional[StorageInfo]
             if storage_info and storage_info.multi is True:
                 if isinstance(self, Operational):
-                    if self.operation.new is True:
+                    if self.operation.new is False:
                         logger.error(f"Entity {type(self)} does not have index set. And it is not new.")
                 else:
                     logger.info(f"Entity {type(self)} converts to index-less storage record.")
