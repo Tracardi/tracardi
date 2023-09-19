@@ -33,15 +33,16 @@ def call_function(call_string, event: Event, profile: Union[Profile, dict]):
 
 
 def cache_predefined_event_types():
-    path = os.path.join(f"{_local_dir}/setup/events/*.json")
-    for file_path in glob.glob(path):
-        with open(file_path, "r") as file:
-            try:
-                content = json.load(file)
-                for item in content:
-                    _predefined_event_types[item['id']] = item
-            except Exception as e:
-                raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
+    if not _predefined_event_types:
+        path = os.path.join(f"{_local_dir}/setup/events/*.json")
+        for file_path in glob.glob(path):
+            with open(file_path, "r") as file:
+                try:
+                    content = json.load(file)
+                    for item in content:
+                        _predefined_event_types[item['id']] = item
+                except Exception as e:
+                    raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
 
 
 def get_predefined_event_types():
@@ -88,13 +89,15 @@ async def get_event_types(query: str = None, limit: int = 1000):
 
 
 def get_default_mappings_for(event_type, type) -> Optional[dict]:
-    if event_type not in _predefined_event_types:
+    if not _predefined_event_types:
         cache_predefined_event_types()
 
     schema = _predefined_event_types.get(event_type, None)
-    if schema and type in schema:
-        return schema[type]
-    return None
+
+    if schema is None:
+        return None
+
+    return schema.get(type, None)
 
 
 def get_default_event_type_schema(event_type) -> Optional[dict]:
