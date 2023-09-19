@@ -14,7 +14,6 @@ from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.license import License, INDEXER
 
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.config import tracardi, memory_cache
@@ -39,8 +38,6 @@ from tracardi.service.storage.driver.elastic import flow as flow_db
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
-if License.has_service(INDEXER):
-    from com_tracardi.service.event_mapper import map_event_props_to_traits
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -154,7 +151,6 @@ class TrackingManager(TrackingManagerBase):
         if self.tracker_payload.events:
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
-                from datetime import datetime
                 _event = event.to_event(
                     self.tracker_payload.metadata,
                     self.tracker_payload.source,

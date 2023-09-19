@@ -7,6 +7,7 @@ from pydantic import BaseModel, field_validator, PrivateAttr
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
+from ..enum.event_status import COLLECTED
 from ..event import Event, EventSession, Tags
 from ..event_metadata import EventMetadata
 from ..event_metadata import EventPayloadMetadata
@@ -131,12 +132,15 @@ class EventPayload(BaseModel):
 
         return event
 
-    def to_event(self, metadata: EventPayloadMetadata, source: Entity,
+    def to_event(self,
+                 metadata: EventPayloadMetadata,
+                 source: Entity,
                  session: Union[Optional[Entity], Optional[Session]],
                  profile: Optional[Entity],
                  has_profile: bool) -> Event:
 
         meta = EventMetadata(**metadata.model_dump())
+        meta.status = COLLECTED
         meta.profile_less = not has_profile
         meta.instance = Entity(id=ApiInstance().id)
 
