@@ -49,13 +49,7 @@ class TrackerResultPersister:
 
             profile = tracker_result.profile
 
-            print("profile1", profile.operation.new, profile.has_meta_data())
-
-            # todo why is it changed?
             if isinstance(profile, Profile) and (profile.operation.new or profile.operation.needs_update()):
-                # Clean operations
-                profile.operation = Operation()
-                print("profile2", profile.operation.new, profile.has_meta_data())
                 yield profile
 
 
@@ -63,7 +57,6 @@ class TrackerResultPersister:
     def get_sessions_to_save(tracker_results: List[TrackerResult]) -> Generator[Session, Any, None]:
         for tracker_result in tracker_results:
             if isinstance(tracker_result.session, Session):
-                print("session1", tracker_result.session.operation.new, tracker_result.session.has_meta_data())
                 if tracker_result.session.is_new() or tracker_result.session.operation.needs_update():
                     # Session to add. Add new profile id to session if it does not exist,
                     # or profile id in session is different from the real profile id.
@@ -126,8 +119,6 @@ class TrackerResultPersister:
                             # session.context = {}
                             if not isinstance(session.context, dict):
                                 session.context = {}
-                            session.operation = Operation()
-                            print("Session2", session.operation.new, session.has_meta_data())
 
                         result = await session_db.save(sessions_to_add)
 
@@ -187,11 +178,6 @@ class TrackerResultPersister:
             event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
                 event.metadata.time.insert)
 
-            # Reset operations
-            print("event1", event.operation.new, event.has_meta_data())
-            event.operation.new = False
-            event.operation.update = False
-            print("event2", event.operation.new, event.has_meta_data())
             # Reset session id if session is not saved
             # TODO ERROR - here
             if tracker_result.tracker_payload.is_on('saveSession', default=True) is False:
