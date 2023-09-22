@@ -7,7 +7,7 @@ import yaml
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 from tracardi.service.singleton import Singleton
-from tracardi.service.utils.getters import get_env_as_int
+from tracardi.service.utils.environment import get_env_as_int
 from tracardi.service.utils.validators import is_valid_url
 
 VERSION = os.environ.get('_DEBUG_VERSION', '0.8.1')
