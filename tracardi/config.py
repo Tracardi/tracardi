@@ -150,6 +150,7 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.async_storing = env.get('ASYNC_STORING', 'yes').lower() == 'yes'
+        self.async_destinations = env.get('ASYNC_DESTINATIONS', 'yes').lower() == 'yes'
         self.bulk_storing = env.get('BULK_STORING', 'yes').lower() == 'yes'
         self.bulk_pool = int(env.get('BULK_POOL', 100))
         self.bulk_pool_timeout = int(env.get('BULK_POOL_TIMEOUT', 5))

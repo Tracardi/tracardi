@@ -7,7 +7,6 @@ from tracardi.config import tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.entity import Entity
 from tracardi.domain.enum.event_status import PROCESSED
-from tracardi.domain.value_object.operation import Operation
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.cache_manager import CacheManager
 
