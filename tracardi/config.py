@@ -150,10 +150,14 @@ class TracardiConfig(metaclass=Singleton):
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.async_storing = env.get('ASYNC_STORING', 'yes').lower() == 'yes'
         self.async_destinations = env.get('ASYNC_DESTINATIONS', 'yes').lower() == 'yes'
-        self.bulk_storing = env.get('BULK_STORING', 'yes').lower() == 'yes'
-        self.bulk_pool = get_env_as_int('BULK_POOL', 100)
+
         self.bulk_pool_timeout = get_env_as_int('BULK_POOL_TIMEOUT', 5)
         self.async_workflow = env.get('ASYNC_WORKFLOW', 'yes').lower() == 'yes'
+
+        self.pulsar_host = env.get('PULSAR_HOST', None)
+        self.pulsar_collector_topic = env.get('PULSAR_COLLECTOR_TOPIC', 'tracardi-collector')
+        self.pulsar_collector_pool = get_env_as_int('PULSAR_COLLECTOR_POOL', 100)
+        self.pulsar_serializer = env.get('PULSAR_SERIALIZER', 'pickle')
 
         # Not used now
         self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
