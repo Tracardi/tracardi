@@ -37,6 +37,7 @@ class MemoryCacheConfig:
         self.event_metadata_cache_ttl = get_env_as_int('EVENT_METADATA_CACHE_TTL', 2)
         self.event_destination_cache_ttl = get_env_as_int('EVENT_DESTINATION_CACHE_TTL', 2)
         self.profile_destination_cache_ttl = get_env_as_int('PROFILE_DESTINATION_CACHE_TTL', 2)
+        self.data_compliance_cache_ttl = get_env_as_int('DATA_COMPLIANCE_CACHE_TTL', 2)
 
 
 class ElasticConfig:
@@ -65,8 +66,6 @@ class ElasticConfig:
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
         self.query_timeout = get_env_as_int('ELASTIC_QUERY_TIMEOUT', 12)
-        self.save_pool = get_env_as_int('ELASTIC_SAVE_POOL', 0)
-        self.save_pool_ttl = get_env_as_int('ELASTIC_SAVE_POOL_TTL', 5)
         self.logging_level = _get_logging_level(
             env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 
