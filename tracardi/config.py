@@ -13,6 +13,8 @@ from tracardi.service.utils.validators import is_valid_url
 VERSION = os.environ.get('_DEBUG_VERSION', '0.8.2-dev')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
+logger = logging.getLogger(__name__)
+
 
 def _get_logging_level(level: str) -> int:
     level = level.upper()
@@ -196,6 +198,11 @@ class TracardiConfig(metaclass=Singleton):
 
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
             raise AssertionError('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
+
+        if self.async_storing and self.pulsar_host is None:
+            logger.error('Env ASYNC_STORING set to yes and PULSAR_HOST is None. Can not store async without pulsar. '
+                         'ASYNC_STORING turned off.')
+            self.async_storing = False
 
     @property
     def config(self) -> YamlConfig:

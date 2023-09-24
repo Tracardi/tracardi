@@ -37,4 +37,5 @@ class ProfileTime(Time):
 
 class EventTime(Time):
     process_time: Optional[float] = 0
+    total_time: Optional[float] = 0
 

@@ -310,7 +310,6 @@ class ElasticClient:
     def instance():
 
         global _singleton
-        print("Connecting ElasticSearch...")
 
         def get_elastic_client():
             kwargs = ElasticClient.get_elastic_config(config.elastic)

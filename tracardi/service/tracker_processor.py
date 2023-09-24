@@ -46,7 +46,8 @@ class TrackProcessorBase(ABC):
     async def handle(self,
                      tracker_payloads: TrackerPayloads,
                      source: EventSource,
-                     tracker_config: TrackerConfig) -> List[CollectResult]:
+                     tracker_config: TrackerConfig,
+                     tracking_start: float) -> List[CollectResult]:
         pass
 
 
@@ -60,7 +61,8 @@ class TrackerProcessor(TrackProcessorBase):
     async def handle(self,
                      tracker_payload: TrackerPayload,
                      source: EventSource,
-                     tracker_config: TrackerConfig):
+                     tracker_config: TrackerConfig,
+                     tracking_start: float):
 
         """
         Starts collecting data and process it.
@@ -70,7 +72,7 @@ class TrackerProcessor(TrackProcessorBase):
 
             # This is a commercial way of tracking
 
-            return await track_async(source, tracker_payload, tracker_config, self.console_log)
+            return await track_async(source, tracker_payload, tracker_config, tracking_start, self.console_log)
 
         else:
 
