@@ -1,7 +1,7 @@
 from typing import Optional, Any, List
 from uuid import uuid4
 
-from pydantic import field_validator, AnyHttpUrl
+from pydantic import field_validator
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.value_object.storage_info import StorageInfo
@@ -10,7 +10,7 @@ from tracardi.domain.value_object.storage_info import StorageInfo
 class EventRedirect(NamedEntity):
     source: NamedEntity
     description: Optional[str] = ""
-    url: AnyHttpUrl
+    url: str  # AnyHttpUrl
     props: Optional[dict] = {}
     event_type: str
     tags: Optional[List[str]] = []
