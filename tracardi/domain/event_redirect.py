@@ -1,7 +1,7 @@
-from typing import Optional, Any, List, Union
+from typing import Optional, Any, List
 from uuid import uuid4
 
-from pydantic import field_validator, AnyHttpUrl
+from pydantic import field_validator
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.value_object.storage_info import StorageInfo

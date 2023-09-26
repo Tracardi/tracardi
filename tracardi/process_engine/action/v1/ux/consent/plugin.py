@@ -1,4 +1,4 @@
-from pydantic import field_validator, AnyHttpUrl
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -8,8 +8,8 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Configuration(PluginConfig):
-    endpoint: AnyHttpUrl
-    uix_source: AnyHttpUrl
+    endpoint: str # AnyHttpUrl
+    uix_source: str # AnyHttpUrl
     position: str = "bottom"
     expand_height: int = 400
     enabled: bool = True

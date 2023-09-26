@@ -7,7 +7,7 @@ import aiohttp
 from typing import Optional
 
 from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
-from pydantic import BaseModel, AnyHttpUrl
+from pydantic import BaseModel
 
 from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
@@ -24,7 +24,7 @@ logger.addHandler(log_handler)
 
 
 class HttpCredentials(BaseModel):
-    url: AnyHttpUrl
+    url: str  # AnyHttpUrl
     username: Optional[str] = None
     password: Optional[str] = None
 

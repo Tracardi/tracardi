@@ -1,4 +1,4 @@
-from pydantic import field_validator, AnyHttpUrl
+from pydantic import field_validator
 from pydantic.main import BaseModel
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.named_entity import NamedEntity
@@ -25,7 +25,7 @@ class AwsSqsConfiguration(PluginConfig):
     source: NamedEntity
     message: Content
     region_name: str
-    queue_url: AnyHttpUrl
+    queue_url: str # AnyHttpUrl
     delay_seconds: int = 0
     message_attributes: str
 

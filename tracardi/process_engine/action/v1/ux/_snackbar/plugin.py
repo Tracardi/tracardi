@@ -1,4 +1,4 @@
-from pydantic import field_validator, AnyHttpUrl
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -14,7 +14,7 @@ class Configuration(PluginConfig):
     hide_after: str
     position_x: str
     position_y: str
-    uix_mf_source: AnyHttpUrl = "http://localhost:8686"
+    uix_mf_source: str = "http://localhost:8686"  # AnyHttpUrl
 
     @field_validator("message")
     @classmethod
