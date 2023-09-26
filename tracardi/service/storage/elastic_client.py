@@ -316,7 +316,7 @@ class ElasticClient:
             return ElasticClient(**kwargs)
 
         if _singleton is None:
-            print("ElasticSearch singleton created...")
+            logger.info("ElasticSearch singleton created...")
             _singleton = get_elastic_client()
 
         return _singleton
