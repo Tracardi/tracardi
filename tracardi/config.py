@@ -155,6 +155,9 @@ class TracardiConfig(metaclass=Singleton):
         self.async_destinations = env.get('ASYNC_DESTINATIONS', 'yes').lower() == 'yes'
         self.async_workflow = env.get('ASYNC_WORKFLOW', 'yes').lower() == 'yes'
 
+        self.profile_cache_ttl = get_env_as_int('PROFILE_CACHE_TTL', 60)
+        self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 60)
+
         # Not used now
         self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)

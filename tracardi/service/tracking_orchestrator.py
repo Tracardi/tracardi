@@ -192,7 +192,7 @@ class TrackingOrchestrator:
                     )
                 )
 
-            if session.is_new():
+            if session.operation.new:
                 # Add session created event to the registered events
                 tracker_payload.events.append(
                     EventPayload(
@@ -204,7 +204,7 @@ class TrackingOrchestrator:
                 )
 
         # Is new session
-        if session.is_new():
+        if session.operation.new:
 
             # Compute the User Agent data
             try:

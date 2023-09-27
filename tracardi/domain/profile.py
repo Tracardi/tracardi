@@ -48,6 +48,12 @@ class Profile(Entity):
         super().__init__(**data)
         self._add_id_to_ids()
 
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
+
     def serialize(self):
         return {
             "profile": self.model_dump(),

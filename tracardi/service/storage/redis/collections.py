@@ -12,11 +12,12 @@ class Queue:
 class Collection:
     throttle: str = "throttle:"  # Cache for limiter plugin
     token: str = "token:"  # Cache for token memory/db for authentication
-    plugin_memory: str = "plugin-memory:"
-    profile: str = "profile:"
-    session: str = "session"
-    profile_fields: str = "profile:fields"  # Cache profile fields, properties for auto completion
-    event_fields: str = "event:fields"  # Cache event fields, properties for auto completion
+    plugin_memory: str = "plugin-memory:"  # HASH
+    profile_copy: str = "profile-copy:"  # HASH
+    profile: str = "profile:"  # HASH
+    session: str = "session:"  # HASH
+    profile_fields: str = "profile:fields"  # SET, Cache profile fields, properties for auto completion
+    event_fields: str = "event:fields"  # SET, Cache event fields, properties for auto completion
     session_fields: str = "session:fields"  # Cache session fields, properties for auto completion
     postpone_schedule: str = "delay:schedule-flag"  # Cache postponed execution (call)
     postpone_flag: str = "delay:postpone-flag"  # Cache postponed execution (call)

@@ -117,7 +117,7 @@ class TrackingManager(TrackingManagerBase):
         # This is already done in track_async
         if self.has_profile:
             # Calculate only on first click in visit
-            if session.is_new():
+            if session.operation.new:
                 profile.metadata.time.visit.set_visits_times()
                 profile.metadata.time.visit.count += 1
                 profile.operation.update = True

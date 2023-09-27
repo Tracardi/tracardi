@@ -1,29 +1,30 @@
+from typing import Optional, Any
+
 from tracardi.service.storage.redis_client import RedisClient
 import msgpack
 
 
 class RedisCache:
 
-    def __init__(self, ttl, prefix):
+    def __init__(self, ttl):
         self._redis = RedisClient()
         self.ttl = ttl
-        self.prefix = prefix
 
-    def __setitem__(self, key, value):
-        self._redis.set(f"{self.prefix}{key}", msgpack.packb(value), ex=self.ttl)
+    def set(self, key:str, value: Any, collection: str):
+        self._redis.set(f"{collection}{key}", msgpack.packb(value), ex=self.ttl)
 
-    def __getitem__(self, key):
-        value = self._redis.get(f"{self.prefix}{key}")
+    def get(self, key:str, collection: str) -> Optional[Any]:
+        value = self._redis.get(f"{collection}{key}")
         if value is None:
             return None
 
         return msgpack.unpackb(value)
 
-    def __delitem__(self, key):
-        self._redis.delete(f"{self.prefix}{key}")
+    def delete(self, key: str, collection: str):
+        self._redis.delete(f"{collection}{key}")
 
-    def __contains__(self, key):
-        return self._redis.exists(f"{self.prefix}{key}")
+    def has(self, key, collection):
+        return self._redis.exists(f"{collection}{key}")
 
-    def refresh(self, key):
-        self._redis.expire(f"{self.prefix}{key}", self.ttl)
+    def refresh(self, key, collection):
+        self._redis.expire(f"{collection}{key}", self.ttl)

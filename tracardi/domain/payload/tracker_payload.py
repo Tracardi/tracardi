@@ -1,3 +1,5 @@
+import time
+
 import json
 import logging
 from hashlib import sha1
@@ -57,6 +59,7 @@ class TrackerPayload(BaseModel):
     _scheduled_flow_id: str = PrivateAttr(None)
     _scheduled_node_id: str = PrivateAttr(None)
     _tracardi_referer: dict = PrivateAttr({})
+    _timestamp: float = PrivateAttr(None)
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -79,6 +82,7 @@ class TrackerPayload(BaseModel):
         super().__init__(**data)
         self._id = str(uuid4())
         self._tracardi_referer = self.get_tracardi_data_referer()
+        self._timestamp = time.time()
         if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
             if isinstance(self.options['scheduledFlowId'], str) and isinstance(self.options['scheduledNodeId'], str):
                 if len(self.events) > 1:
@@ -107,6 +111,9 @@ class TrackerPayload(BaseModel):
         self.session = Entity(id=session_id)
         self.profile_less = False
         self.options.update({"saveSession": True})
+
+    def get_timestamp(self) -> float:
+        return self._timestamp
 
     def generate_profile_and_session_for_webhook(self, console_log: list) -> bool:
 

@@ -101,9 +101,6 @@ class Session(Entity):
             self.os = session.os
             self.app = session.app
 
-    def is_new(self) -> bool:
-        return self.operation.new
-
     def is_reopened(self) -> bool:
         return self.operation.new or self.metadata.status == 'ended'
 
@@ -115,3 +112,9 @@ class Session(Entity):
             exclude={"operation": ...},
             multi=True
         )
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
