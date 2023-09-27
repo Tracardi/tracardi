@@ -150,9 +150,9 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
         self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
-        self.async_destinations = env.get('ASYNC_DESTINATIONS', 'yes').lower() == 'yes'
-
         self.bulk_pool_timeout = get_env_as_int('BULK_POOL_TIMEOUT', 5)
+
+        self.async_destinations = env.get('ASYNC_DESTINATIONS', 'yes').lower() == 'yes'
         self.async_workflow = env.get('ASYNC_WORKFLOW', 'yes').lower() == 'yes'
 
         # Not used now
