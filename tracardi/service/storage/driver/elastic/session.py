@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Set
 
 from tracardi.config import tracardi
 from tracardi.domain.session import Session
@@ -18,7 +18,7 @@ async def save_sessions(sessions: List[Session]):
     return await storage_manager("session").upsert(sessions, exclude={"operation": ...})
 
 
-async def save(session: Union[Session, List[Session]]) -> BulkInsertResult:
+async def save(session: Union[Session, List[Session], Set[Session]]) -> BulkInsertResult:
     return await storage_manager('session').upsert(session, exclude={"operation": ...})
 
 
