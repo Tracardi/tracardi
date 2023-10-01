@@ -9,8 +9,9 @@ from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from collections import defaultdict
 from datetime import datetime
-from typing import Optional, List, Dict, Tuple, Any
-from pydantic.utils import deep_update, KeyType
+from typing import Optional, List, Dict, Tuple
+from pydantic.utils import deep_update
+# from pydantic.v1.utils import deep_update
 
 from ..config import tracardi
 from ..domain.metadata import ProfileMetadata
@@ -215,7 +216,7 @@ class ProfileMerger:
         return merge_key_values
 
     @staticmethod
-    def _deep_update(mapping: Dict[KeyType, Any], *updating_mappings: Dict[KeyType, Any]) -> Dict[KeyType, Any]:
+    def _deep_update(mapping: Dict, *updating_mappings: Dict) -> Dict:
         updated_mapping = mapping.copy()
         for updating_mapping in updating_mappings:
             for k, v in updating_mapping.items():

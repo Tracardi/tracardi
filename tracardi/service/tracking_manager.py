@@ -5,6 +5,7 @@ from typing import List, Optional, Callable
 from uuid import uuid4
 from dotty_dict import dotty
 from pydantic.error_wrappers import ValidationError
+# from pydantic import ValidationError   # pydatnic v2.0
 from tracardi.service.events import auto_index_default_event_type, copy_default_event_to_profile, \
     get_default_event_type_mapping, call_function
 
@@ -32,7 +33,7 @@ from tracardi.domain.session import Session
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
-from tracardi.service.segmentation import segment
+from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.service.storage.driver.elastic import segment as segment_db
 from tracardi.service.storage.driver.elastic import rule as rule_db
 from tracardi.service.storage.driver.elastic import flow as flow_db
@@ -40,7 +41,7 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
 if License.has_service(INDEXER):
-    from com_tracardi.service.event_indexer import index_event_traits
+    from com_tracardi.service.event_traits_mapper import map_event_props_to_traits
 
 if License.has_license():
     from com_tracardi.service.data_compliance import DataComplianceHandler
@@ -118,7 +119,7 @@ class TrackingManager(TrackingManagerBase):
 
         if self.has_profile:
             # Calculate only on first click in visit
-            if session.operation.new:
+            if session.is_new():
                 logger.info("Profile visits metadata changed.")
                 profile.metadata.time.visit.set_visits_times()
                 profile.metadata.time.visit.count += 1
@@ -152,6 +153,7 @@ class TrackingManager(TrackingManagerBase):
         if self.tracker_payload.events:
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
+                from datetime import datetime
                 _event = event.to_event(
                     self.tracker_payload.metadata,
                     self.tracker_payload.source,
@@ -165,6 +167,16 @@ class TrackingManager(TrackingManagerBase):
 
                 # Append session data
                 if isinstance(self.session, Session):
+
+                    # Add session status
+                    if _event.type == 'visit-started':
+                        self.session.metadata.status = 'started'
+                        self.session.operation.update = True
+
+                    if _event.type == 'visit-ended':
+                        self.session.metadata.status = 'ended'
+                        self.session.operation.update = True
+
                     _event.session.start = self.session.metadata.time.insert
                     _event.session.duration = self.session.metadata.time.duration
 
@@ -178,24 +190,12 @@ class TrackingManager(TrackingManagerBase):
                 # Auto index event
                 _event = auto_index_default_event_type(_event, self.profile)
                 if License.has_service(INDEXER):
-                    _event = await index_event_traits(_event, self.console_log)
+                    _event = await map_event_props_to_traits(_event, self.console_log)
 
                 event_list.append(_event)
         return event_list
 
-    async def invoke_track_process(self) -> TrackerResult:
-
-        # Get events
-        events = await self.get_events()
-        flat_events = {event.id: dotty(event.dict()) for event in events}
-
-        # Anonymize, data compliance
-        if License.has_license():
-            if self.profile is not None:
-                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
-
-        debugger = None
-        segmentation_result = None
+    async def get_routing_rules(self, events):
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
@@ -226,6 +226,25 @@ class TrackingManager(TrackingManagerBase):
         else:
             # Routing rules are subject to caching
             event_rules = await rule_db.load_rules(self.tracker_payload.source, events)
+
+        return event_rules
+
+    async def invoke_track_process(self) -> TrackerResult:
+
+        # Get events
+        events = await self.get_events()
+        flat_events = {event.id: dotty(event.dict()) for event in events}
+
+        # Anonymize, data compliance
+        if License.has_license():
+            if self.profile is not None:
+                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
+
+        debugger = None
+
+        # Get routing rules if workflow is not disabled
+
+        event_rules = await self.get_routing_rules(events) if tracardi.enable_workflow else None
 
         # Copy data from event to profile. This must be run just before processing.
 
@@ -298,9 +317,14 @@ class TrackingManager(TrackingManagerBase):
 
                     if coping_schema.event_to_profile:
                         allowed_profile_fields = (
-                            "data", "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux")
+                            "data", "traits", "pii", "ids", "stats", "segments", "interests", "consents", "aux", "misc", "trash")
                         for event_ref, profile_ref, operation in coping_schema.items():
                             if not profile_ref.startswith(allowed_profile_fields):
+                                message = f"You are trying to copy the data to unknown field in profile. " \
+                                          f"Your profile reference `{profile_ref}` does not start with typical " \
+                                          f"fields that are {allowed_profile_fields}. Please check if there isn't " \
+                                          f"an error in your copy schema. Data will not be copied if it does not " \
+                                          f"match Profile schema."
                                 self.console_log.append(
                                     Console(
                                         flow_id=None,
@@ -311,16 +335,33 @@ class TrackingManager(TrackingManagerBase):
                                         class_name=TrackingManager.__name__,
                                         module=__name__,
                                         type='warning',
-                                        message=f"You are trying to copy the data to unknown field in profile. "
-                                                f"Your profile reference `{profile_ref}` does not start with typical "
-                                                f"fields that are {allowed_profile_fields}. Please check if there isn't "
-                                                f"an error in your copy schema. Data will not be copied if it does not "
-                                                f"match Profile schema.",
+                                        message=message,
                                         traceback=[]
                                     )
                                 )
+                                logger.warning(message)
+                                continue
 
                             try:
+                                if not flat_event[event_ref]:
+                                    message = f"Value of event@{event_ref} is None or empty. " \
+                                              f"No data has been assigned to profile@{profile_ref}"
+                                    self.console_log.append(
+                                        Console(
+                                            flow_id=None,
+                                            node_id=None,
+                                            event_id=event.id,
+                                            profile_id=get_entity_id(self.profile),
+                                            origin='event',
+                                            class_name=TrackingManager.__name__,
+                                            module=__name__,
+                                            type='warning',
+                                            message=message
+                                        )
+                                    )
+                                    logger.warning(message)
+                                    continue
+
                                 if operation == APPEND:
                                     if profile_ref not in flat_profile:
                                         flat_profile[profile_ref] = [flat_event[event_ref]]
@@ -374,7 +415,8 @@ class TrackingManager(TrackingManagerBase):
                     for profile_property, compute_string in compute_schema:
                         if not compute_string.startswith("call:"):
                             continue
-                        flat_profile[profile_property] = call_function(compute_string, event=event, profile=flat_profile)
+                        flat_profile[profile_property] = call_function(compute_string, event=event,
+                                                                       profile=flat_profile)
 
                 try:
                     metadata = self.profile.get_meta_data()
@@ -408,16 +450,16 @@ class TrackingManager(TrackingManagerBase):
                     )
                     logger.error(message)
 
-
-
         ux = []
         post_invoke_events = None
         flow_responses = FlowResponses([])
 
+        # Workflow
+
         try:
             #  If no event_rules for delivered event then no need to run rule invoke
             #  and no need for profile merging
-            if event_rules is not None:
+            if tracardi.enable_workflow and event_rules is not None:
 
                 # Skips INVALID events in invoke method
                 rules_engine = RulesEngine(
@@ -454,14 +496,6 @@ class TrackingManager(TrackingManagerBase):
                     for event in events:
                         event.metadata.processed_by.rules = invoked_rules[event.id]
                         event.metadata.processed_by.flows = rule_invoke_result.invoked_flows
-
-                    # Segment only if there is profile
-
-                    if isinstance(self.profile, Profile):
-                        # Segment
-                        segmentation_result = await segment(self.profile,
-                                                            rule_invoke_result.ran_event_types,
-                                                            segment_db.load_segments)
 
                 except Exception as e:
                     message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
@@ -526,6 +560,16 @@ class TrackingManager(TrackingManagerBase):
                 logger.debug(f"No routing rules found for workflow.")
 
         finally:
+
+            # Segment only if there is profile
+
+            if isinstance(self.profile, Profile):
+                # Post Event Segmentation
+                await post_ev_segment(self.profile,
+                                      self.session,
+                                      [event.type for event in events],
+                                      segment_db.load_segments)
+
             # Synchronize post invoke events. Replace events with events changed by WF.
             # Events are saved only if marked in event.operation.update==true
             if post_invoke_events is not None:
@@ -539,12 +583,13 @@ class TrackingManager(TrackingManagerBase):
                 events = synced_events
 
             # Run event destination
-            load_destination_task = cache.event_destination
-            await event_destination_dispatch(load_destination_task,
-                                             self.profile,
-                                             self.session,
-                                             events,
-                                             self.tracker_payload.debug)
+            if tracardi.enable_event_destinations:
+                load_destination_task = cache.event_destination
+                await event_destination_dispatch(load_destination_task,
+                                                 self.profile,
+                                                 self.session,
+                                                 events,
+                                                 self.tracker_payload.debug)
 
             return TrackerResult(
                 session=self.session,

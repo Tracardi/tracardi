@@ -27,7 +27,7 @@ async def check_if_production_db_exists():
         raise ValueError("Can not deploy in production server.")
 
     for _, stage_alias, _, production_alias in get_staged_indices():
-        if not raw_db.exists_alias(production_alias, index=None):
+        if not await raw_db.exists_alias(production_alias, index=None):
             return False
     return True
 
@@ -38,13 +38,12 @@ async def add_alias_staging_to_production():
 
     actions = []
     for stage_index, _, production_index, production_alias in get_staged_indices():
-        print(stage_index, production_index, production_alias)
         action = {"add": {"index": stage_index, "alias": production_alias}}
         actions.append(action)
         action = {"remove": {"index": production_index, "alias": production_alias}}
         actions.append(action)
     if actions:
-        return raw_db.update_aliases({
+        return await raw_db.update_aliases({
             "actions": actions
         })
 
@@ -59,7 +58,7 @@ async def remove_alias_staging_to_production():
         action = {"add": {"index": production_index, "alias": production_alias}}
         actions.append(action)
     if actions:
-        return raw_db.update_aliases({
+        return await raw_db.update_aliases({
             "actions": actions
         })
 

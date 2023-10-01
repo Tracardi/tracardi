@@ -2,8 +2,6 @@ from contextvars import ContextVar
 from typing import Optional, Any
 from uuid import uuid4
 
-from pydantic import BaseModel
-
 from tracardi.config import tracardi
 from tracardi.domain.user import User
 from tracardi.service.singleton import Singleton

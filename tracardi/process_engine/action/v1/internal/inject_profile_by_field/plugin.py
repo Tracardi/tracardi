@@ -67,7 +67,7 @@ def register() -> Plugin:
             license="MIT",
             author="Risto Kowaczewski",
             init={
-                "field": "pii.email",
+                "field": "data.contact.email",
                 "value": "event@properties.email"
             },
             manual='profile_inject_action',
@@ -81,9 +81,9 @@ def register() -> Plugin:
                             description="Select the PII profile field by which will be used to identify the profile.",
                             component=FormComponent(type="select", props={"label": "Field", "items": {
                                 "id": "Id",
-                                "pii.email": "E-mail",
-                                "pii.telephone": "Phone",
-                                "pii.twitter": "Twitter handle"
+                                "data.contact.email": "E-mail",
+                                "data.contact.phone": "Phone",
+                                "data.contact.app.twitter": "Twitter handle"
                             }})
                         ),
                         FormField(

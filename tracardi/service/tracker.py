@@ -1,8 +1,6 @@
 import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any, Optional
-
-from tracardi.context import get_context
 from tracardi.service.profile_merger import ProfileMerger
 
 from tracardi.domain.entity import Entity
@@ -246,13 +244,13 @@ class Tracker:
         source_id = tracker_payload.source.id
         ip = tracker_payload.metadata.ip
 
-        if source_id == f"@{tracardi.fingerprint}":
+        if source_id == tracardi.internal_source:
             return EventSource(
                 id=source_id,
-                type=['rest'],
+                type=['internal'],
                 bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
                 name="Internal event source",
-                description="This is internal event source for internal events.",
+                description="This is event source for internal events.",
                 channel="Internal",
                 transitional=False,  # ephemeral
                 tags=['internal']

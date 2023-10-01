@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime
 from typing import List, Union, Generator, AsyncGenerator, Any, Dict
@@ -61,7 +62,7 @@ class TrackerResultPersister:
     def get_sessions_to_save(tracker_results: List[TrackerResult]) -> Generator[Session, Any, None]:
         for tracker_result in tracker_results:
             if isinstance(tracker_result.session, Session):
-                if tracker_result.session.operation.new or tracker_result.session.operation.needs_update():
+                if tracker_result.session.is_new() or tracker_result.session.operation.needs_update():
                     # Session to add. Add new profile id to session if it does not exist,
                     # or profile id in session is different from the real profile id.
                     if tracker_result.session.profile is None or (
@@ -112,6 +113,17 @@ class TrackerResultPersister:
                         Remove session new. Add empty operation.
                         """
                         for session in sessions_to_add:
+
+                            # This is a hack. Storage has dynamic content and sometimes can not be stored.
+                            # Saves it as json and removes storage
+
+                            if 'storage' in session.context:
+                                session.context['local_storage'] = json.dumps(session.context['storage'])
+                                del(session.context['storage'])
+
+                            # session.context = {}
+                            if not isinstance(session.context, dict):
+                                session.context = {}
                             session.operation = Operation()
 
                         result = await session_db.save(sessions_to_add)
@@ -151,18 +163,22 @@ class TrackerResultPersister:
                 yield event
 
     @staticmethod
-    async def __tag_events(events: Union[List[Event], Generator[Event, Any, None]]) -> AsyncGenerator[Event, Any]:
+    async def __map_events_tags_and_journey(events: Union[List[Event], Generator[Event, Any, None]]) -> AsyncGenerator[Event, Any]:
 
         for event in events:
             try:
 
-                event_meta_data = await cache.event_metadata(event.type, ttl=memory_cache.event_metadata_cache_ttl)
-                if event_meta_data:
-                    event_type_meta_data = event_meta_data.to_entity(EventTypeMetadata)
+                event_mapping = await cache.event_mapping(event.type, ttl=memory_cache.event_metadata_cache_ttl)
+                if event_mapping:
+                    event_mapping = event_mapping.to_entity(EventTypeMetadata)
 
-                    event.tags.values = tuple(tag.lower() for tag in set(
-                        tuple(event.tags.values) + tuple(event_type_meta_data.tags)
-                    ))
+                    if event_mapping.tags:
+                        event.tags.values = tuple(tag.lower() for tag in set(
+                            tuple(event.tags.values) + tuple(event_mapping.tags)
+                        ))
+
+                    if event_mapping.journey and event.journey.is_empty():
+                        event.journey.state = event_mapping.journey
 
             except ValueError as e:
                 logger.error(str(e))
@@ -171,7 +187,7 @@ class TrackerResultPersister:
 
     async def __standard_event_save(self, events):
         tagged_events = [event async for event in
-                         self.__tag_events(self.__get_persistent_events_without_source(events))]
+                         self.__map_events_tags_and_journey(self.__get_persistent_events_without_source(events))]
         event_result = await event_db.save(tagged_events, exclude={"operation": ...})
         event_result = SaveResult(**event_result.dict())
 
@@ -188,7 +204,7 @@ class TrackerResultPersister:
                 # Watcher runs only once.
                 event_pool.watcher()
                 # Add event to the pool
-                async for event in self.__tag_events(self.__get_persistent_events_without_source(events)):
+                async for event in self.__map_events_tags_and_journey(self.__get_persistent_events_without_source(events)):
                     await event_pool.add(event)
                 return SaveResult()
         # Standard

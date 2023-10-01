@@ -28,7 +28,7 @@ class ElasticClient:
             pool = PoolManager("es-bulk-save", max_pool=elastic.save_pool, on_pool_purge=self._bulk_save)
             self.pool = pool
 
-    async def _bulk_save(self, bulk):
+    async def _bulk_save(self, bulk, attr):
         success, errors = await helpers.async_bulk(self._client, bulk)
         if errors:
             logger.error(f"Errors from pool {errors}")
@@ -86,8 +86,11 @@ class ElasticClient:
         except NotFoundError:
             return False
 
-    async def search(self, index, query):
-        return await self._client.search(index=index, body=query)
+    async def search(self, index, query, scroll=None):
+        return await self._client.search(index=index, body=query, scroll=scroll)
+
+    async def scroll(self, *args, **kwargs):
+        return await self._client.scroll(*args, **kwargs)
 
     def scan(self, index, query, scroll="5m", size=1000, preserve_order=False):
         # Does not preserve sorting

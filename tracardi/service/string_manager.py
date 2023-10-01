@@ -1,7 +1,4 @@
-import re
 from typing import Optional
-
-pattern = re.compile(r'[^a-z]')
 
 
 def capitalize_event_type_id(event_type_id: Optional[str]) -> str:
@@ -11,7 +8,3 @@ def capitalize_event_type_id(event_type_id: Optional[str]) -> str:
     return " ".join(words)
 
 
-def remove_non_alpha(text):
-    # Use regular expression to match only lowercase letters
-    cleaned_text = re.sub(pattern, '', text)
-    return cleaned_text

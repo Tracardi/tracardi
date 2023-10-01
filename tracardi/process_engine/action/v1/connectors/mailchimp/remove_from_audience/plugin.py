@@ -87,7 +87,7 @@ def register() -> Plugin:
                                 description="Please provide path to contact's e-mail address.",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "pii.email"
+                                                                               "defaultPathValue": "data.contact.email"
                                                                                })
                             ),
                         ]

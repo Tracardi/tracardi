@@ -45,7 +45,8 @@
             },
             "status": {
               "type": "keyword",
-              "null_value": "NULL"
+              "null_value": "NULL",
+              "ignore_above": 32
             },
             "channel": {
               "type": "keyword"
@@ -228,6 +229,10 @@
             "category": {
               "type": "keyword",
               "ignore_above": 64
+            },
+            "id": {
+              "type": "keyword",
+              "ignore_above": 32
             }
           }
         },
@@ -625,14 +630,36 @@
             },
             "message": {
               "properties": {
+                "id": {
+                  "type": "keyword", "ignore_above": 36
+                },
+                "conversation": {
+                  "type": "keyword", "ignore_above": 36
+                },
                 "type": {
                   "type": "keyword", "ignore_above": 32
                 },
                 "text": {
                   "type": "text"
                 },
+                "sender": {
+                  "type": "keyword",  "ignore_above": 96
+                },
                 "recipient": {
                   "type": "keyword",  "ignore_above": 96
+                },
+                "status": {
+                  "type": "keyword",  "ignore_above": 64
+                },
+                "error": {
+                  "properties": {
+                    "reason": {
+                      "type": "keyword",  "ignore_above": 256
+                    }
+                  }
+                },
+                "aux": {
+                  "type": "flattened"
                 }
               }
             },

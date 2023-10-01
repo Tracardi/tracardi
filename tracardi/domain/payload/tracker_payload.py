@@ -1,36 +1,35 @@
 import json
 import logging
 from hashlib import sha1
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
 from uuid import uuid4
 
 from dotty_dict import dotty
-from pydantic import PrivateAttr, validator, BaseModel, ValidationError
+from pydantic import PrivateAttr, BaseModel
 
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.utils.getters import get_entity_id
 
 from tracardi.config import tracardi
+from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..console import Console
-from ..event import Event
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
-from ..geo import Geo
 from ..identification_point import IdentificationPoint
-from ..marketing import UTM
 from ..payload.event_payload import EventPayload
 from ..session import Session, SessionMetadata, SessionTime
 from ..time import Time
 from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
-from user_agents import parse
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
-from ...service.utils.languages import language_codes_dict, language_countries_dict
-from ...service.utils.parser import parse_accept_language
+
+if License.has_service(LICENSE):
+    from com_tracardi.bridge.bridges import javascript_bridge
+    from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -207,7 +206,7 @@ class TrackerPayload(BaseModel):
     def get_events_dict(self) -> List[dict]:
         # Todo Cache in property - this is expensive
         for event_payload in self.events:
-            # Todo PErformance
+            # Todo Performance
             yield event_payload.to_event_dict(
                 self.source,
                 self.session,
@@ -248,6 +247,42 @@ class TrackerPayload(BaseModel):
             "saveEvents": not flag
         })
 
+    def get_browser_agent(self) -> Optional[str]:
+        try:
+            return self.context['browser']['local']['browser']['userAgent']
+        except KeyError:
+            return None
+
+    def get_browser_language(self) -> Optional[str]:
+        try:
+            return self.context['browser']['local']['browser']['language']
+        except KeyError:
+            return None
+
+    def get_ip(self) -> Optional[str]:
+        try:
+            return self.request['headers']['x-forwarded-for']
+        except KeyError:
+            return None
+
+    def get_resolution(self) -> Optional[str]:
+        try:
+            return f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"
+        except KeyError:
+            pass
+
+    def get_color_depth(self) -> Optional[int]:
+        try:
+            return int(self.context['screen']['local']['colorDepth'])
+        except KeyError:
+            return None
+
+    def get_screen_orientation(self) -> Optional[str]:
+        try:
+            return self.context['screen']['local']['orientation']
+        except KeyError:
+            return None
+
     def force_session(self, session):
         # Get session
         if self.session is None or self.session.id is None:
@@ -276,12 +311,15 @@ class TrackerPayload(BaseModel):
                 raise ValueError("Can not use static profile id without profile.id.")
 
             profile = await profile_loader(self, True)  # is_static is set to true
+
+            # Create empty profile if the profile id does nto point to any profile in database.
             if not profile:
                 profile = Profile(
                     id=self.profile.id
                 )
                 profile.operation.new = True
 
+            # Create empty session if the session id does nto point to any session in database.
             if session is None:
                 session = Session(
                     id=self.session.id,
@@ -358,6 +396,13 @@ class TrackerPayload(BaseModel):
             logger.error(f"Can not find property to load profile by identification data: {str(e)}")
             return None
 
+    def finger_printing_enabled(self):
+        if License.has_service(LICENSE) and self.source.bridge.id == javascript_bridge.id:
+            print("FP enabled")
+            ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
+            return ttl > 0
+        return False
+
     async def get_profile_and_session(self, session: Session,
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
                                       profile_less) -> Tuple[Optional[Profile], Session]:
@@ -365,6 +410,17 @@ class TrackerPayload(BaseModel):
         """
         Returns session. Creates profile if it does not exist.If it exists connects session with profile.
         """
+
+        # Fingerprinting.
+
+        fp_profile_id = None
+        if self.finger_printing_enabled():
+            ttl = 15 * 60
+            device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
+            if self.source.config:
+                ttl = int(self.source.config.get('device_fingerprint_ttl', 15*60))
+            fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
+            fp_profile_id = fp.get_profile_id_by_device_finger_print()
 
         is_new_profile = False
         is_new_session = False
@@ -387,7 +443,7 @@ class TrackerPayload(BaseModel):
 
             if profile_less is False:
 
-                # Bind profile
+                # No profile in tracker payload
                 if self.profile is None:
 
                     # First, check if the tracker_payload does not have events that need merging because
@@ -407,15 +463,13 @@ class TrackerPayload(BaseModel):
 
                         if profile_fields:
 
-
                             profile = await ProfileMerger.invoke_merge_profile(
                                 Profile.new(),
                                 merge_by=profile_fields,
                                 limit=1000)
 
+                        # todo remove after 2023-11
                         # profiles = await profile_driver.load_profiles_to_merge(merge_key_values=profile_fields)
-                        print("profiles", profile)
-                        print(profile_fields)
 
                     # If there is still no profile that means that it could not be loaded. It can happen if
                     # event properties did not have all necessary data or the is no profile with defined
@@ -521,175 +575,34 @@ class TrackerPayload(BaseModel):
 
         session.operation.new = is_new_session
 
-        if session.operation.new:
-
-            # Add session created
-            self.events.append(
-                EventPayload(type='session-opened', properties={})
-            )
-
-            # Compute the User Agent data
-            try:
-                ua_string = session.context['browser']['local']['browser']['userAgent']
-                user_agent = parse(ua_string)
-
-                session.os.version = user_agent.os.version_string
-                session.os.name = user_agent.os.family
-
-                device_type = 'mobile' if user_agent.is_mobile else \
-                    'pc' if user_agent.is_pc else \
-                        'tablet' if user_agent.is_tablet else \
-                            'email' if user_agent.is_email_client else None
-
-                if 'device' in session.context:
-                    session.device.name = session.context['device'].get('name', user_agent.device.family)
-                    session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
-                    session.device.model = session.context['device'].get('model', user_agent.device.model)
-                    session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
-                    session.device.type = session.context['device'].get('type', device_type)
-                else:
-                    session.device.name = user_agent.device.family
-                    session.device.brand = user_agent.device.brand
-                    session.device.model = user_agent.device.model
-                    session.device.touch = user_agent.is_touch_capable
-                    session.device.type = device_type
-
-                if 'location' in self.context:
-                    try:
-                        session.device.geo = Geo(**self.context['location'])
-                        del self.context['location']
-                    except ValidationError:
-                        pass
-
-                # Get Language from request and geo
-
-                spoken_languages = []
-                language_codes = []
-                if 'headers' in self.request and 'accept-language' in self.request['headers']:
-                    languages = parse_accept_language(self.request['headers']['accept-language'])
-                    if languages:
-                        spoken_lang_codes = [language for (language, _) in languages if len(language) == 2]
-                        for lang_code in spoken_lang_codes:
-                            if lang_code in language_codes_dict:
-                                spoken_languages += language_codes_dict[lang_code]
-                                language_codes.append(lang_code)
-
-                if session.device.geo.country.code:
-                    lang_code = session.device.geo.country.code.lower()
-                    if lang_code in language_codes_dict:
-                        spoken_languages += language_codes_dict[lang_code]
-                        language_codes.append(lang_code)
-
-                if spoken_languages:
-                    session.context['language'] = list(set(spoken_languages))
-                    profile.data.pii.language.spoken = session.context['language']
-
-                if 'geo' not in profile.aux:
-                    profile.aux['geo'] = {}
-
-                # Continent
-
-                if 'time' in self.context:
-                    tz = self.context['time'].get('tz', 'utc')
-
-                    if tz.lower() != 'utc':
-                        continent = tz.split('/')[0]
-                    else:
-                        continent = 'n/a'
-
-                    profile.aux['geo']['continent'] = continent
-
-
-                # Aux markets
-
-                markets = []
-                for lang_code in language_codes:
-                    if lang_code in language_countries_dict:
-                        markets += language_countries_dict[lang_code]
-
-                if markets:
-                    profile.aux['geo']['markets'] = markets
-
-                # Screen
-
-                try:
-                    session.device.resolution = f"{self.context['screen']['local']['width']}x{self.context['screen']['local']['height']}"
-                except KeyError:
-                    pass
-
-                try:
-                    session.device.color_depth = int(self.context['screen']['local']['colorDepth'])
-                except KeyError:
-                    pass
-
-                try:
-                    session.device.orientation = self.context['screen']['local']['orientation']
-                except KeyError:
-                    pass
-
-                session.app.bot = user_agent.is_bot
-                session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
-                session.app.version = user_agent.browser.version_string
-                session.app.type = "browser"
-
-                if 'utm' in self.context:
-                    try:
-                        session.utm = UTM(**self.context['utm'])
-                        del self.context['utm']
-                    except ValidationError:
-                        pass
-
-                # session.app.resolution = session.context['screen']
-
-            except Exception as e:
-                pass
-
-            try:
-                session.device.ip = self.request['headers']['x-forwarded-for']
-            except Exception:
-                pass
-
-            try:
-                session.app.language = session.context['browser']['local']['browser']['language']
-            except Exception:
-                pass
-
-        # Updates on EXISTING Session
-
-        if 'location' in self.context:
-            try:
-                # If location is sent but not available in session - update session
-                if session.device.geo.is_empty():
-                    session.device.geo = Geo(**self.context['location'])
-                    session.operation.update = True
-
-                # Add last geo to profile
-                profile.data.devices.last.geo = session.device.geo
-                profile.operation.update = True
-                del self.context['location']
-            except ValidationError:
-                pass
-
-        # If UTM is sent but not available in session - update session
-        if 'utm' in self.context and session.utm.is_empty():
-            try:
-                session.utm = UTM(**self.context['utm'])
-                session.operation.update = True
-                del self.context['utm']
-            except ValidationError:
-                pass
-
-        if isinstance(self.source, EventSource):
-            session.metadata.channel = self.source.channel
-
         if profile_less is False and profile is not None:
             profile.operation.new = is_new_profile
 
-            if profile.operation.new:
-                # Add session created
-                self.events.append(
-                    EventPayload(type='profile-created', properties={})
-                )
+        if profile:
+            # If there is fingerprinted profile and we just created new profile then load fingerprinted profile.
+            if fp_profile_id:
+                # If new profile then check if there is fingerprinted profile
+                if is_new_profile:
+                    if profile.id != fp_profile_id:
+                        # Load profile with finger printed profile id
+                        copy_of_tracker_payload = TrackerPayload(**self.dict())
+                        copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
+
+                        fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
+
+                        if fp_profile:
+                            profile = fp_profile
+                        elif self.finger_printing_enabled():
+                            fp.save_browser_finger_print(profile.id)
+
+                        print("Loading profile by FP")
+                else:
+                    pass
+                    # Todo merge with fingerprint as merge key. Do not know if I want to do this.
+
+            elif self.finger_printing_enabled():
+                # Does not have fingerprinted profile
+                fp.save_browser_finger_print(profile.id)
 
         return profile, session
 

@@ -9,3 +9,5 @@ def get_entity_id(entity: Optional[Entity]) -> Optional[str]:
 
 def get_entity(entity: Optional[Entity]) -> Optional[Entity]:
     return Entity(id=entity.id) if isinstance(entity, Entity) else None
+
+

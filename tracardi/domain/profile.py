@@ -1,198 +1,21 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List, Dict, Any, Set, Union
+from typing import Optional, List, Dict, Any, Set
 from pydantic import BaseModel
-from tracardi.service.notation.dot_accessor import DotAccessor
+
 from .entity import Entity
-from .geo import Geo
 from .metadata import ProfileMetadata
+from .profile_data import ProfileData
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
-from .segment import Segment
-from ..process_engine.tql.condition import Condition
-
-
-def force_lists(props: List[str], data):
-    for prop in props:
-        if prop in data and data[prop] is not None and not isinstance(data[prop], list):
-            data[prop] = [str(data[prop])]
-    return data
 
 
 class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
-
-
-class ProfileLanguage(BaseModel):
-    native: Optional[str] = None
-    spoken: Union[Optional[str], Optional[List[str]]] = None
-
-
-class ProfileEducation(BaseModel):
-    level: Optional[str] = None
-
-
-class ProfileCivilData(BaseModel):
-    status: Optional[str] = None
-
-
-class ProfileAttribute(BaseModel):
-    height: Optional[float] = None
-    weight: Optional[float] = None
-    shoe_number: Optional[float] = None
-
-
-class ProfilePII(BaseModel):
-    firstname: Optional[str] = None
-    lastname: Optional[str] = None
-    name: Optional[str] = None
-    birthday: Optional[datetime] = None
-    language: Optional[ProfileLanguage] = ProfileLanguage()
-    gender: Optional[str] = None
-    education: Optional[ProfileEducation] = ProfileEducation()
-    civil: Optional[ProfileCivilData] = ProfileCivilData()
-    attributes: Optional[ProfileAttribute] = ProfileAttribute()
-
-
-class ProfileContactApp(BaseModel):
-    whatsapp: Optional[str] = None
-    discord: Optional[str] = None
-    slack: Optional[str] = None
-    twitter: Optional[str] = None
-    telegram: Optional[str] = None
-    wechat: Optional[str] = None
-    viber: Optional[str] = None
-    signal: Optional[str] = None
-    other: Optional[dict] = {}
-
-
-class ProfileContactAddress(BaseModel):
-    town: Optional[str] = None
-    county: Optional[str] = None
-    country: Optional[str] = None
-    postcode: Optional[str] = None
-    street: Optional[str] = None
-    other: Optional[str] = None
-
-
-class ProfileContact(BaseModel):
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    app: Optional[ProfileContactApp] = ProfileContactApp()
-    address: Optional[ProfileContactAddress] = ProfileContactAddress()
-    confirmations: List[str] = []
-
-
-class ProfileIdentifier(BaseModel):
-    id: Optional[str] = None
-    badge: Optional[str] = None
-    passport: Optional[str] = None
-    credit_card: Optional[str] = None
-    token: Optional[str] = None
-    coupons: Optional[List[str]] = None
-
-
-class ProfileSocialMedia(BaseModel):
-    twitter: Optional[str] = None
-    facebook: Optional[str] = None
-    youtube: Optional[str] = None
-    instagram: Optional[str] = None
-    tiktok: Optional[str] = None
-    linkedin: Optional[str] = None
-    reddit: Optional[str] = None
-    other: Optional[dict] = {}
-
-
-class ProfileMedia(BaseModel):
-    image: Optional[str] = None
-    webpage: Optional[str] = None
-    social: Optional[ProfileSocialMedia] = ProfileSocialMedia()
-
-
-class ProfilePreference(BaseModel):
-
-    def __init__(self, **data: Any):
-        data = force_lists(['purchases', 'colors', 'sizes', 'devices', 'channels', 'payments', 'brands', 'fragrances',
-                            'services', 'other'], data)
-        super().__init__(**data)
-
-    purchases: Optional[List[str]] = []
-    colors: Optional[List[str]] = []
-    sizes: Optional[List[str]] = []
-    devices: Optional[List[str]] = []
-    channels: Optional[List[str]] = []
-    payments: Optional[List[str]] = []
-    brands: Optional[List[str]] = []
-    fragrances: Optional[List[str]] = []
-    services: Optional[List[str]] = []
-    other: Optional[List[str]] = []
-
-
-class ProfileCompany(BaseModel):
-    name: Optional[str] = None
-    size: Optional[int] = None
-    segment: Union[Optional[str], List[str]] = None
-    country: Optional[str] = None
-
-
-class ProfileJob(BaseModel):
-    position: Optional[str] = None
-    salary: Optional[float] = None
-    type: Optional[str] = None
-    company: Optional[ProfileCompany] = ProfileCompany()
-    department: Optional[str] = None
-
-
-class ProfileMetrics(BaseModel):
-    ltv: Optional[float] = 0
-    ltcosc: Optional[int] = 0   # Live Time Check-Out Started Counter
-    ltcocc: Optional[int] = 0  # Live Time Check-Out Completed Counter
-    ltcop: Optional[float] = 0  # Live Time Check-Out Percentage
-    ltcosv: Optional[float] = 0  # Live Time Check-Out Started Value
-    ltcocv: Optional[float] = 0  # Live Time Check-Out Completed Value
-
-
-class ProfileLoyaltyCard(BaseModel):
-    id: Optional[str] = None
-    name: Optional[str] = None
-    issuer: Optional[str] = None
-    expires: Optional[datetime] = None
-    points: Optional[float] = 0
-
-
-class ProfileLoyalty(BaseModel):
-
-    def __init__(self, **data: Any):
-        data = force_lists(['codes'], data)
-        super().__init__(**data)
-
-    codes: Optional[List[str]] = []
-    card: Optional[ProfileLoyaltyCard] = ProfileLoyaltyCard()
-
-
-class LastGeo(BaseModel):
-    geo: Optional[Geo] = Geo()
-
-
-class ProfileDevices(BaseModel):
-    names: Optional[List[str]] = []
-    last: Optional[LastGeo] = LastGeo()
-
-
-class ProfileData(BaseModel):
-    pii: Optional[ProfilePII] = ProfilePII()
-    contact: Optional[ProfileContact] = ProfileContact()
-    identifier: Optional[ProfileIdentifier] = ProfileIdentifier()
-    devices: Optional[ProfileDevices] = ProfileDevices()
-    media: Optional[ProfileMedia] = ProfileMedia()
-    preferences: Optional[ProfilePreference] = ProfilePreference()
-    job: Optional[ProfileJob] = ProfileJob()
-    metrics: Optional[ProfileMetrics] = ProfileMetrics()
-    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty()
 
 
 class Profile(Entity):
@@ -217,6 +40,9 @@ class Profile(Entity):
             "profile": self.dict(),
             "storage": self.get_meta_data().dict()
         }
+
+    def is_merged(self, profile_id) -> bool:
+        return profile_id != self.id and profile_id in self.ids
 
     @staticmethod
     def deserialize(serialized_profile: dict) -> 'Profile':
@@ -262,51 +88,6 @@ class Profile(Entity):
     def get_consent_ids(self) -> Set[str]:
         return set([consent_id for consent_id, _ in self.consents.items()])
 
-    async def segment(self, event_types, load_segments):
-
-        """
-        This method mutates current profile. Loads segments and adds segments to current profile.
-        """
-
-        # todo cache segments for 30 sec
-        flat_profile = DotAccessor(
-            profile=self
-            # it has access only to profile. Other data is irrelevant because we check only profile.
-        )
-
-        for event_type in event_types:  # type: str
-
-            # Segmentation is run for every event
-
-            # todo segments are loaded one by one - maybe it is possible to load it at once
-            # todo segments are loaded event if they are disabled. It is checked later. Maybe we can filter it here.
-            segments = await load_segments(event_type, limit=500)
-
-            for segment in segments:
-
-                segment = Segment(**segment)
-
-                if segment.enabled is False:
-                    continue
-
-                segment_id = segment.get_id()
-
-                try:
-                    condition = Condition()
-                    if await condition.evaluate(segment.condition, flat_profile):
-                        segments = set(self.segments)
-                        segments.add(segment_id)
-                        self.segments = list(segments)
-
-                        # Yield only if segmentation triggered
-                        yield event_type, segment_id, None
-
-                except Exception as e:
-                    msg = 'Condition id `{}` could not evaluate `{}`. The following error was raised: `{}`'.format(
-                        segment_id, segment.condition, str(e).replace("\n", " "))
-
-                    yield event_type, segment_id, msg
-
     def increase_visits(self, value=1):
         self.stats.visits += value
         self.operation.update = True
@@ -337,11 +118,11 @@ class Profile(Entity):
         )
 
     @staticmethod
-    def new() -> 'Profile':
+    def new(id: Optional[id] = None) -> 'Profile':
         """
         @return Profile
         """
         return Profile(
-            id=str(uuid.uuid4()),
+            id=str(uuid.uuid4()) if not id else id,
             metadata=ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
         )

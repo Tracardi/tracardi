@@ -39,6 +39,7 @@ class SessionMetadata(BaseModel):
     time: SessionTime = SessionTime(insert=datetime.utcnow(), timestamp=datetime.timestamp(datetime.utcnow()))
     channel: Optional[str] = None
     aux: Optional[dict] = {}
+    status: Optional[str] = None
 
 
 class SessionContext(dict):
@@ -101,6 +102,12 @@ class Session(Entity):
             self.device = session.device
             self.os = session.os
             self.app = session.app
+
+    def is_new(self) -> bool:
+        return self.operation.new
+
+    def is_reopened(self) -> bool:
+        return self.operation.new or self.metadata.status == 'ended'
 
     @staticmethod
     def storage_info() -> StorageInfo:

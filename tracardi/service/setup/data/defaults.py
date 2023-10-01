@@ -1,5 +1,6 @@
 import os
-from google.api_core.datetime_helpers import utcnow
+from datetime import datetime
+
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 
 from tracardi.config import tracardi
@@ -100,11 +101,11 @@ redirect_bridge = Bridge(
 cardio_event_source = EventSource(
     id=f"@{tracardi.cardio_source}",
     type=["internal"],
-    name="System Source",
-    channel="System",
-    description="Internal event source for system heartbeats.",
+    name="System Internal Source",
+    channel="Internal",
+    description="Internal event source for system heartbeats. If removed automated session closing wil not work.",
     bridge=NamedEntity(**open_rest_source_bridge.dict()),
-    timestamp=utcnow(),
+    timestamp=datetime.utcnow(),
     tags=["internal"],
     groups=["Internal"]
 )

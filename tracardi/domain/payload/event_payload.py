@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import Optional, Any, Union
 from uuid import uuid4
 
-from pydantic import BaseModel, validator
+import tracardi.config
+from pydantic import BaseModel, validator, PrivateAttr
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
@@ -25,10 +26,26 @@ class EventPayload(BaseModel):
     context: Optional[dict] = {}
     tags: Optional[list] = []
 
+    _source_id: str = PrivateAttr(None)
+
     def __init__(self, **data: Any):
-        if 'time' not in data or 'insert' not in data['time']:
+
+        if 'time' not in data:
             data['time'] = Time(insert=datetime.utcnow())
+        else:
+            if isinstance(data['time'], Time):
+                if not data['time'].insert:
+                    data['time'].insert = datetime.utcnow()
+            elif isinstance(data['time'], dict):
+                if 'insert' not in data['time']:
+                    data['time']['insert'] = datetime.utcnow()
+
         super().__init__(**data)
+
+        if 'source_id' in self.options:
+            if self.options['source_id'] == tracardi.config.tracardi.internal_source:
+                self._source_id = self.options['source_id']
+            del(self.options['source_id'])
 
     @validator("type")
     def event_type_can_not_be_empty(cls, value):
@@ -67,7 +84,7 @@ class EventPayload(BaseModel):
 
         # To prevent performance bottleneck do not create full event session
         # event["session"] = self._get_event_session(session)
-        event['source']['id'] = source.id
+        event['source']['id'] = source.id if not self._source_id else self._source_id
         event['config'] = self.options
         event['operation']['update'] = False
         event['operation']['new'] = True
@@ -153,7 +170,7 @@ class EventPayload(BaseModel):
                           utm=session.utm,
 
                           properties=self.properties,
-                          source=source,  # Entity
+                          source=source if not self._source_id else Entity(id=self._source_id),  # Entity
                           config=self.options,
                           context=self.context,
                           operation=RecordFlag(new=True),
@@ -169,7 +186,7 @@ class EventPayload(BaseModel):
                           profile=get_entity(profile),  # profile can be None when profile_less event.
                           type=event_type,
                           properties=self.properties,
-                          source=source,  # Entity
+                          source=source if not self._source_id else Entity(id=self._source_id),  # Entity
                           config=self.options,
                           context=self.context,
                           operation=RecordFlag(new=True),

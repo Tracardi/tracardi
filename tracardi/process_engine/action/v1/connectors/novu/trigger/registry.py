@@ -18,7 +18,7 @@ def register() -> Plugin:
                 "source": {"id": "", "name": ""},
                 "template": {"id": "", "name": ""},
                 "subscriber_id": "profile@id",
-                "recipient_email": "profile@pii.email",
+                "recipient_email": "profile@data.contact.email",
                 "payload": "{}",
                 "hash": False
             },
@@ -71,7 +71,7 @@ def register() -> Plugin:
                                 id="recipient_email",
                                 name="Recipient e-mail address",
                                 description="Please type a reference path to e-mail address. By default we set it to "
-                                            "profile@pii.email.",
+                                            "profile@data.contact.email.",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail address"})
                             ),
                             FormField(

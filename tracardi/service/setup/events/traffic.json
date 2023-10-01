@@ -57,9 +57,11 @@
     "description": "Customer views a page.",
     "id": "page-view",
     "properties": {
+      "id": "string",
       "category": "string"
     },
     "copy": {
+      "hit.id": "properties.id",
       "hit.category": "properties.category"
     },
     "tags": ["activity:browsing"],

@@ -1,18 +1,27 @@
+Version: 0.8.2
+----------------------------------------------------------
+* Upgrade to pytantic v2
+
 Version: 0.8.1
 ----------------------------------------------------------
 * New Dashboard
 * New Profile Details Page
 * Extended analytics
+* Multi-tenant setup available (pro)
 * Debugging in context of event
 * Static Profile ID generator
 * Passing Profile ID between owned domains
 * Predefined events 
 * New Data Schema
+* Customer journey mapping
 * Better Production/Testing switching
 * Tracardi now can handle coping event data to profiles and event indexing on historical data (pro)
 * Better autocomplete of event properties
 * Session open, Session close, Internal events
-* Update documentation
+* Device fingerprinting (pro)
+* New bridge for Javascript integration with the web page (pro)
+* New workflow triggers (pro)
+* Updated documentation
 * Added or Modified Plugins
   * Weaviate (Vector store for AI) (pro)
     * Add
@@ -30,8 +39,9 @@ Version: 0.8.1
   * Event counter (pro)
   * ChatGPT prompt (pro)
 * Misc
-  * Upgrade to python 3.9
+  * Upgrade to python 3.10
   * Performance tweaks
+  * More configuration flags for better configuration
 
 Version 0.8.0
 ----------------------------------------------------------
