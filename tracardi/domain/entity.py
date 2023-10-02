@@ -46,6 +46,9 @@ class Entity(Creatable):
     def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
+    def dump_meta_data(self) -> Optional[dict]:
+        return self._metadata.model_dump(mode='json') if isinstance(self._metadata, RecordMetadata) else None
+
     def has_meta_data(self) -> bool:
         return self._metadata is not None
 
