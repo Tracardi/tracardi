@@ -329,22 +329,11 @@ class TrackerPayload(BaseModel):
 
             # Create empty profile if the profile id does nto point to any profile in database.
             if not profile:
-                profile = Profile(
-                    id=self.profile.id
-                )
-                profile.operation.new = True
+                profile = Profile.new(id=self.profile.id)
 
             # Create empty session if the session id does nto point to any session in database.
             if session is None:
-                session = Session(
-                    id=self.session.id,
-                    metadata=SessionMetadata(
-                        time=SessionTime(
-                            insert=datetime.utcnow()
-                        )
-                    )
-                )
-                session.operation.new = True
+                session = Session.new(id=self.session.id)
 
                 if isinstance(session.context, dict):
                     session.context.update(self.context)
@@ -355,10 +344,6 @@ class TrackerPayload(BaseModel):
                     session.properties.update(self.properties)
                 else:
                     session.properties = self.properties
-
-                # # Remove the session from cache we just created one.
-                # # We repeat it when saving.
-                # cache.session_cache().delete(self.session.id)
 
         return profile, session
 
@@ -444,18 +429,11 @@ class TrackerPayload(BaseModel):
 
         if session is None:  # loaded session is empty
 
-            session = Session(
-                id=self.session.id,
-                metadata=SessionMetadata(
-                    time=SessionTime(
-                        insert=datetime.utcnow()
-                    )
-                )
-            )
+            is_new_session = True
+
+            session = Session.new(id=self.session.id)
 
             logger.debug("New session is to be created with id {}".format(session.id))
-
-            is_new_session = True
 
             if profile_less is False:
 
@@ -537,7 +515,7 @@ class TrackerPayload(BaseModel):
 
         else:
 
-            logger.info("Session exists with id {}".format(session.id))
+            logger.debug("Session exists with id {}".format(session.id))
 
             if profile_less is False:
 

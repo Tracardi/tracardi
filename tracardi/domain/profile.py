@@ -54,6 +54,12 @@ class Profile(Entity):
     def __eq__(self, other):
         return self.id == other.id
 
+    def fill_meta_data(self):
+        """
+        Used to fill metadata with default current index and id.
+        """
+        self._fill_meta_data('profile')
+
     def serialize(self):
         return {
             "profile": self.model_dump(),
@@ -181,7 +187,10 @@ class Profile(Entity):
         """
         @return Profile
         """
-        return Profile(
+        profile = Profile(
             id=str(uuid.uuid4()) if not id else id,
             metadata=ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
         )
+        profile.fill_meta_data()
+        profile.operation.new = True
+        return profile
