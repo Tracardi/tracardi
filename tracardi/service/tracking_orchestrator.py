@@ -402,7 +402,7 @@ class TrackingOrchestrator:
 
         # Lock
         if has_profile and self.source.synchronize_profiles:
-            key = f"profile:{profile.id}"
+            key = f"profile-lock:{profile.id}"
             await profile_synchronizer.wait_for_unlock(key, seq=tracker_payload.get_id())
             profile_synchronizer.lock_entity(key)
             self.locked.append(key)

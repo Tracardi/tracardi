@@ -11,7 +11,7 @@ logger.addHandler(log_handler)
 
 
 class ProfileTracksSynchronizer:
-    def __init__(self, wait=0.1, ttl=10):
+    def __init__(self, wait=0.1, ttl=5):
         self.wait = wait
         self.ttl = ttl
         self.redis = RedisClient()
