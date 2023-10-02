@@ -16,6 +16,8 @@ class Collection:
     profile_copy: str = "profile-copy:"  # HASH
     profile: str = "profile:"  # HASH
     session: str = "session:"  # HASH
+    lock: str = "lock:"  # HASH
+    session_lock: str = "session:lock:"  # HASH
     profile_fields: str = "profile:fields"  # SET, Cache profile fields, properties for auto completion
     event_fields: str = "event:fields"  # SET, Cache event fields, properties for auto completion
     session_fields: str = "session:fields"  # Cache session fields, properties for auto completion
