@@ -72,7 +72,7 @@ class Context:
     def dict(self) -> dict:
         return {
             "production": self.production,
-            "user": self.user,
+            "user": self.user.model_dump(mode='json'),
             "tenant": self.tenant,
             "host": self.host,
             "version": self.version
