@@ -531,7 +531,7 @@ class TrackingManager(TrackingManagerBase):
                                 event_id=None,
                                 profile_id=get_entity_id(self.profile),
                                 origin='profile',
-                                class_name=TrackingManager.__class__,
+                                class_name=TrackingManager.__name__,
                                 module=__name__,
                                 type='warning',
                                 message="Can not merge profile-less event."
