@@ -75,7 +75,7 @@ class Context:
     def dict(self) -> dict:
         return {
             "production": self.production,
-            "user": self.user.model_dump(mode='json'),
+            "user": self.user.model_dump(mode='json') if self.user else None,
             "tenant": self.tenant,
             "host": self.host,
             "version": self.version
