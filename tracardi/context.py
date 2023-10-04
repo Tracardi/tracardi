@@ -40,6 +40,9 @@ class Context:
     def is_production(self) -> bool:
         return self.production
 
+    def context_abrv(self) -> str:
+        return 'p' if self.production else 't'
+
     def switch_context(self, production, user=None, tenant=None) -> 'Context':
         if user is None:
             user = self.user

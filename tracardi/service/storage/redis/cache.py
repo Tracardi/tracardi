@@ -10,7 +10,7 @@ class RedisCache:
         self._redis = RedisClient()
         self.ttl = ttl
 
-    def set(self, key:str, value: Any, collection: str):
+    def set(self, key: str, value: Any, collection: str):
         self._redis.set(f"{collection}{key}", msgpack.packb(value), ex=self.ttl)
 
     def get(self, key:str, collection: str) -> Optional[Any]:
