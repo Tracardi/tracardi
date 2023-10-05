@@ -288,6 +288,7 @@ class Tracker:
                 tracking_start
             )
 
+        # TODO probably can be removed
         # Custom handler
         if not issubclass(self.on_source_ready, TrackProcessorBase):
             raise AssertionError("Callable self.tracker_config.on_source_ready must a TrackProcessorBase object.")
@@ -301,7 +302,8 @@ class Tracker:
         return await tp.handle(
             TrackerPayloads([tracker_payload]),
             source,
-            self.tracker_config
+            self.tracker_config,
+            tracking_start
         )
 
     async def check_source_id(self, source_id) -> Optional[EventSource]:

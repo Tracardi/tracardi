@@ -52,7 +52,10 @@ class Console:
     def get_logs(self) -> Tuple[Log]:
         for type, logs in zip(["info", "warning", "error"], [self.infos, self.warnings, self.errors]):
             for message in logs:
-                yield Log(self.module, self.class_name, type, message,
+                yield Log(self.module,
+                          self.class_name,
+                          type,
+                          message,
                           profile_id=self.profile_id,
                           flow_id=self.flow_id,
                           node_id=self.node_id)

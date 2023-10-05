@@ -1,7 +1,7 @@
 import logging
+from uuid import uuid4
 from dataclasses import dataclass
 from typing import List, Optional, Callable
-from uuid import uuid4
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 
@@ -291,6 +291,8 @@ class WorkflowManagerAsync:
             if post_invoke_events is not None:
                 synced_events = []
                 for ev in events:
+
+                    # Replace event with event changed by workflow
                     if ev.operation.update is True and ev.id in post_invoke_events:
                         ev = post_invoke_events[ev.id]
 

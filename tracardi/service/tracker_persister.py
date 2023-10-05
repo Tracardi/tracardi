@@ -174,7 +174,7 @@ class TrackerResultPersister:
     async def _modify_events(self, tracker_result: TrackerResult, log_event_journal: Dict[str, StatusLog]) -> List[Event]:
         for event in tracker_result.events:
 
-            event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
+            event.metadata.time.total_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
                 event.metadata.time.insert)
 
             # Reset session id if session is not saved

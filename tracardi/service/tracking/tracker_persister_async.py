@@ -150,6 +150,8 @@ class TrackingPersisterAsync:
 
     @staticmethod
     async def __standard_event_save(events):
+        # Skip events that should not be saved
+        events = [event for event in events if event.is_persistent()]
 
         event_result = await save_events(events)
         event_result = SaveResult(**event_result.model_dump())
@@ -161,9 +163,10 @@ class TrackingPersisterAsync:
         return event_result
 
     async def _modify_events(self, events: List[Event]) -> List[Event]:
+
         for event in events:
 
-            event.metadata.time.process_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
+            event.metadata.time.total_time = datetime.timestamp(datetime.utcnow()) - datetime.timestamp(
                 event.metadata.time.insert)
 
             if self.profile_errors:

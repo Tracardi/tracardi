@@ -24,11 +24,12 @@ class WorkflowOrchestratorAsync:
     def __init__(self,
                  source: EventSource,
                  tracker_config: TrackerConfig,
+                 console_log
                  ):
 
         self.tracker_config = tracker_config
         self.source = source
-        self.console_log = ConsoleLog()
+        self.console_log = console_log
         self.locked = []
 
     async def lock_and_invoke(self,

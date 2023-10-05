@@ -226,11 +226,6 @@ class TrackingManager(TrackingManagerBase):
     async def invoke_track_process(self, events) -> TrackerResult:
 
         flat_events = {event.id: dotty(event.model_dump()) for event in events}
-        #
-        # # Anonymize, data compliance
-        # if License.has_license():
-        #     if self.profile is not None:
-        #         events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
 
         debugger = None
 

@@ -76,7 +76,7 @@ class EventPayload(BaseModel):
                       source: Entity,
                       session: Union[Optional[Entity], Optional[Session]],
                       profile: Optional[Entity],
-                      has_profile: bool) -> dict:
+                      profile_less: bool) -> dict:
 
         event_type = self.type.strip()
         event = Event.dictionary(
@@ -86,7 +86,7 @@ class EventPayload(BaseModel):
             type=event_type,
             properties=self.properties,
             context=self.context)
-        event['profile_less'] = not has_profile
+        event['profile_less'] = profile_less
         event['metadata']['instance']['id'] = ApiInstance().id
         if self.time.insert:
             event['metadata']['time']['insert'] = self.time.insert
@@ -137,11 +137,11 @@ class EventPayload(BaseModel):
                  source: Entity,
                  session: Union[Optional[Entity], Optional[Session]],
                  profile: Optional[Entity],
-                 has_profile: bool) -> Event:
+                 profile_less: bool) -> Event:
 
         meta = EventMetadata(**metadata.model_dump())
         meta.status = COLLECTED
-        meta.profile_less = not has_profile
+        meta.profile_less = profile_less
         meta.instance = Entity(id=ApiInstance().id)
 
         if self.time.insert:

@@ -42,7 +42,8 @@ async def dispatch_sync(source: EventSource,
     if tracardi.enable_workflow:
         workflow = WorkflowOrchestratorAsync(
             source,
-            tracker_config
+            tracker_config,
+            console_log
         )
 
         # Start workflow

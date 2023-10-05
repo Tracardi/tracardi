@@ -13,7 +13,6 @@ from tracardi.service.wf.domain.error_debug_info import ErrorDebugInfo
 from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
-from tracardi.service.plugin.domain.console import Log
 from .debugger import Debugger
 from ..config import tracardi
 from ..domain.console import Console
@@ -217,20 +216,7 @@ class RulesEngine:
                     post_invoke_events[post_invoke_event.id] = post_invoke_event
 
                     # Store logs in one console log
-                    for log in log_list:  # type: Log
-                        console = Console(
-                            origin="node",
-                            event_id=event_id,
-                            flow_id=flow_id,
-                            profile_id=log.profile_id,
-                            node_id=log.node_id,
-                            module=log.module,
-                            class_name=log.class_name,
-                            type=log.type,
-                            message=log.message,
-                            traceback=log.traceback
-                        )
-                        self.console_log.append(console)
+                    self.console_log.append_event_log_list(event_id, flow_id, log_list)
 
                 except Exception as e:
                     # todo log error

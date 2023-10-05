@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from tracardi.domain.console import Console
+from tracardi.service.plugin.domain.console import Log
 
 
 class StatusLog:
@@ -42,3 +43,19 @@ class ConsoleLog(List[Console]):
     def get_encoded(self):
         for log in self:
             yield log.encode_record()
+
+    def append_event_log_list(self, event_id: str, flow_id: str, log_list: list):
+        for log in log_list:  # type: Log
+            console = Console(
+                origin="node",
+                event_id=event_id,
+                flow_id=flow_id,
+                profile_id=log.profile_id,
+                node_id=log.node_id,
+                module=log.module,
+                class_name=log.class_name,
+                type=log.type,
+                message=log.message,
+                traceback=log.traceback
+            )
+            self.append(console)

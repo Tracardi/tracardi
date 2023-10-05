@@ -91,7 +91,7 @@ async def validate_events(tracker_payload: TrackerPayload) -> TrackerPayload:
             tracker_payload.source,
             tracker_payload.session,
             tracker_payload.profile,
-            not tracker_payload.profile_less
+            tracker_payload.profile_less
         ), validation_schemas)
 
         event_payload.validation = ProcessStatus(error=validation_error, message=error_message)

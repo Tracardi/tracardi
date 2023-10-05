@@ -744,7 +744,7 @@ async def get_avg_process_time():
     result = await storage_manager("event").query({
         "size": 0,
         "aggs": {
-            "avg_process_time": {"avg": {"field": "metadata.time.process_time"}}
+            "avg_process_time": {"avg": {"field": "metadata.time.total_time"}}
         }
     })
 

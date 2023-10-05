@@ -7,6 +7,8 @@ from collections import defaultdict
 from time import time
 from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel, ValidationError
+
+from tracardi.domain.enum.event_status import PROCESSED
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.config import tracardi
@@ -531,7 +533,7 @@ class GraphInvoker(BaseModel):
                   session: Session,
                   debug_info: DebugInfo,
                   log_list: List[Log],
-                  ) -> Tuple[DebugInfo, List[Log], Profile, Session]:
+                  ) -> Tuple[DebugInfo, List[Log], Profile, Session, Event]:
 
         actions_results = ActionsResults()
         flow_start_time = debug_info.timestamp
@@ -725,10 +727,21 @@ class GraphInvoker(BaseModel):
 
                 # Collect console logs set inside plugins
                 if isinstance(node.object, ActionRunner):
+
+                    if node.object.console.warnings:
+                        event.metadata.warning = True
+
+                    if node.object.console.errors:
+                        event.metadata.error = True
+
                     for log in node.object.console.get_logs():  # type: Log
                         log_list.append(log)
 
-        return debug_info, log_list, profile, session
+        event.metadata.status = PROCESSED
+        # Sum up all process WF times
+        event.metadata.time.process_time = event.metadata.time.process_time + (time() - flow_start_time)
+
+        return debug_info, log_list, profile, session, event
 
     def serialize(self):
         return self.model_dump()

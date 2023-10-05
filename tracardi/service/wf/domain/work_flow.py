@@ -57,7 +57,7 @@ class WorkFlow:
             ux)
 
         if not debug_info.has_errors():
-            debug_info, log_list, profile, session = await exec_dag.run(
+            debug_info, log_list, profile, session, event = await exec_dag.run(
                 payload={},
                 event=event,
                 profile=profile,

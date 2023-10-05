@@ -122,7 +122,7 @@ async def process_track_data(source: EventSource,
         # Compute process time
 
         for event in events:
-            event.metadata.time.process_time = time.time() - tracking_start
+            event.metadata.time.total_time = time.time() - tracking_start
 
         # Async storage
         context = get_context()
