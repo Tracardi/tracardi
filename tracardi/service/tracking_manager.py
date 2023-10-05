@@ -465,10 +465,14 @@ class TrackingManager(TrackingManagerBase):
 
                 # Invoke rules engine
                 try:
+
+                    debug = self.tracker_payload.is_on('debugger', default=False)
+
                     rule_invoke_result = await rules_engine.invoke(
                         flow_db.load_production_flow,
                         ux,
-                        self.tracker_payload
+                        self.tracker_payload,
+                        debug
                     )
 
                     debugger = rule_invoke_result.debugger

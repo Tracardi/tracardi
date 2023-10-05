@@ -26,7 +26,7 @@ class ProcessStatus(BaseModel):
 
 
 class EventPayload(BaseModel):
-    id: str
+    id: Optional[str] = None
     time: Optional[Time] = Time()
     type: str
     properties: Optional[dict] = {}
