@@ -151,6 +151,11 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
 
+        self.lock_on_data_computation = env.get('LOCK_ON_DATA_COMPUTATION', 'yes') == 'yes'
+
+        # Temporary flag
+        self.new_collector = env.get('NEW_COLLECTOR', 'yes').lower() == 'yes'
+
         self.profile_cache_ttl = get_env_as_int('PROFILE_CACHE_TTL', 60)
         self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 60)
 

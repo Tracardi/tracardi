@@ -2,7 +2,7 @@ import logging
 import redis
 from abc import ABC, abstractmethod
 
-from com_tracardi.service.tracking.track_async import track_async
+from tracardi.service.tracking.track_async import process_track_data
 from tracardi.service.license import License
 from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
@@ -68,11 +68,9 @@ class TrackerProcessor(TrackProcessorBase):
         Starts collecting data and process it.
         """
 
-        if License.has_license():
+        if tracardi.new_collector:
 
-            # This is a commercial way of tracking
-
-            return await track_async(source, tracker_payload, tracker_config, tracking_start, self.console_log)
+            return await process_track_data(source, tracker_payload, tracker_config, tracking_start, self.console_log)
 
         else:
 
