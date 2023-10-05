@@ -84,12 +84,5 @@ async def compute_data(tracker_payload: TrackerPayload,
     print(profile.id, "metadata", profile.get_meta_data())
     print(profile.id, "new profile", profile.operation)
 
-    # Update only when needed
-
-    if profile.operation.new or profile.operation.needs_update():
-        save_profile_cache(profile)
-
-    if session.operation.new or session.operation.needs_update():
-        save_session_cache(session)
 
     return profile, session, events, tracker_payload

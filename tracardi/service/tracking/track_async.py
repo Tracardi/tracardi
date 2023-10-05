@@ -2,29 +2,26 @@ import time
 import logging
 
 from tracardi.service.license import License
-from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
+from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.locking import GlobalMutexLock
 from tracardi.service.tracking.system_events import add_system_events
 from tracardi.service.tracking.track_data_computation import compute_data
+from tracardi.service.tracking.track_dispatching import dispatch_sync
 from tracardi.service.tracking.tracker_event_reshaper import EventsReshaper
 from tracardi.service.tracking.event_validation import validate_events
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
-from tracardi.service.tracking.workflow_orchestrator_async import WorkflowOrchestratorAsync
 from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
-from tracardi.service.segments.post_event_segmentation import post_ev_segment
-from tracardi.service.storage.driver.elastic import segment as segment_db
 
 if License.has_license():
     from com_tracardi.config import com_tracardi_settings
@@ -83,6 +80,15 @@ async def process_track_data(source: EventSource,
                     console_log
                 )
 
+                # MUST BE INSIDE MUTEX
+                # Update only when needed
+
+                if profile.operation.new or profile.operation.needs_update():
+                    save_profile_cache(profile)
+
+                if session.operation.new or session.operation.needs_update():
+                    save_session_cache(session)
+
         else:
 
             profile, session, events, tracker_payload = await compute_data(
@@ -91,6 +97,14 @@ async def process_track_data(source: EventSource,
                 source,
                 console_log
             )
+
+            # Update only when needed
+
+            if profile.operation.new or profile.operation.needs_update():
+                save_profile_cache(profile)
+
+            if session.operation.new or session.operation.needs_update():
+                save_session_cache(session)
 
         # Updates/Mutations of tracker_payload
 
@@ -120,7 +134,7 @@ async def process_track_data(source: EventSource,
                 """
                 Async processing can not do the following things:
                 - Discard event or change as it is saved before the workflow kicks off
-                - Save processed by property as processing happens in parallel to saving
+                - Save any properties such as processed_by property as processing happens in parallel to saving
                 - Return response and ux as processing happens in parallel with response
                 """
 
@@ -149,72 +163,28 @@ async def process_track_data(source: EventSource,
                 }
 
             else:
-                print('SYNC')
-                pass
+
+                profile, session, events, ux, response = await dispatch_sync(
+                    source,
+                    profile,
+                    session,
+                    events,
+                    tracker_payload,
+                    tracker_config,
+                    console_log
+                )
 
         else:
 
-            print('SYNC')
-
-            ux = []
-            response = {}
-            # Run event destination
-
-            if tracardi.enable_event_destinations:
-                load_destination_task = cache.event_destination
-                await event_destination_dispatch(
-                    load_destination_task,
-                    profile,
-                    session,
-                    events,
-                    tracker_payload.debug
-                )
-
-            if tracardi.enable_workflow:
-
-                # This is the old way of dispatching profiles to destinations
-
-                profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
-
-                workflow = WorkflowOrchestratorAsync(
-                    source,
-                    tracker_config
-                )
-
-                # Start workflow
-                debug = tracker_payload.is_on('debugger', default=False)
-
-                tracker_result = await workflow.lock_and_invoke(
-                    tracker_payload,
-                    events,
-                    profile,
-                    session,
-                    debug
-                )
-
-                # Reassign results
-
-                profile = tracker_result.profile
-                session = tracker_result.session
-                events = tracker_result.events
-                ux = tracker_result.ux,
-                response = tracker_result.response
-
-                # Dispatch changed profile to destination
-
-                await profile_dispatcher.dispatch(
-                    profile,
-                    session,
-                    events
-                )
-
-                # Post Event Segmentation
-
-                if tracardi.enable_post_event_segmentation and isinstance(profile, Profile):
-                    await post_ev_segment(profile,
-                                          session,
-                                          [event.type for event in events],
-                                          segment_db.load_segments)
+            profile, session, events, ux, response = await dispatch_sync(
+                source,
+                profile,
+                session,
+                events,
+                tracker_payload,
+                tracker_config,
+                console_log
+            )
 
         # Save
 
