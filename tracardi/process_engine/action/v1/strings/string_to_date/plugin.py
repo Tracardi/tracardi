@@ -5,7 +5,7 @@ from tracardi.service.plugin.runner import ActionRunner
 
 from model.configuration import Configuration
 from datetime import datetime
-
+import dateparser
 
 def validate(config: dict) -> Configuration:
     return Configuration(**config)
@@ -19,12 +19,11 @@ class DateConverter(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         date_string = payload.get(self.config.string)
-        date_format = payload.get(self.config.format)
-        print(payload)
 
-        if date_string and date_format:
+
+        if date_string:
             try:
-                converted_date = datetime.strptime(date_string, date_format).strftime("%Y-%m-%d")
+                converted_date = dateparser.parse(date_string).date().strftime("%Y-%m-%d")
                 payload[self.config.replace_with] = converted_date
             except ValueError:
                 pass
