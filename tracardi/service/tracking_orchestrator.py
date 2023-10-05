@@ -3,7 +3,6 @@ import logging
 import os
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from inspect import trace
 from typing import Type
 from uuid import uuid4
 
@@ -28,21 +27,20 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.consistency.session_corrector import correct_session
 from tracardi.service.destination_orchestrator import DestinationOrchestrator
 from tracardi.service.storage.driver.elastic import debug_info as debug_info_db
-from tracardi.service.storage.loaders import get_profile_loader
+from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.synchronizer import profile_synchronizer
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking_manager import TrackingManager, TrackerResult, TrackingManagerBase
 from tracardi.service.utils.getters import get_entity_id
 from user_agents import parse
 
-from .maxmind_geo import get_geo_location
+from .maxmind_geo import get_geo_maxmind_location
 from .utils.domains import free_email_domains
 from .utils.languages import language_codes_dict, language_countries_dict
 from .utils.parser import parse_accept_language
 from ..domain.geo import Geo
 from ..domain.time import Time
-from ..process_engine.action.v1.connectors.maxmind.geoip.model.maxmind_geolite2_client import MaxMindGeoLite2Client, \
-    GeoLiteCredentials
+from ..process_engine.action.v1.connectors.maxmind.geoip.model.maxmind_geolite2_client import GeoLiteCredentials
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -129,7 +127,7 @@ class TrackingOrchestrator:
                 session.profile = Entity(id=list_of_profile_ids_referenced_by_session[0])
 
         # Load profile
-        profile_loader = get_profile_loader()
+        profile_loader = profile_db.load_profile_without_identification
 
         # Force static profile id
 
@@ -194,7 +192,7 @@ class TrackingOrchestrator:
                     )
                 )
 
-            if session.is_new():
+            if session.operation.new:
                 # Add session created event to the registered events
                 tracker_payload.events.append(
                     EventPayload(
@@ -206,7 +204,7 @@ class TrackingOrchestrator:
                 )
 
         # Is new session
-        if session.is_new():
+        if session.operation.new:
 
             # Compute the User Agent data
             try:
@@ -359,7 +357,7 @@ class TrackingOrchestrator:
                 # new. In this case, regardless of whether the session is new or not, the code checks if the profile's
                 # geo location is empty. If it is empty, the code proceeds to fetch the geo location and assigns
                 # it to the profile.
-                _geo = await get_geo_location(GeoLiteCredentials(
+                _geo = await get_geo_maxmind_location(GeoLiteCredentials(
                         license=maxmind_license_key,
                         accountId=maxmind_account_id), ip=session.device.ip)
 
@@ -404,7 +402,7 @@ class TrackingOrchestrator:
 
         # Lock
         if has_profile and self.source.synchronize_profiles:
-            key = f"profile:{profile.id}"
+            key = f"profile-lock:{profile.id}"
             await profile_synchronizer.wait_for_unlock(key, seq=tracker_payload.get_id())
             profile_synchronizer.lock_entity(key)
             self.locked.append(key)
@@ -417,8 +415,8 @@ class TrackingOrchestrator:
                 session,
                 self.on_profile_merge
             )
-
-            tracker_result = await tracking_manager.invoke_track_process()
+            events = await tracking_manager.get_events()
+            tracker_result = await tracking_manager.invoke_track_process(events)
         else:
             if not issubclass(self.on_profile_ready, TrackingManagerBase):
                 raise AssertionError("Callable self.on_profile_ready should be a subtype of TrackingManagerBase.")
@@ -431,7 +429,8 @@ class TrackingOrchestrator:
                 self.on_profile_merge
             )
 
-            tracker_result = await tracking_manager.invoke_track_process()
+            events = tracking_manager.get_events()
+            tracker_result = await tracking_manager.invoke_track_process(events)
 
         # From now on do not use profile or session, use tracker_result.profile, tracker_result.session
         # For security we override old values

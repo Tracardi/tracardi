@@ -1,3 +1,5 @@
+import uuid
+
 from datetime import datetime
 from typing import Optional, Any
 
@@ -6,6 +8,7 @@ from pydantic import ConfigDict, BaseModel
 from .entity import Entity
 from .marketing import UTM
 from .metadata import OS, Device, Application
+
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 
@@ -87,6 +90,12 @@ class Session(Entity):
 
         super().__init__(**data)
 
+    def fill_meta_data(self):
+        """
+        Used to fill metadata with default current index and id.
+        """
+        self._fill_meta_data('session')
+
     def replace(self, session):
         if isinstance(session, Session):
             self.id = session.id
@@ -101,9 +110,6 @@ class Session(Entity):
             self.os = session.os
             self.app = session.app
 
-    def is_new(self) -> bool:
-        return self.operation.new
-
     def is_reopened(self) -> bool:
         return self.operation.new or self.metadata.status == 'ended'
 
@@ -115,3 +121,20 @@ class Session(Entity):
             exclude={"operation": ...},
             multi=True
         )
+
+    @staticmethod
+    def new(id: Optional[str] = None) -> 'Session':
+        session = Session(
+            id=str(uuid.uuid4()) if not id else id,
+            metadata=SessionMetadata()
+        )
+        session.fill_meta_data()
+        session.operation.new = True
+
+        return session
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id

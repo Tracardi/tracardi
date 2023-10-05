@@ -1,3 +1,5 @@
+import time
+
 import json
 import logging
 from hashlib import sha1
@@ -11,8 +13,7 @@ from pydantic import PrivateAttr, BaseModel
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.utils.getters import get_entity_id
 
-from tracardi.config import tracardi, memory_cache
-from ..storage_record import StorageRecords
+from tracardi.config import tracardi
 from ...service.cache_manager import CacheManager
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
@@ -28,7 +29,6 @@ from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
-from ...service.tracking.event_validation import get_event_validation_result
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = CacheManager()
+
 
 class ScheduledEventConfig:
 
@@ -58,6 +59,7 @@ class TrackerPayload(BaseModel):
     _scheduled_flow_id: str = PrivateAttr(None)
     _scheduled_node_id: str = PrivateAttr(None)
     _tracardi_referer: dict = PrivateAttr({})
+    _timestamp: float = PrivateAttr(None)
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -80,6 +82,7 @@ class TrackerPayload(BaseModel):
         super().__init__(**data)
         self._id = str(uuid4())
         self._tracardi_referer = self.get_tracardi_data_referer()
+        self._timestamp = time.time()
         if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
             if isinstance(self.options['scheduledFlowId'], str) and isinstance(self.options['scheduledNodeId'], str):
                 if len(self.events) > 1:
@@ -108,6 +111,9 @@ class TrackerPayload(BaseModel):
         self.session = Entity(id=session_id)
         self.profile_less = False
         self.options.update({"saveSession": True})
+
+    def get_timestamp(self) -> float:
+        return self._timestamp
 
     def generate_profile_and_session_for_webhook(self, console_log: list) -> bool:
 
@@ -229,14 +235,6 @@ class TrackerPayload(BaseModel):
         #                                         self.profile,
         #                                         self.profile_less)
 
-    async def validate_events(self):
-        for event_dict in self.get_events_dict():
-            validation_schemas = await cache.event_validation(
-                event_type=event_dict['type'],
-                ttl=memory_cache.event_validation_cache_ttl)
-            error, message = await get_event_validation_result(event_dict, validation_schemas)
-            print(error, message)
-
     def set_headers(self, headers: dict):
         if 'authorization' in headers:
             del headers['authorization']
@@ -331,22 +329,11 @@ class TrackerPayload(BaseModel):
 
             # Create empty profile if the profile id does nto point to any profile in database.
             if not profile:
-                profile = Profile(
-                    id=self.profile.id
-                )
-                profile.operation.new = True
+                profile = Profile.new(id=self.profile.id)
 
             # Create empty session if the session id does nto point to any session in database.
             if session is None:
-                session = Session(
-                    id=self.session.id,
-                    metadata=SessionMetadata(
-                        time=SessionTime(
-                            insert=datetime.utcnow()
-                        )
-                    )
-                )
-                session.operation.new = True
+                session = Session.new(id=self.session.id)
 
                 if isinstance(session.context, dict):
                     session.context.update(self.context)
@@ -357,10 +344,6 @@ class TrackerPayload(BaseModel):
                     session.properties.update(self.properties)
                 else:
                     session.properties = self.properties
-
-                # # Remove the session from cache we just created one.
-                # # We repeat it when saving.
-                # cache.session_cache().delete(self.session.id)
 
         return profile, session
 
@@ -421,7 +404,7 @@ class TrackerPayload(BaseModel):
             return ttl > 0
         return False
 
-    async def get_profile_and_session(self, session: Session,
+    async def get_profile_and_session(self, session: Optional[Session],
                                       profile_loader: Callable[['TrackerPayload'], Awaitable],
                                       profile_less) -> Tuple[Optional[Profile], Session]:
 
@@ -446,18 +429,11 @@ class TrackerPayload(BaseModel):
 
         if session is None:  # loaded session is empty
 
-            session = Session(
-                id=self.session.id,
-                metadata=SessionMetadata(
-                    time=SessionTime(
-                        insert=datetime.utcnow()
-                    )
-                )
-            )
+            is_new_session = True
+
+            session = Session.new(id=self.session.id)
 
             logger.debug("New session is to be created with id {}".format(session.id))
-
-            is_new_session = True
 
             if profile_less is False:
 
@@ -539,7 +515,7 @@ class TrackerPayload(BaseModel):
 
         else:
 
-            logger.info("Session exists with id {}".format(session.id))
+            logger.debug("Session exists with id {}".format(session.id))
 
             if profile_less is False:
 

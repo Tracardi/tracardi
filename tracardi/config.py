@@ -7,10 +7,13 @@ import yaml
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 from tracardi.service.singleton import Singleton
+from tracardi.service.utils.environment import get_env_as_int
 from tracardi.service.utils.validators import is_valid_url
 
 VERSION = os.environ.get('_DEBUG_VERSION', '0.8.2-dev')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
+
+logger = logging.getLogger(__name__)
 
 
 def _get_logging_level(level: str) -> int:
@@ -29,13 +32,14 @@ def _get_logging_level(level: str) -> int:
 
 class MemoryCacheConfig:
     def __init__(self, env):
-        self.event_to_profile_coping_ttl = int(env.get('EVENT_TO_PROFILE_COPY_CACHE_TTL', 2))
-        self.source_ttl = int(env.get('SOURCE_CACHE_TTL', 2))
-        self.session_cache_ttl = int(env.get('SESSION_CACHE_TTL', 2))
-        self.event_validation_cache_ttl = int(env.get('EVENT_VALIDATION_CACHE_TTL', 2))
-        self.event_metadata_cache_ttl = int(env.get('EVENT_METADATA_CACHE_TTL', 2))
-        self.event_destination_cache_ttl = int(env.get('EVENT_DESTINATION_CACHE_TTL', 2))
-        self.profile_destination_cache_ttl = int(env.get('PROFILE_DESTINATION_CACHE_TTL', 2))
+        self.event_to_profile_coping_ttl = get_env_as_int('EVENT_TO_PROFILE_COPY_CACHE_TTL', 2)
+        self.source_ttl = get_env_as_int('SOURCE_CACHE_TTL', 2)
+        self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 2)
+        self.event_validation_cache_ttl = get_env_as_int('EVENT_VALIDATION_CACHE_TTL', 2)
+        self.event_metadata_cache_ttl = get_env_as_int('EVENT_METADATA_CACHE_TTL', 2)
+        self.event_destination_cache_ttl = get_env_as_int('EVENT_DESTINATION_CACHE_TTL', 2)
+        self.profile_destination_cache_ttl = get_env_as_int('PROFILE_DESTINATION_CACHE_TTL', 2)
+        self.data_compliance_cache_ttl = get_env_as_int('DATA_COMPLIANCE_CACHE_TTL', 2)
 
 
 class ElasticConfig:
@@ -53,7 +57,7 @@ class ElasticConfig:
         self.api_key_id = env.get('ELASTIC_API_KEY_ID', None)
         self.api_key = env.get('ELASTIC_API_KEY', None)
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None
-        self.maxsize = int(env.get('ELASTIC_MAX_CONN', 25))
+        self.maxsize = get_env_as_int('ELASTIC_MAX_CONN', 25)
         self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
         self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
 
@@ -63,9 +67,7 @@ class ElasticConfig:
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
-        self.query_timeout = int(env.get('ELASTIC_QUERY_TIMEOUT', 12))
-        self.save_pool = int(env.get('ELASTIC_SAVE_POOL', 0))
-        self.save_pool_ttl = int(env.get('ELASTIC_SAVE_POOL_TTL', 5))
+        self.query_timeout = get_env_as_int('ELASTIC_QUERY_TIMEOUT', 12)
         self.logging_level = _get_logging_level(
             env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 
@@ -98,7 +100,7 @@ class RedisConfig:
     def __init__(self, env):
         self.env = env
         self.host = env.get('REDIS_HOST', 'localhost')
-        self.port = int(env.get('REDIS_PORT', '6379'))
+        self.port = get_env_as_int('REDIS_PORT', '6379')
         self.redis_host = env.get('REDIS_HOST', 'redis://localhost:6379')
         self.redis_password = env.get('REDIS_PASSWORD', None)
 
@@ -142,21 +144,25 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
         self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
         self.enable_event_validation = env.get('ENABLE_EVENT_VALIDATION', 'yes').lower() == 'yes'
+        self.enable_event_reshaping = env.get('ENABLE_EVENT_RESHAPING', 'yes').lower() == 'yes'
         self.enable_event_source_check = env.get('ENABLE_EVENT_SOURCE_CHECK', 'yes').lower() == 'yes'
         self.enable_profile_immediate_flush = env.get('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes').lower() == 'yes'
         self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
         self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
 
+        self.profile_cache_ttl = get_env_as_int('PROFILE_CACHE_TTL', 60)
+        self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 60)
+
         # Not used now
         self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
-        self.sync_profile_tracks_max_repeats = int(env.get('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10))
-        self.sync_profile_tracks_wait = int(env.get('SYNC_PROFILE_TRACKS_WAIT', 1))
-        self.postpone_destination_sync = int(env.get('POSTPONE_DESTINATION_SYNC', 20))
+        self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
+        self.sync_profile_tracks_wait = get_env_as_int('SYNC_PROFILE_TRACKS_WAIT', 1)
+        self.postpone_destination_sync = get_env_as_int('POSTPONE_DESTINATION_SYNC', 20)
         self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
         self.query_language = env.get('QUERY_LANGUAGE', 'tql')
         self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
-        self.tracardi_pro_port = int(env.get('TRACARDI_PRO_PORT', 40000))
+        self.tracardi_pro_port = get_env_as_int('TRACARDI_PRO_PORT', 40000)
         self.tracardi_scheduler_host = env.get('TRACARDI_SCHEDULER_HOST', 'scheduler.tracardi.com')
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
@@ -164,6 +170,7 @@ class TracardiConfig(metaclass=Singleton):
         self.multi_tenant = env.get('MULTI_TENANT', "no") == 'yes'
         self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
+        self.expose_gui_api = env.get('EXPOSE_GUI_API', 'yes').lower() == "yes"
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
@@ -184,6 +191,7 @@ class TracardiConfig(metaclass=Singleton):
 
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
             raise AssertionError('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
+
 
     @property
     def config(self) -> YamlConfig:

@@ -13,7 +13,7 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-async def get_geo_location(creds: GeoLiteCredentials, ip: str) -> Optional[Geo]:
+async def get_geo_maxmind_location(creds: GeoLiteCredentials, ip: str) -> Optional[Geo]:
     client = MaxMindGeoLite2Client(credentials=creds)
     try:
         _geo = await client.read(ip=ip)

@@ -1,4 +1,4 @@
-from pydantic import field_validator, AnyHttpUrl
+from pydantic import field_validator
 from typing import Optional
 from tracardi.service.secrets import encrypt, decrypt
 from tracardi.domain.named_entity import NamedEntity
@@ -6,7 +6,7 @@ from tracardi.domain.named_entity import NamedEntity
 
 class ImportConfigRecord(NamedEntity):
     description: Optional[str] = ""
-    api_url: AnyHttpUrl
+    api_url: str  # AnyHttpUrl
     event_source: NamedEntity
     event_type: str
     module: str
@@ -19,7 +19,7 @@ class ImportConfig(NamedEntity):
     module: str
     config: dict
     enabled: bool = True
-    api_url: AnyHttpUrl
+    api_url: str # AnyHttpUrl
     event_source: NamedEntity
     event_type: str
 

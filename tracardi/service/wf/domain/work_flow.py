@@ -70,7 +70,7 @@ class WorkFlow:
 
         return FlowInvokeResult(debug_info, log_list, flow, event, profile, session)
 
-    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug=False) -> FlowInvokeResult:
+    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug) -> FlowInvokeResult:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.

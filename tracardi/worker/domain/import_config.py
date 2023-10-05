@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import field_validator, BaseModel, AnyHttpUrl
+from pydantic import field_validator, BaseModel
 
 from tracardi.worker.domain.named_entity import NamedEntity
 
@@ -8,7 +8,7 @@ from tracardi.worker.domain.named_entity import NamedEntity
 class ImportConfig(BaseModel):
     name: str
     description: Optional[str] = ""
-    api_url: AnyHttpUrl
+    api_url: str  # AnyHttpUrl
     event_source: NamedEntity
     event_type: str
     module: str

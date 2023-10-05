@@ -182,10 +182,16 @@ class Event(NamedEntity):
 
     def __init__(self, **data: Any):
         if 'type' in data and isinstance(data['type'], str):
-            data['type'] = data['type'].lower().replace(' ', '-')
+            data['type'] = data.get('type', '@missing-event-type').lower().replace(' ', '-')
         if 'name' not in data:
-            data['name'] = capitalize_event_type_id(data['type'])
+            data['name'] = capitalize_event_type_id(data.get('type', ''))
         super().__init__(**data)
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
 
     def replace(self, event):
         if isinstance(event, Event):

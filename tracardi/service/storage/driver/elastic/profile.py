@@ -134,8 +134,8 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
     return [profile.to_entity(Profile) for profile in profiles]
 
 
-async def save(profile: Union[Profile, List[Profile]], refresh_after_save=False):
-    if isinstance(profile, list):
+async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
+    if isinstance(profile, (list, set)):
         for _profile in profile:
             if isinstance(_profile, Profile):
                 _profile.metadata.time.update = datetime.utcnow()

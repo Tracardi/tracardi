@@ -1,3 +1,5 @@
+import time
+
 import logging
 import traceback
 from typing import Type, Callable, Coroutine, Any, Optional
@@ -48,7 +50,7 @@ async def track_event(tracker_payload: TrackerPayload,
     console_log = ConsoleLog()
 
     try:
-
+        tracking_start = time.time()
         tr = Tracker(
             console_log,
             TrackerConfig(
@@ -64,7 +66,7 @@ async def track_event(tracker_payload: TrackerPayload,
             on_result_ready=on_result_ready
         )
 
-        result = await tr.track_event(tracker_payload)
+        result = await tr.track_event(tracker_payload, tracking_start)
         return result
 
     except Exception as e:
@@ -157,7 +159,7 @@ class Tracker:
                                f"The following error was returned {str(e)}.")
         return tracker_payload
 
-    async def track_event(self, tracker_payload: TrackerPayload):
+    async def track_event(self, tracker_payload: TrackerPayload, tracking_start: float):
 
         # Trim ids - spaces are frequent issues
 
@@ -280,9 +282,10 @@ class Tracker:
             )
 
             return await tp.handle(
-                TrackerPayloads([tracker_payload]),
+                tracker_payload,
                 source,
-                self.tracker_config
+                self.tracker_config,
+                tracking_start
             )
 
         # Custom handler

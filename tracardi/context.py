@@ -18,7 +18,7 @@ class Context:
     version: Optional[str] = None
 
     def __init__(self,
-                 production:bool = None,
+                 production: bool = None,
                  user: Optional[User] = None,
                  tenant: str = None,
                  host: Optional[str] = None,
@@ -39,6 +39,9 @@ class Context:
 
     def is_production(self) -> bool:
         return self.production
+
+    def context_abrv(self) -> str:
+        return 'p' if self.production else 't'
 
     def switch_context(self, production, user=None, tenant=None) -> 'Context':
         if user is None:
@@ -72,7 +75,7 @@ class Context:
     def dict(self) -> dict:
         return {
             "production": self.production,
-            "user": self.user,
+            "user": self.user.model_dump(mode='json') if self.user else None,
             "tenant": self.tenant,
             "host": self.host,
             "version": self.version

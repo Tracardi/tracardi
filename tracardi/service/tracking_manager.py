@@ -6,7 +6,7 @@ from uuid import uuid4
 from dotty_dict import dotty
 from pydantic import ValidationError
 from tracardi.service.events import auto_index_default_event_type, copy_default_event_to_profile, \
-    get_default_event_type_mapping, call_function
+    get_default_mappings_for, call_function
 
 from tracardi.service.notation.dot_accessor import DotAccessor
 
@@ -14,7 +14,6 @@ from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.license import License, INDEXER
 
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.config import tracardi, memory_cache
@@ -39,11 +38,6 @@ from tracardi.service.storage.driver.elastic import flow as flow_db
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
-if License.has_service(INDEXER):
-    from com_tracardi.service.event_traits_mapper import map_event_props_to_traits
-
-if License.has_license():
-    from com_tracardi.service.data_compliance import DataComplianceHandler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -94,7 +88,11 @@ class TrackingManagerBase(ABC):
         pass
 
     @abstractmethod
-    async def invoke_track_process(self) -> TrackerResult:
+    async def get_events(self):
+        pass
+
+    @abstractmethod
+    async def invoke_track_process(self, events) -> TrackerResult:
         pass
 
 
@@ -116,10 +114,10 @@ class TrackingManager(TrackingManagerBase):
         self.profile_copy = None
         self.has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
 
+        # This is already done in track_async
         if self.has_profile:
             # Calculate only on first click in visit
-            if session.is_new():
-                logger.info("Profile visits metadata changed.")
+            if session.operation.new:
                 profile.metadata.time.visit.set_visits_times()
                 profile.metadata.time.visit.count += 1
                 profile.operation.update = True
@@ -152,7 +150,6 @@ class TrackingManager(TrackingManagerBase):
         if self.tracker_payload.events:
             debugging = self.tracker_payload.is_debugging_on()
             for event in self.tracker_payload.events:  # type: EventPayload
-                from datetime import datetime
                 _event = event.to_event(
                     self.tracker_payload.metadata,
                     self.tracker_payload.source,
@@ -188,10 +185,8 @@ class TrackingManager(TrackingManagerBase):
 
                 # Auto index event
                 _event = auto_index_default_event_type(_event, self.profile)
-                if License.has_service(INDEXER):
-                    _event = await map_event_props_to_traits(_event, self.console_log)
-
                 event_list.append(_event)
+
         return event_list
 
     async def get_routing_rules(self, events):
@@ -218,7 +213,7 @@ class TrackingManager(TrackingManagerBase):
                     ).model_dump()
                 ],
                 event
-            ) for event in events]
+            ) for event in events if event.metadata.valid]
 
             logger.debug(
                 f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
@@ -228,16 +223,14 @@ class TrackingManager(TrackingManagerBase):
 
         return event_rules
 
-    async def invoke_track_process(self) -> TrackerResult:
+    async def invoke_track_process(self, events) -> TrackerResult:
 
-        # Get events
-        events = await self.get_events()
         flat_events = {event.id: dotty(event.model_dump()) for event in events}
-
-        # Anonymize, data compliance
-        if License.has_license():
-            if self.profile is not None:
-                events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
+        #
+        # # Anonymize, data compliance
+        # if License.has_license():
+        #     if self.profile is not None:
+        #         events = await DataComplianceHandler(self.profile, self.console_log).comply(events, flat_events)
 
         debugger = None
 
@@ -251,7 +244,9 @@ class TrackingManager(TrackingManagerBase):
 
             # Default event types coping
 
-            copy_schema = get_default_event_type_mapping(event.type, 'profile')
+            # todo this should be moved up in the process.
+
+            copy_schema = get_default_mappings_for(event.type, 'profile')
 
             profile_updated_flag = False
             flat_profile = None
@@ -409,7 +404,7 @@ class TrackingManager(TrackingManagerBase):
 
                 # Compute values
 
-                compute_schema = get_default_event_type_mapping(event.type, 'compute')
+                compute_schema = get_default_mappings_for(event.type, 'compute')
                 if compute_schema:
                     for profile_property, compute_string in compute_schema:
                         if not compute_string.startswith("call:"):
@@ -470,10 +465,14 @@ class TrackingManager(TrackingManagerBase):
 
                 # Invoke rules engine
                 try:
+
+                    debug = self.tracker_payload.is_on('debugger', default=False)
+
                     rule_invoke_result = await rules_engine.invoke(
                         flow_db.load_production_flow,
                         ux,
-                        self.tracker_payload
+                        self.tracker_payload,
+                        debug
                     )
 
                     debugger = rule_invoke_result.debugger

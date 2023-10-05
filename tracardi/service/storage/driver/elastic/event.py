@@ -10,7 +10,7 @@ from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
-from typing import List, Optional, Dict, Tuple, Union
+from typing import List, Optional, Dict, Tuple, Union, Set
 from .raw import load_by_key_value_pairs
 
 import tracardi.config as config
@@ -24,7 +24,7 @@ async def load(id: str) -> Optional[StorageRecord]:
     return await storage_manager("event").load(id)
 
 
-async def save(events: List[Event], exclude=None):
+async def save(events: Union[List[Event], Set[Event]], exclude=None):
     return await storage_manager("event").upsert(events, exclude=exclude)
 
 

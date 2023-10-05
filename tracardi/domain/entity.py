@@ -9,6 +9,7 @@ from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.protocol.operational import Operational
 from tracardi.service.dot_notation_converter import dotter
+from tracardi.service.storage.index import Resource
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -24,7 +25,7 @@ class Creatable(BaseModel):
         if not record:
             return None
 
-        obj = cls(**record)
+        obj = cls(**dict(record))
 
         if hasattr(obj, 'set_meta_data'):
             obj.set_meta_data(record.get_meta_data())
@@ -46,6 +47,17 @@ class Entity(Creatable):
     def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
+    def _fill_meta_data(self, index_type: str):
+        """
+        Used to fill metadata with default current index and id.
+        """
+        if not self.has_meta_data():
+            resource = Resource()
+            self.set_meta_data(RecordMetadata(id=self.id, index=resource[index_type].get_write_index()))
+
+    def dump_meta_data(self) -> Optional[dict]:
+        return self._metadata.model_dump(mode='json') if isinstance(self._metadata, RecordMetadata) else None
+
     def has_meta_data(self) -> bool:
         return self._metadata is not None
 
@@ -64,7 +76,7 @@ class Entity(Creatable):
             storage_info = self.storage_info()  # type: Optional[StorageInfo]
             if storage_info and storage_info.multi is True:
                 if isinstance(self, Operational):
-                    if self.operation.new is True:
+                    if self.operation.new is False:
                         logger.error(f"Entity {type(self)} does not have index set. And it is not new.")
                 else:
                     logger.info(f"Entity {type(self)} converts to index-less storage record.")

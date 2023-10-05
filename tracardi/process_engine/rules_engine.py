@@ -48,7 +48,7 @@ class RulesEngine:
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload) -> RuleInvokeResult:
+    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
 
         source_id = tracker_payload.source.id
         flow_task_store = defaultdict(list)
@@ -165,12 +165,22 @@ class RulesEngine:
                         # Debugging can be controlled from tracker payload.
 
                         flow_task = asyncio.create_task(
-                            workflow.invoke(flow, event, self.profile, self.session, ux, debug=tracker_payload.debug))
+                            workflow.invoke(flow,
+                                            event,
+                                            self.profile,
+                                            self.session,
+                                            ux,
+                                            debug=debug
+                                            )
+                        )
+
+                        # Append to task store to be awaited latter
+
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
                     else:
                         logger.warning(f"Workflow {rule.flow.id} skipped. Event source id is not equal "
-                                       f"to rule source id.")
+                                       f"to trigger rule source id.")
                 else:
                     # todo FlowHistory is empty
                     workflow = WorkFlow(
@@ -182,7 +192,10 @@ class RulesEngine:
                     # Preliminary tests showed no issues but on heavy load we do not know if
                     # the test is still valid and every thing is ok. Solution is to remove create_task.
                     flow_task = asyncio.create_task(
-                        workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
+                        workflow.invoke(flow, event, self.profile, self.session, ux, debug=debug)
+                    )
+
+                    # Append flows to flow_task store
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
         # Run flows and report async

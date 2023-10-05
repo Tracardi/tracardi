@@ -705,11 +705,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 }
 
-if License.has_service(VALIDATOR):
-    installed_plugins["com_tracardi.action.v1.validator.plugin"] = PluginMetadata(
-        test=PluginTest(init={'validation_schema': {}}, resource=None)
-    )
-
 if License.has_service(SCHEDULER):
     installed_plugins["com_tracardi.action.v1.background.plugin"] = PluginMetadata(
         test=PluginTest(

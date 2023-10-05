@@ -40,6 +40,9 @@
                 },
                 "process_time": {
                   "type": "float"
+                },
+                "total_time": {
+                  "type": "float"
                 }
               }
             },
@@ -818,6 +821,9 @@
             "marketing": {
               "properties": {
                 "coupon": {
+                  "type": "keyword"
+                },
+                "channel": {
                   "type": "keyword"
                 },
                 "promotion": {

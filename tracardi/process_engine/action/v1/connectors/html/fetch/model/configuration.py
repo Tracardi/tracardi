@@ -2,7 +2,6 @@ from typing import Optional
 from enum import Enum
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.notation.dot_template import DotTemplate
-from pydantic import AnyHttpUrl
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -14,7 +13,7 @@ class Method(str, Enum):
 
 
 class Configuration(PluginConfig):
-    url: AnyHttpUrl
+    url: str # AnyHttpUrl
     timeout: int = 30
     method: Method = Method.get
     headers: Optional[dict] = {}
