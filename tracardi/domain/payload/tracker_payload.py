@@ -75,6 +75,10 @@ class TrackerPayload(BaseModel):
     debug: Optional[bool] = False
 
     def __init__(self, **data: Any):
+
+        if data.get('context', None) is None:
+            data['context'] = {}
+
         data['metadata'] = EventPayloadMetadata(
             time=Time(
                 insert=datetime.utcnow()
@@ -351,7 +355,7 @@ class TrackerPayload(BaseModel):
 
         try:
             return self.context['tracardi']['pass']
-        except KeyError:
+        except (KeyError, TypeError):
             return {}
 
     def get_referer_data(self, type: str) -> Optional[str]:

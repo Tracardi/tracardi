@@ -40,6 +40,7 @@ async def process_track_data(source: EventSource,
                              console_log: ConsoleLog
                              ):
     try:
+
         if not tracker_payload.events:
             return None
 
@@ -129,7 +130,7 @@ async def process_track_data(source: EventSource,
 
         if License.has_license():
 
-            if com_tracardi_settings.pulsar_host or com_tracardi_settings.async_processing:
+            if com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
 
                 """
                 Async processing can not do the following things:

@@ -58,10 +58,16 @@ class EventsReshaper:
                 if result is not None:
                     event_properties, event_context, session_context = result
 
-                    event.properties = event_properties
-                    event.context = event_context
+                    if event_properties is not None:
+                        event.properties = event_properties
+
+                    if event_context is not None:
+                        event.context = event_context
+
                     event.reshaping = ProcessStatus(error=False)
-                    self.tracker_payload.context = session_context
+
+                    if session_context is not None:
+                        self.tracker_payload.context = session_context
 
             except Exception as e:
                 event.reshaping = ProcessStatus(
