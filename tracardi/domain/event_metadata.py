@@ -24,6 +24,7 @@ class EventMetadata(BaseModel):
     valid: Optional[bool] = True
     error: Optional[bool] = False
     warning: Optional[bool] = False
+    merge: Optional[bool] = False
     instance: Optional[Entity] = None
 
 

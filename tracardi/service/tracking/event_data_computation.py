@@ -107,8 +107,15 @@ async def default_mapping_event_and_profile(flat_event, profile, session, consol
 
     # Custom event mapping
     if License.has_license():
-        flat_event = map_event_props_to_traits(flat_event, custom_event_mapping, console_log)
-        flat_event = map_events_tags_and_journey(flat_event, custom_event_mapping)
+
+        # Map event properties to traits
+        flat_event = map_event_props_to_traits(flat_event,
+                                               custom_event_mapping,
+                                               console_log)
+
+        # Add event tags and add journey tag
+        flat_event = map_events_tags_and_journey(flat_event,
+                                                 custom_event_mapping)
 
     # Map event data to profile
     profile = await map_event_to_profile(custom_event_to_profile_mapping_schemas,
@@ -126,8 +133,8 @@ async def make_event_from_event_payload(event_payload,
                                         source,
                                         metadata,
                                         profile_less,
-                                        tracker_payload,
                                         console_log) -> Dotty:
+
     # Get event
     event = event_payload.to_event(
         metadata,
@@ -138,8 +145,14 @@ async def make_event_from_event_payload(event_payload,
 
     event.metadata.channel = source.channel
 
-    if event_payload.validation is not None:
+    if event_payload.merging is not None:
+        event.metadata.error = event_payload.merging.error
+        # Mark as merged if not error
+        event.metadata.merge = not event_payload.merging.error
+
+    if event_payload.validation is not None and event_payload.validation.error is True:
         event.metadata.valid = False
+
         console_log.append(
             Console(
                 flow_id=None,
@@ -175,8 +188,10 @@ async def compute_events(events: List[EventPayload],
                          console_log: ConsoleLog,
                          tracker_payload: TrackerPayload
                          ) -> Tuple[List[Event], Session, Profile]:
+
     event_objects = []
     for event_payload in events:
+
         # For performance reasons we return flat_event and after mappings convert to event.
         flat_event = await make_event_from_event_payload(
             event_payload,
@@ -185,12 +200,11 @@ async def compute_events(events: List[EventPayload],
             source,
             metadata,
             profile_less,
-            tracker_payload,
             console_log
         )
 
         if flat_event.get('metadata.valid', True) is True:
-            # RUn mappings for valid event
+            # Run mappings for valid event. Maps properties to traits, and adds traits
             flat_event, profile = await default_mapping_event_and_profile(
                 flat_event,
                 profile,

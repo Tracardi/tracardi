@@ -35,6 +35,7 @@ class EventPayload(BaseModel):
     tags: Optional[list] = []
     validation: Optional[ProcessStatus] = None
     reshaping: Optional[ProcessStatus] = None
+    merging: Optional[ProcessStatus] = None
 
     _source_id: str = PrivateAttr(None)
 
@@ -155,7 +156,7 @@ class EventPayload(BaseModel):
             hit = Hit()
 
             try:
-                hit.title = self.context['page']['title']
+                hit.name = self.context['page']['title']
             except KeyError:
                 pass
 

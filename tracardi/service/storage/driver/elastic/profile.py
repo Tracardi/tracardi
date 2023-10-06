@@ -4,6 +4,7 @@ from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
+from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
@@ -97,7 +98,9 @@ async def deduplicate_profile(profile_id):
     return profile
 
 
-async def load_profile_without_identification(tracker_payload, is_static=False) -> Optional[Profile]:
+async def load_profile_without_identification(tracker_payload,
+                                              is_static=False,
+                                              console_log: Optional[ConsoleLog] = None) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     @throws DuplicatedRecordException

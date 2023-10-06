@@ -44,6 +44,8 @@ async def process_track_data(source: EventSource,
         if not tracker_payload.events:
             return None
 
+        # Validate events from tracker payload
+
         if tracardi.enable_event_validation:
             # Validate events. Checks validators and its conditions and sets validation status.
 
@@ -51,6 +53,7 @@ async def process_track_data(source: EventSource,
             tracker_payload = await validate_events(tracker_payload)
 
         if tracardi.enable_event_reshaping:
+
             # Reshape valid events
 
             evh = EventsReshaper(tracker_payload)
@@ -125,6 +128,10 @@ async def process_track_data(source: EventSource,
         for event in events:
             event.metadata.time.total_time = time.time() - tracking_start
 
+        # ----------------------------------------------
+        # FROM THIS POINT EVENTS SHOULD NOT BE MUTATED
+        # ----------------------------------------------
+
         # Async storage
         context = get_context()
 
@@ -165,6 +172,11 @@ async def process_track_data(source: EventSource,
 
             else:
 
+                # Save events - should not be mutated
+
+                storage = TrackingPersisterAsync()
+                result = await storage.save_events(events)
+
                 profile, session, events, ux, response = await dispatch_sync(
                     source,
                     profile,
@@ -175,7 +187,16 @@ async def process_track_data(source: EventSource,
                     console_log
                 )
 
+                result = await storage.save_profile_and_session(
+                    session,
+                    profile
+                )
+
+
         else:
+
+            storage = TrackingPersisterAsync()
+            result = await storage.save_events(events)
 
             profile, session, events, ux, response = await dispatch_sync(
                 source,
@@ -187,13 +208,12 @@ async def process_track_data(source: EventSource,
                 console_log
             )
 
-        # Save
+            # Save
 
-        result = await TrackingPersisterAsync().save(
-            session,
-            profile,
-            events
-        )
+            result = await storage.save_profile_and_session(
+                session,
+                profile
+            )
 
         return {
             "task": tracker_payload.get_id(),

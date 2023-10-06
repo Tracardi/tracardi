@@ -70,12 +70,18 @@ async def dispatch_sync(source: EventSource,
     # Post Event Segmentation
 
     if tracardi.enable_post_event_segmentation and isinstance(profile, Profile):
+
+        # MUTATES Profile
+
         await post_ev_segment(profile,
                               session,
                               [event.type for event in events],
                               segment_db.load_segments)
 
+    # Dispatch events
+
     if tracardi.enable_event_destinations:
+
         load_destination_task = cache.event_destination
         await event_destination_dispatch(
             load_destination_task,
@@ -84,6 +90,8 @@ async def dispatch_sync(source: EventSource,
             events,
             tracker_payload.debug
         )
+
+    # Dispatch profile
 
     await profile_dispatcher.dispatch(
         profile,

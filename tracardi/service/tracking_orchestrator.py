@@ -136,7 +136,8 @@ class TrackingOrchestrator:
             profile, session = await tracker_payload.get_static_profile_and_session(
                 session,
                 profile_loader,
-                tracker_payload.profile_less
+                tracker_payload.profile_less,
+                self.console_log
             )
 
             # Profile exists but was merged
@@ -157,7 +158,8 @@ class TrackingOrchestrator:
             profile, session = await tracker_payload.get_profile_and_session(
                 session,
                 profile_loader,
-                tracker_payload.profile_less
+                tracker_payload.profile_less,
+                self.console_log
             )
 
         if isinstance(tracker_payload.source, EventSource):

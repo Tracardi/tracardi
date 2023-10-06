@@ -82,6 +82,9 @@
             "error": {
               "type": "boolean"
             },
+            "merge": {
+              "type": "boolean"
+            },
             "instance": {
               "properties": {
                 "id": {

@@ -190,11 +190,16 @@ class TrackingPersisterAsync:
 
         return None
 
-    async def save(self,
-                   session: Session,
-                   profile: Profile,
-                   events: List[Event]
-                   ) -> dict:
+    async def save_events(self, events: List[Event]):
+        if tracardi.expose_gui_api is True:
+            if events:
+                FieldMapper().add_field_mappings('event', events)
+        return await self._save_events(events)
+
+    async def save_profile_and_session(self,
+                                       session: Session,
+                                       profile: Profile,
+                                       ) -> tuple:
 
         # Add mappings
         if tracardi.expose_gui_api is True:
@@ -204,20 +209,9 @@ class TrackingPersisterAsync:
             if session:
                 FieldMapper().add_field_mappings('session', [session])
 
-            if events:
-                FieldMapper().add_field_mappings('event', events)
-
         coroutines = [
             self._save_profile(profile),
             self._save_session(session, profile)
         ]
 
-        result = await asyncio.gather(*coroutines)
-        event_result = await self._save_events(events)
-
-        return dict(
-            session=result[1],
-            profile=result[0],
-            # events must be last
-            events=event_result
-        )
+        return await asyncio.gather(*coroutines)

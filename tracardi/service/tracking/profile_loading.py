@@ -4,6 +4,7 @@ from typing import Optional, Tuple
 from tracardi.domain.session import Session
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
+from tracardi.service.console_log import ConsoleLog
 from tracardi.service.license import License
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -20,9 +21,13 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-async def load_profile_and_session(session: Session,
-                                   tracker_config: TrackerConfig,
-                                   tracker_payload: TrackerPayload) -> Tuple[Optional[Profile], Optional[Session]]:
+async def load_profile_and_session(
+        session: Session,
+        tracker_config: TrackerConfig,
+        tracker_payload: TrackerPayload,
+        console_log: ConsoleLog
+) -> Tuple[Optional[Profile], Optional[Session]]:
+
     # Load profile
     if License.has_license():
         profile_loader = load_profile_deduplicate_and_identify \
@@ -34,11 +39,13 @@ async def load_profile_and_session(session: Session,
     # Force static profile id
 
     if tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id():
+
         # Get static profile - This is dangerous
         profile, session = await tracker_payload.get_static_profile_and_session(
             session,
             profile_loader,  # Loads from memory if possible
-            tracker_payload.profile_less
+            tracker_payload.profile_less,
+            console_log
         )
 
         # Profile exists but was merged
@@ -59,7 +66,8 @@ async def load_profile_and_session(session: Session,
         profile, session = await tracker_payload.get_profile_and_session(
             session,
             profile_loader,  # Loads from memory if possible
-            tracker_payload.profile_less
+            tracker_payload.profile_less,
+            console_log
         )
 
     return profile, session

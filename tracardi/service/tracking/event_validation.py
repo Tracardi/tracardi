@@ -87,12 +87,19 @@ async def validate_events(tracker_payload: TrackerPayload) -> TrackerPayload:
         validation_schemas = await cache.event_validation(
             event_type=event_payload.type,
             ttl=memory_cache.event_validation_cache_ttl)
-        validation_error, error_message = await _get_event_validation_result(event_payload.to_event_dict(
-            tracker_payload.source,
-            tracker_payload.session,
-            tracker_payload.profile,
-            tracker_payload.profile_less
-        ), validation_schemas)
+
+        # Validate events
+
+        validation_error, error_message = await _get_event_validation_result(
+            # TODO check for performance reasons
+            event_payload.to_event_dict(
+                tracker_payload.source,
+                tracker_payload.session,
+                tracker_payload.profile,
+                tracker_payload.profile_less
+            ),
+            validation_schemas
+        )
 
         event_payload.validation = ProcessStatus(error=validation_error, message=error_message)
 

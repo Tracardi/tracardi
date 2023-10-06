@@ -212,13 +212,15 @@ class WorkflowManagerAsync:
                     # Profile and session can change inside workflow
                     # Check if it should not be replaced.
 
-                    if self.profile is not rules_engine.profile:
+                    if self.profile is not rules_engine.profile:  # Not equal
                         self.profile = rules_engine.profile
 
                     if self.session is not rules_engine.session:
                         self.session = rules_engine.session
 
                     # Append invoked rules to event metadata
+
+                    # TODO Event MUTATION - FORBIDDEN - ADD ARTEFACTS
 
                     for event in events:
                         event.metadata.processed_by.rules = invoked_rules[event.id]
@@ -287,6 +289,10 @@ class WorkflowManagerAsync:
                 logger.debug(f"No routing rules found for workflow.")
 
         finally:
+
+            # TODO Event MUTATION - FORBIDDEN - ADD ARTEFACTS
+
+            # This is event discarding
 
             if post_invoke_events is not None:
                 synced_events = []

@@ -20,13 +20,19 @@ async def compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
                        console_log: ConsoleLog):
+
     # We need profile and session before async
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
 
     # Load profile
 
-    profile, session = await load_profile_and_session(session, tracker_config, tracker_payload)
+    profile, session = await load_profile_and_session(
+        session,
+        tracker_config,
+        tracker_payload,
+        console_log
+    )
 
     # ------------------------------------
     # Session and events computation
@@ -66,7 +72,7 @@ async def compute_data(tracker_payload: TrackerPayload,
     # events, session, profile = None, None, []
 
     events, session, profile = await compute_events(
-        tracker_payload.events,  # All events with system events
+        tracker_payload.events,  # All events with system events, and validation information
         tracker_payload.metadata,
         source,
         session,
@@ -83,6 +89,5 @@ async def compute_data(tracker_payload: TrackerPayload,
     print("----------------------------------------")
     print(profile.id, "metadata", profile.get_meta_data())
     print(profile.id, "new profile", profile.operation)
-
 
     return profile, session, events, tracker_payload

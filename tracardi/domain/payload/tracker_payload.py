@@ -4,7 +4,7 @@ import json
 import logging
 from hashlib import sha1
 from datetime import datetime, timedelta
-from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple
+from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator
 from uuid import uuid4
 
 from dotty_dict import dotty
@@ -15,6 +15,7 @@ from tracardi.service.utils.getters import get_entity_id
 
 from tracardi.config import tracardi
 from ...service.cache_manager import CacheManager
+from ...service.console_log import ConsoleLog
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..console import Console
@@ -205,10 +206,10 @@ class TrackerPayload(BaseModel):
                 return True
         return False
 
-    def get_event_properties(self, event_type) -> List[dict]:
-        for event in self.events:
-            if event.type == event_type:
-                yield event.properties
+    def get_event_payloads_by_type(self, event_type) -> Generator[EventPayload, Any, None]:
+        for event_payload in self.events:
+            if event_payload.type == event_type:
+                yield event_payload
 
     def force_static_profile_id(self, flag=True):
         self._make_static_profile_id = flag
@@ -318,10 +319,13 @@ class TrackerPayload(BaseModel):
     def is_debugging_on(self) -> bool:
         return tracardi.track_debug and self.is_on('debugger', default=False)
 
-    async def get_static_profile_and_session(self,
-                                             session: Session,
-                                             profile_loader: Callable[['TrackerPayload', bool], Awaitable],
-                                             profile_less: bool) -> Tuple[Optional[Profile], Session]:
+    async def get_static_profile_and_session(
+            self,
+            session: Session,
+            profile_loader: Callable[['TrackerPayload', bool, Optional[ConsoleLog]], Awaitable],
+            profile_less: bool,
+            console_log: Optional[ConsoleLog] = None
+    ) -> Tuple[Optional[Profile], Session]:
 
         if profile_less:
             profile = None
@@ -329,7 +333,9 @@ class TrackerPayload(BaseModel):
             if not self.profile or not self.profile.id:
                 raise ValueError("Can not use static profile id without profile.id.")
 
-            profile = await profile_loader(self, True)  # is_static is set to true
+            profile = await profile_loader(self,
+                                           True,  # is_static is set to true
+                                           console_log)
 
             # Create empty profile if the profile id does nto point to any profile in database.
             if not profile:
@@ -380,19 +386,20 @@ class TrackerPayload(BaseModel):
         try:
             # Get first event type and match identification point for it
             _identification = valid_identification_points[0]
-            properties = dotty(next(self.get_event_properties(_identification.event_type.id)))
+            event_payload = next(self.get_event_payloads_by_type(_identification.event_type.id))
+            flat_properties = dotty({"properties": event_payload})
             find_profile_by_fields = []
             for field in _identification.fields:
                 if field.event_property.ref and field.profile_trait.ref:
-                    if field.event_property.value not in properties:
+                    if field.event_property.value not in flat_properties:
                         raise AssertionError(f"While creating new profile Tracardi was forced to load data by merging "
                                              f"key because identification must be performed on new profile. "
                                              f"We encountered missing data issue for property "
                                              f"[{field.event_property.value}] in the event property. "
                                              f"Identification point [{_identification.name}] has it defined as customer "
-                                             f"merging key but the event has only the properties {properties}.")
+                                             f"merging key but the event has only the properties {flat_properties}.")
                         # error
-                    find_profile_by_fields.append((field.profile_trait.value, properties[field.event_property.value]))
+                    find_profile_by_fields.append((field.profile_trait.value, flat_properties[field.event_property.value]))
             if find_profile_by_fields:
                 # load profile
                 return find_profile_by_fields
@@ -408,9 +415,13 @@ class TrackerPayload(BaseModel):
             return ttl > 0
         return False
 
-    async def get_profile_and_session(self, session: Optional[Session],
-                                      profile_loader: Callable[['TrackerPayload'], Awaitable],
-                                      profile_less) -> Tuple[Optional[Profile], Session]:
+    async def get_profile_and_session(
+            self,
+            session: Optional[Session],
+            profile_loader: Callable[['TrackerPayload', bool, Optional[ConsoleLog]], Awaitable],
+            profile_less,
+            console_log: Optional[ConsoleLog] = None
+    ) -> Tuple[Optional[Profile], Session]:
 
         """
         Returns session. Creates profile if it does not exist.If it exists connects session with profile.
@@ -492,7 +503,10 @@ class TrackerPayload(BaseModel):
                 else:
 
                     # ID exists, load profile from storage
-                    profile: Optional[Profile] = await profile_loader(self)
+                    profile: Optional[Profile] = await profile_loader(
+                        self,
+                        False,  # Not static profile ID
+                        console_log)
 
                     if profile is None:
                         # Profile id delivered but profile does not exist in storage.
@@ -532,7 +546,15 @@ class TrackerPayload(BaseModel):
                     copy_of_tracker_payload = TrackerPayload(**self.model_dump())
                     copy_of_tracker_payload.profile = Entity(id=session.profile.id)
 
-                    profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
+                    # Loader can mutate the copy_of_tracker_payload and add merging status
+
+                    profile: Optional[Profile] = await profile_loader(
+                        copy_of_tracker_payload,  # Not static profile ID
+                        False,
+                        console_log)
+
+                    # Reassign events that can be mutated
+                    self.events = copy_of_tracker_payload.events
 
                     if isinstance(profile, Profile) and session.profile.id != profile.id:
                         # Profile in session id has been merged. Change profile in session.
@@ -581,11 +603,21 @@ class TrackerPayload(BaseModel):
                 # If new profile then check if there is fingerprinted profile
                 if is_new_profile:
                     if profile.id != fp_profile_id:
+
                         # Load profile with finger printed profile id
                         copy_of_tracker_payload = TrackerPayload(**self.model_dump())
                         copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
 
-                        fp_profile: Optional[Profile] = await profile_loader(copy_of_tracker_payload)
+                        # Loader can mutate the copy_of_tracker_payload and add merging status
+
+                        fp_profile: Optional[Profile] = await profile_loader(
+                            copy_of_tracker_payload,
+                            False,  # Not static profile ID
+                            console_log
+                        )
+
+                        # Reassign events that can be mutated
+                        self.events = copy_of_tracker_payload.events
 
                         if fp_profile:
                             profile = fp_profile
