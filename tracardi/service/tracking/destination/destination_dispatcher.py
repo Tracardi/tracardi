@@ -9,13 +9,14 @@ from tracardi.service.destination_orchestrator import DestinationOrchestrator
 class ProfileDestinationDispatcher:
 
     def __init__(self, profile: Optional[Profile], console_log: ConsoleLog):
-        if tracardi.enable_profile_destinations:
+        self.must_dispatch = tracardi.enable_profile_destinations and (profile.operation.new or profile.operation.needs_update())
+        if self.must_dispatch:
             self.has_profile = isinstance(profile, Profile)
             self.console_log = console_log
             self.copy = profile.model_dump(exclude={"operation": ...}) if self.has_profile else None
 
     async def dispatch(self, profile, session, events):
-        if tracardi.enable_profile_destinations:
+        if self.must_dispatch:
             do = DestinationOrchestrator(
                 profile,
                 session,

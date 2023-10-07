@@ -22,8 +22,8 @@ class Collection:
     profile_fields: str = "profile:fields"  # SET, Cache profile fields, properties for auto completion
     event_fields: str = "event:fields"  # SET, Cache event fields, properties for auto completion
     session_fields: str = "session:fields"  # Cache session fields, properties for auto completion
-    postpone_schedule: str = "delay:schedule-flag"  # Cache postponed execution (call)
-    postpone_flag: str = "delay:postpone-flag"  # Cache postponed execution (call)
-    exec_instance: str = "delay:exec-instance"  # Cache postponed execution (call)
+
     value_threshold: str = "value-threshold:"  # Cache for WF value threshold
+
     browser_finger_print: str = 'profile:finger:browser'  # Cache for profile by browser fingerprint
+

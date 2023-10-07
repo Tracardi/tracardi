@@ -625,18 +625,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.flow.postpone_event.plugin": PluginMetadata(
-        test=PluginTest(init={
-            'event_type': 'type',
-            'source': {
-                'id': 'x',
-                'name': 'x'
-            },
-            'event_properties': '{}',
-            'delay': 60},
-            resource=None)
-    ),
-
     "tracardi.process_engine.action.v1.contains_string_action": PluginMetadata(
         test=PluginTest(init={
             "field": "payload@field",
