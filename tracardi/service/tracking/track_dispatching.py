@@ -3,6 +3,8 @@ from typing import List
 import logging
 
 from tracardi.service.console_log import ConsoleLog
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
+from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
 from tracardi.service.tracking.workflow_orchestrator_async import WorkflowOrchestratorAsync
 from tracardi.config import tracardi
@@ -98,5 +100,14 @@ async def dispatch_sync(source: EventSource,
         session,
         events
     )
+
+    # Save to cache after processing. This is needed when both async and sync workers are working
+    # The state should always be in cache.
+
+    if profile.operation.new or profile.operation.needs_update():
+        save_profile_cache(profile)
+
+    if session.operation.new or session.operation.needs_update():
+        save_session_cache(session)
 
     return profile, session, events, ux, response

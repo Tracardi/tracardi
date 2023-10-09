@@ -192,7 +192,6 @@ async def process_track_data(source: EventSource,
                     profile
                 )
 
-
         else:
 
             storage = TrackingPersisterAsync()

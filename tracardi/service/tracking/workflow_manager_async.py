@@ -78,20 +78,6 @@ class WorkflowManagerAsync:
         self.profile_copy = None
         self.has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
 
-        # This is already done in track_async
-        if self.has_profile:
-            # Calculate only on first click in visit
-            if session.operation.new:
-                profile.metadata.time.visit.set_visits_times()
-                profile.metadata.time.visit.count += 1
-                profile.operation.update = True
-                # Set time zone form session
-                if session.context:
-                    try:
-                        profile.metadata.time.visit.tz = session.context['time']['tz']
-                    except KeyError:
-                        pass
-
         if tracker_payload.profile_less is True and profile is not None:
             logger.warning("Something is wrong - profile less events should not have profile attached.")
 

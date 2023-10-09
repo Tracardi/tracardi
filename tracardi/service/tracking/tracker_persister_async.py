@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from tracardi.service.tracking.storage.event_storage import save_events
-from tracardi.service.tracking.storage.profile_storage import save_profile
+from tracardi.service.tracking.storage.profile_storage import save_profile, load_profile
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
@@ -110,7 +110,6 @@ class TrackingPersisterAsync:
 
     async def _save_profile(self, profile: Profile):
         if profile:
-
             if profile and (profile.operation.new or profile.operation.needs_update()):
 
                 results = []
@@ -120,7 +119,6 @@ class TrackingPersisterAsync:
                         for id in result.ids:
                             self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
                     results.append(result)
-
                 except StorageException as e:
                     message = "Could not save profile. Error: {}".format(str(e))
                     raise FieldTypeConflictException(message, rows=e.details)

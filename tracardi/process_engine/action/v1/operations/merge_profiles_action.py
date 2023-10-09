@@ -33,7 +33,6 @@ def validate(config: dict) -> MergeProfileConfiguration:
 
 
 class MergeProfilesAction(ActionRunner):
-
     merge_key: List[str]
 
     async def set_up(self, init):
@@ -75,7 +74,9 @@ def register() -> Plugin:
                             description="Provide a list of fields that can identify user. For example profile@data.contact.email. "
                                         "These fields will be treated as primary keys for merging. Profiles will be "
                                         "grouped by this value and merged.",
-                            component=FormComponent(type="listOfDotPaths", props={"label": "condition"})
+                            component=FormComponent(type="listOfDotPaths", props={"label": "condition",
+                                                                                  "defaultSourceValue": "profile"
+                                                                                  })
                         )
                     ]
                 ),

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import time
 
 import logging
@@ -9,7 +11,6 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
@@ -24,7 +25,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from typing import List
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.tracker_processor import TrackerProcessor, TrackProcessorBase
+from tracardi.service.tracker_processor import TrackerProcessor
 from tracardi.service.tracking_manager import TrackingManagerBase, TrackerResult
 from tracardi.service.storage.cache.model import load as cache_load
 
@@ -41,7 +42,6 @@ async def track_event(tracker_payload: TrackerPayload,
                       internal_source=None,
                       run_async: bool = False,
                       static_profile_id: bool = False,
-                      on_source_ready: Type[TrackProcessorBase] = None,
                       on_profile_merge: Callable[[Profile], Profile] = None,
                       on_profile_ready: Type[TrackingManagerBase] = None,
                       on_result_ready: Callable[
@@ -60,7 +60,6 @@ async def track_event(tracker_payload: TrackerPayload,
                 run_async=run_async,
                 static_profile_id=static_profile_id
             ),
-            on_source_ready=on_source_ready,
             on_profile_merge=on_profile_merge,
             on_profile_ready=on_profile_ready,
             on_result_ready=on_result_ready
@@ -91,13 +90,11 @@ class Tracker:
     def __init__(self,
                  console_log: ConsoleLog,
                  tracker_config: TrackerConfig,
-                 on_source_ready: Type[TrackProcessorBase] = None,
                  on_profile_merge: Callable[[Profile], Profile] = None,
                  on_profile_ready: Type[TrackingManagerBase] = None,
                  on_result_ready: Callable[[List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None
                  ):
 
-        self.on_source_ready = on_source_ready
         self.on_result_ready = on_result_ready
         self.on_profile_ready = on_profile_ready
         self.on_profile_merge = on_profile_merge
@@ -273,34 +270,17 @@ class Tracker:
         if tracker_payload.source.transitional is True:
             tracker_payload.set_ephemeral()
 
-        if self.on_source_ready is None:
-            tp = TrackerProcessor(
-                self.console_log,
-                self.on_profile_merge,
-                self.on_profile_ready,
-                self.on_result_ready
-            )
+        # TODO this is required as long the old processing is required
 
-            return await tp.handle(
-                tracker_payload,
-                source,
-                self.tracker_config,
-                tracking_start
-            )
-
-        # TODO probably can be removed
-        # Custom handler
-        if not issubclass(self.on_source_ready, TrackProcessorBase):
-            raise AssertionError("Callable self.tracker_config.on_source_ready must a TrackProcessorBase object.")
-
-        tp = self.on_source_ready(
+        tp = TrackerProcessor(
             self.console_log,
             self.on_profile_merge,
             self.on_profile_ready,
             self.on_result_ready
         )
+
         return await tp.handle(
-            TrackerPayloads([tracker_payload]),
+            tracker_payload,
             source,
             self.tracker_config,
             tracking_start
@@ -316,7 +296,8 @@ class Tracker:
                 name="Static event source",
                 description="This event source is prepared because of ENABLE_EVENT_SOURCE_CHECK==no.",
                 channel="Web",
-                transitional=False  # ephemeral
+                transitional=False,  # ephemeral
+                timestamp=datetime.utcnow()
             )
 
         source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
@@ -349,7 +330,8 @@ class Tracker:
                 description="This is event source for internal events.",
                 channel="Internal",
                 transitional=False,  # ephemeral
-                tags=['internal']
+                tags=['internal'],
+                timestamp=datetime.utcnow()
             )
 
         source = await self.check_source_id(source_id)
