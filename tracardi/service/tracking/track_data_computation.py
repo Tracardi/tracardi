@@ -1,6 +1,15 @@
+from typing import Tuple, List
+
+from tracardi.config import tracardi
+from tracardi.domain.event import Event
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
+from tracardi.service.storage.redis.collections import Collection
+from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.event_data_computation import compute_events
+from tracardi.service.tracking.locking import GlobalMutexLock
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
     update_profile_visits, update_profile_time
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
@@ -14,12 +23,13 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
+from tracardi.service.utils.getters import get_entity_id
 
 
 async def compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
-                       console_log: ConsoleLog):
+                       console_log: ConsoleLog) -> Tuple[Profile, Session, List[Event], TrackerPayload]:
 
     # We need profile and session before async
 
@@ -88,6 +98,63 @@ async def compute_data(tracker_payload: TrackerPayload,
 
     print("----------------------------------------")
     print(profile.id, "metadata", profile.get_meta_data())
-    print(profile.id, "new profile", profile.operation)
+
+    return profile, session, events, tracker_payload
+
+
+async def lock_and_compute_data(
+        tracker_payload: TrackerPayload,
+        tracker_config: TrackerConfig,
+        source: EventSource,
+        console_log: ConsoleLog) -> Tuple[Profile, Session, List[Event], TrackerPayload]:
+
+    if tracardi.lock_on_data_computation:
+        _redis = RedisClient()
+        async with (
+            GlobalMutexLock(get_entity_id(tracker_payload.profile),
+                            'profile',
+                            namespace=Collection.lock_tracker,
+                            redis=_redis
+                            ),
+            GlobalMutexLock(get_entity_id(tracker_payload.session),
+                            'session',
+                            namespace=Collection.lock_tracker,
+                            redis=_redis
+                            )):
+
+            # Always use GlobalUpdateLock to update profile and session
+
+            profile, session, events, tracker_payload = await compute_data(
+                tracker_payload,
+                tracker_config,
+                source,
+                console_log
+            )
+
+            # MUST BE INSIDE MUTEX
+            # Update only when needed
+
+            if profile.operation.new or profile.operation.needs_update():
+                save_profile_cache(profile)
+
+            if session.operation.new or session.operation.needs_update():
+                save_session_cache(session)
+
+    else:
+
+        profile, session, events, tracker_payload = await compute_data(
+            tracker_payload,
+            tracker_config,
+            source,
+            console_log
+        )
+
+        # Update only when needed
+
+        if profile.operation.new or profile.operation.needs_update():
+            save_profile_cache(profile)
+
+        if session.operation.new or session.operation.needs_update():
+            save_session_cache(session)
 
     return profile, session, events, tracker_payload

@@ -40,7 +40,7 @@ def save_profile_cache(profile: Optional[Profile]):
                     "production": context.production,
                     "tenant": context.tenant
                 },
-                profile.model_dump(mode="json", exclude_unset=True, exclude_defaults=True),
+                profile.model_dump(mode="json", exclude_defaults=True),
                 profile.get_meta_data().model_dump() if profile.has_meta_data() else None
             ),
             f"{Collection.profile}{context.context_abrv()}:{profile.id[0:2]}:"

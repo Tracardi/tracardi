@@ -2,12 +2,9 @@ import time
 import logging
 
 from tracardi.service.license import License
-from tracardi.service.tracking.cache.profile_cache import save_profile_cache
-from tracardi.service.tracking.cache.session_cache import save_session_cache
-from tracardi.service.tracking.locking import GlobalMutexLock
 from tracardi.service.tracking.system_events import add_system_events
-from tracardi.service.tracking.track_data_computation import compute_data
-from tracardi.service.tracking.track_dispatching import dispatch_sync
+from tracardi.service.tracking.track_data_computation import lock_and_compute_data
+from tracardi.service.tracking.track_dispatching import lock_dispatch_sync
 from tracardi.service.tracking.tracker_event_reshaper import EventsReshaper
 from tracardi.service.tracking.event_validation import validate_events
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
@@ -18,10 +15,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.utils.getters import get_entity_id
 
 if License.has_license():
     from com_tracardi.config import com_tracardi_settings
@@ -59,56 +53,14 @@ async def process_track_data(source: EventSource,
             evh = EventsReshaper(tracker_payload)
             tracker_payload = await evh.reshape_events()
 
-        # Lock profile and session for changes
+        # Lock profile and session for changes and compute data
 
-        if tracardi.lock_on_data_computation:
-            _redis = RedisClient()
-            async with (
-                GlobalMutexLock(get_entity_id(tracker_payload.profile),
-                                'profile',
-                                namespace=Collection.lock_tracker,
-                                redis=_redis
-                                ),
-                GlobalMutexLock(get_entity_id(tracker_payload.session),
-                                'session',
-                                namespace=Collection.lock_tracker,
-                                redis=_redis
-                                )):
-
-                # Always use GlobalUpdateLock to update profile and session
-
-                profile, session, events, tracker_payload = await compute_data(
-                    tracker_payload,
-                    tracker_config,
-                    source,
-                    console_log
-                )
-
-                # MUST BE INSIDE MUTEX
-                # Update only when needed
-
-                if profile.operation.new or profile.operation.needs_update():
-                    save_profile_cache(profile)
-
-                if session.operation.new or session.operation.needs_update():
-                    save_session_cache(session)
-
-        else:
-
-            profile, session, events, tracker_payload = await compute_data(
-                tracker_payload,
-                tracker_config,
-                source,
-                console_log
-            )
-
-            # Update only when needed
-
-            if profile.operation.new or profile.operation.needs_update():
-                save_profile_cache(profile)
-
-            if session.operation.new or session.operation.needs_update():
-                save_session_cache(session)
+        profile, session, events, tracker_payload = await lock_and_compute_data(
+            tracker_payload,
+            tracker_config,
+            source,
+            console_log
+        )
 
         # Updates/Mutations of tracker_payload
 
@@ -177,7 +129,7 @@ async def process_track_data(source: EventSource,
                 storage = TrackingPersisterAsync()
                 result = await storage.save_events(events)
 
-                profile, session, events, ux, response = await dispatch_sync(
+                profile, session, events, ux, response = await lock_dispatch_sync(
                     source,
                     profile,
                     session,
@@ -197,7 +149,7 @@ async def process_track_data(source: EventSource,
             storage = TrackingPersisterAsync()
             result = await storage.save_events(events)
 
-            profile, session, events, ux, response = await dispatch_sync(
+            profile, session, events, ux, response = await lock_dispatch_sync(
                 source,
                 profile,
                 session,

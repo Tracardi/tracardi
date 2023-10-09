@@ -1,11 +1,14 @@
-from typing import List
+from typing import List, Tuple, Optional
 
 import logging
 
 from tracardi.service.console_log import ConsoleLog
+from tracardi.service.storage.redis.collections import Collection
+from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
+from tracardi.service.tracking.locking import GlobalMutexLock
 from tracardi.service.tracking.workflow_orchestrator_async import WorkflowOrchestratorAsync
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
@@ -19,6 +22,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracker_config import TrackerConfig
+from tracardi.service.utils.getters import get_entity_id
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -32,14 +36,12 @@ async def dispatch_sync(source: EventSource,
                         events: List[Event],
                         tracker_payload: TrackerPayload,
                         tracker_config: TrackerConfig,
-                        console_log: ConsoleLog):
+                        console_log: ConsoleLog) -> Tuple[
+    Profile, Session, List[Event], Optional[list], Optional[dict]]:
     print('SYNC')
 
     ux = []
     response = {}
-
-    # This is MUST BE FIRST BEFORE WORKFLOW
-    profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
 
     if tracardi.enable_workflow:
         workflow = WorkflowOrchestratorAsync(
@@ -72,7 +74,6 @@ async def dispatch_sync(source: EventSource,
     # Post Event Segmentation
 
     if tracardi.enable_post_event_segmentation and isinstance(profile, Profile):
-
         # MUTATES Profile
 
         await post_ev_segment(profile,
@@ -80,10 +81,76 @@ async def dispatch_sync(source: EventSource,
                               [event.type for event in events],
                               segment_db.load_segments)
 
+    return profile, session, events, ux, response
+
+
+async def lock_dispatch_sync(source: EventSource,
+                             profile: Profile,
+                             session: Session,
+                             events: List[Event],
+                             tracker_payload: TrackerPayload,
+                             tracker_config: TrackerConfig,
+                             console_log: ConsoleLog) -> Tuple[
+    Profile, Session, List[Event], Optional[list], Optional[dict]]:
+
+    # This is MUST BE FIRST BEFORE WORKFLOW
+    profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
+
+    if tracardi.lock_on_data_computation:
+        _redis = RedisClient()
+        async with (
+            GlobalMutexLock(get_entity_id(tracker_payload.profile),
+                            'profile',
+                            namespace=Collection.lock_tracker,
+                            redis=_redis
+                            ),
+            GlobalMutexLock(get_entity_id(tracker_payload.session),
+                            'session',
+                            namespace=Collection.lock_tracker,
+                            redis=_redis
+                            )):
+
+            # Dispatch
+            profile, session, events, ux, response = await dispatch_sync(source,
+                                                                         profile,
+                                                                         session,
+                                                                         events,
+                                                                         tracker_payload,
+                                                                         tracker_config,
+                                                                         console_log)
+
+            # Save to cache after processing. This is needed when both async and sync workers are working
+            # The state should always be in cache. MUST BE INSIDE MUTEX
+
+            if profile.operation.new or profile.operation.needs_update():
+                save_profile_cache(profile)
+
+            if session.operation.new or session.operation.needs_update():
+                save_session_cache(session)
+
+    else:
+
+        # Dispatch
+        profile, session, events, ux, response = await dispatch_sync(source,
+                                                                     profile,
+                                                                     session,
+                                                                     events,
+                                                                     tracker_payload,
+                                                                     tracker_config,
+                                                                     console_log)
+
+        # Save to cache after processing. This is needed when both async and sync workers are working
+        # The state should always be in cache. MUST BE INSIDE MUTEX
+
+        if profile.operation.new or profile.operation.needs_update():
+            save_profile_cache(profile)
+
+        if session.operation.new or session.operation.needs_update():
+            save_session_cache(session)
+
     # Dispatch events
 
     if tracardi.enable_event_destinations:
-
         load_destination_task = cache.event_destination
         await event_destination_dispatch(
             load_destination_task,
@@ -100,14 +167,5 @@ async def dispatch_sync(source: EventSource,
         session,
         events
     )
-
-    # Save to cache after processing. This is needed when both async and sync workers are working
-    # The state should always be in cache.
-
-    if profile.operation.new or profile.operation.needs_update():
-        save_profile_cache(profile)
-
-    if session.operation.new or session.operation.needs_update():
-        save_session_cache(session)
 
     return profile, session, events, ux, response

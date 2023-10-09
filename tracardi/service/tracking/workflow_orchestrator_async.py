@@ -4,7 +4,6 @@ from tracardi.config import tracardi
 from tracardi.domain.event import Event
 from tracardi.domain.event_source import EventSource
 from tracardi.service.cache_manager import CacheManager
-from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -45,12 +44,6 @@ class WorkflowOrchestratorAsync:
         """
 
         # Session and Profile is loaded and attached to tracker payload
-
-        has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
-
-        if has_profile and self.source.synchronize_profiles:
-            # ToDO profile locking
-            pass
 
         # Workflow starts here
 

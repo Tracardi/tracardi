@@ -39,7 +39,7 @@ def save_session_cache(session: Optional[Session]):
                     "production": context.production,
                     "tenant": context.tenant
                 },
-                session.model_dump(mode="json"),
+                session.model_dump(mode="json", exclude_defaults=True),
                 session.get_meta_data().model_dump() if session.has_meta_data() else None
             ),
             f"{Collection.session}{context.context_abrv()}:{session.id[0:2]}:"
