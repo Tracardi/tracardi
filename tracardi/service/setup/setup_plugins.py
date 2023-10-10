@@ -4,6 +4,14 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.strings.string_stripper.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "string": "abc",
+                "to_remove": "a",
+            }, resource=None),
+    ),
+
+
     "tracardi.process_engine.action.v1.internal.tag_event.plugin": PluginMetadata(
         test=PluginTest(init={"tags": "tag1,tag2"}, resource=None),
     ),
@@ -11,15 +19,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.time.last_profile_visit.plugin": PluginMetadata(
         test=PluginTest(init=None, resource=None),
     ),
-
-    # "tracardi.process_engine.action.v1.internal.limiter.plugin": PluginMetadata(
-    #     test=PluginTest(init={
-    #         "keys": [],
-    #         "limit": 10,
-    #         "ttl": 60
-    #     },
-    #         resource=None)
-    # ),
 
     "tracardi.process_engine.action.v1.connectors.telegram.post.plugin": PluginMetadata(
         test=PluginTest(

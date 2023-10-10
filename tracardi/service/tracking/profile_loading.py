@@ -12,8 +12,7 @@ from tracardi.domain.profile import Profile
 from tracardi.service.storage.driver.elastic import profile as profile_db
 
 if License.has_license():
-    from com_tracardi.service.identification_point_service import load_profile_and_deduplicate, \
-        load_profile_deduplicate_and_identify
+    from com_tracardi.service.identification_point_service import load_profile_and_deduplicate
 
 
 logger = logging.getLogger(__name__)
@@ -30,9 +29,7 @@ async def load_profile_and_session(
 
     # Load profile
     if License.has_license():
-        profile_loader = load_profile_deduplicate_and_identify \
-            if tracardi.enable_identification_point \
-            else load_profile_and_deduplicate
+        profile_loader = load_profile_and_deduplicate
     else:
         profile_loader = profile_db.load_profile_without_identification
 

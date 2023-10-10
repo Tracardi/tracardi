@@ -59,3 +59,17 @@ class ConsoleLog(List[Console]):
                 traceback=log.traceback
             )
             self.append(console)
+
+    def has_errors(self) -> bool:
+        for console in self:
+            if console.is_error():
+                return True
+
+        return False
+
+    def has_warnings(self) -> bool:
+        for console in self:
+            if console.is_warning():
+                return True
+
+        return False

@@ -171,10 +171,15 @@ async def make_event_from_event_payload(event_payload,
     flat_event = dotty(event.model_dump(exclude_unset=True))
 
     # Anonymize, data compliance
-    if License.has_license():
-        consents = profile.get_consent_ids() if profile else set()
-        flat_event, compliance_errors = await event_data_compliance(consents, flat_event)
-        # todo add compliance_errors to console.log
+    # if License.has_license():
+    #     consents = profile.get_consent_ids() if profile else set()
+    #     flat_event, compliance_errors = await event_data_compliance(consents, flat_event)
+    #     for error in compliance_errors:
+    #         if error.is_error():
+    #             flat_event['metadata.error'] = True
+    #         if error.is_warning():
+    #             flat_event['metadata.warning'] = True
+    #         console_log.append(error)
 
     return flat_event
 

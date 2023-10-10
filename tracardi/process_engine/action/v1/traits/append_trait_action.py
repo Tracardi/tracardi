@@ -10,6 +10,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 
 
 class Configuration(PluginConfig):
@@ -110,6 +111,7 @@ class AppendTraitAction(ActionRunner):
             self.session.replace(session)
 
         self.update_profile()
+        save_profile_cache(self.profile)
 
         return Result(port="payload", value=payload)
 

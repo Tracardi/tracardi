@@ -225,11 +225,11 @@ async def map_event_to_profile(
                     except KeyError as e:
                         if event_ref.startswith(("properties", "traits")):
                             message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
-                                      f"Original data send to processing. Error message: {repr(e)} key."
+                                      f"Data was not copied. Error message: {repr(e)} key."
                         else:
                             message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
                                       f"Maybe `properties.{event_ref}` or `traits.{event_ref}` could work. " \
-                                      f"Original data send to processing. Error message: {repr(e)} key."
+                                      f"Data was not copied. Error message: {repr(e)} key."
                         console_log.append(
                             Console(
                                 flow_id=None,

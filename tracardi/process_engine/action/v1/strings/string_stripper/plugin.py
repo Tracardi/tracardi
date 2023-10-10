@@ -31,10 +31,10 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='StringStripper',
+            className=StringStripper.__name__,
             inputs=["payload"],
             outputs=["removed"],
-            version='0.1',
+            version='0.8.2',
             license="MIT",
             author="kokobhara",
             init={
@@ -67,8 +67,8 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='String stripper',
-            desc='Removes all the occurrences of characters that appear in to_remove string.',
-            icon='splitter',
+            desc='Removes all defined characters from a string string.',
+            icon='uppercase',
             group=["String"],
             documentation=Documentation(
                 inputs={

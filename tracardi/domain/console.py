@@ -59,3 +59,9 @@ class Console(BaseModel):
     def decode_record(data: dict):
         data['traceback'] = decrypt(data['traceback'])
         return Console(**data)
+
+    def is_error(self) -> bool:
+        return self.type == 'error'
+
+    def is_warning(self) -> bool:
+        return self.type == 'warning'

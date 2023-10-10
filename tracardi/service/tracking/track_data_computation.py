@@ -4,6 +4,7 @@ from tracardi.config import tracardi
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.license import License
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
@@ -25,6 +26,10 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 
+if License.has_license():
+    from com_tracardi.service.data_compliance import event_data_compliance
+    from com_tracardi.service.identification_point_service import identify_and_merge_profile
+
 
 async def compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
@@ -43,6 +48,33 @@ async def compute_data(tracker_payload: TrackerPayload,
         tracker_payload,
         console_log
     )
+
+    if License.has_license():
+        if profile is not None:
+
+            # Anonymize, data compliance
+
+            event_payloads, compliance_errors = await event_data_compliance(
+                profile,
+                event_payloads=tracker_payload.events)
+
+            # Reassign events as there may be changes
+            tracker_payload.events = event_payloads
+
+            for error in compliance_errors:
+                console_log.append(error)
+
+            # Merge profile on identification points
+
+            identification_points = list(await tracker_payload.get_identification_points())
+
+            profile, event_payloads = await identify_and_merge_profile(profile,
+                                                                       identification_points,
+                                                                       tracker_payload.events,
+                                                                       console_log)
+
+            # Save event payload
+            tracker_payload.events = event_payloads
 
     # ------------------------------------
     # Session and events computation
@@ -93,6 +125,7 @@ async def compute_data(tracker_payload: TrackerPayload,
     )
 
     profile, session, events = clear_relations(tracker_payload, profile, session, events)
+
 
     # Cache recent profile and session changes
 

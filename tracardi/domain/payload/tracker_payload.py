@@ -4,7 +4,7 @@ import json
 import logging
 from hashlib import sha1
 from datetime import datetime, timedelta
-from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator
+from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator, Dict
 from uuid import uuid4
 
 from dotty_dict import dotty
@@ -210,6 +210,7 @@ class TrackerPayload(BaseModel):
         for event_payload in self.events:
             if event_payload.type == event_type:
                 yield event_payload
+
 
     def force_static_profile_id(self, flag=True):
         self._make_static_profile_id = flag
