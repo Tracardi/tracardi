@@ -20,7 +20,6 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.module_loader import load_callable, import_package
 
 if License.has_license():
-    from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.event_mapper import map_event_props_to_traits, map_events_tags_and_journey
 
 cache = CacheManager()
@@ -133,7 +132,7 @@ async def make_event_from_event_payload(event_payload,
                                         source,
                                         metadata,
                                         profile_less,
-                                        console_log) -> Dotty:
+                                        console_log) -> Event:
 
     # Get event
     event = event_payload.to_event(
@@ -168,20 +167,7 @@ async def make_event_from_event_payload(event_payload,
             )
         )
 
-    flat_event = dotty(event.model_dump(exclude_unset=True))
-
-    # Anonymize, data compliance
-    # if License.has_license():
-    #     consents = profile.get_consent_ids() if profile else set()
-    #     flat_event, compliance_errors = await event_data_compliance(consents, flat_event)
-    #     for error in compliance_errors:
-    #         if error.is_error():
-    #             flat_event['metadata.error'] = True
-    #         if error.is_warning():
-    #             flat_event['metadata.warning'] = True
-    #         console_log.append(error)
-
-    return flat_event
+    return event
 
 
 async def compute_events(events: List[EventPayload],
@@ -198,7 +184,7 @@ async def compute_events(events: List[EventPayload],
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
-        flat_event = await make_event_from_event_payload(
+        event = await make_event_from_event_payload(
             event_payload,
             profile,
             session,
@@ -207,6 +193,8 @@ async def compute_events(events: List[EventPayload],
             profile_less,
             console_log
         )
+
+        flat_event = dotty(event.model_dump(exclude_unset=True))
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
