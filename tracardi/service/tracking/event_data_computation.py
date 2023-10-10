@@ -1,7 +1,7 @@
 import asyncio
 from dotty_dict import dotty, Dotty
 
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
@@ -86,7 +86,7 @@ def _auto_index_default_event_type(flat_event: Dotty, profile: Profile) -> Dotty
     return flat_event
 
 
-async def default_mapping_event_and_profile(flat_event, profile, session, console_log):
+async def default_mapping_event_and_profile(flat_event, profile: Optional[Profile], session, console_log):
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, profile)
 
@@ -116,11 +116,12 @@ async def default_mapping_event_and_profile(flat_event, profile, session, consol
                                                  custom_event_mapping)
 
     # Map event data to profile
-    profile = await map_event_to_profile(custom_event_to_profile_mapping_schemas,
-                                         flat_event,
-                                         profile,
-                                         session,
-                                         console_log)
+    if profile:
+        profile = await map_event_to_profile(custom_event_to_profile_mapping_schemas,
+                                             flat_event,
+                                             profile,
+                                             session,
+                                             console_log)
 
     return flat_event, profile
 

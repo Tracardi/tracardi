@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import logging
 from tracardi.config import tracardi
 from tracardi.domain.event import Event
@@ -34,7 +34,7 @@ class WorkflowOrchestratorAsync:
     async def lock_and_invoke(self,
                               tracker_payload: TrackerPayload,
                               events: List[Event],
-                              profile: Profile,
+                              profile: Optional[Profile],
                               session: Session,
                               debug: bool = False
                               ) -> TrackerResult:

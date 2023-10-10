@@ -122,10 +122,10 @@ async def lock_dispatch_sync(source: EventSource,
             # Save to cache after processing. This is needed when both async and sync workers are working
             # The state should always be in cache. MUST BE INSIDE MUTEX
 
-            if profile.operation.new or profile.operation.needs_update():
+            if profile and (profile.operation.new or profile.operation.needs_update()):
                 save_profile_cache(profile)
 
-            if session.operation.new or session.operation.needs_update():
+            if session and (session.operation.new or session.operation.needs_update()):
                 save_session_cache(session)
 
     else:

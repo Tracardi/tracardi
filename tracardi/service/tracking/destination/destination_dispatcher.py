@@ -9,7 +9,7 @@ from tracardi.service.destination_orchestrator import DestinationOrchestrator
 class ProfileDestinationDispatcher:
 
     def __init__(self, profile: Optional[Profile], console_log: ConsoleLog):
-        self.must_dispatch = tracardi.enable_profile_destinations and (profile.operation.new or profile.operation.needs_update())
+        self.must_dispatch = profile and tracardi.enable_profile_destinations and (profile.operation.new or profile.operation.needs_update())
         if self.must_dispatch:
             self.has_profile = isinstance(profile, Profile)
             self.console_log = console_log

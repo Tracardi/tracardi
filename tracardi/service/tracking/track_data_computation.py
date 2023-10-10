@@ -126,12 +126,6 @@ async def compute_data(tracker_payload: TrackerPayload,
 
     profile, session, events = clear_relations(tracker_payload, profile, session, events)
 
-
-    # Cache recent profile and session changes
-
-    print("----------------------------------------")
-    print(profile.id, "metadata", profile.get_meta_data())
-
     return profile, session, events, tracker_payload
 
 
@@ -167,10 +161,10 @@ async def lock_and_compute_data(
             # MUST BE INSIDE MUTEX
             # Update only when needed
 
-            if profile.operation.new or profile.operation.needs_update():
+            if profile and (profile.operation.new or profile.operation.needs_update()):
                 save_profile_cache(profile)
 
-            if session.operation.new or session.operation.needs_update():
+            if session and (session.operation.new or session.operation.needs_update()):
                 save_session_cache(session)
 
     else:

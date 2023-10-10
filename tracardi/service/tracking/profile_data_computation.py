@@ -1,3 +1,5 @@
+from typing import Optional
+
 import logging
 
 from dotty_dict import dotty, Dotty
@@ -83,7 +85,7 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 async def map_event_to_profile(
         custom_mapping_schemas: StorageRecords,
         flat_event: Dotty,
-        profile: Profile,
+        profile: Optional[Profile],
         session: Session,
         console_log: ConsoleLog) -> Profile:
 
@@ -95,7 +97,7 @@ async def map_event_to_profile(
     flat_profile = None
 
     if default_mapping_schema is not None:
-        flat_profile = dotty(profile.model_dump())
+        flat_profile = dotty(profile.model_dump(mode='json'))
 
         # Copy default
         flat_profile, profile_updated_flag = copy_default_event_to_profile(

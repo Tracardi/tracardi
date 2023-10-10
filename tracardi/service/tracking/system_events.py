@@ -28,29 +28,30 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
             )
         )
 
-    if session.is_reopened():
-        tracker_payload.events.append(
-            EventPayload(
-                id=str(uuid4()),
-                type='visit-started',
-                time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
-                properties={
-                    'trigger-event-types': [_ev.type for _ev in tracker_payload.events]
-                },
-                options={"source_id": tracardi.internal_source}
+    if session:
+        if session.is_reopened():
+            tracker_payload.events.append(
+                EventPayload(
+                    id=str(uuid4()),
+                    type='visit-started',
+                    time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
+                    properties={
+                        'trigger-event-types': [_ev.type for _ev in tracker_payload.events]
+                    },
+                    options={"source_id": tracardi.internal_source}
+                )
             )
-        )
 
-    if session.operation.new:
-        # Add session created event to the registered events
-        tracker_payload.events.append(
-            EventPayload(
-                id=str(uuid4()),
-                type='session-opened',
-                time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
-                properties={},
-                options={"source_id": tracardi.internal_source}
+        if session.operation.new:
+            # Add session created event to the registered events
+            tracker_payload.events.append(
+                EventPayload(
+                    id=str(uuid4()),
+                    type='session-opened',
+                    time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
+                    properties={},
+                    options={"source_id": tracardi.internal_source}
+                )
             )
-        )
 
     return tracker_payload

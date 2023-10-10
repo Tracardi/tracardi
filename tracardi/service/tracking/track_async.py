@@ -16,6 +16,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
+from tracardi.service.utils.getters import get_entity_id
 
 if License.has_license():
     from com_tracardi.config import com_tracardi_settings
@@ -118,7 +119,7 @@ async def process_track_data(source: EventSource,
                     "ux": [],  # Async does not have ux
                     "response": {},  # Async does not have response
                     "profile": {
-                        "id": profile.id
+                        "id": get_entity_id(profile)
                     }
                 }
 
@@ -171,7 +172,7 @@ async def process_track_data(source: EventSource,
             "ux": ux,
             "response": response,
             "profile": {
-                "id": profile.id
+                "id": get_entity_id(profile)
             }
         }
 
