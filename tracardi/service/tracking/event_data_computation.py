@@ -46,24 +46,23 @@ def _remove_empty_dicts(dictionary):
 
 
 def _auto_index_default_event_type(flat_event: Dotty, profile: Profile) -> Dotty:
-    index_schema = get_default_mappings_for(flat_event['type'], 'copy')
+    event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
-    if index_schema is None:
-        return flat_event
+    if event_mapping_schema is not None:
 
-    for destination, source in index_schema.items():  # type: str, str
-        try:
+        for destination, source in event_mapping_schema.items():  # type: str, str
+            try:
 
-            # if destination not in dot_event:
-            #     logger.warning(f"While indexing type {event.type}. "
-            #                    f"Property destination {destination} could not be found in event schema.")
+                # if destination not in dot_event:
+                #     logger.warning(f"While indexing type {event.type}. "
+                #                    f"Property destination {destination} could not be found in event schema.")
 
-            # Skip none existing event properties.
-            if source in flat_event:
-                flat_event[destination] = flat_event[source]
-                del flat_event[source]
-        except KeyError:
-            pass
+                # Skip none existing event properties.
+                if source in flat_event:
+                    flat_event[destination] = flat_event[source]
+                    del flat_event[source]
+            except KeyError:
+                pass
 
     state = get_default_mappings_for(flat_event['type'], 'state')
 

@@ -213,23 +213,23 @@ def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
 
     if index_schema is not None:
 
-        dot_event = dotty(event.model_dump())
+        flat_event = dotty(event.model_dump())
 
         for destination, source in index_schema.items():  # type: str, str
             try:
 
-                # if destination not in dot_event:
+                # if destination not in flat_event:
                 #     logger.warning(f"While indexing type {event.type}. "
                 #                    f"Property destination {destination} could not be found in event schema.")
 
                 # Skip none existing event properties.
-                if source in dot_event:
-                    dot_event[destination] = dot_event[source]
-                    del dot_event[source]
+                if source in flat_event:
+                    flat_event[destination] = flat_event[source]
+                    del flat_event[source]
             except KeyError:
                 pass
 
-        event_dict = dot_event.to_dict()
+        event_dict = flat_event.to_dict()
         remove_empty_dicts(event_dict)
         event = Event(**event_dict)
 

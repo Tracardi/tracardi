@@ -5,7 +5,11 @@
     "explain": "Use this event when user delivers marketing consents, etc.",
     "id": "consent-update",
     "properties": {
-      "consents": {"consents": ["marketing", "contact", "cookies"], "revoke": null}
+      "consents": {
+        "marketing": {"revoke": null},
+        "contact": {"revoke": null},
+        "cookies": {"revoke": null}
+      }
     },
     "profile": {
       "consents": [
