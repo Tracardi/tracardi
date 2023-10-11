@@ -23,7 +23,7 @@ class GlobalMutexLock:
             self.id = id
             self._redis = redis
             self._lock_ttl = lock_ttl
-            self._wait = 0.25
+            self._wait = 0.06
             self._time = time.time()
 
     async def __aenter__(self):

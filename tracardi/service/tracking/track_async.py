@@ -76,11 +76,6 @@ async def process_track_data(source: EventSource,
         if 'utm' in tracker_payload.context:
             del tracker_payload.context['utm']
 
-        # Compute process time
-
-        for event in events:
-            event.metadata.time.total_time = time.time() - tracking_start
-
         # ----------------------------------------------
         # FROM THIS POINT EVENTS SHOULD NOT BE MUTATED
         # ----------------------------------------------
@@ -90,7 +85,37 @@ async def process_track_data(source: EventSource,
 
         if License.has_license():
 
-            if com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
+            # Split events into async and not async. Compute process time
+            print('ALL EVENTS', [event.type for event in events])
+
+            async_events = []
+            sync_events = []
+            for event in events:
+                event.metadata.time.total_time = time.time() - tracking_start
+                is_async = event.config.get('async', True)
+                if is_async:
+                    async_events.append(event)
+                else:
+                    sync_events.append(event)
+
+            # Delete events so it is no longer used by mistake. Use async_events or sync_events.
+            events = None
+
+            result = {
+                "task": [],
+                "ux": [],  # Async does not have ux
+                "response": {},  # Async does not have response
+                "events": [],
+                "profile": {
+                    "id": get_entity_id(profile)
+                }
+            }
+
+            # Async events
+
+            if async_events and com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
+
+                print('ASYNC', [event.type for event in async_events])
 
                 """
                 Async processing can not do the following things:
@@ -101,54 +126,63 @@ async def process_track_data(source: EventSource,
 
                 # Pulsar publish
 
-                print('ASYNC')
-
                 dispatch_async(
                     context,
                     source,
                     profile,
                     session,
-                    events,
+                    async_events,
                     tracker_payload,
                     tracker_config,
                     timestamp=tracking_start
                 )
 
-                return {
-                    "task": tracker_payload.get_id(),
-                    "ux": [],  # Async does not have ux
-                    "response": {},  # Async does not have response
-                    "profile": {
-                        "id": get_entity_id(profile)
-                    }
-                }
+                result["task"].append(tracker_payload.get_id())
+                result['events'] += [event.id for event in sync_events]
 
-            else:
+            # Sync events
+
+            if sync_events:
+
+                print('SYNC', [event.type for event in sync_events])
 
                 # Save events - should not be mutated
 
                 storage = TrackingPersisterAsync()
-                result = await storage.save_events(events)
+                events_result = await storage.save_events(sync_events)
 
-                profile, session, events, ux, response = await lock_dispatch_sync(
+                profile, session, sync_events, ux, response = await lock_dispatch_sync(
                     source,
                     profile,
                     session,
-                    events,
+                    sync_events,
                     tracker_payload,
                     tracker_config,
                     console_log
                 )
 
-                result = await storage.save_profile_and_session(
+                result['ux'] = ux
+                result['response'] = response
+                result['events'] += [event.id for event in sync_events]
+
+                profile_and_session_result = await storage.save_profile_and_session(
                     session,
                     profile
                 )
 
+            return result
+
         else:
 
+            # Compute process time
+
+            for event in events:
+                event.metadata.time.total_time = time.time() - tracking_start
+
+            # Save events
+
             storage = TrackingPersisterAsync()
-            result = await storage.save_events(events)
+            events_result = await storage.save_events(events)
 
             profile, session, events, ux, response = await lock_dispatch_sync(
                 source,
@@ -162,7 +196,7 @@ async def process_track_data(source: EventSource,
 
             # Save
 
-            result = await storage.save_profile_and_session(
+            profile_and_session_result = await storage.save_profile_and_session(
                 session,
                 profile
             )

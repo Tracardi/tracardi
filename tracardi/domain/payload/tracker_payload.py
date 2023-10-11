@@ -411,7 +411,6 @@ class TrackerPayload(BaseModel):
 
     def finger_printing_enabled(self):
         if License.has_service(LICENSE) and self.source.bridge.id == javascript_bridge.id:
-            print("FP enabled")
             ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
             return ttl > 0
         return False

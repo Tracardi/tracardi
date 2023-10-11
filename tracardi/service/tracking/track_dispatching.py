@@ -38,7 +38,6 @@ async def dispatch_sync(source: EventSource,
                         tracker_config: TrackerConfig,
                         console_log: ConsoleLog) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
-    print('SYNC')
 
     ux = []
     response = {}
