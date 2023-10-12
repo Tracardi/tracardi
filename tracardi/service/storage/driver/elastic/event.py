@@ -625,11 +625,11 @@ async def get_events_by_session(session_id: str, limit: int = 100) -> StorageRec
             }
         ]
     }
-
     return await storage_manager("event").query(query)
 
 
 async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRecords:
+
     query = {
         "query": {
             "term": {

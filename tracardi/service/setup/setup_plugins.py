@@ -1,8 +1,14 @@
 from typing import Dict
-from tracardi.service.license import VALIDATOR, License, SCHEDULER
+from tracardi.service.license import License, SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 
 installed_plugins: Dict[str, PluginMetadata] = {
+
+    "tracardi.process_engine.action.v1.strings.string_to_date.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "string": "abc"
+            }, resource=None),
+    ),
 
     "tracardi.process_engine.action.v1.strings.string_stripper.plugin": PluginMetadata(
         test=PluginTest(init={

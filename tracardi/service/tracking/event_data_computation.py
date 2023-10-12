@@ -211,10 +211,11 @@ async def compute_events(events: List[EventPayload],
 
         # Data that is not needed for any mapping or compliance
 
-        if isinstance(event.request, dict):
-            event.request.update(tracker_payload.request)
-        else:
-            event.request = tracker_payload.request
+        if tracker_payload.request:
+            if isinstance(event.request, dict):
+                event.request.update(tracker_payload.request)
+            else:
+                event.request = tracker_payload.request
 
         debugging = tracker_payload.is_debugging_on()
         event.metadata.debug = debugging
