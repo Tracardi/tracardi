@@ -4,7 +4,7 @@ from pydantic import ConfigDict, BaseModel
 
 class Result(BaseModel):
     port: str
-    value: Any = None
+    value: Optional[dict] = None
     model_config = ConfigDict(frozen=True)
 
     @staticmethod

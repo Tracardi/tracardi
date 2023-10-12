@@ -4,6 +4,20 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.list.operations_on_sets.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "set1": "",
+                "set2": "",
+                "operation": "intersection"
+            }, resource=None),
+    ),
+
+    "tracardi.process_engine.action.v1.list.find_max_value.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "source": "abc"
+            }, resource=None),
+    ),
+
     "tracardi.process_engine.action.v1.strings.string_to_date.plugin": PluginMetadata(
         test=PluginTest(init={
                 "string": "abc"

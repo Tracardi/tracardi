@@ -25,7 +25,7 @@ class DateConverter(ActionRunner):
         if date_string:
             try:
                 converted_date = dateparser.parse(date_string).date()
-                return Result(port="date", value=converted_date)
+                return Result(port="date", value={"date": converted_date})
             except Exception as e:
                 return Result(port="error", value={"message": str(e)})
 
