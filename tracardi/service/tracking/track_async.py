@@ -1,7 +1,8 @@
 import time
 import logging
 
-from tracardi.service.license import License
+from com_tracardi.service.tracking.visti_end_dispatcher import track_vist_end
+from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.system_events import add_system_events
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import lock_dispatch_sync
@@ -83,10 +84,9 @@ async def process_track_data(source: EventSource,
         # Async storage
         context = get_context()
 
-        if License.has_license():
+        if License.has_service(LICENSE):
 
             # Split events into async and not async. Compute process time
-            print('ALL EVENTS', [event.type for event in events])
 
             async_events = []
             sync_events = []
@@ -113,38 +113,45 @@ async def process_track_data(source: EventSource,
 
             # Async events
 
-            if async_events and com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
+            if com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
 
-                print('ASYNC', [event.type for event in async_events])
+                # Track session for visit end
 
-                """
-                Async processing can not do the following things:
-                - Discard event or change as it is saved before the workflow kicks off
-                - Save any properties such as processed_by property as processing happens in parallel to saving
-                - Return response and ux as processing happens in parallel with response
-                """
-
-                # Pulsar publish
-
-                dispatch_async(
+                track_vist_end(
                     context,
-                    source,
-                    profile,
                     session,
-                    async_events,
-                    tracker_payload,
-                    tracker_config,
-                    timestamp=tracking_start
+                    profile,
+                    source
                 )
 
-                result["task"].append(tracker_payload.get_id())
-                result['events'] += [event.id for event in sync_events]
+                if async_events:
+
+                    """
+                    Async processing can not do the following things:
+                    - Discard event or change as it is saved before the workflow kicks off
+                    - Save any properties such as processed_by property as processing happens in parallel to saving
+                    - Return response and ux as processing happens in parallel with response
+                    """
+
+                    # Pulsar publish
+
+                    dispatch_async(
+                        context,
+                        source,
+                        profile,
+                        session,
+                        async_events,
+                        tracker_payload,
+                        tracker_config,
+                        timestamp=tracking_start
+                    )
+
+                    result["task"].append(tracker_payload.get_id())
+                    result['events'] += [event.id for event in sync_events]
 
             # Sync events
 
             if sync_events:
-
-                print('SYNC', [event.type for event in sync_events])
 
                 # Save events - should not be mutated
 

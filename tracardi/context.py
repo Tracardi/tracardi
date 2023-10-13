@@ -1,4 +1,5 @@
 from contextvars import ContextVar
+from pydantic import BaseModel
 from typing import Optional, Any
 from uuid import uuid4
 
@@ -75,7 +76,7 @@ class Context:
     def dict(self) -> dict:
         return {
             "production": self.production,
-            "user": self.user.model_dump(mode='json') if self.user else None,
+            "user": self.user.model_dump(mode='json') if isinstance(self.user, BaseModel) else None,
             "tenant": self.tenant,
             "host": self.host,
             "version": self.version
