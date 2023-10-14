@@ -102,7 +102,7 @@ async def update_device_geo(tracker_payload: TrackerPayload, session: Session) -
     # Still no geolocation. That means there was no 'location' sent in tracker context or
     # it failed parsing the data. But we have device IP. If the sessions geo is empty
     # then we need to make another try.
-    if session.device.ip:
+    if session.device.ip and session.device.ip != '0.0.0.0':
 
         # Check if max mind configured
         maxmind_license_key = os.environ.get('MAXMIND_LICENSE_KEY', None)

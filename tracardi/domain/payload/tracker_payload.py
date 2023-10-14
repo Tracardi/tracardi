@@ -211,7 +211,6 @@ class TrackerPayload(BaseModel):
             if event_payload.type == event_type:
                 yield event_payload
 
-
     def force_static_profile_id(self, flag=True):
         self._make_static_profile_id = flag
 
@@ -258,6 +257,9 @@ class TrackerPayload(BaseModel):
 
     def has_events(self):
         return len(self.events) > 0
+
+    def has_event_type(self, event_type: str):
+        return len([event.type for event in self.events if event_type == event_type]) > 0
 
     def has_profile(self) -> bool:
         return isinstance(self.profile, Entity)
@@ -400,7 +402,8 @@ class TrackerPayload(BaseModel):
                                              f"Identification point [{_identification.name}] has it defined as customer "
                                              f"merging key but the event has only the properties {flat_properties}.")
                         # error
-                    find_profile_by_fields.append((field.profile_trait.value, flat_properties[field.event_property.value]))
+                    find_profile_by_fields.append(
+                        (field.profile_trait.value, flat_properties[field.event_property.value]))
             if find_profile_by_fields:
                 # load profile
                 return find_profile_by_fields

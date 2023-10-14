@@ -12,14 +12,14 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
 
     production = context.context_abrv()
 
-    key = f"{Collection.profile}{production}:{profile_id[0:2]}:"
+    key_namespace = f"{Collection.profile}{production}:{profile_id[0:2]}:"
 
-    if not redis_cache.has(profile_id, key):
+    if not redis_cache.has(profile_id, key_namespace):
         return None
 
     context, profile, profile_metadata = redis_cache.get(
         profile_id,
-        key
+        key_namespace
     )
 
     profile = Profile(**profile)

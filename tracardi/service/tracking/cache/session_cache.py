@@ -8,23 +8,26 @@ from tracardi.service.storage.redis.collections import Collection
 redis_cache = RedisCache(ttl=None)
 
 
-def load_session_cache(session_id: str, production):
-    if not redis_cache.has(session_id, Collection.session):
-        return None
+def get_session_prefix(session_id: str) -> str:
+    session_prefix = session_id[0:2]
+    if len(session_prefix) == 1:
+        session_prefix = f"0{session_prefix}"
+    return session_prefix
 
-    # start = time.time()
+
+def load_session_cache(session_id: str, production):
+    key_namespace = f"{Collection.session}{production}:{get_session_prefix(session_id)}:"
+
+    if not redis_cache.has(session_id, key_namespace):
+        return None
 
     context, session, session_metadata = redis_cache.get(
         session_id,
-        f"{Collection.session}{production}:{session_id[0:2]}:")
-
-    # print(session_metadata, flush=True)
+        key_namespace)
 
     session = Session(**session)
     if session_metadata:
         session.set_meta_data(RecordMetadata(**session_metadata))
-
-    # print("load session cache time", time.time() - start, flush=True)
 
     return session
 
@@ -42,5 +45,5 @@ def save_session_cache(session: Optional[Session]):
                 session.model_dump(mode="json", exclude_defaults=True),
                 session.get_meta_data().model_dump() if session.has_meta_data() else None
             ),
-            f"{Collection.session}{context.context_abrv()}:{session.id[0:2]}:"
+            f"{Collection.session}{context.context_abrv()}:{get_session_prefix(session.id)}:"
         )

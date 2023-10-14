@@ -3,7 +3,6 @@ import logging
 
 from com_tracardi.service.tracking.visti_end_dispatcher import track_vist_end
 from tracardi.service.license import License, LICENSE
-from tracardi.service.tracking.system_events import add_system_events
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import lock_dispatch_sync
 from tracardi.service.tracking.tracker_event_reshaper import EventsReshaper
@@ -64,12 +63,6 @@ async def process_track_data(source: EventSource,
             console_log
         )
 
-        # Updates/Mutations of tracker_payload
-
-        # Add system events
-        if tracardi.system_events:
-            tracker_payload = add_system_events(profile, session, tracker_payload)
-
         # Clean up
         if 'location' in tracker_payload.context:
             del tracker_payload.context['location']
@@ -116,13 +109,14 @@ async def process_track_data(source: EventSource,
             if com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
 
                 # Track session for visit end
-
-                track_vist_end(
-                    context,
-                    session,
-                    profile,
-                    source
-                )
+                print('session.operation.new', session.operation.new)
+                if session.operation.new:
+                    track_vist_end(
+                        context,
+                        session,
+                        profile,
+                        source
+                    )
 
                 if async_events:
 
@@ -132,7 +126,7 @@ async def process_track_data(source: EventSource,
                     - Save any properties such as processed_by property as processing happens in parallel to saving
                     - Return response and ux as processing happens in parallel with response
                     """
-
+                    print('async', [e.type for e in async_events])
                     # Pulsar publish
 
                     dispatch_async(
@@ -148,6 +142,9 @@ async def process_track_data(source: EventSource,
 
                     result["task"].append(tracker_payload.get_id())
                     result['events'] += [event.id for event in sync_events]
+            else:
+                # If disabled async storing or no pulsar add async events to sync and run it
+                sync_events += async_events
 
             # Sync events
 
@@ -157,7 +154,7 @@ async def process_track_data(source: EventSource,
 
                 storage = TrackingPersisterAsync()
                 events_result = await storage.save_events(sync_events)
-
+                print(events_result)
                 profile, session, sync_events, ux, response = await lock_dispatch_sync(
                     source,
                     profile,

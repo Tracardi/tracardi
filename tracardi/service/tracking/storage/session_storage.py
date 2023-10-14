@@ -1,6 +1,6 @@
 from typing import Optional, Union, List, Set
 
-from tracardi.service.tracking.cache.session_cache import load_session_cache
+from tracardi.service.tracking.cache.session_cache import load_session_cache, save_session_cache
 from tracardi.context import get_context
 from tracardi.domain.session import Session
 from tracardi.service.storage.driver.elastic import session as session_db
@@ -11,7 +11,11 @@ async def load_session(session_id: str) -> Optional[Session]:
     if cached_session is not None:
         return cached_session
 
-    return await session_db.load_by_id(session_id)
+    session = await session_db.load_by_id(session_id)
+    if session:
+        save_session_cache(session)
+
+    return session
 
 
 async def save_session(sessions: Union[Session, List[Session], Set[Session]]):

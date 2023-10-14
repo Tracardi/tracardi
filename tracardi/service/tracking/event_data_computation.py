@@ -180,6 +180,8 @@ async def compute_events(events: List[EventPayload],
                          tracker_payload: TrackerPayload
                          ) -> Tuple[List[Event], Session, Profile]:
 
+    print('compute_events', [e.type for e in events])
+
     event_objects = []
     for event_payload in events:
 
@@ -222,6 +224,10 @@ async def compute_events(events: List[EventPayload],
 
         # todo Maybe check not needed
         if isinstance(session, Session):
+
+            if session.metadata.status != 'active':
+                session.metadata.status = 'active'
+                session.operation.update = True
 
             # Add session status
             if event.type == 'visit-started':

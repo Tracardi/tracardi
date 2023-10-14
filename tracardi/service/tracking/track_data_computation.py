@@ -17,6 +17,7 @@ from tracardi.service.tracking.session_data_computation import compute_session, 
     update_session_utm_with_client_data
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 from tracardi.service.tracking.session_loading import load_or_create_session
+from tracardi.service.tracking.system_events import add_system_events
 from tracardi.service.tracking.tracker_persister_async import clear_relations
 
 from tracardi.domain.event_source import EventSource
@@ -108,6 +109,12 @@ async def compute_data(tracker_payload: TrackerPayload,
         # Update profile time zone
         profile = update_profile_time(session, profile)
 
+    # Updates/Mutations of tracker_payload and session
+
+    # Add system events
+    if tracardi.system_events:
+        tracker_payload, session = add_system_events(profile, session, tracker_payload)
+
     # ---------------------------------------------------------------------------
     # Compute events. Session can be changed if there is event e.g. visit-open
     # This should be last in the process. We need all data for event computation
@@ -123,6 +130,8 @@ async def compute_data(tracker_payload: TrackerPayload,
         console_log,
         tracker_payload
     )
+
+    # Clear profile,etc if not saving data.
 
     profile, session, events = clear_relations(tracker_payload, profile, session, events)
 
@@ -160,7 +169,9 @@ async def lock_and_compute_data(
 
             # MUST BE INSIDE MUTEX
             # Update only when needed
-
+            print('session.id', session.id)
+            print('session.metadata.status', session.metadata.status)
+            print('session save', session and (session.operation.new or session.operation.needs_update()))
             if profile and (profile.operation.new or profile.operation.needs_update()):
                 save_profile_cache(profile)
 

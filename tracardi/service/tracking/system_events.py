@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from uuid import uuid4
 
 from datetime import datetime, timedelta
@@ -10,7 +12,7 @@ from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 
 
-def add_system_events(profile: Profile, session: Session, tracker_payload: TrackerPayload) -> TrackerPayload:
+def add_system_events(profile: Profile, session: Session, tracker_payload: TrackerPayload) -> Tuple[TrackerPayload, Session]:
 
     """
     Mutates tracker payload
@@ -29,7 +31,12 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
         )
 
     if session:
-        if session.is_reopened():
+        if not tracker_payload.has_event_type('visit-ended') and session.is_reopened():
+
+            # Session can not be reopened with event type visit started.
+
+            session.metadata.status = 'started'
+            session.operation.update = True
             tracker_payload.events.append(
                 EventPayload(
                     id=str(uuid4()),
@@ -54,4 +61,4 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
                 )
             )
 
-    return tracker_payload
+    return tracker_payload, session
