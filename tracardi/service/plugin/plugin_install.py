@@ -40,7 +40,7 @@ async def install_plugin(module):
                 raise e
 
             return await install_plugin(plugin_metadata.plugin_registry)
-        print(_module, flush=True)
+
         plugin_data = plugin()  # type: Plugin
 
         # If register returns tuple then is has to be Plugin and Settings.
