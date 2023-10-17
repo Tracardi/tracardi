@@ -75,7 +75,8 @@ async def process_track_data(source: EventSource,
         # ----------------------------------------------
 
         # Async storage
-        context = get_context()
+
+        dispatch_context = get_context().get_user_less_context_copy()
 
         if License.has_service(LICENSE):
 
@@ -112,7 +113,7 @@ async def process_track_data(source: EventSource,
 
                 if session.operation.new:
                     track_vist_end(
-                        context,
+                        dispatch_context,
                         session,
                         profile,
                         source
@@ -126,11 +127,11 @@ async def process_track_data(source: EventSource,
                     - Save any properties such as processed_by property as processing happens in parallel to saving
                     - Return response and ux as processing happens in parallel with response
                     """
-                    print('async', [e.type for e in async_events], context)
+                    print('async', [e.type for e in async_events], dispatch_context)
                     # Pulsar publish
 
                     dispatch_async(
-                        context,
+                        dispatch_context,
                         source,
                         profile,
                         session,
@@ -154,7 +155,7 @@ async def process_track_data(source: EventSource,
 
                 storage = TrackingPersisterAsync()
                 events_result = await storage.save_events(sync_events)
-                print("save_sync_result", events_result, context)
+                print("save_sync_result", events_result, get_context())
                 profile, session, sync_events, ux, response = await lock_dispatch_sync(
                     source,
                     profile,

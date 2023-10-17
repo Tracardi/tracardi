@@ -51,16 +51,25 @@ class Context:
             tenant = self.tenant
         return Context(production=production, user=user, tenant=tenant)
 
+    def get_user_less_context_copy(self) -> 'Context':
+        return Context(
+            production=self.production,
+            user=None,
+            tenant=self.tenant,
+            host=self.host,
+            version=self.version
+        )
+
     def __str__(self):
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
-               f"user: {self.user.full_name if self.user else 'Unknown'}, " \
+               f"user: {str(self.user)}, " \
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
                f"host: {self.host})"
 
     def __repr__(self):
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
-               f"user: {self.user.full_name if self.user else 'Unknown'}, " \
+               f"user: {str(self.user)}, " \
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
                f"host: {self.host})"
