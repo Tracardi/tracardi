@@ -169,9 +169,7 @@ async def lock_and_compute_data(
 
             # MUST BE INSIDE MUTEX
             # Update only when needed
-            print('session.id', session.id)
-            print('session.metadata.status', session.metadata.status)
-            print('session save', session and (session.operation.new or session.operation.needs_update()))
+
             if profile and (profile.operation.new or profile.operation.needs_update()):
                 save_profile_cache(profile)
 

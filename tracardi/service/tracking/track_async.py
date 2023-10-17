@@ -109,7 +109,7 @@ async def process_track_data(source: EventSource,
             if com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
 
                 # Track session for visit end
-                print('session.operation.new', session.operation.new)
+
                 if session.operation.new:
                     track_vist_end(
                         context,
@@ -126,7 +126,7 @@ async def process_track_data(source: EventSource,
                     - Save any properties such as processed_by property as processing happens in parallel to saving
                     - Return response and ux as processing happens in parallel with response
                     """
-                    print('async', [e.type for e in async_events])
+                    print('async', [e.type for e in async_events], context)
                     # Pulsar publish
 
                     dispatch_async(
@@ -154,7 +154,7 @@ async def process_track_data(source: EventSource,
 
                 storage = TrackingPersisterAsync()
                 events_result = await storage.save_events(sync_events)
-                print(events_result)
+                print("save_sync_result", events_result, context)
                 profile, session, sync_events, ux, response = await lock_dispatch_sync(
                     source,
                     profile,
