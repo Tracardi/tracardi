@@ -33,8 +33,8 @@
 
 # Open-source Customer Engagement and Data Platform
 
-[TRACARDI](http://www.tracardi.com) is an API-first solution, low-code / no-code platform aimed at any business that 
-wants to start using user data for automated customer engagement. Tracardi is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery. Tracardi __collects data from customer journeys__ and assigns it to a profile, automates __data enhancement__, facilitates 🚀 __Machine Learning APIs__ usage.
+[TRACARDI](http://www.tracardi.com) is an API-first solution, a low-code / no-code platform aimed at any business that 
+wants to start using user data for automated customer engagement. Tracardi is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery. Tracardi __collects data from customer journeys__ and assigns it to a profile, automates __data enhancement__, and facilitates 🚀 __Machine Learning APIs__ usage.
 
 ## ⭐️ Screenshots
 
@@ -46,37 +46,37 @@ wants to start using user data for automated customer engagement. Tracardi is in
 What TRACARDI can do for you:
 
  * **Reuse your current infrastructure**
-   Tracardi doesn’t require the complex integration or dedicated infrastructure. It runs on top of cloud managed services; reusing your existing   
+   Tracardi doesn’t require complex integration or dedicated infrastructure. It runs on top of cloud-managed services; reusing your existing   
    infrastructure and spinning up new resources when needed.
 
- * **Collect Customer Data** - You can collect, ingest, aggregate and store customer data
-   from multiple sources in real time.
+ * **Collect Customer Data** - You can collect, ingest, aggregate, and store customer data
+   from multiple sources in real-time.
    
  * **Model Customer Data** -  You can model data. Define rules that will model data delivered
-   from your page and copy it into user profile. 
+   from your page and copy it into the user profile. 
    
- * **Personalize User Experience** - You can personalize user experience with
-   real-time frontend apps injected into your existing webpage, customized messages, marketing segmentation, in-time messaging.
+ * **Personalize User Experience** - You can personalize the user experience with
+   real-time frontend apps injected into your existing webpage, customized messages, marketing segmentation, and in-time messaging.
    
- * **Unify Profiles** - You can merge customer data from various sources to
+ * **Unify Profiles** - You can merge customer data from various sources into a
    single profile. Auto de-duplicate customer records. Blend customers in one account.
    
  * **Integrate your internal systems** - Tracardi is a centralized communication and orchestration hub that can integrate different parts of your IT parts.
    
- * **Scale you e-commerce easily** - Tracardi is a headless, API first platform. Build with modern tools and designed as a decentralized system that can
+ * **Scale you e-commerce easily** - Tracardi is a headless, API-first platform. It is built with modern tools and designed as a decentralized system that can
    handle your needs.
   
  * **Use Social Engagement** - Use Tracardi bridges to connect your e-commerce platform to the existing social media networks. Reward your clients for 
    sharing your products or commenting on the content that helps you sell.
  
- * **Stay open to all the tools available on the Internet** - Tracardi is open source. Do not limit your business to the closed set of tools. 
+ * **Stay open to all the tools available on the Internet** - Tracardi is open source. Do not limit your business to a closed set of tools. 
    If there is any tool that will help you sell Tracardi will help you connect it with your business.
    
 If you want to see Tracardi in action subscribe to our [:tv: Youtube channel](https://bit.ly/3pbdbPR).
 
 ## 👇 Installation and getting started
 
-The easiest way to run TRACARDI is to install a demo on our site. Visit [https://tracardi.com/index.php/about-tracardi/](https://tracardi.com/index.php/about-tracardi/) fill the form that pops-up and you will recievie a one day demo just for you. 
+The easiest way to run TRACARDI is to install a demo on our site. Visit [https://tracardi.com/index.php/about-tracardi/](https://tracardi.com/index.php/about-tracardi/) fill in the form that pops up and you will receive a one-day demo just for you. 
 
 I you would like to run it as a :whale: docker container on your laptop. Please install docker and docker-compose on your local machine 
 then clone [tracardi/tracardi-api](https://github.com/Tracardi/tracardi-api.git)
@@ -85,7 +85,7 @@ then clone [tracardi/tracardi-api](https://github.com/Tracardi/tracardi-api.git)
 git clone https://github.com/Tracardi/tracardi-api.git
 ```
 
-Go to TRACARDI API folder, and run one line command:
+Go to the TRACARDI API folder, and run one line command:
 
 ```bash
 cd tracardi-api
@@ -103,7 +103,7 @@ There are other types of installation. All are described in detail in our [docum
 <table align="center">
 <tr>
 <td align="center">Join our community</td>
-<td align="center">Visit YouTube Channel</td>
+<td align="center">Visit our YouTube Channel</td>
 <td align="center">Tweet with us</td>
 </tr>
 <tr>
@@ -122,16 +122,16 @@ There are other types of installation. All are described in detail in our [docum
 ## 👇 Documentation
 
 * System documentation is available at: [http://docs.tracardi.com](http://docs.tracardi.com).
-* Api documentation is always available after installation at http://127.0.0.1:8686/docs.
-* Tracardi has also build-in documentation into the system.
+* API documentation is always available after installation at http://127.0.0.1:8686/docs.
+* Tracardi has also built documentation into the system.
 
 ## 👇 Call for contributors
 
-Have you found a bug :bug: ? Or maybe you have a nice feature :sparkles: to contribute ? The
+Have you found a bug :bug: ? Or maybe you have a nice feature :sparkles: to contribute? The
 [CONTRIBUTING guide](https://github.com/Tracardi/tracardi/blob/master/CONTRIBUTING.md) will help you get your
 development environment ready in minutes.
 
-All contributors willing to start coding TRACARDI plugins are urged to read the beginners tutorial:
+All contributors willing to start coding TRACARDI plugins are urged to read the beginner's tutorial:
 
 * [How to code simple plugin in Tracardi](http://docs.tracardi.com/plugins/tutorial/part1/)
 * [Configuring the plugin in Tracardi](http://docs.tracardi.com/plugins/tutorial/part2/)
@@ -142,7 +142,7 @@ If you would like to support us please follow us on:
 
 * [Facebook](https://bit.ly/3uPwP5a) 
 * [Twitter](https://bit.ly/3uVJwLJ), tag us and leave your comments. 
-* Subscribe to our [Youtube channel](https://bit.ly/3pbdbPR) to see development process and new upcoming features.
+* Subscribe to our [Youtube channel](https://bit.ly/3pbdbPR) to see the development process and new upcoming features.
 * ⭐️ Start TRACARDI GitHub project - it really matters and puts a smile on our faces.
 
 We appreciate any help that helps make TRACARDI popular. 
@@ -159,7 +159,7 @@ Support us via referral programs. If you buy service from the following link to 
 
 ## 👇 License
 
-TRACARDI is available under MIT with Common Clause license.
+TRACARDI is available under MIT with a Common Clause license.
 
 ## 👇 Recent activities
 
