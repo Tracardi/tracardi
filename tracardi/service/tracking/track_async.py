@@ -128,6 +128,7 @@ async def process_track_data(source: EventSource,
                     - Return response and ux as processing happens in parallel with response
                     """
                     print('async', [e.type for e in async_events], dispatch_context)
+
                     # Pulsar publish
 
                     dispatch_async(
