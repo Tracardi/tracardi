@@ -11,7 +11,7 @@ from tracardi.domain.flow import PluginRecord
 
 
 class FlowActionPluginRecord(Entity):
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = None
     plugin: PluginRecord
     settings: Optional[Settings] = Settings()
 
@@ -45,7 +45,7 @@ class FlowActionPluginRecord(Entity):
             "metadata": self.metadata,
             "settings": self.settings
         }
-        return FlowActionPlugin.construct(_fields_set=self.__fields_set__, **data)
+        return FlowActionPlugin.model_construct(_fields_set=self.model_fields_set, **data)
 
     def get_validator(self) -> Callable:
         module = import_package(self.plugin.spec.module)

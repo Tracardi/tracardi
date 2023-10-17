@@ -1,5 +1,3 @@
-from parser import ParserError
-
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -7,6 +5,7 @@ from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
 from datetime import datetime
 from dateutil import parser
+from dateutil.parser import ParserError
 
 
 def validate(config: dict):

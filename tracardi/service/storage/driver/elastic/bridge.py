@@ -13,8 +13,8 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-async def load_all() -> StorageRecords:
-    return await storage_manager('bridge').load_all()
+async def load_all(sort=None) -> StorageRecords:
+    return await storage_manager('bridge').load_all(sort=sort)
 
 
 async def load_by_id(id: str) -> Optional[StorageRecord]:

@@ -10,8 +10,8 @@ from tracardi.service.plugin.domain.register import Plugin
 
 
 class Position(BaseModel):
-    x: int
-    y: int
+    x: float
+    y: float
 
 
 class SimplifiedSpec(BaseModel):

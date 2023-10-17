@@ -53,6 +53,16 @@
           }
         }
       },
+      "segment": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "text"
+          }
+        }
+      },
       "source": {
         "properties": {
           "id": {

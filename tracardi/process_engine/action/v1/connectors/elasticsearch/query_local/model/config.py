@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import validator
+from pydantic import field_validator
 import json
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -10,13 +10,15 @@ class Config(PluginConfig):
     query: str
     log: Optional[bool] = False
 
-    @validator("index")
+    @field_validator("index")
+    @classmethod
     def validate_index(cls, value):
         if len(value) == "":
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("query")
+    @field_validator("query")
+    @classmethod
     def validate_content(cls, value):
         try:
             if isinstance(value, dict):

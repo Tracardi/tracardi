@@ -14,6 +14,7 @@ from tracardi.domain.session import Session
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -60,8 +61,8 @@ class CopyTraitAction(ActionRunner):
 
             profile = Profile(**dot.profile)
 
-            flat_profile = flatten(profile.dict())
-            flat_dot_profile = flatten(Profile(**dot.profile).dict())
+            flat_profile = flatten(profile.model_dump())
+            flat_dot_profile = flatten(Profile(**dot.profile).model_dump())
             diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
 
             if diff_result and 'dictionary_item_removed' in diff_result:
@@ -84,6 +85,7 @@ class CopyTraitAction(ActionRunner):
             self.session.replace(session)
 
         self.update_profile()
+        save_profile_cache(self.profile)
 
         return Result(port="payload", value=payload)
 

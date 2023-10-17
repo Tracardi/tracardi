@@ -13,6 +13,8 @@ class DecrementConfig(PluginConfig):
     field: str
     decrement: Union[float, int]
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator('field')
     def field_must_match(cls, value, values, **kwargs):
         if not value.startswith('profile@stats.counters'):
@@ -45,7 +47,7 @@ class DecrementAction(ActionRunner):
         except KeyError:
             value = 0
 
-        if type(value) != int:
+        if not isinstance(value, int):
             raise ValueError("Value of field '{}' is not numeric.".format(self.config.field))
 
         value -= self.config.decrement

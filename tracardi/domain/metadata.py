@@ -13,6 +13,7 @@ class Metadata(BaseModel):
 class ProfileMetadata(BaseModel):
     time: ProfileTime
     aux: Optional[dict] = {}
+    status: Optional[str] = None
 
 
 class OS(BaseModel):
@@ -28,7 +29,7 @@ class Device(BaseModel):
     touch: Optional[bool] = False
     ip: Optional[str] = None
     resolution: Optional[str] = None
-    geo: Optional[Geo] = Geo.construct()
+    geo: Optional[Geo] = Geo.model_construct()
     color_depth: Optional[int] = None
     orientation: Optional[str] = None
 

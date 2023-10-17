@@ -2,7 +2,7 @@ import dateparser
 from ..domain.elastic_condition import ElasticFieldCondition
 from .function_transformer import FunctionTransformer
 from .transformer_namespace import TransformerNamespace
-from ..domain.operations import OrOperation
+from ..domain.operations import OrOperation, AndOperation
 from ..utils.value_compressions import Values
 
 
@@ -38,13 +38,12 @@ class FilterTransformer(TransformerNamespace):
     def and_expr(self, args):
         values = Values()
 
-        # return args
         value1, _, value2 = args
 
-        values.append_or_value(value1)
-        values.append_or_value(value2)
+        values.append_and_value(value1)
+        values.append_and_value(value2)
 
-        return OrOperation({
+        return AndOperation({
             "bool": {
                 "must": values.values
             }
@@ -53,11 +52,10 @@ class FilterTransformer(TransformerNamespace):
     def or_expr(self, args):
         values = Values()
 
-        # return args
         value1, _, value2 = args
 
-        values.append_and_value(value1)
-        values.append_and_value(value2)
+        values.append_or_value(value1)
+        values.append_or_value(value2)
 
         return OrOperation({
             "bool": {
@@ -79,7 +77,7 @@ class FilterTransformer(TransformerNamespace):
 
     @staticmethod
     def _compare(operation, value1, value2):
-        if operation == '=':
+        if operation == '=' or operation == '==':
             if isinstance(value1, list) and not isinstance(value2, list):
                 return value2 in value1
             return value1 == value2
@@ -93,6 +91,8 @@ class FilterTransformer(TransformerNamespace):
             return value1 < value2
         elif operation == '<=':
             return value1 <= value2
+        else:
+            raise ValueError(f"Unexpected operation: {operation}")
 
     def op_condition(self, args):
         value1, operation, value2 = args
@@ -124,7 +124,6 @@ class FilterTransformer(TransformerNamespace):
                 }
             }
         }
-        # return value1 <= field <= value2
 
     def op_field_eq_field(self, args):
         value1, operation, value2 = args

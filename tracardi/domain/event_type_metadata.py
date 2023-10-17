@@ -9,6 +9,7 @@ class EventTypeMetadata(NamedEntity):
     description: Optional[str] = "No description provided"
     enabled: Optional[bool] = False
     index_schema: Optional[dict] = {}
+    journey: Optional[str] = None
     tags: List[str] = []
 
     def __init__(self, **data: Any):

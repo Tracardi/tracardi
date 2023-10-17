@@ -1,17 +1,16 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
 
 from .entity import Entity
 from .event_metadata import EventMetadata
-from pydantic import BaseModel, root_validator
+from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
 
 from .marketing import UTM
-from .metadata import OS, Device, Application, Hit
+# from .metadata import OS, Device, Application, Hit
 from .named_entity import NamedEntity
-from .profile import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
+from .profile_data import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
     ProfileIdentifier, ProfileContact, ProfilePII
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
@@ -21,13 +20,12 @@ from ..service.string_manager import capitalize_event_type_id
 class Tags(BaseModel):
     values: Tuple['str', ...] = ()
     count: int = 0
+    model_config = ConfigDict(validate_assignment=True)
 
-    class Config:
-        validate_assignment = True
-
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def total_tags(cls, values):
-        values["count"] = len(values.get("values"))
+        values["count"] = len(values.get("values", []))
         return values
 
     def add(self, tag: Union[str, List[str]]):
@@ -49,6 +47,9 @@ class EventSession(Entity):
 
 class EventJourney(BaseModel):
     state: Optional[str] = None
+
+    def is_empty(self) -> bool:
+        return self.state is None or self.state == ""
 
 
 class EventProductVariant(BaseModel):
@@ -133,17 +134,17 @@ class EventMarketing(BaseModel):
 
 
 class EventData(BaseModel):
-    pii: Optional[ProfilePII] = ProfilePII.construct()
-    contact: Optional[ProfileContact] = ProfileContact.construct()
-    identifier: Optional[ProfileIdentifier] = ProfileIdentifier.construct()
-    media: Optional[ProfileMedia] = ProfileMedia.construct()
-    preferences: Optional[ProfilePreference] = ProfilePreference.construct()
-    job: Optional[ProfileJob] = ProfileJob.construct()
-    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty.construct()
-    ec: Optional[EventEc] = EventEc.construct()
-    message: Optional[EventMessage] = EventMessage.construct()
-    payment: Optional[EventPayment] = EventPayment.construct()
-    marketing: Optional[EventMarketing] = EventMarketing.construct()
+    pii: Optional[ProfilePII] = ProfilePII.model_construct()
+    contact: Optional[ProfileContact] = ProfileContact.model_construct()
+    identifier: Optional[ProfileIdentifier] = ProfileIdentifier.model_construct()
+    media: Optional[ProfileMedia] = ProfileMedia.model_construct()
+    preferences: Optional[ProfilePreference] = ProfilePreference.model_construct()
+    job: Optional[ProfileJob] = ProfileJob.model_construct()
+    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty.model_construct()
+    ec: Optional[EventEc] = EventEc.model_construct()
+    message: Optional[EventMessage] = EventMessage.model_construct()
+    payment: Optional[EventPayment] = EventPayment.model_construct()
+    marketing: Optional[EventMarketing] = EventMarketing.model_construct()
 
 
 class Event(NamedEntity):
@@ -176,15 +177,21 @@ class Event(NamedEntity):
     # os: Optional[OS] = OS.construct()
     # app: Optional[Application] = Application.construct()
     # hit: Optional[Hit] = Hit.construct()
-    journey: EventJourney = EventJourney.construct()
+    journey: EventJourney = EventJourney.model_construct()
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
         if 'type' in data and isinstance(data['type'], str):
-            data['type'] = data['type'].lower().replace(' ', '-')
+            data['type'] = data.get('type', '@missing-event-type').lower().replace(' ', '-')
         if 'name' not in data:
-            data['name'] = capitalize_event_type_id(data['type'])
+            data['name'] = capitalize_event_type_id(data.get('type', ''))
         super().__init__(**data)
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
 
     def replace(self, event):
         if isinstance(event, Event):
@@ -201,10 +208,14 @@ class Event(NamedEntity):
             self.request = event.request
             self.config = event.config
             self.tags = event.tags
+            self.utm = event.utm
             self.aux = event.aux
-            self.os = event.os
             self.device = event.device
+            self.os = event.os
             self.app = event.app
+            self.hit = event.hit
+            self.data = event.data
+            self.journey = event.journey
 
     def get_ip(self):
         if 'headers' in self.request and 'x-forwarded-for' in self.request['headers']:

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 from tracardi.domain.content import Content
 from tracardi.domain.named_entity import NamedEntity
@@ -10,13 +10,15 @@ class Message(BaseModel):
     subject: str = ""
     content: Content
 
-    @validator("recipient")
+    @field_validator("recipient")
+    @classmethod
     def recipient_subject(cls, value):
         if len(value) == 0:
             raise ValueError("Recipient e-mail can not be empty.")
         return value
 
-    @validator("subject")
+    @field_validator("subject")
+    @classmethod
     def validate_subject(cls, value):
         if len(value) == 0:
             raise ValueError("Subject must be at least one character long.")
@@ -28,7 +30,8 @@ class Config(PluginConfig):
     sender_email: str
     message: Message
 
-    @validator("sender_email")
+    @field_validator("sender_email")
+    @classmethod
     def sender_email_subject(cls, value):
         if len(value) == 0:
             raise ValueError("Sender e-mail can not be empty.")

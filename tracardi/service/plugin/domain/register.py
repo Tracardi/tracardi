@@ -21,12 +21,12 @@ class FormField(BaseModel):
     name: str
     description: Optional[str] = None
     component: FormComponent
-    validation: Optional[FormFieldValidation]
+    validation: Optional[FormFieldValidation] = None
     required: bool = False
 
 
 class FormGroup(BaseModel):
-    name: Optional[str]
+    name: Optional[str] = None
     description: Optional[str] = None
     fields: List[FormField]
 
@@ -46,12 +46,12 @@ class RunOnce(BaseModel):
 
 
 class NodeEvents(BaseModel):
-    on_remove: Optional[str]
-    on_create: Optional[str]
+    on_remove: Optional[str] = None
+    on_create: Optional[str] = None
 
 
 class MicroservicePlugin(NamedEntity):
-    resource: Optional[dict] = {} # Additional resources needed for microservice plugin
+    resource: Optional[dict] = {}  # Additional resources needed for microservice plugin
 
 
 class MicroserviceServer(BaseModel):
@@ -89,7 +89,7 @@ class MicroserviceConfig(BaseModel):
 
 
 class Spec(BaseModel):
-    id: Optional[str]
+    id: Optional[str] = None
     className: str
     module: str
     inputs: Optional[List[str]] = []
@@ -103,11 +103,11 @@ class Spec(BaseModel):
     on_connection_error_repeat: int = 1
     append_input_payload: bool = False
     join_input_payload: bool = False
-    form: Optional[Form]
+    form: Optional[Form] = None
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.8.1'
+    version: Optional[str] = '0.8.2'
     run_once: Optional[RunOnce] = RunOnce()
     node: Optional[NodeEvents] = None
 
@@ -133,7 +133,7 @@ class PortDoc(BaseModel):
 
 
 class Documentation(BaseModel):
-    tutorial: Optional[str]
+    tutorial: Optional[str] = None
     inputs: Dict[str, PortDoc]
     outputs: Dict[str, PortDoc]
 

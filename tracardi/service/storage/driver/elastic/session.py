@@ -1,8 +1,9 @@
 import logging
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Set
 
 from tracardi.config import tracardi
 from tracardi.domain.session import Session
+from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.log_handler import log_handler
@@ -17,7 +18,7 @@ async def save_sessions(sessions: List[Session]):
     return await storage_manager("session").upsert(sessions, exclude={"operation": ...})
 
 
-async def save(session: Union[Session, List[Session]]) -> BulkInsertResult:
+async def save(session: Union[Session, List[Session], Set[Session]]) -> BulkInsertResult:
     return await storage_manager('session').upsert(session, exclude={"operation": ...})
 
 
@@ -84,19 +85,28 @@ async def count(query: dict = None):
     return await storage_manager('session').count(query)
 
 
-async def count_session_by_browser():
-    query = {
-        "size": 0,
-        "aggs": {
-            "browsers": {
-                "terms": {
-                    "field": "app.name"
-                }
+async def _aggregate_session(bucket_name, by, filter_query=None, buckets_size=100) -> StorageAggregateResult:
+    aggregate_query = {
+        bucket_name: {
+            "terms": {
+                "field": by,
+                "size": buckets_size,
             }
         }
     }
 
-    return await storage_manager('session').query(query)
+    if filter_query is None:
+        filter_query = {
+            "match_all": {}
+        }
+
+    query = {
+        "size": 0,
+        "query": filter_query,
+        "aggs": aggregate_query
+    }
+
+    return await storage_manager(index="session").aggregate(query)
 
 
 async def count_online():

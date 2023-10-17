@@ -339,7 +339,7 @@ class SqlSearchQueryEngine:
 
                 return QueryResult(**qs)
 
-            except KeyError as e:
+            except KeyError:
                 # When no result
                 qs = {
                     'total': 0,
@@ -498,7 +498,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def upsert(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
+    async def upsert(self, data: Union[StorageRecord, Entity, BaseModel, dict, list, set],
                      replace_id: bool = True, exclude=None) -> BulkInsertResult:
         try:
             return await self.storage.create(data, replace_id=replace_id, exclude=exclude)

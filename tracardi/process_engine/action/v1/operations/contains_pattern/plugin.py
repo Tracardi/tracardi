@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from pydantic import validator
+from pydantic import field_validator
 from enum import Enum
 import re
 
@@ -27,13 +27,15 @@ class Config(PluginConfig):
     class PatternConfig:
         use_enum_values = True
 
-    @validator("field")
+    @field_validator("field")
+    @classmethod
     def validate_field(cls, value):
         if not value:
             raise ValueError("Field cannot be empty")
         return value
 
-    @validator("pattern")
+    @field_validator("pattern")
+    @classmethod
     def validate_pattern(cls, value):
         if not value:
             raise ValueError("Pattern cannot be empty")

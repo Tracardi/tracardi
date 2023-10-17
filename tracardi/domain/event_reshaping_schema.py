@@ -1,21 +1,8 @@
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, List
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
-from tracardi.domain.ref_value import RefValue
 from tracardi.process_engine.tql.condition import Condition
-
-
-class EntityMapping(BaseModel):
-    profile: RefValue
-    session: RefValue
-    event_type: RefValue
-
-    def has_profile_mapping(self) -> bool:
-        return bool(self.profile.value)
-
-    def has_session_mapping(self) -> bool:
-        return bool(self.session.value)
 
 
 class EventReshapeDefinition(BaseModel):
@@ -32,23 +19,6 @@ class EventReshapeDefinition(BaseModel):
 
 class ReshapeSchema(BaseModel):
     reshape_schema: EventReshapeDefinition
-    mapping: Optional[EntityMapping] = None
-    condition: Optional[str] = None
-
-    @validator("condition")
-    def check_if_condition_valid(cls, value):
-        if value:
-            try:
-                condition = Condition()
-                condition.parse(value)
-            except Exception as _:
-                raise ValueError("Condition expression could not be parsed. It seems to be invalid.")
-            return value
-        else:
-            return None
-
-    def has_mapping(self) -> bool:
-        return bool(self.mapping)
 
 
 class EventReshapingSchema(NamedEntity):

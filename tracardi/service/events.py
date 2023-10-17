@@ -7,6 +7,7 @@ from typing import Optional, Tuple, Union
 from dotty_dict import dotty
 
 from tracardi.config import tracardi
+from tracardi.context import ServerContext, get_context
 from tracardi.domain.event import Event, Tags
 from tracardi.domain.profile import Profile
 from tracardi.exceptions.log_handler import log_handler
@@ -32,15 +33,16 @@ def call_function(call_string, event: Event, profile: Union[Profile, dict]):
 
 
 def cache_predefined_event_types():
-    path = os.path.join(f"{_local_dir}/setup/events/*.json")
-    for file_path in glob.glob(path):
-        with open(file_path, "r") as file:
-            try:
-                content = json.load(file)
-                for item in content:
-                    _predefined_event_types[item['id']] = item
-            except Exception as e:
-                raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
+    if not _predefined_event_types:
+        path = os.path.join(f"{_local_dir}/setup/events/*.json")
+        for file_path in glob.glob(path):
+            with open(file_path, "r") as file:
+                try:
+                    content = json.load(file)
+                    for item in content:
+                        _predefined_event_types[item['id']] = item
+                except Exception as e:
+                    raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
 
 
 def get_predefined_event_types():
@@ -61,10 +63,23 @@ def get_event_type_names():
 async def get_event_types(query: str = None, limit: int = 1000):
     pre_defined = list(get_event_type_names())
     pre_defined_ids = [item[0] for item in pre_defined]
-    result = await event_db.unique_field_value(query, limit)
-    for item in result:
-        if item not in pre_defined_ids:
-            pre_defined.append((item, capitalize_event_type_id(item)))
+
+    context = get_context()
+
+    with ServerContext(context.switch_context(production=True)):
+        production_event_types = await event_db.unique_field_value(query, limit)
+
+        for item in production_event_types:
+            if item not in pre_defined_ids:
+                pre_defined.append((item, capitalize_event_type_id(item)))
+                pre_defined_ids.append(item)
+
+    with ServerContext(context.switch_context(production=False)):
+        test_event_types = await event_db.unique_field_value(query, limit)
+
+        for item in test_event_types:
+            if item not in pre_defined_ids:
+                pre_defined.append((item, capitalize_event_type_id(item)))
 
     events_types = [{"id": item[0], "name": item[1]} for item in sorted(pre_defined)]
     return {
@@ -73,14 +88,16 @@ async def get_event_types(query: str = None, limit: int = 1000):
     }
 
 
-def get_default_event_type_mapping(event_type, type) -> Optional[dict]:
-    if event_type not in _predefined_event_types:
+def get_default_mappings_for(event_type, type) -> Optional[dict]:
+    if not _predefined_event_types:
         cache_predefined_event_types()
 
     schema = _predefined_event_types.get(event_type, None)
-    if schema and type in schema:
-        return schema[type]
-    return None
+
+    if schema is None:
+        return None
+
+    return schema.get(type, None)
 
 
 def get_default_event_type_schema(event_type) -> Optional[dict]:
@@ -143,7 +160,7 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
                                 if flat_profile[profile_path] is None:
                                     flat_profile[profile_path] = 0
                                 flat_profile[profile_path] += float(flat_event[event_path])
-                            except Exception as e:
+                            except Exception:
                                 raise AssertionError(
                                     f"Can not add data {flat_event[event_path]} to {flat_profile[profile_path]} at profile@{profile_path}")
                     elif operation == '-':
@@ -152,7 +169,7 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
                                 if flat_profile[profile_path] is None:
                                     flat_profile[profile_path] = 0
                                 flat_profile[profile_path] -= float(flat_event[event_path])
-                            except Exception as e:
+                            except Exception:
                                 raise AssertionError(
                                     f"Can not add subtract {flat_event[event_path]} to {flat_profile[profile_path]} at profile@{profile_path}")
 
@@ -172,9 +189,10 @@ def copy_default_event_to_profile(copy_schema, flat_profile: dotty, flat_event: 
 
                             profile_updated_flag = True
 
-                        except Exception as e:
+                        except Exception:
                             raise AssertionError(
-                                f"Can not add increment/decrement {flat_event[event_path]} to {flat_profile[profile_path]} at profile@{profile_path}")
+                                f"Can not add increment/decrement {flat_event[event_path]} "
+                                f"to {flat_profile[profile_path]} at profile@{profile_path}")
 
     return flat_profile, profile_updated_flag
 
@@ -191,31 +209,31 @@ def remove_empty_dicts(dictionary):
 
 
 def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
-    index_schema = get_default_event_type_mapping(event.type, 'copy')
+    index_schema = get_default_mappings_for(event.type, 'copy')
 
     if index_schema is not None:
 
-        dot_event = dotty(event.dict())
+        flat_event = dotty(event.model_dump())
 
         for destination, source in index_schema.items():  # type: str, str
             try:
 
-                if destination not in dot_event:
-                    logger.warning(f"While indexing type {event.type}. "
-                                   f"Property destination {destination} could not be found in event schema.")
+                # if destination not in flat_event:
+                #     logger.warning(f"While indexing type {event.type}. "
+                #                    f"Property destination {destination} could not be found in event schema.")
 
                 # Skip none existing event properties.
-                if source in dot_event:
-                    dot_event[destination] = dot_event[source]
-                    del dot_event[source]
+                if source in flat_event:
+                    flat_event[destination] = flat_event[source]
+                    del flat_event[source]
             except KeyError:
                 pass
 
-        event_dict = dot_event.to_dict()
+        event_dict = flat_event.to_dict()
         remove_empty_dicts(event_dict)
         event = Event(**event_dict)
 
-        state = get_default_event_type_mapping(event.type, 'state')
+        state = get_default_mappings_for(event.type, 'state')
 
         if state:
             if isinstance(state, str):
@@ -224,7 +242,7 @@ def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
                 else:
                     event.journey.state = state
 
-        tags = get_default_event_type_mapping(event.type, 'tags')
+        tags = get_default_mappings_for(event.type, 'tags')
         if tags:
             event.tags = Tags(values=tuple(tags), count=len(tags))
 

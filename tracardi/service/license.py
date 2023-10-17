@@ -32,6 +32,7 @@ RESHAPING = "resha-9ds"
 REDIRECTS = "redir-atr"
 INDEXER = "indxs4k1"
 LICENSE = "lice12d4"
+MULTI_TENANT = "multen9ck6"
 
 
 class Service(BaseModel):
@@ -40,7 +41,7 @@ class Service(BaseModel):
 
 class License(BaseModel):
     owner: str
-    expires: int = 60 * 60 * 24
+    expires: int = time() + 60 * 60 * 24
     services: Dict[str, Service]
 
     def is_expired(self):
@@ -63,8 +64,12 @@ class License(BaseModel):
         return self.services.keys()
 
     @staticmethod
+    def _read_license():
+        return os.environ.get('LICENSE', None)
+
+    @staticmethod
     def has_license() -> bool:
-        return os.environ.get('LICENSE', None) is not None
+        return License._read_license() is not None
 
     @staticmethod
     def has_service(service_id):
@@ -72,17 +77,19 @@ class License(BaseModel):
             return False
 
         try:
-            license_string = os.environ.get('LICENSE', None)
+            license_string = License._read_license()
             if not license_string:
                 return False
+
             license = License.get_license(license_string)
+
             return license.get_service(service_id)
         except AssertionError:
             return False
 
     @staticmethod
     def check() -> 'License':
-        license = os.environ.get('LICENSE', None)
+        license = License._read_license()
 
         if license is None:
             raise AttributeError("Set LICENSE variable.")
@@ -107,6 +114,11 @@ class License(BaseModel):
 
     @staticmethod
     def get_license(license: str) -> 'License':
+
+        """
+        Gets license object.
+        """
+
         if license == "":
             raise AssertionError("Invalid license")
 
@@ -143,6 +155,6 @@ class License(BaseModel):
                            services={
                                key: Service(id=service['i']) for key, service in license['s'].items()
                            })
-        except ValueError as e:
+        except ValueError:
             raise ValueError("License incorrect. Please check if you paste everything form the license key.")
 

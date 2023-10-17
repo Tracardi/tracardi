@@ -1,6 +1,7 @@
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.domain.value_object.storage_info import StorageInfo
+from tracardi.service.utils.getters import get_entity
 
 
 def test_should_set_entity_data():
@@ -94,3 +95,13 @@ def test_should_accept_none_metadata():
 
     entity = TestEntity(id="1").set_meta_data(None)
     assert entity.has_meta_data() is False
+
+
+def test_returns_entity_with_same_id():
+    entity = Entity(id="123")
+    result = get_entity(entity)
+    assert result.id == entity.id
+
+def test_returns_none_when_input_is_none():
+    result = get_entity(None)
+    assert result is None

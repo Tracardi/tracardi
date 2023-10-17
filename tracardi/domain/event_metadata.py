@@ -16,7 +16,7 @@ class EventMetadata(BaseModel):
     aux: Optional[dict] = {}
     time: EventTime
     ip: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[str] = 'collected'
     channel: Optional[str] = None
     processed_by: EventProcessors = EventProcessors()
     profile_less: Optional[bool] = False
@@ -24,6 +24,7 @@ class EventMetadata(BaseModel):
     valid: Optional[bool] = True
     error: Optional[bool] = False
     warning: Optional[bool] = False
+    merge: Optional[bool] = False
     instance: Optional[Entity] = None
 
 

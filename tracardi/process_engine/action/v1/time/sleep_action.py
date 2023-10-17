@@ -1,6 +1,6 @@
 from asyncio import sleep
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormComponent, FormField, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -11,7 +11,8 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class SleepConfiguration(PluginConfig):
     wait: float
 
-    @validator('wait')
+    @field_validator('wait')
+    @classmethod
     def is_bigger_then_zero(cls, value):
         if value < 0:
             raise ValueError("Wait value has to be greater than or equal to 0.")

@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -12,25 +12,29 @@ class Config(PluginConfig):
     data: str
     sort_by: str
 
-    @validator("direction")
+    @field_validator("direction")
+    @classmethod
     def if_order_is_empty(cls, value):
         if value == "":
             raise ValueError("Direction cannot be empty")
         return value
 
-    @validator("direction")
+    @field_validator("direction")
+    @classmethod
     def if_order_has_valid_value(cls, value):
         if value == "asc" or value == "desc":
             return value
         raise ValueError("Direction has invalid value. Possible values are: \"asc\" or \"desc\".")
 
-    @validator("sort_by")
+    @field_validator("sort_by")
+    @classmethod
     def if_sprt_by_has_valid_value(cls, value):
         if value == "key" or value == "value":
             return value
         raise ValueError("Direction has invalid value.")
 
-    @validator("data")
+    @field_validator("data")
+    @classmethod
     def if_data_is_empty(cls, value):
         if value == "":
             raise ValueError("Data cannot be empty")

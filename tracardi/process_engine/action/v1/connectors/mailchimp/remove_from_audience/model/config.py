@@ -1,4 +1,4 @@
-from pydantic import validator, BaseModel
+from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.named_entity import NamedEntity
 
@@ -9,13 +9,15 @@ class Config(PluginConfig):
     list_id: str
     delete: bool
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("list_id")
+    @field_validator("list_id")
+    @classmethod
     def validate_list_id(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")

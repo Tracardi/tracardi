@@ -1,7 +1,7 @@
 import json
 from json import JSONDecodeError
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
@@ -14,7 +14,8 @@ class Configuration(PluginConfig):
     value: str = "{}"
     destination: str = "payload"
 
-    @validator("value")
+    @field_validator("value")
+    @classmethod
     def validate_content(cls, value):
         try:
             if isinstance(value, dict):

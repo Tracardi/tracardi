@@ -26,7 +26,7 @@ class HtmlXpathScrapperAction(ActionRunner):
         if result:
             return Result(port="result", value={"result": result})
         self.console.warning("Could not find any data at path '{}'".format(self.config.xpath))
-        return Result(port="error", value=self.config.dict())
+        return Result(port="error", value=self.config.model_dump())
 
 
 def register() -> Plugin:

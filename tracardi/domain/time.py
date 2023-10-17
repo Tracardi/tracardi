@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Time(BaseModel):
-    insert: Optional[datetime]
+    insert: Optional[datetime] = None
     create: Optional[datetime] = None
     update: Optional[datetime] = None
 
@@ -37,4 +37,5 @@ class ProfileTime(Time):
 
 class EventTime(Time):
     process_time: Optional[float] = 0
+    total_time: Optional[float] = 0
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -11,7 +11,8 @@ class Config(PluginConfig):
     prefix: Optional[str] = ""
     resource: Optional[NamedEntity] = NamedEntity(name="Local redis", id="")
 
-    @validator("key")
+    @field_validator("key")
+    @classmethod
     def must_not_be_empty(cls, value):
         if value == "":
             raise ValueError("This field can not be empty")

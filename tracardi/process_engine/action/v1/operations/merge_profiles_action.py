@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.domain.profile import Profile
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -13,7 +13,8 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class MergeProfileConfiguration(PluginConfig):
     mergeBy: List[str]
 
-    @validator("mergeBy")
+    @field_validator("mergeBy")
+    @classmethod
     def list_must_not_be_empty(cls, value):
         if not len(value) > 0:
             raise ValueError("Field mergeBy is empty and has no effect on merging. "
@@ -32,7 +33,6 @@ def validate(config: dict) -> MergeProfileConfiguration:
 
 
 class MergeProfilesAction(ActionRunner):
-
     merge_key: List[str]
 
     async def set_up(self, init):
@@ -71,10 +71,12 @@ def register() -> Plugin:
                         FormField(
                             id="mergeBy",
                             name="Merge by fields",
-                            description="Provide a list of fields that can identify user. For example profile@pii.email. "
+                            description="Provide a list of fields that can identify user. For example profile@data.contact.email. "
                                         "These fields will be treated as primary keys for merging. Profiles will be "
                                         "grouped by this value and merged.",
-                            component=FormComponent(type="listOfDotPaths", props={"label": "condition"})
+                            component=FormComponent(type="listOfDotPaths", props={"label": "condition",
+                                                                                  "defaultSourceValue": "profile"
+                                                                                  })
                         )
                     ]
                 ),

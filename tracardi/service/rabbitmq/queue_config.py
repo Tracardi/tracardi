@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 
 class QueueConfig(BaseModel):
@@ -11,7 +11,8 @@ class QueueConfig(BaseModel):
     auto_declare: bool = True
     serializer: str = 'json'
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def name_not_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Name can not be empty")

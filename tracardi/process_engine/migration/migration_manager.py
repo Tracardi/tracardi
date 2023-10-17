@@ -156,7 +156,7 @@ class MigrationManager:
     async def start_migration(self, ids: List[str], elastic_host: str) -> None:
 
         customized_schemas = await self.get_customized_schemas()
-        final_schemas = [schema.dict() for schema in customized_schemas["schemas"] if schema.id in ids]
+        final_schemas = [schema.model_dump() for schema in customized_schemas["schemas"] if schema.id in ids]
 
         if not final_schemas:
             return

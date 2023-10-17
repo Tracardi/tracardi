@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator, validator
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -10,7 +10,8 @@ class Configuration(PluginConfig):
     true_segment: str
     false_segment: str
 
-    @validator("condition")
+    @field_validator("condition")
+    @classmethod
     def is_valid_condition(cls, value):
         _condition = Condition()
         try:
@@ -20,6 +21,8 @@ class Configuration(PluginConfig):
 
         return value
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("true_segment")
     def is_valid_true_segment(cls, value, values):
         if 'true_action' in values and values['true_action'] != 'none':
@@ -27,6 +30,8 @@ class Configuration(PluginConfig):
                 raise ValueError("Segment can not be empty for action {}".format(values['true_action']))
         return value
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("false_segment")
     def is_valid_false_segment(cls, value, values):
         if 'false_action' in values and values['false_action'] != 'none':

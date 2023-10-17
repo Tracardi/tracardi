@@ -36,3 +36,9 @@ class User(BaseModel):
     def delete_preference(self, key: str):
         if key in self.preference:
             del self.preference[key]
+
+    def __str__(self):
+        return f"User: {self.full_name}"
+
+    def __repr__(self):
+        return f"User: {self.full_name}"

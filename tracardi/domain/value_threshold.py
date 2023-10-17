@@ -12,7 +12,7 @@ class ValueThreshold(NamedEntity):
     last_value: Any
 
     def encode(self) -> str:
-        return b64_encoder(self.dict())
+        return b64_encoder(self.model_dump())
 
     @staticmethod
     def decode(record: str) -> 'ValueThreshold':

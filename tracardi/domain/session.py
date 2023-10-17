@@ -1,17 +1,20 @@
+import uuid
+
 from datetime import datetime
 from typing import Optional, Any
 
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 from .entity import Entity
 from .marketing import UTM
 from .metadata import OS, Device, Application
+
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 
 
 class SessionTime(BaseModel):
-    insert: Optional[datetime]
+    insert: Optional[datetime] = None
     update: Optional[datetime] = None
     timestamp: Optional[float] = 0
     duration: float = 0
@@ -39,6 +42,7 @@ class SessionMetadata(BaseModel):
     time: SessionTime = SessionTime(insert=datetime.utcnow(), timestamp=datetime.timestamp(datetime.utcnow()))
     channel: Optional[str] = None
     aux: Optional[dict] = {}
+    status: Optional[str] = None
 
 
 class SessionContext(dict):
@@ -77,9 +81,7 @@ class Session(Entity):
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, **data: Any):
 
@@ -87,6 +89,12 @@ class Session(Entity):
             data['context'] = SessionContext(data['context'])
 
         super().__init__(**data)
+
+    def fill_meta_data(self):
+        """
+        Used to fill metadata with default current index and id.
+        """
+        self._fill_meta_data('session')
 
     def replace(self, session):
         if isinstance(session, Session):
@@ -102,6 +110,9 @@ class Session(Entity):
             self.os = session.os
             self.app = session.app
 
+    def is_reopened(self) -> bool:
+        return self.operation.new or self.metadata.status == 'ended'
+
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
@@ -110,3 +121,20 @@ class Session(Entity):
             exclude={"operation": ...},
             multi=True
         )
+
+    @staticmethod
+    def new(id: Optional[str] = None) -> 'Session':
+        session = Session(
+            id=str(uuid.uuid4()) if not id else id,
+            metadata=SessionMetadata()
+        )
+        session.fill_meta_data()
+        session.operation.new = True
+
+        return session
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id

@@ -17,7 +17,7 @@ class EventDebugRecord(Entity):
             for debug_infos in debugging:
                 for rule_id, debug_info in debug_infos.items():  # type: DebugInfo
                     # todo - to pole jest za małe (wyskakuje błąd gdy debug infor ma powyżej 32000 znaków)
-                    b64 = b64_encoder(debug_info.dict())
+                    b64 = b64_encoder(debug_info.model_dump())
                     yield EventDebugRecord(id=debug_info.event.id, content=b64)
 
     def decode(self, from_dict=False) -> DebugInfo:

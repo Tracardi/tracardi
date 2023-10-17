@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 
 from tracardi.domain.agg_result import AggResult
 from tracardi.domain.event import Event
+from tracardi.domain.named_entity import NamedEntity
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
-from typing import List, Optional, Dict, Tuple, Union
+from typing import List, Optional, Dict, Tuple, Union, Set
 from .raw import load_by_key_value_pairs
 
 import tracardi.config as config
@@ -23,7 +24,7 @@ async def load(id: str) -> Optional[StorageRecord]:
     return await storage_manager("event").load(id)
 
 
-async def save(events: List[Event], exclude=None):
+async def save(events: Union[List[Event], Set[Event]], exclude=None):
     return await storage_manager("event").upsert(events, exclude=exclude)
 
 
@@ -50,10 +51,12 @@ async def query(query: dict) -> StorageRecords:
 
 
 async def count_events_by_type(profile_id: str, event_type: str, time_span: int) -> int:
+    # todo rewrite to use count instead of query
     query = {
+        "size": 0,
         "query": {
             "bool": {
-                "must": [
+                "filter": [
                     {
                         "range": {
                             "metadata.time.insert": {
@@ -74,36 +77,75 @@ async def count_events_by_type(profile_id: str, event_type: str, time_span: int)
                 ]
             }
         }
-
     }
+
     result = await storage_manager("event").query(query)
+
     return result.total
 
 
-async def aggregate_event_by_field_within_time(profile_id, field, time_span):
+async def aggregate_event_by_field_within_time(profile_id,
+                                               field,
+                                               time_span,
+                                               metric='term',
+                                               event_type: NamedEntity = NamedEntity(id='', name='')):
+
+    mapping = {
+        "terms": "counts"
+    }
+
     query = {
-        "bool": {
-            "must": [
-                {
-                    "range": {
-                        "metadata.time.insert": {
-                            "gte": "now-{}s".format(time_span),
-                            "lte": "now"}
+        # "size": 0,
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        "range": {
+                            "metadata.time.insert": {
+                                "gte": "now-{}s".format(time_span),
+                                "lte": "now"}
+                        }
+                    },
+                    {
+                        "term": {
+                            "profile.id": profile_id
+                        }
                     }
-                },
-                {
-                    "term": {
-                        "profile.id": profile_id
-                    }
+                ]
+            }
+        },
+        "aggs": {
+            "events_bucket": {
+                metric: {
+                    "field": field
                 }
-            ]
+            }
         }
     }
 
-    result = await _aggregate_event("events_bucket", field, filter_query=query)
+    if metric == 'terms':
+        query['aggs']['events_bucket']['terms']['size'] = 100
+
+    if not event_type.is_empty():
+        query['query']['bool']['filter'].append({
+            "term": {
+                "type": event_type.id
+            }
+        })
+
+    result = await storage_manager(index="event").query(query)
+    if metric == 'terms':
+        buckets = result.aggregations('events_bucket').buckets()
+        output = { item['key']: item['doc_count'] for item in buckets}
+    else:
+        buckets = result.aggregations('events_bucket')
+        output = {
+            mapping.get(metric, metric): buckets['value']
+        }
+
     return {
-        "total": result.total,
-        "buckets": result.aggregations['events_bucket'][0]
+        "result": output,
+        "total": result.total
     }
 
 
@@ -226,9 +268,23 @@ async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100)
     return await storage_manager(index="event").aggregate(query)
 
 
-async def aggregate_event_type(bucket_size=100) -> List[Dict[str, str]]:
+async def aggregate_event_type() -> List[Dict[str, str]]:
     bucket_name = "by_type"
-    result = await _aggregate_event(bucket_name, "type", None, bucket_size)
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "type", query, buckets_size=15)
 
     if bucket_name not in result.aggregations:
         return []
@@ -238,7 +294,21 @@ async def aggregate_event_type(bucket_size=100) -> List[Dict[str, str]]:
 
 async def aggregate_event_tag() -> List[Dict[str, str]]:
     bucket_name = "by_tag"
-    result = await _aggregate_event(bucket_name, "tags.values")
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "tags.values", filter_query=query, buckets_size=20)
 
     if bucket_name not in result.aggregations:
         return []
@@ -248,7 +318,117 @@ async def aggregate_event_tag() -> List[Dict[str, str]]:
 
 async def aggregate_event_status() -> List[Dict[str, str]]:
     bucket_name = "by_status"
-    result = await _aggregate_event(bucket_name, "metadata.status")
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "metadata.status", filter_query=query, buckets_size=20)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_device_geo() -> List[Dict[str, str]]:
+    bucket_name = "by_device_geo"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "device.geo.country.name", filter_query=query, buckets_size=15)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_os_name() -> List[Dict[str, str]]:
+    bucket_name = "by_os_name"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "os.name", filter_query=query, buckets_size=20)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_channels() -> List[Dict[str, str]]:
+    bucket_name = "by_channel"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "metadata.channel", filter_query=query, buckets_size=20)
+
+    if bucket_name not in result.aggregations:
+        return []
+
+    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
+
+async def aggregate_event_resolution() -> List[Dict[str, str]]:
+    bucket_name = "by_resolution"
+
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "device.resolution", filter_query=query, buckets_size=20)
 
     if bucket_name not in result.aggregations:
         return []
@@ -257,7 +437,21 @@ async def aggregate_event_status() -> List[Dict[str, str]]:
 
 
 async def aggregate_events_by_source(buckets_size):
-    result = await _aggregate_event(bucket_name='by_source', by="source.id", buckets_size=buckets_size)
+    query = {
+        "bool": {
+            "must": {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": "now-1M",
+                        "lte": "now"
+                    }
+                }
+            }
+        }
+    }
+
+    result = await _aggregate_event(bucket_name='by_source', by="source.id", filter_query=query,
+                                    buckets_size=buckets_size)
 
     if 'by_source' not in result.aggregations:
         return []
@@ -431,11 +625,11 @@ async def get_events_by_session(session_id: str, limit: int = 100) -> StorageRec
             }
         ]
     }
-
     return await storage_manager("event").query(query)
 
 
 async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRecords:
+
     query = {
         "query": {
             "term": {
@@ -550,7 +744,7 @@ async def get_avg_process_time():
     result = await storage_manager("event").query({
         "size": 0,
         "aggs": {
-            "avg_process_time": {"avg": {"field": "metadata.time.process_time"}}
+            "avg_process_time": {"avg": {"field": "metadata.time.total_time"}}
         }
     })
 

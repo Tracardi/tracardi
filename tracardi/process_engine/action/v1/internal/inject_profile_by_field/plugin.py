@@ -5,6 +5,8 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.storage.cache.model import load as cache_load
+
 
 from .model.configuration import Configuration
 
@@ -26,6 +28,7 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
+            cache_load(model=Profile, id=value)
             profile_records = await profile_db.load_by_id(profile_id=value)
             profile = Profile.create(profile_records)
 
@@ -67,7 +70,7 @@ def register() -> Plugin:
             license="MIT",
             author="Risto Kowaczewski",
             init={
-                "field": "pii.email",
+                "field": "data.contact.email",
                 "value": "event@properties.email"
             },
             manual='profile_inject_action',
@@ -81,9 +84,9 @@ def register() -> Plugin:
                             description="Select the PII profile field by which will be used to identify the profile.",
                             component=FormComponent(type="select", props={"label": "Field", "items": {
                                 "id": "Id",
-                                "pii.email": "E-mail",
-                                "pii.telephone": "Phone",
-                                "pii.twitter": "Twitter handle"
+                                "data.contact.email": "E-mail",
+                                "data.contact.phone": "Phone",
+                                "data.contact.app.twitter": "Twitter handle"
                             }})
                         ),
                         FormField(

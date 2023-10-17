@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
@@ -18,7 +18,8 @@ class IfConfiguration(PluginConfig):
     pass_payload: bool = True
     ttl: int = 0
 
-    @validator("condition")
+    @field_validator("condition")
+    @classmethod
     def is_valid_condition(cls, value):
         try:
             _condition = Condition()
@@ -28,7 +29,8 @@ class IfConfiguration(PluginConfig):
 
         return value
 
-    @validator("ttl")
+    @field_validator("ttl")
+    @classmethod
     def is_bigger_then_zero(cls, value):
         if value < 0:
             raise ValueError("This value must be greater then 0")

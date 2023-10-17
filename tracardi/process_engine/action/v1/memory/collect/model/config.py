@@ -1,17 +1,19 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 
 class Config(BaseModel):
     name: str
     type: str = "list"
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def must_not_be_empty(cls, value):
         if value.strip() == "":
             raise ValueError("This field can not be empty")
         return value.replace(" ", "_")
 
-    @validator("type")
+    @field_validator("type")
+    @classmethod
     def must_have_defined_values(cls, value):
         if value.strip() not in ["list", 'dict']:
             raise ValueError("This field accepts only two values: list or dict")

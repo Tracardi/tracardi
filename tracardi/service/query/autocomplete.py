@@ -6,38 +6,7 @@ from lark.lexer import TerminalDef
 
 from tracardi.service.storage.driver.elastic import raw as raw_db
 
-schema = r"""
-?start: multi_expr
-multi_expr: statement 
-            | (and_expr|or_expr) ((OR|AND) (and_expr|or_expr))*
-or_expr: or_multiple_joins
-            | or_join
-and_expr: and_multiple_joins
-            | and_join
-or_multiple_joins: (OPEN_BRACKET ( or_join (OR statement)*) CLOSE_BRACKET)
-and_multiple_joins: (OPEN_BRACKET ( and_join (AND statement)*) CLOSE_BRACKET)
-
-or_join:    (statement|or_multiple_joins|and_multiple_joins) OR (statement|or_multiple_joins|and_multiple_joins)
-and_join:   (statement|or_multiple_joins|and_multiple_joins) AND (statement|or_multiple_joins|and_multiple_joins)
-statement: FIELD OP (QUOTE VALUE QUOTE | VALUE)
-OPEN_BRACKET: "("
-CLOSE_BRACKET: ")"
-QUOTE:      /[\"]/
-VALUE:      /[^\s\"]+|(?<!\\)[\"](.*?)(?<!\\)[\"]/ 
-            | "*"
-FIELD:      /[a-zA-z_\.-0-9]+/
-SPACE:      /[\s]+/
-operator:   ":" 
-            | ":>=" 
-            | ":<=" 
-            | ":<" 
-            | ":>"
-OP: /(:|:<=|:>=|:>|:<)/
-AND: /AND/i
-OR: /OR/i
-
-%ignore /\s+/
-"""
+from .tql_schema import schema
 
 # ([^\s\"]+|(?<!\\)([\"].*?(?<!\\)[\"]))
 # %import common.ESCAPED_STRING
@@ -94,18 +63,19 @@ class Values:
     @staticmethod
     async def _op_description(value):
         descriptions = {
-            ":": "Equals",
-            ":>=": "Greater or equal than",
-            ":<=": "Lower or equal than",
-            ":<": "Lower than",
-            ":>": "Greater than",
+            "=": "Equals",
+            "!=": "Not Equals",
+            ">=": "Greater or equal than",
+            "<=": "Lower or equal than",
+            "<": "Lower than",
+            ">": "Greater than",
         }
         return descriptions[value]
 
     @staticmethod
     async def _op(last: dict[str, Any], current: Value):
         current_value = current.value
-        operations = [':', ':>=', ':<=', ':<', ':>']
+        operations = ['=', '!=', '>=', '<=', '<', '>']
         if current.token == "OP":
             return Values._filter(current_value, operations)
         return operations

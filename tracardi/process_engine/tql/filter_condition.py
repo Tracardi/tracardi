@@ -14,8 +14,10 @@ class FilterCondition(metaclass=Singleton):
     def parse(self, condition):
         return self.parser.parse(condition)
 
-    async def evaluate(self, condition, dot: DotAccessor):
+    async def evaluate(self, condition, dot: DotAccessor = None):
         # todo cache tree
         tree = self.parse(condition)
         await asyncio.sleep(0)
-        return FilterTransformer(dot=dot).transform(tree)
+        if dot:
+            return FilterTransformer(dot=dot).transform(tree)
+        return FilterTransformer().transform(tree)

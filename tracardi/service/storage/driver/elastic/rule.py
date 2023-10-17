@@ -53,7 +53,10 @@ async def _load_rule(event_type, source_id):
 
 async def _get_rules_for_source_and_event_type(source: Entity, events: List[Event]) -> Tuple[
     Dict[str, List[Dict]], bool]:
-    event_types = {event.type for event in events}
+
+    # Get event types for valid events
+
+    event_types = {event.type for event in events if event.metadata.valid}
 
     # Cache rules per event types
 
@@ -126,3 +129,7 @@ async def flush():
 
 async def load_by_event_type(event_type: str, limit: int = 100) -> StorageRecords:
     return await storage_manager('rule').load_by('event_type.id', event_type, limit=limit)
+
+
+async def load_by_segment(segment: str, limit: int = 100) -> StorageRecords:
+    return await storage_manager('rule').load_by('segment.id', segment, limit=limit)

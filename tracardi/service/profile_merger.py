@@ -9,8 +9,8 @@ from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from collections import defaultdict
 from datetime import datetime
-from typing import Optional, List, Dict, Tuple, Any
-from pydantic.utils import deep_update, KeyType
+from typing import Optional, List, Dict, Tuple
+from pydantic.v1.utils import deep_update
 
 from ..config import tracardi
 from ..domain.metadata import ProfileMetadata
@@ -215,7 +215,7 @@ class ProfileMerger:
         return merge_key_values
 
     @staticmethod
-    def _deep_update(mapping: Dict[KeyType, Any], *updating_mappings: Dict[KeyType, Any]) -> Dict[KeyType, Any]:
+    def _deep_update(mapping: Dict, *updating_mappings: Dict) -> Dict:
         updated_mapping = mapping.copy()
         for updating_mapping in updating_mappings:
             for k, v in updating_mapping.items():
@@ -242,7 +242,7 @@ class ProfileMerger:
         """
 
         _traits = [profile.traits for profile in all_profiles]
-        _data = [profile.data.dict() for profile in all_profiles]
+        _data = [profile.data.model_dump(mode='json') for profile in all_profiles]
 
         old_value = {
             'traits': _traits,
@@ -261,12 +261,12 @@ class ProfileMerger:
             E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
         """
 
-        current_profile_dict = self.current_profile.dict()
+        current_profile_dict = self.current_profile.model_dump(mode='json')
 
         for profile in all_profiles:
             current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
                                                                profile.traits)
-            current_profile_dict['data'] = self._deep_update(current_profile_dict['data'], profile.data.dict())
+            current_profile_dict['data'] = self._deep_update(current_profile_dict['data'], profile.data.model_dump(mode='json'))
 
         traits = current_profile_dict['traits']
         data = current_profile_dict['data']
@@ -277,7 +277,7 @@ class ProfileMerger:
         segments = []
         interests = {}
         stats = ProfileStats()
-        time = ProfileTime(**self.current_profile.metadata.time.dict())
+        time = ProfileTime(**self.current_profile.metadata.time.model_dump(mode='json'))
         time.visit.count = 0  # Reset counter - it sums all the visits
 
         for profile in all_profiles:  # Type: Profile

@@ -1,6 +1,6 @@
 git+https://github.com/elasticemail/elasticemail-python.git@4.0.20
 
-pydantic==1.10.11
+pydantic>=2.3.0
 aiohttp[speedups]
 redis
 aioredis
@@ -58,3 +58,10 @@ faker-commerce==1.0.3
 # Worker requirements
 mysql-connector-python
 requests
+
+
+# Com requirements
+weaviate-client>=3.16.2
+twilio==8.2.1
+huey
+pulsar-client==3.3.0

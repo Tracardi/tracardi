@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -6,15 +6,17 @@ class Configuration(PluginConfig):
     field: str
     value: str
 
-    @validator("field")
+    @field_validator("field")
+    @classmethod
     def field_can_not_be_empty(cls, value):
         value = value.strip()
-        if value not in ['pii.email', 'pii.telephone', 'pii.twitter', 'id']:
+        if value not in ['data.contact.email', 'data.contact.phone', 'data.contact.app.twitter', 'id']:
             raise ValueError("Value is incorrect")
 
         return value.strip()
 
-    @validator("value")
+    @field_validator("value")
+    @classmethod
     def value_can_not_be_empty(cls, value):
         value = value.strip()
         if len(value) == 0:

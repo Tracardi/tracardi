@@ -1,12 +1,14 @@
-from typing import Tuple
+from typing import Tuple, Union, Optional, List, Dict
 
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
+from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.cache.model import load as cache_load
 
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
@@ -46,6 +48,34 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
     return profile_records.first()
 
 
+def load_by_ids(profile_ids: List[str], batch):
+    """
+    @throws DuplicatedRecordException
+    """
+
+    query = {
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "terms": {
+                            "ids": profile_ids
+                        }
+                    },
+                    {
+                        "terms": {
+                            "id": profile_ids
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        }
+    }
+
+    return storage_manager('profile').scan(query, batch)
+
+
 async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
     return await storage_manager('profile').load_all(start, limit, sort)
 
@@ -68,7 +98,9 @@ async def deduplicate_profile(profile_id):
     return profile
 
 
-async def load_profile_without_identification(tracker_payload, is_static=False) -> Optional[Profile]:
+async def load_profile_without_identification(tracker_payload,
+                                              is_static=False,
+                                              console_log: Optional[ConsoleLog] = None) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     @throws DuplicatedRecordException
@@ -79,6 +111,7 @@ async def load_profile_without_identification(tracker_payload, is_static=False) 
     profile_id = tracker_payload.profile.id
 
     try:
+        cache_load(model=Profile, id=profile_id)
         profile_record = await load_by_id(profile_id)
 
         if profile_record is None:
@@ -104,8 +137,8 @@ async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> L
     return [profile.to_entity(Profile) for profile in profiles]
 
 
-async def save(profile: Union[Profile, List[Profile]], refresh_after_save=False):
-    if isinstance(profile, list):
+async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
+    if isinstance(profile, (list, set)):
         for _profile in profile:
             if isinstance(_profile, Profile):
                 _profile.metadata.time.update = datetime.utcnow()

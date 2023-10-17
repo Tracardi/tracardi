@@ -76,12 +76,13 @@ class DebugNodeInfo(BaseModel):
             ),
 
             init=node.init,
-            profile=node.object.profile.dict() if isinstance(node.object, ActionRunner) and isinstance(
+            profile=node.object.profile.model_dump() if isinstance(node.object, ActionRunner) and isinstance(
                 node.object.profile, BaseModel) else {},
 
-            event=node.object.event.dict() if isinstance(node.object, ActionRunner) and isinstance(node.object.event,
-                                                                                                   BaseModel) else {},
-            session=node.object.session.dict() if isinstance(node.object, ActionRunner) and isinstance(
+            event=node.object.event.model_dump() if isinstance(node.object, ActionRunner) and isinstance(
+                node.object.event,
+                BaseModel) else {},
+            session=node.object.session.model_dump() if isinstance(node.object, ActionRunner) and isinstance(
                 node.object.session, BaseModel) else {},
             error=error,
 
@@ -115,7 +116,7 @@ class DebugInfo(BaseModel):
             self.edges[input_edge_id].active.append(active)
 
     def add_debug_edge_info(self, input_edges):
-        for edge_id, edge in input_edges.edges.items(): # type: str, InputEdge
+        for edge_id, edge in input_edges.edges.items():  # type: str, InputEdge
             self._add_debug_edge_info(edge_id, edge.active)
 
     def add_node_info(self, info: DebugNodeInfo):

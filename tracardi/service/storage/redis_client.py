@@ -1,37 +1,38 @@
 import logging
 from typing import Optional, Awaitable, Union, List
 
-import aioredis
+# import aioredis
 import redis
 
 from tracardi.context import get_context
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.singleton import Singleton
 from tracardi.config import redis_config, tracardi
+from tracardi.service.storage.redis_connection_pool import get_redis_connection_pool
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-class AsyncRedisClient(metaclass=Singleton):
-    def __init__(self):
-        host = redis_config.redis_host
-        password = redis_config.redis_password
-
-        if password is None:
-            self.client = aioredis.from_url(host)
-        else:
-            self.client = aioredis.from_url(host, password=password)
-
-        logger.info(f"Redis at {host} connected.")
+# class AsyncRedisClient(metaclass=Singleton):
+#     def __init__(self):
+#         host = redis_config.redis_host
+#         password = redis_config.redis_password
+#
+#         if password is None:
+#             self.client = aioredis.from_url(host)
+#         else:
+#             self.client = aioredis.from_url(host, password=password)
+#
+#         logger.info(f"Redis at {host} connected.")
 
 
 class RedisClient(metaclass=Singleton):
     def __init__(self):
         uri = redis_config.get_redis_with_password()
-        logger.debug(f"Connecting redis at {uri}")
-        self.client = redis.from_url(uri)
+        logger.debug(f"Connecting redis vai pool at {uri}")
+        self.client = redis.Redis(connection_pool=get_redis_connection_pool(redis_config))
         logger.info(f"Redis at {redis_config.redis_host} connected.")
 
     @staticmethod
@@ -60,7 +61,7 @@ class RedisClient(metaclass=Singleton):
     def sadd(self, name: str, *values) -> Union[Awaitable[int], int]:
         return self.client.sadd(self.get_tenant_prefix(name), *values)
 
-    def smembers(self, name: str) -> Union[Awaitable[list], list]:
+    def smembers(self, name: str) -> Union[Awaitable[set], list]:
         return self.client.smembers(self.get_tenant_prefix(name))
 
     def ttl(self, name):

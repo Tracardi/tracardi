@@ -4,4 +4,4 @@ from pydantic import BaseModel
 
 class InputParams(BaseModel):
     port: str
-    value: Any
+    value: Any = None

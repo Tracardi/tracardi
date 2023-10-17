@@ -1,9 +1,8 @@
 import re
 
-from pydantic.class_validators import validator
-
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
+from pydantic import field_validator
 
 
 def _is_valid_github_owner_name(value: str):
@@ -47,11 +46,13 @@ class GitHubBaseConfiguration(PluginConfig):
     repo: str
     timeout: int = 10
 
-    @validator("owner")
+    @field_validator("owner")
+    @classmethod
     def owner_must_be_valid(cls, value):
         return _validate(value, _is_valid_github_owner_name, 'Repository owner must be valid')
 
-    @validator("repo")
+    @field_validator("repo")
+    @classmethod
     def repo_must_be_valid(cls, value):
         return _validate(value, _is_valid_github_repo_name, 'Repository name must be valid')
 
@@ -59,6 +60,7 @@ class GitHubBaseConfiguration(PluginConfig):
 class GetIssueConfiguration(GitHubBaseConfiguration):
     issue_id: str
 
-    @validator("issue_id")
+    @field_validator("issue_id")
+    @classmethod
     def owner_must_be_valid(cls, value):
         return _validate(value, _is_non_empty, 'Issue ID must be specified')

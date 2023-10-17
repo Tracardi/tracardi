@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator
 from pydantic.main import BaseModel
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.domain.named_entity import NamedEntity
@@ -13,7 +13,8 @@ class Content(BaseModel):
     content: str
     type: str
 
-    @validator('content')
+    @field_validator('content')
+    @classmethod
     def must_have_2_letters(cls, v):
         if len(v) < 2:
             raise ValueError('String is too short. String must be at least two letters long.')
@@ -24,7 +25,7 @@ class AwsSqsConfiguration(PluginConfig):
     source: NamedEntity
     message: Content
     region_name: str
-    queue_url: AnyHttpUrl
+    queue_url: str # AnyHttpUrl
     delay_seconds: int = 0
     message_attributes: str
 
@@ -46,7 +47,7 @@ class MessageAttribute:
             self.key = "StringValue"
             self.value = str(value)
 
-    def dict(self):
+    def as_dict(self) -> dict:
         return {
             "DataType": self.type,
             self.key: self.value
@@ -63,5 +64,5 @@ class MessageAttributes:
                                  "numbers")
             self._value[key] = MessageAttribute(value)
 
-    def dict(self):
-        return {key: value.dict() for key, value in self._value.items()}
+    def as_dict(self):
+        return {key: value.as_dict() for key, value in self._value.items()}

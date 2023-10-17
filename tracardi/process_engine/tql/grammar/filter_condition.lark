@@ -37,7 +37,7 @@ op_is_null: op_field_sig "IS NULL"i
 op_exists: OP_FIELD EXISTS_TERMINAL
 op_not_exists: OP_FIELD "NOT"i EXISTS_TERMINAL
 
-OP: /(!=|<=|>=|=>|=<|=|>|<)/
+OP: /(!=|<=|>=|=>|=<|==|=|>|<)/
 
 // FIELDS FOR CONDITION
 

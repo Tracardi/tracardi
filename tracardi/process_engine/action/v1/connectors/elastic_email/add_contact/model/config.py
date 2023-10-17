@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-from pydantic import validator, BaseModel
+from pydantic import field_validator, BaseModel
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -10,7 +10,8 @@ class Config(PluginConfig):
     email: str
     additional_mapping: Dict[str, Any]
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")

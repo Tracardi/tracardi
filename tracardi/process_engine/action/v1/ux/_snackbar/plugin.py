@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -14,15 +14,17 @@ class Configuration(PluginConfig):
     hide_after: str
     position_x: str
     position_y: str
-    uix_mf_source: AnyHttpUrl = "http://localhost:8686"
+    uix_mf_source: str = "http://localhost:8686"  # AnyHttpUrl
 
-    @validator("message")
+    @field_validator("message")
+    @classmethod
     def should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Message should not be empty")
         return value
 
-    @validator("hide_after")
+    @field_validator("hide_after")
+    @classmethod
     def hide_after_should_be_numeric(cls, value: str):
         if not value.isnumeric():
             raise ValueError("This value should be numeric")

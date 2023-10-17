@@ -311,7 +311,7 @@
       "from_index": "tracardi-session",
       "to_index": "tracardi-session",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.device = new HashMap();\nrow.os = new HashMap();\nrow.app = new HashMap();\nrow.utm = new HashMap();\n//row.device.name = <type keyword>;\n//row.os.version = <type keyword>;\n//row.app.name = <type keyword>;\n//row.app.language = <type keyword>;\n//row.app.type = <type keyword>;\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.device = new HashMap();\nrow.os = new HashMap();\nrow.app = new HashMap();\nrow.utm = new HashMap();\nif (ctx._source.containsKey('context') && ctx._source.context.containsKey('browser')) { if(ctx._source.context.browser.containsKey('local') && ctx._source.context.browser.local.containsKey('browser') && ctx._source.context.browser.local.browser.containsKey('name')) {row.app.name = ctx._source.context.browser.local.browser.name;} \n if(ctx._source.context.browser.containsKey('local') && ctx._source.context.browser.local.containsKey('device') && ctx._source.context.browser.local.device.containsKey('platform')) {row.os.name = ctx._source.context.browser.local.device.platform;} }\n//row.app.language = <type keyword>;\n//row.app.type = <type keyword>;\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,

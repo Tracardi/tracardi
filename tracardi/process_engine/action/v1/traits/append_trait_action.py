@@ -10,12 +10,15 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 
 
 class Configuration(PluginConfig):
     append: Optional[Dict[str, Any]] = {}
     remove: Optional[Dict[str, Union[Any, List[Any]]]] = {}
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("remove")
     def validate_remove(cls, value, values):
         if 'append' not in values and 'remove' not in values:
@@ -108,6 +111,7 @@ class AppendTraitAction(ActionRunner):
             self.session.replace(session)
 
         self.update_profile()
+        save_profile_cache(self.profile)
 
         return Result(port="payload", value=payload)
 

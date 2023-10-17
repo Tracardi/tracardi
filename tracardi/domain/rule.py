@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, Any, List, Set
 
-from pydantic import validator, PrivateAttr
+from pydantic import field_validator, PrivateAttr
 
 from .metadata import Metadata
 from .named_entity import NamedEntity
@@ -12,17 +12,19 @@ from .value_object.storage_info import StorageInfo
 class Rule(NamedEntity):
 
     _schedule_node_id: str = PrivateAttr(None)
-    event_type: NamedEntity
-    type: Optional[str] = 'workflow'
+    event_type: Optional[NamedEntity] = NamedEntity(id="", name="")
+    type: Optional[str] = 'event-collect'
     flow: NamedEntity
-    source: NamedEntity
+    source: Optional[NamedEntity] = NamedEntity(id="", name="")
+    segment: Optional[NamedEntity] = NamedEntity(id="", name="")
     enabled: Optional[bool] = True
     description: Optional[str] = "No description provided"
     properties: Optional[dict] = None
-    metadata: Optional[Metadata]
+    metadata: Optional[Metadata] = None
     tags: Optional[List[str]] = ["General"]
 
-    @validator("tags")
+    @field_validator("tags")
+    @classmethod
     def tags_can_not_be_empty(cls, value):
         if len(value) == 0:
             value = ["General"]

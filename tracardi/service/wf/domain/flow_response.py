@@ -1,6 +1,6 @@
 import json
 from typing import Dict, List
-from pydantic.utils import deep_update
+from pydantic.v1.utils import deep_update
 
 
 class FlowResponse(Dict[str, dict]):

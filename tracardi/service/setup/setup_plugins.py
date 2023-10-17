@@ -1,8 +1,36 @@
 from typing import Dict
-from tracardi.service.license import VALIDATOR, License, SCHEDULER
+from tracardi.service.license import License, SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 
 installed_plugins: Dict[str, PluginMetadata] = {
+
+    "tracardi.process_engine.action.v1.list.operations_on_sets.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "set1": "",
+                "set2": "",
+                "operation": "intersection"
+            }, resource=None),
+    ),
+
+    "tracardi.process_engine.action.v1.list.find_max_value.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "source": "abc"
+            }, resource=None),
+    ),
+
+    "tracardi.process_engine.action.v1.strings.string_to_date.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "string": "abc"
+            }, resource=None),
+    ),
+
+    "tracardi.process_engine.action.v1.strings.string_stripper.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "string": "abc",
+                "to_remove": "a",
+            }, resource=None),
+    ),
+
 
     "tracardi.process_engine.action.v1.internal.tag_event.plugin": PluginMetadata(
         test=PluginTest(init={"tags": "tag1,tag2"}, resource=None),
@@ -208,7 +236,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.operations.merge_profiles_action": PluginMetadata(
-        test=PluginTest(init={'mergeBy': ['profile@pii.email']},
+        test=PluginTest(init={'mergeBy': ['profile@data.contact.email']},
                         resource=None)
     ),
 
@@ -562,7 +590,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.internal.inject_profile_by_field.plugin": PluginMetadata(
-        test=PluginTest(init={'field': "pii.email", 'value': 'test@test.com'},
+        test=PluginTest(init={'field': "data.contact.email", 'value': 'test@test.com'},
                         resource=None)
     ),
 
@@ -614,18 +642,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.consents.require_consents_action.plugin": PluginMetadata(
         test=PluginTest(init={'consent_ids': [], 'require_all': False},
                         resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.flow.postpone_event.plugin": PluginMetadata(
-        test=PluginTest(init={
-            'event_type': 'type',
-            'source': {
-                'id': 'x',
-                'name': 'x'
-            },
-            'event_properties': '{}',
-            'delay': 60},
-            resource=None)
     ),
 
     "tracardi.process_engine.action.v1.contains_string_action": PluginMetadata(
@@ -696,11 +712,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 }
 
-if License.has_service(VALIDATOR):
-    installed_plugins["com_tracardi.action.v1.validator.plugin"] = PluginMetadata(
-        test=PluginTest(init={'validation_schema': {}}, resource=None)
-    )
-
 if License.has_service(SCHEDULER):
     installed_plugins["com_tracardi.action.v1.background.plugin"] = PluginMetadata(
         test=PluginTest(
@@ -726,6 +737,9 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+    installed_plugins["com_tracardi.action.v1.metrics.plugin"] = PluginMetadata(
+        test=PluginTest(init={})
+    )
     installed_plugins["com_tracardi.action.v1.sms.twilio.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -1396,7 +1410,7 @@ test_plugins: Dict[str, PluginMetadata] = {
     ),
     "tracardi.process_engine.action.v1.connectors.novu.trigger.plugin": PluginMetadata(
         test=PluginTest(
-            init={'payload': '{}', 'recipient_email': 'profile@pii.email', 'source': {'id': '', 'name': ''},
+            init={'payload': '{}', 'recipient_email': 'profile@data.contact.email', 'source': {'id': '', 'name': ''},
                   'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
             resource={
                 "token": "token"

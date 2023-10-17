@@ -1,4 +1,5 @@
 from tracardi.domain.flow import Flow
+from tracardi.domain.session import Session, SessionMetadata
 from tracardi.process_engine.action.v1.end_action import EndAction
 from tracardi.process_engine.action.v1.increase_views_action import IncreaseViewsAction
 from tracardi.process_engine.action.v1.flow.start.start_action import StartAction
@@ -58,7 +59,7 @@ def test_plugin_start():
     flow, node = build_some_workflow_with_start_action(True)
 
     result = run_plugin(StartAction, init, payload, profile=Profile(id="1"), flow=flow,
-                        node=node, event=event)
+                        node=node, event=event, session=Session(id="1", metadata=SessionMetadata()))
 
     assert result.output.value == {}
     assert result.output.port == 'payload'

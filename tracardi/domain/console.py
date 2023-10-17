@@ -51,7 +51,7 @@ class Console(BaseModel):
             self.metadata = Metadata(timestamp=datetime.utcnow())
 
     def encode_record(self) -> ConsoleRecord:
-        data = self.dict()
+        data = self.model_dump()
         data['traceback'] = encrypt(data['traceback'])
         return ConsoleRecord(**data)
 
@@ -59,3 +59,9 @@ class Console(BaseModel):
     def decode_record(data: dict):
         data['traceback'] = decrypt(data['traceback'])
         return Console(**data)
+
+    def is_error(self) -> bool:
+        return self.type == 'error'
+
+    def is_warning(self) -> bool:
+        return self.type == 'warning'

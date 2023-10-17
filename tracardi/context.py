@@ -1,8 +1,7 @@
 from contextvars import ContextVar
+from pydantic import BaseModel
 from typing import Optional, Any
 from uuid import uuid4
-
-from pydantic import BaseModel
 
 from tracardi.config import tracardi
 from tracardi.domain.user import User
@@ -20,7 +19,7 @@ class Context:
     version: Optional[str] = None
 
     def __init__(self,
-                 production:bool = None,
+                 production: bool = None,
                  user: Optional[User] = None,
                  tenant: str = None,
                  host: Optional[str] = None,
@@ -44,6 +43,9 @@ class Context:
     def is_production(self) -> bool:
         return self.production
 
+    def context_abrv(self) -> str:
+        return 'p' if self.production else 't'
+
     def switch_context(self, production, user=None, tenant=None) -> 'Context':
         if user is None:
             user = self.user
@@ -51,16 +53,25 @@ class Context:
             tenant = self.tenant
         return Context(production=production, user=user, tenant=tenant)
 
+    def get_user_less_context_copy(self) -> 'Context':
+        return Context(
+            production=self.production,
+            user=None,
+            tenant=self.tenant,
+            host=self.host,
+            version=self.version
+        )
+
     def __str__(self):
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
-               f"user: {self.user.full_name if self.user else 'Unknown'}, " \
+               f"user: {str(self.user)}, " \
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
                f"host: {self.host})"
 
     def __repr__(self):
         return f"Context(mode: {'production' if self.production else 'staging'}, " \
-               f"user: {self.user.full_name if self.user else 'Unknown'}, " \
+               f"user: {str(self.user)}, " \
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
                f"host: {self.host})"
@@ -76,7 +87,7 @@ class Context:
     def dict(self) -> dict:
         return {
             "production": self.production,
-            "user": self.user,
+            "user": self.user.model_dump(mode='json') if isinstance(self.user, BaseModel) else None,
             "tenant": self.tenant,
             "host": self.host,
             "version": self.version

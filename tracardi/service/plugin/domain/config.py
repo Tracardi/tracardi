@@ -1,6 +1,5 @@
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 
 class PluginConfig(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(frozen=True)

@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -6,14 +6,16 @@ class Config(PluginConfig):
     reference_date: str
     now: str
 
-    @validator("now")
+    @field_validator("now")
+    @classmethod
     def validate_now(cls, value):
         if len(value) == 0:
-            raise ValueError(f"Date can not not be empty")
+            raise ValueError("Date can not not be empty")
         return value
 
-    @validator("reference_date")
+    @field_validator("reference_date")
+    @classmethod
     def validate_reference_date(cls, value):
         if len(value) == 0:
-            raise ValueError(f"Date can not not be empty")
+            raise ValueError("Date can not not be empty")
         return value

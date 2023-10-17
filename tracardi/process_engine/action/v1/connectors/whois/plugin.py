@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -15,7 +15,8 @@ def validate(config):
 class Configuration(PluginConfig):
     domain: str
 
-    @validator("domain")
+    @field_validator("domain")
+    @classmethod
     def must_not_be_emty(cls, value):
         if value.strip() == "":
             raise ValueError("Domain must not be empty.")
