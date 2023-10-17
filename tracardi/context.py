@@ -14,7 +14,7 @@ class Context:
 
     production: bool = tracardi.version.production
     user: Optional[User] = None
-    tenant: str
+    tenant: Optional[str] = None
     host: Optional[str] = None
     version: Optional[str] = None
 
@@ -32,6 +32,8 @@ class Context:
         if not tracardi.multi_tenant:
             self.tenant = tracardi.version.name
         else:
+            if tenant is None:
+                raise ValueError("Tenant is not set.")
             self.tenant = tenant
 
         self.user = user

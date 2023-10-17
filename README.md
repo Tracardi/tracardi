@@ -57,12 +57,13 @@ What TRACARDI can do for you:
  * **Unify Profiles** - You can merge customer data from various sources into a single profile. Automate the process of eliminating duplicate customer records. Blend customers into one account.
    
  * **Integrate Internal Systems** - Tracardi is a centralised communication and orchestration hub that can integrate different parts of your IT.
-   
+
  * **Scale E-commerce Easily** - Tracardi is a headless, API-first platform. Built with modern tools and designed as a decentralised system that can handle your needs.
   
  * **Use Social Engagement** - Connect your e-commerce platform to existing social media networks using **Tracardi bridges**. Reward your customers for sharing your products or leaving comments on contents that helps you sell.
  
  * **Stay open to all the tools available on the Internet** - Tracardi is open source. Do not limit your business to a closed set of tools. If there is any tool that will help you sell Tracardi, it will help you connect it with your business.
+
    
 Want to see Tracardi in action? Subscribe to our [:tv: Youtube channel](https://bit.ly/3pbdbPR)!
 
@@ -95,7 +96,7 @@ There are alternate methods of installation available as well. These are describ
 <table align="center">
 <tr>
 <td align="center">Join our community</td>
-<td align="center">Visit YouTube Channel</td>
+<td align="center">Visit our YouTube Channel</td>
 <td align="center">Tweet with us</td>
 </tr>
 <tr>
@@ -119,7 +120,7 @@ There are alternate methods of installation available as well. These are describ
 
 ## 👇 Call for Contributors
 
-Have you found a bug :bug: ? Or maybe you have a nice feature :sparkles: to contribute ? The
+Have you found a bug :bug: ? Or maybe you have a nice feature :sparkles: to contribute? The
 [CONTRIBUTING guide](https://github.com/Tracardi/tracardi/blob/master/CONTRIBUTING.md) will help you get your
 development environment ready in minutes.
 
