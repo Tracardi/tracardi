@@ -190,15 +190,15 @@ class TracardiConfig(metaclass=Singleton):
 
         if self.multi_tenant and (self.multi_tenant_manager_url is None or self.multi_tenant_manager_api_key is None):
             if self.multi_tenant_manager_url is None:
-                raise AssertionError('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
+                logger.warning('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
                                      'the MULTI_TENANT_MANAGER_URL or set MULTI_TENANT to "no"')
 
             if self.multi_tenant_manager_api_key is None:
-                raise AssertionError('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
+                logger.warning('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
                                      'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"')
 
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
-            raise AssertionError('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
+            logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
 
 
     @property

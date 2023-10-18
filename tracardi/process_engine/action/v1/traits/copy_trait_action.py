@@ -39,13 +39,13 @@ class CopyTraitAction(ActionRunner):
 
     async def set_up(self, init):
         self.config = validate(init)
-        self.mapping = self.config.traits.set
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
+        mapping = self.config.traits.set
 
-        for destination, value in self.mapping.items():
+        for destination, value in mapping.items():
             dot[destination] = value
 
         logger.debug("NEW PROFILE: {}".format(dot.profile))
