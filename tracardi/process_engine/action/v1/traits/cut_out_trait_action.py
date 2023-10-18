@@ -48,7 +48,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.traits.cut_out_trait_action',
+            module=__name__,
             className='CutOutTraitAction',
             inputs=['payload'],
             outputs=["trait"],

@@ -1,24 +1,17 @@
 from typing import Union
 
-from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.plugin.wrappers import lock_for_profile_update
 
 
 class DecrementConfig(PluginConfig):
     field: str
     decrement: Union[float, int]
-
-    @field_validator('field')
-    @classmethod
-    def field_must_match(cls, value):
-        if not value.startswith('profile@aux.counters'):
-            raise ValueError(f"Only fields inside `profile@aux.counters` can be decremented. Field `{value}` given.")
-        return value
 
 
 def validate(config: dict):
@@ -32,6 +25,7 @@ class DecrementAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
+    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload)
@@ -39,15 +33,17 @@ class DecrementAction(ActionRunner):
         try:
 
             value = dot[self.config.field]
-
             if value is None:
                 value = 0
 
         except KeyError:
+            self.console.error(f"Property `{self.config.field}` does not exist. Value set to 0.")
             value = 0
 
-        if not isinstance(value, int):
-            raise ValueError("Value of field '{}' is not numeric.".format(self.config.field))
+        if not isinstance(value, (int, float)):
+            message = "Value of field '{}' is not numeric.".format(self.config.field)
+            self.console.error(message)
+            return Result(port="error", value={"message": message})
 
         value -= self.config.decrement
 
@@ -65,7 +61,7 @@ def register() -> Plugin:
             module=__name__,
             className='DecrementAction',
             inputs=["payload"],
-            outputs=['payload'],
+            outputs=['payload', 'error'],
             init={"field": "profile@aux.counters", "decrement": 1},
             form=Form(groups=[
                 FormGroup(
@@ -97,13 +93,13 @@ def register() -> Plugin:
                 ),
             ]),
             manual="decrement_action",
-            version='0.1',
+            version='0.8.2',
             license="MIT",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(
             name='Decrement counter',
-            desc='Decrement profile stats.counters value. Returns payload',
+            desc='Decrement profile value. Returns payload or error if value is not numeric.',
             icon='minus',
             group=["Stats"],
             purpose=['collection', 'segmentation'],

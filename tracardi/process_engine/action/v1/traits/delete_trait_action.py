@@ -9,6 +9,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.plugin.wrappers import lock_for_profile_update, lock_for_session_update
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 
 
@@ -34,14 +35,19 @@ class DeleteTraitAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
+    @lock_for_profile_update
+    @lock_for_session_update
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         for value in self.config.delete:
+            if value.startswith("event@"):
+                self.console.warning(f"Could not delete value {value}, it is an event property and events "
+                                     f"can not be changed in workflow.")
             try:
                 del dot[value]
             except KeyError as e:
-                self.console.warning("Could not delete value {} due to error: {}".format(value, str(e)))
+                self.console.warning(f"Could not delete value {value}, it is missing, details: {repr(e)}")
 
         if self.event.metadata.profile_less is False:
             profile = Profile(**dot.profile)
@@ -50,9 +56,6 @@ class DeleteTraitAction(ActionRunner):
         if 'id' in dot.session:
             session = Session(**dot.session)
             self.session.replace(session)
-
-        event = Event(**dot.event)
-        self.event.replace(event)
 
         self.update_profile()
         save_profile_cache(self.profile)

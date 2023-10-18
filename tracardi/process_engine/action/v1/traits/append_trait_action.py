@@ -6,11 +6,10 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 
-from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.tracking.cache.profile_cache import save_profile_cache
+from tracardi.service.plugin.wrappers import lock_for_profile_update, lock_for_session_update
 
 
 class Configuration(PluginConfig):
@@ -38,6 +37,8 @@ class AppendTraitAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
+    @lock_for_profile_update
+    @lock_for_session_update
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
@@ -91,15 +92,6 @@ class AppendTraitAction(ActionRunner):
                 self.console.warning("Profile changes were discarded in node `Append/Remove Trait`. "
                                      "This event is profile less so there is no profile.")
 
-        try:
-            event = Event(**dot.event)
-        except ValidationError as e:
-            self.console.error(f"Event could not be updated. Some values where set incorrectly. "
-                               f"Please see the error {str(e)}")
-            return Result(port="error", value=payload)
-
-        self.event.replace(event)
-
         if 'id' in dot.session:
             try:
                 session = Session(**dot.session)
@@ -111,7 +103,6 @@ class AppendTraitAction(ActionRunner):
             self.session.replace(session)
 
         self.update_profile()
-        save_profile_cache(self.profile)
 
         return Result(port="payload", value=payload)
 

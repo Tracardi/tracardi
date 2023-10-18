@@ -7,18 +7,12 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.plugin.wrappers import lock_for_profile_update
 
 
 class IncrementConfig(PluginConfig):
     field: str
     increment: Union[int, float]
-
-    @field_validator('field')
-    @classmethod
-    def field_must_match(cls, value):
-        if not value.startswith('profile@aux.counters'):
-            raise ValueError(f"Only fields inside `profile@aux.counters` can be incremented. Field `{value}` given.")
-        return value
 
 
 def validate(config: dict):
@@ -32,6 +26,7 @@ class IncrementAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
+    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
@@ -44,10 +39,13 @@ class IncrementAction(ActionRunner):
                 value = 0
 
         except KeyError:
+            self.console.error(f"Property `{self.config.field}` does not exist. Value set to 0.")
             value = 0
 
-        if not isinstance(value, int):
-            raise ValueError("Filed `{}` value is not numeric.".format(self.config.field))
+        if not isinstance(value, (int, float)):
+            message = "Value of field '{}' is not numeric.".format(self.config.field)
+            self.console.error(message)
+            return Result(port="error", value={"message": message})
 
         value += self.config.increment
 
@@ -66,7 +64,7 @@ def register() -> Plugin:
             module=__name__,
             className='IncrementAction',
             inputs=["payload"],
-            outputs=['payload'],
+            outputs=['payload', 'error'],
             init={"field": "profile@aux.counters", "increment": 1},
             form=Form(groups=[
                 FormGroup(

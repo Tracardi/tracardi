@@ -8,6 +8,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.plugin.wrappers import lock_for_session_update, lock_for_profile_update
 
 
 class Configuration(PluginConfig):
@@ -25,6 +26,8 @@ class MaskTraitsAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
+    @lock_for_session_update
+    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload)
@@ -33,6 +36,10 @@ class MaskTraitsAction(ActionRunner):
 
             if dot.source(trait) == 'flow':
                 self.console.warning("Flow values can not be hashed.")
+                continue
+
+            if dot.source(trait) == 'event':
+                self.console.warning("Event values can not be modified in workflow.")
                 continue
 
             elif not dot.validate(trait) or trait not in dot:
@@ -48,9 +55,6 @@ class MaskTraitsAction(ActionRunner):
         if dot.session:
             session = Session(**dot.session)
             self.session.replace(session)
-
-        event = Event(**dot.event)
-        self.event.replace(event)
 
         return Result(port='payload', value=payload)
 

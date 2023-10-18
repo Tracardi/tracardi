@@ -5,6 +5,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.plugin.wrappers import lock_for_profile_update
 
 from .model.configuration import Configuration
 from tracardi.process_engine.tql.condition import Condition
@@ -33,6 +34,7 @@ class ProfileSegmentAction(ActionRunner):
         profile.metadata.time.segmentation = datetime.utcnow()
         self.profile.replace(profile)
 
+    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is False:
             dot = self._get_dot_accessor(payload)

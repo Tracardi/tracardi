@@ -3,6 +3,7 @@ import logging
 from pydantic import BaseModel
 
 from tracardi.config import tracardi
+from tracardi.context import get_context
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -14,7 +15,12 @@ from tracardi.domain.session import Session
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.tracking.cache.profile_cache import save_profile_cache
+from tracardi.service.storage.redis.collections import Collection
+from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache, load_profile_cache
+from tracardi.service.tracking.cache.session_cache import save_session_cache
+from tracardi.service.tracking.locking import GlobalMutexLock
+from tracardi.service.utils.getters import get_entity_id
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -41,51 +47,81 @@ class CopyTraitAction(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+        _redis = RedisClient()
 
-        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
-        mapping = self.config.traits.set
+        # Lock profile for changes
 
-        for destination, value in mapping.items():
-            dot[destination] = value
+        async with GlobalMutexLock(
+                get_entity_id(self.profile),
+                'profile',
+                namespace=Collection.lock_tracker,
+                redis=_redis
+        ):
 
-        logger.debug("NEW PROFILE: {}".format(dot.profile))
+            # Refresh profile
+            _profile = load_profile_cache(self.profile.id, get_context())
 
-        if self.event.metadata.profile_less is False:
-            if 'traits' not in dot.profile:
-                raise ValueError("Missing traits in profile.")
+            if not _profile:
+                message = f"Could not load profile id={self.profile.id}"
+                self.console.error(message)
+                return Result(port="error", value={"message": message})
 
-            if not isinstance(dot.profile['traits'], dict):
-                raise ValueError(
-                    "Error when setting profile@traits to value `{}`. Traits must have key:value pair. "
-                    "E.g. `name`: `{}`".format(dot.profile['traits'], dot.profile['traits']))
+            self.profile = _profile
 
-            profile = Profile(**dot.profile)
+            dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
+            mapping = self.config.traits.set
 
-            flat_profile = flatten(profile.model_dump())
-            flat_dot_profile = flatten(Profile(**dot.profile).model_dump())
-            diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
+            for destination, value in mapping.items():
+                if destination.startswith('event'):
+                    self.console.warning(f"Can not copy data to event. Events are imputable and can not be changed. "
+                                         f"Property {destination} skipped.")
+                    continue
+                dot[destination] = value
 
-            if diff_result and 'dictionary_item_removed' in diff_result:
-                errors = [item.replace("root[", "profile[") for item in diff_result['dictionary_item_removed']]
-                error_msg = "Some values were not added to profile. Profile schema seems not to have path: {}. " \
-                            "This node is probably misconfigured.".format(errors)
-                raise ValueError(error_msg)
+            if self.event.metadata.profile_less is False:
+                if 'traits' not in dot.profile:
+                    message = "Missing traits in profile."
+                    self.console.error(message)
+                    return Result(port="error", value={"message": message })
 
-            self.profile.replace(profile)
-        else:
-            if dot.profile:
-                self.console.warning("Profile changes were discarded in node `Set Trait`. This event is profile "
-                                     "less so there is no profile.")
+                if not isinstance(dot.profile['traits'], dict):
+                    message = ("Error when setting profile@traits to value `{}`. Traits must have key:value pair. "
+                               "E.g. `name`: `{}`").format(dot.profile['traits'], dot.profile['traits'])
+                    self.console.error(message)
+                    return Result(port="error", value={"message": message})
 
-        event = Event(**dot.event)
-        self.event.replace(event)
+                profile = Profile(**dot.profile)
 
-        if 'id' in dot.session:
-            session = Session(**dot.session)
-            self.session.replace(session)
+                flat_profile = flatten(profile.model_dump(mode='json'))
+                flat_dot_profile = flatten(Profile(**dot.profile).model_dump(mode='json'))
+                diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
 
-        self.update_profile()
-        save_profile_cache(self.profile)
+                if diff_result and 'dictionary_item_removed' in diff_result:
+                    errors = [item.replace("root[", "profile[") for item in diff_result['dictionary_item_removed']]
+                    error_msg = "Some values were not added to profile. Profile schema seems not to have path: {}. " \
+                                "This node is probably misconfigured.".format(errors)
+                    raise ValueError(error_msg)
+
+                self.update_profile()
+                self.profile.replace(profile)
+                save_profile_cache(self.profile)
+
+            else:
+                if dot.profile:
+                    self.console.warning("Profile changes were discarded in node `Copy data`. This event is profile "
+                                         "less so there is no profile.")
+
+        async with GlobalMutexLock(
+                get_entity_id(self.session),
+                'session',
+                namespace=Collection.lock_tracker,
+                redis=_redis
+        ):
+            if 'id' in dot.session:
+                session = Session(**dot.session)
+                self.session.replace(session)
+
+                save_session_cache(self.session)
 
         return Result(port="payload", value=payload)
 
@@ -97,7 +133,7 @@ def register() -> Plugin:
             module=__name__,
             className='CopyTraitAction',
             inputs=['payload'],
-            outputs=["payload"],
+            outputs=["payload", "error"],
             init={
                 "traits": {
                     "set": {
@@ -122,7 +158,7 @@ def register() -> Plugin:
                     ]
                 ),
             ]),
-            version='0.8.1',
+            version='0.8.2',
             license="MIT",
             author="Risto Kowaczewski"
         ),

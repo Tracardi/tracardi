@@ -40,9 +40,9 @@ class MergeProfilesAction(ActionRunner):
         self.merge_key = [key.lower() for key in config.mergeBy]
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        if self.debug is True:
-            self.console.warning("Profiles are not merged when in debug mode.")
         if isinstance(self.profile, Profile):
+            # TODO LOOK for self.profile.operation.needs_merging()
+            # TODO operation can be overwritten by update form cache. maybe mrege here not at the end of workflow.
             self.profile.operation.merge = self.merge_key
         else:
             if self.event.metadata.profile_less is True:
@@ -59,12 +59,12 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.operations.merge_profiles_action',
+            module=__name__,
             className='MergeProfilesAction',
             inputs=["payload"],
             outputs=["payload", "error"],
             init={"mergeBy": []},
-            version="0.8.0",
+            version="0.8.2",
             form=Form(groups=[
                 FormGroup(
                     fields=[

@@ -240,11 +240,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.operations.update_event_action": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
     "tracardi.process_engine.action.v1.operations.update_session_action": PluginMetadata(
         test=PluginTest(init={},
                         resource=None)
@@ -314,21 +309,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.traits.field_type_action": PluginMetadata(
         test=PluginTest(init={'field': "profile@id"},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.events.event_discarder.plugin": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.profiles.profile_discarder.plugin": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.sessions.session_discarder.plugin": PluginMetadata(
-        test=PluginTest(init={},
                         resource=None)
     ),
 

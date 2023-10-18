@@ -7,11 +7,7 @@ from tracardi.service.plugin.runner import ActionRunner
 class UpdateSessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
-        if self.debug is True:
-            self.console.warning("Session will not be updated in debug mode. "
-                                 "Debug only test workflow and does not run "
-                                 "the whole ingestion process.")
-        elif isinstance(self.session, Session) and isinstance(self.session.operation, Operation):
+        if isinstance(self.session, Session) and isinstance(self.session.operation, Operation):
             self.session.operation.new = True
         return None
 
@@ -24,7 +20,7 @@ def register() -> Plugin:
             className='UpdateSessionAction',
             inputs=["payload"],
             outputs=[],
-            version="0.6.2",
+            version="0.8.2",
             init=None,
             manual="update_session_action"
         ),

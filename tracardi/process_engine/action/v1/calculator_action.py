@@ -8,6 +8,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.process_engine.tql.equation import MathEquation
+from tracardi.service.plugin.wrappers import lock_for_profile_update, lock_for_session_update
 
 
 class CalculatorConfig(PluginConfig):
@@ -26,12 +27,13 @@ def validate(config: dict):
 
 
 class CalculatorAction(ActionRunner):
-
     config: CalculatorConfig
 
     async def set_up(self, init):
         self.config = validate(init)
 
+    @lock_for_profile_update
+    @lock_for_session_update
     async def run(self, payload: dict, in_edge=None) -> Result:
         calc_lines = [line.strip() for line in self.config.calc_dsl.split("\n")]
 
@@ -47,9 +49,6 @@ class CalculatorAction(ActionRunner):
         if 'id' in dot.session:
             session = Session(**dot.session)
             self.session.replace(session)
-
-        event = Event(**dot.event)
-        self.event.replace(event)
 
         return Result(port="payload", value={
             "result": results[-1],
@@ -70,7 +69,7 @@ def register() -> Plugin:
             init={
                 "calc_dsl": ""
             },
-            version='0.6.0.1',
+            version='0.8.2',
             license="MIT",
             author="Risto Kowaczewski",
             form=Form(groups=[
@@ -83,7 +82,7 @@ def register() -> Plugin:
                             id="calc_dsl",
                             name="Calculation equations",
                             description="One calculation per line. "
-                                        "Example: profile@stats.counters.my_count = profile@stats.visits + 1",
+                                        "Example: profile@aux.counters.my_count = profile@aaux.visits + 1",
                             component=FormComponent(type="textarea", props={"label": "Calculations"})
                         )
                     ]

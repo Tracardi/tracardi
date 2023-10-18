@@ -86,4 +86,3 @@ class ActionRunner:
 
     def join_output(self) -> bool:
         return isinstance(self.join, JoinSettings) and self.join.merge is True
-

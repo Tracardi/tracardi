@@ -31,6 +31,8 @@ class HashTraitsAction(ActionRunner):
 
         dot = self._get_dot_accessor(payload)
 
+        print(self.profile.traits)
+
         for trait in self.config.traits:
 
             if dot.source(trait) == 'flow':
