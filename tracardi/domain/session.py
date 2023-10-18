@@ -81,6 +81,7 @@ class Session(Entity):
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, **data: Any):

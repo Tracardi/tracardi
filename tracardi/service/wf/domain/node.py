@@ -37,6 +37,7 @@ class Node(Entity):
     microservice: Optional[MicroserviceConfig] = None
     remote: bool = False
     graph: Graph = Graph()
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def get_input_edges(self) -> PortToPortEdges:
