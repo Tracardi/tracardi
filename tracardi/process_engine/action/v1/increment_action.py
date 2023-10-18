@@ -16,8 +16,8 @@ class IncrementConfig(PluginConfig):
     @field_validator('field')
     @classmethod
     def field_must_match(cls, value):
-        if not value.startswith('profile@stats.counters'):
-            raise ValueError(f"Only fields inside `profile@stats.counters` can be incremented. Field `{value}` given.")
+        if not value.startswith('profile@aux.counters'):
+            raise ValueError(f"Only fields inside `profile@aux.counters` can be incremented. Field `{value}` given.")
         return value
 
 
@@ -63,11 +63,11 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.increment_action',
+            module=__name__,
             className='IncrementAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"field": "profile@stats.counters", "increment": 1},
+            init={"field": "profile@aux.counters", "increment": 1},
             form=Form(groups=[
                 FormGroup(
                     fields=[
@@ -75,7 +75,7 @@ def register() -> Plugin:
                             id="field",
                             name="Path to field",
                             description="Provide path to field that should be incremented. "
-                                        "E.g. profile@stats.counters.boughtProducts",
+                                        "E.g. profile@aux.counters.boughtProducts",
                             component=FormComponent(type="dotPath", props={"label": "Field path",
                                                                            "defaultSourceValue": "profile"})
                         )

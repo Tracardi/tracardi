@@ -126,16 +126,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.increase_views_action": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.increase_visits_action": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
     "tracardi.process_engine.action.v1.increment_action": PluginMetadata(
         test=PluginTest(init={'field': 'profile@stats.counters.test', 'increment': 1},
                         resource=None)

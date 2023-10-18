@@ -1,6 +1,6 @@
 from typing import Union
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -13,12 +13,11 @@ class DecrementConfig(PluginConfig):
     field: str
     decrement: Union[float, int]
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator('field')
-    def field_must_match(cls, value, values, **kwargs):
-        if not value.startswith('profile@stats.counters'):
-            raise ValueError(f"Only fields inside `profile@stats.counters` can be decremented. Field `{value}` given.")
+    @field_validator('field')
+    @classmethod
+    def field_must_match(cls, value):
+        if not value.startswith('profile@aux.counters'):
+            raise ValueError(f"Only fields inside `profile@aux.counters` can be decremented. Field `{value}` given.")
         return value
 
 
@@ -63,11 +62,11 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.decrement_action',
+            module=__name__,
             className='DecrementAction',
             inputs=["payload"],
             outputs=['payload'],
-            init={"field": "profile@stats.counters", "decrement": 1},
+            init={"field": "profile@aux.counters", "decrement": 1},
             form=Form(groups=[
                 FormGroup(
                     fields=[
@@ -75,7 +74,7 @@ def register() -> Plugin:
                             id="field",
                             name="Path to field",
                             description="Provide path to field that should be decremented. "
-                                        "E.g. profile@stats.counters.boughtProducts",
+                                        "E.g. profile@aux.counters.boughtProducts",
                             component=FormComponent(type="dotPath", props={"label": "Field path",
                                                                            "defaultSourceValue": "profile"})
                         )

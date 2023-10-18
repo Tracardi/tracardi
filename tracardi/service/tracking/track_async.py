@@ -111,7 +111,7 @@ async def process_track_data(source: EventSource,
 
                 # Track session for visit end
 
-                if session.operation.new:
+                if session and session.operation.new:
                     track_vist_end(
                         dispatch_context,
                         session,
