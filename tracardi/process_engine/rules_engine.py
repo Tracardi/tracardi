@@ -119,16 +119,16 @@ class RulesEngine:
                     continue
 
                 if not rule.enabled:
-                    logger.info(f"Rule {rule.name}:{rule.id} skipped. Rule is disabled.")
+                    logger.info(f"Trigger rule `{rule.name}:{rule.id}` skipped. Trigger is disabled.")
                     continue
 
-                logger.info(f"Running rule {rule.name}:{rule.id}")
+                logger.info(f"Triggering rule `{rule.name}:{rule.id}`")
 
                 try:
 
                     # Loads flow for given rule
 
-                    flow = await load_flow_callable(rule.flow.id)  # type: Flow
+                    flow: Flow = await load_flow_callable(rule.flow.id)
 
                 except Exception as e:
                     logger.error(str(e))

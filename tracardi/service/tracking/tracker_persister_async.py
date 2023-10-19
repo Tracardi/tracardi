@@ -50,7 +50,7 @@ def clear_relations(tracker_payload, profile: Profile, session: Session, events:
 
 def _get_savable_session(session: Optional[Session], profile: Profile) -> Optional[Session]:
     if isinstance(session, Session):
-        if session.operation.new or session.operation.needs_update():
+        if session.has_not_saved_changes():
             # Session to add. Add new profile id to session if it does not exist,
             # or profile id in session is different from the real profile id.
             if session.profile is None or (
@@ -110,7 +110,7 @@ class TrackingPersisterAsync:
 
     async def _save_profile(self, profile: Profile):
         if profile:
-            if profile and (profile.operation.new or profile.operation.needs_update()):
+            if profile and profile.has_not_saved_changes():
 
                 results = []
                 try:
@@ -131,7 +131,7 @@ class TrackingPersisterAsync:
             if session:
                 session = _get_savable_session(session, profile)
 
-                if session and (session.operation.new or session.operation.needs_update()):
+                if session and session.has_not_saved_changes():
 
                     result = await save_session(session)
 
@@ -213,3 +213,4 @@ class TrackingPersisterAsync:
         ]
 
         return await asyncio.gather(*coroutines)
+

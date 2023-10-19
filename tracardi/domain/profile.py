@@ -182,6 +182,9 @@ class Profile(Entity):
             multi=True
         )
 
+    def has_not_saved_changes(self) -> bool:
+        return self.operation.new or self.operation.needs_update()
+
     @staticmethod
     def new(id: Optional[id] = None) -> 'Profile':
         """

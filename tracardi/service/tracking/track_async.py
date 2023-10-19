@@ -1,6 +1,7 @@
 import time
 import logging
 
+from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
@@ -157,6 +158,9 @@ async def process_track_data(source: EventSource,
                 storage = TrackingPersisterAsync()
                 events_result = await storage.save_events(sync_events)
                 print("save_sync_result", events_result, get_context())
+
+                # TODO Do not know if destinations are needed here. They are also dispatched in async
+
                 profile, session, sync_events, ux, response = await dispatch_sync_workflow_and_destinations(
                     source,
                     profile,
@@ -171,10 +175,13 @@ async def process_track_data(source: EventSource,
                 result['response'] = response
                 result['events'] += [event.id for event in sync_events]
 
-                profile_and_session_result = await storage.save_profile_and_session(
-                    session,
-                    profile
-                )
+                # We do not have to save manually. In commercial version there is a
+                # flusher worker that saves in-memory profile and session automatically
+
+                # profile_and_session_result = await storage.save_profile_and_session(
+                #     session,
+                #     profile
+                # )
 
             return result
 
@@ -202,7 +209,8 @@ async def process_track_data(source: EventSource,
                 console_log
             )
 
-            # Save
+            # Save. We need to manually save the session and profile in Open-source as there is no
+            # flusher worker and in-memory profile and session is not saved
 
             profile_and_session_result = await storage.save_profile_and_session(
                 session,

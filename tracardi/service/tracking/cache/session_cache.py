@@ -1,12 +1,17 @@
 from typing import Optional
-from tracardi.context import get_context
+from tracardi.context import get_context, Context
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
+from tracardi.service.merging.session_merger import merge_sessions
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
+from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
+from tracardi.service.tracking.locking import GlobalMutexLock
+from tracardi.service.utils.getters import get_entity_id
 
 redis_cache = RedisCache(ttl=None)
+_redis = RedisClient()
 
 
 def load_session_cache(session_id: str, production):
@@ -41,3 +46,27 @@ def save_session_cache(session: Optional[Session]):
             ),
             f"{Collection.session}{context.context_abrv()}:{get_cache_prefix(session.id[0:2])}:"
         )
+
+
+def merge_with_cache_session(session: Session, context: Context) -> Session:
+    # Loads profile form cache and merges it with the current profile
+
+    _cache_session = load_session_cache(session.id, context)
+
+    if not _cache_session:
+        return session
+
+    return merge_sessions(base_session=_cache_session, session=session)
+
+
+async def lock_merge_with_cache_and_save_session(session: Session, context: Context, lock_name=None):
+    async with GlobalMutexLock(
+            get_entity_id(session),
+            'session',
+            namespace=Collection.lock_tracker,
+            redis=_redis,
+            name=lock_name
+    ):
+        session = merge_with_cache_session(session, context)
+
+        return save_session_cache(session)

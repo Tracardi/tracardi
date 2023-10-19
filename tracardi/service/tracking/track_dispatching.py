@@ -2,14 +2,13 @@ from typing import List, Tuple, Optional
 
 import logging
 
+from tracardi.context import get_context
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis_client import RedisClient
-from tracardi.service.tracking.cache.profile_cache import save_profile_cache
-from tracardi.service.tracking.cache.session_cache import save_session_cache
+from tracardi.service.field_mappings_cache import add_new_field_mappings
+from tracardi.service.tracking.cache.profile_cache import lock_merge_with_cache_and_save_profile
+from tracardi.service.tracking.cache.session_cache import lock_merge_with_cache_and_save_session
 from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
-from tracardi.service.tracking.locking import GlobalMutexLock
-from tracardi.service.tracking.workflow_orchestrator_async import WorkflowOrchestratorAsync
+from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
@@ -22,7 +21,6 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.utils.getters import get_entity_id
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -30,35 +28,28 @@ logger.addHandler(log_handler)
 cache = CacheManager()
 
 
-async def start_workflow_sync(source: EventSource,
-                              profile: Profile,
-                              session: Session,
-                              events: List[Event],
-                              tracker_payload: TrackerPayload,
-                              tracker_config: TrackerConfig,
-                              console_log: ConsoleLog) -> Tuple[
+async def trigger_workflows(profile: Profile,
+                            session: Session,
+                            events: List[Event],
+                            tracker_payload: TrackerPayload,
+                            console_log: ConsoleLog,
+                            debug: bool) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
+
+    # Checks rules and trigger workflows for given events and saves profile and session
 
     ux = []
     response = {}
 
     if tracardi.enable_workflow:
-        workflow = WorkflowOrchestratorAsync(
-            source,
-            tracker_config,
-            console_log
-        )
-
-        # Start workflow
-        debug = tracker_payload.is_on('debugger', default=False)
-
-        tracker_result = await workflow.lock_and_invoke(
+        tracking_manager = WorkflowManagerAsync(
+            console_log,
             tracker_payload,
-            events,
             profile,
-            session,
-            debug
+            session
         )
+
+        tracker_result = await tracking_manager.trigger_workflows_for_events(events, debug)
 
         # Reassign results
 
@@ -80,6 +71,27 @@ async def start_workflow_sync(source: EventSource,
                               [event.type for event in events],
                               segment_db.load_segments)
 
+    # Add new fields to field mapping. New fields can be created in workflow.
+
+    add_new_field_mappings(profile, session)
+
+    # Save to cache after processing. This is needed when both async and sync workers are working
+    # The state should always be in cache.
+
+    if profile.has_not_saved_changes():
+        # Locks profile, loads profile from cache merges it with current profile and saves it in cache
+
+        await lock_merge_with_cache_and_save_profile(profile,
+                                                     context=get_context(),
+                                                     lock_name="post-workflow-profile-save")
+
+    if session.has_not_saved_changes():
+        # Locks session, loads session from cache merges it with current session and saves it in cache
+
+        await lock_merge_with_cache_and_save_session(session,
+                                                     context=get_context(),
+                                                     lock_name="post-workflow-session-save")
+
     return profile, session, events, ux, response
 
 
@@ -91,29 +103,19 @@ async def dispatch_sync_workflow_and_destinations(source: EventSource,
                                                   tracker_config: TrackerConfig,
                                                   console_log: ConsoleLog) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
-
     # This is MUST BE FIRST BEFORE WORKFLOW
 
     profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
 
     # Dispatch workflow and post eve segmentation
 
-    profile, session, events, ux, response = await start_workflow_sync(source,
-                                                                       profile,
-                                                                       session,
-                                                                       events,
-                                                                       tracker_payload,
-                                                                       tracker_config,
-                                                                       console_log)
-
-    # Save to cache after processing. This is needed when both async and sync workers are working
-    # The state should always be in cache. MUST BE INSIDE MUTEX
-
-    if profile.operation.new or profile.operation.needs_update():
-        save_profile_cache(profile)
-
-    if session.operation.new or session.operation.needs_update():
-        save_session_cache(session)
+    debug = tracker_payload.is_on('debugger', default=False)
+    profile, session, events, ux, response = await trigger_workflows(profile,
+                                                                     session,
+                                                                     events,
+                                                                     tracker_payload,
+                                                                     console_log,
+                                                                     debug)
 
     # Dispatch events
 

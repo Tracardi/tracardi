@@ -81,7 +81,8 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Delete segment',
-            desc='Deletes segment from profile.',
+            desc='Deletes profile from segment.',
+            keywords=['remove', 'unset'],
             icon='segment',
             group=["Segmentation"],
             purpose=['collection', 'segmentation'],

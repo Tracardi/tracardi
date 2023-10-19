@@ -66,11 +66,9 @@ class WorkflowManagerAsync:
                  console_log: ConsoleLog,
                  tracker_payload: TrackerPayload,
                  profile: Optional[Profile] = None,
-                 session: Optional[Session] = None,
-                 on_profile_merge: Callable[[Profile], Profile] = None
+                 session: Optional[Session] = None
                  ):
 
-        self.on_profile_merge = on_profile_merge
         self.tracker_payload = tracker_payload
         self.profile = profile
         self.session = session
@@ -154,7 +152,7 @@ class WorkflowManagerAsync:
                 )
             )
 
-    async def invoke_workflow(self, events: List[Event], debug: bool = False) -> TrackerResult:
+    async def trigger_workflows_for_events(self, events: List[Event], debug: bool = False) -> TrackerResult:
 
         debugger = None
 
@@ -235,10 +233,7 @@ class WorkflowManagerAsync:
                 try:
                     if self.profile is not None:  # Profile can be None if profile_less event is processed
                         if self.profile.operation.needs_merging():
-                            if self.on_profile_merge:
-                                self.profile = await self.on_profile_merge(self.profile)
-                            else:
-                                self.profile = await self.merge_profile(self.profile)
+                            self.profile = await self.merge_profile(self.profile)
                     else:
                         self.console_log.append(
                             Console(

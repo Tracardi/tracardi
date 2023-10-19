@@ -114,6 +114,9 @@ class Session(Entity):
     def is_reopened(self) -> bool:
         return self.operation.new or self.metadata.status == 'ended'
 
+    def has_not_saved_changes(self) -> bool:
+        return self.operation.new or self.operation.needs_update()
+
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(

@@ -172,10 +172,10 @@ async def lock_and_compute_data(
             # MUST BE INSIDE MUTEX
             # Update only when needed
 
-            if profile and (profile.operation.new or profile.operation.needs_update()):
+            if profile and profile.has_not_saved_changes():
                 save_profile_cache(profile)
 
-            if session and (session.operation.new or session.operation.needs_update()):
+            if session and session.has_not_saved_changes():
                 save_session_cache(session)
 
     else:
@@ -189,10 +189,10 @@ async def lock_and_compute_data(
 
         # Update only when needed
 
-        if profile.operation.new or profile.operation.needs_update():
+        if profile.has_not_saved_changes():
             save_profile_cache(profile)
 
-        if session.operation.new or session.operation.needs_update():
+        if session.has_not_saved_changes():
             save_session_cache(session)
 
     return profile, session, events, tracker_payload

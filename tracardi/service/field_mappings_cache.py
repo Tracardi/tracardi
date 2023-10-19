@@ -1,7 +1,10 @@
 from collections import defaultdict
-from typing import List, Set
+from typing import List, Set, Optional
 
+from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
@@ -57,3 +60,13 @@ class FieldMapper(metaclass=Singleton):
         for type, field_maps in field_mappings.items():
             if len(field_maps) > 0 and type in redis_collections:
                 self.redis.sadd(redis_collections[type], *list(field_maps))
+
+
+def add_new_field_mappings(profile: Optional[Profile], session: Optional[Session]):
+    # Add mappings
+    if tracardi.expose_gui_api is True:
+        if profile:
+            FieldMapper().add_field_mappings('profile', [profile])
+
+        if session:
+            FieldMapper().add_field_mappings('session', [session])
