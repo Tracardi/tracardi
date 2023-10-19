@@ -5,13 +5,13 @@ class DotNotationConverter:
 
     def __init__(self, profile):
         self.profile = profile
+        self.flat_profile = dotty(self.profile.dict())
 
     def get_profile_file_value_pair(self, dot_notation):
         if dot_notation.startswith('profile@'):
             field = dot_notation[len('profile@'):]
-            dot = dotty(self.profile.dict())
             try:
-                return field, dot[field]
+                return field, self.flat_profile[field]
             except KeyError:
                 raise KeyError("Invalid dot notation. Could not find value for `{}` in profile.".format(dot_notation))
         else:

@@ -76,6 +76,8 @@ class CopyTraitAction(ActionRunner):
                     self.console.warning(f"Can not copy data to event. Events are imputable and can not be changed. "
                                          f"Property {destination} skipped.")
                     continue
+
+                # Value is automatically converted to value if in dot format
                 dot[destination] = value
 
             if self.event.metadata.profile_less is False:
