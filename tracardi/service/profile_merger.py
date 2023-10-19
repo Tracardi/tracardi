@@ -20,7 +20,7 @@ from ..domain.time import ProfileTime
 from ..exceptions.log_handler import log_handler
 from ..service.dot_notation_converter import DotNotationConverter
 
-from tracardi.service.merger import merge as dict_merge, get_changed_values
+from tracardi.service.merger import merge as dict_merge, get_conflicted_values
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -254,7 +254,7 @@ class ProfileMerger:
             'data': dict_merge({}, _data)
         }
 
-        conflicts_aux = get_changed_values(old_value, new_value)
+        conflicts_aux = get_conflicted_values(old_value, new_value)
 
         """
             Marge overrides data. Conflicts are resoled to single value. Latest wins.
@@ -322,6 +322,7 @@ class ProfileMerger:
             consents.update(profile.consents)
 
             # Interests
+            # TODO use dict_merge it does is automatically
 
             for interest, count in profile.interests.items():
                 if interest not in interests:

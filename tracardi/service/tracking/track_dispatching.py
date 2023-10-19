@@ -30,13 +30,13 @@ logger.addHandler(log_handler)
 cache = CacheManager()
 
 
-async def dispatch_sync(source: EventSource,
-                        profile: Profile,
-                        session: Session,
-                        events: List[Event],
-                        tracker_payload: TrackerPayload,
-                        tracker_config: TrackerConfig,
-                        console_log: ConsoleLog) -> Tuple[
+async def start_workflow_sync(source: EventSource,
+                              profile: Profile,
+                              session: Session,
+                              events: List[Event],
+                              tracker_payload: TrackerPayload,
+                              tracker_config: TrackerConfig,
+                              console_log: ConsoleLog) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
 
     ux = []
@@ -83,69 +83,37 @@ async def dispatch_sync(source: EventSource,
     return profile, session, events, ux, response
 
 
-async def lock_dispatch_sync(source: EventSource,
-                             profile: Profile,
-                             session: Session,
-                             events: List[Event],
-                             tracker_payload: TrackerPayload,
-                             tracker_config: TrackerConfig,
-                             console_log: ConsoleLog) -> Tuple[
+async def dispatch_sync_workflow_and_destinations(source: EventSource,
+                                                  profile: Profile,
+                                                  session: Session,
+                                                  events: List[Event],
+                                                  tracker_payload: TrackerPayload,
+                                                  tracker_config: TrackerConfig,
+                                                  console_log: ConsoleLog) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
 
     # This is MUST BE FIRST BEFORE WORKFLOW
+
     profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
 
-    if tracardi.lock_on_data_computation:
-        _redis = RedisClient()
-        async with (
-            GlobalMutexLock(get_entity_id(tracker_payload.profile),
-                            'profile',
-                            namespace=Collection.lock_tracker,
-                            redis=_redis
-                            ),
-            GlobalMutexLock(get_entity_id(tracker_payload.session),
-                            'session',
-                            namespace=Collection.lock_tracker,
-                            redis=_redis
-                            )):
+    # Dispatch workflow and post eve segmentation
 
-            # Dispatch
-            profile, session, events, ux, response = await dispatch_sync(source,
-                                                                         profile,
-                                                                         session,
-                                                                         events,
-                                                                         tracker_payload,
-                                                                         tracker_config,
-                                                                         console_log)
+    profile, session, events, ux, response = await start_workflow_sync(source,
+                                                                       profile,
+                                                                       session,
+                                                                       events,
+                                                                       tracker_payload,
+                                                                       tracker_config,
+                                                                       console_log)
 
-            # Save to cache after processing. This is needed when both async and sync workers are working
-            # The state should always be in cache. MUST BE INSIDE MUTEX
+    # Save to cache after processing. This is needed when both async and sync workers are working
+    # The state should always be in cache. MUST BE INSIDE MUTEX
 
-            if profile and (profile.operation.new or profile.operation.needs_update()):
-                save_profile_cache(profile)
+    if profile.operation.new or profile.operation.needs_update():
+        save_profile_cache(profile)
 
-            if session and (session.operation.new or session.operation.needs_update()):
-                save_session_cache(session)
-
-    else:
-
-        # Dispatch
-        profile, session, events, ux, response = await dispatch_sync(source,
-                                                                     profile,
-                                                                     session,
-                                                                     events,
-                                                                     tracker_payload,
-                                                                     tracker_config,
-                                                                     console_log)
-
-        # Save to cache after processing. This is needed when both async and sync workers are working
-        # The state should always be in cache. MUST BE INSIDE MUTEX
-
-        if profile.operation.new or profile.operation.needs_update():
-            save_profile_cache(profile)
-
-        if session.operation.new or session.operation.needs_update():
-            save_session_cache(session)
+    if session.operation.new or session.operation.needs_update():
+        save_session_cache(session)
 
     # Dispatch events
 

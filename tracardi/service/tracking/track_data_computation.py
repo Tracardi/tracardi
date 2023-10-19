@@ -150,12 +150,14 @@ async def lock_and_compute_data(
             GlobalMutexLock(get_entity_id(tracker_payload.profile),
                             'profile',
                             namespace=Collection.lock_tracker,
-                            redis=_redis
+                            redis=_redis,
+                            name='lock_and_compute_data'
                             ),
             GlobalMutexLock(get_entity_id(tracker_payload.session),
                             'session',
                             namespace=Collection.lock_tracker,
-                            redis=_redis
+                            redis=_redis,
+                            name='lock_and_compute_data'
                             )):
 
             # Always use GlobalUpdateLock to update profile and session

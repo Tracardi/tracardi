@@ -14,7 +14,14 @@ logger.addHandler(log_handler)
 
 class GlobalMutexLock:
 
-    def __init__(self, id: Optional[str], entity: str, namespace, redis, policy="lock", unlock=True, lock_ttl=5):
+    def __init__(self, id: Optional[str], entity: str,
+                 namespace,
+                 redis,
+                 policy="lock",
+                 unlock=True,
+                 lock_ttl=5,
+                 name: str = None):
+        self.name = str(name) if name else 'unknown'
         self.unlock = unlock
         self.policy = policy
         self._key = f"{namespace}{entity}:{id}" if id else None
@@ -32,16 +39,20 @@ class GlobalMutexLock:
                 while True:
                     if self._redis.exists(self._key):
                         logger.warning(
-                            f"Waiting {self._wait}s for {self._key} to finish. Expires in {self._redis.ttl(self._key)}s")
+                            f"Execution stopped in {self.name}. "
+                            f"Waiting {self._wait}s for lock key {self._key} to get released. "
+                            f"Lock is created by {self._redis.get(self._key)}. "
+                            f"Expires in {self._redis.ttl(self._key)}s"
+                        )
                         await asyncio.sleep(self._wait)
                         continue
                     break
-                self._redis.set(self._key, "1", ex=self._lock_ttl)
+                self._redis.set(self._key, self.name, ex=self._lock_ttl)
                 return self
             elif self.policy == 'skip':
                 if self._redis.exists(self._key):
                     return True
-                self._redis.set(self._key, "1", ex=self._lock_ttl)
+                self._redis.set(self._key, self.name, ex=self._lock_ttl)
                 return False
             else:
                 raise ValueError('Unknown policy for GlobalMutexLock.')
@@ -59,7 +70,11 @@ class GlobalMutexLock:
                 while True:
                     if self._redis.exists(self._key):
                         logger.warning(
-                            f"Waiting {self._wait}s for {self._key} to finish. Expires in {self._redis.ttl(self._key)}s")
+                            f"Execution stopped in {self.name}. "
+                            f"Waiting {self._wait}s for lock key {self._key} to get released. "
+                            f"Lock is created by {self._redis.get(self._key)}. "
+                            f"Expires in {self._redis.ttl(self._key)}s"
+                        )
                         time.sleep(self._wait)
                         continue
                     break

@@ -1,10 +1,15 @@
+from datetime import datetime
+
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.wrappers import lock_for_profile_update
 
 
 class UpdateProfileAction(ActionRunner):
 
+    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None):
+        self.profile.metadata.time.update = datetime.utcnow()
         self.update_profile()
 
 

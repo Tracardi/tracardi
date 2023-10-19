@@ -1,14 +1,20 @@
+from datetime import datetime
+
 from tracardi.domain.session import Session
 from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.plugin.wrappers import lock_for_session_update
 
 
 class UpdateSessionAction(ActionRunner):
 
+    @lock_for_session_update
     async def run(self, payload: dict, in_edge=None):
-        if isinstance(self.session, Session) and isinstance(self.session.operation, Operation):
-            self.session.operation.new = True
+        if isinstance(self.session, Session):
+            if isinstance(self.session.operation, Operation):
+                self.session.operation.new = True
+            self.session.metadata.time.update = datetime.utcnow()
         return None
 
 

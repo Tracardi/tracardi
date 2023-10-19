@@ -35,7 +35,7 @@ class DecrementAction(ActionRunner):
                 value = 0
 
         except KeyError:
-            self.console.error(f"Property `{self.config.field}` does not exist. Value set to 0.")
+            self.console.warning(f"Property `{self.config.field}` does not exist. Value set to 0.")
             value = 0
 
         if not isinstance(value, (int, float)):

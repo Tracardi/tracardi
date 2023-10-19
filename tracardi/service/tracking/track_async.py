@@ -1,10 +1,9 @@
 import time
 import logging
 
-from com_tracardi.service.tracking.visti_end_dispatcher import track_vist_end
 from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
-from tracardi.service.tracking.track_dispatching import lock_dispatch_sync
+from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
 from tracardi.service.tracking.tracker_event_reshaper import EventsReshaper
 from tracardi.service.tracking.event_validation import validate_events
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
@@ -20,7 +19,8 @@ from tracardi.service.utils.getters import get_entity_id
 
 if License.has_license():
     from com_tracardi.config import com_tracardi_settings
-    from com_tracardi.service.tracking.track_dispatcher import dispatch_async
+    from com_tracardi.service.tracking.track_dispatcher import dispatch_events_wf_destinations_async
+    from com_tracardi.service.tracking.visti_end_dispatcher import track_vist_end
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -131,7 +131,7 @@ async def process_track_data(source: EventSource,
 
                     # Pulsar publish
 
-                    dispatch_async(
+                    dispatch_events_wf_destinations_async(
                         dispatch_context,
                         source,
                         profile,
@@ -157,7 +157,7 @@ async def process_track_data(source: EventSource,
                 storage = TrackingPersisterAsync()
                 events_result = await storage.save_events(sync_events)
                 print("save_sync_result", events_result, get_context())
-                profile, session, sync_events, ux, response = await lock_dispatch_sync(
+                profile, session, sync_events, ux, response = await dispatch_sync_workflow_and_destinations(
                     source,
                     profile,
                     session,
@@ -180,6 +180,8 @@ async def process_track_data(source: EventSource,
 
         else:
 
+            # Open-source version
+
             # Compute process time
 
             for event in events:
@@ -190,7 +192,7 @@ async def process_track_data(source: EventSource,
             storage = TrackingPersisterAsync()
             events_result = await storage.save_events(events)
 
-            profile, session, events, ux, response = await lock_dispatch_sync(
+            profile, session, events, ux, response = await dispatch_sync_workflow_and_destinations(
                 source,
                 profile,
                 session,
