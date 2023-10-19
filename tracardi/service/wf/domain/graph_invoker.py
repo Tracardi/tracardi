@@ -47,7 +47,7 @@ class InputEdge(BaseModel):
     id: str
     active: bool
     port: str
-    params: dict = None
+    params: Optional[dict] = None
 
 
 class InputEdges:
@@ -386,12 +386,16 @@ class GraphInvoker(BaseModel):
                 """ Yield results one by one """
 
                 _single_input_edge = InputEdges()
+
                 if input_edge_id is not None:
                     """ Skip if there is no input edge """
                     try:
                         _single_input_edge.add_edge(input_edge_id,
-                                                    InputEdge(id=input_edge_id, active=active, port=input_port,
-                                                              params=input_params))
+                                                    InputEdge(id=input_edge_id,
+                                                              active=active,
+                                                              port=input_port,
+                                                              params=input_params)
+                                                    )
                     except ValidationError as e:
                         raise ValueError(f"Node name `{node.name}` received data that is not a object/dictionary. "
                                          f"Data come from edge name `{edge.name}`. "
