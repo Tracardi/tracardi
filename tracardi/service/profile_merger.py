@@ -20,7 +20,7 @@ from ..domain.time import ProfileTime
 from ..exceptions.log_handler import log_handler
 from ..service.dot_notation_converter import DotNotationConverter
 
-from tracardi.service.merger import merge as dict_merge, get_conflicted_values
+from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -250,8 +250,8 @@ class ProfileMerger:
         }
 
         new_value = {
-            'traits': dict_merge({}, _traits),
-            'data': dict_merge({}, _data)
+            'traits': dict_merge({}, _traits, MergingStrategy()),
+            'data': dict_merge({}, _data, MergingStrategy())
         }
 
         conflicts_aux = get_conflicted_values(old_value, new_value)

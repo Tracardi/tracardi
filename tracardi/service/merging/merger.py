@@ -1,12 +1,20 @@
+from dataclasses import dataclass
 from datetime import datetime
-
 from pydantic import BaseModel
-
 from typing import List
-
 from deepdiff import DeepDiff
 from deepdiff.model import DiffLevel
 from dotty_dict import dotty
+
+
+@dataclass
+class MergingStrategy:
+    make_lists_uniq: bool = True
+    disallow_single_value_list: bool = True
+    default_string_strategy: str = 'append'
+    default_number_strategy: str = 'add'
+    default_object_strategy: str = 'override'
+    default_list_strategy: str = 'append'
 
 
 def validate_list_values(values):
@@ -15,7 +23,7 @@ def validate_list_values(values):
             raise ValueError("Invalid value in list `{}`".format(values))
 
 
-def append(base, key, value, make_lists_uniq: bool = True, disallow_single_value_list=True):
+def append(base, key, value, strategy: MergingStrategy):
     if base.get(key, None) == value:
         return base
 
@@ -54,31 +62,49 @@ def append(base, key, value, make_lists_uniq: bool = True, disallow_single_value
             # Existing value is not a dict and value is a simple value
         elif not isinstance(base[key], dict) and isinstance(value, (str, int, float, bool, list, BaseModel, datetime)):
             if isinstance(value, list):
-                validate_list_values(value)
-                base[key] += value
+                if strategy.default_list_strategy == 'override':
+                    validate_list_values(value)
+                    base[key] += value
+                else:
+                    raise ValueError(f"Unknown merging strategy {strategy.default_list_strategy} for list.")
             elif isinstance(value, (BaseModel, bool, datetime)):
-                # BaseModel and boll are not added to a list of values
-                base[key] = value
+                if strategy.default_object_strategy == 'override':
+                    # BaseModel and bool are not added to a list of values
+                    base[key] = value
+                else:
+                    raise ValueError(f"Unknown merging strategy {strategy.default_object_strategy} for object type.")
             elif isinstance(value, (int, float)):
-                # numeric values are added together
-                base[key] += value
+                if strategy.default_number_strategy == 'override':
+                    base[key] = value
+                elif strategy.default_number_strategy == 'add':
+                    # numeric values are added together
+                    base[key] += value
+                elif strategy.default_number_strategy == 'append':
+                    base[key] = [base[key]]
+                    base[key].append(value)
+                else:
+                    raise ValueError(f"Unknown merging strategy {strategy.default_number_strategy} for number type.")
             elif value != base[key]:  # This is STR
-                # Only simple values are added to a list
-                base[key] = [base[key]]
-                base[key].append(value)
+                if strategy.default_string_strategy == 'override':
+                    base[key] = value
+                elif strategy.default_string_strategy == 'append':
+                    base[key] = [base[key]]
+                    base[key].append(value)
+                else:
+                    raise ValueError(f"Unknown merging strategy {strategy.default_string_strategy} for sting type.")
         else:
             raise ValueError("Could not merge `{}` with value `{}`".format(base[key], value))
 
     # make uniq
-    if make_lists_uniq and isinstance(base[key], list):
+    if strategy.make_lists_uniq and isinstance(base[key], list):
         base[key] = list(set(base[key]))
-        if disallow_single_value_list and len(base[key]) == 1:
+        if strategy.disallow_single_value_list and len(base[key]) == 1:
             base[key] = base[key][0]
 
     return base
 
 
-def merge(base: dict, dict_list: List[dict], make_lists_uniq=True, disallow_single_value_list=True) -> dict:
+def merge(base: dict, dict_list: List[dict], strategy: MergingStrategy) -> dict:
     base = dict(base)
     for key in set().union(*dict_list):
         for data in dict_list:
@@ -88,12 +114,12 @@ def merge(base: dict, dict_list: List[dict], make_lists_uniq=True, disallow_sing
                     continue
                 # Simple types
                 elif isinstance(data[key], (str, int, float, bool, tuple, list, set, BaseModel, datetime)):
-                    append(base, key, data[key], make_lists_uniq, disallow_single_value_list)
+                    append(base, key, data[key], strategy)
                 # Dicts
                 elif type(data[key]) in [dict]:
                     if key not in base:
                         base[key] = {}
-                    base[key] = merge(base[key], [data[key]], make_lists_uniq, disallow_single_value_list)
+                    base[key] = merge(base[key], [data[key]], strategy)
                 # Objects
                 elif isinstance(data[key], object):
                     raise ValueError("Object of type `{}: {}` can not be merged with value `{}: {}`".format(
@@ -105,15 +131,14 @@ def merge(base: dict, dict_list: List[dict], make_lists_uniq=True, disallow_sing
     return base
 
 
-def list_merge(base: List, new_list: List, make_lists_uniq=True, disallow_single_value_list=True) -> list:
+def list_merge(base: List, new_list: List, strategy: MergingStrategy) -> list:
 
     if base == new_list:
         return new_list
 
     result = merge({"__root__": base},
                    [{"__root__": new_list}],
-                   make_lists_uniq,
-                   disallow_single_value_list)
+                   strategy)
     return result["__root__"]
 
 

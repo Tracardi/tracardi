@@ -2,15 +2,18 @@ from tracardi.context import Context
 from tracardi.domain.profile import Profile
 from tracardi.domain.profile_data import ProfileData
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache
-from tracardi.service.merger import merge as dict_merge, list_merge
+from tracardi.service.merging.merger import merge as dict_merge, list_merge, MergingStrategy
 
 
 def _merge_dict(base_dict, update_dict):
-    return dict_merge(base_dict,
-                      [update_dict],
-                      make_lists_uniq=True,
-                      disallow_single_value_list=False
-                      )
+    return dict_merge(
+        base_dict,
+        [update_dict],
+        MergingStrategy(
+            make_lists_uniq=True,
+            disallow_single_value_list=False
+        )
+    )
 
 
 def merge_cache_and_profile(profile: Profile, context: Context):
@@ -22,14 +25,28 @@ def merge_cache_and_profile(profile: Profile, context: Context):
     # Smart replace
 
     try:
-        profile.data = ProfileData(**_merge_dict(
-            base_dict=_cache_profile.data.model_dump(mode='json'),
-            update_dict=profile.data.model_dump(mode='json')
-        ))
+        profile.data = ProfileData(
+            **dict_merge(
+                _cache_profile.data.model_dump(mode='json'),
+                [profile.data.model_dump(mode='json')],
+                MergingStrategy(
+                    make_lists_uniq=True,
+                    disallow_single_value_list=False,
+                    # cache number values have priority and override WF values
+                    default_number_strategy="override"
+                )
+            )
+        )
 
-        profile.traits = _merge_dict(
-            base_dict=_cache_profile.traits,
-            update_dict=profile.traits
+        profile.traits = dict_merge(
+            _cache_profile.traits,
+            [profile.traits],
+            MergingStrategy(
+                make_lists_uniq=True,
+                disallow_single_value_list=False,
+                # cache number values have priority and override WF values
+                default_number_strategy="override"
+            )
         )
 
         profile.metadata.aux = _merge_dict(
@@ -60,8 +77,10 @@ def merge_cache_and_profile(profile: Profile, context: Context):
         profile.segments = list_merge(
             base=_cache_profile.segments,
             new_list=profile.segments,
-            make_lists_uniq=True,
-            disallow_single_value_list=False
+            strategy=MergingStrategy(
+                make_lists_uniq=True,
+                disallow_single_value_list=False
+            )
         )
 
     except Exception as e:
