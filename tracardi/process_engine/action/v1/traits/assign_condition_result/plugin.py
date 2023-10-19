@@ -1,11 +1,10 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.plugin.wrappers import lock_for_profile_update
-from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.domain.profile import Profile
+from .model.config import Config
 
 
 def validate(config: dict) -> Config:
@@ -19,7 +18,6 @@ class AssignConditionResultPlugin(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
         condition = Condition()
         dot = self._get_dot_accessor(payload)

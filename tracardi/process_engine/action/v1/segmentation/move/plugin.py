@@ -9,7 +9,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.plugin.wrappers import lock_for_profile_update
 
 
 class Configuration(PluginConfig):
@@ -41,7 +40,6 @@ class MoveSegmentAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
             dot = self._get_dot_accessor(payload)

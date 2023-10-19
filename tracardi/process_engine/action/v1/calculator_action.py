@@ -1,6 +1,5 @@
 from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.domain.event import Event
 from tracardi.domain.session import Session
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -8,7 +7,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.process_engine.tql.equation import MathEquation
-from tracardi.service.plugin.wrappers import lock_for_profile_update, lock_for_session_update
 
 
 class CalculatorConfig(PluginConfig):
@@ -32,8 +30,6 @@ class CalculatorAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    @lock_for_profile_update
-    @lock_for_session_update
     async def run(self, payload: dict, in_edge=None) -> Result:
         calc_lines = [line.strip() for line in self.config.calc_dsl.split("\n")]
 

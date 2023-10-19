@@ -1,6 +1,5 @@
 from typing import List
 
-from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -8,7 +7,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.plugin.wrappers import lock_for_session_update, lock_for_profile_update
 
 
 class Configuration(PluginConfig):
@@ -26,8 +24,6 @@ class MaskTraitsAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    @lock_for_session_update
-    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload)

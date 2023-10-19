@@ -1,13 +1,11 @@
 from typing import Union
 
-from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.plugin.wrappers import lock_for_profile_update
 
 
 class IncrementConfig(PluginConfig):
@@ -26,7 +24,6 @@ class IncrementAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)

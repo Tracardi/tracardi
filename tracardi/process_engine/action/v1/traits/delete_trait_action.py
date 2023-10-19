@@ -4,12 +4,9 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-
-from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.plugin.wrappers import lock_for_profile_update, lock_for_session_update
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 
 
@@ -35,8 +32,6 @@ class DeleteTraitAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    @lock_for_profile_update
-    @lock_for_session_update
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 

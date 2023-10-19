@@ -6,7 +6,6 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.plugin.wrappers import lock_for_profile_update
 
 
 class DecrementConfig(PluginConfig):
@@ -25,7 +24,6 @@ class DecrementAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    @lock_for_profile_update
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         dot = self._get_dot_accessor(payload)
