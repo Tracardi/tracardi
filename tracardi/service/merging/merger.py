@@ -1,20 +1,25 @@
-from dataclasses import dataclass
+from collections import defaultdict
+
 from datetime import datetime
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, Any
 from deepdiff import DeepDiff
 from deepdiff.model import DiffLevel
 from dotty_dict import dotty
 
 
-@dataclass
-class MergingStrategy:
-    make_lists_uniq: bool = True
-    disallow_single_value_list: bool = True
-    default_string_strategy: str = 'append'
-    default_number_strategy: str = 'add'
-    default_object_strategy: str = 'override'
-    default_list_strategy: str = 'append'
+class MergingStrategy(BaseModel):
+    make_lists_uniq: Optional[bool] = True
+    no_single_value_list: Optional[bool] = True
+    default_string_strategy: Optional[str] = 'append'
+    default_number_strategy: Optional[str] = 'add'
+    default_object_strategy: Optional[str] = 'override'
+    default_list_strategy: Optional[str] = 'append'
+
+
+class FieldMergingStrategy(BaseModel):
+    field: str
+    strategy: MergingStrategy
 
 
 def validate_list_values(values):
@@ -55,10 +60,15 @@ def append(base, key, value, strategy: MergingStrategy):
 
         # Existing value is a list
         if isinstance(base[key], list):
-            if isinstance(value, list):
-                base[key] += value
+            if strategy.default_list_strategy == 'override':
+                base[key] = value
+            elif strategy.default_list_strategy == 'append':
+                if isinstance(value, list):
+                    base[key] += value
+                else:
+                    base[key].append(value)
             else:
-                base[key].append(value)
+                raise ValueError(f"Unknown merging strategy {strategy.default_list_strategy} for list.")
             # Existing value is not a dict and value is a simple value
         elif not isinstance(base[key], dict) and isinstance(value, (str, int, float, bool, list, BaseModel, datetime)):
             if isinstance(value, list):
@@ -98,7 +108,7 @@ def append(base, key, value, strategy: MergingStrategy):
     # make uniq
     if strategy.make_lists_uniq and isinstance(base[key], list):
         base[key] = list(set(base[key]))
-        if strategy.disallow_single_value_list and len(base[key]) == 1:
+        if strategy.no_single_value_list and len(base[key]) == 1:
             base[key] = base[key][0]
 
     return base
@@ -132,7 +142,6 @@ def merge(base: dict, dict_list: List[dict], strategy: MergingStrategy) -> dict:
 
 
 def list_merge(base: List, new_list: List, strategy: MergingStrategy) -> list:
-
     if base == new_list:
         return new_list
 
@@ -142,11 +151,21 @@ def list_merge(base: List, new_list: List, strategy: MergingStrategy) -> list:
     return result["__root__"]
 
 
+def universal_merger(base: Any, delta: any, strategy: MergingStrategy):
+    if isinstance(base, dict):
+        return merge(base, [delta], strategy)
+    elif isinstance(base, list):
+        return list_merge(base, delta, strategy)
+    else:
+        return delta
+
+
 def get_conflicted_values(old_dict: dict, new_dict: dict) -> dict:
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
     changed_values = dotty()
     for change in diff_result.get("type_changes", []):  # type: DiffLevel
-        key = ".".join(change.path(output_format='list'))
+        path = [str(item) for item in change.path(output_format='list')]
+        key = ".".join(path)
         value = change.t2
         changed_values[key] = value
 
@@ -157,18 +176,40 @@ def get_changed_values(old_dict: dict, new_dict: dict) -> dict:
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
     changed_values = dotty()
     for change in diff_result.get("values_changed", []):  # type: DiffLevel
-        key = ".".join(change.path(output_format='list'))
+        path = [str(item) for item in change.path(output_format='list')]
+        key = ".".join(path)
         value = change.t2
         changed_values[key] = value
 
     return changed_values.to_dict()
 
 
+def get_modifications(old_dict: dotty, new_dict: dotty) -> dict:
+    print(old_dict)
+    print(new_dict)
+    diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
+    # print(diff_result)
+    modifications = defaultdict(dict)
+    for type, changes in diff_result.items():
+        for change in changes:
+            path = [str(item) for item in change.path(output_format='list') if item != '_data']
+            key = ".".join(path)
+
+            modifications[type][key] = {
+                "before": old_dict.get(key),
+                "after": new_dict.get(key),
+                "ch": (change.t1, change.t2)
+            }
+
+    return dict(modifications)
+
+
 def get_added_values(old_dict: dict, new_dict: dict) -> dict:
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
     changed_values = dotty()
     for change in diff_result.get("dictionary_item_added", []):  # type: DiffLevel
-        key = ".".join(change.path(output_format='list'))
+        path = [str(item) for item in change.path(output_format='list')]
+        key = ".".join(path)
         value = change.t2
         changed_values[key] = value
 
