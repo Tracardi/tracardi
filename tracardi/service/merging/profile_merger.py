@@ -9,7 +9,7 @@ def _merge_dict(base_dict, update_dict):
         [update_dict],
         MergingStrategy(
             make_lists_uniq=True,
-            disallow_single_value_list=False
+            no_single_value_list=False
         )
     )
 
@@ -23,7 +23,7 @@ def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
                 [profile.data.model_dump(mode='json')],
                 MergingStrategy(
                     make_lists_uniq=True,
-                    disallow_single_value_list=False,
+                    no_single_value_list=False,
                     # cache number values have priority and override WF values
                     default_number_strategy="override"
                 )
@@ -35,7 +35,7 @@ def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
             [profile.traits],
             MergingStrategy(
                 make_lists_uniq=True,
-                disallow_single_value_list=False,
+                no_single_value_list=False,
                 # cache number values have priority and override WF values
                 default_number_strategy="override"
             )
@@ -74,7 +74,7 @@ def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
             new_list=profile.segments,
             strategy=MergingStrategy(
                 make_lists_uniq=True,
-                disallow_single_value_list=False
+                no_single_value_list=False
             )
         )
 
@@ -83,3 +83,4 @@ def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
 
     finally:
         return profile
+

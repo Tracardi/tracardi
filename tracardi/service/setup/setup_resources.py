@@ -221,6 +221,7 @@ def get_resource_types() -> List[ResourceSettings]:
             name="Novu",
             tags=["token", "novu"],
             config={
+                "host": "https://api.novu.co",
                 "token": "<token>"
             },
             manual="novu_resource"
