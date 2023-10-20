@@ -114,7 +114,7 @@ def register() -> Plugin:
             name="Trigger message",
             desc="Creates and sends notification to chosen recipient.",
             brand="Novu",
-            icon="message",
+            icon="entity",
             tags=['email','chat', 'sms'],
             group=["Novu"],
             documentation=Documentation(

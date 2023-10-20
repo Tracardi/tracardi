@@ -50,6 +50,10 @@ class Endpoint(PluginEndpoint):
                     ssl=True
             ) as response:
                 content = await response.json()
+
+                if 'data' not in content:
+                    raise ValueError("Could not retrieve data from remote server.")
+
                 result = [{"id": item['triggers'][0]['identifier'], "name": item['name']} for item in content['data'] if
                           item['active'] is True]
                 return {
@@ -75,7 +79,10 @@ class Endpoint(PluginEndpoint):
                     ssl=True
             ) as response:
                 content = await response.json()
-                print(content)
+
+                if 'data' not in content:
+                    raise ValueError("Could not retrieve data from remote server.")
+
                 result = [{"id": item['_id'], "name": item['name']} for item in content['data']]
                 return {
                     "total": len(result),
