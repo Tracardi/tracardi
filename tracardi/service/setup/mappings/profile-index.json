@@ -70,6 +70,9 @@
         },
         "data": {
           "properties": {
+            "anonymous": {
+              "type": "boolean"
+            },
             "media": {
               "properties": {
                 "image": {

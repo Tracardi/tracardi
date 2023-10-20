@@ -88,6 +88,11 @@ class Profile(Entity):
 
         return metric.expired()
 
+    def mark_for_update(self):
+        self.operation.update = True
+        self.metadata.time.update = datetime.utcnow()
+        self.data.compute_anonymous_field()
+
     def get_next_metric_computation_date(self) -> Optional[datetime]:
 
         if not self.data.metrics.custom:

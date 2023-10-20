@@ -141,9 +141,9 @@ async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_aft
     if isinstance(profile, (list, set)):
         for _profile in profile:
             if isinstance(_profile, Profile):
-                _profile.metadata.time.update = datetime.utcnow()
+                _profile.mark_for_update()
     elif isinstance(profile, Profile):
-        profile.metadata.time.update = datetime.utcnow()
+        profile.mark_for_update()
     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
     if refresh_after_save or elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()

@@ -53,6 +53,11 @@ class ProfileContactApp(BaseModel):
     signal: Optional[str] = None
     other: Optional[dict] = {}
 
+    def has_contact(self) -> bool:
+        return bool(
+            self.whatsapp or self.discord or self.slack or self.twitter or
+            self.telegram or self.wechat or self.viber or self.signal)
+
 
 class ProfileContactAddress(BaseModel):
     town: Optional[str] = None
@@ -69,6 +74,9 @@ class ProfileContact(BaseModel):
     app: Optional[ProfileContactApp] = ProfileContactApp()
     address: Optional[ProfileContactAddress] = ProfileContactAddress()
     confirmations: List[str] = []
+
+    def has_contact(self):
+        return self.email or self.phone or self.app.has_contact()
 
 
 class ProfileIdentifier(BaseModel):
@@ -133,7 +141,7 @@ class ProfileJob(BaseModel):
 
 class ProfileMetrics(BaseModel):
     ltv: Optional[float] = 0
-    ltcosc: Optional[int] = 0   # Live Time Check-Out Started Counter
+    ltcosc: Optional[int] = 0  # Live Time Check-Out Started Counter
     ltcocc: Optional[int] = 0  # Live Time Check-Out Completed Counter
     ltcop: Optional[float] = 0  # Live Time Check-Out Percentage
     ltcosv: Optional[float] = 0  # Live Time Check-Out Started Value
@@ -170,6 +178,7 @@ class ProfileDevices(BaseModel):
 
 
 class ProfileData(BaseModel):
+    anonymous: Optional[bool] = None
     pii: Optional[ProfilePII] = ProfilePII()
     contact: Optional[ProfileContact] = ProfileContact()
     identifier: Optional[ProfileIdentifier] = ProfileIdentifier()
@@ -179,3 +188,6 @@ class ProfileData(BaseModel):
     job: Optional[ProfileJob] = ProfileJob()
     metrics: Optional[ProfileMetrics] = ProfileMetrics()
     loyalty: Optional[ProfileLoyalty] = ProfileLoyalty()
+
+    def compute_anonymous_field(self):
+        self.anonymous = not self.contact.has_contact()

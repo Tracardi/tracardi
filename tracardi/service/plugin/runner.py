@@ -65,7 +65,7 @@ class ActionRunner:
 
     def update_profile(self):
         if isinstance(self.profile, Profile):
-            self.profile.operation.update = True
+            self.profile.mark_for_update()
         else:
             if self.event.metadata.profile_less is True:
                 self.console.warning("Can not update profile when processing profile less events.")
