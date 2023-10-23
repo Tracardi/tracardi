@@ -195,3 +195,17 @@ def test_dot_traverser_no_values_throw_error():
         assert False
     except KeyError:
         assert True
+
+
+def test_with_embedded_object_path():
+    query = {
+        "source.id": "6fe7dbfe-4da4-48a8-becd",
+        "a": {
+            "b\∞v": 1
+        }
+    }
+
+    dot = DotAccessor(profile={"b": [1, 2]}, event={})
+    t = DictTraverser(dot)
+    r = t.reshape(query)
+    assert r == {'source.id': '6fe7dbfe-4da4-48a8-becd', 'a': {'b∞v': 1}}
