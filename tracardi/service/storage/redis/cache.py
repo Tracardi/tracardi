@@ -13,6 +13,9 @@ class RedisCache:
     def set(self, key: str, value: Any, collection: str):
         self._redis.set(f"{collection}{key}", msgpack.packb(value), ex=self.ttl)
 
+    def mset(self, mapping):
+        return self._redis.mset(mapping)
+
     def get(self, key:str, collection: str) -> Optional[Any]:
         value = self._redis.get(f"{collection}{key}")
         if value is None:
@@ -28,3 +31,9 @@ class RedisCache:
 
     def refresh(self, key, collection):
         self._redis.expire(f"{collection}{key}", self.ttl)
+
+    def expire(self, key, ttl):
+        self._redis.expire(key, ttl)
+
+    def persist(self, key):
+        self._redis.persist(key)

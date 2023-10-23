@@ -1,4 +1,5 @@
-from typing import Optional
+import msgpack
+from typing import Optional, List
 from tracardi.context import get_context, Context
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.service.storage.redis.cache import RedisCache
@@ -22,10 +23,15 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
     if not redis_cache.has(profile_id, key_namespace):
         return None
 
-    context, profile, profile_metadata = redis_cache.get(
+    _data = redis_cache.get(
         profile_id,
         key_namespace
     )
+
+    try:
+        context, profile, profile_metadata = _data
+    except Exception:
+        return None
 
     profile = Profile(**profile)
     if profile_metadata:
@@ -50,6 +56,26 @@ def save_profile_cache(profile: Optional[Profile]):
             ),
             f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
         )
+
+
+def save_profiles_in_cache(profiles: List[Profile]):
+    context = get_context()
+    if profiles:
+
+        for profile in profiles:
+            if profile:
+                value = (
+                    {
+                        "production": context.production,
+                        "tenant": context.tenant
+                    },
+                    profile.model_dump(mode="json", exclude_defaults=True),
+                    profile.get_meta_data().model_dump() if profile.has_meta_data() else None
+                )
+
+                collection = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
+
+                redis_cache.set(profile.id, value, collection)
 
 
 def merge_with_cache_profile(profile: Profile, context: Context) -> Profile:

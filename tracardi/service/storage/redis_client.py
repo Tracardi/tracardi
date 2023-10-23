@@ -110,3 +110,9 @@ class RedisClient(metaclass=Singleton):
 
     def pubsub(self, **kwargs):
         return self.client.pubsub(**kwargs)
+
+    def mset(self, mapping):
+        return self.client.mset(mapping)
+
+    def persist(self, key):
+        return self.client.persist(key)
