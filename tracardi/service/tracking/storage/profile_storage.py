@@ -20,7 +20,6 @@ async def load_profile(profile_id: str) -> Optional[Profile]:
     if cached_profile is not None:
         return cached_profile
 
-    start = time.time()
     profile_record = await load_by_id(profile_id)
 
     if profile_record is not None:
