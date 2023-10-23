@@ -113,12 +113,13 @@ async def process_track_data(source: EventSource,
                 # Track session for visit end
 
                 if session and session.operation.new:
-                    schedule_visit_end_check(
+                    task = schedule_visit_end_check(
                         dispatch_context,
                         session,
                         profile,
                         source
                     )
+                    logger.info(f"Scheduled visit end check with task {task} for profile {profile.id}")
 
                 if async_events:
 
