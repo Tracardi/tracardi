@@ -21,7 +21,7 @@ from tracardi.service.utils.getters import get_entity_id
 if License.has_license():
     from com_tracardi.config import com_tracardi_settings
     from com_tracardi.service.tracking.track_dispatcher import dispatch_events_wf_destinations_async
-    from com_tracardi.service.tracking.visti_end_dispatcher import schedule_vist_end_check
+    from com_tracardi.service.tracking.visti_end_dispatcher import schedule_visit_end_check
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -113,7 +113,7 @@ async def process_track_data(source: EventSource,
                 # Track session for visit end
 
                 if session and session.operation.new:
-                    schedule_vist_end_check(
+                    schedule_visit_end_check(
                         dispatch_context,
                         session,
                         profile,
