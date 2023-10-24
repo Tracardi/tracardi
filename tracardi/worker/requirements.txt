@@ -4,3 +4,4 @@ mysql-connector-python==8.0.29
 pydantic>=2.3.0
 requests
 elasticsearch==7.10.1
+pulsar-client==3.3.0

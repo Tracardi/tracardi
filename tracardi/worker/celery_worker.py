@@ -1,4 +1,5 @@
 import logging
+import tracardi.worker.service.worker.migration_workers as migration_workers
 from celery import Celery
 from tracardi.worker.config import redis_config
 from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
@@ -7,7 +8,6 @@ from tracardi.worker.service.worker.mysql_query_worker import MysqlConnectionCon
 from tracardi.worker.service.import_dispatcher import ImportDispatcher
 from tracardi.worker.domain.import_config import ImportConfig
 from tracardi.worker.domain.migration_schema import MigrationSchema
-import tracardi.worker.service.worker.migration_workers as migration_workers
 from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.add_task import add_task
 
