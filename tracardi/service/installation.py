@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 import os
@@ -56,7 +57,18 @@ async def check_installation():
 
             logger.info(f"Authorizing `{context.tenant}` for installation at {mtm.auth_endpoint}.")
 
-            await mtm.authorize(tracardi.multi_tenant_manager_api_key)
+            try:
+                await mtm.authorize(tracardi.multi_tenant_manager_api_key)
+            except asyncio.exceptions.TimeoutError:
+                message = (f"Authorizing failed for tenant `{context.tenant}`. "
+                           f"Could not reach Tenant Management Service.")
+                logger.warning(message)
+                return {
+                    "schema_ok": False,
+                    "admin_ok": False,
+                    "form_ok": False,
+                    "warning": message
+                }
 
             tenant = await mtm.is_tenant_allowed(context.tenant)
             if not tenant:
