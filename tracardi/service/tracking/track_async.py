@@ -176,13 +176,15 @@ async def process_track_data(source: EventSource,
                 result['response'] = response
                 result['events'] += [event.id for event in sync_events]
 
-                # We do not have to save manually. In commercial version there is a
-                # flusher worker that saves in-memory profile and session automatically
+                # We save manually only when async processing is disabled.
+                # Otherwise flusher worker saves in-memory profile and session automatically
 
-                # profile_and_session_result = await storage.save_profile_and_session(
-                #     session,
-                #     profile
-                # )
+                if com_tracardi_settings.async_processing is False:
+
+                    profile_and_session_result = await storage.save_profile_and_session(
+                        session,
+                        profile
+                    )
 
             return result
 

@@ -259,7 +259,7 @@ class TrackerPayload(BaseModel):
         return len(self.events) > 0
 
     def has_event_type(self, event_type: str):
-        return len([event.type for event in self.events if event_type == event_type]) > 0
+        return len([event.type for event in self.events if event.type == event_type]) > 0
 
     def has_profile(self) -> bool:
         return isinstance(self.profile, Entity)
