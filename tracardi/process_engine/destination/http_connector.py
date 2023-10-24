@@ -117,9 +117,11 @@ class HttpConnector(DestinationInterface):
 
         except ClientConnectorError as e:
             logger.error(str(e))
+            raise e
 
         except asyncio.exceptions.TimeoutError as e:
             logger.error(str(e))
+            raise e
 
     async def dispatch_profile(self, data, profile: Profile, session: Session):
         await self._dispatch(data)

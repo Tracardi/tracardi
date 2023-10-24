@@ -102,4 +102,5 @@ async def profile_destination_dispatch(load_destination_task: Callable,
         destination_class = _get_destination_class(destination)
         destination_instance = destination_class(debug, resource, destination)  # type: DestinationInterface
 
+        logger.info(f"Dispatching profile with destination class {destination_class}.")
         await destination_instance.dispatch_profile(data, profile, session)
