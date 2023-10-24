@@ -3,7 +3,6 @@ import redis
 from abc import ABC, abstractmethod
 
 from tracardi.service.tracking.track_async import process_track_data
-from tracardi.service.license import License
 from tracardi.domain.profile import Profile
 from tracardi.domain.tracker_payloads import TrackerPayloads
 from tracardi.exceptions.exception import TracardiException
