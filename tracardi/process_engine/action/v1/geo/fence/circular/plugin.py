@@ -38,7 +38,8 @@ def register() -> Plugin:
             outputs=["payload"],
             version='0.6.1',
             license="MIT",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual="geo/geo_fence"
         ),
         metadata=MetaData(
             name='Geo fence',
