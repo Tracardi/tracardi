@@ -77,6 +77,7 @@ setup(
         'weaviate-client>=3.16.2',
         'twilio==8.2.1',
         'huey',
+        'pulsar-client==3.3.0'
 
     ],
     classifiers=[
