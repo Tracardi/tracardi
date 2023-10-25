@@ -58,7 +58,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["password"],
             version='0.7.1',
-            license="MIT",
+            license="MIT + CC",
             author="Mateusz Zitaruk",
             init={
                 "min_length": 8,

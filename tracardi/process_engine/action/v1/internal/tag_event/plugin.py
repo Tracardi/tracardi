@@ -38,7 +38,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             version='0.8.0',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={
                 "tags": ""

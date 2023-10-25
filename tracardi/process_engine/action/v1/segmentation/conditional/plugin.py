@@ -62,7 +62,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['true', "false", "error"],
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="segmentation/profile_segment",
             init={

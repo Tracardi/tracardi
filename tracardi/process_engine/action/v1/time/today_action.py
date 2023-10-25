@@ -98,7 +98,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.1.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={"timezone": "session@context.time.tz"},
             manual="today_action",

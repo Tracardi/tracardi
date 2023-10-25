@@ -35,7 +35,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["removed"],
             version='0.8.2',
-            license="MIT",
+            license="MIT + CC",
             author="kokobhara",
             init={
                 "string": None,

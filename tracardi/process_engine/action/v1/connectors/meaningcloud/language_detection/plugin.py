@@ -60,7 +60,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['response', 'error'],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Patryk Migaj, Risto Kowaczewski",
             manual="lang_detection_action",
 

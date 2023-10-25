@@ -54,7 +54,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload", "error"],
             version='0.8.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={
                 "source": {

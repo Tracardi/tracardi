@@ -66,7 +66,7 @@ def register() -> Plugin:
                 )]
             ),
             version='0.8.0',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

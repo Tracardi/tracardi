@@ -76,7 +76,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["success", "error"],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="edit_points_in_mautic_action",
             init={

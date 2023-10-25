@@ -35,7 +35,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.7.3',
-            license="MIT",
+            license="MIT + CC",
             author="Yusuke Kohatsu",
             manual="string_join_action",
             init={

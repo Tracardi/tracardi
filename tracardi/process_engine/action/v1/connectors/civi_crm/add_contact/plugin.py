@@ -66,7 +66,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["success", "error"],
             version='0.6.3',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             # manual="add_civi_crm_contact_action",
             init={

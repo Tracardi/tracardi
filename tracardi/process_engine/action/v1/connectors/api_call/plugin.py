@@ -233,7 +233,7 @@ def register() -> Plugin:
             ]),
             version="0.8.0",
             author="Risto Kowaczewski",
-            license="MIT",
+            license="MIT + CC",
             manual="remote_call_action"
         ),
         metadata=MetaData(

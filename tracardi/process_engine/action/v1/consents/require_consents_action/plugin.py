@@ -89,7 +89,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["true", "false"],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="require_consents_action",
             form=Form(

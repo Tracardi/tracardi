@@ -34,7 +34,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=[],
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={
                 "message": "Flow stopped due to error."

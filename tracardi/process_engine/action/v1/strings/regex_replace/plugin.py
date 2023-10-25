@@ -41,7 +41,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["replaced", "not_found"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             init={
                 "string": None,

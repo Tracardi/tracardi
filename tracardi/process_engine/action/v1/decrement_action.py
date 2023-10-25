@@ -92,7 +92,7 @@ def register() -> Plugin:
             ]),
             manual="decrement_action",
             version='0.8.2',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

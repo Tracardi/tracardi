@@ -122,7 +122,7 @@ def register() -> Plugin:
                 }
             },
             version='0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="append_remove_trait_action"
         ),

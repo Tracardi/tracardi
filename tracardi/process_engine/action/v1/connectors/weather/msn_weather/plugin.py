@@ -50,7 +50,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["weather", "error"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="weather_action",
             init={

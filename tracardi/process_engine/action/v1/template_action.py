@@ -39,7 +39,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['template'],
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk, Risto Kowaczewski",
             manual="template_action",
             init={

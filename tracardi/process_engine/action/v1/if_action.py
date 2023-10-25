@@ -132,7 +132,7 @@ def register() -> Plugin:
             ]),
             manual="if_action",
             version='0.7.4',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

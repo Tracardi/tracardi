@@ -40,7 +40,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.8.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk, Risto Kowaczewski",
             init={
                 "conditions": {}

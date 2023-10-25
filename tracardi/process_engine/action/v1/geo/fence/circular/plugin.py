@@ -37,7 +37,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="geo/geo_fence"
         ),

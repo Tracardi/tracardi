@@ -81,7 +81,7 @@ def register() -> Plugin:
                 "uix_mf_source": "http://localhost:8686"
             },
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             form=Form(groups=[
                 FormGroup(

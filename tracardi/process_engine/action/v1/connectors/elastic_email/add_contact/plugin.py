@@ -71,7 +71,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Ben Ullrich",
             manual="elastic_email_contact_add_action",
             init={

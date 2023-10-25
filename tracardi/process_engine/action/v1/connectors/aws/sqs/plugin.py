@@ -67,7 +67,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["result", "error"],
             version='0.7.0',
-            license="MIT",
+            license="MIT + CC",
             author="Bart Dobrosielski, Risto Kowaczewski",
         ),
         metadata=MetaData(

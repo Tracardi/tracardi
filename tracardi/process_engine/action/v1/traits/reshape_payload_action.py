@@ -101,7 +101,7 @@ def register() -> Plugin:
             ]),
             manual="reshape_payload_action",
             version='0.8.0',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

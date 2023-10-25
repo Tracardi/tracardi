@@ -12,7 +12,7 @@ def register() -> Plugin:
             inputs=['payload'],
             outputs=['response', 'error'],
             version="0.8.2",
-            license="MIT",
+            license="MIT + CC",
             author="Mateusz Zitaruk, Risto Kowaczewski",
             init={
                 "source": {"id": "", "name": ""},

@@ -54,7 +54,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.7.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="generic_uix_action",
             init={

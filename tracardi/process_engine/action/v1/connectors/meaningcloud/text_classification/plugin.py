@@ -79,7 +79,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload', 'error'],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="text_classification_action"
         ),

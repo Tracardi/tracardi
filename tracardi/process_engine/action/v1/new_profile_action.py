@@ -27,7 +27,7 @@ def register() -> Plugin:
             init=None,
             manual="new_profile_action",
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

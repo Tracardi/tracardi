@@ -70,7 +70,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Marcin Gaca, Risto Kowaczewski, Ben Ullrich",
             manual="hubspot_update_contact_action",
             init={

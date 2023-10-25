@@ -118,7 +118,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="question_popup_action",
             init={

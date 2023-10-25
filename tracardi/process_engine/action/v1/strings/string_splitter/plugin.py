@@ -33,7 +33,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Bartosz Dobrosielski",
             manual="string_splitter_action",
             init={

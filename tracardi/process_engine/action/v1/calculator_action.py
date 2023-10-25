@@ -66,7 +66,7 @@ def register() -> Plugin:
                 "calc_dsl": ""
             },
             version='0.8.2',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             form=Form(groups=[
                 FormGroup(

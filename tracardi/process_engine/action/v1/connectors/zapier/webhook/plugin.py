@@ -77,7 +77,7 @@ def register() -> Plugin:
             outputs=["response", "error"],
             version="0.7.0",
             author="Risto Kowaczewski",
-            license="MIT",
+            license="MIT + CC",
             manual="zapier_webhook_action"
         ),
         metadata=MetaData(

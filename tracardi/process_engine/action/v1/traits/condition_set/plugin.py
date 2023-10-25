@@ -36,7 +36,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["result"],
             version='0.6.2.1',
-            license="MIT",
+            license="MIT + CC",
             author="Daniel Demedziuk",
             init={
                 'conditions': {}

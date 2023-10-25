@@ -30,7 +30,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["date"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Mateusz Zitaruk",
             manual="weekdays_checker_action"
 

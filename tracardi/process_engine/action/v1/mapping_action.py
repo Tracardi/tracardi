@@ -60,7 +60,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["result"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="mapping_action",
             init={

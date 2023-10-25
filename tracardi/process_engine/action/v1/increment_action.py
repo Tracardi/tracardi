@@ -95,7 +95,7 @@ def register() -> Plugin:
             ]),
             manual="increment_action",
             version='0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

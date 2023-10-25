@@ -111,7 +111,7 @@ def register() -> Plugin:
             ]),
             manual="create_response_action",
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

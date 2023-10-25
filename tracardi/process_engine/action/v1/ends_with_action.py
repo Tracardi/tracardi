@@ -48,7 +48,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["true", "false"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Mateusz Zitaruk",
             init={
                 "field": "",

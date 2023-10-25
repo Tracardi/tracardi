@@ -69,7 +69,7 @@ def register() -> Plugin:
                 "direction": "asc",
             },
             version='0.7.3',
-            license="MIT",
+            license="MIT + CC",
             author="Tanay PrabhuDesai",
             form=Form(
                 groups=[

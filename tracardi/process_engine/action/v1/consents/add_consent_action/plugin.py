@@ -74,7 +74,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             version='0.6.3',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             init={
                 "consents": None

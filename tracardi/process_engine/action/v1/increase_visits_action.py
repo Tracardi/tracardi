@@ -32,7 +32,7 @@ def register() -> Plugin:
             init=None,
             manual="increase_visits_action",
             version='0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

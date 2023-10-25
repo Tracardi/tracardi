@@ -76,7 +76,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload', 'error'],
             version='0.7.1',
-            license="MIT",
+            license="MIT + CC",
             author="Bartosz Dobrosielski, Risto Kowaczewski",
             manual="send_pushover_msg_action"
         ),
