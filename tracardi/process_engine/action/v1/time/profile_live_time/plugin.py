@@ -52,7 +52,8 @@ def register() -> Plugin:
             outputs=["live-time", "error"],
             version='0.8.0',
             license="MIT + CC",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual='profile_live_time'
         ),
         metadata=MetaData(
             name='Profile live time',

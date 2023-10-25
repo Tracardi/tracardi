@@ -44,8 +44,9 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.1.2',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
+            manual='sleep',
             init={"wait": 1},
             form=Form(groups=[
                 FormGroup(

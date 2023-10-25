@@ -60,8 +60,9 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["time_difference"],
             version='0.6.0.1',
-            license="MIT",
-            author="Dawid Kruk",
+            license="MIT + CC",
+            author="Dawid Kruk, Risto Kowaczewski",
+            manual='time_difference',
             init={
                 "reference_date": None,
                 "now": "now"

@@ -23,8 +23,8 @@ def register() -> Plugin:
             outputs=['uuid4'],
             version='0.6.2',
             license="MIT",
-            author="Risto Kowaczewski"
-
+            author="Risto Kowaczewski",
+            manual='uuid4'
         ),
         metadata=MetaData(
             name='UUID4',

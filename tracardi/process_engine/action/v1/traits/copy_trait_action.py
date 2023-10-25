@@ -123,8 +123,9 @@ def register() -> Plugin:
                 ),
             ]),
             version='0.8.2',
-            license="MIT",
-            author="Risto Kowaczewski"
+            license="MIT + CC",
+            author="Risto Kowaczewski",
+            manual='copy_data'
         ),
         metadata=MetaData(
             name='Copy data',

@@ -97,6 +97,7 @@ def register() -> Plugin:
                 "ssl_check": True,
                 "body": ""
             },
+            manual='html_fetcher',
             form=Form(groups=[
                 FormGroup(
                     name="Remote call settings",
@@ -162,7 +163,7 @@ def register() -> Plugin:
             ]),
             version="0.6.1",
             author="Risto Kowaczewski",
-            license="MIT"
+            license="MIT + CC"
         ),
         metadata=MetaData(
             name='HTML fetcher',
