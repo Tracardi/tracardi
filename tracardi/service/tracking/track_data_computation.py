@@ -189,10 +189,10 @@ async def lock_and_compute_data(
 
         # Update only when needed
 
-        if profile.has_not_saved_changes():
+        if profile and profile.has_not_saved_changes():
             save_profile_cache(profile)
 
-        if session.has_not_saved_changes():
+        if session and session.has_not_saved_changes():
             save_session_cache(session)
 
     return profile, session, events, tracker_payload
