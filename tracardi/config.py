@@ -156,6 +156,8 @@ class TracardiConfig(metaclass=Singleton):
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
 
+        self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
+
         self.lock_on_data_computation = env.get('LOCK_ON_DATA_COMPUTATION', 'yes') == 'yes'
 
         # Temporary flag

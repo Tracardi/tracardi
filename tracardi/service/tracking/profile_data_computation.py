@@ -295,5 +295,7 @@ async def map_event_to_profile(
                 )
             )
             logger.error(message)
+            if not tracardi.skip_errors_on_profile_mapping:
+                raise e
 
     return profile
