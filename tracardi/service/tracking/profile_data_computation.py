@@ -236,7 +236,7 @@ async def map_event_to_profile(
                             Console(
                                 flow_id=None,
                                 node_id=None,
-                                event_id=flat_event['id'],
+                                event_id=flat_event.get('id', None),
                                 profile_id=get_entity_id(profile),
                                 origin='event',
                                 class_name='map_event_to_profile',
@@ -284,7 +284,7 @@ async def map_event_to_profile(
                 Console(
                     flow_id=None,
                     node_id=None,
-                    event_id=flat_event['id'],
+                    event_id=flat_event.get('id', None),
                     profile_id=get_entity_id(profile),
                     origin='event',
                     class_name='map_event_to_profile',

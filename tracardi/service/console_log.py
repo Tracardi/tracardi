@@ -44,6 +44,9 @@ class ConsoleLog(List[Console]):
         for log in self:
             yield log.encode_record()
 
+    def serialize(self) -> List[dict]:
+        return [log.model_dump(mode='json') for log in self]
+
     def append_event_log_list(self, event_id: str, flow_id: str, log_list: list):
         for log in log_list:  # type: Log
             console = Console(

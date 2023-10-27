@@ -154,6 +154,7 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
         self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
+        self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
 
         self.lock_on_data_computation = env.get('LOCK_ON_DATA_COMPUTATION', 'yes') == 'yes'
 
