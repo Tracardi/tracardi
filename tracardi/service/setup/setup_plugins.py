@@ -1027,6 +1027,24 @@ test_plugins: Dict[str, PluginMetadata] = {
         plugin_registry="tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry"
     ),
 
+    "tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "resource": {
+                    "id": "1",
+                    "name": "1"
+                },
+                "message": "text",
+                "recipient": "a",
+                "sender": "b"
+            },
+            resource={
+                "api_key": "api_key",
+                "username": "username",
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.clicksend.sendsms.registry"
+    ),
+
     "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginMetadata(
         test=PluginTest(
             init={'bucket': "bucket", 'fields': {}, 'measurement': "measurement", 'organization': "measurement",
