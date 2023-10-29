@@ -20,8 +20,33 @@
             }
         }
       },
-      "timestamp": {
-        "type": "date"
+      "metadata": {
+        "properties":{
+          "time": {
+            "properties": {
+              "insert": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+              },
+              "create": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+              },
+              "update": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+              },
+              "due": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+              },
+              "expired": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+              }
+            }
+          }
+        }
       },
       "type": {
         "type": "keyword"
