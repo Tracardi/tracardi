@@ -17,6 +17,7 @@ from .debugger import Debugger
 from ..config import tracardi
 from ..domain.console import Console
 from ..domain.entity import Entity
+from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow
 from ..domain.flow_invoke_result import FlowInvokeResult
 from ..domain.payload.tracker_payload import TrackerPayload
@@ -140,7 +141,7 @@ class RulesEngine:
                             name=rule.flow.name,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=103)]
                         ),
-                        event=Entity(id=event.id)
+                        event=WfEntity(id=event.id)
                     )
                     debugger[event.type].append({rule.name: debug_info})
                     continue
@@ -235,12 +236,12 @@ class RulesEngine:
 
                     debug_info = DebugInfo(
                         timestamp=time(),
+                        event=WfEntity(id=event_id),
                         flow=FlowDebugInfo(
                             id=rule.flow.name,
                             name=rule.flow.name,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=86)]
-                        ),
-                        event=Entity(id=event_id)
+                        )
                     )
 
                 debugger[event_type].append({rule_name: debug_info})

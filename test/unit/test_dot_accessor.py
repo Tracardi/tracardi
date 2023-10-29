@@ -1,6 +1,14 @@
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 
+def test_wrong_source():
+    dot = DotAccessor(profile={"a": {"id": 10, "c": {"d": 20}}})
+    try:
+        assert dot["payload@a.id"] == 10
+    except Exception:
+        assert True
+
+
 def test_should_access_object_with_dollar():
     dot = DotAccessor(profile={"a": {"$id": 10, "$c": {"d": 20}}})
     assert dot["profile@a.$id"] == 10

@@ -1,5 +1,5 @@
 from time import time
-from tracardi.service.wf.domain.entity import Entity
+from tracardi.service.wf.domain.entity import Entity as WfEntity
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
 from tracardi.domain.flow_invoke_result import FlowInvokeResult
@@ -40,7 +40,7 @@ class WorkFlow:
         debug_info = DebugInfo(
             timestamp=flow_start_time,
             flow=FlowDebugInfo(id=flow.id, name=flow.name),
-            event=Entity(id=event.id)
+            event=WfEntity(id=event.id)
         )
         log_list = []
 

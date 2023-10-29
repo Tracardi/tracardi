@@ -681,29 +681,59 @@
                       "type": "keyword",
                       "ignore_above": 32
                     },
+                    "receivable": {
+                      "properties": {
+                        "value": {
+                          "type": "float"
+                        },
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                        },
+                        "currency": {
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "payable": {
+                      "properties": {
+                        "value": {
+                          "type": "float"
+                        },
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                        },
+                        "currency": {
+                          "type": "text"
+                        }
+                      }
+                    },
                     "income": {
                       "properties": {
                         "value": {
                           "type": "float"
                         },
-                        "revenue": {
-                          "type": "float"
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                        },
+                        "currency": {
+                          "type": "text"
                         }
                       }
                     },
                     "cost": {
                       "properties": {
-                        "shipping": {
+                        "value": {
                           "type": "float"
                         },
-                        "tax": {
-                          "type": "float"
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                         },
-                        "discount": {
-                          "type": "float"
-                        },
-                        "other": {
-                          "type": "float"
+                        "currency": {
+                          "type": "text"
                         }
                       }
                     },

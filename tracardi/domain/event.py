@@ -65,16 +65,10 @@ class EventCheckout(BaseModel):
     value: Optional[float] = 0
 
 
-class EventIncome(BaseModel):
+class Money(BaseModel):
     value: Optional[float] = 0
-    revenue: Optional[float] = 0
-
-
-class EventCost(BaseModel):
-    shipping: Optional[float] = 0
-    tax: Optional[float] = 0
-    discount: Optional[float] = 0
-    other: Optional[float] = 0
+    due_date: Optional[datetime] = None
+    currency: Optional[str] = None
 
 
 class EventProduct(BaseModel):
@@ -95,8 +89,10 @@ class EventOrder(BaseModel):
     id: Optional[str] = None
     status: Optional[str] = None
     currency: Optional[str] = None
-    income: Optional[EventIncome] = EventIncome()
-    cost: Optional[EventCost] = EventCost()
+    receivable: Optional[Money] = Money()
+    payable: Optional[Money] = Money()
+    income: Optional[Money] = Money()
+    cost: Optional[Money] = Money()
     affiliation: Optional[str] = None
 
 

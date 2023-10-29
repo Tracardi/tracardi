@@ -51,7 +51,7 @@ class SqlSearchQueryEngine:
             'session': 'metadata.time.insert',
             'profile': 'metadata.time.insert',
             'log': 'date',
-            'entity': 'timestamp'
+            'entity': 'metadata.time.insert'
         }
         self.parser = SqlSearchQueryParser()
 

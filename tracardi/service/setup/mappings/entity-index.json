@@ -40,7 +40,7 @@
                 "type": "date",
                 "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
               },
-              "expired": {
+              "expire": {
                 "type": "date",
                 "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
               }

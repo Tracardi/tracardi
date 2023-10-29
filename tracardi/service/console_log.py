@@ -44,8 +44,8 @@ class ConsoleLog(List[Console]):
         for log in self:
             yield log.encode_record()
 
-    def serialize(self) -> List[dict]:
-        return [log.model_dump(mode='json') for log in self]
+    def get_errors_and_warnings(self) -> List[dict]:
+        return [log.model_dump(mode='json') for log in self if log.is_error() or log.is_warning()]
 
     def append_event_log_list(self, event_id: str, flow_id: str, log_list: list):
         for log in log_list:  # type: Log
