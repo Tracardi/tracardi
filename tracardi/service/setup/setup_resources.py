@@ -154,6 +154,15 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="clicksend",
+            name="ClickSend",
+            tags=["clicksend", "api_key"],
+            config={
+                "username": "<username>",
+                "api_key": "<api_key>"
+            }
+        ),
+        ResourceSettings(
             id="full-contact",
             name="FullContact",
             tags=["token", "full-contact"],
