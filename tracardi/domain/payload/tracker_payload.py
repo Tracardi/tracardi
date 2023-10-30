@@ -480,9 +480,6 @@ class TrackerPayload(BaseModel):
                                 merge_by=profile_fields,
                                 limit=1000)
 
-                        # todo remove after 2023-11
-                        # profiles = await profile_driver.load_profiles_to_merge(merge_key_values=profile_fields)
-
                     # If there is still no profile that means that it could not be loaded. It can happen if
                     # event properties did not have all necessary data or the is no profile with defined
                     # attributes.
@@ -498,10 +495,6 @@ class TrackerPayload(BaseModel):
 
                         logger.info(
                             "New profile created at UTC {} with id {}".format(profile.metadata.time.insert, profile.id))
-
-                    # if True:  # has identification point
-                    #     self.profile = profile
-                    #     # load profile by identification data
 
                 else:
 

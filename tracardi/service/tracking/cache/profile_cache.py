@@ -1,4 +1,3 @@
-import msgpack
 from typing import Optional, List
 from tracardi.context import get_context, Context
 from tracardi.domain.storage_record import RecordMetadata
@@ -13,6 +12,16 @@ from tracardi.service.merging.profile_merger import merge_profiles
 
 redis_cache = RedisCache(ttl=None)
 _redis = RedisClient()
+
+
+def delete_profile_cache(profile_id: str, context: Context):
+    production = context.context_abrv()
+
+    key_namespace = f"{Collection.profile}{production}:{get_cache_prefix(profile_id[0:2])}:"
+    redis_cache.delete(
+        profile_id,
+        key_namespace
+    )
 
 
 def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
