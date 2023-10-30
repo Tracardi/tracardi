@@ -171,7 +171,7 @@ class ExprTransformer(TransformerNamespace):
         if isinstance(value2, ValueError) or isinstance(value2, MissingValue):
             return value2
 
-        if operation == '==':
+        if operation in ['==', '=']:
             if isinstance(value1, Field):
                 value1 = value1.value
             if isinstance(value2, Field):
