@@ -280,7 +280,8 @@ class ProfileMerger:
         for profile in all_profiles:
             current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
                                                                profile.traits)
-            current_profile_dict['data'] = self._deep_update(current_profile_dict['data'], profile.data.model_dump(mode='json'))
+            current_profile_dict['data'] = self._deep_update(current_profile_dict['data'],
+                                                             profile.data.model_dump(mode='json'))
 
         traits = current_profile_dict['traits']
         data = current_profile_dict['data']

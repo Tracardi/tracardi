@@ -24,7 +24,7 @@ class FieldMergingStrategy(BaseModel):
 
 def validate_list_values(values):
     for value in values:
-        if type(value) not in [str, int, float, bool]:
+        if not isinstance(value, (str, int, float, bool)):
             raise ValueError("Invalid value in list `{}`".format(values))
 
 
@@ -68,21 +68,32 @@ def append(base, key, value, strategy: MergingStrategy):
                 else:
                     base[key].append(value)
             else:
-                raise ValueError(f"Unknown merging strategy {strategy.default_list_strategy} for list.")
+                raise ValueError(f"Unknown merging strategy `{strategy.default_list_strategy}` for list.")
             # Existing value is not a dict and value is a simple value
         elif not isinstance(base[key], dict) and isinstance(value, (str, int, float, bool, list, BaseModel, datetime)):
+
+            # Value types
+
             if isinstance(value, list):
                 if strategy.default_list_strategy == 'override':
-                    validate_list_values(value)
-                    base[key] += value
+                    base[key] = value
+                elif strategy.default_list_strategy == 'append':
+                    validate_list_values(values=value)
+                    if isinstance(base[key], list):
+                        base[key] += value
+                    elif not isinstance(base[key], (dict, object)):
+                        base[key] = [base[key]]
+                        base[key] += value
+                    base[key] = list(set(value))
+
                 else:
-                    raise ValueError(f"Unknown merging strategy {strategy.default_list_strategy} for list.")
+                    raise ValueError(f"Unknown merging strategy `{strategy.default_object_strategy}` for list.")
             elif isinstance(value, (BaseModel, bool, datetime)):
                 if strategy.default_object_strategy == 'override':
                     # BaseModel and bool are not added to a list of values
                     base[key] = value
                 else:
-                    raise ValueError(f"Unknown merging strategy {strategy.default_object_strategy} for object type.")
+                    raise ValueError(f"Unknown merging strategy `{strategy.default_object_strategy}` for object type.")
             elif isinstance(value, (int, float)):
                 if strategy.default_number_strategy == 'override':
                     base[key] = value
