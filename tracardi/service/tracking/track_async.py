@@ -1,7 +1,8 @@
+from datetime import timedelta, datetime
+
 import time
 import logging
 
-from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
@@ -122,7 +123,8 @@ async def process_track_data(source: EventSource,
                         profile,
                         source
                     )
-                    logger.info(f"Scheduled visit end check with task {task} for profile {profile.id}")
+                    logger.info(f"Scheduled visit end check with task {task} for profile {profile.id}. "
+                                f"Kicks off at {datetime.utcnow()+ timedelta(seconds=60 * 5)}")
 
                 if async_events:
 

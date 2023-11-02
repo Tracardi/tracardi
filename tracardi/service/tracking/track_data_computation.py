@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from tracardi.config import tracardi
 from tracardi.domain.event import Event
@@ -35,7 +35,7 @@ if License.has_license():
 async def compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
-                       console_log: ConsoleLog) -> Tuple[Profile, Session, List[Event], TrackerPayload]:
+                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload]:
 
     # We need profile and session before async
 
@@ -134,6 +134,8 @@ async def compute_data(tracker_payload: TrackerPayload,
     # Clear profile,etc if not saving data.
 
     profile, session, events = clear_relations(tracker_payload, profile, session, events)
+
+    # Caution: After clear session can become None if set sessionSave = False
 
     return profile, session, events, tracker_payload
 
