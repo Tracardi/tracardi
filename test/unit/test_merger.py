@@ -60,6 +60,58 @@ def test_merger_on_duplicate_values():
     assert result == {"d": "a"}
 
 
+def test_merger_on_list_of_number_values():
+    dict_1 = {
+        "d": [1]
+    }
+
+    dict_2 = {
+        "d": 2
+    }
+
+    result = dict_merge(dict_1, [dict_2], MergingStrategy(
+        make_lists_uniq=False,
+        no_single_value_list=False,
+        default_string_strategy='append'
+    ))
+
+    assert set(result['d']) == {1, 2}
+
+    # ---
+
+    dict_1 = {
+        "d": 1
+    }
+
+    dict_2 = {
+        "d": [2, 3]  # this overrides the int, do not know if it is correct
+    }
+
+    result = dict_merge(dict_1, [dict_2], MergingStrategy(
+        make_lists_uniq=False,
+        no_single_value_list=False,
+        default_string_strategy='append'
+    ))
+
+    assert set(result['d']) == {2, 3}
+
+    # ---
+
+    dict_1 = {"a": {"d": [1]}}
+
+    dict_2 = {
+        "a": {"d": 2}
+    }
+
+    result = dict_merge(dict_1, [dict_2], MergingStrategy(
+        make_lists_uniq=False,
+        no_single_value_list=False,
+        default_string_strategy='append'
+    ))
+
+    assert set(result['a']['d']) == {1, 2}
+
+
 def test_merger_on_same_values():
     dict_1 = {
         "d": "a",

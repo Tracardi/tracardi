@@ -152,24 +152,9 @@ class ProfileMerger:
                     updated_mapping[k] = v
         return updated_mapping
 
-    def _get_merged_profile(self,
-                            similar_profiles: List[Profile],
-                            conflict_aux_key: str = "conflicts",
-                            merge_stats: bool = True,
-                            merge_time: bool = True
-                            ) -> Profile:
-
-        all_profiles = similar_profiles + [self.current_profile]
-
-        # Merge traits and piis
-
-        """
-           Marge do not loose data. Conflicts are resoled to list of values.
-           E.g. Name="bill" + Name="Wiliam"  = Name=['bill','wiliam']
-        """
-
-        _traits = [profile.traits for profile in all_profiles]
-        _data = [profile.data.model_dump(mode='json') for profile in all_profiles]
+    def _merge_traits_and_data(self, profiles, merging_strategy: MergingStrategy):
+        _traits = [profile.traits for profile in profiles]
+        _data = [profile.data.model_dump(mode='json') for profile in profiles]
 
         old_value = {
             'traits': _traits,
@@ -177,29 +162,30 @@ class ProfileMerger:
         }
 
         new_value = {
-            'traits': dict_merge({}, _traits, MergingStrategy()),
-            'data': dict_merge({}, _data, MergingStrategy())
+            'traits': dict_merge({}, _traits, merging_strategy),
+            'data': dict_merge({}, _data, merging_strategy)
         }
 
         conflicts_aux = get_conflicted_values(old_value, new_value)
 
-        """
-            Marge overrides data. Conflicts are resoled to single value. Latest wins.
-            E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
-        """
-
         traits = new_value['traits']
         data = ProfileData(**new_value['data'])
 
-        # current_profile_dict = self.current_profile.model_dump(mode='json')
+        return traits, data, conflicts_aux
 
-        # for profile in all_profiles:
-        #     current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
-        #                                                        profile.traits)
-        #     current_profile_dict['data'] = self._deep_update(current_profile_dict['data'],
-        #                                                      profile.data.model_dump(mode='json'))
-        # traits = current_profile_dict['traits']
-        # data = current_profile_dict['data']
+    def _get_merged_profile(self,
+                            similar_profiles: List[Profile],
+                            merging_strategy: MergingStrategy,
+                            conflict_aux_key: str = "conflicts",
+                            merge_stats: bool = True,
+                            merge_time: bool = True
+                            ) -> Profile:
+
+        all_profiles = [self.current_profile] + similar_profiles
+
+        # Merge traits and piis
+
+        traits, data, conflicts_aux = self._merge_traits_and_data(all_profiles, merging_strategy)
 
         # Merge stats, consents, segments, etc.
 
@@ -323,8 +309,10 @@ class ProfileMerger:
         if len(profiles_to_merge) > 0:
             # Add current profile to existing ones and get merged profile
 
+            merging_strategy = MergingStrategy()
             merged_profile = self._get_merged_profile(
                 profiles_to_merge,
+                merging_strategy,
                 conflict_aux_key=conflict_aux_key)
 
             # merged_profile.ids += profiles_to_merge

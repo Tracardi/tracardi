@@ -4,7 +4,6 @@ from tracardi.service.tracking.cache.profile_cache import load_profile_cache
 from tracardi.context import get_context
 from tracardi.domain.profile import Profile
 from tracardi.service.storage.driver.elastic import profile as profile_db
-from tracardi.service.storage.driver.elastic.profile import load_by_id
 
 
 async def save_profile(profiles: Union[Profile, List[Profile], Set[Profile]]):
@@ -20,7 +19,7 @@ async def load_profile(profile_id: str) -> Optional[Profile]:
     if cached_profile is not None:
         return cached_profile
 
-    profile_record = await load_by_id(profile_id)
+    profile_record = await profile_db.load_by_id(profile_id)
 
     if profile_record is not None:
         return Profile.create(profile_record)
