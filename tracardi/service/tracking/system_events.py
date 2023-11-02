@@ -44,40 +44,43 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
         )
 
     if session:
-        if session.is_reopened():
 
-            # Session can not be reopened with event type visit started.
+        if tracker_payload.is_on('saveSession', default=True):
 
-            session.metadata.status = 'started'
-            session.operation.update = True
-            tracker_payload.events.append(
-                EventPayload(
-                    id=str(uuid4()),
-                    type='visit-started',
-                    time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
-                    properties={
-                        'trigger-event-types': [_ev.type for _ev in tracker_payload.events]
-                    },
-                    options={
-                        "source_id": tracardi.internal_source,
-                        "async": async_processing
-                    }
+            if session.is_reopened():
+
+                # Session can not be reopened with event type visit started.
+
+                session.metadata.status = 'started'
+                session.operation.update = True
+                tracker_payload.events.append(
+                    EventPayload(
+                        id=str(uuid4()),
+                        type='visit-started',
+                        time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
+                        properties={
+                            'trigger-event-types': [_ev.type for _ev in tracker_payload.events]
+                        },
+                        options={
+                            "source_id": tracardi.internal_source,
+                            "async": async_processing
+                        }
+                    )
                 )
-            )
 
-        if session.operation.new:
-            # Add session created event to the registered events
-            tracker_payload.events.append(
-                EventPayload(
-                    id=str(uuid4()),
-                    type='session-opened',
-                    time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
-                    properties={},
-                    options={
-                        "source_id": tracardi.internal_source,
-                        "async": async_processing
-                    }
+            if session.operation.new:
+                # Add session created event to the registered events
+                tracker_payload.events.append(
+                    EventPayload(
+                        id=str(uuid4()),
+                        type='session-opened',
+                        time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
+                        properties={},
+                        options={
+                            "source_id": tracardi.internal_source,
+                            "async": async_processing
+                        }
+                    )
                 )
-            )
 
     return tracker_payload, session
