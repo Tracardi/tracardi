@@ -1,10 +1,11 @@
-from typing import Tuple, Union, Optional, List, Dict
+from typing import Tuple, Union
 
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
 from tracardi.service.console_log import ConsoleLog
+from tracardi.service.profile_merger import *
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
@@ -81,13 +82,20 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
 
 
 async def deduplicate_profile(profile_id):
-    _duplicated_profiles = await load_duplicates(profile_id)  # 1st records is the newest
-    valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
-    profile = valid_profile_record.to_entity(Profile)
+    _duplicated_profiles = await _load_duplicates(profile_id)  # 1st records is the newest
 
     if len(_duplicated_profiles) == 1:
         # If 1 then there is no duplication
-        return profile
+        valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
+        return valid_profile_record.to_entity(Profile)
+
+    profile = Profile.new(id=profile_id)
+    similar_profiles = []
+    for _profile_record in _duplicated_profiles:
+        similar_profiles.append(Profile(**_profile_record))
+
+    merger = ProfileMerger(profile)
+    return merger.compute_one_profile(profile, similar_profiles)
 
     # We have duplicated records. Delete all but first profile.
     for _profile_record in _duplicated_profiles[1:]:  # type: StorageRecord
@@ -202,11 +210,23 @@ async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],
     return await raw_db.load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
 
 
-async def load_duplicates(id: str):
+async def _load_duplicates(id: str):
     return await storage_manager('profile').query({
         "query": {
-            "term": {
-                '_id': id
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            "ids": id
+                        }
+                    },
+                    {
+                        "term": {
+                            "id": id
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
             }
         },
         "sort": [

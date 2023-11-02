@@ -1,14 +1,14 @@
 import asyncio
 import logging
+from tracardi.domain.profile_data import ProfileData
 
-from .tracking.cache.profile_cache import delete_profile_cache, save_profiles_in_cache, save_profile_cache
+from .tracking.cache.profile_cache import delete_profile_cache, save_profile_cache
 from ..context import get_context
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic import raw as raw_db
-from collections import defaultdict
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update
@@ -28,76 +28,53 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
+async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
+                                                              duplicate_profiles: List[Profile]) -> Profile:
+    merged_profile.ids.append(merged_profile.id)
+
+    for dup_profile in duplicate_profiles:
+        if isinstance(dup_profile.ids, list):
+            merged_profile.ids += dup_profile.ids
+    merged_profile.ids = list(set(merged_profile.ids))
+
+    return merged_profile
+
+
+async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
+    for old_profile in duplicate_profiles:
+        if old_profile.id != merged_profile.id:
+            await raw_db.update_profile_ids('event', old_profile.id, merged_profile.id)
+            await event_db.refresh()
+            await raw_db.update_profile_ids('session', old_profile.id, merged_profile.id)
+            await session_db.refresh()
+
+
+async def _save_profile(profile):
+    # Save to database
+    await profile_db.save(profile, refresh_after_save=False)
+    await profile_db.refresh()
+
+    # Save in cache
+    save_profile_cache(profile)
+
+
+async def _delete_by_id(profile_id, index):
+    # Delete from database
+    await profile_db.delete_by_id(profile_id, index)
+    # Delete from cache
+    delete_profile_cache(profile_id, get_context())
+
+
+async def _delete_profiles(profile_ids: List[Tuple[str, RecordMetadata]]):
+    tasks = [asyncio.create_task(_delete_by_id(profile_id, metadata.index))
+             for profile_id, metadata in profile_ids]
+    return await asyncio.gather(*tasks)
+
+
 class ProfileMerger:
 
     def __init__(self, profile: Profile):
         self.current_profile = profile
-
-    # @staticmethod
-    # async def _delete_duplicate_profiles(duplicate_profiles: List[Profile]):
-    #     profile_by_index: Dict[str, List[Profile]] = defaultdict(list)
-    #     for dup_profile in duplicate_profiles:
-    #         profile_by_index[dup_profile.get_meta_data().index].append(dup_profile)
-    #
-    #     # Iterate one by one
-    #     # Todo maybe some bulk delete
-    #     for _, dup_profile_bulk in profile_by_index.items():
-    #         for dup_profile in dup_profile_bulk:
-    #             await profile_db.delete_by_id(dup_profile.id, dup_profile.get_meta_data().index)
-    #             # Delete from cache
-    #             delete_profile_cache(dup_profile.id, get_context())
-    #
-    # @staticmethod
-    # async def _save_mark_duplicates_as_inactive_profiles(duplicate_profiles: List[Profile]):
-    #     profile_by_index = defaultdict(list)
-    #     for dup_profile in duplicate_profiles:
-    #         profile_by_index[dup_profile.get_meta_data().index].append(dup_profile)
-    #
-    #     for _, dup_profile_bulk in profile_by_index.items():
-    #         await profile_db.save_all(dup_profile_bulk)
-
-    @staticmethod
-    async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
-                                                                  duplicate_profiles: List[Profile]) -> Profile:
-        merged_profile.ids.append(merged_profile.id)
-
-        for dup_profile in duplicate_profiles:
-            if isinstance(dup_profile.ids, list):
-                merged_profile.ids += dup_profile.ids
-        merged_profile.ids = list(set(merged_profile.ids))
-
-        return merged_profile
-
-    @staticmethod
-    async def _save_profile(profile):
-        # Save to database
-        await profile_db.save(profile, refresh_after_save=False)
-        await profile_db.refresh()
-
-        # Save in cache
-        save_profile_cache(profile)
-
-    @staticmethod
-    async def _delete_by_id(profile_id, index):
-        # Delete from database
-        await profile_db.delete_by_id(profile_id, index)
-        # Delete from cache
-        delete_profile_cache(profile_id, get_context())
-
-    @staticmethod
-    async def _delete_profiles(profile_ids: List[Tuple[str, RecordMetadata]]):
-        tasks = [asyncio.create_task(ProfileMerger._delete_by_id(profile_id, metadata.index))
-                 for profile_id, metadata in profile_ids]
-        return await asyncio.gather(*tasks)
-
-    @staticmethod
-    async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
-        for old_profile in duplicate_profiles:
-            if old_profile.id != merged_profile.id:
-                await raw_db.update_profile_ids('event', old_profile.id, merged_profile.id)
-                await event_db.refresh()
-                await raw_db.update_profile_ids('session', old_profile.id, merged_profile.id)
-                await session_db.refresh()
 
     @staticmethod
     def add_keywords(merge_by):
@@ -145,73 +122,9 @@ class ProfileMerger:
                 logger.info("No profiles to merge")
                 return None
 
-            merger = ProfileMerger(profile)
-
-            # Merge
-            merged_profile, duplicate_profiles = await merger.merge(
-                similar_profiles,
-                conflict_aux_key=conflict_aux_key)
-
-            if merged_profile:
-                # Copy ids
-                merged_profile = await ProfileMerger._copy_duplicated_profiles_ids_to_merged_profile_ids(
-                    merged_profile,
-                    duplicate_profiles)
-
-                await ProfileMerger._save_profile(merged_profile)
-
-                # Schedule - move events from duplicated profiles
-                await ProfileMerger._move_profile_events_and_sessions(duplicate_profiles, merged_profile)
-
-                # Schedule - mark duplicated profiles
-                records_to_delete: List[Tuple[str, RecordMetadata]] = [(profile.id, profile.get_meta_data())
-                                                                       for profile in duplicate_profiles]
-
-                logger.info(f"Profiles to delete {records_to_delete}.")
-
-                await ProfileMerger._delete_profiles(records_to_delete)
-
-                # Replace current profile with merged profile
-                profile.replace(merged_profile)
-
-                return profile
-
-            else:
-                logger.info("No need to merge")
+            return await ProfileMerger.compute_one_profile(profile, similar_profiles, conflict_aux_key)
 
         return None
-
-    # @staticmethod
-    # async def invoke_deduplicate_profile(profile: Optional[Profile],
-    #                                      merge_by: List[Tuple[str, str]],
-    #                                      limit: int = 2000) -> Optional[Profile]:
-    #     if len(merge_by) > 0:
-    #         # Load all profiles that match merging criteria
-    #         similar_profiles = await profile_db.load_profiles_to_merge(
-    #             merge_by,
-    #             limit=limit
-    #         )
-    #
-    #         merger = ProfileMerger(profile)
-    #
-    #         # Merge
-    #         merged_profile, profiles_to_delete = await merger.deduplicate(
-    #             similar_profiles)
-    #
-    #         if merged_profile:
-    #             # Remove duplicated profiles
-    #
-    #             await ProfileMerger._delete_duplicate_profiles(profiles_to_delete)
-    #
-    #             # Replace current profile with merged profile
-    #             profile.replace(merged_profile)
-    #
-    #             # Update profile after merge
-    #             profile.operation.update = True
-    #
-    #             return profile
-    #
-    #     return None
 
     @staticmethod
     def _get_merge_key_values(profile: Profile) -> List[tuple]:
@@ -275,16 +188,18 @@ class ProfileMerger:
             E.g. Name="bill" + Name="Wiliam" = Name='wiliam'
         """
 
-        current_profile_dict = self.current_profile.model_dump(mode='json')
+        traits = new_value['traits']
+        data = ProfileData(**new_value['data'])
 
-        for profile in all_profiles:
-            current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
-                                                               profile.traits)
-            current_profile_dict['data'] = self._deep_update(current_profile_dict['data'],
-                                                             profile.data.model_dump(mode='json'))
+        # current_profile_dict = self.current_profile.model_dump(mode='json')
 
-        traits = current_profile_dict['traits']
-        data = current_profile_dict['data']
+        # for profile in all_profiles:
+        #     current_profile_dict['traits'] = self._deep_update(current_profile_dict['traits'],
+        #                                                        profile.traits)
+        #     current_profile_dict['data'] = self._deep_update(current_profile_dict['data'],
+        #                                                      profile.data.model_dump(mode='json'))
+        # traits = current_profile_dict['traits']
+        # data = current_profile_dict['data']
 
         # Merge stats, consents, segments, etc.
 
@@ -367,6 +282,26 @@ class ProfileMerger:
     async def merge(self,
                     similar_profiles: List[Profile],
                     conflict_aux_key: str = "conflicts") -> Tuple[Optional[Profile], List[Profile]]:
+        return await self._merge(
+            similar_profiles,
+            allow_duplicate_ids=False,
+            conflict_aux_key=conflict_aux_key
+        )
+
+    async def deduplicate(self,
+                          similar_profiles: List[Profile],
+                          conflict_aux_key: str = "conflicts"
+                          ) -> Tuple[Optional[Profile], List[Profile]]:
+        return await self._merge(
+            similar_profiles,
+            allow_duplicate_ids=True,
+            conflict_aux_key=conflict_aux_key
+        )
+
+    async def _merge(self,
+                     similar_profiles: List[Profile],
+                     allow_duplicate_ids: bool = False,
+                     conflict_aux_key: str = "conflicts") -> Tuple[Optional[Profile], List[Profile]]:
         """
         Merges profiles on keys set in profile.operation.merge. Loads profiles from database and
         combines its data into current profile. Returns Profiles object with profiles to be disables.
@@ -378,8 +313,11 @@ class ProfileMerger:
         if len(similar_profiles) == 0:
             return merged_profile, []
 
-        # Filter only profiles that are not current profile and where not merged
-        profiles_to_merge = [p for p in similar_profiles if p.id != self.current_profile.id]
+        if not allow_duplicate_ids:
+            # Filter only profiles that are not current profile and where not merged
+            profiles_to_merge = [p for p in similar_profiles if p.id != self.current_profile.id]
+        else:
+            profiles_to_merge = similar_profiles
 
         # Are there any profiles to merge?
         if len(profiles_to_merge) > 0:
@@ -393,25 +331,42 @@ class ProfileMerger:
 
         return merged_profile, profiles_to_merge
 
-    async def deduplicate(self,
-                          similar_profiles: List[Profile]) -> Tuple[Optional[Profile], List[Profile]]:
+    @staticmethod
+    async def compute_one_profile(profile: Optional[Profile], similar_profiles: List[Profile],
+                                  conflict_aux_key: str = "conflicts"):
 
-        merged_profile = None
-        profiles_to_delete = []
-        if len(similar_profiles) > 1:
-            # Add current profile to existing ones and get merged profile
+        merger = ProfileMerger(profile)
 
-            merged_profile = self._get_merged_profile(
-                similar_profiles,
-                merge_stats=False,
-                merge_time=True
-            )
+        # Merge
+        merged_profile, duplicate_profiles = await merger.merge(
+            similar_profiles,
+            conflict_aux_key=conflict_aux_key)
 
-            # Get Profiles to delete
+        if merged_profile:
+            # Copy ids
+            merged_profile = await _copy_duplicated_profiles_ids_to_merged_profile_ids(
+                merged_profile,
+                duplicate_profiles)
 
-            # Deactivate all other profiles except merged one
+            await _save_profile(merged_profile)
 
-            profiles_to_delete = [p for p in similar_profiles
-                                  if p.get_meta_data().index != self.current_profile.get_meta_data().index]
+            # Schedule - move events from duplicated profiles
+            await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)
 
-        return merged_profile, profiles_to_delete
+            # Schedule - mark duplicated profiles
+            records_to_delete: List[Tuple[str, RecordMetadata]] = [(profile.id, profile.get_meta_data())
+                                                                   for profile in duplicate_profiles]
+
+            logger.info(f"Profiles to delete {records_to_delete}.")
+
+            await _delete_profiles(records_to_delete)
+
+            # Replace current profile with merged profile
+            profile.replace(merged_profile)
+
+            return profile
+
+        else:
+            logger.info("No need to merge")
+
+        return None

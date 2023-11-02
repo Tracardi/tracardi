@@ -11,7 +11,7 @@ from dotty_dict import dotty
 class MergingStrategy(BaseModel):
     make_lists_uniq: Optional[bool] = True
     no_single_value_list: Optional[bool] = True
-    default_string_strategy: Optional[str] = 'append'
+    default_string_strategy: Optional[str] = 'override'
     default_number_strategy: Optional[str] = 'add'
     default_object_strategy: Optional[str] = 'override'
     default_list_strategy: Optional[str] = 'append'
