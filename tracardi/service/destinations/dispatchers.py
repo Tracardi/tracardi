@@ -2,6 +2,7 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
+from tracardi.domain.session import Session
 from tracardi.process_engine.destination.destination_interface import DestinationInterface
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.domain.resource import Resource
@@ -78,6 +79,10 @@ async def event_destination_dispatch(load_destination_task: Callable, profile, s
             destination_class = _get_destination_class(destination)
             destination_instance = destination_class(debug, resource, destination)  # type: DestinationInterface
             reshaped_data = template.reshape(reshape_template=destination.mapping)
+
+            if session is None:
+                logger.warning(f"Dispatching event without session. New session created.")
+                session = Session.new()
 
             logger.info(f"Dispatching event with destination class {destination_class}.")
             await destination_instance.dispatch_event(reshaped_data, profile=profile, session=session, event=ev)

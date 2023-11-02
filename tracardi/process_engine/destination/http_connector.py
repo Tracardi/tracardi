@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import asyncio
 import json
 import logging
@@ -39,7 +41,15 @@ class HttpConfiguration(BaseModel):
     cookies: Optional[dict] = {}
     ssl_check: bool = True
 
+    @staticmethod
+    def _convert_params(param):
+        if isinstance(param, bool):
+            return 1 if param else 0
+        return param
+
     def get_params(self, body: dict) -> dict:
+
+        self.headers = {key.lower(): value for key, value in self.headers.items()}
 
         content_type = self.headers['content-type'] if 'content-type' in self.headers else 'application/json'
 
@@ -47,6 +57,7 @@ class HttpConfiguration(BaseModel):
 
             if self.method.lower() == 'get':
                 params = flatten(body)
+                params = {key: self._convert_params(value) for key,value in params.items() if value is not None}
                 return {
                     "params": params
                 }
@@ -85,6 +96,10 @@ class HttpConnector(DestinationInterface):
 
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 params = config.get_params(data)
+
+                print(url)
+                pprint(params)
+
                 async with session.request(
                         method=config.method,
                         url=url,
