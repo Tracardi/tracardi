@@ -103,6 +103,9 @@ async def process_track_data(source: EventSource,
                 "events": [],
                 "profile": {
                     "id": get_entity_id(profile)
+                },
+                "session": {
+                    "id": get_entity_id(session)
                 }
             }
 
@@ -226,6 +229,9 @@ async def process_track_data(source: EventSource,
             "response": response,
             "profile": {
                 "id": get_entity_id(profile)
+            },
+            "session": {
+                "id": get_entity_id(session)
             }
         }
 

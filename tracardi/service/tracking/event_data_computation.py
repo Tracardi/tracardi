@@ -180,8 +180,6 @@ async def compute_events(events: List[EventPayload],
                          tracker_payload: TrackerPayload
                          ) -> Tuple[List[Event], Session, Profile]:
 
-    print('compute_events', [e.type for e in events])
-
     event_objects = []
     for event_payload in events:
 

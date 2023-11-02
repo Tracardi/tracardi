@@ -28,11 +28,12 @@ async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Optio
 
         tracker_payload.force_session(session)
 
-        # Do not save
-
-        tracker_payload.options.update({
-            "saveSession": False
-        })
+        # TODO remove after 12-2023
+        # # Do not save
+        #
+        # tracker_payload.options.update({
+        #     "saveSession": False
+        # })
 
         return session, tracker_payload
 

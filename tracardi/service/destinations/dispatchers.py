@@ -1,7 +1,9 @@
 import logging
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Optional, List
 
+from tracardi.domain.event import Event
+from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.destination.destination_interface import DestinationInterface
 from tracardi.service.module_loader import load_callable, import_package
@@ -59,7 +61,12 @@ async def _get_destination_dispatchers(destinations, dot, template):
             yield destination, resource, data
 
 
-async def event_destination_dispatch(load_destination_task: Callable, profile, session, events, debug):
+async def event_destination_dispatch(load_destination_task: Callable,
+                                     profile: Optional[Profile],
+                                     session: Optional[Session],
+                                     events: List[Event],
+                                     debug):
+
     dot = DotAccessor(profile, session)
     for ev in events:
         destinations = [DestinationRecord(**destination_record) for destination_record in
