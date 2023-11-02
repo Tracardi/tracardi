@@ -97,9 +97,6 @@ class HttpConnector(DestinationInterface):
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 params = config.get_params(data)
 
-                print(url)
-                pprint(params)
-
                 async with session.request(
                         method=config.method,
                         url=url,
