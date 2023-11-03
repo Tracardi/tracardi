@@ -72,7 +72,8 @@ class TrackerProcessor(TrackProcessorBase):
             result = await process_track_data(source, tracker_payload, tracker_config, tracking_start, self.console_log)
 
             if tracardi.enable_errors_on_response:
-                result['errors'] = self.console_log.get_errors_and_warnings()
+                result['errors'] = self.console_log.get_errors()
+                result['warnings'] = self.console_log.get_warnings()
 
             return result
 

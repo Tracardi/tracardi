@@ -113,7 +113,6 @@ async def count_online():
 
     # Count except cardio event source
 
-    source_id = f"@{tracardi.cardio_source}"
     query = {
         "size": 0,
         "query": {
@@ -126,14 +125,14 @@ async def count_online():
                             }
                         }
                     }
-                ],
-                "must_not": [
-                    {
-                        "term": {
-                            "source.id": source_id
-                        }
-                    }
                 ]
+                # "must_not": [
+                #     {
+                #         "term": {
+                #             "source.id": source_id
+                #         }
+                #     }
+                # ]
             }
         },
         "aggs": {

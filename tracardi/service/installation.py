@@ -1,5 +1,4 @@
 import asyncio
-import datetime
 import logging
 import os
 from uuid import uuid4
@@ -10,17 +9,13 @@ from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
-from tracardi.domain.event_source import EventSource
-from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.user import User
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
-from tracardi.service.setup.data.defaults import open_rest_source_bridge
-from tracardi.service.setup.setup_indices import create_schema, install_default_data, run_on_start, add_ids
+from tracardi.service.setup.setup_indices import create_schema, install_default_data, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.driver.elastic import system as system_db
-from tracardi.service.storage.driver.elastic import event_source as event_source_db
 from tracardi.service.storage.driver.elastic import user as user_db
 from tracardi.service.storage.index import Resource
 
@@ -177,34 +172,16 @@ async def install_system(credentials: Credentials, update_plugins_on_start_up):
         production_install_result = await _install()
 
     # Demo
-    if os.environ.get("DEMO", None) == 'yes':
+    if os.environ.get("DEMO", 'no') == 'yes':
 
         # Demo
 
-        event_source = EventSource(
-            id=open_rest_source_bridge.id,
-            type=["internal"],
-            name="Test random data",
-            channel="Internal",
-            description="Internal event source for random data.",
-            bridge=NamedEntity(**open_rest_source_bridge.model_dump()),
-            timestamp=datetime.datetime.utcnow(),
-            tags=["internal"],
-            groups=["Internal"]
-        )
-
-        await raw_db.bulk_upsert(
-            Resource().get_index_constant('event-source').get_write_index(),
-            list(add_ids([event_source.model_dump()])))
-
-        await event_source_db.refresh()
-
         for i in range(0, 100):
-            payload = generate_payload(source=open_rest_source_bridge.id)
+            payload = generate_payload(source=tracardi.demo_source)
 
             await track_event(
                 TrackerPayload(**payload),
                 "0.0.0.0",
-                allowed_bridges=['internal'])
+                allowed_bridges=['internal', 'rest'])
 
     return staging_install_result, production_install_result

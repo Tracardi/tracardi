@@ -231,23 +231,9 @@ class WorkflowManagerAsync:
                 # TODO Does profile need rules to merge?
                 # Profile merge
                 try:
-                    if self.profile is not None:  # Profile can be None if profile_less event is processed
-                        if self.profile.operation.needs_merging():
-                            self.profile = await self.merge_profile(self.profile)
-                    else:
-                        self.console_log.append(
-                            Console(
-                                flow_id=None,
-                                node_id=None,
-                                event_id=None,
-                                profile_id=get_entity_id(self.profile),
-                                origin='profile',
-                                class_name=str(WorkflowManagerAsync.__class__),
-                                module=__name__,
-                                type='warning',
-                                message="Can not merge profile-less event."
-                            )
-                        )
+                    if self.profile is not None and self.profile.operation.needs_merging():
+                        # Profile can be None if profile_less event is processed
+                        self.profile = await self.merge_profile(self.profile)
 
                 except Exception as e:
                     message = 'Profile merging returned an error `{}`'.format(str(e))

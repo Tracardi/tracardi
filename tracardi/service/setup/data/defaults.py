@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import os
 from datetime import datetime
 
@@ -98,25 +100,26 @@ redirect_bridge = Bridge(
     manual=manual
 )
 
-cardio_event_source = EventSource(
-    id=f"@{tracardi.cardio_source}",
-    type=["internal"],
-    name="System Internal Source",
-    channel="Internal",
-    description="Internal event source for system heartbeats. If removed automated session closing wil not work.",
+# This is how you set-up default event source
+test_event_source = EventSource(
+    id=tracardi.demo_source,
+    type=["rest"],
+    name="System Test Source",
+    channel="Test",
+    description="This is test event-source. Feel free to remove it.",
     bridge=NamedEntity(**open_rest_source_bridge.model_dump()),
     timestamp=datetime.utcnow(),
-    tags=["internal"],
-    groups=["Internal"]
+    tags=["test"],
+    groups=["Test"]
 )
 
 default_db_data = {
     "bridge": [
-        open_rest_source_bridge.model_dump(),
-        open_webhook_source_bridge.model_dump(),
-        redirect_bridge.model_dump()
+        open_rest_source_bridge.model_dump(mode='json'),
+        open_webhook_source_bridge.model_dump(mode='json'),
+        redirect_bridge.model_dump(mode='json')
     ],
     'event-source': [
-        cardio_event_source.model_dump()
+        test_event_source.model_dump(mode='json')
     ]
 }
