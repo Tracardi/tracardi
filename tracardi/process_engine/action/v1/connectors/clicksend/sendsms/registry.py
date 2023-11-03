@@ -10,7 +10,7 @@ def register() -> Plugin:
             className='ClicksendSendSmsAction',
             inputs=['payload'],
             outputs=['response', 'error'],
-            version="0.0.1",
+            version="0.8.2",
             license="MIT",
             author="kokobhara",
             init={
@@ -19,10 +19,10 @@ def register() -> Plugin:
                     "name": ""
                 },
                 "message": "",
-                "recipient": "profile@pii.telephone",
+                "recipient": "profile@data.pii.telephone",
                 "sender": ""
             },
-            manual="clicksend/clicksend_send_sms_plugin",
+            manual="clicksend_sms",
             form=Form(
                 groups=[
                     FormGroup(
@@ -65,7 +65,7 @@ def register() -> Plugin:
             desc="Send SMS via ClickSend gateway.",
             brand="ClickSend",
             icon="clicksend",
-            group=["ClickSend"],
+            group=["SMS"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes payload object.")

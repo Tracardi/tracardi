@@ -50,10 +50,10 @@ class ClicksendSendSmsAction(ActionRunner):
         }
 
         async with HttpClient(
-            self.node.on_connection_error_repeat,
-            [200],
-            timeout=timeout,
-            auth=aiohttp.BasicAuth(self.credentials.username, self.credentials.api_key)
+                self.node.on_connection_error_repeat,
+                [200],
+                timeout=timeout,
+                auth=aiohttp.BasicAuth(self.credentials.username, self.credentials.api_key)
         ) as client:
             async with client.post(
                     url=url,

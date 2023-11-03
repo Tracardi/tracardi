@@ -160,7 +160,8 @@ def get_resource_types() -> List[ResourceSettings]:
             config={
                 "username": "<username>",
                 "api_key": "<api_key>"
-            }
+            },
+            manual='clicksend_resource'
         ),
         ResourceSettings(
             id="full-contact",

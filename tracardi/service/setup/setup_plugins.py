@@ -4,6 +4,24 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "resource": {
+                    "id": "1",
+                    "name": "1"
+                },
+                "message": "text",
+                "recipient": "a",
+                "sender": "b"
+            },
+            resource={
+                "api_key": "api_key",
+                "username": "username",
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.clicksend.sendsms.registry"
+    ),
+
     "tracardi.process_engine.action.v1.list.operations_on_sets.plugin": PluginMetadata(
         test=PluginTest(init={
                 "set1": "",

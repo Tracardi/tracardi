@@ -1,7 +1,7 @@
 import logging
 from uuid import uuid4
 from dataclasses import dataclass
-from typing import List, Optional, Callable
+from typing import List, Optional
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 
