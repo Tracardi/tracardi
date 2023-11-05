@@ -725,9 +725,6 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
-    installed_plugins["com_tracardi.action.v1.metrics.plugin"] = PluginMetadata(
-        test=PluginTest(init={})
-    )
     installed_plugins["com_tracardi.action.v1.sms.twilio.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
