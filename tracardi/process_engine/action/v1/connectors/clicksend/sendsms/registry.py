@@ -64,7 +64,7 @@ def register() -> Plugin:
             name="Send SMS",
             desc="Send SMS via ClickSend gateway.",
             brand="ClickSend",
-            icon="clicksend",
+            icon="chat",
             group=["SMS"],
             documentation=Documentation(
                 inputs={
