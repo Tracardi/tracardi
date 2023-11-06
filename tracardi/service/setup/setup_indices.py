@@ -65,7 +65,7 @@ async def update_mappings():
                         pprint(await raw_db.get_mapping(idx))
 
 
-async def create_index_and_template(index, index_map, update_mapping) -> Tuple[List[str], List[str], List[str]]:
+async def create_index_and_template(index: Index, index_map, update_mapping) -> Tuple[List[str], List[str], List[str]]:
     indices_created = []
     templates_created = []
     aliases_created = []

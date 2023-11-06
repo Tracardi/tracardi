@@ -1,0 +1,72 @@
+{
+  "index_patterns": [
+    "%%TEMPLATE_PATTERN%%"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": %%SHARDS%%,
+      "number_of_replicas": %%REPLICAS%%,
+      "index.mapping.total_fields.limit": 2000,
+      "index.refresh_interval": "10s"
+    },
+    "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
+      },
+      "dynamic": "strict",
+      "properties": {
+        "timestamp": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+        },
+        "progress_id": {
+          "type": "keyword",
+          "ignore_above": 48
+        },
+        "data": {
+          "properties": {
+            "id": {
+              "type": "keyword",
+              "ignore_above": 48
+            },
+            "type": {
+              "type": "keyword",
+              "ignore_above": 32
+            },
+            "data": {
+              "type": "flattened"
+            }
+          }
+        },
+        "source": {
+          "properties": {
+            "id": {
+              "type": "keyword",
+              "ignore_above": 48
+            },
+            "name": {
+              "type": "keyword",
+              "ignore_above": 64
+            }
+          }
+        },
+        "destination": {
+          "properties": {
+            "id": {
+              "type": "keyword",
+              "ignore_above": 48
+            },
+            "name": {
+              "type": "keyword",
+              "ignore_above": 64
+            }
+          }
+        }
+      }
+    },
+    "aliases": {
+      "%%ALIAS%%": {}
+    }
+  }
+}
