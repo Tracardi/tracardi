@@ -54,6 +54,7 @@ msgpack==1.0.5
 user-agents==2.2.0
 faker==18.4.0
 faker-commerce==1.0.3
+SQLAlchemy==2.0.23
 
 # Worker requirements
 mysql-connector-python
