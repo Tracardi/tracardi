@@ -77,7 +77,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class MyIndex(Base):
+class MyIndexTable(Base):
     __tablename__ = 'my_index'
 
     id = Column(Integer, primary_key=True)  # Assuming there is a primary key field named 'id'

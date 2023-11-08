@@ -4,8 +4,8 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
-class Bridge(Base):
 
+class BridgeTable(Base):
     __tablename__ = 'bridge'
 
     id = Column(String(40), primary_key=True)  # 'keyword' with ignore_above maps to VARCHAR with length
@@ -17,8 +17,7 @@ class Bridge(Base):
     manual = Column(String(48))  # 'keyword' type in ES with 'index' false maps to VARCHAR(255) in MySQL
 
 
-class EventSource(Base):
-
+class EventSourceTable(Base):
     __tablename__ = 'event_source'
 
     id = Column(String(40), primary_key=True)
@@ -50,10 +49,10 @@ class EventSource(Base):
     endpoints_post_url = Column(String(255))
     endpoints_post_method = Column(String(255))
 
-    bridge = relationship("Bridge")
+    bridge = relationship("BridgeTable")
 
 
-class Workflow(Base):
+class WorkflowTable(Base):
     __tablename__ = 'workflow'
 
     id = Column(String(40), primary_key=True)
@@ -72,7 +71,7 @@ class Workflow(Base):
     debug_logging_level = Column(String(32))
 
 
-class Trigger(Base):
+class TriggerTable(Base):
     __tablename__ = 'trigger'
 
     id = Column(String(40), primary_key=True)  # 'keyword' in ES with ignore_above
@@ -93,7 +92,7 @@ class Trigger(Base):
     tags = Column(String(255))  # 'keyword' in ES defaults to 255 if no ignore_above is set
 
 
-class Resource(Base):
+class ResourceTable(Base):
     __tablename__ = 'resource'
 
     id = Column(String(40), primary_key=True)
