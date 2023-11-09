@@ -89,7 +89,8 @@ def register() -> Plugin:
             ]),
             version='0.8.1',
             license="MIT + CC",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual='merge_event_properties'
 
         ),
         metadata=MetaData(

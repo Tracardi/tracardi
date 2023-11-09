@@ -31,7 +31,7 @@ def register() -> Plugin:
         debug=True,
         spec=Spec(
             module=__name__,
-            className='InjectEvent',
+            className=InjectEvent.__name__,
             inputs=["payload"],
             outputs=['payload'],
             version='0.6.0.1',
@@ -53,6 +53,7 @@ def register() -> Plugin:
                     ]
                 ),
             ]),
+            manual='inject_event'
         ),
         metadata=MetaData(
             name='Inject event',

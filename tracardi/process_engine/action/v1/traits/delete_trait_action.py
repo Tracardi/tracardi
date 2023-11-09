@@ -83,7 +83,8 @@ def register() -> Plugin:
             ]),
             version='0.1',
             license="MIT + CC",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual='delete_data'
         ),
         metadata=MetaData(
             name='Delete data',

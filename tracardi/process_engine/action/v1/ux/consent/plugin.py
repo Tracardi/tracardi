@@ -90,6 +90,7 @@ def register() -> Plugin:
             version='0.6.1',
             license="MIT + CC",
             author="Risto Kowaczewski",
+            manual='show_consent_bar',
             form=Form(groups=[
                 FormGroup(
                     name="Widget Configuration",
