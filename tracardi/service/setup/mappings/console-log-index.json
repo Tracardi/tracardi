@@ -1,56 +1,62 @@
 {
-  "settings": {
-    "number_of_shards": %%CONF_SHARDS%%,
-    "number_of_replicas": %%REPLICAS%%
-  },
-  "mappings": {
-    "_meta": {
-      "version": "%%VERSION%%",
-      "name": "%%PREFIX%%"
+  "index_patterns": [
+    "%%TEMPLATE_PATTERN%%"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": %%SHARDS%%,
+      "number_of_replicas": %%REPLICAS%%,
+      "index.refresh_interval": "3s"
     },
-    "dynamic": "strict",
-    "properties": {
-      "event_id": {
-        "type": "keyword", "ignore_above": 64
+    "mappings": {
+      "_meta": {
+        "version": "%%VERSION%%",
+        "name": "%%PREFIX%%"
       },
-      "profile_id": {
-        "type": "keyword"
-      },
-      "flow_id": {
-        "type": "keyword"
-      },
-      "node_id": {
-        "type": "keyword"
-      },
-      "origin": {
-        "type": "keyword"
-      },
-      "metadata": {
-        "properties": {
-          "timestamp": {
-            "type": "date"
+      "dynamic": "strict",
+      "properties": {
+        "event_id": {
+          "type": "keyword", "ignore_above": 64
+        },
+        "profile_id": {
+          "type": "keyword"
+        },
+        "flow_id": {
+          "type": "keyword"
+        },
+        "node_id": {
+          "type": "keyword"
+        },
+        "origin": {
+          "type": "keyword"
+        },
+        "metadata": {
+          "properties": {
+            "timestamp": {
+              "type": "date"
+            }
           }
+        },
+        "class_name": {
+          "type": "keyword"
+        },
+        "module": {
+          "type": "text"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text"
+        },
+        "traceback": {
+          "type": "keyword",
+          "index": false
         }
-      },
-      "class_name": {
-        "type": "keyword"
-      },
-      "module": {
-        "type": "text"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "message": {
-        "type": "text"
-      },
-      "traceback": {
-        "type": "keyword",
-        "index": false
       }
+    },
+    "aliases": {
+      "%%ALIAS%%": {}
     }
-  },
-  "aliases": {
-    "%%ALIAS%%": {}
   }
 }

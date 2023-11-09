@@ -6,7 +6,7 @@
     "settings": {
     "number_of_shards": %%SHARDS%%,
     "number_of_replicas": %%REPLICAS%%,
-      "index.refresh_interval": "3s"
+    "index.refresh_interval": "3s"
     },
     "mappings": {
       "_meta": {

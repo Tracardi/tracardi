@@ -267,7 +267,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
                           index="index-name",
                           mapping=mapping_mock)
             write_index = index.get_write_index()
-            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-Q{(date.month%4) + 1}"
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-q{(date.month%4) + 1}"
 
             index = Index(multi_index=True,
                           partitioning='month',

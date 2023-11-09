@@ -19,9 +19,10 @@ if License.has_service(LICENSE):
 __local_dir = os.path.dirname(__file__)
 
 index_mapping = {
-    'action': {
-        "on-start": install_default_plugins  # Callable to fill the index
-    }
+    # Update on actions is done when installing
+    # 'action': {
+    #     "on-start": install_default_plugins  # Callable to fill the index
+    # }
 }
 
 logger = logging.getLogger(__name__)

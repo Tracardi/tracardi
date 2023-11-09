@@ -37,7 +37,7 @@ class Index:
         elif self.partitioning == 'minute':
             return f"{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
         elif self.partitioning == 'quarter':
-            return f"{date.year}-Q{(date.month%4) + 1}"
+            return f"{date.year}-q{(date.month%4) + 1}"
         else:
             raise ValueError("Unknown partitioning. Expected: year, month, quarter, or day")
 
@@ -290,7 +290,10 @@ class Resource(metaclass=Singleton):
                                       mapping="mappings/event-validator-index.json"),
             "destination": Index(staging=True, multi_index=False, index='tracardi-destination',
                                  mapping="mappings/destination-index.json"),
-            "action": Index(staging=False, static=True, multi_index=False, index="tracardi-flow-action-plugins",
+            "action": Index(staging=False,
+                            static=True,
+                            multi_index=False,
+                            index="tracardi-flow-action-plugins",
                             mapping="mappings/plugin-index.json"),
             "import": Index(staging=False, multi_index=False, index="tracardi-import",
                             mapping="mappings/import-index.json"),
