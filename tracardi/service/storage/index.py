@@ -11,7 +11,7 @@ _local_dir = os.path.dirname(__file__)
 
 
 class Index:
-    def __init__(self, multi_index, index, mapping, staging=False, static=False, single=False):
+    def __init__(self, multi_index, index, mapping, staging=False, static=False, single=False, partitioning=None):
         self.multi_index = multi_index
         self.index = index
         self._version_prefix = tracardi.version.get_version_prefix()  # eg.080
@@ -19,15 +19,27 @@ class Index:
         self.staging = staging
         self.static = static
         self.single = single
+        self.partitioning = 'month' if partitioning is None else partitioning
 
-    @staticmethod
-    def _multi_index_suffix() -> str:
+    def _multi_index_suffix(self) -> str:
         """
         Current date suffix
         """
-
         date = datetime.now()
-        return f"{date.year}-{date.month}"
+        if self.partitioning == 'month':
+            return f"{date.year}-{date.month}"
+        elif self.partitioning == 'year':
+            return f"{date.year}-year"
+        elif self.partitioning == 'day':
+            return f"{date.year}-{date.month}/{date.day}"
+        elif self.partitioning == 'hour':
+            return f"{date.year}-{date.month}/{date.day}/{date.hour}"
+        elif self.partitioning == 'minute':
+            return f"{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
+        elif self.partitioning == 'quarter':
+            return f"{date.year}-Q{(date.month%4) + 1}"
+        else:
+            raise ValueError("Unknown partitioning. Expected: year, month, quarter, or day")
 
     @staticmethod
     def _prefix_with_static(index):
@@ -177,28 +189,50 @@ class Resource(metaclass=Singleton):
         self.resources = {
             "bridge": Index(staging=False, static=True, multi_index=False, index="tracardi-bridge",
                             mapping="mappings/bridge-index.json"),
-            "event": Index(staging=False, multi_index=True, index="tracardi-event",
+            "event": Index(staging=False,
+                           multi_index=True,
+                           partitioning=tracardi.event_partitioning,
+                           index="tracardi-event",
                            mapping="mappings/event-index.json"),
-            "entity": Index(staging=False, multi_index=False, index="tracardi-entity",
+            "entity": Index(staging=False,
+                            multi_index=True,
+                            partitioning=tracardi.entity_partitioning,
+                            index="tracardi-entity",
                             mapping="mappings/entity-index.json"),
-            "entity-list": Index(staging=True, multi_index=False, index="tracardi-entity-list",
-                                 mapping="mappings/entity-list-index.json"),
             "log": Index(staging=False,
                          multi_index=True,
+                         partitioning=tracardi.log_partitioning,
                          index='tracardi-log',
                          mapping="mappings/log-index.json"),
-            "user-logs": Index(staging=False, multi_index=True, index="tracardi-user-log",
+            "user-logs": Index(staging=False,
+                               multi_index=True,
+                               partitioning=tracardi.user_log_partitioning,
+                               index="tracardi-user-log",
                                mapping="mappings/user-log-index.json"),
-
-            "session": Index(staging=False, multi_index=True, index="tracardi-session",
+            "session": Index(staging=False,
+                             multi_index=True,
+                             partitioning=tracardi.session_partitioning,
+                             index="tracardi-session",
                              mapping="mappings/session-index.json"),
-            "profile": Index(staging=False, multi_index=True, index="tracardi-profile",
+            "profile": Index(staging=False,
+                             multi_index=True,
+                             partitioning=tracardi.profile_partitioning,
+                             index="tracardi-profile",
                              mapping="mappings/profile-index.json"),
-            "item": Index(staging=False, multi_index=True, index="tracardi-item",
+            "item": Index(staging=False,
+                          multi_index=True,
+                          partitioning=tracardi.item_partitioning,
+                          index="tracardi-item",
                           mapping="mappings/item-index.json"),
-            "console-log": Index(staging=False, multi_index=False, index="tracardi-console-log",
+            "console-log": Index(staging=False,
+                                 multi_index=True,
+                                 index="tracardi-console-log",
+                                 partitioning=tracardi.console_log_partitioning,
                                  mapping="mappings/console-log-index.json"),
-            "dispatch-log": Index(staging=False, multi_index=True, index="tracardi-dispatch-log",
+            "dispatch-log": Index(staging=False,
+                                  multi_index=True,
+                                  partitioning=tracardi.dispatch_log_partitioning,
+                                  index="tracardi-dispatch-log",
                                   mapping="mappings/dispatch-log-index.json"),
             "user": Index(staging=False,
                           multi_index=False,
@@ -206,7 +240,8 @@ class Resource(metaclass=Singleton):
                           mapping="mappings/user-index.json"),
             "tracardi-pro": Index(staging=False, multi_index=False, index="tracardi-pro",
                                   mapping="mappings/tracardi-pro-index.json"),
-
+            "entity-list": Index(staging=True, multi_index=False, index="tracardi-entity-list",
+                                 mapping="mappings/entity-list-index.json"),
             "resource": Index(staging=True, multi_index=False, index="tracardi-resource",
                               mapping="mappings/resource-index.json"),
             "event-source": Index(staging=True, multi_index=False, index="tracardi-source",

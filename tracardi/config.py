@@ -188,6 +188,17 @@ class TracardiConfig(metaclass=Singleton):
         self.internal_source = f"@internal-{random_hash[:20]}"
         self.segmentation_source = f"@segmentation-{random_hash[:20]}"
         self.demo_source = f"@demo-{random_hash[:20]}"
+
+        self.event_partitioning = env.get('EVENT_PARTITIONING', 'month')
+        self.profile_partitioning = env.get('PROFILE_PARTITIONING', 'quarter')
+        self.session_partitioning = env.get('SESSION_PARTITIONING', 'quarter')
+        self.entity_partitioning = env.get('ITEM_PARTITIONING', 'quarter')
+        self.item_partitioning = env.get('ITEM_PARTITIONING', 'year')
+        self.log_partitioning = env.get('LOG_PARTITIONING', 'month')
+        self.dispatch_log_partitioning = env.get('DISPATCH_LOG_PARTITIONING', 'month')
+        self.console_log_partitioning = env.get('CONSOLE_LOG_PARTITIONING', 'month')
+        self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
+
         self._config = None
         self._unset_secrets()
 
