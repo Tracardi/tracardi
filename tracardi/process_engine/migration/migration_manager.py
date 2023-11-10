@@ -40,7 +40,8 @@ class MigrationManager:
         ("072", "073"): "072_to_073",
         ("073", "074"): "072_to_073",
         ("074", "080"): "074_to_080",
-        ("080", "08x"): "080_to_08x"
+        ("080", "08x"): "080_to_08x",
+        ("08x", "082x"): "08x_to_082x"
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
