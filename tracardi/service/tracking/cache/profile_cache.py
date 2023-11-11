@@ -54,7 +54,9 @@ def save_profile_cache(profile: Optional[Profile]):
         context = get_context()
         key = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
 
-        index = profile.get_meta_data().model_dump()
+        index = profile.get_meta_data()
+
+        print(f"Caching in index {index}")
 
         try:
             if index is None:
@@ -68,7 +70,7 @@ def save_profile_cache(profile: Optional[Profile]):
                         "tenant": context.tenant
                     },
                     profile.model_dump(mode="json", exclude_defaults=True),
-                    profile.get_meta_data().model_dump() if profile.has_meta_data() else None
+                    index.model_dump() if profile.has_meta_data() else None
                 ),
                 key
             )
