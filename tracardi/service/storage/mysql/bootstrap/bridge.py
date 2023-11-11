@@ -6,7 +6,7 @@ from tracardi.service.storage.mysql.orm import BridgeService
 async def bridge_init(database_name):
     bs = BridgeService(database_name)
     return await bs.insert(Bridge(
-        id="878ded05-4ff3-4e08-9a86-72c0195fa95d",
+        id="778ded05-4ff3-4e08-9a86-72c0195fa95d",
         type="rest",
         name="REST API Bridge",
         description="API /track collector",

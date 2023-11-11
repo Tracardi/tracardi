@@ -1,14 +1,25 @@
+from sqlalchemy import and_
+
 from sqlalchemy import Column, String, DateTime, Boolean, JSON, LargeBinary, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+from tracardi.context import get_context
+
 Base = declarative_base()
+
+
+def local_context_filter(table: Base):
+    context = get_context()
+    return and_(table.tenant == context.tenant, table.production == context.production)
 
 
 class BridgeTable(Base):
     __tablename__ = 'bridge'
 
     id = Column(String(40), primary_key=True)  # 'keyword' with ignore_above maps to VARCHAR with length
+    tenant = Column(String(32))
+    production = Column(Boolean)
     name = Column(String(64))  # 'text' type in ES maps to VARCHAR(255) in MySQL
     description = Column(String(255))  # 'text' type in ES maps to VARCHAR(255) in MySQL
     type = Column(String(48))  # 'keyword' type in ES maps to VARCHAR(255) in MySQL
@@ -21,6 +32,8 @@ class EventSourceTable(Base):
     __tablename__ = 'event_source'
 
     id = Column(String(40), primary_key=True)
+    tenant = Column(String(32))
+    production = Column(Boolean)
     timestamp = Column(DateTime)
     update = Column(DateTime)
     type = Column(String(32))
@@ -56,6 +69,8 @@ class WorkflowTable(Base):
     __tablename__ = 'workflow'
 
     id = Column(String(40), primary_key=True)
+    tenant = Column(String(32))
+    production = Column(Boolean)
     timestamp = Column(DateTime)
     deploy_timestamp = Column(DateTime)
     name = Column(String(64))
@@ -75,6 +90,8 @@ class TriggerTable(Base):
     __tablename__ = 'trigger'
 
     id = Column(String(40), primary_key=True)  # 'keyword' in ES with ignore_above
+    tenant = Column(String(32))
+    production = Column(Boolean)
     name = Column(String(150))  # 'keyword' in ES with ignore_above
     description = Column(String(255))  # 'text' in ES with no string length mentioned
     type = Column(String(64))  # 'keyword' in ES defaults to 255 if no ignore_above is set
@@ -96,6 +113,8 @@ class ResourceTable(Base):
     __tablename__ = 'resource'
 
     id = Column(String(40), primary_key=True)
+    tenant = Column(String(32))
+    production = Column(Boolean)
     type = Column(String(48))
     timestamp = Column(DateTime)
     name = Column(String(64))
