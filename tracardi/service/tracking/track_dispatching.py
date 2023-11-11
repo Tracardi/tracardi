@@ -16,11 +16,9 @@ from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.service.storage.driver.elastic import segment as segment_db
 from tracardi.domain.event import Event
-from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.service.tracker_config import TrackerConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -78,14 +76,14 @@ async def trigger_workflows(profile: Profile,
     # Save to cache after processing. This is needed when both async and sync workers are working
     # The state should always be in cache.
 
-    if profile and profile.has_not_saved_changes():
+    if profile and profile.operation.needs_update():
         # Locks profile, loads profile from cache merges it with current profile and saves it in cache
 
         await lock_merge_with_cache_and_save_profile(profile,
                                                      context=get_context(),
                                                      lock_name="post-workflow-profile-save")
 
-    if session and session.has_not_saved_changes():
+    if session and session.operation.needs_update():
         # Locks session, loads session from cache merges it with current session and saves it in cache
 
         await lock_merge_with_cache_and_save_session(session,
@@ -95,12 +93,10 @@ async def trigger_workflows(profile: Profile,
     return profile, session, events, ux, response
 
 
-async def dispatch_sync_workflow_and_destinations(source: EventSource,
-                                                  profile: Profile,
+async def dispatch_sync_workflow_and_destinations(profile: Profile,
                                                   session: Session,
                                                   events: List[Event],
                                                   tracker_payload: TrackerPayload,
-                                                  tracker_config: TrackerConfig,
                                                   console_log: ConsoleLog) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
     # This is MUST BE FIRST BEFORE WORKFLOW

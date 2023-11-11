@@ -78,6 +78,8 @@ def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
             )
         )
 
+        profile.set_meta_data(base_profile.get_meta_data())
+
     except Exception as e:
         print(e)
 

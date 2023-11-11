@@ -170,12 +170,10 @@ async def process_track_data(source: EventSource,
                 # TODO Do not know if destinations are needed here. They are also dispatched in async
 
                 profile, session, sync_events, ux, response = await dispatch_sync_workflow_and_destinations(
-                    source,
                     profile,
                     session,
                     sync_events,
                     tracker_payload,
-                    tracker_config,
                     console_log
                 )
 
@@ -210,12 +208,10 @@ async def process_track_data(source: EventSource,
             events_result = await storage.save_events(events)
 
             profile, session, events, ux, response = await dispatch_sync_workflow_and_destinations(
-                source,
                 profile,
                 session,
                 events,
                 tracker_payload,
-                tracker_config,
                 console_log
             )
 
