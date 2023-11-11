@@ -56,7 +56,7 @@ def save_profile_cache(profile: Optional[Profile]):
 
         index = profile.get_meta_data()
 
-        print(f"Caching in index {index}")
+        print(f"Caching in index {index}", profile.has_meta_data())
 
         try:
             if index is None:
@@ -70,7 +70,7 @@ def save_profile_cache(profile: Optional[Profile]):
                         "tenant": context.tenant
                     },
                     profile.model_dump(mode="json", exclude_defaults=True),
-                    index.model_dump() if profile.has_meta_data() else None
+                    index.model_dump()
                 ),
                 key
             )
