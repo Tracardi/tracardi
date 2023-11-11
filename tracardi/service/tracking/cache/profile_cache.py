@@ -59,21 +59,24 @@ def save_profile_cache(profile: Optional[Profile]):
         try:
             if index is None:
                 raise ValueError("Empty profile index.")
+
+            redis_cache.set(
+                profile.id,
+                (
+                    {
+                        "production": context.production,
+                        "tenant": context.tenant
+                    },
+                    profile.model_dump(mode="json", exclude_defaults=True),
+                    profile.get_meta_data().model_dump() if profile.has_meta_data() else None
+                ),
+                key
+            )
+
         except ValueError as e:
             print(e)
 
-        redis_cache.set(
-            profile.id,
-            (
-                {
-                    "production": context.production,
-                    "tenant": context.tenant
-                },
-                profile.model_dump(mode="json", exclude_defaults=True),
-                profile.get_meta_data().model_dump() if profile.has_meta_data() else None
-            ),
-            key
-        )
+
 
 
 def save_profiles_in_cache(profiles: List[Profile]):
