@@ -54,6 +54,14 @@ def save_profile_cache(profile: Optional[Profile]):
         context = get_context()
         key = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
 
+        index = profile.get_meta_data().model_dump()
+
+        try:
+            if index is None:
+                raise ValueError("Empty profile index.")
+        except ValueError as e:
+            print(e)
+
         redis_cache.set(
             profile.id,
             (
