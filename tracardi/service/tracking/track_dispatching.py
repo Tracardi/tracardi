@@ -79,12 +79,16 @@ async def trigger_workflows(profile: Profile,
     if profile and profile.operation.needs_update():
         # Locks profile, loads profile from cache merges it with current profile and saves it in cache
 
+        logger.info(f"Profile needs update after workflow.")
+
         await lock_merge_with_cache_and_save_profile(profile,
                                                      context=get_context(),
                                                      lock_name="post-workflow-profile-save")
 
     if session and session.operation.needs_update():
         # Locks session, loads session from cache merges it with current session and saves it in cache
+
+        logger.info(f"Session needs update after workflow.")
 
         await lock_merge_with_cache_and_save_session(session,
                                                      context=get_context(),
