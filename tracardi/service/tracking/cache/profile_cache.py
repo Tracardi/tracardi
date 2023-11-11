@@ -56,7 +56,7 @@ def save_profile_cache(profile: Optional[Profile]):
 
         index = profile.get_meta_data()
 
-        print(f"Caching in index {index}", profile.has_meta_data())
+        print(f"Caching with profile index {index}")
 
         try:
             if index is None:
@@ -70,8 +70,6 @@ def save_profile_cache(profile: Optional[Profile]):
                     profile.model_dump(mode="json", exclude_defaults=True),
                     index.model_dump(mode="json")
                 )
-
-            print(value)
 
             redis_cache.set(
                 profile.id,
