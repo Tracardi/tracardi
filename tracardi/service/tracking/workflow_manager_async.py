@@ -36,6 +36,7 @@ APPEND = 2
 
 @dataclass
 class TrackerResult:
+    wf_triggered: bool
     tracker_payload: TrackerPayload
     events: List[Event]
     session: Optional[Session] = None
@@ -155,7 +156,7 @@ class WorkflowManagerAsync:
     async def trigger_workflows_for_events(self, events: List[Event], debug: bool = False) -> TrackerResult:
 
         debugger = None
-
+        wf_triggered = False
         # Get routing rules if workflow is not disabled
 
         event_trigger_rules = await self.get_routing_rules(events) if tracardi.enable_workflow else None
@@ -188,6 +189,7 @@ class WorkflowManagerAsync:
                         debug
                     )
 
+                    wf_triggered = True
                     debugger = rule_invoke_result.debugger
                     post_invoke_events = rule_invoke_result.post_invoke_events
                     invoked_rules = rule_invoke_result.invoked_rules
@@ -278,6 +280,7 @@ class WorkflowManagerAsync:
                 await self._save_debug_data(debugger, get_entity_id(self.profile))
 
             return TrackerResult(
+                wf_triggered=wf_triggered,
                 session=self.session,
                 profile=self.profile,
                 events=events,

@@ -8,7 +8,7 @@ from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.tracking.cache.profile_cache import lock_merge_with_cache_and_save_profile
 from tracardi.service.tracking.cache.session_cache import lock_merge_with_cache_and_save_session
 from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
-from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync
+from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
@@ -38,6 +38,7 @@ async def trigger_workflows(profile: Profile,
 
     ux = []
     response = {}
+    tracker_result = None
 
     if tracardi.enable_workflow:
         tracking_manager = WorkflowManagerAsync(
@@ -69,30 +70,31 @@ async def trigger_workflows(profile: Profile,
                               [event.type for event in events],
                               segment_db.load_segments)
 
-    # Add new fields to field mapping. New fields can be created in workflow.
+    if isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered:
 
-    add_new_field_mappings(profile, session)
+        # Add new fields to field mapping. New fields can be created in workflow.
+        add_new_field_mappings(profile, session)
 
-    # Save to cache after processing. This is needed when both async and sync workers are working
-    # The state should always be in cache.
+        # Save to cache after processing. This is needed when both async and sync workers are working
+        # The state should always be in cache.
 
-    if profile and profile.operation.needs_update():
-        # Locks profile, loads profile from cache merges it with current profile and saves it in cache
+        if profile and profile.operation.needs_update():
+            # Locks profile, loads profile from cache merges it with current profile and saves it in cache
 
-        logger.info(f"Profile needs update after workflow.")
+            logger.info(f"Profile needs update after workflow.")
 
-        await lock_merge_with_cache_and_save_profile(profile,
-                                                     context=get_context(),
-                                                     lock_name="post-workflow-profile-save")
+            await lock_merge_with_cache_and_save_profile(profile,
+                                                         context=get_context(),
+                                                         lock_name="post-workflow-profile-save")
 
-    if session and session.operation.needs_update():
-        # Locks session, loads session from cache merges it with current session and saves it in cache
+        if session and session.operation.needs_update():
+            # Locks session, loads session from cache merges it with current session and saves it in cache
 
-        logger.info(f"Session needs update after workflow.")
+            logger.info(f"Session needs update after workflow.")
 
-        await lock_merge_with_cache_and_save_session(session,
-                                                     context=get_context(),
-                                                     lock_name="post-workflow-session-save")
+            await lock_merge_with_cache_and_save_session(session,
+                                                         context=get_context(),
+                                                         lock_name="post-workflow-session-save")
 
     return profile, session, events, ux, response
 
