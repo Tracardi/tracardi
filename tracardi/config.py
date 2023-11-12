@@ -40,6 +40,7 @@ class MemoryCacheConfig:
         self.event_destination_cache_ttl = get_env_as_int('EVENT_DESTINATION_CACHE_TTL', 2)
         self.profile_destination_cache_ttl = get_env_as_int('PROFILE_DESTINATION_CACHE_TTL', 2)
         self.data_compliance_cache_ttl = get_env_as_int('DATA_COMPLIANCE_CACHE_TTL', 2)
+        self.trigger_rule_cache_ttl = get_env_as_int('TRIGGER_RULE_CACHE_TTL', 5)
 
 
 class ElasticConfig:

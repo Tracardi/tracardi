@@ -2,7 +2,7 @@
   {
     "name": "Messaging Started",
     "description": "Customer starts conversation/messaging. Deliver a conversation id to track the whole conversation session.",
-    "id": "Messaging-started",
+    "id": "messaging-started",
     "properties": {
       "conversation": "string",
       "type": "string",
@@ -168,7 +168,7 @@
   {
     "name": "Messaging Ended",
     "description": "Customer ended conversation/messaging. Deliver a conversation id to track the whole conversation session.",
-    "id": "Messaging-ended",
+    "id": "messaging-ended",
     "properties": {
       "conversation": "string",
       "type": "string",
