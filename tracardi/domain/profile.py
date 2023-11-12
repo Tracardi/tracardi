@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, PrivateAttr
 from dateutil import parser
 
 from .entity import Entity
@@ -44,6 +44,8 @@ class Profile(Entity):
     aux: Optional[dict] = {}
     data: Optional[ProfileData] = ProfileData()
 
+    _updated_in_workflow: bool = PrivateAttr(False)
+
     def __init__(self, **data: Any):
         super().__init__(**data)
         self._add_id_to_ids()
@@ -59,6 +61,12 @@ class Profile(Entity):
         Used to fill metadata with default current index and id.
         """
         self._fill_meta_data('profile')
+
+    def set_updated_in_workflow(self, state=True):
+        self._updated_in_workflow = state
+
+    def is_updated_in_workflow(self) -> bool:
+        return self._updated_in_workflow
 
     def serialize(self):
         return {

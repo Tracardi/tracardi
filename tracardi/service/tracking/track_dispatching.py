@@ -78,7 +78,7 @@ async def trigger_workflows(profile: Profile,
         # Save to cache after processing. This is needed when both async and sync workers are working
         # The state should always be in cache.
 
-        if profile and profile.operation.needs_update():
+        if profile and profile.is_updated_in_workflow():
             # Locks profile, loads profile from cache merges it with current profile and saves it in cache
 
             logger.info(f"Profile needs update after workflow.")
@@ -87,7 +87,7 @@ async def trigger_workflows(profile: Profile,
                                                          context=get_context(),
                                                          lock_name="post-workflow-profile-save")
 
-        if session and session.operation.needs_update():
+        if session and session.is_updated_in_workflow():
             # Locks session, loads session from cache merges it with current session and saves it in cache
 
             logger.info(f"Session needs update after workflow.")

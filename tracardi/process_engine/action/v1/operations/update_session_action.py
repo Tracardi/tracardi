@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from tracardi.domain.session import Session
-from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 
@@ -10,8 +9,7 @@ class UpdateSessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         if isinstance(self.session, Session):
-            if isinstance(self.session.operation, Operation):
-                self.session.operation.new = True
+            self.session.set_updated_in_workflow()
             self.session.metadata.time.update = datetime.utcnow()
         return None
 
