@@ -5,19 +5,27 @@
     "explain": "When a user signs in for a service, this event should be used to track it. This could also be an identification point for profile merging.",
     "id": "sign-in",
     "properties": {
-      "email": "string",
+      "email": {
+        "main": "string",
+        "private": "string",
+        "business": "string"
+      },
       "login": "string",
       "firstname": "string",
       "lastname": "string"
     },
     "copy": {
-      "data.contact.email":  "properties.email",
+      "data.contact.email.main":     "properties.email.main",
+      "data.contact.email.private":  "properties.email.private",
+      "data.contact.email.business": "properties.email.business",
       "data.identifier.token":   "properties.login",
       "data.pii.firstname":      "properties.firstname",
       "data.pii.lastname":       "properties.lastname"
     },
     "profile": {
-      "data.contact.email":     ["data.contact.email", "equal"],
+      "data.contact.email.main":     ["data.contact.email.main", "equal"],
+      "data.contact.email.private":  ["data.contact.email.private", "equal"],
+      "data.contact.email.business": ["data.contact.email.business", "equal"],
       "data.identifier.token":  ["data.identifier.token", "equal"],
       "data.pii.firstname":     ["data.pii.firstname", "equal"],
       "data.pii.lastname":      ["data.pii.lastname", "equal"]
@@ -31,20 +39,28 @@
     "explain": "When a user signs up for a service, this event should be used to track it. This could also be an identification point for profile merging.",
     "id": "sign-up",
     "properties": {
-      "email": "string",
+      "email": {
+        "main": "string",
+        "private": "string",
+        "business": "string"
+      },
       "login": "string",
       "firstname": "string",
       "lastname": "string",
       "custom": "object"
     },
     "copy": {
-      "data.contact.email":  "properties.email",
+      "data.contact.email.main":     "properties.email.main",
+      "data.contact.email.private":  "properties.email.private",
+      "data.contact.email.business": "properties.email.business",
       "data.pii.firstname":      "properties.firstname",
       "data.pii.lastname":       "properties.lastname",
       "data.identifier.token":   "properties.login"
     },
     "profile": {
-      "data.contact.email":     ["data.contact.email", "equal"],
+      "data.contact.email.main":     ["data.contact.email.main", "equal"],
+      "data.contact.email.private":  ["data.contact.email.private", "equal"],
+      "data.contact.email.business": ["data.contact.email.business", "equal"],
       "data.identifier.token":  ["data.identifier.token", "equal"],
       "data.pii.firstname":     ["data.pii.firstname", "equal"],
       "data.pii.lastname":      ["data.pii.lastname", "equal"]
@@ -72,8 +88,12 @@
       "firstname": "string",
       "lastname": "string",
 
-      "phone": "string",
-
+      "phone": {
+        "main": "string",
+        "mobile": "string",
+        "whatsapp": "string",
+        "business": "string"
+      },
       "id": "string",
       "token": "string",
       "passport": "string",
@@ -81,8 +101,11 @@
       "credit_card": "string",
       "coupon": "string",
       "badge": "string",
-
-      "email": "string",
+      "email": {
+        "main": "string",
+        "private": "string",
+        "business": "string"
+      },
       "twitter": "string",
       "whatsapp": "string",
       "discord": "string",
@@ -93,8 +116,13 @@
       "signal": "string"
     },
     "copy": {
-      "data.contact.email":          "properties.email",
-      "data.contact.phone":          "properties.phone",
+      "data.contact.email.main":     "properties.email.main",
+      "data.contact.email.private":  "properties.email.private",
+      "data.contact.email.business": "properties.email.business",
+      "data.contact.phone.main":     "properties.phone.main",
+      "data.contact.phone.mobile":   "properties.phone.mobile",
+      "data.contact.phone.business": "properties.phone.business",
+      "data.contact.phone.whatsapp": "properties.phone.whatsapp",
       "data.pii.firstname":          "properties.firstname",
       "data.pii.lastname":           "properties.lastname",
       "data.identifier.id":          "properties.id",

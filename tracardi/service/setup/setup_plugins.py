@@ -244,7 +244,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.operations.merge_profiles_action": PluginMetadata(
-        test=PluginTest(init={'mergeBy': ['profile@data.contact.email']},
+        test=PluginTest(init={'mergeBy': ['profile@data.contact.email.main']},
                         resource=None)
     ),
 
@@ -578,7 +578,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.internal.inject_profile_by_field.plugin": PluginMetadata(
-        test=PluginTest(init={'field': "data.contact.email", 'value': 'test@test.com'},
+        test=PluginTest(init={'field': "data.contact.email.main", 'value': 'test@test.com'},
                         resource=None)
     ),
 
@@ -1413,7 +1413,7 @@ test_plugins: Dict[str, PluginMetadata] = {
     ),
     "tracardi.process_engine.action.v1.connectors.novu.trigger.plugin": PluginMetadata(
         test=PluginTest(
-            init={'payload': '{}', 'recipient_email': 'profile@data.contact.email', 'source': {'id': '', 'name': ''},
+            init={'payload': '{}', 'recipient_email': 'profile@data.contact.email.main', 'source': {'id': '', 'name': ''},
                   'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
             resource={
                 "token": "token"

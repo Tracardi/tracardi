@@ -420,7 +420,7 @@
       "from_index": "tracardi-event",
       "to_index": "tracardi-event",
       "multi": true,
-      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.data.ec.order.cost.remove(\"other\");\nrow.data.ec.order.income.remove(\"revenue\");\nrow.data.ec.order.cost.remove(\"discount\");\nrow.data.ec.order.cost.remove(\"tax\");\nrow.data.ec.order.cost.remove(\"shipping\");\nctx._source = [:];\nctx._source.putAll(row);"
+      "script": "Map row = new HashMap();\nrow.putAll(ctx._source);\nrow.data.contact.email.main = ctx._source.data.contact.email;\n\nrow.data.contact.phone.main = ctx._source.data.contact.phone;\nrow.data.ec.order.cost.remove(\"other\");\nrow.data.ec.order.income.remove(\"revenue\");\nrow.data.ec.order.cost.remove(\"discount\");\nrow.data.ec.order.cost.remove(\"tax\");\nrow.data.ec.order.cost.remove(\"shipping\");\nctx._source = [:];\nctx._source.putAll(row);"
     },
     "worker": "reindex",
     "conflicts": null,

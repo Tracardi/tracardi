@@ -28,7 +28,7 @@
       "pii": {
         "firstname": "string",
         "lastname": "string",
-        "name": "string",
+        "display_name": "string",
         "birthday": "2010-01-01 00:00:00",
         "language": {
           "native": "string",
@@ -56,8 +56,17 @@
         "badge": "string"
       },
       "contact": {
-        "email": "string",
-        "phone": "string",
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        },
+        "phone": {
+          "main": "string",
+          "business": "string",
+          "mobile": "string",
+          "whatsapp": "string"
+        },
         "app": {
           "whatsapp": "string",
           "discord": "string",
@@ -128,7 +137,7 @@
     "copy": {
       "data.pii.firstname":               "properties.pii.firstname",
       "data.pii.lastname":                "properties.pii.lastname",
-      "data.pii.name":                    "properties.pii.name",
+      "data.pii.display_name":            "properties.pii.display_name",
       "data.pii.birthday":                "properties.pii.birthday",
       "data.pii.language.native":         "properties.pii.language.native",
       "data.pii.language.spoken":         "properties.pii.language.spoken",
@@ -144,8 +153,13 @@
       "data.identifier.credit_card":      "properties.identifier.credit_card",
       "data.identifier.coupons":          "properties.identifier.coupons",
       "data.identifier.badge":            "properties.identifier.badge",
-      "data.contact.email":               "properties.contact.email",
-      "data.contact.phone":               "properties.contact.phone",
+      "data.contact.email.main":          "properties.contact.email.main",
+      "data.contact.email.private":       "properties.contact.email.private",
+      "data.contact.email.business":      "properties.contact.email.business",
+      "data.contact.phone.main":          "properties.contact.phone.main",
+      "data.contact.phone.business":      "properties.contact.phone.business",
+      "data.contact.phone.mobile":        "properties.contact.phone.mobile",
+      "data.contact.phone.whatsapp":      "properties.contact.phone.whatsapp",
       "data.contact.app.whatsapp":        "properties.contact.app.whatsapp",
       "data.contact.app.discord":         "properties.contact.app.discord",
       "data.contact.app.slack":           "properties.contact.app.slack",
@@ -203,8 +217,8 @@
         "data.pii.lastname",
         "equal"
       ],
-      "data.pii.name": [
-        "data.pii.name",
+      "data.pii.display_name": [
+        "data.pii.display_name",
         "equal"
       ],
       "data.pii.birthday": [
@@ -253,12 +267,32 @@
         "data.contact.app.whatsapp",
         "equal"
       ],
-      "data.contact.email": [
-        "data.contact.email",
+      "data.contact.email.main": [
+        "data.contact.email.main",
         "equal"
       ],
-      "data.contact.phone": [
-        "data.contact.phone",
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equal"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equal"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equal"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equal"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equal"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
         "equal"
       ],
       "data.contact.app.discord": [

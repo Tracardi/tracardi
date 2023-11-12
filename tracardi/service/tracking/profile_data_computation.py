@@ -43,8 +43,8 @@ def update_profile_last_geo(session: Session, profile: Profile) -> Profile:
 
 
 def update_profile_email_type(profile: Profile) -> Profile:
-    if profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
-        email_parts = profile.data.contact.email.split('@')
+    if profile.data.contact.email.main and ('email' not in profile.aux or 'free' not in profile.aux['email']):
+        email_parts = profile.data.contact.email.main.split('@')
         if len(email_parts) > 1:
             email_domain = email_parts[1]
 

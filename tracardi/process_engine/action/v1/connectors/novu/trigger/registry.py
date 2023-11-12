@@ -18,7 +18,7 @@ def register() -> Plugin:
                 "source": {"id": "", "name": ""},
                 "template": {"id": "", "name": ""},
                 "subscriber_id": "profile@id",
-                "recipient_email": "profile@data.contact.email",
+                "recipient_email": "profile@data.contact.email.main",
                 "payload": "{}",
                 "hash": False,
                 "upsert_subscriber": True,
@@ -94,14 +94,14 @@ def register() -> Plugin:
                                 id="recipient_email",
                                 name="Recipient e-mail address",
                                 description="Please type a reference path to e-mail address. By default we set it to "
-                                            "profile@data.contact.email.",
+                                            "profile@data.contact.email.main",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail address"})
                             ),
                             FormField(
                                 id="payload",
                                 name="Data",
                                 description="Please type the data you would like to use within template. "
-                                            "You may use the reference to data e.g. profile@pii.name. Please look for "
+                                            "You may use the reference to data e.g. profile@data.pii.firstname. Please look for "
                                             "the term \"Object template\" in documentation for more details.",
                                 component=FormComponent(type="json", props={"label": "Data"})
                             )

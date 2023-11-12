@@ -374,8 +374,8 @@ class TrackingOrchestrator:
                         session.operation.update = True
 
         # Add email type
-        if has_profile and profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
-            email_parts = profile.data.contact.email.split('@')
+        if has_profile and profile.data.contact.email.main and ('email' not in profile.aux or 'free' not in profile.aux['email']):
+            email_parts = profile.data.contact.email.main.split('@')
             if len(email_parts) > 1:
                 email_domain = email_parts[1]
 
