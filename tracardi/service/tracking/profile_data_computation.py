@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple, List
 
 import logging
 
@@ -91,7 +91,7 @@ async def map_event_to_profile(
         flat_event: Dotty,
         profile: Optional[Profile],
         session: Session,
-        console_log: ConsoleLog) -> Profile:
+        console_log: ConsoleLog) -> Tuple[Profile, FieldChangeMonitor]:
 
     # Default event types mappings
 
@@ -263,7 +263,6 @@ async def map_event_to_profile(
                     event=Event(**flat_event.to_dict()),
                     profile=profile_changes.flat_profile)
 
-        _profile_updated = False
         try:
             metadata = profile.get_meta_data()
             profile = Profile(**profile_changes.flat_profile)
@@ -271,8 +270,6 @@ async def map_event_to_profile(
             profile.set_meta_data(metadata)
             # Mark to update the profile
             profile.operation.update = True
-
-            _profile_updated = True
 
         except ValidationError as e:
             message = f"It seems that there was an error when trying to add or update some information to " \
@@ -301,15 +298,4 @@ async def map_event_to_profile(
             if not tracardi.skip_errors_on_profile_mapping:
                 raise e
 
-        # ToDo this should be moved to saving. Otherwise profile may not be saved but changes will
-
-        if _profile_updated:
-
-            # Send changed fields to be saved
-
-            field_change_log_dispatch(
-                get_context(),
-                profile_changes.get_changed_values()
-            )
-
-    return profile
+    return profile, profile_changes

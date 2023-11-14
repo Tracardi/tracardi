@@ -3,6 +3,7 @@ from dotty_dict import dotty, Dotty
 
 from typing import List, Tuple, Union, Optional
 
+from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.config import memory_cache
@@ -86,7 +87,9 @@ def _auto_index_default_event_type(flat_event: Dotty, profile: Profile) -> Dotty
     return flat_event
 
 
-async def default_mapping_event_and_profile(flat_event, profile: Optional[Profile], session, console_log):
+async def default_mapping_event_and_profile(flat_event, profile: Optional[Profile], session, console_log) -> Tuple[
+    Dotty, Optional[Profile], FieldChangeMonitor]:
+
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, profile)
 
@@ -117,14 +120,15 @@ async def default_mapping_event_and_profile(flat_event, profile: Optional[Profil
                                                  custom_event_mapping)
 
     # Map event data to profile
+    profile_changes = None
     if profile:
-        profile = await map_event_to_profile(custom_event_to_profile_mapping_schemas,
-                                             flat_event,
-                                             profile,
-                                             session,
-                                             console_log)
+        profile, profile_changes = await map_event_to_profile(custom_event_to_profile_mapping_schemas,
+                                                              flat_event,
+                                                              profile,
+                                                              session,
+                                                              console_log)
 
-    return flat_event, profile
+    return flat_event, profile, profile_changes
 
 
 async def make_event_from_event_payload(event_payload,
@@ -179,8 +183,9 @@ async def compute_events(events: List[EventPayload],
                          profile_less: bool,
                          console_log: ConsoleLog,
                          tracker_payload: TrackerPayload
-                         ) -> Tuple[List[Event], Session, Profile]:
+                         ) -> Tuple[List[Event], Session, Profile, Optional[FieldChangeMonitor]]:
 
+    profile_changes = None
     event_objects = []
     for event_payload in events:
 
@@ -199,7 +204,7 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, profile = await default_mapping_event_and_profile(
+            flat_event, profile, profile_changes = await default_mapping_event_and_profile(
                 flat_event,
                 profile,
                 session,
@@ -244,4 +249,4 @@ async def compute_events(events: List[EventPayload],
 
         event_objects.append(event)
 
-    return event_objects, session, profile
+    return event_objects, session, profile, profile_changes

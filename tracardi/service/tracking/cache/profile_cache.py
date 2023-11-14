@@ -49,7 +49,7 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
     return profile
 
 
-def save_profile_cache(profile: Optional[Profile]):
+def save_profile_cache(profile: Optional[Profile], profile_changes=None):
     if profile:
         context = get_context()
         key = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
