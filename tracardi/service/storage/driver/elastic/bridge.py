@@ -53,7 +53,7 @@ async def install_bridge(bridge: Bridge):
         bridge.name = f"(Production) {bridge.name}"
         bridge.id = f"prod-{bridge.id}"
     else:
-        bridge.name = f"(Staging) {bridge.name}"
+        bridge.name = f"(Test) {bridge.name}"
         bridge.id = f"stage-{bridge.id}"
 
     result = await save(bridge)
