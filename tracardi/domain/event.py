@@ -183,12 +183,6 @@ class Event(NamedEntity):
             data['name'] = capitalize_event_type_id(data.get('type', ''))
         super().__init__(**data)
 
-    def __hash__(self):
-        return hash(self.id)
-
-    def __eq__(self, other):
-        return self.id == other.id
-
     def replace(self, event):
         if isinstance(event, Event):
             self.id = event.id

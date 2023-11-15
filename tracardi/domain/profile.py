@@ -50,12 +50,6 @@ class Profile(Entity):
         super().__init__(**data)
         self._add_id_to_ids()
 
-    def __hash__(self):
-        return hash(self.id)
-
-    def __eq__(self, other):
-        return self.id == other.id
-
     def fill_meta_data(self):
         """
         Used to fill metadata with default current index and id.

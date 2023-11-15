@@ -92,3 +92,9 @@ class Entity(Creatable):
 
     def get_dotted_properties(self) -> Set[str]:
         return dotter(self.model_dump())
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id if isinstance(other, Entity) else False

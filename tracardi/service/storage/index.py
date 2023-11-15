@@ -37,7 +37,7 @@ class Index:
         elif self.partitioning == 'minute':
             return f"{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
         elif self.partitioning == 'quarter':
-            return f"{date.year}-q{(date.month%4) + 1}"
+            return f"{date.year}-q{(date.month % 4) + 1}"
         else:
             raise ValueError("Unknown partitioning. Expected: year, month, quarter, or day")
 
@@ -239,6 +239,11 @@ class Resource(metaclass=Singleton):
                                       partitioning=tracardi.field_change_log_partitioning,
                                       index="tracardi-field-change-log",
                                       mapping="mappings/field-change-index.json"),
+            "field-timestamp": Index(staging=False,
+                                     multi_index=False,  # Never can be multi
+                                     partitioning=tracardi.field_change_log_partitioning,
+                                     index="tracardi-field-timestamp",
+                                     mapping="mappings/field-timestamp-index.json"),
             "user": Index(staging=False,
                           multi_index=False,
                           index="tracardi-user",
