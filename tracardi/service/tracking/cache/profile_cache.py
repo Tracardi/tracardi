@@ -1,6 +1,7 @@
 from typing import Optional, List
 from tracardi.context import get_context, Context
 from tracardi.domain.storage_record import RecordMetadata
+from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
@@ -38,7 +39,7 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
     )
 
     try:
-        context, profile, profile_metadata = _data
+        context, profile, profile_changes, profile_metadata = _data
     except Exception:
         return None
 
@@ -49,7 +50,7 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
     return profile
 
 
-def save_profile_cache(profile: Optional[Profile], profile_changes=None):
+def save_profile_cache(profile: Optional[Profile], profile_changes: Optional[FieldChangeMonitor] = None):
     if profile:
         context = get_context()
         key = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
@@ -68,6 +69,7 @@ def save_profile_cache(profile: Optional[Profile], profile_changes=None):
                         "tenant": context.tenant
                     },
                     profile.model_dump(mode="json", exclude_defaults=True),
+                    profile_changes.get_changed_values() if profile_changes else None,
                     index.model_dump(mode="json")
                 )
 

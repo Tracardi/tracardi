@@ -1,15 +1,14 @@
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 
 import logging
 
 from dotty_dict import dotty, Dotty
 from pydantic import ValidationError
 
-from com_tracardi.service.tracking.field_change_dispatcher import field_change_log_dispatch
 from tracardi.config import tracardi
-from tracardi.context import get_context
 from tracardi.domain.console import Console
 from tracardi.domain.event import Event
+from tracardi.domain.event_source import EventSource
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -91,6 +90,7 @@ async def map_event_to_profile(
         flat_event: Dotty,
         profile: Optional[Profile],
         session: Session,
+        source: EventSource,
         console_log: ConsoleLog) -> Tuple[Profile, FieldChangeMonitor]:
 
     # Default event types mappings
@@ -102,6 +102,8 @@ async def map_event_to_profile(
     flat_profile = dotty(profile.model_dump(mode='json'))
     profile_changes = FieldChangeMonitor(flat_profile,
                                          type="profile",
+                                         session=session,
+                                         source=source,
                                          track_history=tracardi.enable_field_change_log)
 
     if default_mapping_schema is not None:

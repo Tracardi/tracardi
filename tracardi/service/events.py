@@ -136,22 +136,30 @@ def copy_default_event_to_profile(copy_schema: dict, profile_changes: FieldChang
                 if event_path in flat_event:
                     profile_updated_flag = True
                     if operation == 'append':
+
+                        # Make sure the value is list
+                        if isinstance(flat_event[event_path], (str, int, float)):
+                            value_to_be_appended = [flat_event[event_path]]
+                        else:
+                            value_to_be_appended = flat_event[event_path]
+
+                        # Convert profile property to list if string, int, etc.
+                        if not isinstance(profile_changes[profile_path], list):
+                            # Must have some value, not None, ""
+                            if profile_changes[profile_path]:
+                                profile_changes[profile_path] = [profile_changes[profile_path]]
+
                         if profile_path not in profile_changes or profile_changes[profile_path] is None:
                             profile_changes[profile_path] = _append_value(values=[],
-                                                                          value=flat_event[event_path])
+                                                                          value=value_to_be_appended)
+
                         elif isinstance(profile_changes[profile_path], list):
                             profile_changes[profile_path] = _append_value(values=profile_changes[profile_path],
-                                                                          value=flat_event[event_path])
-                        elif not isinstance(profile_changes[profile_path], dict):
-                            # data in profile exists but is not dict, list. It can be a string ot int.
-
-                            _data = [profile_changes[profile_path], flat_event[event_path]]
-
-                            profile_changes[profile_path] = _data
+                                                                          value=value_to_be_appended)
                         else:
                             raise KeyError(
                                 f"Can not append data {flat_event[event_path]} to {profile_changes[profile_path]} "
-                                f"at profile@{profile_path}")
+                                f"at profile@{profile_path}. Unexpected type {type(flat_event[event_path])}")
 
                     elif operation == 'equals_if_not_exists':
                         if profile_path not in profile_changes:

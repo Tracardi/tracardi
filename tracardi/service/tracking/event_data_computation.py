@@ -87,7 +87,11 @@ def _auto_index_default_event_type(flat_event: Dotty, profile: Profile) -> Dotty
     return flat_event
 
 
-async def default_mapping_event_and_profile(flat_event, profile: Optional[Profile], session, console_log) -> Tuple[
+async def default_mapping_event_and_profile(flat_event: Dotty,
+                                            profile: Optional[Profile],
+                                            session:Session,
+                                            source: EventSource,
+                                            console_log: ConsoleLog) -> Tuple[
     Dotty, Optional[Profile], FieldChangeMonitor]:
 
     # Default event mapping
@@ -122,11 +126,13 @@ async def default_mapping_event_and_profile(flat_event, profile: Optional[Profil
     # Map event data to profile
     profile_changes = None
     if profile:
-        profile, profile_changes = await map_event_to_profile(custom_event_to_profile_mapping_schemas,
-                                                              flat_event,
-                                                              profile,
-                                                              session,
-                                                              console_log)
+        profile, profile_changes = await map_event_to_profile(
+            custom_event_to_profile_mapping_schemas,
+            flat_event,
+            profile,
+            session,
+            source,
+            console_log)
 
     return flat_event, profile, profile_changes
 
@@ -208,6 +214,7 @@ async def compute_events(events: List[EventPayload],
                 flat_event,
                 profile,
                 session,
+                source,
                 console_log)
 
         # Convert to event

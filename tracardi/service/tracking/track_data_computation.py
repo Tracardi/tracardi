@@ -176,7 +176,7 @@ async def lock_and_compute_data(
             # Update only when needed
 
             if profile and profile.has_not_saved_changes():
-                save_profile_cache(profile)
+                save_profile_cache(profile, profile_changes)
 
             if session and session.has_not_saved_changes():
                 save_session_cache(session)
