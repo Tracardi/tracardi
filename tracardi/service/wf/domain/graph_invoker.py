@@ -419,8 +419,12 @@ class GraphInvoker(BaseModel):
                 if node.object.join.has_reshape_templates():
                     output = json.loads(node.object.join.get_reshape_template(out_port).template)
                     if output:
-                        dot = DotAccessor(node.object.profile, node.object.session,
-                                          out_payload if isinstance(out_payload, dict) else None)
+                        dot = DotAccessor(
+                            node.object.profile,
+                            node.object.session,
+                            out_payload if isinstance(out_payload, dict) else None,
+                            node.object.event
+                        )
 
                         if node.object.join.get_reshape_template(out_port).default is True:
                             template = DictTraverser(dot, default=None)
