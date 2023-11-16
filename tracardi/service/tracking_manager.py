@@ -6,7 +6,7 @@ from uuid import uuid4
 from dotty_dict import dotty
 from pydantic import ValidationError
 
-from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.events import auto_index_default_event_type, copy_default_event_to_profile, \
     get_default_mappings_for, call_function
 
@@ -252,7 +252,7 @@ class TrackingManager(TrackingManagerBase):
             if copy_schema is not None:
                 flat_profile = dotty(self.profile.model_dump())
                 flat_event = flat_events[event.id]
-                profile_changes = FieldChangeMonitor(flat_profile, type="profile")
+                profile_changes = FieldTimestampMonitor(flat_profile, type="profile")
 
                 # Copy default
                 profile_changes, profile_updated_flag = copy_default_event_to_profile(

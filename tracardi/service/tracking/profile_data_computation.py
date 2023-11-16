@@ -17,7 +17,7 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
-from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.events import get_default_mappings_for, call_function
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -91,7 +91,7 @@ async def map_event_to_profile(
         profile: Optional[Profile],
         session: Session,
         source: EventSource,
-        console_log: ConsoleLog) -> Tuple[Profile, FieldChangeMonitor]:
+        console_log: ConsoleLog) -> Tuple[Profile, FieldTimestampMonitor]:
 
     # Default event types mappings
 
@@ -100,11 +100,11 @@ async def map_event_to_profile(
     profile_updated_flag = False
 
     flat_profile = dotty(profile.model_dump(mode='json'))
-    profile_changes = FieldChangeMonitor(flat_profile,
-                                         type="profile",
-                                         session=session,
-                                         source=source,
-                                         track_history=tracardi.enable_field_change_log)
+    profile_changes = FieldTimestampMonitor(flat_profile,
+                                            type="profile",
+                                            session=session,
+                                            source=source,
+                                            track_history=tracardi.enable_field_change_log)
 
     if default_mapping_schema is not None:
         # Copy default

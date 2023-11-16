@@ -2,7 +2,7 @@ from typing import Optional
 from tracardi.context import get_context, Context
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
-from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.merging.session_merger import merge_sessions
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
@@ -32,7 +32,7 @@ def load_session_cache(session_id: str, production):
     return session
 
 
-def save_session_cache(session: Optional[Session], session_changes: Optional[FieldChangeMonitor] = None):
+def save_session_cache(session: Optional[Session], session_changes: Optional[FieldTimestampMonitor] = None):
     if session:
         context = get_context()
 

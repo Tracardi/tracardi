@@ -3,7 +3,7 @@ from dotty_dict import dotty, Dotty
 
 from typing import List, Tuple, Union, Optional
 
-from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.config import memory_cache
@@ -92,7 +92,7 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
                                             session:Session,
                                             source: EventSource,
                                             console_log: ConsoleLog) -> Tuple[
-    Dotty, Optional[Profile], FieldChangeMonitor]:
+    Dotty, Optional[Profile], FieldTimestampMonitor]:
 
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, profile)
@@ -189,7 +189,7 @@ async def compute_events(events: List[EventPayload],
                          profile_less: bool,
                          console_log: ConsoleLog,
                          tracker_payload: TrackerPayload
-                         ) -> Tuple[List[Event], Session, Profile, Optional[FieldChangeMonitor]]:
+                         ) -> Tuple[List[Event], Session, Profile, Optional[FieldTimestampMonitor]]:
 
     profile_changes = None
     event_objects = []

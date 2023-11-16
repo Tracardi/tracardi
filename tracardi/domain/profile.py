@@ -94,6 +94,7 @@ class Profile(Entity):
         self.operation.update = True
         self.metadata.time.update = datetime.utcnow()
         self.data.compute_anonymous_field()
+        self.set_updated_in_workflow()
 
     def get_next_metric_computation_date(self) -> Optional[datetime]:
 

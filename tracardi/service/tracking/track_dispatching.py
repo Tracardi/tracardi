@@ -1,3 +1,5 @@
+from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
+from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from typing import List, Tuple, Optional
 
 import logging
@@ -20,6 +22,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
@@ -32,18 +35,20 @@ async def trigger_workflows(profile: Profile,
                             tracker_payload: TrackerPayload,
                             console_log: ConsoleLog,
                             debug: bool) -> Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict]]:
+    Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeTimestampManager, bool]:
 
     # Checks rules and trigger workflows for given events and saves profile and session
 
     ux = []
     response = {}
     tracker_result = None
+    changed_fields_timestamps = None
 
     if tracardi.enable_workflow:
         tracking_manager = WorkflowManagerAsync(
             console_log,
             tracker_payload,
+            FieldChangeTimestampManager(),
             profile,
             session
         )
@@ -57,6 +62,7 @@ async def trigger_workflows(profile: Profile,
         events = tracker_result.events
         ux = tracker_result.ux,
         response = tracker_result.response
+        changed_fields_timestamps = tracker_result.changed_field_timestamps
 
         # Dispatch changed profile to destination
 
@@ -70,10 +76,50 @@ async def trigger_workflows(profile: Profile,
                               [event.type for event in events],
                               segment_db.load_segments)
 
-    if isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered:
+    is_wf_triggered = isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered
+
+    if is_wf_triggered:
 
         # Add new fields to field mapping. New fields can be created in workflow.
         add_new_field_mappings(profile, session)
+
+
+    return profile, session, events, ux, response, changed_fields_timestamps, is_wf_triggered
+
+
+async def dispatch_sync_workflow_and_destinations(profile: Profile,
+                                                  session: Session,
+                                                  events: List[Event],
+                                                  tracker_payload: TrackerPayload,
+                                                  console_log: ConsoleLog,
+                                                  store_in_db:bool,
+                                                  storage: TrackingPersisterAsync
+                                                  ) -> Tuple[
+    Profile, Session, List[Event], Optional[list], Optional[dict]]:
+
+    # This is MUST BE FIRST BEFORE WORKFLOW
+
+    profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
+
+    # Dispatch workflow and post eve segmentation
+
+    debug = tracker_payload.is_on('debugger', default=False)
+
+    profile, session, events, ux, response, changed_fields_timestamps, is_wf_triggered = await (
+        trigger_workflows(
+            profile,
+            session,
+            events,
+            tracker_payload,
+            console_log,
+            debug
+        )
+    )
+
+    # INFO! trigger_workflows will SAVE changed profile and session in the cache. For the async this is
+    # enough to persist data.
+
+    if is_wf_triggered:
 
         # Save to cache after processing. This is needed when both async and sync workers are working
         # The state should always be in cache.
@@ -96,30 +142,22 @@ async def trigger_workflows(profile: Profile,
                                                          context=get_context(),
                                                          lock_name="post-workflow-session-save")
 
-    return profile, session, events, ux, response
+    # We save manually only when async processing is disabled.
+    # Otherwise flusher worker saves in-memory profile and session automatically
+
+    if store_in_db:
+
+        profile_and_session_result = await storage.save_profile_and_session(
+            session,
+            profile
+        )
+
+    # Todo save fields timestamps
+    # save via queue. THis is only COM feature.
+    print(changed_fields_timestamps.get_list())
 
 
-async def dispatch_sync_workflow_and_destinations(profile: Profile,
-                                                  session: Session,
-                                                  events: List[Event],
-                                                  tracker_payload: TrackerPayload,
-                                                  console_log: ConsoleLog) -> Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict]]:
-    # This is MUST BE FIRST BEFORE WORKFLOW
-
-    profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
-
-    # Dispatch workflow and post eve segmentation
-
-    debug = tracker_payload.is_on('debugger', default=False)
-    profile, session, events, ux, response = await trigger_workflows(profile,
-                                                                     session,
-                                                                     events,
-                                                                     tracker_payload,
-                                                                     console_log,
-                                                                     debug)
-
-    # Dispatch events
+    # Dispatch outbound events
 
     if tracardi.enable_event_destinations:
         load_destination_task = cache.event_destination
@@ -131,7 +169,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             tracker_payload.debug
         )
 
-    # Dispatch profile
+    # Dispatch outbound profile
 
     await profile_dispatcher.dispatch(
         profile,

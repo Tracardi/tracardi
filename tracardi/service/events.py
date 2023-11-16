@@ -11,7 +11,7 @@ from tracardi.context import ServerContext, get_context
 from tracardi.domain.event import Event, Tags
 from tracardi.domain.profile import Profile
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.string_manager import capitalize_event_type_id
@@ -123,7 +123,7 @@ def _append_value(values, value):
     return values
 
 
-def copy_default_event_to_profile(copy_schema: dict, profile_changes: FieldChangeMonitor, flat_event: dotty) -> Tuple[FieldChangeMonitor, bool]:
+def copy_default_event_to_profile(copy_schema: dict, profile_changes: FieldTimestampMonitor, flat_event: dotty) -> Tuple[FieldTimestampMonitor, bool]:
     profile_updated_flag = False
     _flat_profile = profile_changes.flat_profile
 

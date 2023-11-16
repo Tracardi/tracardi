@@ -4,7 +4,7 @@ from tracardi.config import tracardi
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.service.change_monitoring.field_change_monitor import FieldChangeMonitor
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.license import License
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
@@ -36,7 +36,7 @@ if License.has_license():
 async def compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
-                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload, Optional[FieldChangeMonitor]]:
+                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
 
     # We need profile and session before async
 
