@@ -3,13 +3,20 @@ from tracardi.service.change_monitoring.field_change_monitor import FieldChangeT
 
 def test_append_valid_input_parameters():
     manager = FieldChangeTimestampManager()
-    manager.append(type="type", profile_id="profile_id", session_id="session_id", source_id="source_id", field="field", value="value")
+    manager.append(type="type",
+                   profile_id="profile_id",
+                   event_id="event_id",
+                   session_id="session_id",
+                   source_id="source_id",
+                   field="field",
+                   value="value")
     log = manager.get_log()
     assert len(log) == 1
     assert len(log["type"]) == 1
-    assert log["type"]["field"]["id"] == "field"
+    assert log["type"]["field"]["id"] == "field:profile_id"
     assert log["type"]["field"]["type"] == "type"
     assert log["type"]["field"]["source_id"] == "source_id"
+    assert log["type"]["field"]["event_id"] == "event_id"
     assert log["type"]["field"]["session_id"] == "session_id"
     assert log["type"]["field"]["field"] == "field"
     assert log["type"]["field"]["value"] == "value"

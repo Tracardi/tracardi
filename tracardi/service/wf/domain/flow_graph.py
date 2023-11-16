@@ -22,8 +22,8 @@ class FlowGraph(NamedEntity):
         # It is merged with other top WorkflowAsyncManager to get global status of changed fields.
         self._change_monitor = FieldChangeTimestampManager()
 
-    def set_change(self, type, profile_id, session_id, source_id, key, value):
-        self._change_monitor.append(type, profile_id, session_id, source_id, key, value)
+    def set_change(self, type, profile_id, event_id, session_id, source_id, key, value):
+        self._change_monitor.append(type, profile_id, event_id, session_id, source_id, key, value)
 
     def get_changes(self) -> List[dict]:
         return self._change_monitor.get_list()

@@ -59,6 +59,7 @@ class CopyTraitAction(ActionRunner):
                 flow.set_change(
                     'profile',
                     self.profile.id,
+                    self.event.id,
                     get_entity_id(self.session),
                     get_entity_id(self.tracker_payload.source),
                     destination,

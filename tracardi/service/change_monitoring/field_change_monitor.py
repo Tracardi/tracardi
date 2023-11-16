@@ -14,12 +14,13 @@ class FieldChangeTimestampManager:
     def __init__(self):
         self._log: Dict[str, Dict[str, dict]] = defaultdict(dict)
 
-    def append(self, type: str, profile_id:str, session_id:str, source_id:str, field: str, value: Any):
+    def append(self, type: str, profile_id:str, event_id:str, session_id:str, source_id:str, field: str, value: Any):
         self._log[type][field]= dict(
                 id=f"{field}:{profile_id}",
                 type=type,
                 timestamp=str(datetime.utcnow()),
                 profile_id=profile_id,
+                event_id=event_id,
                 source_id=source_id,
                 session_id=session_id,
                 field=field,
@@ -31,6 +32,7 @@ class FieldChangeTimestampManager:
             self.append(
                 type=timestamp['type'],
                 profile_id=timestamp['profile_id'],
+                event_id=timestamp['event_id'],
                 session_id=timestamp['session_id'],
                 source_id=timestamp['source_id'],
                 field=timestamp['field'],
@@ -50,7 +52,7 @@ class FieldChangeTimestampManager:
     def get_timestamps(self):
         for field_dicts in self._log.values():
             for log_entry in field_dicts.values():
-                yield log_entry['field'], log_entry['timestamp']
+                yield log_entry['field'], [log_entry['timestamp'], log_entry['event_id']]
 
 
 class FieldChangeLogManager:
@@ -58,13 +60,14 @@ class FieldChangeLogManager:
     def __init__(self):
         self._log: List[dict] = []
 
-    def append(self, type: str, profile_id:str, session_id:str, source_id:str, field: str, value: Any):
+    def append(self, type: str, profile_id:str, event_id: str, session_id:str, source_id:str, field: str, value: Any):
         self._log.append(
             dict(
                 id=str(uuid4()),
                 type=type,
                 timestamp=str(datetime.utcnow()),
                 profile_id=profile_id,
+                event_id=event_id,
                 source_id=source_id,
                 session_id=session_id,
                 field=field,
@@ -81,10 +84,12 @@ class FieldTimestampMonitor:
                  flat_profile,
                  type: str,
                  profile_id: str,
+                 event_id: str,
                  session:Optional[Session] = None,
                  source:Optional[EventSource]=None,
                  track_history=False):
 
+        self.event_id = event_id
         self.profile_id = profile_id
         self.source_id = get_entity_id(source)
         self.session_id = get_entity_id(session)
@@ -105,6 +110,7 @@ class FieldTimestampMonitor:
         self._timestamps_log.append(
             type=self.type,
             profile_id=self.profile_id,
+            event_id=self.event_id,
             session_id=self.session_id,
             source_id=self.source_id,
             field=field,
@@ -115,6 +121,7 @@ class FieldTimestampMonitor:
                 type=self.type,
                 field=field,
                 profile_id=self.profile_id,
+                event_id=self.event_id,
                 session_id=self.session_id,
                 source_id=self.source_id,
                 value=value

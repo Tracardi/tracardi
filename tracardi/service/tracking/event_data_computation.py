@@ -139,8 +139,8 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
     if not isinstance(flat_profile['metadata.fields'], dict):
         flat_profile['metadata.fields'] = {}
 
-    for field, timestamp in profile_changes.get_timestamps():
-        flat_profile['metadata.fields'][field] = timestamp
+    for field, timestamp_data in profile_changes.get_timestamps():
+        flat_profile['metadata.fields'][field] = timestamp_data
 
     return flat_event, flat_profile, profile_changes
 
