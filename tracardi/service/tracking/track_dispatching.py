@@ -35,14 +35,13 @@ async def trigger_workflows(profile: Profile,
                             tracker_payload: TrackerPayload,
                             console_log: ConsoleLog,
                             debug: bool) -> Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeTimestampManager, bool]:
+    Profile, Session, List[Event], Optional[list], Optional[dict], bool]:
 
     # Checks rules and trigger workflows for given events and saves profile and session
 
     ux = []
     response = {}
     tracker_result = None
-    changed_fields_timestamps = None
 
     if tracardi.enable_workflow:
         tracking_manager = WorkflowManagerAsync(
@@ -62,7 +61,10 @@ async def trigger_workflows(profile: Profile,
         events = tracker_result.events
         ux = tracker_result.ux,
         response = tracker_result.response
-        changed_fields_timestamps = tracker_result.changed_field_timestamps
+
+        # Set fields timestamps
+
+        profile.metadata.set_fields_timestamps(tracker_result.changed_field_timestamps)
 
         # Dispatch changed profile to destination
 
@@ -84,7 +86,7 @@ async def trigger_workflows(profile: Profile,
         add_new_field_mappings(profile, session)
 
 
-    return profile, session, events, ux, response, changed_fields_timestamps, is_wf_triggered
+    return profile, session, events, ux, response, is_wf_triggered
 
 
 async def dispatch_sync_workflow_and_destinations(profile: Profile,
@@ -105,7 +107,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
 
     debug = tracker_payload.is_on('debugger', default=False)
 
-    profile, session, events, ux, response, changed_fields_timestamps, is_wf_triggered = await (
+    profile, session, events, ux, response, is_wf_triggered = await (
         trigger_workflows(
             profile,
             session,
@@ -143,7 +145,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
                                                          lock_name="post-workflow-session-save")
 
     # We save manually only when async processing is disabled.
-    # Otherwise flusher worker saves in-memory profile and session automatically
+    # Otherwise, flusher worker saves in-memory profile and session automatically
 
     if store_in_db:
 
@@ -151,11 +153,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             session,
             profile
         )
-
-    # Todo save fields timestamps
-    # save via queue. THis is only COM feature.
-    print(changed_fields_timestamps.get_list())
-
 
     # Dispatch outbound events
 

@@ -140,6 +140,8 @@ async def process_track_data(source: EventSource,
 
                     # Pulsar publish
 
+                    # TODO merge profile_field_timestamps this is from mapping
+
                     dispatch_events_wf_destinations_async(
                         dispatch_context,
                         source,

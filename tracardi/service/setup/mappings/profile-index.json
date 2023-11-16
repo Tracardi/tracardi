@@ -33,6 +33,10 @@
             "aux": {
               "type": "flattened"
             },
+            "fields": {
+              "type": "object",
+              "enabled": false
+            },
             "time": {
               "properties": {
                 "insert": {

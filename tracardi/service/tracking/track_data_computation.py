@@ -36,7 +36,7 @@ if License.has_license():
 async def compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
-                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
+                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload]:
 
     # We need profile and session before async
 
@@ -120,8 +120,9 @@ async def compute_data(tracker_payload: TrackerPayload,
     # Compute events. Session can be changed if there is event e.g. visit-open
     # This should be last in the process. We need all data for event computation
     # events, session, profile = None, None, []
+    # Profile has fields timestamps updated
 
-    events, session, profile, profile_changes = await compute_events(
+    events, session, profile, field_timestamp_monitor = await compute_events(
         tracker_payload.events,  # All events with system events, and validation information
         tracker_payload.metadata,
         source,
@@ -138,7 +139,7 @@ async def compute_data(tracker_payload: TrackerPayload,
 
     # Caution: After clear session can become None if set sessionSave = False
 
-    return profile, session, events, tracker_payload, profile_changes
+    return profile, session, events, tracker_payload
 
 
 async def lock_and_compute_data(
@@ -165,7 +166,7 @@ async def lock_and_compute_data(
 
             # Always use GlobalUpdateLock to update profile and session
 
-            profile, session, events, tracker_payload, profile_changes = await compute_data(
+            profile, session, events, tracker_payload = await compute_data(
                 tracker_payload,
                 tracker_config,
                 source,
@@ -176,14 +177,14 @@ async def lock_and_compute_data(
             # Update only when needed
 
             if profile and profile.has_not_saved_changes():
-                save_profile_cache(profile, profile_changes)
+                save_profile_cache(profile)
 
             if session and session.has_not_saved_changes():
                 save_session_cache(session)
 
     else:
 
-        profile, session, events, tracker_payload, profile_changes = await compute_data(
+        profile, session, events, tracker_payload = await compute_data(
             tracker_payload,
             tracker_config,
             source,
@@ -192,10 +193,8 @@ async def lock_and_compute_data(
 
         # Update only when needed
 
-        print(profile_changes)
-
         if profile and profile.has_not_saved_changes():
-            save_profile_cache(profile, profile_changes)
+            save_profile_cache(profile)
 
         if session and session.has_not_saved_changes():
             save_session_cache(session)

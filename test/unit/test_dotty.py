@@ -1,6 +1,12 @@
 from dotty_dict import dotty
 
 
+def test_none_to_dotty():
+    a = dotty(None)
+    assert bool(a) is False
+
+
+
 def test_spaces():
     a = {
         "A": {"a b c": 1}

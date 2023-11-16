@@ -14,6 +14,7 @@ from tracardi.domain.session import Session
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_graph import FlowGraph
 
 logger = logging.getLogger(__name__)
@@ -54,11 +55,12 @@ class CopyTraitAction(ActionRunner):
 
             # Value is automatically converted to value if in dot format
             dot[destination] = value
-            if destination.startswith('profile'):
+            if self.profile and destination.startswith('profile'):
                 flow.set_change(
                     'profile',
-                    self.session.id,
-                    self.tracker_payload.source.id,
+                    self.profile.id,
+                    get_entity_id(self.session),
+                    get_entity_id(self.tracker_payload.source),
                     destination,
                     dot[destination]  # Use dot destination as it has computed values for `1`, `true`
                 )

@@ -1,7 +1,11 @@
+import logging
+
 from typing import Optional, List
+
+from tracardi.config import tracardi
 from tracardi.context import get_context, Context
 from tracardi.domain.storage_record import RecordMetadata
-from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
@@ -11,6 +15,9 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.domain.profile import Profile
 from tracardi.service.merging.profile_merger import merge_profiles
 
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 redis_cache = RedisCache(ttl=None)
 _redis = RedisClient()
 
@@ -50,8 +57,9 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
     return profile
 
 
-def save_profile_cache(profile: Optional[Profile], profile_changes: Optional[FieldTimestampMonitor] = None):
+def save_profile_cache(profile: Optional[Profile]):
     if profile:
+
         context = get_context()
         key = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
 
@@ -69,7 +77,7 @@ def save_profile_cache(profile: Optional[Profile], profile_changes: Optional[Fie
                         "tenant": context.tenant
                     },
                     profile.model_dump(mode="json", exclude_defaults=True),
-                    profile_changes.get_changed_fields_timestamps() if profile_changes else None,
+                    None,
                     index.model_dump(mode="json")
                 )
 
@@ -80,7 +88,7 @@ def save_profile_cache(profile: Optional[Profile], profile_changes: Optional[Fie
             )
 
         except ValueError as e:
-            print(e)
+            logger.error(f"Saving to cache filed: Detail: {str(e)}")
 
 
 

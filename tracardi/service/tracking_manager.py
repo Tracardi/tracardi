@@ -252,7 +252,7 @@ class TrackingManager(TrackingManagerBase):
             if copy_schema is not None:
                 flat_profile = dotty(self.profile.model_dump())
                 flat_event = flat_events[event.id]
-                profile_changes = FieldTimestampMonitor(flat_profile, type="profile")
+                profile_changes = FieldTimestampMonitor(flat_profile, "profile", self.profile.id)
 
                 # Copy default
                 profile_changes, profile_updated_flag = copy_default_event_to_profile(
