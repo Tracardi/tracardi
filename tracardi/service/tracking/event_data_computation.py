@@ -92,7 +92,7 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
                                             session:Session,
                                             source: EventSource,
                                             console_log: ConsoleLog) -> Tuple[
-    Dotty, Dotty, FieldTimestampMonitor]:
+    Dotty, Dotty, Optional[FieldTimestampMonitor]]:
 
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, flat_profile)
@@ -199,7 +199,7 @@ async def compute_events(events: List[EventPayload],
                          tracker_payload: TrackerPayload
                          ) -> Tuple[List[Event], Session, Profile, Optional[FieldTimestampMonitor]]:
 
-    profile_changes = None
+    field_timestamp_monitor = None
     event_objects = []
 
     flat_profile = dotty(profile.model_dump())
@@ -222,7 +222,7 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, flat_profile, profile_changes = await default_mapping_event_and_profile(
+            flat_event, flat_profile, field_timestamp_monitor = await default_mapping_event_and_profile(
                 flat_event,
                 flat_profile,
                 session,
@@ -273,4 +273,4 @@ async def compute_events(events: List[EventPayload],
     profile = Profile(**flat_profile.to_dict())
     profile.set_meta_data(profile_metadata)
 
-    return event_objects, session, profile, profile_changes
+    return event_objects, session, profile, field_timestamp_monitor

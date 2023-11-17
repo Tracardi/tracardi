@@ -19,10 +19,11 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 
-if License.has_license():
+if License.has_service(LICENSE):
     from com_tracardi.config import com_tracardi_settings
     from com_tracardi.service.tracking.track_dispatcher import dispatch_events_wf_destinations_async
     from com_tracardi.service.tracking.visti_end_dispatcher import schedule_visit_end_check
+    from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -58,7 +59,7 @@ async def process_track_data(source: EventSource,
 
         # Lock profile and session for changes and compute data
 
-        profile, session, events, tracker_payload = await lock_and_compute_data(
+        profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
             tracker_payload,
             tracker_config,
             source,
@@ -80,9 +81,21 @@ async def process_track_data(source: EventSource,
 
         # Async storage
 
+        # Get context for queue
+
         dispatch_context = get_context().get_user_less_context_copy()
 
         if License.has_service(LICENSE):
+
+            # Queue updated fields as field update history log.
+            # Queues only updates made in mapping. Updates made in workflow are queued either
+            # in worker of after workflow.
+
+
+            if tracardi.enable_field_update_log:
+                timestamp_log = field_timestamp_monitor.get_timestamps_log()
+                if timestamp_log.has_changes():
+                    field_update_log_dispatch(dispatch_context, timestamp_log.get_history_log())
 
             # Split events into async and not async. Compute process time
 

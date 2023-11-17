@@ -1,9 +1,9 @@
-from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
-from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
-from typing import List, Tuple, Optional
-
 import logging
 
+from typing import List, Tuple, Optional
+from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
+from tracardi.service.license import License, LICENSE
+from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.field_mappings_cache import add_new_field_mappings
@@ -22,6 +22,8 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
+if License.has_service(LICENSE) :
+    from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -35,19 +37,20 @@ async def trigger_workflows(profile: Profile,
                             tracker_payload: TrackerPayload,
                             console_log: ConsoleLog,
                             debug: bool) -> Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], bool]:
+    Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeTimestampManager, bool]:
 
     # Checks rules and trigger workflows for given events and saves profile and session
 
     ux = []
     response = {}
     tracker_result = None
+    field_manager = FieldChangeTimestampManager()
 
     if tracardi.enable_workflow:
         tracking_manager = WorkflowManagerAsync(
             console_log,
             tracker_payload,
-            FieldChangeTimestampManager(),
+            field_manager,
             profile,
             session
         )
@@ -61,6 +64,7 @@ async def trigger_workflows(profile: Profile,
         events = tracker_result.events
         ux = tracker_result.ux,
         response = tracker_result.response
+        field_manager = tracker_result.changed_field_timestamps
 
         # Set fields timestamps
 
@@ -86,7 +90,7 @@ async def trigger_workflows(profile: Profile,
         add_new_field_mappings(profile, session)
 
 
-    return profile, session, events, ux, response, is_wf_triggered
+    return profile, session, events, ux, response, field_manager, is_wf_triggered
 
 
 async def dispatch_sync_workflow_and_destinations(profile: Profile,
@@ -107,7 +111,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
 
     debug = tracker_payload.is_on('debugger', default=False)
 
-    profile, session, events, ux, response, is_wf_triggered = await (
+    profile, session, events, ux, response, field_update_log_manager, is_wf_triggered = await (
         trigger_workflows(
             profile,
             session,
@@ -143,6 +147,11 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             await lock_merge_with_cache_and_save_session(session,
                                                          context=get_context(),
                                                          lock_name="post-workflow-session-save")
+
+    # Queue storage of fields update history log (changes made by workflow)
+
+    if tracardi.enable_field_update_log and License.has_service(LICENSE) and field_update_log_manager.has_changes():
+        field_update_log_dispatch(get_context(), field_update_log_manager.get_history_log())
 
     # We save manually only when async processing is disabled.
     # Otherwise, flusher worker saves in-memory profile and session automatically

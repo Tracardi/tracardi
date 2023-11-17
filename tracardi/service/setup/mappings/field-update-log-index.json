@@ -26,6 +26,10 @@
           "type": "keyword",
           "ignore_above": 32
         },
+        "event_id": {
+          "type": "keyword",
+          "ignore_above": 40
+        },
         "profile_id": {
           "type": "keyword",
           "ignore_above": 40

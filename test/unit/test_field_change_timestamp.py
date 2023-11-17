@@ -32,3 +32,8 @@ def test_get_list():
     manager = FieldChangeTimestampManager()
     log_list = manager.get_list()
     assert log_list == []
+
+
+def test_has_log():
+    manager = FieldChangeTimestampManager()
+    assert not  manager.has_changes()

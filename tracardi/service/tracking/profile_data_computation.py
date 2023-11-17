@@ -103,8 +103,7 @@ async def map_event_to_profile(
                                             profile_id=flat_profile.get('id', None),
                                             event_id=flat_event.get('id', None),
                                             session=session,
-                                            source=source,
-                                            track_history=tracardi.enable_field_change_log)
+                                            source=source)
 
     if default_mapping_schema is not None:
         # Copy default

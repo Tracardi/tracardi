@@ -39,6 +39,9 @@ class FieldChangeTimestampManager:
                 value=timestamp['value']
             )
 
+    def has_changes(self):
+        return bool(self._log)
+
     def get_log(self) -> Dict[str, Dict[str, dict]]:
         return self._log
 
@@ -46,6 +49,14 @@ class FieldChangeTimestampManager:
         result = []
         for field_dicts in self._log.values():
             for log_entry in field_dicts.values():
+                result.append(log_entry)
+        return result
+
+    def get_history_log(self) -> List[Dict]:
+        result = []
+        for field_dicts in self._log.values():
+            for log_entry in field_dicts.values():
+                log_entry['id'] = str(uuid4())
                 result.append(log_entry)
         return result
 
@@ -86,18 +97,15 @@ class FieldTimestampMonitor:
                  profile_id: str,
                  event_id: str,
                  session:Optional[Session] = None,
-                 source:Optional[EventSource]=None,
-                 track_history=False):
+                 source:Optional[EventSource]=None):
 
         self.event_id = event_id
         self.profile_id = profile_id
         self.source_id = get_entity_id(source)
         self.session_id = get_entity_id(session)
-        self.track_history = track_history
         self.type = type
         self.flat_profile = flat_profile
         self._timestamps_log: FieldChangeTimestampManager = FieldChangeTimestampManager()
-        self._changes_log: FieldChangeLogManager = FieldChangeLogManager()
 
     def __contains__(self, item) -> bool:
         return item in self.flat_profile
@@ -116,16 +124,6 @@ class FieldTimestampMonitor:
             field=field,
             value=value
         )
-        if self.track_history:
-            self._changes_log.append(
-                type=self.type,
-                field=field,
-                profile_id=self.profile_id,
-                event_id=self.event_id,
-                session_id=self.session_id,
-                source_id=self.source_id,
-                value=value
-            )
 
     def get_timestamps_log(self) -> FieldChangeTimestampManager:
         return self._timestamps_log
@@ -136,6 +134,3 @@ class FieldTimestampMonitor:
 
     def get_timestamps(self):
         return self._timestamps_log.get_timestamps()
-
-    def get_changes_log(self) -> List[dict]:
-        return self._changes_log.get_log()

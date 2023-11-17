@@ -36,7 +36,8 @@ if License.has_license():
 async def compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
-                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload]:
+                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
+Optional[FieldTimestampMonitor]]:
 
     # We need profile and session before async
 
@@ -139,14 +140,14 @@ async def compute_data(tracker_payload: TrackerPayload,
 
     # Caution: After clear session can become None if set sessionSave = False
 
-    return profile, session, events, tracker_payload
+    return profile, session, events, tracker_payload, field_timestamp_monitor
 
 
 async def lock_and_compute_data(
         tracker_payload: TrackerPayload,
         tracker_config: TrackerConfig,
         source: EventSource,
-        console_log: ConsoleLog) -> Tuple[Profile, Session, List[Event], TrackerPayload]:
+        console_log: ConsoleLog) -> Tuple[Profile, Session, List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
 
     if tracardi.lock_on_data_computation:
         _redis = RedisClient()
@@ -166,7 +167,7 @@ async def lock_and_compute_data(
 
             # Always use GlobalUpdateLock to update profile and session
 
-            profile, session, events, tracker_payload = await compute_data(
+            profile, session, events, tracker_payload, field_timestamp_monitor = await compute_data(
                 tracker_payload,
                 tracker_config,
                 source,
@@ -182,9 +183,11 @@ async def lock_and_compute_data(
             if session and session.has_not_saved_changes():
                 save_session_cache(session)
 
+
+
     else:
 
-        profile, session, events, tracker_payload = await compute_data(
+        profile, session, events, tracker_payload, field_timestamp_monitor = await compute_data(
             tracker_payload,
             tracker_config,
             source,
@@ -199,4 +202,5 @@ async def lock_and_compute_data(
         if session and session.has_not_saved_changes():
             save_session_cache(session)
 
-    return profile, session, events, tracker_payload
+
+    return profile, session, events, tracker_payload, field_timestamp_monitor
