@@ -63,7 +63,7 @@ def register() -> Plugin:
             desc='Converts string to date',
             type='flowNode',
             icon='date',
-            group=["Transform"],
+            group=["String"],
             documentation=Documentation(
                 inputs={
                     "payload": PortDoc(desc="This port takes any payload.")

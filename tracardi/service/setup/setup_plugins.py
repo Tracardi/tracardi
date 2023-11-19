@@ -4,6 +4,16 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.strings.string_replace.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "field": "profile@",
+                "find": "",
+                "replace": ""
+            },
+            resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin": PluginMetadata(
         test=PluginTest(
             init={
