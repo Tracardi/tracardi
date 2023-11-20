@@ -102,7 +102,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-plugin
+destination
 
 # Elasticsearch index mapping
 
@@ -120,204 +120,61 @@ plugin
     "dynamic": "strict",
     "properties": {
       "id": {
+        "type": "keyword", "ignore_above": 64
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "destination": {
         "type": "keyword",
-        "ignore_above": 64
+        "index": false
       },
-      "metadata": {
+      "condition": {
+        "type": "keyword",
+        "index": false
+      },
+      "mapping": {
+        "type": "keyword",
+        "index": false
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "on_profile_change_only": {
+        "type": "boolean"
+      },
+      "event_type": {
         "properties": {
-          "time": {
-            "properties": {
-              "insert": {
-                "type": "date"
-              }
-            }
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
           }
         }
       },
-      "plugin": {
+      "source": {
         "properties": {
-          "debug": {
-            "type": "boolean"
+          "id": {
+            "type": "keyword"
           },
-          "metadata": {
-            "properties": {
-              "desc": {
-                "type": "text"
-              },
-              "brand": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "group": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "height": {
-                "type": "integer"
-              },
-              "width": {
-                "type": "integer"
-              },
-              "icon": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "keywords": {
-                "type": "text"
-              },
-              "name": {
-                "type": "text"
-              },
-              "type": {
-                "type": "keyword",
-                "ignore_above": 24
-              },
-              "tags": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "pro": {
-                "type": "boolean"
-              },
-              "commercial": {
-                "type": "boolean"
-              },
-              "remote": {
-                "type": "boolean"
-              },
-              "documentation": {
-                "type": "keyword",
-                "index": false
-              },
-              "frontend": {
-                "type": "boolean"
-              },
-              "emits_event": {
-                "type": "keyword",
-                "index": false
-              },
-              "purpose": {
-                "type": "keyword"
-              }
-            }
-          },
-          "spec": {
-            "properties": {
-              "id": {
-                "type": "keyword",
-                "ignore_above": 64
-              },
-              "className": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "module": {
-                "type": "keyword",
-                "ignore_above": 128
-              },
-              "inputs": {
-                "type": "keyword",
-                "ignore_above": 48
-              },
-              "outputs": {
-                "type": "keyword",
-                "ignore_above": 48
-              },
-              "microservice": {
-                "type": "object",
-                "dynamic": "true",
-                "enabled": false
-              },
-              "init": {
-                "index": false,
-                "type": "keyword"
-              },
-              "skip": {
-                "type": "boolean"
-              },
-              "block_flow": {
-                "type": "boolean",
-                "index": false
-              },
-              "run_in_background": {
-                "type": "boolean",
-                "index": false
-              },
-              "on_error_continue": {
-                "type": "boolean",
-                "index": false
-              },
-              "on_connection_error_repeat": {
-                "type": "integer",
-                "index": false
-              },
-              "append_input_payload": {
-                "type": "boolean",
-                "index": false
-              },
-              "join_input_payload": {
-                "type": "boolean",
-                "index": false
-              },
-              "form": {
-                "type": "keyword",
-                "index": false
-              },
-              "manual": {
-               "type": "keyword",
-                "ignore_above": 64,
-                "index": false
-              },
-              "author": {
-                "type": "keyword",
-                "ignore_above": 64
-              },
-              "license": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "version": {
-                "type": "keyword",
-                "ignore_above": 32
-              },
-              "run_once": {
-                "properties": {
-                  "value": {"type": "keyword", "index": false, "ignore_above": 64},
-                  "ttl": {"type":  "integer", "index": false},
-                  "type": {"type": "keyword", "index": false},
-                  "enabled": {"type": "boolean","index": false}
-                }
-              },
-              "node": {
-                "properties": {
-                  "on_remove": {
-                    "type": "keyword",
-                    "ignore_above": 128,
-                    "index": false
-                  },
-                  "on_create": {
-                    "type": "keyword",
-                    "ignore_above": 128,
-                    "index": false
-                  }
-                }
-              }
-            }
-          },
-          "start": {
-            "type": "boolean"
+          "name": {
+            "type": "keyword"
           }
         }
       },
-      "settings": {
+      "resource": {
         "properties": {
-          "enabled": {
-            "type": "boolean"
-          },
-          "hidden": {
-            "type": "boolean"
+          "id": {
+            "type": "keyword"
           }
         }
+      },
+      "tags": {
+        "type": "keyword"
       }
     }
   },
@@ -325,5 +182,6 @@ plugin
     "%%ALIAS%%": {}
   }
 }
+
 
 ```

@@ -30,36 +30,36 @@ async def create_database(async_engine):
         await conn.commit()
 
 
-# async def bootstrap():
-#     engine = AsyncMySqlEngine()
-#
-#     # # Create an async engine instance
-#     async_engine = engine.get_engine()
-#
-#     # Connect to the database
-#     await create_database(async_engine)
-#
-#     # Dispose the engine to avoid any connection issues
-#     await async_engine.dispose()
-#
-#     # Create a new async engine instance with the database selected
-#     async_engine_with_db = engine.get_engine_for_database()
-#
-#     await create_tables(async_engine_with_db)
-#
-#     # Dispose the engine with the database as it's not needed anymore
-#     await async_engine_with_db.dispose()
-#
-#     bs = BridgeService()
-#     for bridge in os_default_bridges:
-#         await bs.insert(bridge)
-#         logger.info(f"Bridge {bridge.name} installed.")
-#
-#     print(await bs.delete('3d8bb87e-28d1-4a38-b19c-d0c1fbb71e22'))
-#
-#     results = await bs.load_all()
-#     for x in results.to_objects(map_to_bridge):
-#         print(x)
+async def bootstrap():
+    engine = AsyncMySqlEngine()
+
+    # # Create an async engine instance
+    async_engine = engine.get_engine()
+
+    # Connect to the database
+    await create_database(async_engine)
+
+    # Dispose the engine to avoid any connection issues
+    await async_engine.dispose()
+
+    # Create a new async engine instance with the database selected
+    async_engine_with_db = engine.get_engine_for_database()
+
+    await create_tables(async_engine_with_db)
+
+    # Dispose the engine with the database as it's not needed anymore
+    await async_engine_with_db.dispose()
+
+    bs = BridgeService()
+    for bridge in os_default_bridges:
+        await bs.insert(bridge)
+        logger.info(f"Bridge {bridge.name} installed.")
+
+    print(await bs.delete('3d8bb87e-28d1-4a38-b19c-d0c1fbb71e22'))
+
+    results = await bs.load_all()
+    for x in results.to_objects(map_to_bridge):
+        print(x)
 
 
 

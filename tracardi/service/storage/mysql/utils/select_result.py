@@ -12,3 +12,6 @@ class SelectResult:
 
     def get_object(self, mapper):
         return mapper(self.result)
+
+    def exists(self) -> bool:
+        return self.result is not None

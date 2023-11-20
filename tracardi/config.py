@@ -49,7 +49,7 @@ class MysqlConfig:
         self.env = env
         self.mysql_database_uri = env.get('MYSQL_DATABASE_URI', "mysql+aiomysql://root:root@localhost/")
         self.mysql_database = env.get('MYSQL_DATABASE', "tracardi")
-        self.mysql_echo = env.get('MYSQL_ECHO', "yes") == "yes"
+        self.mysql_echo = env.get('MYSQL_ECHO', "no") == "yes"
 
         self.mysql_database_uri = self.mysql_database_uri.strip(" /")
         self.mysql_database = self.mysql_database.strip(" /")

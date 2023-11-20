@@ -10,7 +10,7 @@ from tracardi.service.storage.mysql.mapping.plugin_mapping import map_to_table, 
 from tracardi.service.storage.mysql.schema.table import PluginTable
 
 
-def test_correct_mapping():
+def test_to_plugin_mapping():
     config = MicroserviceConfig(
         server=MicroserviceServer(
             resource=NamedEntity(id="plugin1", name="Plugin 1"),
@@ -57,12 +57,14 @@ def test_correct_mapping():
 
     plugin_table = PluginTable(
         id="123",
+
         metadata_time_insert=datetime.utcnow(),
         metadata_time_create=datetime.utcnow(),
         metadata_time_update=datetime.utcnow(),
+
         plugin_start=True,
         plugin_debug=False,
-        plugin_metadata_name="MyPluginName",
+
         plugin_spec_class_name="MyPlugin",
         plugin_spec_module="my_module",
         plugin_spec_inputs='input1,input2',
@@ -87,6 +89,21 @@ def test_correct_mapping():
         plugin_spec_run_once_enabled=True,
         plugin_spec_node_on_remove="remove_node",
         plugin_spec_node_on_create="create_node",
+
+        plugin_metadata_desc="desc",
+        plugin_metadata_brand="brand",
+        plugin_metadata_group="groip1, group2",
+        plugin_metadata_height=100,
+        plugin_metadata_width=200,
+        plugin_metadata_icon="icon",
+        plugin_metadata_keywords="key1,key2",
+        plugin_metadata_name="MyPluginName",
+        plugin_metadata_type="node",
+        plugin_metadata_tags='tag1,tag2',
+        plugin_metadata_pro=True,
+        # plugin_metadata_commercial = True,
+        plugin_metadata_documentation="",
+        plugin_metadata_purpose='collection',
         settings_enabled=True,
         settings_hidden=False
     )

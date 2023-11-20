@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, Callable
 from tracardi.service.plugin.domain.register import Plugin
 from .entity import Entity
 from .metadata import Metadata
 from .settings import Settings
 from .time import Time
 from .value_object.storage_info import StorageInfo
+from tracardi.service.module_loader import import_package, load_callable
 
 
 class FlowActionPlugin(Entity):
@@ -38,3 +39,7 @@ class FlowActionPlugin(Entity):
             'action',
             FlowActionPlugin
         )
+
+    def get_validator(self) -> Callable:
+        module = import_package(self.plugin.spec.module)
+        return load_callable(module, 'validate')

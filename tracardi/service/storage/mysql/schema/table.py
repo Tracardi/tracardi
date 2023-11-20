@@ -1,3 +1,5 @@
+from typing import Tuple, List
+
 from sqlalchemy import and_
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
@@ -18,6 +20,7 @@ def local_context_filter(table: Base):
 def local_context_entity(table: Base, id):
     context = get_context()
     return and_(table.tenant == context.tenant, table.production == context.production, table.id == id)
+
 
 class BridgeTable(Base):
     __tablename__ = 'bridge'
@@ -152,22 +155,22 @@ class PluginTable(Base):
     plugin_metadata_height = Column(Integer)
     plugin_metadata_width = Column(Integer)
     plugin_metadata_icon = Column(String(32))
-    plugin_metadata_keywords = Column(String(256))
+    plugin_metadata_keywords = Column(String(255))
     plugin_metadata_name = Column(String(64))
     plugin_metadata_type = Column(String(24))
-    plugin_metadata_tags = Column(String(32))
+    plugin_metadata_tags = Column(String(128))
     plugin_metadata_pro = Column(Boolean)
     plugin_metadata_commercial = Column(Boolean)
     plugin_metadata_remote = Column(Boolean)
     plugin_metadata_documentation = Column(Text)
     plugin_metadata_frontend = Column(Boolean)
-    plugin_metadata_emits_event = Column(Text)
-    plugin_metadata_purpose = Column(String(255))
+    plugin_metadata_emits_event = Column(String(255))
+    plugin_metadata_purpose = Column(String(64))
     plugin_spec_id = Column(String(64))
-    plugin_spec_class_name = Column(String(32))
+    plugin_spec_class_name = Column(String(255))
     plugin_spec_module = Column(String(128))
-    plugin_spec_inputs = Column(String(255))
-    plugin_spec_outputs = Column(String(255))
+    plugin_spec_inputs = Column(String(255))  # Comma sep lists
+    plugin_spec_outputs = Column(String(255))  # Comma sep lists
     plugin_spec_microservice = Column(JSON)
     plugin_spec_init = Column(JSON)
     plugin_spec_skip = Column(Boolean)
@@ -182,15 +185,40 @@ class PluginTable(Base):
     plugin_spec_author = Column(String(64))
     plugin_spec_license = Column(String(32))
     plugin_spec_version = Column(String(32))
-    plugin_start = Column(Boolean)
     plugin_spec_run_once_value = Column(String(64))
     plugin_spec_run_once_ttl = Column(Integer)
-    plugin_spec_run_once_type = Column(String(255))
+    plugin_spec_run_once_type = Column(String(64))
     plugin_spec_run_once_enabled = Column(Boolean)
     plugin_spec_node_on_remove = Column(String(128))
     plugin_spec_node_on_create = Column(String(128))
+    plugin_start = Column(Boolean)
     settings_enabled = Column(Boolean)
     settings_hidden = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+
+class DestinationTable(Base):
+    __tablename__ = 'destination'
+
+    id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
+    tenant = Column(String(40))
+    production = Column(Boolean)
+    name = Column(String(255))  # 'text' type in ES maps to VARCHAR in MySQL
+    description = Column(Text)  # 'text' type in ES maps to TEXT in MySQL
+    destination = Column(Text)  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
+    condition = Column(Text)  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
+    mapping = Column(String(255))  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
+    enabled = Column(Boolean)  # 'boolean' in ES maps to BOOLEAN in MySQL
+    on_profile_change_only = Column(Boolean)  # 'boolean' in ES maps to BOOLEAN in MySQL
+    event_type_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    event_type_name = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    source_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    source_name = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    resource_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    tags = Column(String(255))  # 'keyword' type in ES maps to VARCHAR in MySQL
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
