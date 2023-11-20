@@ -62,7 +62,7 @@ async def trigger_workflows(profile: Profile,
         profile = tracker_result.profile
         session = tracker_result.session
         events = tracker_result.events
-        ux = tracker_result.ux,
+        ux = tracker_result.ux
         response = tracker_result.response
         field_manager = tracker_result.changed_field_timestamps
 
@@ -121,6 +121,8 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             debug
         )
     )
+
+    print('ux1', len(ux))
 
     # INFO! trigger_workflows will SAVE changed profile and session in the cache. For the async this is
     # enough to persist data.
