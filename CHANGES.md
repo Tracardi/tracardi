@@ -23,6 +23,7 @@ Version: 0.8.2
   * Redone workflow async worker (pro)
 * Configurable data partitioning
 * Preparation for configurable profile merging strategies
+* Fixing missing plugin documentation
 
 
 Version: 0.8.1
