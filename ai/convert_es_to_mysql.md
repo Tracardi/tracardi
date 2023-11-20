@@ -80,7 +80,7 @@ Base = declarative_base()
 class MyIndexTable(Base):
     __tablename__ = 'my_index'
 
-    id = Column(Integer)  # Assuming there is a primary key field named 'id'
+    id = Column(String(40))  # Assuming there is a primary key field named 'id'
     tenant = Column(String(40))  # Add this field for multitenance
     production = Column(Boolean) # Add this field for multitenance
     name = Column(String(255))  # Elasticsearch 'text' type is similar to MySQL 'VARCHAR'
@@ -102,7 +102,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-destination
+identification_point
 
 # Elasticsearch index mapping
 
@@ -123,38 +123,10 @@ destination
         "type": "keyword", "ignore_above": 64
       },
       "name": {
-        "type": "text"
+        "type" :"keyword"
       },
       "description": {
-        "type": "text"
-      },
-      "destination": {
-        "type": "keyword",
-        "index": false
-      },
-      "condition": {
-        "type": "keyword",
-        "index": false
-      },
-      "mapping": {
-        "type": "keyword",
-        "index": false
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "on_profile_change_only": {
-        "type": "boolean"
-      },
-      "event_type": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
+        "type" :"keyword"
       },
       "source": {
         "properties": {
@@ -166,15 +138,24 @@ destination
           }
         }
       },
-      "resource": {
+      "event_type": {
         "properties": {
           "id": {
+            "type": "keyword"
+          },
+          "name": {
             "type": "keyword"
           }
         }
       },
-      "tags": {
-        "type": "keyword"
+      "fields": {
+        "type": "flattened"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "settings": {
+        "type": "flattened"
       }
     }
   },

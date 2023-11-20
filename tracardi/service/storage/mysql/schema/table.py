@@ -1,5 +1,3 @@
-from typing import Tuple, List
-
 from sqlalchemy import and_
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
@@ -43,7 +41,7 @@ class BridgeTable(Base):
 class EventSourceTable(Base):
     __tablename__ = 'event_source'
 
-    id = Column(String(40), primary_key=True)
+    id = Column(String(40))
     tenant = Column(String(40))
     production = Column(Boolean)
     timestamp = Column(DateTime)
@@ -76,32 +74,43 @@ class EventSourceTable(Base):
 
     bridge = relationship("BridgeTable")
 
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
 
 class WorkflowTable(Base):
     __tablename__ = 'workflow'
 
-    id = Column(String(40), primary_key=True)
-    tenant = Column(String(40))
-    production = Column(Boolean)
+    id = Column(String(40))
     timestamp = Column(DateTime)
     deploy_timestamp = Column(DateTime)
     name = Column(String(64))
     description = Column(String(255))
     type = Column(String(64), default="collection")
     projects = Column(String(255))
+
     draft = Column(LargeBinary)
-    production = Column(LargeBinary)
+    prod = Column(LargeBinary)
     backup = Column(LargeBinary)
+
     lock = Column(Boolean)
     deployed = Column(Boolean, default=False)
     debug_enabled = Column(Boolean)
     debug_logging_level = Column(String(32))
 
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
 
 class TriggerTable(Base):
     __tablename__ = 'trigger'
 
-    id = Column(String(40), primary_key=True)  # 'keyword' in ES with ignore_above
+    id = Column(String(40))  # 'keyword' in ES with ignore_above
     tenant = Column(String(40))
     production = Column(Boolean)
     name = Column(String(150))  # 'keyword' in ES with ignore_above
@@ -120,11 +129,15 @@ class TriggerTable(Base):
     enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
     tags = Column(String(255))  # 'keyword' in ES defaults to 255 if no ignore_above is set
 
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
 
 class ResourceTable(Base):
     __tablename__ = 'resource'
 
-    id = Column(String(40), primary_key=True)
+    id = Column(String(40))
     tenant = Column(String(40))
     production = Column(Boolean)
     type = Column(String(48))
@@ -137,6 +150,10 @@ class ResourceTable(Base):
     groups = Column(String(255))
     icon = Column(String(255))
     destination = Column(String(255))
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
 
 
 class PluginTable(Base):
@@ -220,6 +237,70 @@ class DestinationTable(Base):
     resource_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
     tags = Column(String(255))  # 'keyword' type in ES maps to VARCHAR in MySQL
 
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+class VersionTable(Base):
+    __tablename__ = 'version'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above
+    version = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
+    name = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
+    prev_version = Column(JSON)  # 'object' type disabled in ES, corresponding to JSON in MySQL
+    upgrades = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
+    config = Column(JSON)  # 'object' type in ES corresponding to JSON in MySQL
+
+    # Add tenant and production fields for multi-tenancy, assuming they are required
+
+    tenant = Column(String(40))  # Field for multi-tenancy
+    production = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+
+    # Define the primary key constraint
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant'),
+    )
+
+class UserTable(Base):
+    __tablename__ = 'user'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above
+    password = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    full_name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    email = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    roles = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
+    disabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+    expiration_timestamp = Column(Integer)  # 'long' type in ES corresponds to Integer in MySQL
+    preference = Column(JSON)  # 'object' type in ES corresponding to JSON in MySQL
+
+    # Add tenant and production fields for multi-tenancy, assuming they are required
+    tenant = Column(String(40))  # Field for multi-tenancy
+    production = Column(Boolean)  # Field for multi-tenancy
+
+    # Define the primary key constraint
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+class IdentificationPointTable(Base):
+    __tablename__ = 'identification_point'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above
+    name = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
+    description = Column(Text)  # 'keyword' type defaults to VARCHAR(255)
+    source_id = Column(String(40))  # Nested 'keyword' field
+    source_name = Column(String(128))  # Nested 'keyword' field
+    event_type_id = Column(String(40))  # Nested 'keyword' field
+    event_type_name = Column(String(128))  # Nested 'keyword' field
+    fields = Column(JSON)  # 'flattened' type corresponds to JSON
+    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+    settings = Column(JSON)  # 'flattened' type corresponds to JSON
+
+    # Add tenant and production fields for multi-tenancy, assuming they are required
+    tenant = Column(String(40))  # Field for multi-tenancy
+    production = Column(Boolean)  # Field for multi-tenancy
+
+    # Define the primary key constraint
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
