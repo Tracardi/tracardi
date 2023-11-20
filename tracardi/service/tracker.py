@@ -4,14 +4,13 @@ import time
 
 import logging
 import traceback
-from typing import Type, Callable, Coroutine, Any, Optional
+from typing import Optional
 from tracardi.service.profile_merger import ProfileMerger
 
 from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
 from tracardi.service.setup.data.defaults import open_rest_source_bridge
@@ -25,9 +24,8 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from typing import List
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.tracker_processor import TrackerProcessor
-from tracardi.service.tracking_manager import TrackingManagerBase, TrackerResult
 from tracardi.service.storage.cache.model import load as cache_load
+from tracardi.service.tracking.track_async import process_track_data
 
 
 logger = logging.getLogger(__name__)
@@ -41,11 +39,7 @@ async def track_event(tracker_payload: TrackerPayload,
                       allowed_bridges: List[str],
                       internal_source=None,
                       run_async: bool = False,
-                      static_profile_id: bool = False,
-                      on_profile_merge: Callable[[Profile], Profile] = None,
-                      on_profile_ready: Type[TrackingManagerBase] = None,
-                      on_result_ready: Callable[
-                          [List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None
+                      static_profile_id: bool = False
                       ):
     console_log = ConsoleLog()
 
@@ -59,10 +53,7 @@ async def track_event(tracker_payload: TrackerPayload,
                 internal_source=internal_source,
                 run_async=run_async,
                 static_profile_id=static_profile_id
-            ),
-            on_profile_merge=on_profile_merge,
-            on_profile_ready=on_profile_ready,
-            on_result_ready=on_result_ready
+            )
         )
 
         result = await tr.track_event(tracker_payload, tracking_start)
@@ -89,15 +80,8 @@ class Tracker:
 
     def __init__(self,
                  console_log: ConsoleLog,
-                 tracker_config: TrackerConfig,
-                 on_profile_merge: Callable[[Profile], Profile] = None,
-                 on_profile_ready: Type[TrackingManagerBase] = None,
-                 on_result_ready: Callable[[List[TrackerResult], ConsoleLog], Coroutine[Any, Any, CollectResult]] = None
+                 tracker_config: TrackerConfig
                  ):
-
-        self.on_result_ready = on_result_ready
-        self.on_profile_ready = on_profile_ready
-        self.on_profile_merge = on_profile_merge
         self.console_log = console_log
         self.tracker_config = tracker_config
 
@@ -270,21 +254,15 @@ class Tracker:
         if tracker_payload.source.transitional is True:
             tracker_payload.set_ephemeral()
 
-        # TODO this is required as long the old processing is required
+        result = await process_track_data(
+            source, tracker_payload,
+            self.tracker_config, tracking_start, self.console_log)
 
-        tp = TrackerProcessor(
-            self.console_log,
-            self.on_profile_merge,
-            self.on_profile_ready,
-            self.on_result_ready
-        )
+        if tracardi.enable_errors_on_response:
+            result['errors'] = self.console_log.get_errors()
+            result['warnings'] = self.console_log.get_warnings()
 
-        return await tp.handle(
-            tracker_payload,
-            source,
-            self.tracker_config,
-            tracking_start
-        )
+        return result
 
     async def check_source_id(self, source_id) -> Optional[EventSource]:
 
