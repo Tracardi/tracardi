@@ -14,7 +14,7 @@ from tracardi.domain.session import Session
 from tracardi.domain.value_object.collect_result import CollectResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
-from tracardi.service.setup.data.defaults import open_rest_source_bridge
+from tracardi.service.storage.mysql.bootstrap.bridge import open_rest_source_bridge
 from tracardi.service.tracking.source_validation import validate_source
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic.operations import console_log as console_log_db

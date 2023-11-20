@@ -43,6 +43,18 @@ class MemoryCacheConfig:
         self.trigger_rule_cache_ttl = get_env_as_int('TRIGGER_RULE_CACHE_TTL', 5)
 
 
+class MysqlConfig:
+
+    def __init__(self, env):
+        self.env = env
+        self.mysql_database_uri = env.get('MYSQL_DATABASE_URI', "mysql+aiomysql://root:root@localhost/")
+        self.mysql_database = env.get('MYSQL_DATABASE', "tracardi")
+        self.mysql_echo = env.get('MYSQL_ECHO', "yes") == "yes"
+
+        self.mysql_database_uri = self.mysql_database_uri.strip(" /")
+        self.mysql_database = self.mysql_database.strip(" /")
+
+
 class ElasticConfig:
 
     def __init__(self, env):
@@ -232,3 +244,4 @@ class TracardiConfig(metaclass=Singleton):
 
 
 tracardi = TracardiConfig(os.environ)
+mysql = MysqlConfig(os.environ)

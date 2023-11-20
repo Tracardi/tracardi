@@ -3,8 +3,11 @@ import logging
 import os
 from uuid import uuid4
 
+
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.service.license import License, MULTI_TENANT
+from tracardi.service.license import License, MULTI_TENANT, LICENSE
+from tracardi.service.storage.mysql.bootstrap.bridge import os_default_bridges
+from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
@@ -13,14 +16,16 @@ from tracardi.domain.user import User
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
-from tracardi.service.setup.setup_indices import create_schema, install_default_data, run_on_start
+from tracardi.service.setup.setup_indices import create_schema, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.driver.elastic import system as system_db
 from tracardi.service.storage.driver.elastic import user as user_db
 from tracardi.service.storage.index import Resource
 
-if License.has_license() and License.has_service(MULTI_TENANT):
-    from com_tracardi.service.multi_tenant_manager import MultiTenantManager
+if License.has_license():
+    from com_tracardi.db.bootstrap.default_bridges import commercial_default_bridges
+    if License.has_service(MULTI_TENANT):
+        from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
 
 logger = logging.getLogger(__name__)
@@ -129,7 +134,14 @@ async def install_system(credentials: Credentials):
 
         await run_on_start()
 
-        await install_default_data()
+        # Install default bridges
+        bs = BridgeService()
+        await bs.bootstrap(default_bridges=os_default_bridges)
+        if License.has_service(LICENSE):
+            await bs.bootstrap(default_bridges=commercial_default_bridges)
+
+        # TODO remove old way of bootstrapping
+        # await install_default_data()
 
         return {
             "created": schema_result,
@@ -168,7 +180,7 @@ async def install_system(credentials: Credentials):
             # Demo
 
             for i in range(0, 100):
-                payload = generate_payload(source=tracardi.demo_source)
+                payload = generate_payload(source=tracardi.internal_source)
 
                 await track_event(
                     TrackerPayload(**payload),

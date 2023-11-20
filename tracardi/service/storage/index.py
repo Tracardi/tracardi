@@ -187,8 +187,6 @@ class Resource(metaclass=Singleton):
 
     def __init__(self):
         self.resources = {
-            "bridge": Index(staging=False, static=True, multi_index=False, index="tracardi-bridge",
-                            mapping="mappings/bridge-index.json"),
             "event": Index(staging=False,
                            multi_index=True,
                            partitioning=tracardi.event_partitioning,

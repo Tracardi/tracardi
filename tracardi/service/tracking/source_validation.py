@@ -9,8 +9,8 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from tracardi.exceptions.exception import UnauthorizedException
+from tracardi.service.storage.mysql.bootstrap.bridge import open_rest_source_bridge
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.setup.data.defaults import open_rest_source_bridge
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

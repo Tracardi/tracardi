@@ -12,6 +12,11 @@ def to_json(data) -> str:
 
 
 def from_json(json_data: str, model: Optional[Type] = None):
+    data = json.loads(json_data)
+
+    if data is None:
+        return None
+
     if model is None:
-        return json.loads(json_data)
-    return model(**json.loads(json_data))
+        return data
+    return model(**data)

@@ -1,7 +1,7 @@
 from tracardi.context import get_context
 from tracardi.domain.bridge import Bridge
 from tracardi.service.plugin.domain.register import Form
-from tracardi.service.storage.mysql.table import BridgeTable
+from tracardi.service.storage.mysql.schema.table import BridgeTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
 
 

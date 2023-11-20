@@ -6,24 +6,13 @@ from elasticsearch.exceptions import TransportError, NotFoundError
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.license import LICENSE, License
-from tracardi.service.plugin.plugin_install import install_default_plugins
-from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
 import logging
 
-if License.has_service(LICENSE):
-    from com_tracardi.bridge.bridges import bridges_db
-
 __local_dir = os.path.dirname(__file__)
 
-index_mapping = {
-    # Update on actions is done when installing
-    # 'action': {
-    #     "on-start": install_default_plugins  # Callable to fill the index
-    # }
-}
+index_mapping = {}
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -38,17 +27,6 @@ def add_ids(data):
     for record in data:
         record['_id'] = record['id']
         yield record
-
-
-async def install_default_data():
-    for index_name, data in default_db_data.items():
-        index = Resource().get_index_constant(index_name)
-        await raw_db.bulk_upsert(index.get_write_index(), list(add_ids(data)))
-
-    if License.has_service(LICENSE):
-        for index_name, data in bridges_db.items():
-            index = Resource().get_index_constant(index_name)
-            await raw_db.bulk_upsert(index.get_write_index(), list(add_ids(data)))
 
 
 # todo add to install
@@ -209,48 +187,3 @@ async def create_schema(index_mappings: Generator[Tuple[Index, dict], Any, None]
             logger.error(str(e))
 
     return output
-
-# def get_index(index, mapping_file, version):
-#     if 'name' in index:
-#         del index['name']
-#     index['mapping'] = mapping_file
-#     index = Index(**index)
-#     index.set_version(version)
-#
-#     return index
-#
-# async def remote_system_upgrade(version):
-#     def get_index_mappings(version) -> Generator[Tuple[Index, dict], Any, None]:
-#         for mapping_file, index in data['indices'].items():
-#
-#             index = get_index(index, mapping_file, version)
-#
-#             if mapping_file not in data['mappings']:
-#                 raise ValueError(f"No mapping for {index.index} in release settings for version {version}.")
-#             mapping = index.prepare_mappings(data['mappings'][mapping_file], index)
-#
-#             yield index, mapping
-#
-#     async with HttpClient(3, 200) as client:
-#         async with client.get(f"http://localhost:11111/{version}", json={}) as response:
-#             data = await response.json()
-#             if 'mappings' not in data:
-#                 raise ValueError(f"No mappings in release settings for version {version}.")
-#
-#             if 'indices' not in data:
-#                 raise ValueError(f"No indices in release settings for version {version}.")
-#
-#             # Install
-#             with ServerContext(get_context().switch_context(production=True)):
-#                 await create_schema(get_index_mappings(version), update_mapping=False)
-#                 await install_default_data(version)
-#
-#             with ServerContext(get_context().switch_context(production=False)):
-#                 await create_schema(get_index_mappings(version), update_mapping=False)
-#                 await install_default_data(version)
-#
-#
-# if __name__ == "__main__":
-#     import asyncio
-#
-#     asyncio.run(remote_system_upgrade('1.0.0'))

@@ -1,6 +1,6 @@
 from sqlalchemy import and_
 
-from sqlalchemy import Column, String, DateTime, Boolean, JSON, LargeBinary, ForeignKey
+from sqlalchemy import Column, String, DateTime, Boolean, JSON, LargeBinary, ForeignKey, PrimaryKeyConstraint, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -14,18 +14,26 @@ def local_context_filter(table: Base):
     return and_(table.tenant == context.tenant, table.production == context.production)
 
 
+def local_context_entity(table: Base, id):
+    context = get_context()
+    return and_(table.tenant == context.tenant, table.production == context.production, table.id == id)
+
 class BridgeTable(Base):
     __tablename__ = 'bridge'
 
-    id = Column(String(40), primary_key=True)  # 'keyword' with ignore_above maps to VARCHAR with length
+    id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
     tenant = Column(String(32))
     production = Column(Boolean)
     name = Column(String(64))  # 'text' type in ES maps to VARCHAR(255) in MySQL
-    description = Column(String(255))  # 'text' type in ES maps to VARCHAR(255) in MySQL
+    description = Column(Text)  # 'text' type in ES maps to VARCHAR(255) in MySQL
     type = Column(String(48))  # 'keyword' type in ES maps to VARCHAR(255) in MySQL
     config = Column(JSON)  # 'object' type in ES with 'enabled' false maps to JSON in MySQL
     form = Column(JSON)  # 'object' type in ES with 'enabled' false maps to JSON in MySQL
-    manual = Column(String(48))  # 'keyword' type in ES with 'index' false maps to VARCHAR(255) in MySQL
+    manual = Column(Text, nullable=True)  # 'keyword' type in ES with 'index' false maps to VARCHAR(255) in MySQL
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
 
 
 class EventSourceTable(Base):

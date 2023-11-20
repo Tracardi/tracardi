@@ -15,19 +15,6 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-# class AsyncRedisClient(metaclass=Singleton):
-#     def __init__(self):
-#         host = redis_config.redis_host
-#         password = redis_config.redis_password
-#
-#         if password is None:
-#             self.client = aioredis.from_url(host)
-#         else:
-#             self.client = aioredis.from_url(host, password=password)
-#
-#         logger.info(f"Redis at {host} connected.")
-
-
 class RedisClient(metaclass=Singleton):
     def __init__(self):
         uri = redis_config.get_redis_with_password()
