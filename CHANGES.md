@@ -12,6 +12,7 @@ Version: 0.8.2
   * Set Operation Plugin - Perform set operations on two sets of data.
   * Max/Min Value
   * String to date - converts string to date
+  * String replace
 * Profile Metrics
 * Workers
   * Entity expiration worker (pro)
