@@ -18,7 +18,7 @@ def generate_profile_data():
         "pii": {
             "firstname": name[0],
             "lastname": name[1],
-            "name": " ".join(name),
+            "display_name": " ".join(name),
             "birthday": fake.date_time_between(start_date='-75y', end_date='-18y').strftime("%Y-%m-%d %H:%M:%S"),
             # "language": {
             #     "native": fake.current_country_code(),

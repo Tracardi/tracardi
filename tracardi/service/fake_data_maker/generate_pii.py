@@ -27,12 +27,12 @@ def make_identification_data():
     return {
         "firstname": name[0],
         "lastname": name[1],
-        "name": name,
+        "display_name": name,
         "slack": f"@{name[1]}",
         "telegram": f"@{name[0]}",
-        "phone": tn,
+        "phone": {"main": tn},
         "whatsapp": tn,
-        "email": fake_emails[randint(0, 1499)],
+        "email": {"main": fake_emails[randint(0, 1499)]},
         "birthday": fake.date_time_between(start_date='-75y', end_date='-18y').strftime("%Y-%m-%dT%H:%M:%S")
     }
 

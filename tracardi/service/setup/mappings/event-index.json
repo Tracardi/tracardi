@@ -397,7 +397,7 @@
                 "lastname": {
                   "type": "keyword"
                 },
-                "name": {
+                "display_name": {
                   "type": "keyword"
                 },
                 "birthday": {
@@ -477,10 +477,40 @@
             "contact": {
               "properties": {
                 "email": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "private": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    }
+                  }
                 },
                 "phone": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "mobile": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "whatsapp": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    }
+                  }
                 },
                 "app": {
                   "properties": {

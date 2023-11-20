@@ -1,4 +1,3 @@
-import time
 from typing import Optional, Union, List, Set
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache, save_profile_cache
 from tracardi.context import get_context

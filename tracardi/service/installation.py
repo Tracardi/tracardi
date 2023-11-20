@@ -83,7 +83,7 @@ async def check_installation():
     }
 
 
-async def install_system(credentials: Credentials, update_plugins_on_start_up):
+async def install_system(credentials: Credentials):
     if tracardi.multi_tenant:
         if not License.has_license():
             raise PermissionError("Installation forbidden. Multi-tenant installation is not "
@@ -162,26 +162,26 @@ async def install_system(credentials: Credentials, update_plugins_on_start_up):
             logger.warning("There is at least one admin account. New admin account not created.")
             staging_install_result['admin'] = True
 
-        if staging_install_result['admin'] is True and update_plugins_on_start_up is not False:
-            logger.info(
-                f"Updating plugins on startup due to: UPDATE_PLUGINS_ON_STARTUP={update_plugins_on_start_up}")
-            staging_install_result['plugins'] = await install_default_plugins()
+        # Demo
+        if os.environ.get("DEMO", 'no') == 'yes':
+
+            # Demo
+
+            for i in range(0, 100):
+                payload = generate_payload(source=tracardi.demo_source)
+
+                await track_event(
+                    TrackerPayload(**payload),
+                    "0.0.0.0",
+                    allowed_bridges=['internal', 'rest'])
 
     # Install production
     with ServerContext(get_context().switch_context(production=True)):
         production_install_result = await _install()
 
-    # Demo
-    if os.environ.get("DEMO", 'no') == 'yes':
-
-        # Demo
-
-        for i in range(0, 100):
-            payload = generate_payload(source=tracardi.demo_source)
-
-            await track_event(
-                TrackerPayload(**payload),
-                "0.0.0.0",
-                allowed_bridges=['internal', 'rest'])
+    logger.info(f"Installing plugins on startup")
+    installed_plugins = await install_default_plugins()
+    staging_install_result['plugins'] = installed_plugins
+    production_install_result['plugins'] = installed_plugins
 
     return staging_install_result, production_install_result

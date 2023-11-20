@@ -1,7 +1,7 @@
 import logging
 from typing import List, Tuple, Dict, Optional
 
-from tracardi.config import tracardi
+from tracardi.config import tracardi, memory_cache as memory_cache_config
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords
 
@@ -48,6 +48,7 @@ async def _load_rule(event_type, source_id):
             }
         }
     }
+
     return await storage_manager(index="rule").filter(query)
 
 
@@ -69,8 +70,8 @@ async def _get_rules_for_source_and_event_type(source: Entity, events: List[Even
             logger.debug("Loading routing rules for cache key {}".format(cache_key))
             rules = await _load_rule(event_type, source.id)
 
-            # todo set MemoryCache ttl from env
-            memory_cache[cache_key] = CacheItem(data=rules, ttl=5)
+            memory_cache[cache_key] = CacheItem(data=rules,
+                                                ttl=memory_cache_config.trigger_rule_cache_ttl)
 
         routes = list(memory_cache[cache_key].data)
         if not has_routes and routes:

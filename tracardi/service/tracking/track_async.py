@@ -19,10 +19,11 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 
-if License.has_license():
+if License.has_service(LICENSE):
     from com_tracardi.config import com_tracardi_settings
     from com_tracardi.service.tracking.track_dispatcher import dispatch_events_wf_destinations_async
     from com_tracardi.service.tracking.visti_end_dispatcher import schedule_visit_end_check
+    from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -58,12 +59,14 @@ async def process_track_data(source: EventSource,
 
         # Lock profile and session for changes and compute data
 
-        profile, session, events, tracker_payload = await lock_and_compute_data(
+        profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
             tracker_payload,
             tracker_config,
             source,
             console_log
         )
+
+        logger.info(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
 
         # Clean up
         if 'location' in tracker_payload.context:
@@ -78,9 +81,21 @@ async def process_track_data(source: EventSource,
 
         # Async storage
 
+        # Get context for queue
+
         dispatch_context = get_context().get_user_less_context_copy()
 
         if License.has_service(LICENSE):
+
+            # Queue updated fields as field update history log.
+            # Queues only updates made in mapping. Updates made in workflow are queued either
+            # in worker of after workflow.
+
+
+            if tracardi.enable_field_update_log:
+                timestamp_log = field_timestamp_monitor.get_timestamps_log()
+                if timestamp_log.has_changes():
+                    field_update_log_dispatch(dispatch_context, timestamp_log.get_history_log())
 
             # Split events into async and not async. Compute process time
 
@@ -138,6 +153,8 @@ async def process_track_data(source: EventSource,
 
                     # Pulsar publish
 
+                    # TODO merge profile_field_timestamps this is from mapping
+
                     dispatch_events_wf_destinations_async(
                         dispatch_context,
                         source,
@@ -155,7 +172,7 @@ async def process_track_data(source: EventSource,
                 # If disabled async storing or no pulsar add async events to sync and run it
                 sync_events += async_events
 
-            # Sync events
+            # Sync events. Events that are marked as async: false
 
             if sync_events:
 
@@ -167,29 +184,24 @@ async def process_track_data(source: EventSource,
 
                 # TODO Do not know if destinations are needed here. They are also dispatched in async
 
-                profile, session, sync_events, ux, response = await dispatch_sync_workflow_and_destinations(
-                    source,
-                    profile,
-                    session,
-                    sync_events,
-                    tracker_payload,
-                    tracker_config,
-                    console_log
+                profile, session, sync_events, ux, response = await (
+                    dispatch_sync_workflow_and_destinations(
+                        profile,
+                        session,
+                        sync_events,
+                        tracker_payload,
+                        console_log,
+                        # We save manually only when async processing is disabled. Disabled async it will not
+                        # be processed by async storage worker. Otherwise flusher worker saves in-memory profile
+                        # and session automatically
+                        store_in_db=com_tracardi_settings.async_processing is False,
+                        storage=storage
+                    )
                 )
 
                 result['ux'] = ux
                 result['response'] = response
                 result['events'] += [event.id for event in sync_events]
-
-                # We save manually only when async processing is disabled.
-                # Otherwise flusher worker saves in-memory profile and session automatically
-
-                if com_tracardi_settings.async_processing is False:
-
-                    profile_and_session_result = await storage.save_profile_and_session(
-                        session,
-                        profile
-                    )
 
             return result
 
@@ -207,23 +219,18 @@ async def process_track_data(source: EventSource,
             storage = TrackingPersisterAsync()
             events_result = await storage.save_events(events)
 
-            profile, session, events, ux, response = await dispatch_sync_workflow_and_destinations(
-                source,
-                profile,
-                session,
-                events,
-                tracker_payload,
-                tracker_config,
-                console_log
-            )
-
-            # Save. We need to manually save the session and profile in Open-source as there is no
-            # flusher worker and in-memory profile and session is not saved
-
-            profile_and_session_result = await storage.save_profile_and_session(
-                session,
-                profile
-            )
+            profile, session, events, ux, response = await (
+                dispatch_sync_workflow_and_destinations(
+                    profile,
+                    session,
+                    events,
+                    tracker_payload,
+                    console_log,
+                    # Save. We need to manually save the session and profile in Open-source as there is no
+                    # flusher worker and in-memory profile and session is not saved
+                    store_in_db=True,  # No cache worker for OS. mus store manually
+                    storage=storage
+                ))
 
         return {
             "task": tracker_payload.get_id(),

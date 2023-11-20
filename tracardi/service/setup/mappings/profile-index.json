@@ -5,7 +5,8 @@
   "template": {
     "settings": {
       "number_of_shards": %%SHARDS%%,
-      "number_of_replicas": %%REPLICAS%%
+      "number_of_replicas": %%REPLICAS%%,
+      "index.mapping.total_fields.limit": 2000
     },
     "mappings": {
       "_meta": {
@@ -31,6 +32,10 @@
             },
             "aux": {
               "type": "flattened"
+            },
+            "fields": {
+              "type": "object",
+              "enabled": false
             },
             "time": {
               "properties": {
@@ -119,7 +124,7 @@
                 "lastname": {
                   "type": "keyword"
                 },
-                "name": {
+                "display_name": {
                   "type": "keyword"
                 },
                 "birthday": {
@@ -199,10 +204,40 @@
             "contact": {
               "properties": {
                 "email": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "private": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    }
+                  }
                 },
                 "phone": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "mobile": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "whatsapp": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -330,7 +365,8 @@
             },
             "devices": {
               "properties": {
-                "names": {"type": "keyword", "ignore_above": 32},
+                "push": {"type": "keyword", "ignore_above": 40},
+                "other": {"type": "keyword", "ignore_above": 40},
                 "last": {
                   "properties": {
                     "geo": {

@@ -34,7 +34,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='HtmlXpathScrapperAction',
+            className=HtmlXpathScrapperAction.__name__,
             inputs=["payload"],
             outputs=["result", "error"],
             version='0.6.1',
@@ -63,6 +63,7 @@ def register() -> Plugin:
                     ]
                 )
             ]),
+            manual='xpath_html_scrapper'
 
         ),
         metadata=MetaData(

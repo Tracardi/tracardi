@@ -1,6 +1,31 @@
 Version: 0.8.2
 ----------------------------------------------------------
 * Upgrade to pytantic v2
+* Refactoring of the collector
+  * Improved performance
+  * Simpler code
+  * Asynchronous workflows, destinations, etc. (pro)
+* Fixed some GUI errors
+* Preparation for KeyCloak oAuth authorisation (pro)
+* New plugins:
+  * Send SMS via ClickSend gateway.
+  * Set Operation Plugin - Perform set operations on two sets of data.
+  * Max/Min Value
+  * String to date - converts string to date
+  * String replace
+* Profile Metrics
+* Workers
+  * Entity expiration worker (pro)
+  * Redone the scheduler worker (pro)
+  * New distributed storage worker (pro)
+  * New in-memory storage for profiles
+  * New metrics worker (pro)
+  * Redone visit-ended worker (pro)
+  * Redone workflow async worker (pro)
+* Configurable data partitioning
+* Preparation for configurable profile merging strategies
+* Fixing missing plugin documentation
+
 
 Version: 0.8.1
 ----------------------------------------------------------

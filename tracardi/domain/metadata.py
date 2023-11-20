@@ -14,6 +14,11 @@ class ProfileMetadata(BaseModel):
     time: ProfileTime
     aux: Optional[dict] = {}
     status: Optional[str] = None
+    fields: Optional[dict] = {}
+
+    def set_fields_timestamps(self, field_timestamp_manager):
+        for field, timestamp_data  in field_timestamp_manager.get_timestamps():
+            self.fields[field] = timestamp_data
 
 
 class OS(BaseModel):

@@ -3,6 +3,7 @@ import logging
 from pydantic import BaseModel
 
 from tracardi.config import tracardi
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -13,6 +14,8 @@ from tracardi.domain.session import Session
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.utils.getters import get_entity_id
+from tracardi.service.wf.domain.flow_graph import FlowGraph
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -42,6 +45,8 @@ class CopyTraitAction(ActionRunner):
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
         mapping = self.config.traits.set
 
+        flow: FlowGraph = self.flow
+
         for destination, value in mapping.items():
             if destination.startswith('event'):
                 self.console.warning(f"Can not copy data to event. Events are imputable and can not be changed. "
@@ -50,6 +55,16 @@ class CopyTraitAction(ActionRunner):
 
             # Value is automatically converted to value if in dot format
             dot[destination] = value
+            if self.profile and destination.startswith('profile'):
+                flow.set_change(
+                    'profile',
+                    self.profile.id,
+                    self.event.id,
+                    get_entity_id(self.session),
+                    get_entity_id(self.tracker_payload.source),
+                    destination,
+                    dot[destination]  # Use dot destination as it has computed values for `1`, `true`
+                )
 
         if self.event.metadata.profile_less is False:
             if 'traits' not in dot.profile:

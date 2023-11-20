@@ -202,6 +202,7 @@ class RulesEngine:
 
         post_invoke_events = {}
         flow_responses = []
+        changed_field_timestamps: List[dict] = []
         for event_type, tasks in flow_task_store.items():
             for flow_id, event_id, rule_name, task in tasks:  # type: str, str, str, Task
                 try:
@@ -212,6 +213,8 @@ class RulesEngine:
                     debug_info = flow_invoke_result.debug_info
                     log_list = flow_invoke_result.log_list
                     post_invoke_event = flow_invoke_result.event
+
+                    changed_field_timestamps += flow_invoke_result.flow.get_changes()
 
                     flow_responses.append(flow_invoke_result.flow.response)
                     post_invoke_events[post_invoke_event.id] = post_invoke_event
@@ -248,12 +251,15 @@ class RulesEngine:
 
         ran_event_types = list(flow_task_store.keys())
 
-        return RuleInvokeResult(debugger,
-                                ran_event_types,
-                                post_invoke_events,
-                                invoked_rules,
-                                invoked_flows,
-                                flow_responses)
+        return RuleInvokeResult(
+            debugger,
+            ran_event_types,
+            post_invoke_events,
+            invoked_rules,
+            invoked_flows,
+            flow_responses,
+            changed_field_timestamps
+        )
 
     def _get_merging_keys_and_values(self):
         merge_key_values = self.profile.get_merge_key_values()

@@ -83,7 +83,8 @@ def register() -> Plugin:
             ]),
             version='0.8.0',
             license="MIT + CC",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual='cut_out_data'
         ),
         metadata=MetaData(
             name='Cut out data',

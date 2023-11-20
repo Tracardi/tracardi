@@ -173,7 +173,7 @@ class NovuTriggerAction(ActionRunner):
                     subscriberId=subscriber_id,
                     firstName=self.profile.data.pii.firstname,
                     lastName=self.profile.data.pii.lastname,
-                    phone=self.profile.data.contact.phone
+                    phone=self.profile.data.contact.phone.main
                 )
 
                 response = await self._add_subscriber(novu_payload)

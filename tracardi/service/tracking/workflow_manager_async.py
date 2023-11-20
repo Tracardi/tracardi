@@ -8,6 +8,7 @@ from tracardi.domain.rule import Rule
 from tracardi.config import tracardi
 from tracardi.process_engine.debugger import Debugger
 from tracardi.service.cache_manager import CacheManager
+from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.domain.console import Console
@@ -36,8 +37,10 @@ APPEND = 2
 
 @dataclass
 class TrackerResult:
+    wf_triggered: bool
     tracker_payload: TrackerPayload
     events: List[Event]
+    changed_field_timestamps: FieldChangeTimestampManager
     session: Optional[Session] = None
     profile: Optional[Profile] = None
     console_log: Optional[ConsoleLog] = None
@@ -65,10 +68,12 @@ class WorkflowManagerAsync:
     def __init__(self,
                  console_log: ConsoleLog,
                  tracker_payload: TrackerPayload,
+                 field_timestamps: FieldChangeTimestampManager,
                  profile: Optional[Profile] = None,
                  session: Optional[Session] = None
                  ):
 
+        self.field_timestamps = field_timestamps
         self.tracker_payload = tracker_payload
         self.profile = profile
         self.session = session
@@ -155,6 +160,7 @@ class WorkflowManagerAsync:
     async def trigger_workflows_for_events(self, events: List[Event], debug: bool = False) -> TrackerResult:
 
         debugger = None
+        wf_triggered = False
 
         # Get routing rules if workflow is not disabled
 
@@ -188,10 +194,12 @@ class WorkflowManagerAsync:
                         debug
                     )
 
+                    wf_triggered = True
                     debugger = rule_invoke_result.debugger
                     post_invoke_events = rule_invoke_result.post_invoke_events
                     invoked_rules = rule_invoke_result.invoked_rules
                     flow_responses = FlowResponses(rule_invoke_result.flow_responses)
+                    self.field_timestamps.merge(rule_invoke_result.changes_timestamps)
 
                     # Profile and session can change inside workflow
                     # Check if it should not be replaced.
@@ -278,6 +286,7 @@ class WorkflowManagerAsync:
                 await self._save_debug_data(debugger, get_entity_id(self.profile))
 
             return TrackerResult(
+                wf_triggered=wf_triggered,
                 session=self.session,
                 profile=self.profile,
                 events=events,
@@ -285,5 +294,6 @@ class WorkflowManagerAsync:
                 console_log=self.console_log,
                 response=flow_responses.merge(),
                 debugger=debugger,
-                ux=ux
+                ux=ux,
+                changed_field_timestamps = self.field_timestamps
             )

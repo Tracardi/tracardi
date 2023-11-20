@@ -1,13 +1,14 @@
-from typing import Optional
+from typing import Tuple
 
 import logging
 
-from dotty_dict import dotty, Dotty
+from dotty_dict import Dotty
 from pydantic import ValidationError
 
 from tracardi.config import tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.event import Event
+from tracardi.domain.event_source import EventSource
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -16,11 +17,12 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.events import get_default_mappings_for, copy_default_event_to_profile, call_function
+from tracardi.service.events import get_default_mappings_for, call_function
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.utils.domains import free_email_domains
-from tracardi.service.utils.getters import get_entity_id
+from tracardi.service.events import copy_default_event_to_profile
 
 cache = CacheManager()
 
@@ -43,8 +45,8 @@ def update_profile_last_geo(session: Session, profile: Profile) -> Profile:
 
 
 def update_profile_email_type(profile: Profile) -> Profile:
-    if profile.data.contact.email and ('email' not in profile.aux or 'free' not in profile.aux['email']):
-        email_parts = profile.data.contact.email.split('@')
+    if profile.data.contact.email.main and ('email' not in profile.aux or 'free' not in profile.aux['email']):
+        email_parts = profile.data.contact.email.main.split('@')
         if len(email_parts) > 1:
             email_domain = email_parts[1]
 
@@ -85,34 +87,34 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 async def map_event_to_profile(
         custom_mapping_schemas: StorageRecords,
         flat_event: Dotty,
-        profile: Optional[Profile],
+        flat_profile: Dotty,
         session: Session,
-        console_log: ConsoleLog) -> Profile:
+        source: EventSource,
+        console_log: ConsoleLog) -> Tuple[Dotty, FieldTimestampMonitor]:
 
     # Default event types mappings
 
     default_mapping_schema = get_default_mappings_for(flat_event['type'], 'profile')
 
     profile_updated_flag = False
-    flat_profile = None
+
+    profile_changes = FieldTimestampMonitor(flat_profile,
+                                            type="profile",
+                                            profile_id=flat_profile.get('id', None),
+                                            event_id=flat_event.get('id', None),
+                                            session=session,
+                                            source=source)
 
     if default_mapping_schema is not None:
-        flat_profile = dotty(profile.model_dump(mode='json'))
-
         # Copy default
-        flat_profile, profile_updated_flag = copy_default_event_to_profile(
+        profile_changes, profile_updated_flag = copy_default_event_to_profile(
             default_mapping_schema,
-            flat_profile,
+            profile_changes,
             flat_event)
 
     # Custom event types mappings, filtered by event type
 
-    if profile is not None and custom_mapping_schemas.total > 0:
-
-        # Flat data can be already prepared in default coping
-
-        if flat_profile is None:
-            flat_profile = dotty(profile.model_dump())
+    if custom_mapping_schemas.total > 0:
 
         for custom_mapping_schema in custom_mapping_schemas:
             custom_mapping_schema = custom_mapping_schema.to_entity(EventToProfile)
@@ -121,7 +123,8 @@ async def map_event_to_profile(
             if 'condition' in custom_mapping_schema.config:
                 if_statement = custom_mapping_schema.config['condition']
                 try:
-                    dot = DotAccessor(event=Event(**flat_event.to_dict()), profile=profile, session=session)
+                    # Todo converting to Profile and event may be not performant, maybe extend dot accessor to take dotty
+                    dot = DotAccessor(event=Event(**flat_event.to_dict()), profile=Profile(**flat_profile.to_dict()), session=session)
                     result = await _check_mapping_condition_if_met(if_statement, dot)
                     if result is False:
                         continue
@@ -129,8 +132,8 @@ async def map_event_to_profile(
                     console_log.append(Console(
                         flow_id=None,
                         node_id=None,
-                        event_id=flat_event['id'],
-                        profile_id=get_entity_id(profile),
+                        event_id=flat_event.get('id', None),
+                        profile_id=flat_profile.get('id', None),
                         origin='event',
                         class_name='map_event_to_profile',
                         module=__name__,
@@ -151,7 +154,6 @@ async def map_event_to_profile(
                 allowed_profile_fields = (
                     "data",
                     "traits",
-                    "pii",
                     "ids",
                     "stats",
                     "segments",
@@ -171,8 +173,8 @@ async def map_event_to_profile(
                             Console(
                                 flow_id=None,
                                 node_id=None,
-                                event_id=flat_event['id'],
-                                profile_id=get_entity_id(profile),
+                                event_id=flat_event.get('id', None),
+                                profile_id=flat_profile.get('id', None),
                                 origin='event',
                                 class_name='map_event_to_profile',
                                 module=__name__,
@@ -192,8 +194,8 @@ async def map_event_to_profile(
                                 Console(
                                     flow_id=None,
                                     node_id=None,
-                                    event_id=flat_event['id'],
-                                    profile_id=get_entity_id(profile),
+                                    event_id=flat_event.get('id', None),
+                                    profile_id=flat_profile.get('id', None),
                                     origin='event',
                                     class_name='map_event_to_profile',
                                     module=__name__,
@@ -205,22 +207,21 @@ async def map_event_to_profile(
                             continue
 
                         if operation == APPEND:
-                            if profile_ref not in flat_profile:
-                                flat_profile[profile_ref] = [flat_event[event_ref]]
-                            elif isinstance(flat_profile[profile_ref], list):
-                                flat_profile[profile_ref].append(flat_event[event_ref])
-                            elif not isinstance(flat_profile[profile_ref], dict):
-                                flat_profile[profile_ref] = [flat_profile[profile_ref]]
-                                flat_profile[profile_ref].append(flat_event[event_ref])
+                            if profile_ref not in profile_changes:
+                                profile_changes[profile_ref] = [flat_event[event_ref]]
+                            elif isinstance(profile_changes[profile_ref], list):
+                                profile_changes[profile_ref].append(flat_event[event_ref])
+                            elif not isinstance(profile_changes[profile_ref], dict):
+                                profile_changes[profile_ref] = [profile_changes[profile_ref], flat_event[event_ref]]
                             else:
                                 raise KeyError(
-                                    f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
+                                    f"Can not append data {flat_event[event_ref]} to {profile_changes[profile_ref]} at profile@{profile_ref}")
 
                         elif operation == EQUALS_IF_NOT_EXISTS:
-                            if profile_ref not in flat_profile:
-                                flat_profile[profile_ref] = flat_event[event_ref]
+                            if profile_ref not in profile_changes:
+                                profile_changes[profile_ref] = flat_event[event_ref]
                         else:
-                            flat_profile[profile_ref] = flat_event[event_ref]
+                            profile_changes[profile_ref] = flat_event[event_ref]
 
                         profile_updated_flag = True
 
@@ -237,7 +238,7 @@ async def map_event_to_profile(
                                 flow_id=None,
                                 node_id=None,
                                 event_id=flat_event.get('id', None),
-                                profile_id=get_entity_id(profile),
+                                profile_id=flat_profile.get('id', None),
                                 origin='event',
                                 class_name='map_event_to_profile',
                                 module=__name__,
@@ -248,7 +249,7 @@ async def map_event_to_profile(
                         )
                         logger.error(message)
 
-    if profile_updated_flag is True and flat_profile is not None:
+    if profile_updated_flag is True and profile_changes is not None:
 
         # Compute values
 
@@ -259,18 +260,14 @@ async def map_event_to_profile(
                     continue
 
                 # todo keep event flat
-                flat_profile[profile_property] = call_function(
+                profile_changes[profile_property] = call_function(
                     compute_string,
                     event=Event(**flat_event.to_dict()),
-                    profile=flat_profile)
+                    profile=profile_changes.flat_profile)
 
         try:
-            metadata = profile.get_meta_data()
-            profile = Profile(**flat_profile)
-            # New profile was created but not metadata is saved. We need to pass metadata with current index
-            profile.set_meta_data(metadata)
-            # Mark to update the profile
-            profile.operation.update = True
+            flat_profile['operation.update'] = True
+
         except ValidationError as e:
             message = f"It seems that there was an error when trying to add or update some information to " \
                       f"your profile. The error occurred because you tried to add a value that is not " \
@@ -285,7 +282,7 @@ async def map_event_to_profile(
                     flow_id=None,
                     node_id=None,
                     event_id=flat_event.get('id', None),
-                    profile_id=get_entity_id(profile),
+                    profile_id=flat_profile.get('id', None),
                     origin='event',
                     class_name='map_event_to_profile',
                     module=__name__,
@@ -298,4 +295,4 @@ async def map_event_to_profile(
             if not tracardi.skip_errors_on_profile_mapping:
                 raise e
 
-    return profile
+    return flat_profile, profile_changes

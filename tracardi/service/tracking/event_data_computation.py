@@ -3,6 +3,7 @@ from dotty_dict import dotty, Dotty
 
 from typing import List, Tuple, Union, Optional
 
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.config import memory_cache
@@ -45,7 +46,7 @@ def _remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def _auto_index_default_event_type(flat_event: Dotty, profile: Profile) -> Dotty:
+def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Dotty:
     event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
     if event_mapping_schema is not None:
@@ -69,11 +70,11 @@ def _auto_index_default_event_type(flat_event: Dotty, profile: Profile) -> Dotty
     if state:
         if isinstance(state, str):
             if state.startswith("call:"):
-                # todo stick to flat_event for performance reasons
+                # todo stick to flat_event and flat_profile for performance reasons
                 event_dict = flat_event.to_dict()
                 _remove_empty_dicts(event_dict)
                 event = Event(**event_dict)
-
+                profile = Profile(**flat_profile.to_dict())
                 state = _call_function(call_string=state, event=event, profile=profile)
 
             flat_event['journey.state'] = state
@@ -86,13 +87,20 @@ def _auto_index_default_event_type(flat_event: Dotty, profile: Profile) -> Dotty
     return flat_event
 
 
-async def default_mapping_event_and_profile(flat_event, profile: Optional[Profile], session, console_log):
+async def default_mapping_event_and_profile(flat_event: Dotty,
+                                            flat_profile: Dotty,
+                                            session:Session,
+                                            source: EventSource,
+                                            console_log: ConsoleLog) -> Tuple[
+    Dotty, Dotty, Optional[FieldTimestampMonitor]]:
+
     # Default event mapping
-    flat_event = _auto_index_default_event_type(flat_event, profile)
+    flat_event = _auto_index_default_event_type(flat_event, flat_profile)
 
     custom_event_mapping_coroutine = cache.event_mapping(
         event_type=flat_event['type'],
         ttl=memory_cache.event_metadata_cache_ttl)
+
     custom_event_to_profile_mapping_coroutine = cache.event_to_profile_coping(
         event_type=flat_event['type'],
         ttl=memory_cache.event_to_profile_coping_ttl)
@@ -116,14 +124,25 @@ async def default_mapping_event_and_profile(flat_event, profile: Optional[Profil
                                                  custom_event_mapping)
 
     # Map event data to profile
-    if profile:
-        profile = await map_event_to_profile(custom_event_to_profile_mapping_schemas,
-                                             flat_event,
-                                             profile,
-                                             session,
-                                             console_log)
+    profile_changes = None
+    if flat_profile:
+        flat_profile, profile_changes = await map_event_to_profile(
+            custom_event_to_profile_mapping_schemas,
+            flat_event,
+            flat_profile,
+            session,
+            source,
+            console_log)
 
-    return flat_event, profile
+    # Add fields timestamps
+
+    if not isinstance(flat_profile['metadata.fields'], dict):
+        flat_profile['metadata.fields'] = {}
+
+    for field, timestamp_data in profile_changes.get_timestamps():
+        flat_profile['metadata.fields'][field] = timestamp_data
+
+    return flat_event, flat_profile, profile_changes
 
 
 async def make_event_from_event_payload(event_payload,
@@ -178,9 +197,14 @@ async def compute_events(events: List[EventPayload],
                          profile_less: bool,
                          console_log: ConsoleLog,
                          tracker_payload: TrackerPayload
-                         ) -> Tuple[List[Event], Session, Profile]:
+                         ) -> Tuple[List[Event], Session, Profile, Optional[FieldTimestampMonitor]]:
 
+    field_timestamp_monitor = None
     event_objects = []
+
+    flat_profile = dotty(profile.model_dump())
+    profile_metadata = profile.get_meta_data()
+
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
@@ -198,10 +222,11 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, profile = await default_mapping_event_and_profile(
+            flat_event, flat_profile, field_timestamp_monitor = await default_mapping_event_and_profile(
                 flat_event,
-                profile,
+                flat_profile,
                 session,
+                source,
                 console_log)
 
         # Convert to event
@@ -243,4 +268,9 @@ async def compute_events(events: List[EventPayload],
 
         event_objects.append(event)
 
-    return event_objects, session, profile
+    # Recreate Profile from flat_profile, that was changed
+
+    profile = Profile(**flat_profile.to_dict())
+    profile.set_meta_data(profile_metadata)
+
+    return event_objects, session, profile, field_timestamp_monitor

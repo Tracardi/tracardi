@@ -40,6 +40,7 @@ class MemoryCacheConfig:
         self.event_destination_cache_ttl = get_env_as_int('EVENT_DESTINATION_CACHE_TTL', 2)
         self.profile_destination_cache_ttl = get_env_as_int('PROFILE_DESTINATION_CACHE_TTL', 2)
         self.data_compliance_cache_ttl = get_env_as_int('DATA_COMPLIANCE_CACHE_TTL', 2)
+        self.trigger_rule_cache_ttl = get_env_as_int('TRIGGER_RULE_CACHE_TTL', 5)
 
 
 class ElasticConfig:
@@ -155,6 +156,7 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
+        self.enable_field_update_log = env.get('ENABLE_FIELD_UPDATE_LOG', 'yes').lower() == 'yes'
 
         self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
 
@@ -188,6 +190,18 @@ class TracardiConfig(metaclass=Singleton):
         self.internal_source = f"@internal-{random_hash[:20]}"
         self.segmentation_source = f"@segmentation-{random_hash[:20]}"
         self.demo_source = f"@demo-{random_hash[:20]}"
+
+        self.event_partitioning = env.get('EVENT_PARTITIONING', 'month')
+        self.profile_partitioning = env.get('PROFILE_PARTITIONING', 'quarter')
+        self.session_partitioning = env.get('SESSION_PARTITIONING', 'quarter')
+        self.entity_partitioning = env.get('ITEM_PARTITIONING', 'quarter')
+        self.item_partitioning = env.get('ITEM_PARTITIONING', 'year')
+        self.log_partitioning = env.get('LOG_PARTITIONING', 'month')
+        self.dispatch_log_partitioning = env.get('DISPATCH_LOG_PARTITIONING', 'month')
+        self.console_log_partitioning = env.get('CONSOLE_LOG_PARTITIONING', 'month')
+        self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
+        self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
+
         self._config = None
         self._unset_secrets()
 

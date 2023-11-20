@@ -417,10 +417,18 @@ class GraphInvoker(BaseModel):
                 # todo template per port
 
                 if node.object.join.has_reshape_templates():
-                    output = json.loads(node.object.join.get_reshape_template(out_port).template)
+                    try:
+                        output = json.loads(node.object.join.get_reshape_template(out_port).template)
+                    except Exception as e:
+                        raise ValueError(f"Error in join node. Could not parse reshape schema. Details: {str(e)}.")
+
                     if output:
-                        dot = DotAccessor(node.object.profile, node.object.session,
-                                          out_payload if isinstance(out_payload, dict) else None)
+                        dot = DotAccessor(
+                            node.object.profile,
+                            node.object.session,
+                            out_payload if isinstance(out_payload, dict) else None,
+                            node.object.event
+                        )
 
                         if node.object.join.get_reshape_template(out_port).default is True:
                             template = DictTraverser(dot, default=None)

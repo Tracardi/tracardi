@@ -38,7 +38,8 @@ def register() -> Plugin:
             outputs=["payload"],
             version='0.6.1',
             license="MIT + CC",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual='geo_distance'
         ),
         metadata=MetaData(
             name='Geo distance',

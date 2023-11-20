@@ -8,6 +8,7 @@ from ssl import create_default_context
 from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.pool_manager import PoolManager
 
@@ -164,6 +165,7 @@ class ElasticClient:
             except Exception as e:
                 last_exception = e
                 logger.error(f"Bulk insert error: {str(e)}")
+                print(get_traceback(e))
                 await asyncio.sleep(1)
 
             repeats -= 1

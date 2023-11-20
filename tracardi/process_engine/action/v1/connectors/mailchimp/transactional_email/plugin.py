@@ -123,7 +123,7 @@ def register() -> Plugin:
                                             "the e-mail address itself.",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "data.contact.email"
+                                                                               "defaultPathValue": "data.contact.email.main"
                                                                                })
                             ),
                             FormField(
@@ -136,7 +136,7 @@ def register() -> Plugin:
                                 name="Message content",
                                 description="This field contains the body of your message. It can be either text "
                                             "or HTML content. You can use templates in both HTML and text types, "
-                                            "something like 'Hello {{profile@pii.name}}!' will result in calling "
+                                            "something like 'Hello {{profile@data.pii.display_name}}!' will result in calling "
                                             "the customer by their name in the message text.",
                                 component=FormComponent(type="contentInput", props={
                                     "label": "Message body",

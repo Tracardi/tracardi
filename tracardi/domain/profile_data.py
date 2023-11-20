@@ -33,7 +33,7 @@ class ProfileAttribute(BaseModel):
 class ProfilePII(BaseModel):
     firstname: Optional[str] = None
     lastname: Optional[str] = None
-    name: Optional[str] = None
+    display_name: Optional[str] = None
     birthday: Optional[datetime] = None
     language: Optional[ProfileLanguage] = ProfileLanguage()
     gender: Optional[str] = None
@@ -68,15 +68,28 @@ class ProfileContactAddress(BaseModel):
     other: Optional[str] = None
 
 
+class ProfilePhone(BaseModel):
+    main: Optional[str] = None
+    business: Optional[str] = None
+    mobile: Optional[str] = None
+    whatsapp: Optional[str] = None
+
+
+class ProfileEmail(BaseModel):
+    main: Optional[str] = None
+    private: Optional[str] = None
+    business: Optional[str] = None
+
+
 class ProfileContact(BaseModel):
-    email: Optional[str] = None
-    phone: Optional[str] = None
+    email: Optional[ProfileEmail] = ProfileEmail()
+    phone: Optional[ProfilePhone] = ProfilePhone()
     app: Optional[ProfileContactApp] = ProfileContactApp()
     address: Optional[ProfileContactAddress] = ProfileContactAddress()
     confirmations: List[str] = []
 
     def has_contact(self):
-        return self.email or self.phone or self.app.has_contact()
+        return self.email or self.phone.mobile or self.phone.whatsapp or self.app.has_contact()
 
 
 class ProfileIdentifier(BaseModel):
@@ -173,7 +186,8 @@ class LastGeo(BaseModel):
 
 
 class ProfileDevices(BaseModel):
-    names: Optional[List[str]] = []
+    push: Optional[List[str]] = []
+    other: Optional[List[str]] = []
     last: Optional[LastGeo] = LastGeo()
 
 

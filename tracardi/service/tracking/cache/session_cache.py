@@ -2,6 +2,7 @@ from typing import Optional
 from tracardi.context import get_context, Context
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
+from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.merging.session_merger import merge_sessions
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
@@ -20,7 +21,7 @@ def load_session_cache(session_id: str, production):
     if not redis_cache.has(session_id, key_namespace):
         return None
 
-    context, session, session_metadata = redis_cache.get(
+    context, session, changes, session_metadata = redis_cache.get(
         session_id,
         key_namespace)
 
@@ -31,21 +32,33 @@ def load_session_cache(session_id: str, production):
     return session
 
 
-def save_session_cache(session: Optional[Session]):
+def save_session_cache(session: Optional[Session], session_changes: Optional[FieldTimestampMonitor] = None):
     if session:
         context = get_context()
-        redis_cache.set(
-            session.id,
-            (
-                {
-                    "production": context.production,
-                    "tenant": context.tenant
-                },
-                session.model_dump(mode="json", exclude_defaults=True),
-                session.get_meta_data().model_dump() if session.has_meta_data() else None
-            ),
-            f"{Collection.session}{context.context_abrv()}:{get_cache_prefix(session.id[0:2])}:"
-        )
+
+        index = session.get_meta_data()
+
+        print(f"Caching with session index {index}")
+
+        try:
+            if index is None:
+                raise ValueError("Empty session index.")
+
+            redis_cache.set(
+                session.id,
+                (
+                    {
+                        "production": context.production,
+                        "tenant": context.tenant
+                    },
+                    session.model_dump(mode="json", exclude_defaults=True),
+                    None,
+                    index.model_dump(mode="json")
+                ),
+                f"{Collection.session}{context.context_abrv()}:{get_cache_prefix(session.id[0:2])}:"
+            )
+        except ValueError as e:
+            print(e)
 
 
 def merge_with_cache_session(session: Session, context: Context) -> Session:

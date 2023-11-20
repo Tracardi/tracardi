@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from typing import Optional, Any
 
-from pydantic import ConfigDict, BaseModel
+from pydantic import ConfigDict, BaseModel, PrivateAttr
 
 from .entity import Entity
 from .marketing import UTM
@@ -82,6 +82,8 @@ class Session(Entity):
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
 
+    _updated_in_workflow: bool = PrivateAttr(False)
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, **data: Any):
@@ -90,6 +92,12 @@ class Session(Entity):
             data['context'] = SessionContext(data['context'])
 
         super().__init__(**data)
+
+    def set_updated_in_workflow(self, state=True):
+        self._updated_in_workflow = state
+
+    def is_updated_in_workflow(self) -> bool:
+        return self._updated_in_workflow
 
     def fill_meta_data(self):
         """
@@ -136,9 +144,3 @@ class Session(Entity):
         session.operation.new = True
 
         return session
-
-    def __hash__(self):
-        return hash(self.id)
-
-    def __eq__(self, other):
-        return self.id == other.id

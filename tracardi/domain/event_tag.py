@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class EventTag(BaseModel):
-    type: str = ""
+    type: Optional[str] = ""
     tags: List[str] = []
