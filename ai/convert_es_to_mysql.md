@@ -71,7 +71,7 @@ this:
 
 ```python
 
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float, PrimaryKeyConstraint, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -80,7 +80,9 @@ Base = declarative_base()
 class MyIndexTable(Base):
     __tablename__ = 'my_index'
 
-    id = Column(Integer, primary_key=True)  # Assuming there is a primary key field named 'id'
+    id = Column(Integer)  # Assuming there is a primary key field named 'id'
+    tenant = Column(String(40))  # Add this field for multitenance
+    production = Column(Boolean) # Add this field for multitenance
     name = Column(String(255))  # Elasticsearch 'text' type is similar to MySQL 'VARCHAR'
     age = Column(Integer)  # 'integer' in ES is the same as in MySQL
     address_street = Column(
@@ -89,6 +91,10 @@ class MyIndexTable(Base):
     tags = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
 
     # Notice that all fields are converted.
+    
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
 
 ```
 
@@ -96,12 +102,16 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-bridge
+plugin
 
 # Elasticsearch index mapping
 
 ```json
 {
+  "settings": {
+    "number_of_shards": %%CONF_SHARDS%%,
+    "number_of_replicas": %%REPLICAS%%
+  },
   "mappings": {
     "_meta": {
       "version": "%%VERSION%%",
@@ -110,32 +120,210 @@ bridge
     "dynamic": "strict",
     "properties": {
       "id": {
-        "type": "keyword", "ignore_above": 64
-      },
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "config": {
-        "type": "object",
-        "dynamic": "true",
-        "enabled": false
-      },
-      "form": {
-        "type": "object",
-        "dynamic": "true",
-        "enabled": false
-      },
-      "manual": {
         "type": "keyword",
-        "index": false
+        "ignore_above": 64
+      },
+      "metadata": {
+        "properties": {
+          "time": {
+            "properties": {
+              "insert": {
+                "type": "date"
+              }
+            }
+          }
+        }
+      },
+      "plugin": {
+        "properties": {
+          "debug": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "properties": {
+              "desc": {
+                "type": "text"
+              },
+              "brand": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "group": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "height": {
+                "type": "integer"
+              },
+              "width": {
+                "type": "integer"
+              },
+              "icon": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "keywords": {
+                "type": "text"
+              },
+              "name": {
+                "type": "text"
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 24
+              },
+              "tags": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "pro": {
+                "type": "boolean"
+              },
+              "commercial": {
+                "type": "boolean"
+              },
+              "remote": {
+                "type": "boolean"
+              },
+              "documentation": {
+                "type": "keyword",
+                "index": false
+              },
+              "frontend": {
+                "type": "boolean"
+              },
+              "emits_event": {
+                "type": "keyword",
+                "index": false
+              },
+              "purpose": {
+                "type": "keyword"
+              }
+            }
+          },
+          "spec": {
+            "properties": {
+              "id": {
+                "type": "keyword",
+                "ignore_above": 64
+              },
+              "className": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "module": {
+                "type": "keyword",
+                "ignore_above": 128
+              },
+              "inputs": {
+                "type": "keyword",
+                "ignore_above": 48
+              },
+              "outputs": {
+                "type": "keyword",
+                "ignore_above": 48
+              },
+              "microservice": {
+                "type": "object",
+                "dynamic": "true",
+                "enabled": false
+              },
+              "init": {
+                "index": false,
+                "type": "keyword"
+              },
+              "skip": {
+                "type": "boolean"
+              },
+              "block_flow": {
+                "type": "boolean",
+                "index": false
+              },
+              "run_in_background": {
+                "type": "boolean",
+                "index": false
+              },
+              "on_error_continue": {
+                "type": "boolean",
+                "index": false
+              },
+              "on_connection_error_repeat": {
+                "type": "integer",
+                "index": false
+              },
+              "append_input_payload": {
+                "type": "boolean",
+                "index": false
+              },
+              "join_input_payload": {
+                "type": "boolean",
+                "index": false
+              },
+              "form": {
+                "type": "keyword",
+                "index": false
+              },
+              "manual": {
+               "type": "keyword",
+                "ignore_above": 64,
+                "index": false
+              },
+              "author": {
+                "type": "keyword",
+                "ignore_above": 64
+              },
+              "license": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "version": {
+                "type": "keyword",
+                "ignore_above": 32
+              },
+              "run_once": {
+                "properties": {
+                  "value": {"type": "keyword", "index": false, "ignore_above": 64},
+                  "ttl": {"type":  "integer", "index": false},
+                  "type": {"type": "keyword", "index": false},
+                  "enabled": {"type": "boolean","index": false}
+                }
+              },
+              "node": {
+                "properties": {
+                  "on_remove": {
+                    "type": "keyword",
+                    "ignore_above": 128,
+                    "index": false
+                  },
+                  "on_create": {
+                    "type": "keyword",
+                    "ignore_above": 128,
+                    "index": false
+                  }
+                }
+              }
+            }
+          },
+          "start": {
+            "type": "boolean"
+          }
+        }
+      },
+      "settings": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        }
       }
     }
+  },
+  "aliases": {
+    "%%ALIAS%%": {}
   }
 }
+
 ```
