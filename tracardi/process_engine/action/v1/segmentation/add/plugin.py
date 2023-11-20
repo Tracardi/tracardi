@@ -47,7 +47,6 @@ class AddSegmentAction(ActionRunner):
                     if isinstance(self.config.segment, list):
                         converter = DictTraverser(dot, include_none=False)
                         segments = converter.reshape(self.config.segment)
-                        # Add segment is important here as if can trigger other workflows
                         profile = trigger_segment_add(profile, self.session, segments)
 
                     elif isinstance(self.config.segment, str):
