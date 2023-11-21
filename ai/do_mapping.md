@@ -123,41 +123,15 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class EventSourceTable(Base):
-    __tablename__ = 'event_source'
+class TracardiPro(Base):
+    __tablename__ = 'tracardi_pro'
 
     id = Column(String(40))
+    host = Column(String(128))
+    token = Column(String(255))
+
     tenant = Column(String(40))
     production = Column(Boolean)
-    timestamp = Column(DateTime)
-    update = Column(DateTime)
-    type = Column(String(32))
-    bridge_id = Column(String(40))
-    bridge_name = Column(String(128), ForeignKey('bridge.id'))
-    name = Column(String(64))
-    description = Column(String(255))
-    channel = Column(String(32))
-    url = Column(String(255))
-    enabled = Column(Boolean)
-    locked = Column(Boolean)
-    transitional = Column(Boolean)
-    tags = Column(String(255))
-    groups = Column(String(255))
-    icon = Column(String(32))
-    config = Column(JSON)
-    configurable = Column(Boolean)
-    hash = Column(String(255))
-    returns_profile = Column(Boolean)
-    permanent_profile_id = Column(Boolean)
-    requires_consent = Column(Boolean)
-    synchronize_profiles = Column(Boolean)
-    manual = Column(String(64))
-    endpoints_get_url = Column(String(255))
-    endpoints_get_method = Column(String(255))
-    endpoints_post_url = Column(String(255))
-    endpoints_post_method = Column(String(255))
-
-    bridge = relationship("BridgeTable")
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
@@ -167,32 +141,6 @@ class EventSourceTable(Base):
 and it to the object EventSource that has the following schema:
 
 ```python
-from datetime import datetime
-from typing import Optional, Union, List, Any
-
-from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.value_object.storage_info import StorageInfo
-from tracardi.domain.entity import Entity
-
-
-class EventSource(Entity):
-    type: List[str]
-    bridge: NamedEntity
-    timestamp: datetime
-    name: Optional[str] = "No name provided"
-    description: Optional[str] = "No description provided"
-    channel: Optional[str] = ""
-    enabled: Optional[bool] = True
-    transitional: Optional[bool] = False
-    tags: Union[List[str], str] = ["general"]
-    groups: Union[List[str], str] = []
-    returns_profile: Optional[bool] = False   # Todo remove - not used
-    permanent_profile_id: Optional[bool] = False
-    requires_consent: Optional[bool] = False
-    manual: Optional[str] = None
-    locked: bool = False
-    synchronize_profiles: bool = True
-    config: Optional[dict] = None
 
 ```
 

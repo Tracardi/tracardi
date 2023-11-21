@@ -122,40 +122,11 @@ identification_point
       "id": {
         "type": "keyword", "ignore_above": 64
       },
-      "name": {
-        "type" :"keyword"
+      "host": {
+        "type": "keyword"
       },
-      "description": {
-        "type" :"keyword"
-      },
-      "source": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
-      },
-      "event_type": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
-      },
-      "fields": {
-        "type": "flattened"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "settings": {
-        "type": "flattened"
+      "token": {
+        "type": "keyword"
       }
     }
   },
@@ -163,6 +134,7 @@ identification_point
     "%%ALIAS%%": {}
   }
 }
+
 
 
 ```

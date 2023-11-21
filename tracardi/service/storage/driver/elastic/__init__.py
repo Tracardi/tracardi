@@ -17,7 +17,6 @@ __all__ = [
     "import_config",
     "live_segment",
     "log",
-    "pro",
     "profile",
     "raw",
     "user",

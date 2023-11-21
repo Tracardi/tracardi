@@ -76,7 +76,7 @@ class TableService:
                 # Fetch all results
                 return SelectResult(result.scalars().all())
 
-    async def _where(self, table: Type[Base], where) -> SelectResult:
+    async def _where(self, table: Type[Base], where, one_record:bool=False) -> SelectResult:
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             # Start a new transaction
@@ -86,6 +86,8 @@ class TableService:
                     where
                 ))
                 # Fetch all results
+                if one_record:
+                    return SelectResult(result.scalars().one_or_none())
                 return SelectResult(result.scalars().all())
 
     async def _insert(self, table: Type[Base]) -> Optional[str]:

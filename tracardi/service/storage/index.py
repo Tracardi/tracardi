@@ -241,8 +241,8 @@ class Resource(metaclass=Singleton):
                           multi_index=False,
                           index="tracardi-user",
                           mapping="mappings/user-index.json"),
-            "tracardi-pro": Index(staging=False, multi_index=False, index="tracardi-pro",
-                                  mapping="mappings/tracardi-pro-index.json"),
+            # "tracardi-pro": Index(staging=False, multi_index=False, index="tracardi-pro",
+            #                       mapping="mappings/tracardi-pro-index.json"),
             "entity-list": Index(staging=True, multi_index=False, index="tracardi-entity-list",
                                  mapping="mappings/entity-list-index.json"),
             "resource": Index(staging=True, multi_index=False, index="tracardi-resource",
@@ -277,8 +277,8 @@ class Resource(metaclass=Singleton):
                                 multi_index=False,
                                 index="tracardi-debug-info",
                                 mapping="mappings/debug-info-index.json"),
-            "heartbeats": Index(staging=True, multi_index=False, index="tracardi-heartbeats",
-                                mapping="mappings/heartbeats-index.json"),
+            # "heartbeats": Index(staging=True, multi_index=False, index="tracardi-heartbeats",
+            #                     mapping="mappings/heartbeats-index.json"),
             "event-tags": Index(staging=True, multi_index=False, index="tracardi-events-tags",
                                 mapping="mappings/tag-index.json"),
             "consent-type": Index(staging=True, multi_index=False, index="tracardi-consent-type",
@@ -291,11 +291,6 @@ class Resource(metaclass=Singleton):
                                       mapping="mappings/event-validator-index.json"),
             "destination": Index(staging=True, multi_index=False, index='tracardi-destination',
                                  mapping="mappings/destination-index.json"),
-            # "action": Index(staging=False,
-            #                 static=True,
-            #                 multi_index=False,
-            #                 index="tracardi-flow-action-plugins",
-            #                 mapping="mappings/plugin-index.json"),
             "import": Index(staging=False, multi_index=False, index="tracardi-import",
                             mapping="mappings/import-index.json"),
             "task": Index(staging=False, multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
@@ -303,8 +298,8 @@ class Resource(metaclass=Singleton):
                             mapping="mappings/report-index.json"),
             "identification-point": Index(staging=True, multi_index=False, index="tracardi-identification-point",
                                           mapping="mappings/identification-point-index.json"),
-            "version": Index(staging=False, multi_index=False, index="tracardi-version",
-                             mapping="mappings/version-index.json")
+            # "version": Index(staging=False, multi_index=False, index="tracardi-version",
+            #                  mapping="mappings/version-index.json")
         }
 
     def list_aliases(self) -> set:

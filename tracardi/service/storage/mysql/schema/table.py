@@ -302,6 +302,14 @@ class IdentificationPointTable(Base):
     production = Column(Boolean)  # Field for multi-tenancy
 
     # Define the primary key constraint
+
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+
+class TracardiProTable(Base):
+    __tablename__ = 'tracardi_pro'
+
+    id = Column(String(40), primary_key=True)
+    token = Column(String(255))
