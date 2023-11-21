@@ -14,6 +14,7 @@ from typing import List, Optional, Dict, Tuple, Union, Set
 from .raw import load_by_key_value_pairs
 
 import tracardi.config as config
+from ...mysql.service.event_source_service import EventSourceService
 
 logger = logging.getLogger(__name__)
 logger.setLevel(config.tracardi.logging_level)
@@ -458,8 +459,13 @@ async def aggregate_events_by_source(buckets_size):
 
     query_string = [f"id:{id}" for id in result.aggregations['by_source'][0]]
     query_string = " OR ".join(query_string)
-    sources = await storage_manager('event-source').load_by_query_string(query_string)
-    source_names_idx = {source['id']: source['name'] for source in sources}
+
+    print(query_string)
+
+    ess =  EventSourceService()
+    event_source_as_named_entities = (await ess.load_all()).as_named_entities()
+
+    source_names_idx = {source.id: source.name for source in event_source_as_named_entities}
     return [{"name": _get_name(source_names_idx, id), "value": count} for id, count in
             result.aggregations['by_source'][0].items()]
 

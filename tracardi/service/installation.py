@@ -8,6 +8,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.license import License, MULTI_TENANT, LICENSE
 from tracardi.service.storage.mysql.bootstrap.bridge import os_default_bridges
 from tracardi.service.storage.mysql.service.bridge_service import BridgeService
+from tracardi.service.storage.mysql.service.database_service import DatabaseService
 from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
@@ -37,6 +38,8 @@ async def check_installation():
     """
     Returns list of missing and updated indices
     """
+
+    # TODO Check MYSQL database
 
     is_schema_ok, indices = await system_db.is_schema_ok()
 
@@ -134,19 +137,21 @@ async def install_system(credentials: Credentials):
 
         await run_on_start()
 
-        # Install default bridges
-        bs = BridgeService()
-        await bs.bootstrap(default_bridges=os_default_bridges)
-        if License.has_service(LICENSE):
-            await bs.bootstrap(default_bridges=commercial_default_bridges)
-
-        # TODO remove old way of bootstrapping
-        # await install_default_data()
-
         return {
             "created": schema_result,
             "admin": False
         }
+
+    # Bootstrap MySQL Database
+
+    ds = DatabaseService()
+    await ds.bootstrap()
+
+    # Install global default bridges
+    await BridgeService.bootstrap(default_bridges=os_default_bridges)
+    if License.has_service(LICENSE):
+        await BridgeService.bootstrap(default_bridges=commercial_default_bridges)
+
 
     # Install staging
     with ServerContext(get_context().switch_context(production=False)):

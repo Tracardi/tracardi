@@ -247,8 +247,6 @@ class Resource(metaclass=Singleton):
                                  mapping="mappings/entity-list-index.json"),
             "resource": Index(staging=True, multi_index=False, index="tracardi-resource",
                               mapping="mappings/resource-index.json"),
-            "event-source": Index(staging=True, multi_index=False, index="tracardi-source",
-                                  mapping="mappings/event-source-index.json"),
             "event-redirect": Index(staging=True, multi_index=False, index="tracardi-event-redirect",
                                     mapping="mappings/event-redirect-index.json"),
             "flow": Index(staging=True, multi_index=False, index="tracardi-flow",

@@ -4,6 +4,11 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin": PluginMetadata(
+        test=PluginTest(init={},
+                        resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.strings.string_replace.plugin": PluginMetadata(
         test=PluginTest(
             init={
@@ -574,11 +579,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginMetadata(
         test=PluginTest(init={'value': ''},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin": PluginMetadata(
-        test=PluginTest(init={},
                         resource=None)
     ),
 

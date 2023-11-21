@@ -135,7 +135,6 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
     if not await raw_db.exists_alias(alias_index, index=None):
         # Check if it points to target index
 
-        print(alias_index)
         try:
             existing_aliases_setup = await raw_db.get_alias(alias_index)
         except NotFoundError:

@@ -58,7 +58,7 @@ async def bootstrap():
     print(await bs.delete('3d8bb87e-28d1-4a38-b19c-d0c1fbb71e22'))
 
     results = await bs.load_all()
-    for x in results.to_objects(map_to_bridge):
+    for x in results.map_to_objects(map_to_bridge):
         print(x)
 
 

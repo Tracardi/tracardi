@@ -6,7 +6,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.plugin.domain.register import Spec, Form, FormGroup, FormField, FormComponent, MetaData, \
     Documentation, PortDoc, Plugin, MicroserviceConfig, MicroserviceServer, MicroservicePlugin
-from tracardi.service.storage.mysql.mapping.plugin_mapping import map_to_table, map_to_flow_action_plugin
+from tracardi.service.storage.mysql.mapping.plugin_mapping import map_to_plugin_table, map_to_flow_action_plugin
 from tracardi.service.storage.mysql.schema.table import PluginTable
 
 
@@ -211,7 +211,7 @@ def test_correctly_map_all_fields():
     )
 
     with ServerContext(Context(production=True, tenant="123")):
-        table = map_to_table(flow_plugin)
+        table = map_to_plugin_table(flow_plugin)
 
         assert table.id == "123"
         assert table.production == True

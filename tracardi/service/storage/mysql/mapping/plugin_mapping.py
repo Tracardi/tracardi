@@ -15,7 +15,7 @@ from tracardi.service.storage.mysql.schema.table import PluginTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
 
 
-def map_to_table(plugin: FlowActionPlugin) -> PluginTable:
+def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
     context = get_context()
     return PluginTable(
         id=plugin.id,

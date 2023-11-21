@@ -1,3 +1,5 @@
+from typing import Type
+
 from sqlalchemy import and_
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
@@ -10,14 +12,14 @@ from tracardi.context import get_context
 Base = declarative_base()
 
 
-def local_context_filter(table: Base):
+def tenant_context_filter(table: Type[Base]):
     context = get_context()
     return and_(table.tenant == context.tenant, table.production == context.production)
 
 
-def local_context_entity(table: Base, id):
+def tenant_only_context_filter(table: Type[Base]):
     context = get_context()
-    return and_(table.tenant == context.tenant, table.production == context.production, table.id == id)
+    return table.tenant == context.tenant
 
 
 class BridgeTable(Base):
@@ -25,7 +27,6 @@ class BridgeTable(Base):
 
     id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
     tenant = Column(String(40))
-    production = Column(Boolean)
     name = Column(String(64))  # 'text' type in ES maps to VARCHAR(255) in MySQL
     description = Column(Text)  # 'text' type in ES maps to VARCHAR(255) in MySQL
     type = Column(String(48))  # 'keyword' type in ES maps to VARCHAR(255) in MySQL
@@ -34,7 +35,7 @@ class BridgeTable(Base):
     manual = Column(Text, nullable=True)  # 'keyword' type in ES with 'index' false maps to VARCHAR(255) in MySQL
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
+        PrimaryKeyConstraint('id', 'tenant'),
     )
 
 
@@ -47,8 +48,8 @@ class EventSourceTable(Base):
     timestamp = Column(DateTime)
     update = Column(DateTime)
     type = Column(String(32))
-    bridge_id = Column(String(40))
-    bridge_name = Column(String(128), ForeignKey('bridge.id'))
+    bridge_id = Column(String(40), ForeignKey('bridge.id'))
+    bridge_name = Column(String(128))
     name = Column(String(64))
     description = Column(String(255))
     channel = Column(String(32))
@@ -66,7 +67,7 @@ class EventSourceTable(Base):
     permanent_profile_id = Column(Boolean)
     requires_consent = Column(Boolean)
     synchronize_profiles = Column(Boolean)
-    manual = Column(String(64))
+    manual = Column(Text)
     endpoints_get_url = Column(String(255))
     endpoints_get_method = Column(String(255))
     endpoints_post_url = Column(String(255))

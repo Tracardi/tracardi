@@ -6,7 +6,6 @@ from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
-from tracardi.service.storage.driver.elastic import event_source as event_source_db
 from tracardi.service.storage.driver.elastic import destination as destination_db
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.driver.elastic import event_to_profile as event_to_profile_db
@@ -14,6 +13,8 @@ from tracardi.service.storage.driver.elastic import event_management as event_ma
 from tracardi.service.storage.driver.elastic import event_validation as event_validation_db
 from tracardi.service.storage.driver.elastic import data_compliance as data_compliance_db
 from tracardi.service.storage.driver.elastic import event_reshaping as event_reshaping_db
+from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
+from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
 
 
 class CacheManager(metaclass=Singleton):
@@ -123,16 +124,22 @@ class CacheManager(metaclass=Singleton):
         Event source cache
         """
 
+        async def _load_event_source(source_id):
+            ess = EventSourceService()
+            return (await ess.load_by_id(source_id)).map_to_object(map_to_event_source)
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_source_cache(),
                 event_source_id,
                 ttl,
-                event_source_db.load,
+                _load_event_source,
                 True,
                 event_source_id
             )
-        return await event_source_db.load(event_source_id)
+
+
+        return await _load_event_source(event_source_id)
 
     async def event_validation(self, event_type, ttl) -> StorageRecords:
         """

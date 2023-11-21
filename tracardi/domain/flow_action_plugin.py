@@ -5,7 +5,6 @@ from .entity import Entity
 from .metadata import Metadata
 from .settings import Settings
 from .time import Time
-from .value_object.storage_info import StorageInfo
 from tracardi.service.module_loader import import_package, load_callable
 
 
@@ -29,16 +28,6 @@ class FlowActionPlugin(Entity):
 
     # Persistence
 
-    """
-    Do not use load method. This object must be decoded from FlowActionPluginRecord
-    """
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'action',
-            FlowActionPlugin
-        )
 
     def get_validator(self) -> Callable:
         module = import_package(self.plugin.spec.module)

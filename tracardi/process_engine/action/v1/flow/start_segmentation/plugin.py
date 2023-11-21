@@ -33,6 +33,7 @@ class StartSegmentationAction(ActionRunner):
             event = Event(
                 id=str(uuid4()),
                 type="@segmentation",
+                name="Segmentation",
                 source=Entity(id=str(uuid4())),
                 metadata=EventMetadata(time=EventTime(insert=datetime.utcnow()), debug=self.debug)
             )

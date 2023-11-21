@@ -5,12 +5,11 @@ from tracardi.service.storage.mysql.schema.table import BridgeTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
 
 
-def map_to_table(bridge: Bridge) -> BridgeTable:
+def map_to_bridge_table(bridge: Bridge) -> BridgeTable:
     context = get_context()
     return BridgeTable(
         id=bridge.id,
         tenant=context.tenant,
-        production=context.production,
         name=bridge.name,
         description=bridge.description,
         type=bridge.type,

@@ -10,7 +10,6 @@ __all__ = [
     "event_redirect",
     "event_reshaping",
     "event_to_profile",
-    "event_source",
     "event_validation",
     "flow",
     "helper",
