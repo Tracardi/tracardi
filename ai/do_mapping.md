@@ -123,15 +123,25 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class TracardiPro(Base):
-    __tablename__ = 'tracardi_pro'
+class DestinationTable(Base):
+    __tablename__ = 'destination'
 
-    id = Column(String(40))
-    host = Column(String(128))
-    token = Column(String(255))
-
+    id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
     tenant = Column(String(40))
     production = Column(Boolean)
+    name = Column(String(255))  # 'text' type in ES maps to VARCHAR in MySQL
+    description = Column(Text)  # 'text' type in ES maps to TEXT in MySQL
+    destination = Column(Text)  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
+    condition = Column(Text)  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
+    mapping = Column(String(255))  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
+    enabled = Column(Boolean)  # 'boolean' in ES maps to BOOLEAN in MySQL
+    on_profile_change_only = Column(Boolean)  # 'boolean' in ES maps to BOOLEAN in MySQL
+    event_type_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    event_type_name = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    source_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    source_name = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    resource_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
+    tags = Column(String(255))  # 'keyword' type in ES maps to VARCHAR in MySQL
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
@@ -141,7 +151,68 @@ class TracardiPro(Base):
 and it to the object EventSource that has the following schema:
 
 ```python
+from typing import Optional, List
+from pydantic import field_validator, BaseModel
+from tracardi.domain.entity import Entity
+from tracardi.domain.value_object.storage_info import StorageInfo
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.process_engine.tql.condition import Condition
+from tracardi.service.secrets import b64_decoder, b64_encoder
 
+
+class DestinationConfig(BaseModel):
+    package: str
+    init: dict = {}
+    form: dict = {}
+
+    @field_validator("package")
+    @classmethod
+    def package_not_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Destination package cannot be empty")
+        return value
+
+    def encode(self):
+        return b64_encoder(self)
+
+    @staticmethod
+    def decode(encoded_string) -> "DestinationConfig":
+        return DestinationConfig(
+            **b64_decoder(encoded_string)
+        )
+
+
+class Destination(NamedEntity):
+    description: Optional[str] = ""
+    destination: DestinationConfig
+    enabled: bool = False
+    tags: List[str] = []
+    mapping: dict = {}
+    condition: Optional[str] = ""
+    on_profile_change_only: Optional[bool] = True
+    resource: Entity
+    event_type: NamedEntity
+    source: NamedEntity
+
+    @field_validator("name")
+    @classmethod
+    def name_not_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Name cannot be empty")
+        return value
+
+    @field_validator("condition")
+    @classmethod
+    def is_valid_condition(cls, value):
+        if value:
+            _condition = Condition()
+            try:
+                _condition.parse(value)
+            except Exception as e:
+                raise ValueError("There is an error in the prerequisites field. The condition is incorrect. The system "
+                                 "could not parse it. Please see the documentation for the condition syntax.", str(e))
+
+        return value
 ```
 
 create function `map_to_<oject-name>table` that maps domain object to sqlalchemy table. And function `map_to_<object-name>` that

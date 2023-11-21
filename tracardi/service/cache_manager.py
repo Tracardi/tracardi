@@ -1,19 +1,21 @@
 from typing import Optional, List
 
+from tracardi.domain.destination import Destination
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
-from tracardi.service.storage.driver.elastic import destination as destination_db
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.driver.elastic import event_to_profile as event_to_profile_db
 from tracardi.service.storage.driver.elastic import event_management as event_management_db
 from tracardi.service.storage.driver.elastic import event_validation as event_validation_db
 from tracardi.service.storage.driver.elastic import data_compliance as data_compliance_db
 from tracardi.service.storage.driver.elastic import event_reshaping as event_reshaping_db
+from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
+from tracardi.service.storage.mysql.service.destination_service import DestinationService
 from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
 
 
@@ -63,37 +65,48 @@ class CacheManager(metaclass=Singleton):
 
     # Caches
 
-    async def event_destination(self, event_type, source_id, ttl) -> StorageRecords:
+    async def event_destination(self, event_type, source_id, ttl) -> List[Destination]:
         """
         Session cache
         """
+
+        async def _load_event_destinations(event_type, source_id) -> List[Destination]:
+            ds = DestinationService()
+            return (await ds.load_event_destinations(event_type, source_id)).map_to_objects(map_to_destination)
+
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_destination_cache(),
                 f"{event_type}-{source_id}",
                 ttl,
-                destination_db.load_event_destinations,
+                _load_event_destinations,
                 True,
                 event_type,
                 source_id
             )
 
-        return await destination_db.load_event_destinations(event_type=event_type, source_id=source_id)
+        return await _load_event_destinations(event_type, source_id)
 
-    async def profile_destinations(self, ttl) -> StorageRecords:
+    async def profile_destinations(self, ttl) -> List[Destination]:
         """
         Session cache
         """
+
+        async def _load_profile_destinations() -> List[Destination]:
+            ds = DestinationService()
+            return (await ds.load_profile_destinations()).map_to_objects(map_to_destination)
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.profile_destination_cache(),
                 "profile-destination-key",
                 ttl,
-                destination_db.load_profile_destinations,
+                _load_profile_destinations,
                 True
             )
 
-        return await destination_db.load_profile_destinations()
+        return await _load_profile_destinations()
 
     async def session(self, session_id, ttl) -> Optional[Session]:
         """

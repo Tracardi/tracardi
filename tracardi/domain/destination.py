@@ -38,7 +38,7 @@ class Destination(NamedEntity):
     condition: Optional[str] = ""
     on_profile_change_only: Optional[bool] = True
     resource: Entity
-    event_type: NamedEntity
+    event_type: Optional[NamedEntity] = None
     source: NamedEntity
 
     @field_validator("name")

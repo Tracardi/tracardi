@@ -222,21 +222,23 @@ class DestinationTable(Base):
     __tablename__ = 'destination'
 
     id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
+    name = Column(String(128))
+
     tenant = Column(String(40))
     production = Column(Boolean)
-    name = Column(String(255))  # 'text' type in ES maps to VARCHAR in MySQL
-    description = Column(Text)  # 'text' type in ES maps to TEXT in MySQL
-    destination = Column(Text)  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
-    condition = Column(Text)  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
-    mapping = Column(String(255))  # 'keyword' type in ES maps to VARCHAR in MySQL, 'index': false
-    enabled = Column(Boolean)  # 'boolean' in ES maps to BOOLEAN in MySQL
-    on_profile_change_only = Column(Boolean)  # 'boolean' in ES maps to BOOLEAN in MySQL
-    event_type_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
-    event_type_name = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
-    source_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
-    source_name = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
-    resource_id = Column(String(255))  # Nested 'keyword' fields converted to 'VARCHAR'
-    tags = Column(String(255))  # 'keyword' type in ES maps to VARCHAR in MySQL
+
+    description = Column(Text)
+    destination = Column(JSON)
+    condition = Column(Text)
+    mapping = Column(JSON)
+    enabled = Column(Boolean)
+    on_profile_change_only = Column(Boolean)
+    event_type_id = Column(String(40))
+    event_type_name = Column(String(128))
+    source_id = Column(String(40))
+    source_name = Column(String(128))
+    resource_id = Column(String(40))
+    tags = Column(String(255))
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),

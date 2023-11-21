@@ -122,10 +122,58 @@ identification_point
       "id": {
         "type": "keyword", "ignore_above": 64
       },
-      "host": {
-        "type": "keyword"
+      "name": {
+        "type": "text"
       },
-      "token": {
+      "description": {
+        "type": "text"
+      },
+      "destination": {
+        "type": "keyword",
+        "index": false
+      },
+      "condition": {
+        "type": "keyword",
+        "index": false
+      },
+      "mapping": {
+        "type": "keyword",
+        "index": false
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "on_profile_change_only": {
+        "type": "boolean"
+      },
+      "event_type": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "source": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "resource": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tags": {
         "type": "keyword"
       }
     }
@@ -134,7 +182,5 @@ identification_point
     "%%ALIAS%%": {}
   }
 }
-
-
 
 ```

@@ -36,7 +36,7 @@ def _get_destination_class(destination: Destination):
     return load_callable(module, class_name)
 
 
-async def _get_destination_dispatchers(destinations, dot, template):
+async def _get_destination_dispatchers(destinations: List[Destination], dot, template):
     for destination in destinations:
 
         if not destination.enabled:
@@ -49,7 +49,6 @@ async def _get_destination_dispatchers(destinations, dot, template):
         if resource.enabled is False:
             raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
 
-        destination = destination.decode()
         data = template.reshape(reshape_template=destination.mapping)
 
         if destination.condition:
@@ -69,10 +68,9 @@ async def event_destination_dispatch(load_destination_task: Callable,
 
     dot = DotAccessor(profile, session)
     for ev in events:
-        destinations = [DestinationRecord(**destination_record) for destination_record in
-                        await load_destination_task(ev.type,
-                                                    ev.source.id,
-                                                    ttl=memory_cache.event_destination_cache_ttl)]
+        destinations: List[Destination] = await load_destination_task(ev.type,
+                                                   ev.source.id,
+                                                   ttl=memory_cache.event_destination_cache_ttl)
 
         dot.set_storage("event", ev)
 
@@ -103,8 +101,7 @@ async def profile_destination_dispatch(load_destination_task: Callable,
     dot = DotAccessor(profile, session)
     template = DictTraverser(dot, default=None)
 
-    destinations = [DestinationRecord(**destination_record) for destination_record in
-                    await load_destination_task(ttl=memory_cache.profile_destination_cache_ttl)]
+    destinations: List[Destination] = await load_destination_task(ttl=memory_cache.profile_destination_cache_ttl)
 
     async for destination, resource, data in _get_destination_dispatchers(
                 destinations,
