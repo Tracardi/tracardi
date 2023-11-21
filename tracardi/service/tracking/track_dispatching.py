@@ -3,13 +3,13 @@ import logging
 from typing import List, Tuple, Optional
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
+from tracardi.service.tracking.destination.dispatcher import sync_destination
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.tracking.cache.profile_cache import lock_merge_with_cache_and_save_profile
 from tracardi.service.tracking.cache.session_cache import lock_merge_with_cache_and_save_session
-from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
@@ -103,10 +103,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
                                                   ) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
 
-    # This is MUST BE FIRST BEFORE WORKFLOW
-
-    profile_dispatcher = ProfileDestinationDispatcher(profile, console_log)
-
     # Dispatch workflow and post eve segmentation
 
     debug = tracker_payload.is_on('debugger', default=False)
@@ -179,10 +175,9 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
 
     # Dispatch outbound profile
 
-    await profile_dispatcher.dispatch(
-        profile,
-        session,
-        events
-    )
+    must_dispatch = profile and tracardi.enable_profile_destinations and profile.has_not_saved_changes()
+    if must_dispatch:
+        await sync_destination(profile, session, console_log)
+
 
     return profile, session, events, ux, response

@@ -68,9 +68,10 @@ async def event_destination_dispatch(load_destination_task: Callable,
 
     dot = DotAccessor(profile, session)
     for ev in events:
-        destinations: List[Destination] = await load_destination_task(ev.type,
-                                                   ev.source.id,
-                                                   ttl=memory_cache.event_destination_cache_ttl)
+        destinations: List[Destination] = await load_destination_task(
+            ev.type,
+            ev.source.id,
+            ttl=memory_cache.event_destination_cache_ttl)
 
         dot.set_storage("event", ev)
 
