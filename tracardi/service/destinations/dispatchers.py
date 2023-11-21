@@ -13,7 +13,7 @@ from tracardi.config import tracardi, memory_cache
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.cache_manager import CacheManager
-from tracardi.domain.destination import DestinationRecord, Destination
+from tracardi.domain.destination import Destination
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.storage.driver.elastic import resource as resource_db
 

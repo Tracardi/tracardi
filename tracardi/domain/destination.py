@@ -1,7 +1,6 @@
 from typing import Optional, List
 from pydantic import field_validator, BaseModel
 from tracardi.domain.entity import Entity
-from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.secrets import b64_decoder, b64_encoder
@@ -60,63 +59,3 @@ class Destination(NamedEntity):
                                  "could not parse it. Please see the documentation for the condition syntax.", str(e))
 
         return value
-
-
-class DestinationRecord(NamedEntity):
-    description: Optional[str] = ""
-    destination: str
-    enabled: bool = False
-    tags: List[str] = []
-    mapping: Optional[str] = None
-    condition: Optional[str] = ""
-    on_profile_change_only: Optional[bool] = True
-    resource: Entity
-    event_type: NamedEntity
-    source: NamedEntity
-
-    @field_validator("destination")
-    @classmethod
-    def destination_not_empty(cls, value):
-        if len(value) == 0:
-            raise ValueError("Destination cannot be empty")
-        return value
-
-    def decode(self):
-        return Destination(
-            id=self.id,
-            resource=self.resource,
-            name=self.name,
-            description=self.description,
-            destination=DestinationConfig.decode(self.destination) if self.destination is not None else None,
-            enabled=self.enabled,
-            tags=self.tags,
-            mapping=b64_decoder(self.mapping) if self.mapping else {},
-            condition=self.condition,
-            on_profile_change_only=self.on_profile_change_only,
-            event_type=self.event_type,
-            source=self.source
-        )
-
-    @staticmethod
-    def encode(destination: Destination):
-        return DestinationRecord(
-            id=destination.id,
-            resource=destination.resource,
-            name=destination.name,
-            description=destination.description,
-            destination=destination.destination.encode() if destination.destination else None,
-            enabled=destination.enabled,
-            tags=destination.tags,
-            mapping=b64_encoder(destination.mapping),
-            condition=destination.condition,
-            on_profile_change_only=destination.on_profile_change_only,
-            event_type=destination.event_type,
-            source=destination.source
-        )
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'destination',
-            DestinationRecord
-        )
