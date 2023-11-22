@@ -5,7 +5,7 @@ from tracardi.domain.flow_action_plugin import FlowActionPlugin
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.plugin_mapping import map_to_plugin_table
 from tracardi.service.storage.mysql.schema.table import PluginTable
-from tracardi.service.storage.mysql.service.table_service import TableService
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context, sql_functions
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 
@@ -31,4 +31,13 @@ class ActionPluginService(TableService):
         return await self._delete_by_id(PluginTable, primary_id=plugin_id)
 
     async def filter(self, purpose: str):
-        return await self._field_filter(PluginTable, field=PluginTable.plugin_metadata_purpose, value=purpose)
+
+        where = where_tenant_context(
+            PluginTable,
+            sql_functions().find_in_set(purpose, PluginTable.plugin_metadata_purpose)>0
+        )
+
+        return await self._query(
+            PluginTable,
+            where
+        )

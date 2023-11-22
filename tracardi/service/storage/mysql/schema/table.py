@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy import and_
+from sqlalchemy import and_, Index
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
                         ForeignKey, PrimaryKeyConstraint, Text, Integer, UniqueConstraint)
@@ -27,7 +27,7 @@ class BridgeTable(Base):
 
     id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
     tenant = Column(String(40))
-    name = Column(String(64))  # 'text' type in ES maps to VARCHAR(255) in MySQL
+    name = Column(String(64), index=True)  # 'text' type in ES maps to VARCHAR(255) in MySQL
     description = Column(Text)  # 'text' type in ES maps to VARCHAR(255) in MySQL
     type = Column(String(48))  # 'keyword' type in ES maps to VARCHAR(255) in MySQL
     config = Column(JSON)  # 'object' type in ES with 'enabled' false maps to JSON in MySQL
@@ -37,7 +37,6 @@ class BridgeTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant'),
     )
-
 
 class EventSourceTable(Base):
     __tablename__ = 'event_source'
@@ -50,7 +49,7 @@ class EventSourceTable(Base):
     type = Column(String(32))
     bridge_id = Column(String(40), ForeignKey('bridge.id'))
     bridge_name = Column(String(128))
-    name = Column(String(64))
+    name = Column(String(64), index=True)
     description = Column(String(255))
     channel = Column(String(32))
     url = Column(String(255))
@@ -86,9 +85,9 @@ class WorkflowTable(Base):
     id = Column(String(40))
     timestamp = Column(DateTime)
     deploy_timestamp = Column(DateTime)
-    name = Column(String(64))
+    name = Column(String(64), index=True)
     description = Column(String(255))
-    type = Column(String(64), default="collection")
+    type = Column(String(64), default="collection", index=True)
     projects = Column(String(255))
 
     draft = Column(LargeBinary)
@@ -114,21 +113,21 @@ class TriggerTable(Base):
     id = Column(String(40))  # 'keyword' in ES with ignore_above
     tenant = Column(String(40))
     production = Column(Boolean)
-    name = Column(String(150))  # 'keyword' in ES with ignore_above
+    name = Column(String(150), index=True)  # 'keyword' in ES with ignore_above
     description = Column(String(255))  # 'text' in ES with no string length mentioned
     type = Column(String(64))  # 'keyword' in ES defaults to 255 if no ignore_above is set
     metadata_time_insert = Column(DateTime)  # Nested 'date' fields
     event_type_id = Column(String(40))  # Nested 'keyword' fields
     event_type_name = Column(String(64))  # Nested 'keyword' fields
-    flow_id = Column(String(40))  # Nested 'keyword' fields
+    flow_id = Column(String(40), index=True)  # Nested 'keyword' fields
     flow_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
-    segment_id = Column(String(40))  # Nested 'keyword' fields
+    segment_id = Column(String(40), index=True)  # Nested 'keyword' fields
     segment_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
-    source_id = Column(String(40))  # Nested 'keyword' fields
+    source_id = Column(String(40), index=True)  # Nested 'keyword' fields
     source_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
     properties = Column(JSON)  # 'object' in ES is mapped to 'JSON' in MySQL
     enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
-    tags = Column(String(255))  # 'keyword' in ES defaults to 255 if no ignore_above is set
+    tags = Column(String(255), index=True)  # 'keyword' in ES defaults to 255 if no ignore_above is set
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
@@ -143,11 +142,11 @@ class ResourceTable(Base):
     production = Column(Boolean)
     type = Column(String(48))
     timestamp = Column(DateTime)
-    name = Column(String(64))
+    name = Column(String(64), index=True)
     description = Column(String(255))
     credentials = Column(String(255))
     enabled = Column(Boolean)
-    tags = Column(String(255))
+    tags = Column(String(255), index=True)
     groups = Column(String(255))
     icon = Column(String(255))
     destination = Column(String(255))
@@ -222,7 +221,7 @@ class DestinationTable(Base):
     __tablename__ = 'destination'
 
     id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
-    name = Column(String(128))
+    name = Column(String(128), index=True)
 
     tenant = Column(String(40))
     production = Column(Boolean)
@@ -237,7 +236,7 @@ class DestinationTable(Base):
     event_type_name = Column(String(128))
     source_id = Column(String(40))
     source_name = Column(String(128))
-    resource_id = Column(String(40))
+    resource_id = Column(String(40), index=True)
     tags = Column(String(255))
 
     __table_args__ = (
@@ -270,7 +269,7 @@ class UserTable(Base):
     id = Column(String(40))  # 'keyword' type with ignore_above
     password = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
     full_name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
-    email = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    email = Column(String(128), index=True)  # 'keyword' type defaults to VARCHAR(255)
     roles = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
     disabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
     expiration_timestamp = Column(Integer)  # 'long' type in ES corresponds to Integer in MySQL
@@ -286,13 +285,15 @@ class UserTable(Base):
         UniqueConstraint('email', 'password', name='uiq_email_password')
     )
 
+Index('index_email_password', UserTable.email, UserTable.password)
+
 class IdentificationPointTable(Base):
     __tablename__ = 'identification_point'
 
     id = Column(String(40))  # 'keyword' type with ignore_above
     name = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
     description = Column(Text)  # 'keyword' type defaults to VARCHAR(255)
-    source_id = Column(String(40))  # Nested 'keyword' field
+    source_id = Column(String(40), index=True)  # Nested 'keyword' field
     source_name = Column(String(128))  # Nested 'keyword' field
     event_type_id = Column(String(40))  # Nested 'keyword' field
     event_type_name = Column(String(128))  # Nested 'keyword' field

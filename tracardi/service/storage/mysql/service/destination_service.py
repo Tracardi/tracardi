@@ -55,3 +55,15 @@ class DestinationService(TableService):
         for resource_type in resource_types:
             if resource_type.destination is not None:
                 yield resource_type.destination.package, resource_type.dict()
+                
+
+    async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
+        if text:
+            where = where_tenant_context(
+                DestinationTable,
+                DestinationTable.name.like(f"%{text}%")
+            )
+        else:
+            where = where_tenant_context(DestinationTable)
+        return await self._query(DestinationTable, where, order_by=DestinationTable.name, limit=limit, offset=start)
+                

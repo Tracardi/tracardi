@@ -119,3 +119,14 @@ class EventSourceService(TableService):
             return await self._replace(EventSourceTable, map_to_event_source_table(event_source))
         else:
             raise ValueError(f"Unknown event source types {event_source.type}. Available {types}.")
+
+
+    async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
+        if text:
+            where = where_tenant_context(
+                EventSourceTable,
+                EventSourceTable.name.like(f"%{text}%")
+            )
+        else:
+            where = where_tenant_context(EventSourceTable)
+        return  await self._query(EventSourceTable, where, order_by=EventSourceTable.name, limit=limit, offset=start)

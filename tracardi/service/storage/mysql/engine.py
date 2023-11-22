@@ -7,10 +7,10 @@ from tracardi.service.singleton import Singleton
 
 class AsyncMySqlEngine(metaclass=Singleton):
 
-    def __init__(self):
+    def __init__(self, echo: bool = None):
         self.default = None
         self.engines = {}
-        self.echo = mysql.mysql_echo
+        self.echo = mysql.mysql_echo if echo is None else echo
 
     def get_session(self, async_engine):
         return sessionmaker(

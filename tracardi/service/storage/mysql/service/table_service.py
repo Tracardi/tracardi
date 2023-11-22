@@ -37,8 +37,8 @@ def where_with_context(table: Type[Base], server_context:bool, *clauses):
 
 class TableService:
 
-    def __init__(self):
-        self.client = AsyncMySqlEngine()
+    def __init__(self, echo: bool=None):
+        self.client = AsyncMySqlEngine(echo)
         self.engine = self.client.get_engine_for_database()
 
     async def exists(self, table_name: str) -> bool:
@@ -63,10 +63,11 @@ class TableService:
                 _select = select(table).where(where)
 
                 if limit:
-                    _select.limit(limit)
+                    _select = _select.limit(limit)
 
                     if offset:
-                        _select.offset(offset)
+                        _select = _select.offset(offset)
+
                 # Use SQLAlchemy core to perform an asynchronous query
                 result = await session.execute(_select)
                 # Fetch all results
@@ -102,7 +103,7 @@ class TableService:
                 # Fetch all results
                 return SelectResult(result.scalars().all())
 
-    async def _query(self, table: Type[Base], where, limit:int=None, offset:int=None, one_record:bool=False) -> SelectResult:
+    async def _query(self, table: Type[Base], where, order_by: Column=None, limit:int=None, offset:int=None, one_record:bool=False) -> SelectResult:
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             # Start a new transaction
@@ -110,11 +111,14 @@ class TableService:
 
                 _select = select(table).where(where)
 
+                if order_by is not None:
+                    _select = _select.order_by(order_by)
+
                 if limit:
-                    _select.limit(limit)
+                    _select = _select.limit(limit)
 
                     if offset:
-                        _select.offset(offset)
+                        _select = _select.offset(offset)
 
                 # Use SQLAlchemy core to perform an asynchronous query
                 result = await session.execute(_select)
