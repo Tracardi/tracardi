@@ -19,7 +19,6 @@ __all__ = [
     "log",
     "profile",
     "raw",
-    "user",
     "report",
     "resource",
     "rule",
@@ -28,6 +27,5 @@ __all__ = [
     "snapshot",
     "system",
     "task",
-    "user",
     "user_log"
 ]

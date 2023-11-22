@@ -3,7 +3,9 @@ from typing import Optional, Type
 from sqlalchemy.dialects.mysql import insert
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
 from sqlalchemy.future import select
-from sqlalchemy import and_, delete, inspect, update, Column
+from sqlalchemy import and_, delete, inspect, update, Column, Table, text
+from sqlalchemy.sql import func
+
 
 from tracardi.service.storage.mysql.schema.table import Base, tenant_only_context_filter
 from tracardi.service.storage.mysql.schema.table import tenant_context_filter
@@ -17,6 +19,10 @@ def where_only_tenant_context(table, *clauses):
     return and_(tenant_only_context_filter(table), *clauses)
 
 
+def sql_functions():
+    return func
+
+
 def where_with_context(table: Type[Base], server_context:bool, *clauses):
     return where_tenant_context(
         table,
@@ -27,13 +33,26 @@ def where_with_context(table: Type[Base], server_context:bool, *clauses):
     )
 
 
+
+
 class TableService:
 
     def __init__(self):
         self.client = AsyncMySqlEngine()
         self.engine = self.client.get_engine_for_database()
 
-    async def _load_all(self, table: Type[Base], server_context:bool=True) -> SelectResult:
+    async def exists(self, table_name: str) -> bool:
+        local_session = self.client.get_session(self.engine)
+
+        async with local_session() as session:
+            async with session.begin():
+                # Use a raw SQL query to check for table existence
+                query = text(f"SHOW TABLES LIKE '{table_name}';")
+                result = await session.execute(query)
+                return result.scalar() is not None
+
+
+    async def _load_all(self, table: Type[Base], limit:int=None, offset:int=None, server_context:bool=True) -> SelectResult:
         local_session = self.client.get_session(self.engine)
 
         where = where_with_context(table, server_context)
@@ -41,8 +60,15 @@ class TableService:
         async with local_session() as session:
             # Start a new transaction
             async with session.begin():
+                _select = select(table).where(where)
+
+                if limit:
+                    _select.limit(limit)
+
+                    if offset:
+                        _select.offset(offset)
                 # Use SQLAlchemy core to perform an asynchronous query
-                result = await session.execute(select(table).where(where))
+                result = await session.execute(_select)
                 # Fetch all results
                 bridges = result.scalars().all()
                 return SelectResult(bridges)
@@ -76,15 +102,22 @@ class TableService:
                 # Fetch all results
                 return SelectResult(result.scalars().all())
 
-    async def _where(self, table: Type[Base], where, one_record:bool=False) -> SelectResult:
+    async def _query(self, table: Type[Base], where, limit:int=None, offset:int=None, one_record:bool=False) -> SelectResult:
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             # Start a new transaction
             async with session.begin():
+
+                _select = select(table).where(where)
+
+                if limit:
+                    _select.limit(limit)
+
+                    if offset:
+                        _select.offset(offset)
+
                 # Use SQLAlchemy core to perform an asynchronous query
-                result = await session.execute(select(table).where(
-                    where
-                ))
+                result = await session.execute(_select)
                 # Fetch all results
                 if one_record:
                     return SelectResult(result.scalars().one_or_none())

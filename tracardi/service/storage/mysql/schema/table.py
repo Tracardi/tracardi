@@ -3,7 +3,7 @@ from typing import Type
 from sqlalchemy import and_
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
-                        ForeignKey, PrimaryKeyConstraint, Text, Integer)
+                        ForeignKey, PrimaryKeyConstraint, Text, Integer, UniqueConstraint)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -283,6 +283,7 @@ class UserTable(Base):
     # Define the primary key constraint
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        UniqueConstraint('email', 'password', name='uiq_email_password')
     )
 
 class IdentificationPointTable(Base):

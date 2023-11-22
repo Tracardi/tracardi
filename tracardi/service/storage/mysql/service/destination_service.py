@@ -39,7 +39,7 @@ class DestinationService(TableService):
             DestinationTable.source_id == source_id,
             DestinationTable.event_type_id == event_type,
         )
-        return await self._where(DestinationTable, where)
+        return await self._query(DestinationTable, where)
 
     async def load_profile_destinations(self) -> SelectResult:
         where = where_tenant_context(
@@ -47,7 +47,7 @@ class DestinationService(TableService):
             DestinationTable.enabled == True,
             DestinationTable.on_profile_change_only == True
         )
-        return await self._where(DestinationTable, where)
+        return await self._query(DestinationTable, where)
 
     @staticmethod
     def get_destination_types():

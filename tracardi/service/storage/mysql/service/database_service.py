@@ -24,6 +24,11 @@ class DatabaseService:
             await conn.commit()
         await engine.dispose()
 
+    async def exists(self, database_name: str) -> bool:
+        engine = self.client.get_engine()
+        async with engine.connect() as conn:
+            result = await conn.execute(text(f"SHOW DATABASES LIKE '{database_name}';"))
+            return result.fetchone() is not None
 
     async def bootstrap(self):
 

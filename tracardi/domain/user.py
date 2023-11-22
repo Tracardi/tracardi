@@ -15,8 +15,9 @@ class User(BaseModel):
     preference: Optional[dict] = {}
     expiration_timestamp: Optional[int] = None
 
-    def encode_password(self):
-        self.password = SHA1Encoder.encode(self.password)
+    @staticmethod
+    def encode_password(password):
+        return SHA1Encoder.encode(password)
 
     def has_roles(self, roles) -> bool:
         return len(set(self.roles).intersection(set(roles))) > 0

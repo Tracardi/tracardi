@@ -102,7 +102,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-identification_point
+user
 
 # Elasticsearch index mapping
 
@@ -122,59 +122,28 @@ identification_point
       "id": {
         "type": "keyword", "ignore_above": 64
       },
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "destination": {
-        "type": "keyword",
-        "index": false
-      },
-      "condition": {
-        "type": "keyword",
-        "index": false
-      },
-      "mapping": {
-        "type": "keyword",
-        "index": false
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "on_profile_change_only": {
-        "type": "boolean"
-      },
-      "event_type": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
-      },
-      "source": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
-      },
-      "resource": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          }
-        }
-      },
-      "tags": {
+      "password": {
         "type": "keyword"
+      },
+      "full_name": {
+        "type": "keyword"
+      },
+      "email": {
+        "type": "keyword"
+      },
+      "roles": {
+        "type": "keyword"
+      },
+      "disabled": {
+        "type": "boolean"
+      },
+      "expiration_timestamp": {
+        "type": "long"
+      },
+      "preference": {
+        "dynamic": "true",
+          "type": "object",
+          "enabled": false
       }
     }
   },

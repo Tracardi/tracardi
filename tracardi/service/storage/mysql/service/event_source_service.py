@@ -49,7 +49,7 @@ class EventSourceService(TableService):
         )
 
     async def load_active_by_bridge_id(self, bridge_id: str) -> SelectResult:
-        return await self._where(
+        return await self._query(
             EventSourceTable,
             where=where_tenant_context(
                 EventSourceTable,

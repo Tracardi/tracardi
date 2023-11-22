@@ -9,8 +9,10 @@ from tracardi.service.license import License, MULTI_TENANT, LICENSE
 from tracardi.service.storage.mysql.bootstrap.bridge import os_default_bridges
 from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
+from tracardi.service.storage.mysql.service.table_service import TableService
+from tracardi.service.storage.mysql.service.user_service import UserService
 from tracardi.service.tracker import track_event
-from tracardi.config import tracardi, elastic
+from tracardi.config import tracardi, elastic, mysql
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
 from tracardi.domain.user import User
@@ -20,7 +22,6 @@ from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.driver.elastic import system as system_db
-from tracardi.service.storage.driver.elastic import user as user_db
 from tracardi.service.storage.index import Resource
 
 if License.has_license():
@@ -39,19 +40,29 @@ async def check_installation():
     Returns list of missing and updated indices
     """
 
-    # TODO Check MYSQL database
+    # Check MYSQL database exists
+
+    ds = DatabaseService()
+
+    if not await ds.exists(mysql.mysql_database):
+        return {
+            "schema_ok": False,
+            "admin_ok": False,
+            "form_ok": False,
+            "warning": None
+        }
 
     is_schema_ok, indices = await system_db.is_schema_ok()
 
-    # Missing admin
-    existing_aliases = [idx[1] for idx in indices if idx[0] == 'existing_alias']
-    index = Resource().get_index_constant('user')
-    if index.get_index_alias() in existing_aliases:
-        admins = await user_db.search_by_role('admin')
-    else:
-        admins = None
+    ts = TableService()
 
-    has_admin_account = admins is not None and admins.total > 0
+    if await ts.exists('user'):
+        us = UserService()
+        admin_records = await us.load_by_role('admin')
+    else:
+        admin_records = []
+
+    has_admin_account = len(admin_records) > 0
 
     if tracardi.multi_tenant and (not is_schema_ok or not has_admin_account):
         if License.has_service(MULTI_TENANT):
@@ -158,20 +169,26 @@ async def install_system(credentials: Credentials):
         staging_install_result = await _install()
 
         # Add admin
-        admins = await user_db.search_by_role('admin')
+        us = UserService()
+        admins = await us.load_by_role('admin')
 
-        if credentials.needs_admin and admins.total == 0:
+        if credentials.needs_admin and len(admins) == 0:
             user = User(
                 id=str(uuid4()),
-                password=credentials.password,
+                password=User.encode_password(credentials.password),
                 roles=['admin', 'maintainer'],
                 email=credentials.username,
                 full_name="Default Admin"
             )
 
-            if not await user_db.check_if_exists(credentials.username):
-                await user_db.add_user(user)
+            us = UserService()
+
+            if await us.insert_if_none(user):
                 logger.info("Default admin account created.")
+
+            # if not await user_db.check_if_exists(credentials.username):
+            #     await user_db.add_user(user)
+            #     logger.info("Default admin account created.")
 
             staging_install_result['admin'] = True
 
