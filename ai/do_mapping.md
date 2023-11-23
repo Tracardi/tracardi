@@ -123,55 +123,63 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class UserTable(Base):
-    __tablename__ = 'user'
+class ConsentTypeTable(Base):
+    __tablename__ = 'consent_type'
 
-    id = Column(String(40))  # 'keyword' type with ignore_above
-    password = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
-    full_name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
-    email = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
-    roles = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
-    disabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
-    expiration_timestamp = Column(Integer)  # 'long' type in ES corresponds to Integer in MySQL
-    preference = Column(JSON)  # 'object' type in ES corresponding to JSON in MySQL
+    id = Column(String(40))  # 'keyword' with 'ignore_above' 64
+    name = Column(String(128))  # 'text' type in Elasticsearch
+    description = Column(Text)  # 'text' type in Elasticsearch
+    revokable = Column(Boolean)  # 'boolean' type in Elasticsearch
+    default_value = Column(String(255))  # 'keyword' type in Elasticsearch
+    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+    tags = Column(String(128))  # 'keyword' type in Elasticsearch
+    required = Column(Boolean)  # 'boolean' type in Elasticsearch
+    auto_revoke = Column(JSON)  # 'keyword' type in Elasticsearch
 
-    # Add tenant and production fields for multi-tenancy, assuming they are required
-    tenant = Column(String(40))  # Field for multi-tenancy
-    production = Column(Boolean)  # Field for multi-tenancy
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean)  # Additional field for multi-tenancy
 
-    # Define the primary key constraint
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
-
 ```
 
 and it to the object EventSource that has the following schema:
 
 ```python
-from typing import Optional, List
-from pydantic import field_validator, BaseModel
-from tracardi.domain.entity import Entity
-from tracardi.domain.value_object.storage_info import StorageInfo
-from tracardi.domain.named_entity import NamedEntity
-from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.secrets import b64_decoder, b64_encoder
-from typing import List, Optional, Any
-from pydantic import BaseModel
-
-from tracardi.service.sha1_hasher import SHA1Encoder
-from datetime import datetime
+from pydantic import field_validator, BaseModel, validator
+from typing import List, Optional
+from pytimeparse import parse
 
 
-class User(BaseModel):
-    id: str
-    password: str
-    full_name: str
-    email: str
-    roles: List[str]
-    disabled: bool = False
-    preference: Optional[dict] = {}
-    expiration_timestamp: Optional[int] = None
+class ConsentType(BaseModel):
+    name: str
+    description: str
+    revokable: bool = False
+    default_value: str
+    enabled: bool = True
+    tags: List[str] = []
+    required: bool = False
+    auto_revoke: Optional[str] = None
+
+    @field_validator("default_value")
+    @classmethod
+    def default_value_validator(cls, value):
+        if value not in ("grant", "deny"):
+            raise ValueError("'default_value' must be either 'grant' or 'deny'")
+        return value
+
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
+    @validator('auto_revoke')
+    def auto_revoke_validator(cls, value, values):
+        if (value is not None and value != "") and (parse(value) is None or parse(value) < 0):
+            raise ValueError("Auto-revoke time is in invalid form.")
+        if 'revokable' in values and values['revokable'] is True and not value:
+            raise ValueError("Auto-revoke time can not be empty if you require the consent to be revoked.")
+        return value
+
+
 ```
 
 create function `map_to_<oject-name>table` that maps domain object to sqlalchemy table. And function `map_to_<object-name>` that

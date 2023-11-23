@@ -102,7 +102,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-user
+consent_type
 
 # Elasticsearch index mapping
 
@@ -122,28 +122,29 @@ user
       "id": {
         "type": "keyword", "ignore_above": 64
       },
-      "password": {
-        "type": "keyword"
+      "name": {
+        "type": "text"
       },
-      "full_name": {
-        "type": "keyword"
+      "description": {
+        "type": "text"
       },
-      "email": {
-        "type": "keyword"
-      },
-      "roles": {
-        "type": "keyword"
-      },
-      "disabled": {
+      "revokable": {
         "type": "boolean"
       },
-      "expiration_timestamp": {
-        "type": "long"
+      "default_value": {
+        "type": "keyword"
       },
-      "preference": {
-        "dynamic": "true",
-          "type": "object",
-          "enabled": false
+      "enabled": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "required": {
+        "type": "boolean"
+      },
+      "auto_revoke": {
+        "type": "keyword"
       }
     }
   },

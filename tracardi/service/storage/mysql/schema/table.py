@@ -317,3 +317,62 @@ class TracardiProTable(Base):
 
     id = Column(String(40), primary_key=True)
     token = Column(String(255))
+
+
+class EventRedirectTable(Base):
+    __tablename__ = 'event_redirect'
+
+    id = Column(String(40))  # 'keyword' with 'ignore_above' 64
+    name = Column(String(128))  # 'text' type in Elasticsearch
+    description = Column(Text)  # 'text' type in Elasticsearch
+    url = Column(String(128))  # 'keyword' type in Elasticsearch
+    source_id = Column(String(40))  # Nested 'keyword' field named 'id', converted to 'String(40)'
+    source_name = Column(String(128))  # Nested 'text' field named 'name'
+    event_type = Column(String(64))  # 'keyword' type in Elasticsearch
+    props = Column(JSON)  # 'object' type in Elasticsearch
+    tags = Column(String(128))  # 'keyword' type in Elasticsearch
+
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean) # Additional field for multi-tenancy
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+class EventValidationTable(Base):
+    __tablename__ = 'event_validation'
+
+    id = Column(String(40))  # 'keyword' with 'ignore_above' 64
+    name = Column(String(128))  # 'keyword' type in Elasticsearch
+    description = Column(Text)  # 'keyword' type in Elasticsearch
+    validation = Column(JSON)  # 'object' type in Elasticsearch
+    tags = Column(String(128))  # 'keyword' type in Elasticsearch
+    event_type = Column(String(64))  # 'keyword' type in Elasticsearch
+    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean)  # Additional field for multi-tenancy
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+class ConsentTypeTable(Base):
+    __tablename__ = 'consent_type'
+
+    id = Column(String(40))  # 'keyword' with 'ignore_above' 64
+    name = Column(String(128))  # 'text' type in Elasticsearch
+    description = Column(Text)  # 'text' type in Elasticsearch
+    revokable = Column(Boolean)  # 'boolean' type in Elasticsearch
+    default_value = Column(String(255))  # 'keyword' type in Elasticsearch
+    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+    tags = Column(String(128))  # 'keyword' type in Elasticsearch
+    required = Column(Boolean)  # 'boolean' type in Elasticsearch
+    auto_revoke = Column(String(128))  # 'keyword' type in Elasticsearch
+
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean)  # Additional field for multi-tenancy
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )

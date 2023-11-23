@@ -1,9 +1,11 @@
-from pydantic import field_validator, BaseModel, validator
+from pydantic import field_validator, validator
 from typing import List, Optional
 from pytimeparse import parse
 
+from tracardi.domain.entity import Entity
 
-class ConsentType(BaseModel):
+
+class ConsentType(Entity):
     name: str
     description: str
     revokable: bool = False
