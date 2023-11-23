@@ -21,7 +21,7 @@ class UserService(TableService):
 
 
     async def load_all(self, limit:int = None, offset:int = None) -> SelectResult:
-        return await self._load_all(UserTable, limit, offset)
+        return await self._load_all(UserTable, limit=limit, offset=offset)
 
     async def load_by_id(self, user_id: str) -> SelectResult:
         return await self._load_by_id(UserTable, primary_id=user_id)
@@ -43,7 +43,7 @@ class UserService(TableService):
             UserTable.disabled == False
         )
 
-        records = await self._query(UserTable, where)
+        records = await self._select_query(UserTable, where=where)
 
         if not records.exists():
             return None
@@ -57,7 +57,7 @@ class UserService(TableService):
             sql_functions().find_in_set(role, UserTable.roles) > 0
         )
 
-        records = await self._query(UserTable, where)
+        records = await self._select_query(UserTable, where=where)
 
         if not records.exists():
             return []
@@ -70,7 +70,7 @@ class UserService(TableService):
             UserTable.full_name.like(name)
         )
 
-        records = await self._query(UserTable, where, limit=start, offset=limit)
+        records = await self._select_query(UserTable, where=where, limit=start, offset=limit)
 
         users: List[User] = list(records.map_to_objects(map_to_user))
 
@@ -82,7 +82,7 @@ class UserService(TableService):
             UserTable.email == email
         )
 
-        records = await self._query(UserTable, where)
+        records = await self._select_query(UserTable, where=where)
 
         return records.exists()
 

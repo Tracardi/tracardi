@@ -17,7 +17,8 @@ class TracardiProService(TableService):
         return get_context().tenant
 
     async def load_by_tenant_id(self) -> SelectResult:
-        return await self._query(TracardiProTable, TracardiProTable.id == self._get_id(), one_record=True)
+        # No context here
+        return await self._select_query(TracardiProTable, where=TracardiProTable.id == self._get_id(), one_record=True)
 
 
     async def authorize(self, token: str) -> bool:

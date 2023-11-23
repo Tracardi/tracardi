@@ -45,5 +45,7 @@ class SelectResult:
 
     def count(self):
         if self.exists():
-            return len(self.rows)
+            if self.has_multiple_records():
+                return len(self.rows)
+            return 1
         return 0

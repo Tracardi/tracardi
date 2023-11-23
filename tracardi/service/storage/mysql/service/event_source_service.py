@@ -49,7 +49,7 @@ class EventSourceService(TableService):
         )
 
     async def load_active_by_bridge_id(self, bridge_id: str) -> SelectResult:
-        return await self._query(
+        return await self._select_query(
             EventSourceTable,
             where=where_tenant_context(
                 EventSourceTable,
@@ -65,7 +65,7 @@ class EventSourceService(TableService):
         return await self._insert_if_none(EventSourceTable, map_to_event_source_table(event_source))
 
     async def lock_by_bridge_id(self, bridge_id: str, lock):
-        return await self._update_by_query(
+        return await self._update_query(
             EventSourceTable,
             where=(
                 where_tenant_context(
@@ -129,4 +129,8 @@ class EventSourceService(TableService):
             )
         else:
             where = where_tenant_context(EventSourceTable)
-        return  await self._query(EventSourceTable, where, order_by=EventSourceTable.name, limit=limit, offset=start)
+        return  await self._select_query(EventSourceTable,
+                                         where=where,
+                                         order_by=EventSourceTable.name,
+                                         limit=limit,
+                                         offset=start)

@@ -3,8 +3,8 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.storage.mysql.service.consent_type_service import ConsentTypeService
 from .model.payload import Configuration
-from tracardi.service.storage.driver.elastic import consent_type as consent_type_db
 from pytimeparse import parse
 from datetime import datetime
 from tracardi.domain.profile import ConsentRevoke
@@ -36,10 +36,11 @@ class ConsentAdder(ActionRunner):
             # consents = Consents(__root__=)
             for consent_id, granted in consents_data.items():
                 if granted is True:
-                    consent_type_data = await consent_type_db.get_by_id(consent_id)
+                    cts = ConsentTypeService()
+                    consent_type_record = await cts.load_by_id(consent_id)
 
-                    if consent_type_data is not None:
-                        consent_type = ConsentType(**consent_type_data)
+                    if consent_type_record.exists():
+                        consent_type = consent_type_record.map_to_object(ConsentType)
                         if consent_type.revokable is False:
                             self.profile.consents[consent_id] = ConsentRevoke(revoke=None)
                         else:

@@ -37,7 +37,7 @@ class ActionPluginService(TableService):
             sql_functions().find_in_set(purpose, PluginTable.plugin_metadata_purpose)>0
         )
 
-        return await self._query(
+        return await self._select_query(
             PluginTable,
-            where
+            where=where
         )

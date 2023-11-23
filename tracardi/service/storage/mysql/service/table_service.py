@@ -1,9 +1,9 @@
-from typing import Optional, Type
+from typing import Optional, Type, Any
 
 from sqlalchemy.dialects.mysql import insert
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
 from sqlalchemy.future import select
-from sqlalchemy import and_, delete, inspect, update, Column, Table, text
+from sqlalchemy import and_, delete, inspect, update, Column, Table, text, Select
 from sqlalchemy.sql import func
 
 
@@ -51,28 +51,60 @@ class TableService:
                 result = await session.execute(query)
                 return result.scalar() is not None
 
+    @staticmethod
+    def _select_clause(table: Type[Base],
+                       fields=None,
+                       where=None,
+                       order_by: Column=None,
+                       limit:int=None,
+                       offset:int=None,
+                       distinct: bool = False) -> Select[Any]:
 
-    async def _load_all(self, table: Type[Base], limit:int=None, offset:int=None, server_context:bool=True) -> SelectResult:
-        local_session = self.client.get_session(self.engine)
+
+
+        if fields is not None:
+            _select = select(*fields)
+        else:
+            _select = select(table)
+
+        if distinct:
+            _select = _select.distinct()
+
+        if where is not None:
+            _select = _select.where(where)
+
+        if order_by is not None:
+            _select = _select.order_by(order_by)
+
+        if limit:
+            _select = _select.limit(limit)
+
+            if offset:
+                _select = _select.offset(offset)
+
+        return _select
+
+
+    async def _load_all(self,
+                        table: Type[Base],
+                        columns=None,
+                        order_by: Column = None,
+                        limit: int = None,
+                        offset: int = None,
+                        distinct: bool = False,
+                        server_context:bool=True) -> SelectResult:
 
         where = where_with_context(table, server_context)
             
-        async with local_session() as session:
-            # Start a new transaction
-            async with session.begin():
-                _select = select(table).where(where)
-
-                if limit:
-                    _select = _select.limit(limit)
-
-                    if offset:
-                        _select = _select.offset(offset)
-
-                # Use SQLAlchemy core to perform an asynchronous query
-                result = await session.execute(_select)
-                # Fetch all results
-                bridges = result.scalars().all()
-                return SelectResult(bridges)
+        return await self._select_query(
+            table,
+            columns,
+            where,
+            order_by,
+            limit,
+            offset,
+            distinct
+        )
 
     async def _load_by_id(self, table: Type[Base], primary_id: str, server_context:bool=True) -> SelectResult:
         local_session = self.client.get_session(self.engine)
@@ -103,22 +135,28 @@ class TableService:
                 # Fetch all results
                 return SelectResult(result.scalars().all())
 
-    async def _query(self, table: Type[Base], where, order_by: Column=None, limit:int=None, offset:int=None, one_record:bool=False) -> SelectResult:
+    async def _select_query(self,
+                            table: Type[Base],
+                            columns = None,
+                            where = None,
+                            order_by: Column=None,
+                            limit:int=None,
+                            offset:int=None,
+                            distinct: bool = False,
+                            one_record:bool=False) -> SelectResult:
+
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             # Start a new transaction
             async with session.begin():
 
-                _select = select(table).where(where)
-
-                if order_by is not None:
-                    _select = _select.order_by(order_by)
-
-                if limit:
-                    _select = _select.limit(limit)
-
-                    if offset:
-                        _select = _select.offset(offset)
+                _select = self._select_clause(table,
+                                              columns,
+                                              where,
+                                              order_by,
+                                              limit,
+                                              offset,
+                                              distinct)
 
                 # Use SQLAlchemy core to perform an asynchronous query
                 result = await session.execute(_select)
@@ -150,7 +188,7 @@ class TableService:
                 await session.commit()
                 return primary_id
 
-    async def _update_by_query(self, table: Type[Base], where, new_data: dict):
+    async def _update_query(self, table: Type[Base], where, new_data: dict):
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             async with session.begin():
