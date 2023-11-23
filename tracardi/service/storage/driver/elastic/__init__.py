@@ -5,7 +5,6 @@ __all__ = [
     "entity",
     "event",
     "event_management",
-    "event_redirect",
     "event_reshaping",
     "event_to_profile",
     "event_validation",

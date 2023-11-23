@@ -15,8 +15,8 @@ logger.addHandler(log_handler)
 
 class EventRedirectService(TableService):
 
-    async def load_all(self) -> SelectResult:
-        return await self._load_all(EventRedirectTable)
+    async def load_all(self, start:int=None, limit:int=None) -> SelectResult:
+        return await self._load_all(EventRedirectTable, offset=start, limit=limit)
 
     async def load_by_id(self, event_redirect_id: str) -> SelectResult:
         return await self._load_by_id(EventRedirectTable, primary_id=event_redirect_id)
@@ -25,4 +25,4 @@ class EventRedirectService(TableService):
         return await self._delete_by_id(EventRedirectTable, primary_id=event_redirect_id)
 
     async def insert(self, event_redirect: EventRedirect):
-        return await self._insert_if_none(EventRedirectTable, map_to_event_redirect_table(event_redirect))
+        return await self._replace(EventRedirectTable, map_to_event_redirect_table(event_redirect))

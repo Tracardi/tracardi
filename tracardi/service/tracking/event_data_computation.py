@@ -26,7 +26,7 @@ if License.has_license():
 cache = CacheManager()
 
 
-def _call_function(call_string, event: Event, profile: Union[Profile, dict]):
+def _call_function(call_string, event: Event, profile: Union[Optional[Profile], dict]):
     state = call_string[5:]
     module, function = state.split(',')
     module = import_package(module)
@@ -46,7 +46,7 @@ def _remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Dotty:
+def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Dotty]) -> Dotty:
     event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
     if event_mapping_schema is not None:
@@ -74,7 +74,10 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Do
                 event_dict = flat_event.to_dict()
                 _remove_empty_dicts(event_dict)
                 event = Event(**event_dict)
-                profile = Profile(**flat_profile.to_dict())
+                if flat_profile:
+                    profile = Profile(**flat_profile.to_dict())
+                else:
+                    profile = None
                 state = _call_function(call_string=state, event=event, profile=profile)
 
             flat_event['journey.state'] = state
@@ -88,11 +91,11 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Do
 
 
 async def default_mapping_event_and_profile(flat_event: Dotty,
-                                            flat_profile: Dotty,
+                                            flat_profile: Optional[Dotty],
                                             session:Session,
                                             source: EventSource,
                                             console_log: ConsoleLog) -> Tuple[
-    Dotty, Dotty, Optional[FieldTimestampMonitor]]:
+    Dotty, Optional[Dotty], Optional[FieldTimestampMonitor]]:
 
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, flat_profile)
@@ -134,13 +137,13 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
             source,
             console_log)
 
-    # Add fields timestamps
+        # Add fields timestamps
 
-    if not isinstance(flat_profile['metadata.fields'], dict):
-        flat_profile['metadata.fields'] = {}
+        if not isinstance(flat_profile['metadata.fields'], dict):
+            flat_profile['metadata.fields'] = {}
 
-    for field, timestamp_data in profile_changes.get_timestamps():
-        flat_profile['metadata.fields'][field] = timestamp_data
+        for field, timestamp_data in profile_changes.get_timestamps():
+            flat_profile['metadata.fields'][field] = timestamp_data
 
     return flat_event, flat_profile, profile_changes
 
@@ -193,7 +196,7 @@ async def compute_events(events: List[EventPayload],
                          metadata,
                          source: EventSource,
                          session: Session,
-                         profile: Profile,
+                         profile: Optional[Profile],
                          profile_less: bool,
                          console_log: ConsoleLog,
                          tracker_payload: TrackerPayload
@@ -202,8 +205,12 @@ async def compute_events(events: List[EventPayload],
     field_timestamp_monitor = None
     event_objects = []
 
-    flat_profile = dotty(profile.model_dump())
-    profile_metadata = profile.get_meta_data()
+    if profile:
+        flat_profile: Optional[Dotty] = dotty(profile.model_dump())
+        profile_metadata = profile.get_meta_data()
+    else:
+        profile_metadata = None
+        flat_profile = None
 
     for event_payload in events:
 
@@ -270,7 +277,8 @@ async def compute_events(events: List[EventPayload],
 
     # Recreate Profile from flat_profile, that was changed
 
-    profile = Profile(**flat_profile.to_dict())
-    profile.set_meta_data(profile_metadata)
+    if profile:
+        profile = Profile(**flat_profile.to_dict())
+        profile.set_meta_data(profile_metadata)
 
     return event_objects, session, profile, field_timestamp_monitor

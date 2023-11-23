@@ -1,5 +1,4 @@
 import logging
-from sqlalchemy import and_
 
 from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
