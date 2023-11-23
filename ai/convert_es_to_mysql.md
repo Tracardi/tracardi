@@ -24,6 +24,9 @@ this in the section `Elasticsearch table mapping` you will get a mapping form El
       },
       "tags": {
         "type": "keyword"
+      },
+      "external_id": {
+        "type": "keyword"
       }
     }
   }
@@ -80,15 +83,16 @@ Base = declarative_base()
 class MyIndexTable(Base):
     __tablename__ = 'my_index'
 
-    id = Column(String(40))  # Assuming there is a primary key field named 'id'
+    id = Column(String(40))  # No primary key
     tenant = Column(String(40))  # Add this field for multitenance
     production = Column(Boolean) # Add this field for multitenance
-    name = Column(String(255))  # Elasticsearch 'text' type is similar to MySQL 'VARCHAR'
+    name = Column(String(128))  # Elasticsearch 'text' type is similar to MySQL 'VARCHAR'. Name field should have always 128
     age = Column(Integer)  # 'integer' in ES is the same as in MySQL
     address_street = Column(
         String(64))  # Nested 'text' fields converted to 'VARCHAR', and ignore_above set as max String length
     address_city = Column(String(255))
     tags = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    external_id = Column(String(40))  # Always 40 char string
 
     # Notice that all fields are converted.
     
@@ -102,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-consent_type
+event_data_compliance
 
 # Elasticsearch index mapping
 
@@ -123,28 +127,26 @@ consent_type
         "type": "keyword", "ignore_above": 64
       },
       "name": {
-        "type": "text"
+        "type" :"keyword"
       },
       "description": {
-        "type": "text"
+        "type" :"keyword"
       },
-      "revokable": {
-        "type": "boolean"
+      "event_type": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
       },
-      "default_value": {
-        "type": "keyword"
+      "settings": {
+        "type": "flattened"
       },
       "enabled": {
         "type": "boolean"
-      },
-      "tags": {
-        "type": "keyword"
-      },
-      "required": {
-        "type": "boolean"
-      },
-      "auto_revoke": {
-        "type": "keyword"
       }
     }
   },

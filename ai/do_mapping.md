@@ -123,18 +123,16 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class ConsentTypeTable(Base):
-    __tablename__ = 'consent_type'
+class EventDataComplianceTable(Base):
+    __tablename__ = 'event_data_compliance'
 
     id = Column(String(40))  # 'keyword' with 'ignore_above' 64
-    name = Column(String(128))  # 'text' type in Elasticsearch
-    description = Column(Text)  # 'text' type in Elasticsearch
-    revokable = Column(Boolean)  # 'boolean' type in Elasticsearch
-    default_value = Column(String(255))  # 'keyword' type in Elasticsearch
+    name = Column(String(128))  # 'keyword' type in Elasticsearch
+    description = Column(Text)  # 'keyword' type in Elasticsearch
+    event_type_id = Column(String(40))  # Nested 'keyword' field named 'id'
+    event_type_name = Column(String(64))  # Nested 'keyword' field named 'name'
+    settings = Column(JSON)  # 'flattened' type in Elasticsearch maps to JSON
     enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
-    tags = Column(String(128))  # 'keyword' type in Elasticsearch
-    required = Column(Boolean)  # 'boolean' type in Elasticsearch
-    auto_revoke = Column(JSON)  # 'keyword' type in Elasticsearch
 
     tenant = Column(String(40))  # Additional field for multi-tenancy
     production = Column(Boolean)  # Additional field for multi-tenancy
@@ -144,40 +142,37 @@ class ConsentTypeTable(Base):
     )
 ```
 
-and it to the object EventSource that has the following schema:
+and it to the corresponding object `ConsentFieldCompliance` that has the following schema:
 
 ```python
-from pydantic import field_validator, BaseModel, validator
 from typing import List, Optional
-from pytimeparse import parse
+
+from pydantic import BaseModel
+
+from tracardi.domain.entity import Entity
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.ref_value import RefValue
 
 
-class ConsentType(BaseModel):
+class ConsentFieldComplianceSetting(BaseModel):
+    action: str  # Remove, Hash, Do nothing
+    field: RefValue
+    consents: List[NamedEntity]
+
+    def get_consents(self) -> set:
+        return {item.id for item in self.consents}
+
+    def complies_to_consents(self, profile_consents: set) -> bool:
+        required_consents = self.get_consents()
+        return required_consents.intersection(profile_consents) == required_consents
+
+
+class ConsentFieldCompliance(Entity):
     name: str
-    description: str
-    revokable: bool = False
-    default_value: str
-    enabled: bool = True
-    tags: List[str] = []
-    required: bool = False
-    auto_revoke: Optional[str] = None
-
-    @field_validator("default_value")
-    @classmethod
-    def default_value_validator(cls, value):
-        if value not in ("grant", "deny"):
-            raise ValueError("'default_value' must be either 'grant' or 'deny'")
-        return value
-
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator('auto_revoke')
-    def auto_revoke_validator(cls, value, values):
-        if (value is not None and value != "") and (parse(value) is None or parse(value) < 0):
-            raise ValueError("Auto-revoke time is in invalid form.")
-        if 'revokable' in values and values['revokable'] is True and not value:
-            raise ValueError("Auto-revoke time can not be empty if you require the consent to be revoked.")
-        return value
+    description: Optional[str] = ""
+    event_type: NamedEntity
+    settings: List[ConsentFieldComplianceSetting]  # Flattened ES field
+    enabled: Optional[bool] = False
 
 
 ```

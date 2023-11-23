@@ -376,3 +376,61 @@ class ConsentTypeTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+class EventReshapingTable(Base):
+    __tablename__ = 'event_reshaping'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above maps to VARCHAR with length
+    name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    description = Column(Text)  # 'keyword' type defaults to VARCHAR(255)
+    reshaping = Column(JSON)  # 'object' type in ES corresponding to JSON in MySQL
+    tags = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
+    event_source_id = Column(String(40))  # Nested 'keyword' type defaults to VARCHAR(255)
+    event_source_name = Column(String(128))  # Nested 'keyword' type defaults to VARCHAR(255)
+    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean)  # Additional field for multi-tenancy
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+class EventToProfileMappingTable(Base):
+    __tablename__ = 'event_to_profile_mapping'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above maps to VARCHAR with length
+    name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    description = Column(Text)  # 'keyword' type defaults to VARCHAR(255)
+    event_type_id = Column(String(40))  # Nested 'keyword' type defaults to VARCHAR(255)
+    event_type_name = Column(String(128))  # Nested 'keyword' type defaults to VARCHAR(255)
+    tags = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
+    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+    config = Column(JSON)  # 'flattened' type in ES corresponding to JSON in MySQL
+    event_to_profile = Column(JSON)  # 'flattened' type in ES corresponding to JSON in MySQL
+
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean)  # Additional field for multi-tenancy
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+class EventDataComplianceTable(Base):
+    __tablename__ = 'event_data_compliance'
+
+    id = Column(String(40))  # 'keyword' with 'ignore_above' 64
+    name = Column(String(128))  # 'keyword' type in Elasticsearch
+    description = Column(Text)  # 'keyword' type in Elasticsearch
+    event_type_id = Column(String(40))  # Nested 'keyword' field named 'id'
+    event_type_name = Column(String(64))  # Nested 'keyword' field named 'name'
+    settings = Column(JSON)  # 'flattened' type in Elasticsearch maps to JSON
+    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean)  # Additional field for multi-tenancy
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
