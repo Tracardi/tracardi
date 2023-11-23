@@ -92,7 +92,7 @@ async def process_track_data(source: EventSource,
             # in worker of after workflow.
 
 
-            if tracardi.enable_field_update_log:
+            if tracardi.enable_field_update_log and field_timestamp_monitor:
                 timestamp_log = field_timestamp_monitor.get_timestamps_log()
                 if timestamp_log.has_changes():
                     field_update_log_dispatch(dispatch_context, timestamp_log.get_history_log())

@@ -134,13 +134,13 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
             source,
             console_log)
 
-    # Add fields timestamps
+        # Add fields timestamps
 
-    if not isinstance(flat_profile['metadata.fields'], dict):
-        flat_profile['metadata.fields'] = {}
+        if not isinstance(flat_profile['metadata.fields'], dict):
+            flat_profile['metadata.fields'] = {}
 
-    for field, timestamp_data in profile_changes.get_timestamps():
-        flat_profile['metadata.fields'][field] = timestamp_data
+        for field, timestamp_data in profile_changes.get_timestamps():
+            flat_profile['metadata.fields'][field] = timestamp_data
 
     return flat_event, flat_profile, profile_changes
 
@@ -202,8 +202,12 @@ async def compute_events(events: List[EventPayload],
     field_timestamp_monitor = None
     event_objects = []
 
-    flat_profile = dotty(profile.model_dump())
-    profile_metadata = profile.get_meta_data()
+    if profile:
+        flat_profile = dotty(profile.model_dump())
+        profile_metadata = profile.get_meta_data()
+    else:
+        flat_profile = None
+        profile_metadata = None
 
     for event_payload in events:
 
@@ -270,7 +274,8 @@ async def compute_events(events: List[EventPayload],
 
     # Recreate Profile from flat_profile, that was changed
 
-    profile = Profile(**flat_profile.to_dict())
-    profile.set_meta_data(profile_metadata)
+    if profile:
+        profile = Profile(**flat_profile.to_dict())
+        profile.set_meta_data(profile_metadata)
 
     return event_objects, session, profile, field_timestamp_monitor
