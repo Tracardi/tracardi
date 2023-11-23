@@ -200,7 +200,7 @@ async def compute_events(events: List[EventPayload],
                          profile_less: bool,
                          console_log: ConsoleLog,
                          tracker_payload: TrackerPayload
-                         ) -> Tuple[List[Event], Session, Profile, Optional[FieldTimestampMonitor]]:
+                         ) -> Tuple[List[Event], Session, Optional[Profile], Optional[FieldTimestampMonitor]]:
 
     field_timestamp_monitor = None
     event_objects = []
