@@ -42,7 +42,11 @@ async def _load_profile_and_deduplicate(
             # Static means the profile id was given in the track payload
 
             if is_static:
-                return Profile(id=tracker_payload.profile.id)
+                profile = Profile(id=tracker_payload.profile.id)
+                # This is new profile as we could not load it.
+                profile.operation.new = True
+                profile.operation.update = False
+                return profile
 
             return None
 
