@@ -28,7 +28,9 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
         if com_tracardi_settings.async_processing:
             async_processing = True
 
-    if profile and profile.operation.new:
+
+    if profile and profile.operation.new and not tracker_payload.has_event_type('profile-created'):
+
         # Add session created
         tracker_payload.events.append(
             EventPayload(
