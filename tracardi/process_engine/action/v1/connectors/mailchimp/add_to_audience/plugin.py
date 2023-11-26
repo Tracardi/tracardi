@@ -7,6 +7,7 @@ from .model.config import Config
 from tracardi.process_engine.action.v1.connectors.mailchimp.service.mailchimp_audience_editor import MailChimpAudienceEditor
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.storage.driver.elastic import resource as resource_db
+from ..endpoints import Endpoint
 
 
 def validate(config: dict):
@@ -37,7 +38,7 @@ class MailChimpAudienceAdder(ActionRunner):
         merge_fields = traverser.reshape(self.config.merge_fields)
 
         results = [await self._update_or_add(
-            list_id=self.config.list_id,
+            list_id=self.config.list_id.id,
             email_address=email,
             subscribed=self.config.subscribed,
             merge_fields=merge_fields
@@ -62,15 +63,18 @@ def register() -> Plugin:
             className='MailChimpAudienceAdder',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.0.1',
+            version='0.8.2',
             license="MIT + CC",
-            author="Dawid Kruk",
+            author="Dawid Kruk, Risto Kowaczewski",
             init={
                 "source": {
                     "id": None,
                     "name": None
                 },
-                "list_id": None,
+                "list_id": {
+                    "id": None,
+                    "name": None
+                },
                 "email": None,
                 "merge_fields": {},
                 "subscribed": False,
@@ -90,9 +94,17 @@ def register() -> Plugin:
                             ),
                             FormField(
                                 id="list_id",
-                                name="ID of your e-mail list (audience)",
-                                description="Please type in your MailChimp audience ID.",
-                                component=FormComponent(type="text", props={"label": "Audience ID"})
+                                name="Mailchimp audience",
+                                description="Please select your MailChimp audience.",
+                                component=FormComponent(type="autocomplete", props={
+                                    "label": "Audience",
+                                    "endpoint": {
+                                        "url": Endpoint.url(
+                                            'tracardi.process_engine.action.v1.connectors.mailchimp.endpoints',
+                                            'get_audiences'),
+                                        "method": "post"
+                                    },
+                                })
                             ),
                             FormField(
                                 id="email",

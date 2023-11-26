@@ -12,7 +12,7 @@ def validate(config: dict):
     return Config(**config)
 
 
-class MailChimpAudienceRemover(ActionRunner):
+class MailChimpContactTagger(ActionRunner):
 
     _client: MailChimpAudienceEditor
     config: Config
@@ -29,19 +29,16 @@ class MailChimpAudienceRemover(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        emails = dot[self.config.email]
-        emails = emails if isinstance(emails, list) else [emails]
-        results = [
-            await self._delete_or_archive(list_id=self.config.list_id.id, email_address=email) for email in emails
-        ]
-        for result in results:
-            if result is not None:
-                return Result(port="error", value={"result": results})
-        return Result(port="response", value={"result": results})
-
-    async def _delete_or_archive(self, **kwargs):
-        return await self._client.delete_contact(**kwargs) if self.config.delete else \
-            await self._client.archive_contact(**kwargs)
+        email = dot[self.config.email]
+        tags = [tag.strip() for tag in self.config.tags.split(',')]
+        try:
+            results = await self._client.tag_contact(
+                list_id=self.config.list_id.id,
+                email_address=email,
+                tag_names=tags)
+            return Result(port="response", value={"result": results})
+        except Exception as e:
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:
@@ -49,12 +46,12 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='MailChimpAudienceRemover',
+            className=MailChimpContactTagger.__name__,
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.8.2',
             license="MIT + CC",
-            author="Dawid Kruk, Risto Kowaczewski",
+            author="Risto Kowaczewski",
             init={
                 "source": {
                     "id": None,
@@ -65,9 +62,8 @@ def register() -> Plugin:
                     "name": None
                 },
                 "email": None,
-                "delete": False
+                "tags": ""
             },
-            manual="mailchimp_remove_from_audience_action",
             form=Form(
                 groups=[
                     FormGroup(
@@ -102,29 +98,21 @@ def register() -> Plugin:
                                                                                "defaultPathValue": "data.contact.email.main"
                                                                                })
                             ),
-                        ]
-                    ),
-                    FormGroup(
-                        name="For Advanced Users Only",
-                        fields=[
                             FormField(
-                                id="delete",
-                                name="Permanently delete contact",
-                                description="Please determine if plugin should permanently delete contact, or archive "
-                                            "it. Please notice that if you permanently delete your contact, then you"
-                                            " cannot add it again. ON switch position indicates deleting mode.",
-                                component=FormComponent(type="bool", props={"label": "Permanently delete contact"})
-                            )
+                                id="tags",
+                                name="Tags",
+                                description="Please type comma separated tags for this email.",
+                                component=FormComponent(type="text", props={"label": "Tags"})
+                            ),
                         ]
                     )
-
                 ]
             )
         ),
         metadata=MetaData(
-            name='Remove from audience',
+            name='Tag e-mail',
             brand="MailChimp",
-            desc='Removes contact to MailChimp audience or archives it.',
+            desc='Tags delivered e-mail with defined tags.',
             icon='mailchimp',
             group=["Mailchimp"],
             tags=['mailing'],

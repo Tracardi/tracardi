@@ -13,6 +13,7 @@ Version: 0.8.2
   * Max/Min Value
   * String to date - converts string to date
   * String replace
+  * Tag Mailchimp Contact
 * Profile Metrics
 * Workers
   * Entity expiration worker (pro)
@@ -25,6 +26,7 @@ Version: 0.8.2
 * Configurable data partitioning
 * Preparation for configurable profile merging strategies
 * Fixing missing plugin documentation
+* Extended integration with mailchimp.
 
 
 Version: 0.8.1

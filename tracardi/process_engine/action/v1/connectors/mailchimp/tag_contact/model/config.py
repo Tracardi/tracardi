@@ -7,7 +7,7 @@ class Config(PluginConfig):
     source: NamedEntity
     email: str
     list_id: NamedEntity
-    delete: bool
+    tags: str
 
     @field_validator("email")
     @classmethod
