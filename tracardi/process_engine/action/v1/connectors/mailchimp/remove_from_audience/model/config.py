@@ -6,7 +6,7 @@ from tracardi.domain.named_entity import NamedEntity
 class Config(PluginConfig):
     source: NamedEntity
     email: str
-    list_id: str
+    list_id: NamedEntity
     delete: bool
 
     @field_validator("email")
