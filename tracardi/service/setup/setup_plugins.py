@@ -59,11 +59,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
             }, resource=None),
     ),
 
-
-    "tracardi.process_engine.action.v1.internal.tag_event.plugin": PluginMetadata(
-        test=PluginTest(init={"tags": "tag1,tag2"}, resource=None),
-    ),
-
     "tracardi.process_engine.action.v1.time.last_profile_visit.plugin": PluginMetadata(
         test=PluginTest(init=None, resource=None),
     ),
@@ -1591,6 +1586,22 @@ test_plugins: Dict[str, PluginMetadata] = {
                 "public_key": "<client-public-key>",
                 "private_key": "<client-private-key>",
                 "api_url": "<url-of-mautic-instance>"
+            })
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mailchimp.tag_contact.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                'tags': "test",
+                'email': 'test@test.com',
+                'list_id': "None",
+                'source': {
+                    'id': "None",
+                    'name': "None"
+                }
+            },
+            resource={
+                "token": "<token>"
             })
     ),
 

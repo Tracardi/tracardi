@@ -31,6 +31,16 @@ class MailChimpAudienceEditor:
             ) as response:
                 return await response.json()
 
+    async def get_contact_fields(self, list_id) -> List[Dict]:
+        async with HttpClient(self._retries, [200, 201, 401], headers={"Content-Type": "application/json"}) as client:
+            async with client.get(
+                    url=f"https://{self._server}.api.mailchimp.com/3.0/lists/{list_id}/merge-fields",
+                    auth=aiohttp.BasicAuth("user", self._key)
+            ) as response:
+                result = await response.json()
+                lists = result.get('merge_fields', [])
+                return [{"name": l['name'], "id": l['tag']} for l in lists]
+
     async def get_all_audience_ids(self) -> List[Dict]:
         async with HttpClient(self._retries, [200, 201, 401], headers={"Content-Type": "application/json"}) as client:
             async with client.get(
