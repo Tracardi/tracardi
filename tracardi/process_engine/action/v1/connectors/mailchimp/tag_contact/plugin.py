@@ -31,14 +31,14 @@ class MailChimpContactTagger(ActionRunner):
         dot = self._get_dot_accessor(payload)
         email = dot[self.config.email]
         tags = [tag.strip() for tag in self.config.tags]
-        results = await self._client.tag_contact(
-            list_id=self.config.list_id.id,
-            email_address=email,
-            tag_names=tags)
-        for result in results:
-            if result is not None:
-                return Result(port="error", value={"result": results})
-        return Result(port="response", value={"result": results})
+        try:
+            results = await self._client.tag_contact(
+                list_id=self.config.list_id.id,
+                email_address=email,
+                tag_names=tags)
+            return Result(port="response", value={"result": results})
+        except Exception as e:
+            return Result(port="error", value={"message": str(e)})
 
 
 def register() -> Plugin:
