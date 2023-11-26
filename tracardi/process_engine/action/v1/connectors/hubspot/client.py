@@ -20,6 +20,40 @@ class HubSpotClient:
     def set_retries(self, retries: int):
         self.retries = retries
 
+
+    async def create_list(self, list_name: str):
+        data = {
+            "objectTypeId": "0-1",
+            "name": list_name,
+            "processingType": "MANUAL"
+        }
+
+        async with HttpClient(self.retries, [200, 401], headers=self.auth_headers) as session:
+            async with session.post(
+                    url=f"{self.api_url}/crm/v3/lists",
+                    json=data
+            ) as response:
+
+                print(response)
+
+                return await response.json()
+
+    async def add_contact_to_list(self, list_id, contact_ids):
+
+        data = {
+            "inputs": [{"id": contact_id} for contact_id in contact_ids]
+        }
+
+        async with HttpClient(self.retries, [200, 401], headers=self.auth_headers) as session:
+            async with session.post(
+                    url=f"{self.api_url}/crm/v3/objects/contact_lists/{list_id}/contacts",
+                    json=data
+            ) as response:
+
+                print(response)
+
+                return await response.json()
+
     async def add_company(self, properties) -> dict:
         data = {"properties": properties}
         async with HttpClient(self.retries, [200, 401], headers=self.auth_headers) as session:
@@ -114,7 +148,7 @@ class HubSpotClient:
                         await response.json():
                     raise HubSpotClientException(await response.text())
 
-                return await response.json()
+                return response.json()
 
     @property
     def credentials(self):

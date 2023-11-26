@@ -22,7 +22,7 @@ open_rest_source_bridge = Bridge(
     },
     form=Form(groups=[
         FormGroup(
-            name="Tracker configuration",
+            name="REST API Bridge Configuration",
             fields=[
                 FormField(
                     id="static_profile_id",
@@ -49,7 +49,7 @@ open_webhook_source_bridge = Bridge(
     },
     form=Form(groups=[
         FormGroup(
-            name="Webhook configuration",
+            name="API Webhook Bridge Configuration",
             description="A webhook typically gathers data without creating a profile or session. However, "
                         "if you want to create a profile and session for the collected data, you can set up the "
                         "configuration for it here.",

@@ -54,6 +54,13 @@ class HubSpotContactAdder(ActionRunner):
             result = await self.client.add_contact(
                 self.config.properties
             )
+
+            if 'id' in result:
+                contact_id = result['id']
+                if not self.profile.metadata.system.has_integration('hubspot'):
+                    self.profile.metadata.system.set_integration('hubspot', contact_id)
+                    self.profile.set_updated_in_workflow()
+
             return Result(port="response", value=result)
 
         except HubSpotClientException as e:
