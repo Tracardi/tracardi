@@ -30,7 +30,7 @@ class MailChimpContactTagger(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
         email = dot[self.config.email]
-        tags = [tag.strip() for tag in self.config.tags]
+        tags = [tag.strip() for tag in self.config.tags.split(',')]
         try:
             results = await self._client.tag_contact(
                 list_id=self.config.list_id.id,
