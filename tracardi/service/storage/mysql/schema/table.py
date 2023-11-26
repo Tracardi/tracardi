@@ -434,3 +434,23 @@ class EventDataComplianceTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+
+class ActivationTable(Base):
+    __tablename__ = 'activation'
+
+    id = Column(String(40))
+    name = Column(String(128))
+    description = Column(Text)
+    activation_class = Column(String(128))
+    audience_query = Column(Text)
+    mapping = Column(JSON)
+    enabled = Column(Boolean)
+
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
