@@ -213,7 +213,7 @@ class CacheManager(metaclass=Singleton):
 
         async def _load_event_mapping(event_type_id: str) -> Optional[EventTypeMetadata]:
             ems = EventMappingService()
-            record = await ems.load_by_event_type(event_type_id, only_enabled=True)
+            record = await ems.load_by_event_type_id(event_type_id, only_enabled=True)
             if not record.exists():
                 return None
             return record.map_to_object(map_to_event_mapping)

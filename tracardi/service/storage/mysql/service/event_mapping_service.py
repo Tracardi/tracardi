@@ -38,7 +38,7 @@ class EventMappingService(TableService):
     async def insert(self, event_type_metadata: EventTypeMetadata):
         return await self._replace(EventMappingTable, map_to_event_mapping_table(event_type_metadata))
 
-    async def load_by_event_type(self, event_type: str, only_enabled: bool = True):
+    async def load_by_event_type(self, event_type: str, only_enabled: bool = True) -> SelectResult:
         if only_enabled:
             where = where_tenant_context(
                 EventMappingTable,
@@ -53,4 +53,24 @@ class EventMappingService(TableService):
 
         return await self._select_query(EventMappingTable,
                                         where=where,
-                                        order_by=EventMappingTable.name)
+                                        order_by=EventMappingTable.name
+                                        )
+
+    async def load_by_event_type_id(self, event_type_id: str, only_enabled: bool = True) -> SelectResult:
+        if only_enabled:
+            where = where_tenant_context(
+                EventMappingTable,
+                EventMappingTable.event_type == event_type_id,
+                EventMappingTable.enabled == only_enabled
+            )
+        else:
+            where = where_tenant_context(
+                EventMappingTable,
+                EventMappingTable.event_type == event_type_id
+            )
+
+        return await self._select_query(EventMappingTable,
+                                        where=where,
+                                        order_by=EventMappingTable.name,
+                                        one_record=True
+                                        )

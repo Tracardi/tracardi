@@ -4,7 +4,6 @@ __all__ = [
     "debug_info",
     "entity",
     "event",
-    "event_management",
     "event_to_profile",
     "flow",
     "helper",
