@@ -10,7 +10,7 @@ from tracardi.exceptions.exception import EventValidationException
 from dotty_dict import Dotty
 from tracardi.process_engine.tql.transformer.expr_transformer import ExprTransformer
 from tracardi.process_engine.tql.parser import Parser
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 from tracardi.config import memory_cache
 
 parser = Parser(Parser.read('grammar/uql_expr.lark'), start='expr')
@@ -34,26 +34,32 @@ def _validate(validator: EventValidator, dot: DotAccessor) -> Tuple[bool, Option
     return False, None
 
 
-def _get_validators_that_meet_condition(validators, dot: DotAccessor):
+def _get_validators_that_meet_condition(validators: List[EventValidator], dot: DotAccessor):
     validators_to_use = []
     for validator in validators:
+
+        # No schema
+        if not validator.validation.json_schema:
+            continue
+
         if validator.validation.condition:
             try:
                 condition = ExprTransformer(dot=dot).transform(
                     tree=parser.parse(validator.validation.condition))
-            except Exception:
-                condition = False
-        else:
-            condition = True
 
-        if condition:
-            validators_to_use.append(validator)
+                if not condition:
+                    continue
+
+            except Exception:
+                continue
+
+        validators_to_use.append(validator)
 
     return validators_to_use
 
 
-async def _get_event_validation_result(event: dict, validation_schemas: StorageRecords) -> Tuple[bool, Optional[str]]:
-    if validation_schemas:
+async def _get_event_validation_result(event: dict, validators: List[EventValidator]) -> Tuple[bool, Optional[str]]:
+    if validators:
 
         dot = DotAccessor(
             profile=None,
@@ -63,8 +69,6 @@ async def _get_event_validation_result(event: dict, validation_schemas: StorageR
             flow=None,
             memory=None
         )
-
-        validators = validation_schemas.to_domain_objects(EventValidator)
 
         validators_to_use = _get_validators_that_meet_condition(validators, dot)
 

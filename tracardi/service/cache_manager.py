@@ -3,6 +3,7 @@ from typing import Optional, List
 from tracardi.domain.destination import Destination
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
+from tracardi.domain.event_validator import EventValidator
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.event_server.utils.memory_cache import MemoryCache
@@ -10,13 +11,14 @@ from tracardi.service.singleton import Singleton
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.driver.elastic import event_to_profile as event_to_profile_db
 from tracardi.service.storage.driver.elastic import event_management as event_management_db
-from tracardi.service.storage.driver.elastic import event_validation as event_validation_db
 from tracardi.service.storage.driver.elastic import data_compliance as data_compliance_db
 from tracardi.service.storage.driver.elastic import event_reshaping as event_reshaping_db
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
+from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_to_event_validation
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
 from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
+from tracardi.service.storage.mysql.service.event_validation_service import EventValidationService
 
 
 class CacheManager(metaclass=Singleton):
@@ -137,7 +139,7 @@ class CacheManager(metaclass=Singleton):
         Event source cache
         """
 
-        async def _load_event_source(source_id):
+        async def _load_event_source(source_id) -> Optional[EventSource]:
             ess = EventSourceService()
             return (await ess.load_by_id(source_id)).map_to_object(map_to_event_source)
 
@@ -154,19 +156,25 @@ class CacheManager(metaclass=Singleton):
 
         return await _load_event_source(event_source_id)
 
-    async def event_validation(self, event_type, ttl) -> StorageRecords:
+    async def event_validation(self, event_type, ttl) -> List[EventValidator]:
         """
         Event validation schema cache
         """
+
+        async def _load_event_validation(event_type: str) -> List[EventValidator]:
+            evs = EventValidationService()
+            return list((await evs.load_by_event_type(event_type, only_enabled=True)).map_to_objects(map_to_event_validation))
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_validation_cache(),
                 event_type,
                 ttl,
-                event_validation_db.load_by_event_type,
+                _load_event_validation,
                 True,
                 event_type)
-        return await event_validation_db.load_by_event_type(event_type)
+
+        return await _load_event_validation(event_type)
 
     async def event_consent_compliance(self, event_type, ttl) -> StorageRecords:
         """

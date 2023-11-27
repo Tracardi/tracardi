@@ -7,7 +7,6 @@ __all__ = [
     "event_management",
     "event_reshaping",
     "event_to_profile",
-    "event_validation",
     "flow",
     "helper",
     "identification",
