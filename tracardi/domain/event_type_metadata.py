@@ -11,6 +11,7 @@ class EventTypeMetadata(NamedEntity):
     index_schema: Optional[dict] = {}
     journey: Optional[str] = None
     tags: List[str] = []
+    build_in: Optional[bool] = False
 
     def __init__(self, **data: Any):
         if 'event_type' in data:

@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-event_data_compliance
+event_mapping
 
 # Elasticsearch index mapping
 
@@ -127,26 +127,25 @@ event_data_compliance
         "type": "keyword", "ignore_above": 64
       },
       "name": {
-        "type" :"keyword"
+        "type": "keyword"
       },
       "description": {
-        "type" :"keyword"
+        "type": "keyword"
       },
       "event_type": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
+        "type": "keyword"
       },
-      "settings": {
-        "type": "flattened"
+      "tags": {
+        "type": "keyword"
+      },
+      "journey": {
+        "type": "keyword"
       },
       "enabled": {
         "type": "boolean"
+      },
+      "index_schema": {
+        "type": "flattened"
       }
     }
   },

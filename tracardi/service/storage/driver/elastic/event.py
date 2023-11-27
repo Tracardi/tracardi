@@ -543,30 +543,6 @@ async def load_events_heatmap(profile_id: str = None):
     return list(convert_data(raw_result))
 
 
-async def update_tags(event_type: str, tags: List[str]):
-    tags = [tag.lower() for tag in tags]
-    query = {
-        "script": {
-            "source": f"ctx._source.tags.values = {tags}; ctx._source.tags.count = {len(tags)}",
-            "lang": "painless"
-        },
-        "query": {
-            "bool": {
-                "must": {"match": {"type": event_type}},
-                "must_not": {
-                    "bool": {
-                        "must": [
-                            *[{"term": {"tags.values": tag}} for tag in tags],
-                            {"term": {"tags.count": len(tags)}}
-                        ]
-                    }
-                }
-            }
-        }
-    }
-    return await storage_manager(index="event").update_by_query(query=query)
-
-
 async def aggregate_timespan_events(time_from: datetime, time_to: datetime,
                                     aggregate_query: dict) -> StorageAggregateResult:
     query = {

@@ -397,6 +397,27 @@ class EventReshapingTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+class EventMappingTable(Base):
+    __tablename__ = 'event_mapping'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above
+    name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    description = Column(Text)  # 'keyword' type defaults to VARCHAR(255)
+    event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
+    tags = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    journey = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
+    enabled = Column(Boolean)  # 'boolean' in ES is the same as Boolean in MySQL
+    index_schema = Column(JSON)  # 'flattened' type in ES is similar to JSON in MySQL
+
+    # Additional fields for multi-tenancy
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+
 class EventToProfileMappingTable(Base):
     __tablename__ = 'event_to_profile_mapping'
 

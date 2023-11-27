@@ -123,19 +123,21 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class EventDataComplianceTable(Base):
-    __tablename__ = 'event_data_compliance'
+class EventMappingTable(Base):
+    __tablename__ = 'event_mapping'
 
-    id = Column(String(40))  # 'keyword' with 'ignore_above' 64
-    name = Column(String(128))  # 'keyword' type in Elasticsearch
-    description = Column(Text)  # 'keyword' type in Elasticsearch
-    event_type_id = Column(String(40))  # Nested 'keyword' field named 'id'
-    event_type_name = Column(String(64))  # Nested 'keyword' field named 'name'
-    settings = Column(JSON)  # 'flattened' type in Elasticsearch maps to JSON
-    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+    id = Column(String(40), primary_key=True)  # 'keyword' type with ignore_above
+    name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    description = Column(Text)  # 'keyword' type defaults to VARCHAR(255)
+    event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
+    tags = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    journey = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
+    enabled = Column(Boolean)  # 'boolean' in ES is the same as Boolean in MySQL
+    index_schema = Column(JSON)  # 'flattened' type in ES is similar to JSON in MySQL
 
-    tenant = Column(String(40))  # Additional field for multi-tenancy
-    production = Column(Boolean)  # Additional field for multi-tenancy
+    # Additional fields for multi-tenancy
+    tenant = Column(String(40))
+    production = Column(Boolean)
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
@@ -145,36 +147,24 @@ class EventDataComplianceTable(Base):
 and it to the corresponding object `ConsentFieldCompliance` that has the following schema:
 
 ```python
-from typing import List, Optional
+from typing import List, Any
+from typing import Optional
 
-from pydantic import BaseModel
-
-from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.ref_value import RefValue
 
 
-class ConsentFieldComplianceSetting(BaseModel):
-    action: str  # Remove, Hash, Do nothing
-    field: RefValue
-    consents: List[NamedEntity]
-
-    def get_consents(self) -> set:
-        return {item.id for item in self.consents}
-
-    def complies_to_consents(self, profile_consents: set) -> bool:
-        required_consents = self.get_consents()
-        return required_consents.intersection(profile_consents) == required_consents
-
-
-class ConsentFieldCompliance(Entity):
-    name: str
-    description: Optional[str] = ""
-    event_type: NamedEntity
-    settings: List[ConsentFieldComplianceSetting]  # Flattened ES field
+class EventTypeMetadata(NamedEntity):
+    event_type: str
+    description: Optional[str] = "No description provided"
     enabled: Optional[bool] = False
+    index_schema: Optional[dict] = {}
+    journey: Optional[str] = None
+    tags: List[str] = []
 
-
+    def __init__(self, **data: Any):
+        if 'event_type' in data:
+            data['id'] = data['event_type']
+        super().__init__(**data)
 ```
 
 create function `map_to_<oject-name>table` that maps domain object to sqlalchemy table. And function `map_to_<object-name>` that

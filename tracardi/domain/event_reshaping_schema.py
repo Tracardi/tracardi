@@ -1,8 +1,7 @@
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, List
-from pydantic import field_validator, BaseModel
+from pydantic import BaseModel
 
-from tracardi.process_engine.tql.condition import Condition
 
 
 class EventReshapeDefinition(BaseModel):

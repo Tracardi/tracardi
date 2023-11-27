@@ -3,20 +3,23 @@ from typing import Optional, List
 from tracardi.domain.destination import Destination
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
+from tracardi.domain.event_type_metadata import EventTypeMetadata
 from tracardi.domain.event_validator import EventValidator
 from tracardi.domain.session import Session
-from tracardi.domain.storage_record import StorageRecords, StorageRecord
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.driver.elastic import event_to_profile as event_to_profile_db
-from tracardi.service.storage.driver.elastic import event_management as event_management_db
 from tracardi.service.storage.driver.elastic import data_compliance as data_compliance_db
-from tracardi.service.storage.driver.elastic import event_reshaping as event_reshaping_db
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
+from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
+from tracardi.service.storage.mysql.mapping.event_to_event_mapping import map_to_event_mapping
 from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_to_event_validation
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
+from tracardi.service.storage.mysql.service.event_mapping_service import EventMappingService
+from tracardi.service.storage.mysql.service.event_reshaping_service import EventReshapingService
 from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
 from tracardi.service.storage.mysql.service.event_validation_service import EventValidationService
 
@@ -206,23 +209,32 @@ class CacheManager(metaclass=Singleton):
             )
         return await event_to_profile_db.get_event_to_profile(event_type)
 
-    async def event_mapping(self, event_type, ttl) -> Optional[StorageRecord]:
+    async def event_mapping(self, event_type_id, ttl) -> Optional[EventTypeMetadata]:
+
+        async def _load_event_mapping(event_type_id: str) -> Optional[EventTypeMetadata]:
+            ems = EventMappingService()
+            record = await ems.load_by_event_type(event_type_id, only_enabled=True)
+            if not record.exists():
+                return None
+            return record.map_to_object(map_to_event_mapping)
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_metadata_cache(),
-                event_type,
+                event_type_id,
                 ttl,
-                event_management_db.get_event_type_mapping,
+                _load_event_mapping,
                 True,
-                event_type)
+                event_type_id)
 
-        return await event_management_db.get_event_type_mapping(event_type)
+        return await _load_event_mapping(event_type_id)
 
     @staticmethod
     async def _load_and_convert_reshaping(event_type) -> Optional[List[EventReshapingSchema]]:
-        reshape_schemas = await event_reshaping_db.load_by_event_type(event_type)
-        if reshape_schemas:
-            return reshape_schemas.to_domain_objects(EventReshapingSchema)
+        ers = EventReshapingService()
+        reshape_schemas = await ers.load_by_event_type(event_type)
+        if reshape_schemas.exists():
+            return reshape_schemas.map_to_objects(map_to_event_reshaping)
         return None
 
     async def event_reshaping(self, event_type, ttl) -> Optional[List[EventReshapingSchema]]:

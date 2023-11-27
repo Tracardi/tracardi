@@ -101,7 +101,7 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
     flat_event = _auto_index_default_event_type(flat_event, flat_profile)
 
     custom_event_mapping_coroutine = cache.event_mapping(
-        event_type=flat_event['type'],
+        event_type_id=flat_event['type'],
         ttl=memory_cache.event_metadata_cache_ttl)
 
     custom_event_to_profile_mapping_coroutine = cache.event_to_profile_coping(
