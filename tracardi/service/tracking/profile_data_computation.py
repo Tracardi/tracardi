@@ -260,10 +260,13 @@ async def map_event_to_profile(
                     continue
 
                 # todo keep event flat
-                profile_changes[profile_property] = call_function(
+                computation_result = call_function(
                     compute_string,
                     event=Event(**flat_event.to_dict()),
                     profile=profile_changes.flat_profile)
+
+                if profile_property is not None:
+                    profile_changes[profile_property] = computation_result
 
         try:
             flat_profile['operation.update'] = True
