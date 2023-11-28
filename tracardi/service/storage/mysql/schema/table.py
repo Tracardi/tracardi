@@ -475,3 +475,21 @@ class ActivationTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+
+class SegmentTable(Base):
+    __tablename__ = 'segment'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above
+    name = Column(Text)  # 'text' type in ES maps to Text in MySQL
+    description = Column(Text)  # 'text' type in ES maps to Text in MySQL
+    event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
+    condition = Column(Text)  # 'keyword' type in ES defaults to VARCHAR(255)
+    enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
+    machine_name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )

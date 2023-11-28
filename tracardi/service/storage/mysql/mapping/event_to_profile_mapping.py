@@ -31,5 +31,5 @@ def map_to_event_to_profile(event_to_profile_table: EventToProfileMappingTable) 
         tags=event_to_profile_table.tags.split(',') if event_to_profile_table.tags else [],
         enabled=event_to_profile_table.enabled if event_to_profile_table.enabled is not None else False,
         config=from_json(event_to_profile_table.config, dict),
-        event_to_profile=from_json(event_to_profile_table.event_to_profile, list[EventToProfileMap])
+        event_to_profile=from_json(event_to_profile_table.event_to_profile, EventToProfileMap)
     )

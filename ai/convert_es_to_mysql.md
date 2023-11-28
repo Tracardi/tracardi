@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-event_mapping
+segment
 
 # Elasticsearch index mapping
 
@@ -126,26 +126,23 @@ event_mapping
       "id": {
         "type": "keyword", "ignore_above": 64
       },
-      "name": {
+      "eventType": {
         "type": "keyword"
+      },
+      "name": {
+        "type": "text"
       },
       "description": {
-        "type": "keyword"
+        "type": "text"
       },
-      "event_type": {
-        "type": "keyword"
-      },
-      "tags": {
-        "type": "keyword"
-      },
-      "journey": {
+      "condition": {
         "type": "keyword"
       },
       "enabled": {
         "type": "boolean"
       },
-      "index_schema": {
-        "type": "flattened"
+      "machine_name": {
+        "type": "keyword"
       }
     }
   },
@@ -153,5 +150,6 @@ event_mapping
     "%%ALIAS%%": {}
   }
 }
+
 
 ```

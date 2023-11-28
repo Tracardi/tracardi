@@ -2,17 +2,18 @@ from tracardi.context import ServerContext, Context, get_context
 from tracardi.domain.event_to_profile import EventToProfile, EventToProfileMap
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.ref_value import RefValue
-from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile_table
+from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile_table, \
+    map_to_event_to_profile
 from tracardi.service.storage.mysql.schema.table import EventToProfileMappingTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json
 
 
-def test_valid_event_to_profile():
+def test_event_to_profile_table():
     with ServerContext(Context(production=True)):
         prof_map = EventToProfileMap(
-                    event=RefValue(ref=True, value="Test Event"),
-                    profile=RefValue(ref=True, value="Test Profile"),
-                    op=1)
+            event=RefValue(ref=True, value="Test Event"),
+            profile=RefValue(ref=True, value="Test Profile"),
+            op=1)
         event_to_profile = EventToProfile(
             id="123",
             name="Test Event",
@@ -36,3 +37,36 @@ def test_valid_event_to_profile():
         assert result.config == '{"key": "value"}'
         assert result.event_to_profile == to_json([prof_map])
         assert result.production == get_context().production
+
+
+def test_event_to_profile():
+
+    event_to_profile_table = EventToProfileMappingTable(
+        id="123",
+        name="Test Event",
+        description="This is a test event",
+        event_type_id="456",
+        event_type_name="Test Event Type",
+        tags="tag1,tag2",
+        enabled=True,
+        config='{"key": "value"}',
+        event_to_profile='[{"event": {"value": "event1", "ref": true}, "op": 1, "profile": {"value": "profile1", "ref": true}}]',
+        tenant="test",
+        production=True
+    )
+
+    expected_event_to_profile = EventToProfile(
+        id="123",
+        name="Test Event",
+        description="This is a test event",
+        event_type=NamedEntity(id="456", name="Test Event Type"),
+        tags=["tag1", "tag2"],
+        enabled=True,
+        config={"key": "value"},
+        event_to_profile=[EventToProfileMap(
+            event=RefValue(value="event1", ref=True), op=1,
+            profile=RefValue(value="profile1", ref=True)
+        )]
+    )
+
+    assert map_to_event_to_profile(event_to_profile_table) == expected_event_to_profile

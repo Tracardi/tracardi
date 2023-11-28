@@ -123,103 +123,52 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class TriggerTable(Base):
-    __tablename__ = 'trigger'
+class SegmentTable(Base):
+    __tablename__ = 'segment'
 
-    id = Column(String(40))  # 'keyword' in ES with ignore_above
+    id = Column(String(40))  # 'keyword' type with ignore_above
+    name = Column(Text)  # 'text' type in ES maps to Text in MySQL
+    description = Column(Text)  # 'text' type in ES maps to Text in MySQL
+    event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
+    condition = Column(Text)  # 'keyword' type in ES defaults to VARCHAR(255)
+    enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
+    machine_name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+
     tenant = Column(String(40))
     production = Column(Boolean)
-    name = Column(String(150), index=True)  # 'keyword' in ES with ignore_above
-    description = Column(String(255))  # 'text' in ES with no string length mentioned
-    type = Column(String(64))  # 'keyword' in ES defaults to 255 if no ignore_above is set
-    metadata_time_insert = Column(DateTime)  # Nested 'date' fields
-    event_type_id = Column(String(40))  # Nested 'keyword' fields
-    event_type_name = Column(String(64))  # Nested 'keyword' fields
-    flow_id = Column(String(40), index=True)  # Nested 'keyword' fields
-    flow_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
-    segment_id = Column(String(40), index=True)  # Nested 'keyword' fields
-    segment_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
-    source_id = Column(String(40), index=True)  # Nested 'keyword' fields
-    source_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
-    properties = Column(JSON)  # 'object' in ES is mapped to 'JSON' in MySQL
-    enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
-    tags = Column(String(255), index=True)  # 'keyword' in ES defaults to 255 if no ignore_above is set
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 ```
 
-and it to the corresponding object `Rule` that has the following schema:
+and it to the corresponding object `Segment` that has the following schema:
 
 ```python
-from datetime import datetime
-from typing import Optional, Any, List, Set
-
-from pydantic import field_validator, PrivateAttr
-
-from .metadata import Metadata
-from .named_entity import NamedEntity
-from .time import Time
-from .value_object.storage_info import StorageInfo
+from typing import Optional, Any, List
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.value_object.storage_info import StorageInfo
 
 
-class Rule(NamedEntity):
-
-    _schedule_node_id: str = PrivateAttr(None)
-    event_type: Optional[NamedEntity] = NamedEntity(id="", name="")
-    type: Optional[str] = 'event-collect'
-    flow: NamedEntity
-    source: Optional[NamedEntity] = NamedEntity(id="", name="")
-    segment: Optional[NamedEntity] = NamedEntity(id="", name="")
+class Segment(NamedEntity):
+    description: Optional[str] = ""
+    eventType: Optional[List[str]] = []
+    condition: str
     enabled: Optional[bool] = True
-    description: Optional[str] = "No description provided"
-    properties: Optional[dict] = None
-    metadata: Optional[Metadata] = None
-    tags: Optional[List[str]] = ["General"]
-
-    @field_validator("tags")
-    @classmethod
-    def tags_can_not_be_empty(cls, value):
-        if len(value) == 0:
-            value = ["General"]
-        return value
-
-    def set_as_scheduled(self, schedule_node_id):
-        self._schedule_node_id = schedule_node_id
-
-    def schedule_node_id(self):
-        return self._schedule_node_id
-
-    def are_consents_met(self, profile_consent_ids: Set[str]) -> bool:
-        if self.properties is None:
-            # No restriction
-            return True
-
-        if not profile_consent_ids:
-            # No consents set on profile
-            return True
-
-        if 'consents' in self.properties and isinstance(self.properties['consents'], list):
-            if len(self.properties['consents']) > 0:
-                required_consent_ids = set([item['id'] for item in self.properties['consents'] if 'id' in item])
-                return required_consent_ids.intersection(profile_consent_ids) == required_consent_ids
-
-        return True
+    machine_name: Optional[str] = None
 
     def __init__(self, **data: Any):
-        if 'metadata' not in data:
-            data['metadata'] = Metadata(
-                time=Time(
-                    insert=datetime.utcnow()
-                ))
         super().__init__(**data)
+        self.machine_name = self.get_id()
+
+    def get_id(self) -> str:
+        return self.name.replace(" ", "-").lower()
 
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
-            'rule',
-            Rule
+            'segment',
+            Segment
         )
 
 ```
