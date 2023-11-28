@@ -1,0 +1,72 @@
+from datetime import datetime
+
+from tracardi.context import ServerContext, Context
+from tracardi.domain.flow import FlowRecord
+from tracardi.service.storage.mysql.mapping.workflow_mapping import map_to_workflow_table, map_to_workflow_record
+from tracardi.service.storage.mysql.schema.table import WorkflowTable
+
+
+def test_valid_flow_record():
+    with ServerContext(Context(production=True)):
+
+        flow_record = FlowRecord(
+            id="flow_1",
+            timestamp=datetime.now(),
+            deploy_timestamp=datetime.now(),
+            name="Flow 1",
+            description="This is flow 1",
+            type="collection",
+            projects=["General"],
+            draft="draft_flow_1",
+            production="prod_flow_1",
+            backup="backup_flow_1",
+            lock=True,
+        )
+
+        workflow_table = map_to_workflow_table(flow_record)
+
+        assert isinstance(workflow_table, WorkflowTable)
+        assert workflow_table.id == "flow_1"
+        assert workflow_table.timestamp == flow_record.timestamp
+        assert workflow_table.deploy_timestamp == flow_record.deploy_timestamp
+        assert workflow_table.name == "Flow 1"
+        assert workflow_table.description == "This is flow 1"
+        assert workflow_table.type == "collection"
+        assert workflow_table.projects == "General"
+        assert workflow_table.draft =="draft_flow_1"
+        assert workflow_table.prod == "prod_flow_1"
+        assert workflow_table.backup == "backup_flow_1"
+        assert workflow_table.lock == True
+        assert workflow_table.deployed == False
+        assert workflow_table.production
+
+def test_maps_workflow_table_to_flow_record():
+        workflow_table = WorkflowTable(
+            id='123',
+            timestamp=datetime.now(),
+            deploy_timestamp=datetime.now(),
+            name='Test Workflow',
+            description='This is a test workflow',
+            type='collection',
+            projects='Project1,Project2',
+            draft='abc',
+            prod='zxc',
+            backup='qwe',
+            lock=True,
+            deployed=True
+        )
+
+        flow_record = map_to_workflow_record(workflow_table)
+
+        assert flow_record.id == '123'
+        assert flow_record.timestamp == workflow_table.timestamp
+        assert flow_record.deploy_timestamp == workflow_table.deploy_timestamp
+        assert flow_record.name == 'Test Workflow'
+        assert flow_record.description == 'This is a test workflow'
+        assert flow_record.type == 'collection'
+        assert flow_record.projects == ['Project1', 'Project2']
+        assert flow_record.draft == "abc"
+        assert flow_record.production == "zxc"
+        assert flow_record.backup == "qwe"
+        assert flow_record.lock is True
+        assert flow_record.deployed is True

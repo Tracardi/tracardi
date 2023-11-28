@@ -65,7 +65,7 @@ class Flow(FlowGraph):
 
     def get_production_workflow_record(self) -> 'FlowRecord':
 
-        production = encrypt(self.model_dump())
+        production = encrypt(self.model_dump(mode='json'))
 
         return FlowRecord(
             id=self.id,
@@ -93,12 +93,18 @@ class Flow(FlowGraph):
         )
 
     @staticmethod
-    def from_workflow_record(record: 'FlowRecord', output) -> 'Flow':
+    def from_workflow_record(record: 'FlowRecord', output) -> Optional['Flow']:
 
         if output == 'draft':
-            decrypted = decrypt(record.draft)
+            if record.draft:
+                decrypted = decrypt(record.draft)
+            else:
+                return None
         else:
-            decrypted = decrypt(record.production)
+            if record.production:
+                decrypted = decrypt(record.production)
+            else:
+                return None
 
         if 'type' not in decrypted:
             decrypted['type'] = record.type
@@ -317,10 +323,10 @@ class FlowRecord(NamedEntity):
             FlowRecord
         )
 
-    def get_production_workflow(self) -> 'Flow':
+    def get_production_workflow(self) -> Optional['Flow']:
         return Flow.from_workflow_record(self, output='production')
 
-    def get_draft_workflow(self) -> 'Flow':
+    def get_draft_workflow(self) -> Optional['Flow']:
         return Flow.from_workflow_record(self, output='draft')
 
     def get_empty_workflow(self, id) -> 'Flow':

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 def b64_encoder(data):
     if isinstance(data, BaseModel):
-        data = data.model_dump()
+        data = data.model_dump(mode='json')
     json_init = json.dumps(data, default=str)
     gziped = gzip.compress(bytes(json_init, 'utf-8'))
     b64 = base64.b64encode(gziped)
