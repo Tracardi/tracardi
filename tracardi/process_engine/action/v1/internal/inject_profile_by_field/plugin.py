@@ -55,7 +55,7 @@ class InjectProfileByField(ActionRunner):
         self.event.operation.update = True
         self.execution_graph.set_profiles(profile)
 
-        return Result(port="profile", value=profile)
+        return Result(port="profile", value=profile.model_dump(mode='json'))
 
 
 def register() -> Plugin:
@@ -66,7 +66,7 @@ def register() -> Plugin:
             className='InjectProfileByField',
             inputs=['payload'],
             outputs=['profile', 'error'],
-            version='0.7.2',
+            version='0.8.2',
             license="MIT + CC",
             author="Risto Kowaczewski",
             init={
