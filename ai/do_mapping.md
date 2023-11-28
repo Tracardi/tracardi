@@ -123,384 +123,104 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class WorkflowTable(Base):
-    __tablename__ = 'workflow'
+class TriggerTable(Base):
+    __tablename__ = 'trigger'
 
-    id = Column(String(40))
-    timestamp = Column(DateTime)
-    deploy_timestamp = Column(DateTime)
-    name = Column(String(64), index=True)
-    description = Column(String(255))
-    type = Column(String(64), default="collection", index=True)
-    projects = Column(String(255))
-
-    draft = Column(LargeBinary)
-    prod = Column(LargeBinary)
-    backup = Column(LargeBinary)
-
-    lock = Column(Boolean)
-    deployed = Column(Boolean, default=False)
-    debug_enabled = Column(Boolean)
-    debug_logging_level = Column(String(32))
-
+    id = Column(String(40))  # 'keyword' in ES with ignore_above
     tenant = Column(String(40))
     production = Column(Boolean)
+    name = Column(String(150), index=True)  # 'keyword' in ES with ignore_above
+    description = Column(String(255))  # 'text' in ES with no string length mentioned
+    type = Column(String(64))  # 'keyword' in ES defaults to 255 if no ignore_above is set
+    metadata_time_insert = Column(DateTime)  # Nested 'date' fields
+    event_type_id = Column(String(40))  # Nested 'keyword' fields
+    event_type_name = Column(String(64))  # Nested 'keyword' fields
+    flow_id = Column(String(40), index=True)  # Nested 'keyword' fields
+    flow_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
+    segment_id = Column(String(40), index=True)  # Nested 'keyword' fields
+    segment_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
+    source_id = Column(String(40), index=True)  # Nested 'keyword' fields
+    source_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
+    properties = Column(JSON)  # 'object' in ES is mapped to 'JSON' in MySQL
+    enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
+    tags = Column(String(255), index=True)  # 'keyword' in ES defaults to 255 if no ignore_above is set
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 ```
 
-and it to the corresponding object `FlowRecord` that has the following schema:
+and it to the corresponding object `Rule` that has the following schema:
 
 ```python
-import uuid
 from datetime import datetime
+from typing import Optional, Any, List, Set
 
-from tracardi.service.wf.domain.flow_graph import FlowGraph
+from pydantic import field_validator, PrivateAttr
+
+from .metadata import Metadata
 from .named_entity import NamedEntity
+from .time import Time
 from .value_object.storage_info import StorageInfo
-from typing import Optional, List, Any
-from pydantic import BaseModel
-from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, EdgeBundle
-from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents, MicroserviceConfig
-
-from ..config import tracardi
-from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
 
 
-class FlowSchema(BaseModel):
-    version: str = tracardi.version.version
-    uri: str = 'http://www.tracardi.com/2021/WFSchema'
-    server_version: str = None
+class Rule(NamedEntity):
+
+    _schedule_node_id: str = PrivateAttr(None)
+    event_type: Optional[NamedEntity] = NamedEntity(id="", name="")
+    type: Optional[str] = 'event-collect'
+    flow: NamedEntity
+    source: Optional[NamedEntity] = NamedEntity(id="", name="")
+    segment: Optional[NamedEntity] = NamedEntity(id="", name="")
+    enabled: Optional[bool] = True
+    description: Optional[str] = "No description provided"
+    properties: Optional[dict] = None
+    metadata: Optional[Metadata] = None
+    tags: Optional[List[str]] = ["General"]
+
+    @field_validator("tags")
+    @classmethod
+    def tags_can_not_be_empty(cls, value):
+        if len(value) == 0:
+            value = ["General"]
+        return value
+
+    def set_as_scheduled(self, schedule_node_id):
+        self._schedule_node_id = schedule_node_id
+
+    def schedule_node_id(self):
+        return self._schedule_node_id
+
+    def are_consents_met(self, profile_consent_ids: Set[str]) -> bool:
+        if self.properties is None:
+            # No restriction
+            return True
+
+        if not profile_consent_ids:
+            # No consents set on profile
+            return True
+
+        if 'consents' in self.properties and isinstance(self.properties['consents'], list):
+            if len(self.properties['consents']) > 0:
+                required_consent_ids = set([item['id'] for item in self.properties['consents'] if 'id' in item])
+                return required_consent_ids.intersection(profile_consent_ids) == required_consent_ids
+
+        return True
 
     def __init__(self, **data: Any):
+        if 'metadata' not in data:
+            data['metadata'] = Metadata(
+                time=Time(
+                    insert=datetime.utcnow()
+                ))
         super().__init__(**data)
-        self.server_version = tracardi.version.version
-
-
-class Flow(FlowGraph):
-    projects: Optional[List[str]] = ["General"]
-    lock: bool = False
-    type: str
-    timestamp: Optional[datetime] = None
-    deploy_timestamp: Optional[datetime] = None
-    wf_schema: FlowSchema = FlowSchema()
-
-    def arrange_nodes(self):
-        if self.flowGraph is not None:
-            targets = {edge.target for edge in self.flowGraph.edges}
-            starting_nodes = [node for node in self.flowGraph.nodes if node.id not in targets]
-
-            start_at = [0, 0]
-            for starting_node in starting_nodes:
-                node_to_distance_map = self.flowGraph.traverse_graph_for_distances(start_at_id=starting_node.id)
-
-                for node_id in node_to_distance_map:
-                    node = self.flowGraph.get_node_by_id(node_id)
-                    node.position.y = start_at[1] + 150 * node_to_distance_map[node_id]
-
-                distance_to_nodes_map = {}
-                for node_id in node_to_distance_map:
-                    if node_to_distance_map[node_id] not in distance_to_nodes_map:
-                        distance_to_nodes_map[node_to_distance_map[node_id]] = []
-                    distance_to_nodes_map[node_to_distance_map[node_id]].append(node_id)
-
-                for node_ids in distance_to_nodes_map.values():
-                    nodes = [self.flowGraph.get_node_by_id(node_id) for node_id in node_ids]
-                    row_center = start_at[0] - 200 * len(nodes) + 250
-                    for node in nodes:
-                        node.position.x = row_center - node.data.metadata.width // 2
-                        row_center += node.data.metadata.width
-
-                start_at[0] += len(max(distance_to_nodes_map.values(), key=len)) * 200
-
-    def get_production_workflow_record(self) -> 'FlowRecord':
-
-        production = encrypt(self.model_dump())
-
-        return FlowRecord(
-            id=self.id,
-            timestamp=self.timestamp,
-            deploy_timestamp=self.deploy_timestamp,
-            description=self.description,
-            name=self.name,
-            projects=self.projects,
-            draft=production,
-            production=production,
-            lock=self.lock,
-            type=self.type
-        )
-
-    def get_empty_workflow_record(self, type: str) -> 'FlowRecord':
-
-        return FlowRecord(
-            id=self.id,
-            timestamp=datetime.utcnow(),
-            description=self.description,
-            name=self.name,
-            projects=self.projects,
-            lock=self.lock,
-            type=type
-        )
-
-    @staticmethod
-    def from_workflow_record(record: 'FlowRecord', output) -> 'Flow':
-
-        if output == 'draft':
-            decrypted = decrypt(record.draft)
-        else:
-            decrypted = decrypt(record.production)
-
-        if 'type' not in decrypted:
-            decrypted['type'] = record.type
-
-        flow = Flow(**decrypted)
-        flow.deploy_timestamp = record.deploy_timestamp
-        flow.timestamp = record.timestamp
-
-        if not flow.timestamp:
-            flow.timestamp = datetime.utcnow()
-
-        return flow
-
-    @staticmethod
-    def new(id: str = None) -> 'Flow':
-        return Flow(
-            id=str(uuid.uuid4()) if id is None else id,
-            timestamp=datetime.utcnow(),
-            name="Empty",
-            wf_schema=FlowSchema(version=str(tracardi.version)),
-            flowGraph=FlowGraphData(nodes=[], edges=[]),
-            type='collection'
-        )
-
-    @staticmethod
-    def build(name: str, description: str = None, id=None, lock=False, projects=None, type='collection') -> 'Flow':
-        if projects is None:
-            projects = ["General"]
-
-        return Flow(
-            id=str(uuid.uuid4()) if id is None else id,
-            timestamp=datetime.utcnow(),
-            name=name,
-            wf_schema=FlowSchema(version=str(tracardi.version)),
-            description=description,
-            projects=projects,
-            lock=lock,
-            flowGraph=FlowGraphData(
-                nodes=[],
-                edges=[]
-            ),
-            type=type
-        )
-
-    def __add__(self, edge_bundle: EdgeBundle):
-        if edge_bundle.source not in self.flowGraph.nodes:
-            self.flowGraph.nodes.append(edge_bundle.source)
-        if edge_bundle.target not in self.flowGraph.nodes:
-            self.flowGraph.nodes.append(edge_bundle.target)
-
-        if edge_bundle.edge not in self.flowGraph.edges:
-            self.flowGraph.edges.append(edge_bundle.edge)
-        else:
-            logger.warning("Edge {}->{} already exists".format(edge_bundle.edge.source, edge_bundle.edge.target))
-
-        return self
-
-
-class SpecRecord(BaseModel):
-    id: str
-    className: str
-    module: str
-    inputs: Optional[List[str]] = []
-    outputs: Optional[List[str]] = []
-    init: Optional[str] = ""
-    microservice: Optional[MicroserviceConfig] = None
-    node: Optional[NodeEvents] = None
-    form: Optional[str] = ""
-    manual: Optional[str] = None
-    author: Optional[str] = None
-    license: Optional[str] = "MIT"
-    version: Optional[str] = '0.8.2-dev'
-
-    @staticmethod
-    def encode(spec: Spec) -> 'SpecRecord':
-        return SpecRecord(
-            id=spec.id,
-            className=spec.className,
-            module=spec.module,
-            inputs=spec.inputs,
-            outputs=spec.outputs,
-            init=encrypt(spec.init),
-            microservice=spec.microservice,
-            node=spec.node,
-            form=b64_encoder(spec.form),
-            manual=spec.manual,
-            author=spec.author,
-            license=spec.license,
-            version=spec.version
-        )
-
-    def decode(self) -> Spec:
-        return Spec(
-            id=self.id,
-            className=self.className,
-            module=self.module,
-            inputs=self.inputs,
-            outputs=self.outputs,
-            init=decrypt(self.init),
-            microservice=self.microservice,
-            node=self.node,
-            form=b64_decoder(self.form),
-            manual=self.manual,
-            author=self.author,
-            license=self.license,
-            version=self.version
-        )
-
-
-class MetaDataRecord(BaseModel):
-    name: str
-    brand: Optional[str] = ""
-    desc: Optional[str] = ""
-    keywords: Optional[List[str]] = []
-    type: str = 'flowNode'
-    width: int = 300
-    height: int = 100
-    icon: str = 'plugin'
-    documentation: Optional[str] = ""
-    group: Optional[List[str]] = ["General"]
-    tags: List[str] = []
-    pro: bool = False
-    commercial: bool = False
-    remote: bool = False
-    frontend: bool = False
-    emits_event: Optional[str] = ""
-    purpose: List[str] = ['collection']
-
-    @staticmethod
-    def encode(metadata: MetaData) -> 'MetaDataRecord':
-        return MetaDataRecord(
-            name=metadata.name,
-            brand=metadata.brand,
-            desc=metadata.desc,
-            keywords=metadata.keywords,
-            type=metadata.type,
-            width=metadata.width,
-            height=metadata.height,
-            icon=metadata.icon,
-            documentation=b64_encoder(metadata.documentation),
-            group=metadata.group,
-            tags=metadata.tags,
-            pro=metadata.pro,
-            commercial=metadata.commercial,
-            remote=metadata.remote,
-            frontend=metadata.frontend,
-            emits_event=b64_encoder(metadata.emits_event),
-            purpose=metadata.purpose
-        )
-
-    def decode(self) -> MetaData:
-        return MetaData(
-            name=self.name,
-            brand=self.brand,
-            desc=self.desc,
-            keywords=self.keywords,
-            type=self.type,
-            width=self.width,
-            height=self.height,
-            icon=self.icon,
-            documentation=b64_decoder(self.documentation),
-            group=self.group,
-            tags=self.tags,
-            pro=self.pro,
-            commercial=self.commercial,
-            remote=self.remote,
-            frontend=self.frontend,
-            emits_event=b64_decoder(self.emits_event),
-            purpose=self.purpose
-        )
-
-
-class PluginRecord(BaseModel):
-    start: bool = False
-    debug: bool = False
-    spec: SpecRecord
-    metadata: MetaDataRecord
-
-    @staticmethod
-    def encode(plugin: Plugin) -> 'PluginRecord':
-        return PluginRecord(
-            start=plugin.start,
-            debug=plugin.debug,
-            spec=SpecRecord.encode(plugin.spec),
-            metadata=MetaDataRecord.encode(plugin.metadata)
-        )
-
-    def decode(self) -> Plugin:
-        data = {
-            "start": self.start,
-            "debug": self.debug,
-            "spec": self.spec.decode(),
-            "metadata": self.metadata.decode()
-        }
-        return Plugin.model_construct(_fields_set=self.model_fields_set, **data)
-
-
-class FlowRecord(NamedEntity):
-    timestamp: Optional[datetime] = None
-    deploy_timestamp: Optional[datetime] = None
-    description: Optional[str] = None
-    projects: Optional[List[str]] = ["General"]
-    draft: Optional[str] = ''
-    production: Optional[str] = ''
-    backup: Optional[str] = ''
-    lock: bool = False
-    deployed: Optional[bool] = False
-    type: str
-
-    # Persistence
 
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
-            'flow',
-            FlowRecord
+            'rule',
+            Rule
         )
-
-    def get_production_workflow(self) -> 'Flow':
-        return Flow.from_workflow_record(self, output='production')
-
-    def get_draft_workflow(self) -> 'Flow':
-        return Flow.from_workflow_record(self, output='draft')
-
-    def get_empty_workflow(self, id) -> 'Flow':
-        return Flow.build(id=id, name=self.name, description=self.description,
-                          projects=self.projects, lock=self.lock)
-
-    def restore_production_from_backup(self):
-        if not self.backup:
-            raise ValueError("Back up is empty.")
-        self.production = self.backup
-
-    def restore_draft_from_production(self):
-        if not self.production:
-            raise ValueError("Production up is empty.")
-        self.draft = self.production
-
-    def set_lock(self, lock: bool = True) -> None:
-        self.lock = lock
-        production_flow = self.get_production_workflow()
-        production_flow.lock = lock
-        self.production = encrypt(production_flow.model_dump())
-        draft_flow = self.get_draft_workflow()
-        draft_flow.lock = lock
-        self.draft = encrypt(draft_flow.model_dump())
 
 ```
 
