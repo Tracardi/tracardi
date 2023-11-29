@@ -23,6 +23,8 @@ class EventToProfile(NamedEntity):
     config: Optional[dict] = {}
     event_to_profile: Optional[List[EventToProfileMap]] = []
     tags: List[str] = []
+    build_in: Optional[bool] = False
+
 
     def items(self):
         for item in self.event_to_profile:

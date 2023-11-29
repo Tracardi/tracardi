@@ -117,7 +117,6 @@ async def map_event_to_profile(
     if len(custom_mapping_schemas) > 0:
 
         for custom_mapping_schema in custom_mapping_schemas:
-            # custom_mapping_schema = custom_mapping_schema.to_entity(EventToProfile)
 
             # Check condition
             if 'condition' in custom_mapping_schema.config:
