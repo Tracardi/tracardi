@@ -39,7 +39,7 @@ class RulesEngine:
     def __init__(self,
                  session: Session,
                  profile: Optional[Profile],
-                 events_rules: List[Tuple[List[Dict], Event]],
+                 events_rules: List[Tuple[List[Rule], Event]],
                  console_log: ConsoleLog
                  ):
 
@@ -87,15 +87,13 @@ class RulesEngine:
                     continue
 
                 # this is main roles loop
-                if 'name' in rule:
-                    invoked_rules[event.id].append(rule['name'])
-                    rule_name = rule['name']
+                if rule.name:
+                    invoked_rules[event.id].append(rule.name)
+                    rule_name = rule.name
                 else:
                     rule_name = 'Unknown'
 
                 try:
-                    rule = Rule(**rule)
-
                     # Can check consents only if there is profile
                     if License.has_license() and self.profile is not None:
                         # Check consents

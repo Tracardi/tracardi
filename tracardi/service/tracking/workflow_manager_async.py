@@ -1,7 +1,7 @@
 import logging
 from uuid import uuid4
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 
@@ -20,8 +20,8 @@ from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.storage.driver.elastic import debug_info as debug_info_db
-from tracardi.service.storage.driver.elastic import rule as rule_db
 from tracardi.service.storage.driver.elastic import flow as flow_db
+from tracardi.service.storage.mysql.service.workflow_trigger_service import WorkflowTriggerService
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
@@ -98,7 +98,7 @@ class WorkflowManagerAsync:
 
         return profile
 
-    async def get_routing_rules(self, events: List[Event]):
+    async def get_routing_rules(self, events: List[Event]) -> Optional[List[Tuple[List[Rule], Event]]]:
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
@@ -121,7 +121,7 @@ class WorkflowManagerAsync:
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
                         properties={},
                         enabled=True,
-                    ).model_dump()
+                    )
                 ],
                 event
             ) for event in events if event.metadata.valid]
@@ -130,7 +130,8 @@ class WorkflowManagerAsync:
                 f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
         else:
             # Routing rules are subject to caching
-            event_rules = await rule_db.load_rules(self.tracker_payload.source, events)
+            wts = WorkflowTriggerService()
+            event_rules = await wts.load_by_source_and_events(self.tracker_payload.source, events)
 
         return event_rules
 

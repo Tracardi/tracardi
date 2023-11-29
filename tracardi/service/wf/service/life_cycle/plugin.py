@@ -41,7 +41,12 @@ def set_context(node: Node,
                 tracker_payload: TrackerPayload,
                 execution_graph,
                 debug: bool) -> ActionRunner:
-    node.object.node = node.copy(exclude={"object": ..., "className": ..., "module": ..., "init": ...})
+
+    # node.object.node = node.copy(exclude={"object": ..., "className": ..., "module": ..., "init": ...})
+
+    data = node.model_dump(exclude={"object": ...}, mode='json')
+    node.object.node = Node(**data)
+
     node.object.debug = debug
     node.object.event = event
     node.object.session = session

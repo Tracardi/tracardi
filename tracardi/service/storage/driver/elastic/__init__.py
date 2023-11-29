@@ -12,7 +12,6 @@ __all__ = [
     "raw",
     "report",
     "resource",
-    "rule",
     "segment",
     "session",
     "snapshot",

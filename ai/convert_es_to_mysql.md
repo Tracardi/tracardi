@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-report
+content
 
 # Elasticsearch index mapping
 
@@ -124,27 +124,47 @@ report
     "dynamic": "strict",
     "properties": {
       "id": {
-        "type": "keyword", "ignore_above": 64
+        "type": "keyword",
+        "ignore_above": 48
       },
-      "name": {
-        "type": "text"
+      "profile": {
+        "properties": {
+            "id": {
+              "type": "keyword"
+            }
+        }
       },
-      "description": {
-        "type": "text"
+      "timestamp": {
+        "type": "date"
       },
-      "tags": {
+      "type": {
         "type": "keyword"
       },
-      "index": {
+      "url": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
+      },
+      "author": {
+        "type": "keyword",
+        "ignore_above": 96
+      },
+      "copyright": {
+        "type": "keyword"
+      },
+      "content": {
+        "type": "binary"
+      },
+      "text": {
         "type": "text"
       },
-      "query": {
-        "index": false,
-        "type": "text"
+      "properties": {
+        "type": "flattened"
       },
-      "enabled": {
-        "type": "boolean",
-        "null_value": true
+      "traits": {
+        "type": "object",
+        "dynamic": "true"
       }
     }
   },

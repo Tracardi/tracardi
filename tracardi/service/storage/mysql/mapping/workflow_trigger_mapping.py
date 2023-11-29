@@ -5,36 +5,37 @@ from tracardi.domain.metadata import Metadata
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 from tracardi.domain.time import Time
-from tracardi.service.storage.mysql.schema.table import TriggerTable
+from tracardi.service.storage.mysql.schema.table import WorkflowTriggerTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json
 
 
-def map_to_workflow_trigger_table(rule: Rule) -> TriggerTable:
+def map_to_workflow_trigger_table(workflow_trigger: Rule) -> WorkflowTriggerTable:
     context = get_context()
 
-    return TriggerTable(
-        id=rule.id,
-        name=rule.name,
-        description=rule.description,
-        type=rule.type,
-        metadata_time_insert=rule.metadata.time.insert if rule.metadata and rule.metadata.time else None,
-        event_type_id=rule.event_type.id if rule.event_type else None,
-        event_type_name=rule.event_type.name if rule.event_type else None,
-        flow_id=rule.flow.id if rule.flow else None,
-        flow_name=rule.flow.name if rule.flow else None,
-        segment_id=rule.segment.id if rule.segment else None,
-        segment_name=rule.segment.name if rule.segment else None,
-        source_id=rule.source.id if rule.source else None,
-        source_name=rule.source.name if rule.source else None,
-        properties=to_json(rule.properties) if rule.properties else None,
-        enabled=rule.enabled,
-        tags=",".join(rule.tags) if rule.tags else None,
+    return WorkflowTriggerTable(
+        id=workflow_trigger.id,
+        name=workflow_trigger.name,
+        description=workflow_trigger.description,
+        type=workflow_trigger.type,
+        metadata_time_insert=workflow_trigger.metadata.time.insert if workflow_trigger.metadata and workflow_trigger.metadata.time else None,
+        event_type_id=workflow_trigger.event_type.id if workflow_trigger.event_type else None,
+        event_type_name=workflow_trigger.event_type.name if workflow_trigger.event_type else None,
+        flow_id=workflow_trigger.flow.id if workflow_trigger.flow else None,
+        flow_name=workflow_trigger.flow.name if workflow_trigger.flow else None,
+        segment_id=workflow_trigger.segment.id if workflow_trigger.segment else None,
+        segment_name=workflow_trigger.segment.name if workflow_trigger.segment else None,
+        source_id=workflow_trigger.source.id if workflow_trigger.source else None,
+        source_name=workflow_trigger.source.name if workflow_trigger.source else None,
+        properties=to_json(workflow_trigger.properties) if workflow_trigger.properties else None,
+        enabled=workflow_trigger.enabled,
+        tags=",".join(workflow_trigger.tags) if workflow_trigger.tags else None,
 
         tenant=context.tenant,
         production=context.production
     )
 
-def map_to_workflow_trigger_rule(trigger_table: TriggerTable) -> Rule:
+
+def map_to_workflow_trigger_rule(trigger_table: WorkflowTriggerTable) -> Rule:
     return Rule(
         id=trigger_table.id,
         name=trigger_table.name,

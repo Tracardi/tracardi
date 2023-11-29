@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy import and_, Index
+from sqlalchemy import and_, Index, BLOB
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
                         ForeignKey, PrimaryKeyConstraint, Text, Integer, UniqueConstraint)
@@ -107,8 +107,8 @@ class WorkflowTable(Base):
     )
 
 
-class TriggerTable(Base):
-    __tablename__ = 'trigger'
+class WorkflowTriggerTable(Base):
+    __tablename__ = 'workflow_trigger'
 
     id = Column(String(40))  # 'keyword' in ES with ignore_above
     tenant = Column(String(40))
@@ -508,6 +508,30 @@ class ReportTable(Base):
 
     tenant = Column(String(40))  # Field added for multitenance
     production = Column(Boolean) # Field added for multitenance
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+
+class ContentTable(Base):
+    __tablename__ = 'content'
+
+    id = Column(String(48))  # 'keyword' type with ignore_above 48
+    profile_id = Column(String(40))  # Nested 'keyword' fields converted to 'VARCHAR' with default length
+    timestamp = Column(DateTime)  # 'date' type in ES corresponds to 'DateTime' in MySQL
+    type = Column(String(64))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    url = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    source = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    author = Column(String(96))  # 'keyword' type with ignore_above 96
+    copyright = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    content = Column(BLOB)  # 'binary' type in ES corresponds to 'BLOB' in MySQL
+    text = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    properties = Column(JSON)  # 'flattened' type in ES corresponds to 'JSON' in MySQL
+    traits = Column(JSON)  # 'object' type in ES corresponds to 'JSON' in MySQL
+
+    tenant = Column(String(40))  # Add this field for multitenance
+    production = Column(Boolean)  # Add this field for multitenance
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),

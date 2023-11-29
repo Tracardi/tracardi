@@ -7,7 +7,7 @@ from tracardi.domain.rule import Rule
 from tracardi.domain.time import Time
 from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_to_workflow_trigger_table, \
     map_to_workflow_trigger_rule
-from tracardi.service.storage.mysql.schema.table import TriggerTable
+from tracardi.service.storage.mysql.schema.table import WorkflowTriggerTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json
 
 
@@ -68,7 +68,7 @@ def test_valid_rule_mapping():
 
 
 def test_valid_trigger_table():
-    trigger_table = TriggerTable(
+    trigger_table = WorkflowTriggerTable(
         id="123",
         tenant="test",
         production=True,
