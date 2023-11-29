@@ -20,7 +20,7 @@ class ConsentFieldComplianceSetting(BaseModel):
         return required_consents.intersection(profile_consents) == required_consents
 
 
-class ConsentFieldCompliance(Entity):
+class EventDataCompliance(Entity):
     name: str
     description: Optional[str] = ""
     event_type: NamedEntity

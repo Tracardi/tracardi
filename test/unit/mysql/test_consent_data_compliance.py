@@ -1,5 +1,5 @@
 from tracardi.context import ServerContext, Context
-from tracardi.domain.consent_field_compliance import ConsentFieldCompliance, ConsentFieldComplianceSetting
+from tracardi.domain.consent_field_compliance import EventDataCompliance, ConsentFieldComplianceSetting
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.ref_value import RefValue
 from tracardi.service.storage.mysql.mapping.event_data_compliance_mapping import map_to_event_data_compliance_table, \
@@ -8,7 +8,7 @@ from tracardi.service.storage.mysql.schema.table import EventDataComplianceTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json
 
 
-def test_returns_instance_with_correct_values():
+def test_table_mapping():
 
     settings = [
                 ConsentFieldComplianceSetting(
@@ -19,7 +19,7 @@ def test_returns_instance_with_correct_values():
             ]
 
     with ServerContext(Context(production=True)) as context:
-        event_data_compliance = ConsentFieldCompliance(
+        event_data_compliance = EventDataCompliance(
             id="123",
             name="Example Compliance",
             description="This is an example compliance",
@@ -55,16 +55,22 @@ def test_correctly_map_all_fields():
         event_type_id="2",
         event_type_name="Test event type",
         settings=to_json(settings),
+        enabled=True
     )
 
-    expected_result = ConsentFieldCompliance(
+    expected_result = EventDataCompliance(
         id="1",
         name="Test",
         description="",
         event_type=NamedEntity(id="2", name="Test event type"),
         settings=settings,
-        enabled=False
+        enabled=True
     )
     result = map_to_event_data_compliance(event_data_compliance_table)
 
-    assert result == expected_result
+    assert result.id == expected_result.id
+    assert result.name == expected_result.name
+    assert result.description == expected_result.description
+    assert result.event_type == expected_result.event_type
+    assert result.settings == expected_result.settings
+    assert result.enabled == expected_result.enabled

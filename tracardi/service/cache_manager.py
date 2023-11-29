@@ -1,5 +1,6 @@
 from typing import Optional, List, Generator
 
+from tracardi.domain.consent_field_compliance import EventDataCompliance
 from tracardi.domain.destination import Destination
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
@@ -7,17 +8,17 @@ from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.event_type_metadata import EventTypeMetadata
 from tracardi.domain.event_validator import EventValidator
 from tracardi.domain.session import Session
-from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.driver.elastic import session as session_db
-from tracardi.service.storage.driver.elastic import data_compliance as data_compliance_db
+from tracardi.service.storage.mysql.mapping.event_data_compliance_mapping import map_to_event_data_compliance
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
 from tracardi.service.storage.mysql.mapping.event_to_event_mapping import map_to_event_mapping
 from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile
 from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_to_event_validation
+from tracardi.service.storage.mysql.service.event_data_compliance_service import ConsentDataComplianceService
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
 from tracardi.service.storage.mysql.service.event_mapping_service import EventMappingService
 from tracardi.service.storage.mysql.service.event_reshaping_service import EventReshapingService
@@ -181,19 +182,29 @@ class CacheManager(metaclass=Singleton):
 
         return await _load_event_validation(event_type)
 
-    async def event_consent_compliance(self, event_type, ttl) -> StorageRecords:
+    async def event_consent_compliance(self, event_type, ttl) -> List[EventDataCompliance]:
+
         """
         Event consent compliance
         """
+
+        async def _load_data_compliance(event_type_id: str) -> List[EventDataCompliance]:
+            cdcs = ConsentDataComplianceService()
+            records = await cdcs.load_by_event_type(event_type_id, enabled_only=True)
+            if not records.exists():
+                return []
+            return list(records.map_to_objects(map_to_event_data_compliance))
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_consent_compliance_cache(),
                 event_type,
                 ttl,
-                data_compliance_db.load_by_event_type,
+                _load_data_compliance,
                 True,
                 event_type)
-        return await data_compliance_db.load_by_event_type(event_type)
+
+        return await _load_data_compliance(event_type)
 
     async def event_to_profile_coping(self, event_type_id, ttl) -> List[EventToProfile]:
         """
