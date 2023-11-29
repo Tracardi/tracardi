@@ -23,13 +23,14 @@ from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..identification_point import IdentificationPoint
 from ..payload.event_payload import EventPayload
-from ..session import Session, SessionMetadata, SessionTime
+from ..session import Session
 from ..time import Time
 from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 
-from tracardi.service.storage.driver.elastic import identification as identification_db
+from ...service.storage.mysql.mapping.identificcation_point_mapping import map_to_identification_point
+from ...service.storage.mysql.service.idetification_point_service import IdentificationPointService
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
@@ -633,8 +634,9 @@ class TrackerPayload(BaseModel):
 
     @staticmethod
     async def _load_identification_points():
-        identification_points = await identification_db.load_enabled(limit=200)
-        return identification_points.to_domain_objects(IdentificationPoint)
+        ips = IdentificationPointService()
+        records = await ips.load_enabled(limit=200)
+        return records.map_to_objects(map_to_identification_point)
 
     def _get_valid_identification_points(self,
                                          identification_points: List[IdentificationPoint]):
