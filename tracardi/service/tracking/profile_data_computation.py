@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import logging
 
@@ -85,7 +85,7 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 
 
 async def map_event_to_profile(
-        custom_mapping_schemas: StorageRecords,
+        custom_mapping_schemas: List[EventToProfile],
         flat_event: Dotty,
         flat_profile: Dotty,
         session: Session,
@@ -114,10 +114,10 @@ async def map_event_to_profile(
 
     # Custom event types mappings, filtered by event type
 
-    if custom_mapping_schemas.total > 0:
+    if len(custom_mapping_schemas) > 0:
 
         for custom_mapping_schema in custom_mapping_schemas:
-            custom_mapping_schema = custom_mapping_schema.to_entity(EventToProfile)
+            # custom_mapping_schema = custom_mapping_schema.to_entity(EventToProfile)
 
             # Check condition
             if 'condition' in custom_mapping_schema.config:

@@ -1,8 +1,9 @@
-from typing import Optional, List
+from typing import Optional, List, Generator
 
 from tracardi.domain.destination import Destination
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.domain.event_source import EventSource
+from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.event_type_metadata import EventTypeMetadata
 from tracardi.domain.event_validator import EventValidator
 from tracardi.domain.session import Session
@@ -16,11 +17,13 @@ from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_de
 from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
 from tracardi.service.storage.mysql.mapping.event_to_event_mapping import map_to_event_mapping
+from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile
 from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_to_event_validation
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
 from tracardi.service.storage.mysql.service.event_mapping_service import EventMappingService
 from tracardi.service.storage.mysql.service.event_reshaping_service import EventReshapingService
 from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
+from tracardi.service.storage.mysql.service.event_to_profile_service import EventToProfileMappingService
 from tracardi.service.storage.mysql.service.event_validation_service import EventValidationService
 
 
@@ -193,21 +196,29 @@ class CacheManager(metaclass=Singleton):
                 event_type)
         return await data_compliance_db.load_by_event_type(event_type)
 
-    async def event_to_profile_coping(self, event_type, ttl) -> StorageRecords:
+    async def event_to_profile_coping(self, event_type, ttl) -> List[EventToProfile]:
         """
         Event to profile coping schema cache
         """
+
+        async def _load_event_to_profile(event_type_id: str) -> List[EventToProfile]:
+            etpms = EventToProfileMappingService()
+            records = await etpms.load_by_type(event_type_id, enabled_only=True)
+            if not records.exists():
+                return []
+            return list(records.map_to_objects(map_to_event_to_profile))
+
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_to_profile_coping_cache(),
                 event_type,
                 ttl,
-                event_to_profile_db.get_event_to_profile,
+                _load_event_to_profile,
                 True,
                 event_type,
                 True  # Only enabled
             )
-        return await event_to_profile_db.get_event_to_profile(event_type)
+        return await _load_event_to_profile(event_type)
 
     async def event_mapping(self, event_type_id, ttl) -> Optional[EventTypeMetadata]:
 
