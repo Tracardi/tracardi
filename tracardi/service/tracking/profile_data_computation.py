@@ -11,7 +11,6 @@ from tracardi.domain.event_source import EventSource
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.domain.storage_record import StorageRecords
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.process_engine.tql.condition import Condition
