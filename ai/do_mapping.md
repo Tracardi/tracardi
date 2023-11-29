@@ -123,53 +123,115 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class SegmentTable(Base):
-    __tablename__ = 'segment'
+class ReportTable(Base):
+    __tablename__ = 'report'
 
-    id = Column(String(40))  # 'keyword' type with ignore_above
-    name = Column(Text)  # 'text' type in ES maps to Text in MySQL
-    description = Column(Text)  # 'text' type in ES maps to Text in MySQL
-    event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
-    condition = Column(Text)  # 'keyword' type in ES defaults to VARCHAR(255)
-    enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
-    machine_name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    id = Column(String(40))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL with ignore_above
+    name = Column(String(128))  # Elasticsearch 'text' type is similar to MySQL 'VARCHAR'
+    description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    tags = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    index = Column(String(128))  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    query = Column(JSON)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL, 'index' property in ES ignored
+    enabled = Column(Boolean, default=True)  # 'boolean' type in ES is the same as in MySQL, default value set from 'null_value'
+    
 
-    tenant = Column(String(40))
-    production = Column(Boolean)
+    tenant = Column(String(40))  # Field added for multitenance
+    production = Column(Boolean) # Field added for multitenance
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 ```
 
-and it to the corresponding object `Segment` that has the following schema:
+and it to the corresponding object `Report` that has the following schema:
 
 ```python
-from typing import Optional, Any, List
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.value_object.storage_info import StorageInfo
+from pydantic import field_validator
+from typing import List
+from tracardi.service.secrets import encrypt, decrypt
+import json
+import re
 
 
-class Segment(NamedEntity):
-    description: Optional[str] = ""
-    eventType: Optional[List[str]] = []
-    condition: str
-    enabled: Optional[bool] = True
-    machine_name: Optional[str] = None
+class QueryBuildingError(Exception):
+    pass
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self.machine_name = self.get_id()
 
-    def get_id(self) -> str:
-        return self.name.replace(" ", "-").lower()
+class ReportRecord(NamedEntity):
+    description: str
+    index: str
+    query: str
+    tags: List[str]
+
+
+class Report(NamedEntity):
+    _regex = re.compile(r"\"\{{2}\s*([0-9a-zA-Z_]+)\s*\}{2}\"")
+    description: str
+    index: str
+    query: dict
+    tags: List[str]
+
+    @field_validator("index")
+    @classmethod
+    def validate_entity(cls, value):
+        if value not in ("profile", "session", "event", "entity"):
+            raise ValueError(f"Entity has to be one of: profile, session, event, entity. `{value}` given.")
+        return value
+
+    def encode(self) -> ReportRecord:
+        return ReportRecord(
+            id=self.id,
+            name=self.name,
+            description=self.description,
+            tags=self.tags,
+            index=self.index,
+            query=encrypt(self.query)
+        )
 
     @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'segment',
-            Segment
+    def decode(record: ReportRecord) -> 'Report':
+        return Report(
+            id=record.id,
+            name=record.name,
+            description=record.description,
+            index=record.index,
+            tags=record.tags,
+            query=decrypt(record.query)
         )
+
+    @staticmethod
+    def _format_value(value) -> str:
+        return f"\"{value}\"" if isinstance(value, str) else str(value)
+
+    def get_built_query(self, **kwargs) -> dict:
+        try:
+            query = json.dumps(self.query)
+            query = re.sub(
+                self._regex,
+                lambda x: self._format_value(kwargs[x.group(1)]),
+                query
+            )
+            return json.loads(query)
+        except KeyError as e:
+            raise QueryBuildingError(f"Missing parameter: {str(e)}")
+
+        except Exception as e:
+            raise QueryBuildingError(str(e))
+
+    @property
+    def expected_query_params(self) -> List[str]:
+        return re.findall(self._regex, json.dumps(self.query))
+
+    def __eq__(self, other: 'Report') -> bool:
+        return self.id == other.id \
+               and json.dumps(self.query) == json.dumps(other.query) \
+               and self.name == other.name \
+               and self.index == other.index \
+               and self.description == other.description \
+               and self.tags == other.tags
+
+
 
 ```
 

@@ -493,3 +493,22 @@ class SegmentTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+class ReportTable(Base):
+    __tablename__ = 'report'
+
+    id = Column(String(40))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL with ignore_above
+    name = Column(String(128))  # Elasticsearch 'text' type is similar to MySQL 'VARCHAR'
+    description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    tags = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    index = Column(String(128))  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    query = Column(JSON)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL, 'index' property in ES ignored
+    enabled = Column(Boolean, default=True)  # 'boolean' type in ES is the same as in MySQL, default value set from 'null_value'
+
+
+    tenant = Column(String(40))  # Field added for multitenance
+    production = Column(Boolean) # Field added for multitenance
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )

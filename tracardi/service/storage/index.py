@@ -296,8 +296,8 @@ class Resource(metaclass=Singleton):
             "task": Index(staging=False, multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
             "report": Index(staging=True, multi_index=False, index="tracardi-report",
                             mapping="mappings/report-index.json"),
-            "identification-point": Index(staging=True, multi_index=False, index="tracardi-identification-point",
-                                          mapping="mappings/identification-point-index.json"),
+            # "identification-point": Index(staging=True, multi_index=False, index="tracardi-identification-point",
+            #                               mapping="mappings/identification-point-index.json"),
             # "version": Index(staging=False, multi_index=False, index="tracardi-version",
             #                  mapping="mappings/version-index.json")
         }

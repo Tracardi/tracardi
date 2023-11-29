@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-segment
+report
 
 # Elasticsearch index mapping
 
@@ -126,23 +126,25 @@ segment
       "id": {
         "type": "keyword", "ignore_above": 64
       },
-      "eventType": {
-        "type": "keyword"
-      },
       "name": {
         "type": "text"
       },
       "description": {
         "type": "text"
       },
-      "condition": {
+      "tags": {
         "type": "keyword"
+      },
+      "index": {
+        "type": "text"
+      },
+      "query": {
+        "index": false,
+        "type": "text"
       },
       "enabled": {
-        "type": "boolean"
-      },
-      "machine_name": {
-        "type": "keyword"
+        "type": "boolean",
+        "null_value": true
       }
     }
   },
@@ -150,6 +152,7 @@ segment
     "%%ALIAS%%": {}
   }
 }
+
 
 
 ```

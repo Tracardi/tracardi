@@ -1,6 +1,6 @@
 from tracardi.domain.named_entity import NamedEntity
 from pydantic import field_validator
-from typing import List
+from typing import List, Optional
 from tracardi.service.secrets import encrypt, decrypt
 import json
 import re
@@ -23,6 +23,7 @@ class Report(NamedEntity):
     index: str
     query: dict
     tags: List[str]
+    enabled: Optional[bool] = False
 
     @field_validator("index")
     @classmethod
