@@ -196,7 +196,7 @@ class CacheManager(metaclass=Singleton):
                 event_type)
         return await data_compliance_db.load_by_event_type(event_type)
 
-    async def event_to_profile_coping(self, event_type, ttl) -> List[EventToProfile]:
+    async def event_to_profile_coping(self, event_type_id, ttl) -> List[EventToProfile]:
         """
         Event to profile coping schema cache
         """
@@ -211,14 +211,13 @@ class CacheManager(metaclass=Singleton):
         if ttl > 0:
             return await MemoryCache.cache(
                 self.event_to_profile_coping_cache(),
-                event_type,
+                event_type_id,
                 ttl,
                 _load_event_to_profile,
                 True,
-                event_type,
-                True  # Only enabled
+                event_type_id
             )
-        return await _load_event_to_profile(event_type)
+        return await _load_event_to_profile(event_type_id)
 
     async def event_mapping(self, event_type_id, ttl) -> Optional[EventTypeMetadata]:
 
