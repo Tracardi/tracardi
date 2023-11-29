@@ -11,7 +11,6 @@ from tracardi.domain.storage_record import StorageRecords
 from tracardi.event_server.utils.memory_cache import MemoryCache
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.driver.elastic import session as session_db
-from tracardi.service.storage.driver.elastic import event_to_profile as event_to_profile_db
 from tracardi.service.storage.driver.elastic import data_compliance as data_compliance_db
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping

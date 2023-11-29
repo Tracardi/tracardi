@@ -18,11 +18,11 @@ from tracardi.service.storage.factory import storage_manager
 #     return await sm.load(event_id)
 
 
-async def get_event_to_profile(event_type: str, enabled_only: bool = False) -> StorageRecords:
-    fields = [("event_type.id", event_type)]
-    if enabled_only:
-        fields.append(("enabled", True))
-    return await storage_manager("event-to-profile").load_by_values(fields)
+# async def get_event_to_profile(event_type: str, enabled_only: bool = False) -> StorageRecords:
+#     fields = [("event_type.id", event_type)]
+#     if enabled_only:
+#         fields.append(("enabled", True))
+#     return await storage_manager("event-to-profile").load_by_values(fields)
 
 
 # async def load_events_to_profiles(start: int = 0, limit: int = 200) -> StorageRecords:
