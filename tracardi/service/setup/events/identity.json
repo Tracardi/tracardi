@@ -82,7 +82,7 @@
   {
     "name": "Identification",
     "description": "User sends PII data.",
-    "explain": "T\"Identification\" event should be used when a customer sends personally identifiable information (PII) data. The example could be when user signs-in for the newsletter, or some service. Leaves comment wht email etc.",
+    "explain": "The \"Identification\" event should be employed when a customer provides personally identifiable information (PII). For instance, this event is relevant when a user subscribes to a newsletter or a service, or leaves a comment with their email address, or signs-in.",
     "id": "identification",
     "properties": {
       "firstname": "string",
