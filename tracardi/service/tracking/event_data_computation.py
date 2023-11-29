@@ -1,12 +1,16 @@
+import logging
+
 import asyncio
 from dotty_dict import dotty, Dotty
 
-from typing import List, Tuple, Union, Optional
+from typing import List, Tuple, Optional
 
+from tracardi.exceptions.exception_service import get_traceback
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
-from tracardi.config import memory_cache
+from tracardi.config import memory_cache, tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
@@ -17,22 +21,16 @@ from tracardi.domain.event import Event
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.events import get_default_mappings_for
+from tracardi.service.tracking.utils.function_call import default_event_call_function
 from tracardi.service.utils.getters import get_entity_id
-from tracardi.service.module_loader import load_callable, import_package
 
 if License.has_license():
     from com_tracardi.service.event_mapper import map_event_props_to_traits, map_events_tags_and_journey
 
 cache = CacheManager()
-
-
-def _call_function(call_string, event: Event, profile: Union[Optional[Profile], dict]):
-    state = call_string[5:]
-    module, function = state.split(',')
-    module = import_package(module)
-    state_function = load_callable(module, function)
-
-    return state_function(event, profile)
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 def _remove_empty_dicts(dictionary):
@@ -70,15 +68,7 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Dot
     if state:
         if isinstance(state, str):
             if state.startswith("call:"):
-                # todo stick to flat_event and flat_profile for performance reasons
-                event_dict = flat_event.to_dict()
-                _remove_empty_dicts(event_dict)
-                event = Event(**event_dict)
-                if flat_profile:
-                    profile = Profile(**flat_profile.to_dict())
-                else:
-                    profile = None
-                state = _call_function(call_string=state, event=event, profile=profile)
+                state = default_event_call_function(call_string=state, event=flat_event, profile=flat_profile)
 
             flat_event['journey.state'] = state
 
@@ -278,7 +268,35 @@ async def compute_events(events: List[EventPayload],
     # Recreate Profile from flat_profile, that was changed
 
     if profile:
-        profile = Profile(**flat_profile.to_dict())
-        profile.set_meta_data(profile_metadata)
+        try:
+            profile = Profile(**flat_profile.to_dict())
+            profile.set_meta_data(profile_metadata)
+        except Exception as e:
+            message = f"It seems that there was an error when trying to add or update some information to " \
+                      f"your profile. The error occurred because you tried to add a value that is not " \
+                      f"allowed by the type of data that the profile can accept.  For instance, you may " \
+                      f"have tried to add a name to a field in your profile that only accepts a single string, " \
+                      f"but you provided a list of strings instead. No changes were made to your profile, and " \
+                      f"the original data you sent was not copied because it did not meet the " \
+                      f"requirements of the profile. " \
+                      f"Details: {repr(e)}."
+            console_log.append(
+                Console(
+                    flow_id=None,
+                    node_id=None,
+                    event_id=None,
+                    profile_id=flat_profile.get('id', None),
+                    origin='event',
+                    class_name='map_event_to_profile',
+                    module=__name__,
+                    type='error',
+                    message=message,
+                    traceback=get_traceback(e)
+                )
+            )
+            logger.error(message)
+            if not tracardi.skip_errors_on_profile_mapping:
+                raise e
+
 
     return event_objects, session, profile, field_timestamp_monitor

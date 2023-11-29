@@ -2,17 +2,14 @@ import glob
 import json
 import logging
 import os
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 from dotty_dict import dotty
 
 from tracardi.config import tracardi
 from tracardi.context import ServerContext, get_context
-from tracardi.domain.event import Event, Tags
-from tracardi.domain.profile import Profile
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
-from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.string_manager import capitalize_event_type_id
 
@@ -24,13 +21,13 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-def call_function(call_string, event: Event, profile: Union[Profile, dict]):
-    state = call_string[5:]
-    module, function = state.split(',')
-    module = import_package(module)
-    state_function = load_callable(module, function)
-
-    return state_function(event, profile)
+# def call_function(call_string, event: Dotty, profile: Dotty):
+#     state = call_string[5:]
+#     module, function = state.split(',')
+#     module = import_package(module)
+#     state_function = load_callable(module, function)
+#
+#     return state_function(event, profile)
 
 
 def cache_predefined_event_types():
@@ -212,53 +209,53 @@ def copy_default_event_to_profile(copy_schema: dict, profile_changes: FieldTimes
     return profile_changes, profile_updated_flag
 
 
-def remove_empty_dicts(dictionary):
-    keys_to_remove = []
-    for key, value in dictionary.items():
-        if isinstance(value, dict):
-            remove_empty_dicts(value)  # Recursively check nested dictionaries
-            if not value:  # Empty dictionary after recursive check
-                keys_to_remove.append(key)
-    for key in keys_to_remove:
-        del dictionary[key]
+# def remove_empty_dicts(dictionary):
+#     keys_to_remove = []
+#     for key, value in dictionary.items():
+#         if isinstance(value, dict):
+#             remove_empty_dicts(value)  # Recursively check nested dictionaries
+#             if not value:  # Empty dictionary after recursive check
+#                 keys_to_remove.append(key)
+#     for key in keys_to_remove:
+#         del dictionary[key]
 
 
-def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
-    index_schema = get_default_mappings_for(event.type, 'copy')
-
-    if index_schema is not None:
-
-        flat_event = dotty(event.model_dump())
-
-        for destination, source in index_schema.items():  # type: str, str
-            try:
-
-                # if destination not in flat_event:
-                #     logger.warning(f"While indexing type {event.type}. "
-                #                    f"Property destination {destination} could not be found in event schema.")
-
-                # Skip none existing event properties.
-                if source in flat_event:
-                    flat_event[destination] = flat_event[source]
-                    del flat_event[source]
-            except KeyError:
-                pass
-
-        event_dict = flat_event.to_dict()
-        remove_empty_dicts(event_dict)
-        event = Event(**event_dict)
-
-        state = get_default_mappings_for(event.type, 'state')
-
-        if state:
-            if isinstance(state, str):
-                if state.startswith("call:"):
-                    event.journey.state = call_function(call_string=state, event=event, profile=profile)
-                else:
-                    event.journey.state = state
-
-        tags = get_default_mappings_for(event.type, 'tags')
-        if tags:
-            event.tags = Tags(values=tuple(tags), count=len(tags))
-
-    return event
+# def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
+#     index_schema = get_default_mappings_for(event.type, 'copy')
+#
+#     if index_schema is not None:
+#
+#         flat_event = dotty(event.model_dump())
+#
+#         for destination, source in index_schema.items():  # type: str, str
+#             try:
+#
+#                 # if destination not in flat_event:
+#                 #     logger.warning(f"While indexing type {event.type}. "
+#                 #                    f"Property destination {destination} could not be found in event schema.")
+#
+#                 # Skip none existing event properties.
+#                 if source in flat_event:
+#                     flat_event[destination] = flat_event[source]
+#                     del flat_event[source]
+#             except KeyError:
+#                 pass
+#
+#         event_dict = flat_event.to_dict()
+#         remove_empty_dicts(event_dict)
+#         event = Event(**event_dict)
+#
+#         state = get_default_mappings_for(event.type, 'state')
+#
+#         if state:
+#             if isinstance(state, str):
+#                 if state.startswith("call:"):
+#                     event.journey.state = call_function(call_string=state, event=flat_event, profile=profile)
+#                 else:
+#                     event.journey.state = state
+#
+#         tags = get_default_mappings_for(event.type, 'tags')
+#         if tags:
+#             event.tags = Tags(values=tuple(tags), count=len(tags))
+#
+#     return event

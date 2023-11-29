@@ -3,7 +3,6 @@ from typing import Tuple, List
 import logging
 
 from dotty_dict import Dotty
-from pydantic import ValidationError
 
 from tracardi.config import tracardi
 from tracardi.domain.console import Console
@@ -19,8 +18,9 @@ from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.events import get_default_mappings_for, call_function
+from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.service.tracking.utils.function_call import default_event_call_function
 from tracardi.service.utils.domains import free_email_domains
 from tracardi.service.events import copy_default_event_to_profile
 
@@ -267,43 +267,15 @@ async def map_event_to_profile(
                 if not compute_string.startswith("call:"):
                     continue
 
-                # todo keep event flat
-                computation_result = call_function(
+                computation_result = default_event_call_function(
                     compute_string,
-                    event=Event(**flat_event.to_dict()),
+                    event=flat_event,
                     profile=profile_changes.flat_profile)
 
                 if profile_property is not None:
                     profile_changes[profile_property] = computation_result
 
-        try:
-            flat_profile['operation.update'] = True
+        flat_profile['operation.update'] = True
 
-        except ValidationError as e:
-            message = f"It seems that there was an error when trying to add or update some information to " \
-                      f"your profile. The error occurred because you tried to add a value that is not " \
-                      f"allowed by the type of data that the profile can accept.  For instance, you may " \
-                      f"have tried to add a name to a field in your profile that only accepts a single string, " \
-                      f"but you provided a list of strings instead. No changes were made to your profile, and " \
-                      f"the original data you sent was not copied because it did not meet the " \
-                      f"requirements of the profile. " \
-                      f"Details: {repr(e)}. See: event to profile copy schema for event `{flat_event['type']}`."
-            console_log.append(
-                Console(
-                    flow_id=None,
-                    node_id=None,
-                    event_id=flat_event.get('id', None),
-                    profile_id=flat_profile.get('id', None),
-                    origin='event',
-                    class_name='map_event_to_profile',
-                    module=__name__,
-                    type='error',
-                    message=message,
-                    traceback=get_traceback(e)
-                )
-            )
-            logger.error(message)
-            if not tracardi.skip_errors_on_profile_mapping:
-                raise e
 
     return flat_profile, profile_changes
