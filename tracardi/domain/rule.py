@@ -6,7 +6,6 @@ from pydantic import field_validator, PrivateAttr
 from .metadata import Metadata
 from .named_entity import NamedEntity
 from .time import Time
-from .value_object.storage_info import StorageInfo
 
 
 class Rule(NamedEntity):
@@ -59,10 +58,3 @@ class Rule(NamedEntity):
                     insert=datetime.utcnow()
                 ))
         super().__init__(**data)
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'rule',
-            Rule
-        )

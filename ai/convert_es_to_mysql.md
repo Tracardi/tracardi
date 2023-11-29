@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-content
+import
 
 # Elasticsearch index mapping
 
@@ -124,47 +124,42 @@ content
     "dynamic": "strict",
     "properties": {
       "id": {
-        "type": "keyword",
-        "ignore_above": 48
+        "type": "keyword", "ignore_above": 64
       },
-      "profile": {
-        "properties": {
-            "id": {
-              "type": "keyword"
-            }
-        }
-      },
-      "timestamp": {
-        "type": "date"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "url": {
-        "type": "keyword"
-      },
-      "source": {
-        "type": "keyword"
-      },
-      "author": {
-        "type": "keyword",
-        "ignore_above": 96
-      },
-      "copyright": {
-        "type": "keyword"
-      },
-      "content": {
-        "type": "binary"
-      },
-      "text": {
+      "name": {
         "type": "text"
       },
-      "properties": {
-        "type": "flattened"
+      "description": {
+        "type": "text"
       },
-      "traits": {
-        "type": "object",
-        "dynamic": "true"
+      "module": {
+        "type": "keyword"
+      },
+      "config": {
+        "type": "keyword",
+        "index": false
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "transitional": {
+        "type": "boolean"
+      },
+      "api_url": {
+        "type": "keyword"
+      },
+      "event_source": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "event_type": {
+        "type": "keyword"
       }
     }
   },
@@ -172,7 +167,5 @@ content
     "%%ALIAS%%": {}
   }
 }
-
-
 
 ```

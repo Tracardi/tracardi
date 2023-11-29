@@ -41,6 +41,14 @@ class WorkflowTriggerService(TableService):
     async def delete_by_id(self, trigger_id: str) -> str:
         return await self._delete_by_id(WorkflowTriggerTable, primary_id=trigger_id)
 
+
+    async def delete_by_workflow_id(self, workflow_id: str) -> str:
+        where = where_tenant_context(
+            WorkflowTriggerTable,
+            WorkflowTriggerTable.flow_id == workflow_id
+        )
+        return await self._delete_query(WorkflowTriggerTable, where=where)
+
     async def insert(self, workflow_trigger: Rule):
         return await self._replace(WorkflowTriggerTable, map_to_workflow_trigger_table(workflow_trigger))
 

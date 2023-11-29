@@ -20,7 +20,6 @@ from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.storage.driver.elastic import debug_info as debug_info_db
-from tracardi.service.storage.driver.elastic import flow as flow_db
 from tracardi.service.storage.mysql.service.workflow_trigger_service import WorkflowTriggerService
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
@@ -189,7 +188,6 @@ class WorkflowManagerAsync:
                 # Invoke rules engine
                 try:
                     rule_invoke_result = await rules_engine.invoke(
-                        flow_db.load_production_flow,
                         ux,
                         self.tracker_payload,
                         debug

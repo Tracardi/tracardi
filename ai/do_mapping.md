@@ -123,113 +123,104 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class ReportTable(Base):
-    __tablename__ = 'report'
+class ImportTable(Base):
+    __tablename__ = 'import'
 
-    id = Column(String(40))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL with ignore_above
-    name = Column(String(128))  # Elasticsearch 'text' type is similar to MySQL 'VARCHAR'
+    id = Column(String(64), primary_key=True)  # 'keyword' type with ignore_above 64
+    name = Column(String(128))  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
     description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
-    tags = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    index = Column(String(128))  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
-    query = Column(JSON)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL, 'index' property in ES ignored
-    enabled = Column(Boolean, default=True)  # 'boolean' type in ES is the same as in MySQL, default value set from 'null_value'
+    module = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    config = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
+    transitional = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
+    api_url = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    event_source_id = Column(String(40))  # Nested 'keyword' field as 'VARCHAR'
+    event_source_name = Column(String(128))  # Nested 'keyword' field as 'VARCHAR'
+    event_type = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
     
-
-    tenant = Column(String(40))  # Field added for multitenance
-    production = Column(Boolean) # Field added for multitenance
+    tenant = Column(String(40))  # Add this field for multitenance
+    production = Column(Boolean)  # Add this field for multitenance
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 ```
 
-and it to the corresponding object `Report` that has the following schema:
+and it to the corresponding object `ImportConfig` that has the following schema:
 
 ```python
-from tracardi.domain.named_entity import NamedEntity
 from pydantic import field_validator
-from typing import List
+from typing import Optional
 from tracardi.service.secrets import encrypt, decrypt
-import json
-import re
+from tracardi.domain.named_entity import NamedEntity
 
 
-class QueryBuildingError(Exception):
-    pass
+class ImportConfigRecord(NamedEntity):
+    description: Optional[str] = ""
+    api_url: str  # AnyHttpUrl
+    event_source: NamedEntity
+    event_type: str
+    module: str
+    config: str
+    enabled: bool = True
 
 
-class ReportRecord(NamedEntity):
-    description: str
-    index: str
-    query: str
-    tags: List[str]
+class ImportConfig(NamedEntity):
+    description: Optional[str] = ""
+    module: str
+    config: dict
+    enabled: bool = True
+    api_url: str # AnyHttpUrl
+    event_source: NamedEntity
+    event_type: str
 
-
-class Report(NamedEntity):
-    _regex = re.compile(r"\"\{{2}\s*([0-9a-zA-Z_]+)\s*\}{2}\"")
-    description: str
-    index: str
-    query: dict
-    tags: List[str]
-
-    @field_validator("index")
+    @field_validator("event_source")
     @classmethod
-    def validate_entity(cls, value):
-        if value not in ("profile", "session", "event", "entity"):
-            raise ValueError(f"Entity has to be one of: profile, session, event, entity. `{value}` given.")
+    def validate_named_entities(cls, value):
+        if not value.id:
+            raise ValueError("This field cannot be empty.")
         return value
 
-    def encode(self) -> ReportRecord:
-        return ReportRecord(
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value):
+        if len(value) == 0:
+            raise ValueError("Name cannot be empty.")
+        return value
+
+    @field_validator("event_type")
+    @classmethod
+    def validate_event_type(cls, value):
+        if len(value) == 0:
+            raise ValueError("Event type cannot be empty.")
+        return value
+
+    def encode(self) -> ImportConfigRecord:
+        return ImportConfigRecord(
             id=self.id,
             name=self.name,
             description=self.description,
-            tags=self.tags,
-            index=self.index,
-            query=encrypt(self.query)
+            event_type=self.event_type,
+            event_source=self.event_source,
+            api_url=self.api_url,
+            module=self.module,
+            config=encrypt(self.config),
+            enabled=self.enabled,
         )
 
     @staticmethod
-    def decode(record: ReportRecord) -> 'Report':
-        return Report(
+    def decode(record: ImportConfigRecord) -> 'ImportConfig':
+        return ImportConfig(
             id=record.id,
             name=record.name,
             description=record.description,
-            index=record.index,
-            tags=record.tags,
-            query=decrypt(record.query)
+            api_url=record.api_url,
+            event_source=record.event_source,
+            event_type=record.event_type,
+            module=record.module,
+            config=decrypt(record.config),
+            enabled=record.enabled,
         )
-
-    @staticmethod
-    def _format_value(value) -> str:
-        return f"\"{value}\"" if isinstance(value, str) else str(value)
-
-    def get_built_query(self, **kwargs) -> dict:
-        try:
-            query = json.dumps(self.query)
-            query = re.sub(
-                self._regex,
-                lambda x: self._format_value(kwargs[x.group(1)]),
-                query
-            )
-            return json.loads(query)
-        except KeyError as e:
-            raise QueryBuildingError(f"Missing parameter: {str(e)}")
-
-        except Exception as e:
-            raise QueryBuildingError(str(e))
-
-    @property
-    def expected_query_params(self) -> List[str]:
-        return re.findall(self._regex, json.dumps(self.query))
-
-    def __eq__(self, other: 'Report') -> bool:
-        return self.id == other.id \
-               and json.dumps(self.query) == json.dumps(other.query) \
-               and self.name == other.name \
-               and self.index == other.index \
-               and self.description == other.description \
-               and self.tags == other.tags
 
 
 

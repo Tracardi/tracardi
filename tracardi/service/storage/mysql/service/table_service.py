@@ -53,7 +53,7 @@ class TableService:
 
     @staticmethod
     def _select_clause(table: Type[Base],
-                       fields=None,
+                       columns=None,
                        where=None,
                        order_by: Column=None,
                        limit:int=None,
@@ -62,8 +62,8 @@ class TableService:
 
 
 
-        if fields is not None:
-            _select = select(*fields)
+        if columns is not None:
+            _select = select(*columns)
         else:
             _select = select(table)
 
@@ -254,3 +254,13 @@ class TableService:
                 )
 
                 return primary_id
+
+    async def _delete_query(self, table: Type[Base], where):
+
+        local_session = self.client.get_session(self.engine)
+        async with local_session() as session:
+            async with session.begin():
+                await session.execute(
+                    delete(table).where(where)
+                )
+

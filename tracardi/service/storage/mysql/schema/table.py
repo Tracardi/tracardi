@@ -536,3 +536,26 @@ class ContentTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+
+class ImportTable(Base):
+    __tablename__ = 'import'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above 64
+    name = Column(String(128))  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    module = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    config = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
+    transitional = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
+    api_url = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    event_source_id = Column(String(40))  # Nested 'keyword' field as 'VARCHAR'
+    event_source_name = Column(String(128))  # Nested 'keyword' field as 'VARCHAR'
+    event_type = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+
+    tenant = Column(String(40))  # Add this field for multitenance
+    production = Column(Boolean)  # Add this field for multitenance
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from tracardi.config import tracardi
 from tracardi.context import ServerContext, Context
-from tracardi.domain.flow import Flow
+from tracardi.domain.flow import Flow, FlowRecord
 from tracardi.service.secrets import encrypt
 from tracardi.service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record, map_to_workflow_table
 from tracardi.service.storage.mysql.schema.table import WorkflowTable
@@ -60,3 +60,13 @@ def test_flow_to_workflow_table_mapping():
         assert table.id == flow.id
         assert table.name == flow.name
 
+
+def test_workflow_only_from_metadata():
+    flow = FlowRecord(id="1", name="test", description="", type='collection')
+
+    # Should not fail
+
+    assert flow.name == 'test'
+    assert flow.id == '1'
+    assert flow.description == ''
+    assert flow.type == 'collection'

@@ -27,7 +27,7 @@ class ActionPluginService(TableService):
     async def update_by_id(self, data: dict, plugin_id: str):
         return await self._update_by_id(PluginTable, primary_id=plugin_id, new_data=data)
 
-    async def delete(self, plugin_id):
+    async def delete_by_id(self, plugin_id):
         return await self._delete_by_id(PluginTable, primary_id=plugin_id)
 
     async def filter(self, purpose: str):

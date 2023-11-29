@@ -44,6 +44,6 @@ class BridgeService(TableService):
 
 ```
 
-rewrite it to be for current object `WorkflowTrigger`. Replace `Bridge` with current Object. And replace `BrideTable` to be `<current-object>Table`.
+rewrite it to be for current object `Workflow`. Replace `Bridge` with current Object. And replace `BrideTable` to be `<current-object>Table`.
 Notice that there is `map_to_bridge_table` function it should be named `map_to_<currnet-object>_table`, also `bridge_id` should be changed accordingly.
 

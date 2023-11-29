@@ -314,15 +314,6 @@ class FlowRecord(NamedEntity):
     deployed: Optional[bool] = False
     type: str
 
-    # Persistence
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'flow',
-            FlowRecord
-        )
-
     def get_production_workflow(self) -> Optional['Flow']:
         return Flow.from_workflow_record(self, output='production')
 

@@ -25,9 +25,12 @@ from ..domain.profile import Profile
 from ..domain.rule_invoke_result import RuleInvokeResult
 from ..domain.session import Session
 from ..domain.rule import Rule
+from ..exceptions.exception import TracardiException
 from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import log_handler
 from ..service.console_log import ConsoleLog
+from ..service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
+from ..service.storage.mysql.service.workflow_service import WorkflowService
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -48,7 +51,7 @@ class RulesEngine:
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
+    async def invoke(self, ux: list, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
 
         source_id = tracker_payload.source.id
         flow_task_store = defaultdict(list)
@@ -127,7 +130,13 @@ class RulesEngine:
 
                     # Loads flow for given rule
 
-                    flow: Flow = await load_flow_callable(rule.flow.id)
+                    ws = WorkflowService()
+                    flow_record = (await ws.load_by_id(rule.flow.id)).map_to_object(map_to_workflow_record)
+
+                    if not flow_record:
+                        raise ValueError("Could not find flow `{}`".format(rule.flow.id))
+
+                    flow: Flow = flow_record.get_production_workflow()
 
                 except Exception as e:
                     logger.error(str(e))
