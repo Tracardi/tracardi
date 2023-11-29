@@ -220,6 +220,13 @@ async def map_event_to_profile(
                         elif operation == EQUALS_IF_NOT_EXISTS:
                             if profile_ref not in profile_changes:
                                 profile_changes[profile_ref] = flat_event[event_ref]
+                            elif isinstance(profile_changes[profile_ref], str) :
+                                __value = profile_changes[profile_ref].strip()
+                                if not __value:
+                                    profile_changes[profile_ref] = flat_event[event_ref]
+                            elif isinstance(profile_changes[profile_ref], (list, dict)):
+                                if not profile_changes[profile_ref]:
+                                    profile_changes[profile_ref] = flat_event[event_ref]
                         else:
                             profile_changes[profile_ref] = flat_event[event_ref]
 
