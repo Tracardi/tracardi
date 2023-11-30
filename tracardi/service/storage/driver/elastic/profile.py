@@ -39,6 +39,8 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
 
     profile_records = await storage_manager('profile').query(query)
 
+    print(profile_records)
+
     if profile_records.total > 1:
         raise DuplicatedRecordException("Profile {} id duplicated in the database..".format(profile_id))
 
@@ -109,8 +111,13 @@ async def load_profile_without_identification(tracker_payload,
     return profile
 
 
-async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:
-    profiles = await storage_manager('profile').load_by_values(merge_key_values, limit=limit)
+async def load_profiles_to_merge(merge_key_values: List[tuple],
+                                 condition: str='must',
+                                 limit=1000) -> List[Profile]:
+    profiles = await storage_manager('profile').load_by_values(
+        merge_key_values,
+        condition=condition,
+        limit=limit)
     return [profile.to_entity(Profile) for profile in profiles]
 
 
