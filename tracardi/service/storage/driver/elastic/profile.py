@@ -39,8 +39,6 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
 
     profile_records = await storage_manager('profile').query(query)
 
-    print(profile_records)
-
     if profile_records.total > 1:
         raise DuplicatedRecordException("Profile {} id duplicated in the database..".format(profile_id))
 
