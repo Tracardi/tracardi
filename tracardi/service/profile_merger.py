@@ -89,6 +89,7 @@ class ProfileMerger:
     async def invoke_merge_profile(profile: Optional[Profile],
                                    merge_by: List[Tuple[str, str]],  # Field: value
                                    conflict_aux_key: str = "conflicts",
+                                   condition:str ='must',
                                    limit: int = 2000) -> Optional[Profile]:
 
         if profile is None:
@@ -107,6 +108,7 @@ class ProfileMerger:
 
             similar_profiles = await profile_db.load_profiles_to_merge(
                 merge_by,
+                condition=condition,
                 limit=limit
             )
 
