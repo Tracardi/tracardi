@@ -1,7 +1,7 @@
 from tracardi.domain.named_entity import NamedEntity
 from pydantic import field_validator
 from typing import List, Optional
-from tracardi.service.secrets import encrypt, decrypt
+# from tracardi.service.secrets import encrypt, decrypt
 import json
 import re
 
@@ -32,26 +32,26 @@ class Report(NamedEntity):
             raise ValueError(f"Entity has to be one of: profile, session, event, entity. `{value}` given.")
         return value
 
-    def encode(self) -> ReportRecord:
-        return ReportRecord(
-            id=self.id,
-            name=self.name,
-            description=self.description,
-            tags=self.tags,
-            index=self.index,
-            query=encrypt(self.query)
-        )
-
-    @staticmethod
-    def decode(record: ReportRecord) -> 'Report':
-        return Report(
-            id=record.id,
-            name=record.name,
-            description=record.description,
-            index=record.index,
-            tags=record.tags,
-            query=decrypt(record.query)
-        )
+    # def encode(self) -> ReportRecord:
+    #     return ReportRecord(
+    #         id=self.id,
+    #         name=self.name,
+    #         description=self.description,
+    #         tags=self.tags,
+    #         index=self.index,
+    #         query=encrypt(self.query)
+    #     )
+    #
+    # @staticmethod
+    # def decode(record: ReportRecord) -> 'Report':
+    #     return Report(
+    #         id=record.id,
+    #         name=record.name,
+    #         description=record.description,
+    #         index=record.index,
+    #         tags=record.tags,
+    #         query=decrypt(record.query)
+    #     )
 
     @staticmethod
     def _format_value(value) -> str:

@@ -9,7 +9,6 @@ __all__ = [
     "log",
     "profile",
     "raw",
-    "report",
     "resource",
     "segment",
     "session",
