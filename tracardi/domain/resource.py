@@ -71,7 +71,7 @@ class Resource(Entity):
                 test=pro.service.form.data,
                 production=pro.service.form.data
             ),
-            destination=DestinationConfig(**dict(pro.destination))
+            destination=DestinationConfig(**dict(pro.destination)) if pro.destination else None
         )
 
 
