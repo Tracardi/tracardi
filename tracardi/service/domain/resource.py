@@ -1,7 +1,4 @@
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from typing import List, Tuple, Optional
-from tracardi.domain.resource import Resource, ResourceRecord
-from tracardi.service.storage.factory import storage_manager
+from tracardi.domain.resource import Resource
 from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource
 from tracardi.service.storage.mysql.service.resource_service import ResourceService
 

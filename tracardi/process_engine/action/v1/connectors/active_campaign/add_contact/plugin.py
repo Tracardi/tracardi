@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config, EndpointConfig
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.active_campaign.client import ActiveCampaignClient, \
     ActiveCampaignClientException
 from tracardi.service.notation.dict_traverser import DictTraverser

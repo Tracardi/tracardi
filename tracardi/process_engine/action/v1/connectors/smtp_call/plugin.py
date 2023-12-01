@@ -2,7 +2,7 @@ from tracardi.domain.content import Content
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.domain.resource import Resource
 from tracardi.service.notation.dot_template import DotTemplate
 

@@ -7,7 +7,7 @@ from tracardi.domain.resources.redis_resource import RedisCredentials
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormField, \
     FormGroup, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.service.storage.redis.collections import Collection
 from .model.config import Config
 from tracardi.service.storage.redis_client import RedisClient

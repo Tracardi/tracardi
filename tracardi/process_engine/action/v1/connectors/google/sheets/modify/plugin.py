@@ -11,7 +11,7 @@ from tracardi.service.plugin.domain.result import Result
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from .model.configuration import Configuration
 
 

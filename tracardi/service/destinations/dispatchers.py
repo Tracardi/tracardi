@@ -15,7 +15,7 @@ from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.cache_manager import CacheManager
 from tracardi.domain.destination import Destination
 from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

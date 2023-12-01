@@ -10,7 +10,7 @@ from .importer import Importer
 from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.service.storage.driver.elastic import task as task_db
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.worker.celery_worker import run_elastic_import_job
