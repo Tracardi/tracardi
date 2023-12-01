@@ -60,6 +60,7 @@ class Resource(Entity):
     def from_pro_service(pro: ProService) -> 'Resource':
         return Resource(
             id=str(uuid4()),
+            timestamp=datetime.utcnow(),
             type=pro.service.metadata.type,
             name=pro.service.form.metadata.name,
             description=pro.service.form.metadata.description,
@@ -70,7 +71,7 @@ class Resource(Entity):
                 test=pro.service.form.data,
                 production=pro.service.form.data
             ),
-            destination=pro.destination
+            destination=DestinationConfig(**dict(pro.destination))
         )
 
 
