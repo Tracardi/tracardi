@@ -4,6 +4,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from ..config import Configuration
+from ..utils import is_valid_string
 
 
 def validate(config: dict):
@@ -28,7 +29,16 @@ class DecreaseInterestAction(ActionRunner):
 
             return Result(value={"message": msg}, port="error")
 
-        self.profile.decrease_interest(self.config.interest, float(self.config.value))
+        dot = self._get_dot_accessor(payload)
+        interest_key = dot[self.config.interest]
+
+        if not is_valid_string(interest_key):
+            message = (f"Invalid interest name. Expected alpha-numeric string without spaces, got `{interest_key}`. "
+                       f"Interest name must be an alpha-numeric string without spaces. Hyphen and dashes are allowed.")
+            self.console.error(message)
+            return Result(value={"message": message}, port="error")
+
+        self.profile.decrease_interest(interest_key, float(self.config.value))
         self.profile.operation.update = True
 
         return Result(port="payload", value=payload)
@@ -54,7 +64,7 @@ def register() -> Plugin:
                             id="interest",
                             name="Interest name",
                             description="Please type interest name.",
-                            component=FormComponent(type="text", props={"label": "Interest name"})
+                            component=FormComponent(type="dotPath", props={"label": "Interest name"})
                         ),
                         FormField(
                             id="value",
@@ -65,9 +75,10 @@ def register() -> Plugin:
                     ]
                 )]
             ),
-            version='0.8.0',
+            version='0.8.2',
             license="MIT + CC",
-            author="Risto Kowaczewski"
+            author="Risto Kowaczewski",
+            manual="decrease_interest"
         ),
         metadata=MetaData(
             name='Decrease interest',
