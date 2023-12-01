@@ -123,107 +123,165 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class ImportTable(Base):
-    __tablename__ = 'import'
+class ResourceTable(Base):
+    __tablename__ = 'resource'
 
-    id = Column(String(64), primary_key=True)  # 'keyword' type with ignore_above 64
-    name = Column(String(128))  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
-    description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
-    module = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    config = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
-    transitional = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
-    api_url = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    event_source_id = Column(String(40))  # Nested 'keyword' field as 'VARCHAR'
-    event_source_name = Column(String(128))  # Nested 'keyword' field as 'VARCHAR'
-    event_type = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    
-    tenant = Column(String(40))  # Add this field for multitenance
-    production = Column(Boolean)  # Add this field for multitenance
+    id = Column(String(40))
+    tenant = Column(String(40))
+    production = Column(Boolean)
+    type = Column(String(48))
+    timestamp = Column(DateTime)
+    name = Column(String(64), index=True)
+    description = Column(String(255))
+    credentials = Column(String(255))
+    enabled = Column(Boolean)
+    tags = Column(String(255), index=True)
+    groups = Column(String(255))
+    icon = Column(String(255))
+    destination = Column(String(255))
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 ```
 
-and it to the corresponding object `ImportConfig` that has the following schema:
+and it to the corresponding object `ResourceRecord` that has the following schema:
 
 ```python
-from pydantic import field_validator
-from typing import Optional
-from tracardi.service.secrets import encrypt, decrypt
-from tracardi.domain.named_entity import NamedEntity
+from datetime import datetime
+from typing import Optional, Any, List, Union, Type, TypeVar
+from uuid import uuid4
+
+from pydantic import BaseModel
+
+from .destination import DestinationConfig
+from .entity import Entity
+from .pro_service_form_data import ProService
+from .value_object.storage_info import StorageInfo
+from ..context import get_context
+from ..service.secrets import encrypt, decrypt
+
+T = TypeVar("T")
 
 
-class ImportConfigRecord(NamedEntity):
-    description: Optional[str] = ""
-    api_url: str  # AnyHttpUrl
-    event_source: NamedEntity
-    event_type: str
-    module: str
-    config: str
-    enabled: bool = True
+class ResourceCredentials(BaseModel):
+    production: Optional[dict] = {}
+    test: Optional[dict] = {}
+
+    def get_credentials(self, plugin, output: Type[T] = None) -> Union[T, dict]:
+        """
+        Returns configuration of resource depending on the state of the executed workflow: test or production.
+        """
+
+        if plugin.debug is True or not get_context().production:
+            return output(**self.test) if output is not None else self.test
+        return output(**self.production) if output is not None else self.production
 
 
-class ImportConfig(NamedEntity):
-    description: Optional[str] = ""
-    module: str
-    config: dict
-    enabled: bool = True
-    api_url: str # AnyHttpUrl
-    event_source: NamedEntity
-    event_type: str
+class Resource(Entity):
+    type: str
+    timestamp: datetime
+    name: Optional[str] = "No name provided"
+    description: Optional[str] = "No description provided"
+    credentials: ResourceCredentials = ResourceCredentials()
+    tags: Union[List[str], str] = ["general"]
+    groups: Union[List[str], str] = []
+    icon: Optional[str] = None
+    destination: Optional[DestinationConfig] = None
+    enabled: Optional[bool] = True
 
-    @field_validator("event_source")
-    @classmethod
-    def validate_named_entities(cls, value):
-        if not value.id:
-            raise ValueError("This field cannot be empty.")
-        return value
+    def __init__(self, **data: Any):
+        data['timestamp'] = datetime.utcnow()
+        super().__init__(**data)
 
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, value):
-        if len(value) == 0:
-            raise ValueError("Name cannot be empty.")
-        return value
+    # Persistence
 
-    @field_validator("event_type")
-    @classmethod
-    def validate_event_type(cls, value):
-        if len(value) == 0:
-            raise ValueError("Event type cannot be empty.")
-        return value
+    @staticmethod
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'resource',
+            Resource
+        )
 
-    def encode(self) -> ImportConfigRecord:
-        return ImportConfigRecord(
+    def is_destination(self):
+        return self.destination is not None
+
+    @staticmethod
+    def from_pro_service(pro: ProService) -> 'Resource':
+        return Resource(
+            id=str(uuid4()),
+            type=pro.service.metadata.type,
+            name=pro.service.form.metadata.name,
+            description=pro.service.form.metadata.description,
+            icon=pro.service.metadata.icon,
+            tags=pro.service.form.metadata.tags,
+            groups=[],
+            credentials=ResourceCredentials(
+                test=pro.service.form.data,
+                production=pro.service.form.data
+            ),
+            destination=pro.destination
+        )
+class ResourceRecord(Entity):
+    type: str
+    timestamp: datetime
+    name: Optional[str] = "No name provided"
+    description: Optional[str] = "No description provided"
+    credentials: Optional[str] = None
+    enabled: Optional[bool] = True
+    tags: Union[List[str], str] = ["general"]
+    groups: Union[List[str], str] = []
+    icon: Optional[str] = None
+    destination: Optional[str] = None
+
+    def __init__(self, **data: Any):
+        data['timestamp'] = datetime.utcnow()
+        super().__init__(**data)
+
+    @staticmethod
+    def encode(resource: Resource) -> 'ResourceRecord':
+        return ResourceRecord(
+            id=resource.id,
+            name=resource.name,
+            description=resource.description,
+            type=resource.type,
+            tags=resource.tags,
+            destination=resource.destination.encode() if resource.destination else None,
+            groups=resource.groups,
+            enabled=resource.enabled,
+            icon=resource.icon,
+            credentials=encrypt(resource.credentials)
+        )
+
+    def decode(self) -> Resource:
+        if self.credentials is not None:
+            decrypted = decrypt(self.credentials)
+        else:
+            decrypted = {"production": {}, "test": {}}
+        return Resource(
             id=self.id,
             name=self.name,
             description=self.description,
-            event_type=self.event_type,
-            event_source=self.event_source,
-            api_url=self.api_url,
-            module=self.module,
-            config=encrypt(self.config),
+            type=self.type,
+            tags=self.tags,
+            destination=DestinationConfig.decode(self.destination) if self.destination is not None else None,
+            groups=self.groups,
+            icon=self.icon,
             enabled=self.enabled,
+            credentials=ResourceCredentials(**decrypted)
         )
+
+    # Persistence
 
     @staticmethod
-    def decode(record: ImportConfigRecord) -> 'ImportConfig':
-        return ImportConfig(
-            id=record.id,
-            name=record.name,
-            description=record.description,
-            api_url=record.api_url,
-            event_source=record.event_source,
-            event_type=record.event_type,
-            module=record.module,
-            config=decrypt(record.config),
-            enabled=record.enabled,
+    def storage_info() -> StorageInfo:
+        return StorageInfo(
+            'resource',
+            ResourceRecord
         )
 
-
-
+    def is_destination(self):
+        return self.destination is not None
 ```
 
 create function `map_to_<oject-name>table` that maps domain object to sqlalchemy table. And function `map_to_<object-name>` that
