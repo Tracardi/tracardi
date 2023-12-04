@@ -154,8 +154,8 @@ async def bulk_delete_by_id(ids: List[str]):
     return await sm.bulk_delete(ids)
 
 
-def scan(query: dict = None):
-    return storage_manager('profile').scan(query)
+def scan(query: dict = None, batch: int = 1000):
+    return storage_manager('profile').scan(query, batch)
 
 
 def query(query: dict = None):
