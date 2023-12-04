@@ -417,6 +417,24 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=['discord'],
             name='Discord',
             manual='discord_resource',
+        ),
+        ResourceSettings(
+            id='apache-pulsar',
+            config={
+                'host': '<pulsar://localhost:6650>',
+                'token': '<token>'
+            },
+            icon='pulsar',
+            tags=['pulsar', 'apache', 'queue'],
+            name='Apache Pulsar',
+            manual='apache_pulsar_resource',
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.pulsar_connector.PulsarConnector",
+                init={
+                    "topic": "<topic>",
+                    "serializer": "json"
+                }
+            )
         )
     ]
 

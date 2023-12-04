@@ -16,6 +16,7 @@ class MergeProfileConfiguration(PluginConfig):
     @field_validator("mergeBy")
     @classmethod
     def list_must_not_be_empty(cls, value):
+        # Merge by keys must exist and come from profile
         if not len(value) > 0:
             raise ValueError("Field mergeBy is empty and has no effect on merging. "
                              "Add merging key or remove this action from flow.")

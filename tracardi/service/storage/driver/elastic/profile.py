@@ -109,8 +109,13 @@ async def load_profile_without_identification(tracker_payload,
     return profile
 
 
-async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:
-    profiles = await storage_manager('profile').load_by_values(merge_key_values, limit=limit)
+async def load_profiles_to_merge(merge_key_values: List[tuple],
+                                 condition: str='must',
+                                 limit=1000) -> List[Profile]:
+    profiles = await storage_manager('profile').load_by_values(
+        merge_key_values,
+        condition=condition,
+        limit=limit)
     return [profile.to_entity(Profile) for profile in profiles]
 
 
@@ -149,8 +154,8 @@ async def bulk_delete_by_id(ids: List[str]):
     return await sm.bulk_delete(ids)
 
 
-def scan(query: dict = None):
-    return storage_manager('profile').scan(query)
+def scan(query: dict = None, batch: int = 1000):
+    return storage_manager('profile').scan(query, batch)
 
 
 def query(query: dict = None):
