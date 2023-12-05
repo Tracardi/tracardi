@@ -130,6 +130,9 @@ class MigrationManager:
                                                         to_index,
                                                         production=schema.copy_index.production)
 
+                    if context.production:
+                        to_index = f"prod-{to_index}"
+
                     set_of_schemas_to_migrate.append(MigrationSchema(
                         id=sha1(f"{from_index}{to_index}".encode("utf-8")).hexdigest(),
                         copy_index=CopyIndex(
