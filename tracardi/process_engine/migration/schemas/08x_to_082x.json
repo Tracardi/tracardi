@@ -382,7 +382,8 @@
     },
     "worker": "reindex_to_one_index",
     "params": {
-      "index_type": "profile"
+        "partitioning": "quarter",
+        "replace": "(\\d{4}-\\d+)$"
     },
     "conflicts": [
       {
@@ -427,7 +428,8 @@
     },
     "worker": "reindex_to_one_index",
     "params": {
-      "index_type": "event"
+      "partitioning": "quarter",
+      "replace": "(\\d{4}-\\d+)$"
     },
     "conflicts": null,
     "asynchronous": true

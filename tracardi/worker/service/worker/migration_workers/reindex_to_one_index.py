@@ -1,22 +1,46 @@
-from tracardi.service.storage.index import Resource
+import re
+
+from datetime import datetime
+from time import sleep
+import logging
+
 from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.add_task import add_task
-from time import sleep
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
-import logging
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
 
+def _get_partitioning_suffix(partitioning) -> str:
+    """
+    Current date suffix
+    """
+    date = datetime.now()
+    if partitioning == 'month':
+        return f"{date.year}-{date.month}"
+    elif partitioning == 'year':
+        return f"{date.year}-year"
+    elif partitioning == 'day':
+        return f"{date.year}-{date.month}/{date.day}"
+    elif partitioning == 'hour':
+        return f"{date.year}-{date.month}/{date.day}/{date.hour}"
+    elif partitioning == 'minute':
+        return f"{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
+    elif partitioning == 'quarter':
+        return f"{date.year}-q{(date.month % 4) + 1}"
+    else:
+        raise ValueError("Unknown partitioning. Expected: year, month, quarter, or day")
+
 def reindex_to_one_index(celery_job, schema: MigrationSchema, url: str, task_index: str):
 
-    if 'index_type' in schema.params:
-        logging.info(f"Migration from `{schema.copy_index.from_index}` FAILED. Wrong configuration. Missing params.index_type.")
+    if not 'replace' in schema.params and 'partitioning' not in schema.params:
+        logging.info(f"Migration from `{schema.copy_index.from_index}` FAILED. Wrong configuration. "
+                     f"Missing params.replace or params.partitioning.")
         return
 
-    resource = Resource()
-    index = resource[schema.params['index_type']]
-    schema.copy_index.to_index = index.get_write_index()
+    partition = _get_partitioning_suffix(schema.params['partitioning'])
+    pattern = schema.params['replace']
+    schema.copy_index.to_index = re.sub(pattern, partition, schema.copy_index.to_index)
 
     add_task(
         url,
