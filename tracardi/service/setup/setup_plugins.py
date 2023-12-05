@@ -63,6 +63,15 @@ installed_plugins: Dict[str, PluginMetadata] = {
         test=PluginTest(init=None, resource=None),
     ),
 
+    "tracardi.process_engine.action.v1.connectors.resend.send_email.plugin": PluginMetadata(
+        test=PluginTest(
+            init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},
+            resource={
+                "api_key": "api_key",
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.resend.send_email.registry"
+    ),
+
     "tracardi.process_engine.action.v1.connectors.telegram.post.plugin": PluginMetadata(
         test=PluginTest(
             init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},

@@ -75,6 +75,14 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="resend",
+            name="Resend",
+            tags=["resend"],
+            config={
+                "api_key": "<api-key>",
+            },
+        ),
+        ResourceSettings(
             id="telegram",
             name="Telegram",
             tags=["telegram"],
