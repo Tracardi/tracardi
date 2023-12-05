@@ -98,7 +98,8 @@ class MigrationManager:
 
     async def get_available_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
 
-        tenant = get_context().tenant
+        context = get_context()
+        tenant = context.tenant
 
         if self.get_current_db_version_prefix(tracardi.version) != self.to_version or tenant != self.to_tenant:
             raise ValueError(f"Installed system version is {tracardi.version.db_version} for tenant {tenant}, "
@@ -116,7 +117,7 @@ class MigrationManager:
 
                 from_partitioned_indices = await self._get_partitioned_indices(
                     template_name=schema.copy_index.from_index,
-                    production=schema.copy_index.production)
+                    production=context.production)
 
                 for from_index in from_partitioned_indices:
 
@@ -149,12 +150,12 @@ class MigrationManager:
                     self.from_version,
                     self.from_tenant,
                     schema.copy_index.from_index,
-                    production=schema.copy_index.production)
+                    production=context.production)
                 schema.copy_index.to_index = self._get_single_indices(
                     self.to_version,
                     self.to_tenant,
                     schema.copy_index.to_index,
-                    production=schema.copy_index.production)
+                    production=context.production)
 
                 es = ElasticClient.instance()
                 if await es.exists_index(schema.copy_index.from_index):
