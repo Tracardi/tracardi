@@ -31,7 +31,7 @@ logger.addHandler(log_handler)
 class RedisClient(metaclass=Singleton):
     def __init__(self):
         uri = redis_config.get_redis_with_password()
-        logger.debug(f"Connecting redis vai pool at {uri}")
+        logger.debug(f"Connecting redis via pool at {uri}")
         self.client = redis.Redis(connection_pool=get_redis_connection_pool(redis_config))
         logger.info(f"Redis at {redis_config.redis_host} connected.")
 

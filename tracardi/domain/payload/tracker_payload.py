@@ -217,28 +217,28 @@ class TrackerPayload(BaseModel):
     def has_static_profile_id(self) -> bool:
         return self._make_static_profile_id
 
-    def get_events_dict(self) -> List[dict]:
-        if self._cached_events_as_dicts is None:
-            self._cached_events_as_dicts = []
-            for event_payload in self.events:
-                self._cached_events_as_dicts.append(
-                    event_payload.to_event_dict(
-                        self.source,
-                        self.session,
-                        self.profile,
-                        self.profile_less)
-                )
-        return self._cached_events_as_dicts
-        # yield event_payload.to_event(self.metadata,
-        #                              self.source,
-        #                              self.session,
-        #                              self.profile,
-        #                              self.profile_less)
-        # yield event_payload.to_event_data_class(self.metadata,
-        #                                         self.source,
-        #                                         self.session,
-        #                                         self.profile,
-        #                                         self.profile_less)
+    # def get_events_dict(self) -> List[dict]:
+    #     if self._cached_events_as_dicts is None:
+    #         self._cached_events_as_dicts = []
+    #         for event_payload in self.events:
+    #             self._cached_events_as_dicts.append(
+    #                 event_payload.to_event_dict(
+    #                     self.source,
+    #                     self.session,
+    #                     self.profile,
+    #                     self.profile_less)
+    #             )
+    #     return self._cached_events_as_dicts
+    #     # yield event_payload.to_event(self.metadata,
+    #     #                              self.source,
+    #     #                              self.session,
+    #     #                              self.profile,
+    #     #                              self.profile_less)
+    #     # yield event_payload.to_event_data_class(self.metadata,
+    #     #                                         self.source,
+    #     #                                         self.session,
+    #     #                                         self.profile,
+    #     #                                         self.profile_less)
 
     def set_headers(self, headers: dict):
         if 'authorization' in headers:

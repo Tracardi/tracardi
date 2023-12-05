@@ -122,12 +122,12 @@ class RedisConfig:
     @staticmethod
     def get_redis_uri(host, user=None, password=None, protocol="redis", database="0"):
         if not host.startswith('redis://'):
-            host = f"{protocol}://{host}/{database}"
+            host = f"{protocol}://{host}"
 
         if user and password:
-            return f"{protocol}://{user}:{password}@{host[8:]}/{database}"
+            host = f"{protocol}://{user}:{password}@{host[8:]}/{database}"
         elif password:
-            return f"{protocol}://:{password}@{host[8:]}/{database}"
+            host = f"{protocol}://:{password}@{host[8:]}/{database}"
 
         return host
 
