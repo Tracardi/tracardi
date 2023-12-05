@@ -1,8 +1,12 @@
+import logging
+
 from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
+
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.worker.celery_worker import run_migration_job
 import asyncio
@@ -14,6 +18,9 @@ import re
 from tracardi.service.storage.index import Resource
 from typing import Union
 
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 class MigrationNotFoundException(Exception):
     pass
@@ -29,7 +36,7 @@ class MigrationManager:
     migration script that should be used. The class has several methods, including "get_schemas()", which loads
     the migration script corresponding to the source and destination versions specified in the attributes,
     "get_multi_indices()" which returns a list of indices that match a given template name, and
-    "get_customized_schemas()" which returns a dictionary of customized schemas for the migration.
+    "get_available_schemas()" which returns a dictionary of available schemas for the migration.
     The class also has an async method called "run()" which is used to run the migration job in an async
      way by using ThreadPoolExecutor and Celery worker.
     """
@@ -55,7 +62,7 @@ class MigrationManager:
     def get_current_db_version_prefix(version: Version):
         return version.db_version.replace(".", "")
 
-    def _get_schemas(self):
+    def _get_migration_schemas_for_current_version(self) -> List[MigrationSchema]:
         try:
             filename = self.available_migrations[
                 (self.from_version, self.to_version)
@@ -80,7 +87,7 @@ class MigrationManager:
             index = f"prod-{index}"
         return index
 
-    async def _get_multi_indices(self, template_name, production: bool):
+    async def _get_partitioned_indices(self, template_name, production: bool):
         template = fr"{self.from_version}." \
                    fr"{self.from_tenant}.{template_name}-[0-9]{'{4}'}-[0-9]+"
         if production:
@@ -89,27 +96,33 @@ class MigrationManager:
         es = ElasticClient.instance()
         return [index for index in await es.list_indices() if re.fullmatch(template, index)]
 
-    async def get_customized_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
+    async def get_available_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
 
-        tenant = get_context().tenant
+        context = get_context()
+        tenant = context.tenant
 
         if self.get_current_db_version_prefix(tracardi.version) != self.to_version or tenant != self.to_tenant:
             raise ValueError(f"Installed system version is {tracardi.version.db_version} for tenant {tenant}, "
                              f"but migration script is for version {self.to_version} for "
                              f"tenant {self.to_tenant}.")
 
-        general_schemas = self._get_schemas()
+        schemas = self._get_migration_schemas_for_current_version()
 
-        customized_schemas = []
+        set_of_schemas_to_migrate = []
 
-        for schema in general_schemas:
+        for schema in schemas:
             if schema.copy_index.multi is True:
 
-                from_indices = await self._get_multi_indices(
-                    template_name=schema.copy_index.from_index,
-                    production=schema.copy_index.production)
+                # Todo - now multi indices can have different suffixes, not only month
 
-                for from_index in from_indices:
+                from_partitioned_indices = await self._get_partitioned_indices(
+                    template_name=schema.copy_index.from_index,
+                    production=context.production)
+
+                for from_index in from_partitioned_indices:
+
+                    # Todo should migrate to the same partition
+
                     to_index = f"{schema.copy_index.to_index}{re.findall(r'-[0-9]{4}-[0-9]+', from_index)[0]}"
 
                     to_index = self._get_single_indices(self.to_version,
@@ -117,7 +130,10 @@ class MigrationManager:
                                                         to_index,
                                                         production=schema.copy_index.production)
 
-                    customized_schemas.append(MigrationSchema(
+                    if context.production:
+                        to_index = f"prod-{to_index}"
+
+                    set_of_schemas_to_migrate.append(MigrationSchema(
                         id=sha1(f"{from_index}{to_index}".encode("utf-8")).hexdigest(),
                         copy_index=CopyIndex(
                             from_index=from_index,
@@ -128,7 +144,8 @@ class MigrationManager:
                         ),
                         asynchronous=schema.asynchronous,
                         worker=schema.worker,
-                        wait_for_completion=schema.wait_for_completion
+                        wait_for_completion=schema.wait_for_completion,
+                        params=schema.params
                     ))
 
             else:
@@ -136,27 +153,27 @@ class MigrationManager:
                     self.from_version,
                     self.from_tenant,
                     schema.copy_index.from_index,
-                    production=schema.copy_index.production)
+                    production=context.production)
                 schema.copy_index.to_index = self._get_single_indices(
                     self.to_version,
                     self.to_tenant,
                     schema.copy_index.to_index,
-                    production=schema.copy_index.production)
+                    production=context.production)
 
                 es = ElasticClient.instance()
                 if await es.exists_index(schema.copy_index.from_index):
-                    customized_schemas.append(schema)
+                    set_of_schemas_to_migrate.append(schema)
                 else:
-                    print(f"Can't find the index {schema.copy_index.from_index}")
+                    logger.error(f"Can't find the index {schema.copy_index.from_index}")
 
         # TODO Warning disabled - save installation info in redis.
         warn = self.from_version in tracardi.version.upgrades
 
-        return {"warn": warn, "schemas": customized_schemas}
+        return {"warn": warn, "schemas": set_of_schemas_to_migrate}
 
     async def start_migration(self, ids: List[str], elastic_host: str) -> None:
 
-        customized_schemas = await self.get_customized_schemas()
+        customized_schemas = await self.get_available_schemas()
         final_schemas = [schema.model_dump() for schema in customized_schemas["schemas"] if schema.id in ids]
 
         if not final_schemas:

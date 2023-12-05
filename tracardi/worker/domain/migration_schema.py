@@ -15,3 +15,4 @@ class MigrationSchema(BaseModel):
     worker: str
     asynchronous: bool
     wait_for_completion: Optional[bool] = True
+    params: Optional[dict] = {}
