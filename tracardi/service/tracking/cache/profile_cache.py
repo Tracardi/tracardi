@@ -22,10 +22,11 @@ redis_cache = RedisCache(ttl=None)
 _redis = RedisClient()
 
 
-def delete_profile_cache(profile_id: str, context: Context):
-    production = context.context_abrv()
+def get_profile_key_namespace(profile_id, context):
+    return f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile_id[0:2])}:"
 
-    key_namespace = f"{Collection.profile}{production}:{get_cache_prefix(profile_id[0:2])}:"
+def delete_profile_cache(profile_id: str, context: Context):
+    key_namespace = get_profile_key_namespace(profile_id, context)
     redis_cache.delete(
         profile_id,
         key_namespace
@@ -33,9 +34,8 @@ def delete_profile_cache(profile_id: str, context: Context):
 
 
 def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
-    production = context.context_abrv()
 
-    key_namespace = f"{Collection.profile}{production}:{get_cache_prefix(profile_id[0:2])}:"
+    key_namespace = get_profile_key_namespace(profile_id, context)
 
     if not redis_cache.has(profile_id, key_namespace):
         return None
@@ -61,7 +61,7 @@ def save_profile_cache(profile: Optional[Profile]):
     if profile:
 
         context = get_context()
-        key = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
+        key = get_profile_key_namespace(profile.id, context)
 
         index = profile.get_meta_data()
 
@@ -108,7 +108,7 @@ def save_profiles_in_cache(profiles: List[Profile]):
                     profile.get_meta_data().model_dump() if profile.has_meta_data() else None
                 )
 
-                collection = f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile.id[0:2])}:"
+                collection = get_profile_key_namespace(profile.id, context)
 
                 redis_cache.set(profile.id, value, collection)
 

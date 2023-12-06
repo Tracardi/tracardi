@@ -7,7 +7,7 @@ from tracardi.service.storage.driver.elastic import session as session_db
 
 
 async def load_session(session_id: str) -> Optional[Session]:
-    cached_session = load_session_cache(session_id, production=get_context().context_abrv())
+    cached_session = load_session_cache(session_id, get_context())
     if cached_session is not None:
         return cached_session
 
