@@ -7,7 +7,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
-from tracardi.context import ServerContext, get_context
+from tracardi.context import ServerContext, get_context, Context
 from tracardi.domain.credentials import Credentials
 from tracardi.domain.user import User
 from tracardi.exceptions.log_handler import log_handler
@@ -38,10 +38,12 @@ async def check_installation():
     # Missing admin
     existing_aliases = [idx[1] for idx in indices if idx[0] == 'existing_alias']
     index = Resource().get_index_constant('user')
-    if index.get_index_alias() in existing_aliases:
-        admins = await user_db.search_by_role('admin')
-    else:
-        admins = None
+
+    with ServerContext(get_context().switch_context(False)):
+        if index.get_index_alias() in existing_aliases:
+            admins = await user_db.search_by_role('admin')
+        else:
+            admins = None
 
     has_admin_account = admins is not None and admins.total > 0
 
@@ -154,6 +156,7 @@ async def install_system(credentials: Credentials):
 
             if not await user_db.check_if_exists(credentials.username):
                 await user_db.add_user(user)
+                await user_db.refresh()
                 logger.info("Default admin account created.")
 
             staging_install_result['admin'] = True
