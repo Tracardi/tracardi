@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy import and_, Index, BLOB
+from sqlalchemy import and_, Index, BLOB, Float
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
                         ForeignKey, PrimaryKeyConstraint, Text, Integer, UniqueConstraint)
@@ -575,6 +575,26 @@ class WorkflowSegmentationTriggerTable(Base):
     code = Column(Text)  # 'binary' type in ES is similar to 'LargeBinary' in MySQL
     workflow_id = Column(String(40))  # Embedded 'keyword' field, converted to 'VARCHAR'
     workflow_name = Column(String(128))  # Embedded 'keyword' field, converted to 'VARCHAR'
+
+    tenant = Column(String(40))  # Add this field for multitenance
+    production = Column(Boolean)  # Add this field for multitenance
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+
+class TaskTable(Base):
+    __tablename__ = 'task'
+
+    id = Column(String(40))  # 'keyword' type with ignore_above as max String length
+    timestamp = Column(DateTime)  # 'date' type in ES corresponds to 'DateTime' in MySQL
+    status = Column(String(64))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    name = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    type = Column(String(64))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    progress = Column(Float)  # 'double' in ES is similar to 'Float' in MySQL
+    task_id = Column(String(40))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL, assuming it's an ID-like field
+    params = Column(JSON)  # 'flattened' type in ES corresponds to 'JSON' in MySQL
 
     tenant = Column(String(40))  # Add this field for multitenance
     production = Column(Boolean)  # Add this field for multitenance

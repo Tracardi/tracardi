@@ -123,22 +123,19 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class SegmentTriggerTable(Base):
-    __tablename__ = 'workflow_segmentation_trigger'  # Previously live_segment
+class TaskTable(Base):
+    __tablename__ = 'task'
 
-    id = Column(String(64), primary_key=True)  # 'keyword' type with ignore_above as max String length
+    id = Column(String(40))  # 'keyword' type with ignore_above as max String length
     timestamp = Column(DateTime)  # 'date' type in ES corresponds to 'DateTime' in MySQL
+    status = Column(String(64))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
     name = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
-    enabled = Column(Boolean)  # 'boolean' in ES is the same as in MySQL
-    type = Column(String(32))  # 'keyword' type with ignore_above as max String length
-    condition = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    operation = Column(String(32))  # 'keyword' type with ignore_above as max String length
-    segment = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    code = Column(JSON)  # 'binary' type in ES is similar to 'LargeBinary' in MySQL
-    workflow_id = Column(String(40))  # Embedded 'keyword' field, converted to 'VARCHAR'
-    workflow_name = Column(String(128))  # Embedded 'keyword' field, converted to 'VARCHAR'
-    
+    type = Column(String(64))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    progress = Column(Float)  # 'double' in ES is similar to 'Float' in MySQL
+    task_id = Column(String(40))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL, assuming it's an ID-like field
+    params = Column(JSON)  # 'flattened' type in ES corresponds to 'JSON' in MySQL
+    event_type = Column(String(64))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+
     tenant = Column(String(40))  # Add this field for multitenance
     production = Column(Boolean)  # Add this field for multitenance
 
@@ -150,30 +147,32 @@ class SegmentTriggerTable(Base):
 and it to the corresponding object `ResourceRecord` that has the following schema:
 
 ```python
-from datetime import datetime
-from typing import Optional
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.value_object.storage_info import StorageInfo
+from datetime import datetime
+from pydantic import field_validator
+from typing import Optional
 
 
-class LiveSegment(NamedEntity):
+class Task(NamedEntity):
+
+    """
+    This object is for storing background tasks that run for example imports, etc.
+    """
+
+    task_id: str
     timestamp: Optional[datetime] = None
-    description: Optional[str] = ""
-    enabled: bool = True
-    workflow: NamedEntity
-    type: Optional[str] = 'workflow'
+    status: str = 'pending'
+    progress: float = 0
+    type: str
+    params: dict = {}
 
-    operation: Optional[str] = None
-    condition: Optional[str] = None
-    segment: Optional[str] = None
-    code: Optional[str] = None
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value):
+        if value not in ("pending", "running", "error", "done", "cancelled"):
+            raise ValueError(f"Status must be one of: pending, running, error, done, cancelled. {value} given.")
+        return value
 
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'live-segment',
-            LiveSegment
-        )
 
 ```
 

@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-live_segment
+task
 
 # Elasticsearch index mapping
 
@@ -127,44 +127,28 @@ live_segment
         "type": "keyword", "ignore_above": 64
       },
       "timestamp": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
       },
       "name": {
         "type": "keyword"
       },
-      "description": {
-        "type": "text"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
       "type": {
-        "type": "keyword",
-        "ignore_above": 32
-      },
-      "condition": {
         "type": "keyword"
       },
-      "operation": {
-        "type": "keyword",
-        "ignore_above": 32
+      "progress": {
+        "type": "double"
       },
-      "segment": {
+      "task_id": {
         "type": "keyword"
       },
-      "code": {
-        "type": "binary"
+      "params": {
+        "type": "flattened"
       },
-      "workflow": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
+      "event_type": {
+        "type": "keyword"
       }
     }
   },
