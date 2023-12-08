@@ -69,7 +69,7 @@ Optional[FieldTimestampMonitor]]:
 
             # Merge profile on identification points
 
-            identification_points = list(await tracker_payload.get_identification_points())
+            identification_points = await tracker_payload.list_identification_points()
 
             profile, event_payloads = await identify_and_merge_profile(profile,
                                                                        identification_points,
