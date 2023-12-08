@@ -1,6 +1,5 @@
 __all__ = [
     "console_log",
-    "debug_info",
     "entity",
     "event",
     "helper",

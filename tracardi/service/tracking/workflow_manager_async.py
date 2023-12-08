@@ -19,7 +19,6 @@ from tracardi.domain.session import Session
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
-from tracardi.service.storage.driver.elastic import debug_info as debug_info_db
 from tracardi.service.storage.mysql.service.workflow_trigger_service import WorkflowTriggerService
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
@@ -133,29 +132,6 @@ class WorkflowManagerAsync:
             event_rules = await wts.load_by_source_and_events(self.tracker_payload.source, events)
 
         return event_rules
-
-    async def _save_debug_data(self, debugger, profile_id):
-        try:
-            if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
-                # Save debug info in background
-                await debug_info_db.save_debug_info(debugger)
-        except Exception as e:
-            message = "Error during saving debug info: `{}`".format(str(e))
-            logger.error(message)
-            self.console_log.append(
-                Console(
-                    flow_id=None,
-                    node_id=None,
-                    event_id=None,
-                    profile_id=profile_id,
-                    origin='profile',
-                    class_name='invoke_track_process_step_2',
-                    module=__name__,
-                    type='error',
-                    message=message,
-                    traceback=get_traceback(e)
-                )
-            )
 
     async def trigger_workflows_for_events(self, events: List[Event], debug: bool = False) -> TrackerResult:
 
@@ -279,10 +255,6 @@ class WorkflowManagerAsync:
                     synced_events.append(ev)
 
                 events = synced_events
-
-            # Debug data
-            if tracardi.track_debug or debug:
-                await self._save_debug_data(debugger, get_entity_id(self.profile))
 
             return TrackerResult(
                 wf_triggered=wf_triggered,
