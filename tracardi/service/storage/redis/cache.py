@@ -41,3 +41,6 @@ class RedisCache:
 
     def persist(self, key):
         self._redis.persist(key)
+
+    def get_ttl(self, key:str, collection:str):
+        return self._redis.ttl(f"{collection}{key}")

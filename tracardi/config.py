@@ -181,7 +181,6 @@ class TracardiConfig(metaclass=Singleton):
         self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 60)
 
         # Not used now
-        self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
         self.sync_profile_tracks_wait = get_env_as_int('SYNC_PROFILE_TRACKS_WAIT', 1)
         self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')

@@ -3,7 +3,6 @@ import logging
 import os
 from uuid import uuid4
 
-
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.license import License, MULTI_TENANT, LICENSE
 from tracardi.service.storage.mysql.bootstrap.bridge import os_default_bridges
@@ -57,8 +56,9 @@ async def check_installation():
     ts = TableService()
 
     if await ts.exists('user'):
-        us = UserService()
-        admin_records = await us.load_by_role('admin')
+        with ServerContext(get_context().switch_context(False)):
+            us = UserService()
+            admin_records = await us.load_by_role('admin')
     else:
         admin_records = []
 
