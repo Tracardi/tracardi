@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-import
+live_segment
 
 # Elasticsearch index mapping
 
@@ -126,29 +126,37 @@ import
       "id": {
         "type": "keyword", "ignore_above": 64
       },
+      "timestamp": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+      },
       "name": {
-        "type": "text"
+        "type": "keyword"
       },
       "description": {
         "type": "text"
       },
-      "module": {
-        "type": "keyword"
-      },
-      "config": {
-        "type": "keyword",
-        "index": false
-      },
       "enabled": {
         "type": "boolean"
       },
-      "transitional": {
-        "type": "boolean"
+      "type": {
+        "type": "keyword",
+        "ignore_above": 32
       },
-      "api_url": {
+      "condition": {
         "type": "keyword"
       },
-      "event_source": {
+      "operation": {
+        "type": "keyword",
+        "ignore_above": 32
+      },
+      "segment": {
+        "type": "keyword"
+      },
+      "code": {
+        "type": "binary"
+      },
+      "workflow": {
         "properties": {
           "id": {
             "type": "keyword"
@@ -157,9 +165,6 @@ import
             "type": "keyword"
           }
         }
-      },
-      "event_type": {
-        "type": "keyword"
       }
     }
   },
@@ -167,5 +172,6 @@ import
     "%%ALIAS%%": {}
   }
 }
+
 
 ```

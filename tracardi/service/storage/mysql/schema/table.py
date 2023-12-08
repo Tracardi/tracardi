@@ -559,3 +559,26 @@ class ImportTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+class WorkflowSegmentationTriggerTable(Base):
+    __tablename__ = 'workflow_segmentation_trigger'  # Previously live_segment
+
+    id = Column(String(40))  # 'keyword' type with ignore_above as max String length
+    timestamp = Column(DateTime)  # 'date' type in ES corresponds to 'DateTime' in MySQL
+    name = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    enabled = Column(Boolean)  # 'boolean' in ES is the same as in MySQL
+    type = Column(String(32))  # 'keyword' type with ignore_above as max String length
+    condition = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    operation = Column(String(32))  # 'keyword' type with ignore_above as max String length
+    segment = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    code = Column(Text)  # 'binary' type in ES is similar to 'LargeBinary' in MySQL
+    workflow_id = Column(String(40))  # Embedded 'keyword' field, converted to 'VARCHAR'
+    workflow_name = Column(String(128))  # Embedded 'keyword' field, converted to 'VARCHAR'
+
+    tenant = Column(String(40))  # Add this field for multitenance
+    production = Column(Boolean)  # Add this field for multitenance
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )

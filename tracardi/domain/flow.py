@@ -3,7 +3,6 @@ from datetime import datetime
 
 from tracardi.service.wf.domain.flow_graph import FlowGraph
 from .named_entity import NamedEntity
-from .value_object.storage_info import StorageInfo
 from typing import Optional, List, Any
 from pydantic import BaseModel
 from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, EdgeBundle

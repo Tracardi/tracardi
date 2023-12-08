@@ -123,22 +123,24 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class ResourceTable(Base):
-    __tablename__ = 'resource'
+class SegmentTriggerTable(Base):
+    __tablename__ = 'workflow_segmentation_trigger'  # Previously live_segment
 
-    id = Column(String(40))
-    tenant = Column(String(40))
-    production = Column(Boolean)
-    type = Column(String(48))
-    timestamp = Column(DateTime)
-    name = Column(String(64), index=True)
-    description = Column(String(255))
-    credentials = Column(String(255))
-    enabled = Column(Boolean)
-    tags = Column(String(255), index=True)
-    groups = Column(String(255))
-    icon = Column(String(255))
-    destination = Column(String(255))
+    id = Column(String(64), primary_key=True)  # 'keyword' type with ignore_above as max String length
+    timestamp = Column(DateTime)  # 'date' type in ES corresponds to 'DateTime' in MySQL
+    name = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
+    enabled = Column(Boolean)  # 'boolean' in ES is the same as in MySQL
+    type = Column(String(32))  # 'keyword' type with ignore_above as max String length
+    condition = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    operation = Column(String(32))  # 'keyword' type with ignore_above as max String length
+    segment = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
+    code = Column(JSON)  # 'binary' type in ES is similar to 'LargeBinary' in MySQL
+    workflow_id = Column(String(40))  # Embedded 'keyword' field, converted to 'VARCHAR'
+    workflow_name = Column(String(128))  # Embedded 'keyword' field, converted to 'VARCHAR'
+    
+    tenant = Column(String(40))  # Add this field for multitenance
+    production = Column(Boolean)  # Add this field for multitenance
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
@@ -149,139 +151,30 @@ and it to the corresponding object `ResourceRecord` that has the following schem
 
 ```python
 from datetime import datetime
-from typing import Optional, Any, List, Union, Type, TypeVar
-from uuid import uuid4
-
-from pydantic import BaseModel
-
-from .destination import DestinationConfig
-from .entity import Entity
-from .pro_service_form_data import ProService
-from .value_object.storage_info import StorageInfo
-from ..context import get_context
-from ..service.secrets import encrypt, decrypt
-
-T = TypeVar("T")
+from typing import Optional
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.value_object.storage_info import StorageInfo
 
 
-class ResourceCredentials(BaseModel):
-    production: Optional[dict] = {}
-    test: Optional[dict] = {}
+class LiveSegment(NamedEntity):
+    timestamp: Optional[datetime] = None
+    description: Optional[str] = ""
+    enabled: bool = True
+    workflow: NamedEntity
+    type: Optional[str] = 'workflow'
 
-    def get_credentials(self, plugin, output: Type[T] = None) -> Union[T, dict]:
-        """
-        Returns configuration of resource depending on the state of the executed workflow: test or production.
-        """
-
-        if plugin.debug is True or not get_context().production:
-            return output(**self.test) if output is not None else self.test
-        return output(**self.production) if output is not None else self.production
-
-
-class Resource(Entity):
-    type: str
-    timestamp: datetime
-    name: Optional[str] = "No name provided"
-    description: Optional[str] = "No description provided"
-    credentials: ResourceCredentials = ResourceCredentials()
-    tags: Union[List[str], str] = ["general"]
-    groups: Union[List[str], str] = []
-    icon: Optional[str] = None
-    destination: Optional[DestinationConfig] = None
-    enabled: Optional[bool] = True
-
-    def __init__(self, **data: Any):
-        data['timestamp'] = datetime.utcnow()
-        super().__init__(**data)
-
-    # Persistence
+    operation: Optional[str] = None
+    condition: Optional[str] = None
+    segment: Optional[str] = None
+    code: Optional[str] = None
 
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
-            'resource',
-            Resource
+            'live-segment',
+            LiveSegment
         )
 
-    def is_destination(self):
-        return self.destination is not None
-
-    @staticmethod
-    def from_pro_service(pro: ProService) -> 'Resource':
-        return Resource(
-            id=str(uuid4()),
-            type=pro.service.metadata.type,
-            name=pro.service.form.metadata.name,
-            description=pro.service.form.metadata.description,
-            icon=pro.service.metadata.icon,
-            tags=pro.service.form.metadata.tags,
-            groups=[],
-            credentials=ResourceCredentials(
-                test=pro.service.form.data,
-                production=pro.service.form.data
-            ),
-            destination=pro.destination
-        )
-class ResourceRecord(Entity):
-    type: str
-    timestamp: datetime
-    name: Optional[str] = "No name provided"
-    description: Optional[str] = "No description provided"
-    credentials: Optional[str] = None
-    enabled: Optional[bool] = True
-    tags: Union[List[str], str] = ["general"]
-    groups: Union[List[str], str] = []
-    icon: Optional[str] = None
-    destination: Optional[str] = None
-
-    def __init__(self, **data: Any):
-        data['timestamp'] = datetime.utcnow()
-        super().__init__(**data)
-
-    @staticmethod
-    def encode(resource: Resource) -> 'ResourceRecord':
-        return ResourceRecord(
-            id=resource.id,
-            name=resource.name,
-            description=resource.description,
-            type=resource.type,
-            tags=resource.tags,
-            destination=resource.destination.encode() if resource.destination else None,
-            groups=resource.groups,
-            enabled=resource.enabled,
-            icon=resource.icon,
-            credentials=encrypt(resource.credentials)
-        )
-
-    def decode(self) -> Resource:
-        if self.credentials is not None:
-            decrypted = decrypt(self.credentials)
-        else:
-            decrypted = {"production": {}, "test": {}}
-        return Resource(
-            id=self.id,
-            name=self.name,
-            description=self.description,
-            type=self.type,
-            tags=self.tags,
-            destination=DestinationConfig.decode(self.destination) if self.destination is not None else None,
-            groups=self.groups,
-            icon=self.icon,
-            enabled=self.enabled,
-            credentials=ResourceCredentials(**decrypted)
-        )
-
-    # Persistence
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'resource',
-            ResourceRecord
-        )
-
-    def is_destination(self):
-        return self.destination is not None
 ```
 
 create function `map_to_<oject-name>table` that maps domain object to sqlalchemy table. And function `map_to_<object-name>` that
