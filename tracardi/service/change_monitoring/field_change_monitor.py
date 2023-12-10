@@ -1,4 +1,6 @@
 from collections import defaultdict
+from zoneinfo import ZoneInfo
+
 from uuid import uuid4
 
 from typing import List, Any, Optional, Dict
@@ -18,7 +20,7 @@ class FieldChangeTimestampManager:
         self._log[type][field]= dict(
                 id=f"{field}:{profile_id}",
                 type=type,
-                timestamp=str(datetime.utcnow()),
+                timestamp=str(datetime.utcnow().replace(tzinfo=ZoneInfo('UTC'))),
                 profile_id=profile_id,
                 event_id=event_id,
                 source_id=source_id,
@@ -76,7 +78,7 @@ class FieldChangeLogManager:
             dict(
                 id=str(uuid4()),
                 type=type,
-                timestamp=str(datetime.utcnow()),
+                timestamp=str(datetime.utcnow().replace(tzinfo=ZoneInfo('UTC'))),
                 profile_id=profile_id,
                 event_id=event_id,
                 source_id=source_id,
