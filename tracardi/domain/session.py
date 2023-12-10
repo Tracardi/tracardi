@@ -47,11 +47,11 @@ class SessionMetadata(BaseModel):
 
 class SessionContext(dict):
 
-    def get_time_zone(self) -> str:
+    def get_time_zone(self) -> Optional[str]:
         try:
             return self['time']['tz']
         except KeyError:
-            return 'utc'
+            return None
 
     def get_platform(self):
         try:

@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 from datetime import datetime
 from typing import Optional, Any, Union
 from uuid import uuid4
@@ -45,15 +47,17 @@ class EventPayload(BaseModel):
         if 'id' not in data:
             data['id'] = str(uuid4())
 
+        _now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+
         if 'time' not in data:
-            data['time'] = Time(insert=datetime.utcnow())
+            data['time'] = Time(insert=_now)
         else:
             if isinstance(data['time'], Time):
                 if not data['time'].insert:
-                    data['time'].insert = datetime.utcnow()
+                    data['time'].insert = _now
             elif isinstance(data['time'], dict):
                 if 'insert' not in data['time']:
-                    data['time']['insert'] = datetime.utcnow()
+                    data['time']['insert'] = _now
 
         super().__init__(**data)
 
@@ -90,13 +94,16 @@ class EventPayload(BaseModel):
             context=self.context)
         event['profile_less'] = profile_less
         event['metadata']['instance']['id'] = ApiInstance().id
+
+        # Get time from event payload
         if self.time.insert:
             event['metadata']['time']['insert'] = self.time.insert
         else:
-            event['metadata']['time']['insert'] = datetime.utcnow()
+            event['metadata']['time']['insert'] = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
 
         if self.time.create:
-            event['metadata']['time']['create'] = self.time.create
+            event['metadata']['time']['create'] = self.time.create.replace(tzinfo=ZoneInfo("UTC"))
+
 
         # To prevent performance bottleneck do not create full event session
         # event["session"] = self._get_event_session(session)

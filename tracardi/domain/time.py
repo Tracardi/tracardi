@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 from datetime import datetime
 from typing import Optional, Any
 from pydantic import BaseModel
@@ -10,7 +12,7 @@ class Time(BaseModel):
 
     def __init__(self, **data: Any):
         if 'insert' not in data:
-            data['insert'] = datetime.utcnow()
+            data['insert'] = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         super().__init__(**data)
 
 
@@ -26,7 +28,7 @@ class ProfileVisit(BaseModel):
     def set_visits_times(self):
         if self.had_previous_visit():
             self.last = self.current
-        self.current = datetime.utcnow()
+        self.current = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
 
 
 class ProfileTime(Time):

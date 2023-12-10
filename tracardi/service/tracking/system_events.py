@@ -9,6 +9,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.license import License, LICENSE
+from zoneinfo import ZoneInfo
 
 if License.has_service(LICENSE):
     from com_tracardi.config import com_tracardi_settings
@@ -28,15 +29,20 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
         if com_tracardi_settings.async_processing:
             async_processing = True
 
+    _now_utc = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
 
     if profile and profile.operation.new and not tracker_payload.has_event_type('profile-created'):
 
+        _time = _now_utc- timedelta(seconds=3)
         # Add session created
         tracker_payload.events.append(
             EventPayload(
                 id=str(uuid4()),
                 type='profile-created',
-                time=Time(insert=datetime.utcnow() - timedelta(seconds=3)),
+                time=Time(
+                    create=_time,
+                    insert=_time
+                ),
                 properties={},
                 options={
                     "source_id": tracardi.internal_source,
@@ -55,11 +61,15 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
 
                 session.metadata.status = 'started'
                 session.operation.update = True
+                _time = _now_utc - timedelta(seconds=1)
                 tracker_payload.events.append(
                     EventPayload(
                         id=str(uuid4()),
                         type='visit-started',
-                        time=Time(insert=datetime.utcnow() - timedelta(seconds=1)),
+                        time=Time(
+                            create=_time,
+                            insert=_time
+                        ),
                         properties={
                             'trigger-event-types': [_ev.type for _ev in tracker_payload.events]
                         },
@@ -72,11 +82,15 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
 
             if session.operation.new:
                 # Add session created event to the registered events
+                _time = _now_utc - timedelta(seconds=2)
                 tracker_payload.events.append(
                     EventPayload(
                         id=str(uuid4()),
                         type='session-opened',
-                        time=Time(insert=datetime.utcnow() - timedelta(seconds=2)),
+                        time=Time(
+                            create=_time,
+                            insert=_time,
+                        ),
                         properties={},
                         options={
                             "source_id": tracardi.internal_source,

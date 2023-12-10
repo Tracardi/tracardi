@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 import time
 
 import json
@@ -82,7 +84,7 @@ class TrackerPayload(BaseModel):
 
         data['metadata'] = EventPayloadMetadata(
             time=Time(
-                insert=datetime.utcnow()
+                insert=datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
             ))
         super().__init__(**data)
         self._id = str(uuid4())

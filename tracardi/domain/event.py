@@ -42,7 +42,7 @@ class Tags(BaseModel):
 class EventSession(Entity):
     start: datetime = datetime.utcnow()
     duration: float = 0
-    tz: Optional[str] = 'utc'
+    tz: Optional[str] = None
 
 
 class EventJourney(BaseModel):
