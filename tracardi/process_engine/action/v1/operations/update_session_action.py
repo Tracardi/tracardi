@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 from datetime import datetime
 
 from tracardi.domain.session import Session
@@ -10,7 +12,7 @@ class UpdateSessionAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
         if isinstance(self.session, Session):
             self.session.set_updated_in_workflow()
-            self.session.metadata.time.update = datetime.utcnow()
+            self.session.metadata.time.update = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         return None
 
 

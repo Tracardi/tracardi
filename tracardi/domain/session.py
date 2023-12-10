@@ -15,6 +15,7 @@ from .value_object.storage_info import StorageInfo
 
 class SessionTime(BaseModel):
     insert: Optional[datetime] = None
+    create: Optional[datetime] = None
     update: Optional[datetime] = None
     timestamp: Optional[float] = 0
     duration: float = 0
