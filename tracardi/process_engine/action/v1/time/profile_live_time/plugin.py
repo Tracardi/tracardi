@@ -1,3 +1,5 @@
+from tracardi.service.utils.date import now_in_utc
+
 from datetime import datetime
 from dateutil import parser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, \
@@ -23,7 +25,7 @@ class ProfileLiveTimeAction(ActionRunner):
                     created = parser.parse(created)
 
                 if isinstance(created, datetime):
-                    diff_secs = (datetime.utcnow() - created).total_seconds()
+                    diff_secs = (now_in_utc() - created).total_seconds()
 
                     return Result(port="live-time", value={
                         'last': created,

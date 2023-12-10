@@ -1,4 +1,4 @@
-from zoneinfo import ZoneInfo
+from tracardi.service.utils.date import now_in_utc
 
 from datetime import datetime
 from typing import Optional, Any, Union
@@ -47,7 +47,7 @@ class EventPayload(BaseModel):
         if 'id' not in data:
             data['id'] = str(uuid4())
 
-        _now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        _now = now_in_utc()
 
         if 'time' not in data:
             data['time'] = Time(insert=_now)
@@ -99,7 +99,7 @@ class EventPayload(BaseModel):
         if self.time.insert:
             event['metadata']['time']['insert'] = self.time.insert
         else:
-            event['metadata']['time']['insert'] = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+            event['metadata']['time']['insert'] = now_in_utc()
 
         if self.time.create:
             event['metadata']['time']['create'] = self.time.create.replace(tzinfo=ZoneInfo("UTC"))

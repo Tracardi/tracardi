@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 
 import time
 
@@ -204,7 +204,7 @@ class Tracker:
                 description="This event source is prepared because of ENABLE_EVENT_SOURCE_CHECK==no.",
                 channel="Web",
                 transitional=False,  # ephemeral
-                timestamp=datetime.utcnow()
+                timestamp=now_in_utc()
             )
 
         source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
@@ -238,7 +238,7 @@ class Tracker:
                 channel="Internal",
                 transitional=False,  # ephemeral
                 tags=['internal'],
-                timestamp=datetime.utcnow()
+                timestamp=now_in_utc()
             )
 
         source = await self.check_source_id(source_id)

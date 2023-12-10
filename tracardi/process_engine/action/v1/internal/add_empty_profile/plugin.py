@@ -1,6 +1,4 @@
-from zoneinfo import ZoneInfo
-
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 from uuid import uuid4
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import EventSession
@@ -27,12 +25,11 @@ class AddEmptyProfileAction(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        now = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        now = now_in_utc()
         profile = Profile(
             id=str(uuid4()),
             metadata=ProfileMetadata(
                 time=ProfileTime(
-                    insert=now,
                     visit=ProfileVisit(
                         count=1,
                         current=now
@@ -61,8 +58,7 @@ class AddEmptyProfileAction(ActionRunner):
         session = Session(
             id=str(uuid4()),
             profile=Entity(id=profile.id),
-            metadata=SessionMetadata(
-                time=SessionTime(insert=datetime.utcnow(), timestamp=datetime.timestamp(datetime.utcnow()))),
+            metadata=SessionMetadata(time=SessionTime()),
             operation=Operation(update=True)
         )
 

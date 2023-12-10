@@ -5,9 +5,6 @@ from tracardi.service.plugin.runner import ActionRunner
 
 class DebugPlugin(ActionRunner):
 
-    def __init__(self):
-        pass
-
     async def run(self, payload: dict, in_edge=None) -> Result:
         return Result(port="payload", value=payload)
 

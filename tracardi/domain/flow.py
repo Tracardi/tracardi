@@ -13,6 +13,8 @@ from ..config import tracardi
 from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 import logging
 
+from ..service.utils.date import now_in_utc
+
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 
@@ -84,7 +86,7 @@ class Flow(FlowGraph):
 
         return FlowRecord(
             id=self.id,
-            timestamp=datetime.utcnow(),
+            timestamp=now_in_utc(),
             description=self.description,
             name=self.name,
             projects=self.projects,
@@ -108,7 +110,7 @@ class Flow(FlowGraph):
         flow.timestamp = record.timestamp
 
         if not flow.timestamp:
-            flow.timestamp = datetime.utcnow()
+            flow.timestamp = now_in_utc()
 
         return flow
 
@@ -116,7 +118,7 @@ class Flow(FlowGraph):
     def new(id: str = None) -> 'Flow':
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
-            timestamp=datetime.utcnow(),
+            timestamp=now_in_utc(),
             name="Empty",
             wf_schema=FlowSchema(version=str(tracardi.version)),
             flowGraph=FlowGraphData(nodes=[], edges=[]),
@@ -130,7 +132,7 @@ class Flow(FlowGraph):
 
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
-            timestamp=datetime.utcnow(),
+            timestamp=now_in_utc(),
             name=name,
             wf_schema=FlowSchema(version=str(tracardi.version)),
             description=description,

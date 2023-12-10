@@ -149,53 +149,53 @@ async def aggregate_event_by_field_within_time(profile_id,
     }
 
 
-async def heatmap_by_event_type(event_type=None):
-    query = {
-        "size": 0,
-        "aggs": {
-            "items_over_time": {
-                "date_histogram": {
-                    "min_doc_count": 1,
-                    "field": "metadata.time.insert",
-                    "fixed_interval": "1d",
-                    "extended_bounds": {
-                        "min": datetime.utcnow() - timedelta(days=1 * 365),
-                        "max": datetime.utcnow()
-                    }
-                }
-            }
-        }
-    }
+# async def heatmap_by_event_type(event_type=None):
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             "items_over_time": {
+#                 "date_histogram": {
+#                     "min_doc_count": 1,
+#                     "field": "metadata.time.insert",
+#                     "fixed_interval": "1d",
+#                     "extended_bounds": {
+#                         "min": datetime.utcnow() - timedelta(days=1 * 365),
+#                         "max": datetime.utcnow()
+#                     }
+#                 }
+#             }
+#         }
+#     }
+#
+#     if event_type is not None:
+#         query["query"] = {"term": {"type": event_type}}
+#
+#     result = await storage_manager(index="event").query(query)
+#     return result['aggregations']["items_over_time"]['buckets']
 
-    if event_type is not None:
-        query["query"] = {"term": {"type": event_type}}
 
-    result = await storage_manager(index="event").query(query)
-    return result['aggregations']["items_over_time"]['buckets']
-
-
-async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> StorageAggregateResult:
-    query = {
-        "size": 0,
-        "aggs": {
-            bucket_name: {
-                "date_histogram": {
-                    "min_doc_count": 1,
-                    "field": "metadata.time.insert",
-                    "fixed_interval": "1d",
-                    "extended_bounds": {
-                        "min": datetime.utcnow() - timedelta(days=1 * 365),
-                        "max": datetime.utcnow()
-                    }
-                }
-            }
-        }
-    }
-
-    if profile_id is not None:
-        query["query"] = {"term": {"profile.id": profile_id}}
-
-    return await storage_manager(index="event").aggregate(query, aggregate_key='key_as_string')
+# async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> StorageAggregateResult:
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             bucket_name: {
+#                 "date_histogram": {
+#                     "min_doc_count": 1,
+#                     "field": "metadata.time.insert",
+#                     "fixed_interval": "1d",
+#                     "extended_bounds": {
+#                         "min": datetime.utcnow() - timedelta(days=1 * 365),
+#                         "max": datetime.utcnow()
+#                     }
+#                 }
+#             }
+#         }
+#     }
+#
+#     if profile_id is not None:
+#         query["query"] = {"term": {"profile.id": profile_id}}
+#
+#     return await storage_manager(index="event").aggregate(query, aggregate_key='key_as_string')
 
 
 async def load_event_by_type(event_type, limit=1) -> StorageRecords:

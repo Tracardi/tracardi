@@ -1,10 +1,7 @@
-from uuid import uuid4
-
 import os
-from datetime import datetime
 
+from tracardi.service.utils.date import now_in_utc
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
-
 from tracardi.config import tracardi
 from tracardi.domain.bridge import Bridge
 from tracardi.domain.event_source import EventSource
@@ -108,7 +105,7 @@ test_event_source = EventSource(
     channel="Test",
     description="This is test event-source. Feel free to remove it.",
     bridge=NamedEntity(**open_rest_source_bridge.model_dump()),
-    timestamp=datetime.utcnow(),
+    timestamp=now_in_utc(),
     tags=["test"],
     groups=["Test"]
 )

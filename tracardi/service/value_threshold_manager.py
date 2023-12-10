@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 from typing import Optional
 from tracardi.domain.value_threshold import ValueThreshold
 from tracardi.service.storage.redis.collections import Collection
@@ -54,7 +54,7 @@ class ValueThresholdManager:
             id=self.id,
             profile_id=self.profile_id,
             name=self.name,
-            timestamp=datetime.utcnow(),
+            timestamp=now_in_utc(),
             ttl=self.ttl,
             last_value=current_value,
         )
