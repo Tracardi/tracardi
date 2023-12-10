@@ -15,6 +15,7 @@ from .value_object.storage_info import StorageInfo
 
 class SessionTime(BaseModel):
     insert: Optional[datetime] = None
+    create: Optional[datetime] = None
     update: Optional[datetime] = None
     timestamp: Optional[float] = 0
     duration: float = 0
@@ -47,11 +48,11 @@ class SessionMetadata(BaseModel):
 
 class SessionContext(dict):
 
-    def get_time_zone(self) -> str:
+    def get_time_zone(self) -> Optional[str]:
         try:
             return self['time']['tz']
         except KeyError:
-            return 'utc'
+            return None
 
     def get_platform(self):
         try:

@@ -30,7 +30,7 @@ class ResourceCredentials(BaseModel):
 
 class Resource(Entity):
     type: str
-    timestamp: datetime
+    timestamp: Optional[datetime] = None
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     credentials: ResourceCredentials = ResourceCredentials()
@@ -62,8 +62,8 @@ class Resource(Entity):
             id=str(uuid4()),
             timestamp=datetime.utcnow(),
             type=pro.service.metadata.type,
-            name=pro.service.form.metadata.name,
-            description=pro.service.form.metadata.description,
+            name=pro.service.form.metadata.name or "No name provided",
+            description=pro.service.form.metadata.description or "No description provided",
             icon=pro.service.metadata.icon,
             tags=pro.service.form.metadata.tags,
             groups=[],

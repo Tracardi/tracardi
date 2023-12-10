@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
@@ -92,7 +94,7 @@ class Profile(Entity):
 
     def mark_for_update(self):
         self.operation.update = True
-        self.metadata.time.update = datetime.utcnow()
+        self.metadata.time.update = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
         self.data.compute_anonymous_field()
         self.set_updated_in_workflow()
 
@@ -198,9 +200,15 @@ class Profile(Entity):
         """
         @return Profile
         """
+
+        _now = datetime.utcnow().replace(tzinfo=ZoneInfo('UTC'))
+
         profile = Profile(
             id=str(uuid.uuid4()) if not id else id,
-            metadata=ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
+            metadata=ProfileMetadata(time=ProfileTime(
+                create=_now,
+                insert=_now
+            ))
         )
         profile.fill_meta_data()
         profile.operation.new = True
