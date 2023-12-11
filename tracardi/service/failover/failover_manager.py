@@ -11,8 +11,8 @@ class FailOverManager:
         self.db_client.create_storage()
         self._sleep_on_failure = sleep_on_failure
 
-    def add(self, events: Union[dict, List[dict]]):
-        self.db_client.add_record(str(uuid4()), events)
+    def add(self, data):
+        self.db_client.add_record(str(uuid4()), data)
 
     def sync(self):
         self.db_client.sync()
