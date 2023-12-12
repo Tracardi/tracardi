@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from tracardi.context import Context
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.event_metadata import EventMetadata

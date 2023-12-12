@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import asyncio
 import logging
 
@@ -26,27 +28,16 @@ async def main():
     manager = QueueWithFailOverPublisher(event_producer, FailOverManager(EVENT_FO))
     manager.init()
 
-    counter = 0
-    while True:
-        counter += 1
+    message = ("workflow", {
+        "payload": {},
+        "profile": {},
+        "session": {},
+        "events": {}
+    })
 
-        events = [Event(
-            id=str(counter),
-            name="test",
-            type="test",
-            metadata=EventMetadata(time=EventTime()),
-            source=Entity(id="1")
-        ).model_dump()]
-
-        message = ("workflow", {
-            "payload": {},
-            "profile": {},
-            "session": {},
-            "events": events
-        })
-
-        manager.send(message, context)
-        sleep(.05)
+    manager.send(message, context, options=dict(
+        deliver_after = timedelta(seconds=15)
+    ))
 
 
 asyncio.run(main())

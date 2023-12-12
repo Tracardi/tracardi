@@ -25,12 +25,12 @@ try:
         try:
             d = msg.data().decode('utf-8')
             d = json.loads(d)
-            if isinstance(d['_data'], list):
-                d = d['_data'][0]
-            else:
-                d= d['_data']
+            # if isinstance(d['_data'], list):
+            #     d = d['_data'][0]
+            # else:
+            #     d= d['_data']
             # Do something with the message
-            print(Entity(**d))
+            print(d)
 
             # Acknowledge successful processing of the message
             consumer.acknowledge(msg)
