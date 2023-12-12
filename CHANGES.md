@@ -24,9 +24,14 @@ Version: 0.8.2
   * Redone visit-ended worker (pro)
   * Redone workflow async worker (pro)
 * Configurable data partitioning
-* Preparation for configurable profile merging strategies
+* Preparation for configurable profile merging strategies (pro)
 * Fixing missing plugin documentation
 * Extended integration with mailchimp.
+* Time is zone aware now (no longer naive dates) - All timestamps are UTC with UTC zone. 
+* Fail over database for bigger fault tolerance (pro)
+* All records have insert, create, update timestamps. 
+* Info on fields updates.
+* Updates profile details page.
 
 
 Version: 0.8.1
