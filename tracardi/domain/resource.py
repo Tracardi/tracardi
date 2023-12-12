@@ -10,6 +10,7 @@ from .pro_service_form_data import ProService
 from .value_object.storage_info import StorageInfo
 from ..context import get_context
 from ..service.secrets import encrypt, decrypt
+from ..service.utils.date import now_in_utc
 
 T = TypeVar("T")
 
@@ -41,7 +42,7 @@ class Resource(Entity):
     enabled: Optional[bool] = True
 
     def __init__(self, **data: Any):
-        data['timestamp'] = datetime.utcnow()
+        data['timestamp'] = now_in_utc()
         super().__init__(**data)
 
     # Persistence
@@ -88,7 +89,7 @@ class ResourceRecord(Entity):
     destination: Optional[str] = None
 
     def __init__(self, **data: Any):
-        data['timestamp'] = datetime.utcnow()
+        data['timestamp'] = now_in_utc()
         super().__init__(**data)
 
     @staticmethod

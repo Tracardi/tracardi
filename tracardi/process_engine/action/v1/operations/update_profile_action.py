@@ -1,6 +1,4 @@
-from zoneinfo import ZoneInfo
-
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -9,7 +7,7 @@ from tracardi.service.plugin.runner import ActionRunner
 class UpdateProfileAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
-        self.profile.metadata.time.update = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        self.profile.metadata.time.update = now_in_utc()
         self.profile.set_updated_in_workflow()
         self.profile.data.compute_anonymous_field()
 

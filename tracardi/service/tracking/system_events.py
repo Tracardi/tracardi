@@ -1,6 +1,6 @@
 from typing import Tuple
 from uuid import uuid4
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from tracardi.config import tracardi
 from tracardi.domain.payload.event_payload import EventPayload
@@ -9,7 +9,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.license import License, LICENSE
-from zoneinfo import ZoneInfo
+from tracardi.service.utils.date import now_in_utc
 
 if License.has_service(LICENSE):
     from com_tracardi.config import com_tracardi_settings
@@ -29,7 +29,7 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
         if com_tracardi_settings.async_processing:
             async_processing = True
 
-    _now_utc = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+    _now_utc = now_in_utc()
 
     if profile and profile.operation.new and not tracker_payload.has_event_type('profile-created'):
 

@@ -8,28 +8,22 @@ from pydantic import ConfigDict, BaseModel, PrivateAttr
 from .entity import Entity
 from .marketing import UTM
 from .metadata import OS, Device, Application
+from .time import Time
 
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
+from ..service.utils.date import now_in_utc
 
 
-class SessionTime(BaseModel):
-    insert: Optional[datetime] = None
-    create: Optional[datetime] = None
-    update: Optional[datetime] = None
+class SessionTime(Time):
     timestamp: Optional[float] = 0
     duration: float = 0
     weekday: Optional[int] = None
 
     def __init__(self, **data: Any):
 
-        now = datetime.utcnow()
-
-        if 'insert' not in data:
-            data['insert'] = now
-
         if 'timestamp' not in data:
-            data['timestamp'] = datetime.timestamp(now)
+            data['timestamp'] = datetime.timestamp(now_in_utc())
 
         if 'duration' not in data:
             data['duration'] = 0
@@ -40,7 +34,7 @@ class SessionTime(BaseModel):
 
 
 class SessionMetadata(BaseModel):
-    time: SessionTime = SessionTime(insert=datetime.utcnow(), timestamp=datetime.timestamp(datetime.utcnow()))
+    time: SessionTime = SessionTime()
     channel: Optional[str] = None
     aux: Optional[dict] = {}
     status: Optional[str] = None

@@ -1,22 +1,15 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional, Union, Any
+from typing import Optional, Union
 
 from tracardi.domain.entity import Entity, NullableEntity
+from tracardi.domain.time import Time
 from tracardi.domain.value_object.storage_info import StorageInfo
 
 
-class EntityRecordTime(BaseModel):
-    insert: Optional[datetime] = None
-    create: Optional[datetime] = None
-    update: Optional[datetime] = None
+class EntityRecordTime(Time):
     due: Optional[datetime] = None
     expire: Optional[datetime] = None
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if self.insert is None:
-            self.insert = datetime.utcnow()
 
 
 class EntityRecordMetadata(BaseModel):

@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 from logging import Handler, LogRecord
 from time import time
 from tracardi.config import tracardi
@@ -16,7 +16,7 @@ class ElasticLogHandler(Handler):
 
     def emit(self, record: LogRecord):
         log = {
-            "date": datetime.utcnow(),
+            "date": now_in_utc(),
             "message": record.msg,
             "logger": record.name,
             "file": record.filename,

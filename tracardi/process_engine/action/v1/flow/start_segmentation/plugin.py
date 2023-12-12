@@ -35,14 +35,12 @@ class StartSegmentationAction(ActionRunner):
                 type="@segmentation",
                 name="Segmentation",
                 source=Entity(id=str(uuid4())),
-                metadata=EventMetadata(time=EventTime(insert=datetime.utcnow()), debug=self.debug)
+                metadata=EventMetadata(time=EventTime(), debug=self.debug)
             )
 
             session = Session(
                 id=str(uuid4()),
-                metadata=SessionMetadata(time=SessionTime(
-                    insert=datetime.utcnow(),
-                    timestamp=datetime.timestamp(datetime.utcnow())))
+                metadata=SessionMetadata(time=SessionTime())
             )
 
             if not self.config.profile_id:

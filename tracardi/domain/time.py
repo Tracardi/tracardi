@@ -1,8 +1,8 @@
-from zoneinfo import ZoneInfo
-
 from datetime import datetime
 from typing import Optional, Any
 from pydantic import BaseModel
+
+from tracardi.service.utils.date import now_in_utc
 
 
 class Time(BaseModel):
@@ -12,7 +12,7 @@ class Time(BaseModel):
 
     def __init__(self, **data: Any):
         if 'insert' not in data:
-            data['insert'] = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+            data['insert'] = now_in_utc()
         super().__init__(**data)
 
 
@@ -28,7 +28,7 @@ class ProfileVisit(BaseModel):
     def set_visits_times(self):
         if self.had_previous_visit():
             self.last = self.current
-        self.current = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        self.current = now_in_utc()
 
 
 class ProfileTime(Time):

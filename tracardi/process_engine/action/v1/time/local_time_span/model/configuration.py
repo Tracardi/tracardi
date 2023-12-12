@@ -1,3 +1,5 @@
+from tracardi.service.utils.date import now_in_utc
+
 from typing import Union
 
 import pytz
@@ -32,7 +34,7 @@ class TimeSpanConfiguration(PluginConfig):
         return datetime.strptime(hour_string, '%H:%M:%S')
 
     def is_in_timespan(self):
-        now = datetime.utcnow()
+        now = now_in_utc()
 
         tz = pytz.timezone(self.timezone)
         local_now = now.replace(tzinfo=pytz.utc).astimezone(tz)

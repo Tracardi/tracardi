@@ -1,5 +1,3 @@
-from zoneinfo import ZoneInfo
-
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
@@ -15,6 +13,7 @@ from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
+from ..service.utils.date import now_in_utc
 
 
 class ConsentRevoke(BaseModel):
@@ -27,7 +26,7 @@ class CustomMetric(BaseModel):
     value: Any = None
 
     def expired(self) -> bool:
-        return datetime.utcnow() > self.next
+        return now_in_utc() > self.next
 
     def changed(self, value) -> bool:
         return value != self.value
@@ -35,7 +34,9 @@ class CustomMetric(BaseModel):
 
 class Profile(Entity):
     ids: Optional[List[str]] = []
-    metadata: Optional[ProfileMetadata] = ProfileMetadata(time=ProfileTime(insert=datetime.utcnow()))
+    metadata: Optional[ProfileMetadata] = ProfileMetadata(
+        time=ProfileTime()
+    )
     operation: Optional[Operation] = Operation()
     stats: ProfileStats = ProfileStats()
     traits: Optional[dict] = {}
@@ -94,7 +95,7 @@ class Profile(Entity):
 
     def mark_for_update(self):
         self.operation.update = True
-        self.metadata.time.update = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+        self.metadata.time.update = now_in_utc()
         self.data.compute_anonymous_field()
         self.set_updated_in_workflow()
 
@@ -201,7 +202,7 @@ class Profile(Entity):
         @return Profile
         """
 
-        _now = datetime.utcnow().replace(tzinfo=ZoneInfo('UTC'))
+        _now = now_in_utc()
 
         profile = Profile(
             id=str(uuid.uuid4()) if not id else id,

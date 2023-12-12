@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 
 from pydantic import field_validator
 
@@ -49,7 +49,7 @@ class MoveSegmentAction(ActionRunner):
                 profile.segments.remove(self.config.from_segment)
             if self.config.to_segment not in profile.segments:
                 profile.segments.append(self.config.to_segment)
-            profile.metadata.time.segmentation = datetime.utcnow()
+            profile.metadata.time.segmentation = now_in_utc()
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:
