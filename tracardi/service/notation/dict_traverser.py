@@ -1,6 +1,6 @@
 from typing import List, Dict, Union
 
-from dotty_dict import dotty
+from dotty_dict import Dotty
 from .dot_accessor import DotAccessor
 
 
@@ -14,6 +14,7 @@ class DictTraverser:
             self.throw_error = False
         else:
             self.throw_error = True
+        self.separator = "\u221E"
 
     def _get_value(self, path, optional):
         if self.throw_error is True:
@@ -36,14 +37,14 @@ class DictTraverser:
 
         if isinstance(value, dict):
             for k, v in value.items():
-                yield from self.traverse(v, k, path + "." + k)
+                yield from self.traverse(v, k, path + self.separator + k)
         elif isinstance(value, list):
             # Return empty lists as they are.
             if not value:
                 yield key, [], path
             for n, v in enumerate(value):
                 k = str(n)
-                yield from self.traverse(v, k, path + '.' + k)
+                yield from self.traverse(v, k, path + self.separator + k)
         else:
             yield key, value, path
 
@@ -61,7 +62,7 @@ class DictTraverser:
         if isinstance(reshape_template, list) and len(reshape_template) == 0:
             return []
 
-        out_dot = dotty()
+        out_dot = Dotty({}, self.separator, esc_char='\\', no_list=False)
         for key, value, path in self.traverse(reshape_template):
             if key is not None:
                 path = path[:-len(key)-1]
@@ -80,12 +81,12 @@ class DictTraverser:
             if value is None and self.include_none is False:
                 continue
 
+            in_key = f"{path}{self.separator}{key}"
             if not value:
                 if not optional:
-                    out_dot[f"{path}.{key}"] = value
+                    out_dot[in_key] = value
             else:
-                out_dot[f"{path}.{key}"] = value
+                out_dot[in_key] = value
 
-        # TODO THIS DOES NOT SUPPORT DATETIME
         result = out_dot.to_dict()
         return result['root'] if 'root' in result else {}
