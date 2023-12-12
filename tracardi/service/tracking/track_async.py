@@ -162,8 +162,7 @@ async def process_track_data(source: EventSource,
                         session,
                         async_events,
                         tracker_payload,
-                        tracker_config,
-                        timestamp=tracking_start
+                        tracker_config
                     )
 
                     result["task"].append(tracker_payload.get_id())

@@ -6,6 +6,7 @@ from .metadata import Metadata
 from .settings import Settings
 from .time import Time
 from tracardi.service.module_loader import import_package, load_callable
+from ..service.utils.date import now_in_utc
 
 
 class FlowActionPlugin(Entity):
@@ -22,7 +23,7 @@ class FlowActionPlugin(Entity):
     def __init__(self, **data: Any):
         data['metadata'] = Metadata(
             time=Time(
-                insert=datetime.utcnow()
+                insert=now_in_utc()
             ))
         super().__init__(**data)
 

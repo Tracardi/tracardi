@@ -3,6 +3,7 @@ import os
 from tracardi.domain.bridge import Bridge
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 
+
 _local_dir = os.path.dirname(__file__)
 
 open_rest_source_bridge = Bridge(

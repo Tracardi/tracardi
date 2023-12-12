@@ -3,10 +3,12 @@ from datetime import datetime
 from pydantic import field_validator, BaseModel, validator
 from pytimeparse.timeparse import timeparse
 
+from tracardi.service.utils.date import now_in_utc
+
 
 class Schedule(BaseModel):
     type: str = "date|delta|interval"
-    time: str = datetime.utcnow()
+    time: str = now_in_utc()
 
     @field_validator("type")
     @classmethod

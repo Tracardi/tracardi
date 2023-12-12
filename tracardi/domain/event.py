@@ -8,13 +8,13 @@ from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
 
 from .marketing import UTM
-# from .metadata import OS, Device, Application, Hit
 from .named_entity import NamedEntity
 from .profile_data import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
     ProfileIdentifier, ProfileContact, ProfilePII
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 from ..service.string_manager import capitalize_event_type_id
+from ..service.utils.date import now_in_utc
 
 
 class Tags(BaseModel):
@@ -40,7 +40,7 @@ class Tags(BaseModel):
 
 
 class EventSession(Entity):
-    start: datetime = datetime.utcnow()
+    start: datetime = now_in_utc()
     duration: float = 0
     tz: Optional[str] = None
 

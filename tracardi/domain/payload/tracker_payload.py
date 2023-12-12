@@ -1,4 +1,4 @@
-from zoneinfo import ZoneInfo
+from tracardi.service.utils.date import now_in_utc
 
 import time
 
@@ -85,7 +85,7 @@ class TrackerPayload(BaseModel):
 
         data['metadata'] = EventPayloadMetadata(
             time=Time(
-                insert=datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
+                insert=now_in_utc()
             ))
         super().__init__(**data)
         self._id = str(uuid4())
@@ -559,7 +559,9 @@ class TrackerPayload(BaseModel):
                         # Profile in session id has been merged. Change profile in session.
 
                         session.profile.id = profile.id
-                        session.metadata.time.timestamp = datetime.timestamp(datetime.utcnow())
+                        session.metadata.time.timestamp = datetime.timestamp(
+                            now_in_utc()
+                        )
 
                         is_new_session = True
 

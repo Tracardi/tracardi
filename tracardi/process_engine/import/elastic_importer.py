@@ -1,6 +1,7 @@
+from tracardi.service.utils.date import now_in_utc
+
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from typing import Tuple
 from uuid import uuid4
 from tracardi.domain.import_config import ImportConfig
@@ -99,7 +100,7 @@ class ElasticIndexImporter(Importer):
         # Save task
 
         task = Task(
-            timestamp=datetime.utcnow(),
+            timestamp=now_in_utc(),
             id=str(uuid4()),
             name=task_name if task_name else import_config.name,
             type="import",

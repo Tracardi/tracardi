@@ -1,8 +1,9 @@
 from collections import defaultdict
+from tracardi.service.utils.date import now_in_utc
+
 from uuid import uuid4
 
 from typing import List, Any, Optional, Dict
-from datetime import datetime
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.session import Session
@@ -18,7 +19,7 @@ class FieldChangeTimestampManager:
         self._log[type][field]= dict(
                 id=f"{field}:{profile_id}",
                 type=type,
-                timestamp=str(datetime.utcnow()),
+                timestamp=str(now_in_utc()),
                 profile_id=profile_id,
                 event_id=event_id,
                 source_id=source_id,
@@ -76,7 +77,7 @@ class FieldChangeLogManager:
             dict(
                 id=str(uuid4()),
                 type=type,
-                timestamp=str(datetime.utcnow()),
+                timestamp=str(now_in_utc()),
                 profile_id=profile_id,
                 event_id=event_id,
                 source_id=source_id,

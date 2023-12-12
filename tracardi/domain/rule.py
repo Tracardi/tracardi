@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional, Any, List, Set
 
 from pydantic import field_validator, PrivateAttr
@@ -6,6 +5,7 @@ from pydantic import field_validator, PrivateAttr
 from .metadata import Metadata
 from .named_entity import NamedEntity
 from .time import Time
+from ..service.utils.date import now_in_utc
 
 
 class Rule(NamedEntity):
@@ -55,6 +55,6 @@ class Rule(NamedEntity):
         if 'metadata' not in data:
             data['metadata'] = Metadata(
                 time=Time(
-                    insert=datetime.utcnow()
+                    insert=now_in_utc()
                 ))
         super().__init__(**data)

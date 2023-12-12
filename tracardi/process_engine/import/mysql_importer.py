@@ -1,7 +1,8 @@
+from tracardi.service.utils.date import now_in_utc
+
 import asyncio
 import re
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from typing import Tuple
 from uuid import uuid4
 
@@ -174,7 +175,7 @@ class MySQLTableImporter(Importer):
         celery_task = completed.pop().result()
 
         task = Task(
-            timestamp=datetime.utcnow(),
+            timestamp=now_in_utc(),
             id=str(uuid4()),
             name=task_name if task_name else import_config.name,
             type="import",

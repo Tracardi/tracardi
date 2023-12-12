@@ -29,4 +29,4 @@ def test_retrieving_nonexistent_field_raises_key_error():
     flat_profile = {'field1': 'value1', 'field2': 'value2'}
     monitor = FieldTimestampMonitor(flat_profile, 'type', "profile_id", 'event_id')
     with pytest.raises(KeyError):
-        monitor['field3']
+        x = monitor['field3']

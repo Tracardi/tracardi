@@ -3,6 +3,7 @@ from typing import Optional, Union, List, Any
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.entity import Entity
+from tracardi.service.utils.date import now_in_utc
 
 
 class EventSource(Entity):
@@ -25,7 +26,7 @@ class EventSource(Entity):
 
     def __init__(self, **data: Any):
         if 'timestamp' not in data or data['timestamp'] is None:
-            data['timestamp'] = datetime.utcnow()
+            data['timestamp'] = now_in_utc()
         if 'type' in data and isinstance(data['type'], str):
             data['type'] = [data['type']]
         super().__init__(**data)

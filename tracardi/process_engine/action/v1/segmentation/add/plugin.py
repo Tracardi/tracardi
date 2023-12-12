@@ -1,4 +1,5 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
+
 from typing import List, Union
 
 from pydantic import field_validator
@@ -40,7 +41,7 @@ class AddSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             if self.config.segment not in self.profile.segments:
-                profile.metadata.time.segmentation = datetime.utcnow()
+                profile.metadata.time.segmentation = now_in_utc()
 
                 try:
                     dot = self._get_dot_accessor(payload)
