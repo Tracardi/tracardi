@@ -125,6 +125,10 @@
                 "longitude": {
                   "type": "float"
                 },
+                "location": {
+                  "ignore_malformed": true,
+                  "type": "geo_point"
+                },
                 "postal": {
                   "type": "keyword",
                   "ignore_above": 24

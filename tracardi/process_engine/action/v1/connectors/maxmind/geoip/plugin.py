@@ -1,3 +1,4 @@
+from tracardi.domain.geo import Geo
 from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormGroup, FormField, FormComponent, Form, \
     Documentation, PortDoc
@@ -33,19 +34,25 @@ class GeoIPAction(ActionRunner):
 
             ip = dot[self.config.ip]
 
-            location = await self.client.fetch(ip)
+            geo = await self.client.fetch(ip)
 
             result = {
-                "city": location.city.name,
+                "city": geo.city.name,
                 "country": {
-                    "name": location.country.name,
-                    "code": location.country.iso_code
+                    "name": geo.country.name,
+                    "code": geo.country.iso_code
                 },
-                "county": location.subdivisions.most_specific.name,
-                "postal": location.postal.code,
-                "latitude": location.location.latitude,
-                "longitude": location.location.longitude
+                "county": geo.subdivisions.most_specific.name,
+                "postal": geo.postal.code,
+                "latitude": geo.location.latitude,
+                "longitude": geo.location.longitude,
+                "location": (geo.location.longitude, geo.location.latitude)
             }
+
+            if self.config.add_to_profile:
+                self.profile.data.devices.last.geo = Geo(**result)
+                self.profile.mark_for_update()
+
             return Result(port="location", value=result)
         except Exception as e:
             self.console.error(str(e))
@@ -69,7 +76,8 @@ def register() -> Plugin:
                     "id": None,
                     "name": None,
                 },
-                "ip": "event@request.ip"
+                "ip": "event@request.headers.x-forwarded-for",
+                "add_to_profile": False
             },
             form=Form(groups=[
                 FormGroup(
@@ -91,6 +99,12 @@ def register() -> Plugin:
                             name="Path to ip",
                             description="Type path to IP data or IP address itself.",
                             component=FormComponent(type="dotPath", props={"label": "IP address"})
+                        ),
+                        FormField(
+                            id="add_to_profile",
+                            name="Add location to profile",
+                            description="Add discovered location to profile's last device location.",
+                            component=FormComponent(type="bool", props={"label": "Add to profile"})
                         )
                     ]
                 ),

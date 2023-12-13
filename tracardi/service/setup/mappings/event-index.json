@@ -172,7 +172,11 @@
                   "type": "float"
                 },
                 "longitude": {
+                  "ignore_malformed": true,
                   "type": "float"
+                },
+                "location": {
+                  "type": "geo_point"
                 },
                 "postal": {
                   "type": "keyword",

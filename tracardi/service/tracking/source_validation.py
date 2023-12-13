@@ -66,7 +66,7 @@ async def _validate_source(tracker_payload: TrackerPayload, allowed_bridges) -> 
     source = await _check_source_id(allowed_bridges, source_id)
 
     if source is None:
-        raise ValueError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
+        raise UnauthorizedException(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
                          f"width payload: {tracker_payload}")
 
     return source
@@ -75,18 +75,14 @@ async def _validate_source(tracker_payload: TrackerPayload, allowed_bridges) -> 
 def _get_internal_source(tracker_config: TrackerConfig, tracker_payload: TrackerPayload):
     if tracker_config.internal_source.id != tracker_payload.source.id:
         msg = f"Invalid event source `{tracker_payload.source.id}`"
-        raise ValueError(msg)
+        raise UnauthorizedException(msg)
     return tracker_config.internal_source
 
 
 async def validate_source(tracker_config: TrackerConfig, tracker_payload: TrackerPayload) -> EventSource:
-    try:
-        if tracker_config.internal_source is not None:
-            source = _get_internal_source(tracker_config, tracker_payload)
-        else:
-            source = await _validate_source(tracker_payload, tracker_config.allowed_bridges)
+    if tracker_config.internal_source is not None:
+        source = _get_internal_source(tracker_config, tracker_payload)
+    else:
+        source = await _validate_source(tracker_payload, tracker_config.allowed_bridges)
 
-        return source
-
-    except ValueError as e:
-        raise UnauthorizedException(e)
+    return source

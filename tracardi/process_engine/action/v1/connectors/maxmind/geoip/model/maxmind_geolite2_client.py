@@ -1,3 +1,5 @@
+from typing import Optional
+
 import geoip2.database
 import geoip2.webservice
 
@@ -11,6 +13,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class PluginConfiguration(PluginConfig):
     source: NamedEntity
     ip: str
+    add_to_profile: Optional[bool] = False
 
 
 class GeoLiteCredentials(BaseModel):
