@@ -17,6 +17,7 @@ def test_should_access_object_with_dollar():
 
 def test_should_validate_dot_notation():
     assert not DotAccessor.validate("invalid@dot.notation")
+    assert DotAccessor.validate("event@properties.event-data.recipient")
     assert DotAccessor.validate("payload@dot.0.notation")
     assert DotAccessor.validate("payload@dot.0.$")
     assert DotAccessor.validate("payload@dot.0.*")
