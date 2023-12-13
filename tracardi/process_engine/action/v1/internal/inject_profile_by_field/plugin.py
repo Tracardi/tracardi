@@ -1,11 +1,10 @@
+from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.domain.profile import Profile
-
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.cache.model import load as cache_load
 
 
 from .model.configuration import Configuration
@@ -28,9 +27,7 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
-            cache_load(model=Profile, id=value)
-            profile_records = await profile_db.load_by_id(profile_id=value)
-            profile = Profile.create(profile_records)
+            profile = await load_profile(profile_id=value)
 
             if not profile:
                 return Result(port="error", value={"message": "Could not find profile."})
