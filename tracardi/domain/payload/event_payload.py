@@ -1,6 +1,7 @@
+from zoneinfo import ZoneInfo
+
 from tracardi.service.utils.date import now_in_utc
 
-from datetime import datetime
 from typing import Optional, Any, Union
 from uuid import uuid4
 

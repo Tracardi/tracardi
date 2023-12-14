@@ -1,16 +1,21 @@
 from time import sleep
 from uuid import uuid4
-from typing import Callable, List, Union
+from typing import Callable, Dict
 
-from tracardi.context import Context
 from tracardi.service.storage.speedb.rocksdb_clinet import RocksDbClient
 
 
 class FailOverManager:
 
+    dbs: Dict[str, RocksDbClient] = {}
+
     def __init__(self, db_name, sleep_on_failure:int=3):
-        self.db_client = RocksDbClient(db_name)
-        self.db_client.create_storage()
+        if db_name not in self.dbs:
+            client = RocksDbClient(db_name)
+            client.create_storage()
+            self.dbs[db_name] = client
+
+        self.db_client = self.dbs[db_name]
         self._sleep_on_failure = sleep_on_failure
 
     def add(self, context, data, options):

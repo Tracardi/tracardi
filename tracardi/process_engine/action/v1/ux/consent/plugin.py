@@ -13,6 +13,7 @@ class Configuration(PluginConfig):
     position: str = "bottom"
     expand_height: int = 400
     enabled: bool = True
+    always_display: bool = True
 
     @field_validator("uix_source")
     @classmethod
@@ -55,6 +56,11 @@ class ConsentUx(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+
+        if self.config.always_display is False and self.profile.has_consents_set():
+            # If consents were already granted (set) please do not show the widget.
+            return Result(port="payload", value=payload)
+
         if self.config.enabled is True:
             self.ux.append({"tag": "div", "props": {
                 "class": "tracardi-uix-consent",
@@ -85,9 +91,10 @@ def register() -> Plugin:
                 "agree_all_event_type": "agree-all-event-type",
                 "position": "bottom",
                 "expand_height": 400,
-                "enabled": True
+                "enabled": True,
+                "always_display": True
             },
-            version='0.6.1',
+            version='0.8.2',
             license="MIT + CC",
             author="Risto Kowaczewski",
             manual='show_consent_bar',
@@ -115,6 +122,12 @@ def register() -> Plugin:
                             name="Enable widget",
                             description="Only enabled widgets are show on the page",
                             component=FormComponent(type="bool", props={"label": "Enable"})
+                        ),
+                        FormField(
+                            id="always_display",
+                            name="Display even if customer already granted consents",
+                            description="When set widget will always be visible event if the consents were granted",
+                            component=FormComponent(type="bool", props={"label": "Display always"})
                         ),
                     ],
 

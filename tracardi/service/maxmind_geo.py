@@ -26,7 +26,8 @@ async def get_geo_maxmind_location(creds: GeoLiteCredentials, ip: str) -> Option
             "county": _geo.subdivisions.most_specific.name,
             "postal": _geo.postal.code,
             "latitude": _geo.location.latitude,
-            "longitude": _geo.location.longitude
+            "longitude": _geo.location.longitude,
+            "location": (_geo.location.longitude, _geo.location.latitude)
         })
 
         return _geo

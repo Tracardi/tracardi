@@ -1,5 +1,7 @@
 import asyncio
 import logging
+from tracardi.service.tracking.storage.profile_storage import save_profile, delete_profile
+
 from tracardi.domain.profile_data import ProfileData
 
 from .tracking.cache.profile_cache import delete_profile_cache, save_profile_cache
@@ -50,17 +52,16 @@ async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], m
 
 
 async def _save_profile(profile):
-    # Save to database
-    await profile_db.save(profile, refresh_after_save=False)
-    await profile_db.refresh()
-
     # Save in cache
     save_profile_cache(profile)
+
+    # Save to database
+    await save_profile(profile)
 
 
 async def _delete_by_id(profile_id, index):
     # Delete from database
-    await profile_db.delete_by_id(profile_id, index)
+    await delete_profile(profile_id, index)
     # Delete from cache
     delete_profile_cache(profile_id, get_context())
 

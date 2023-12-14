@@ -1,19 +1,18 @@
 import json
 from json import JSONDecodeError
-from tracardi.domain.profile import Profile
+
+from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
-from tracardi.service.storage.driver.elastic import profile as profile_db
 from .model.configuration import Configuration
 from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from typing import Optional
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity
-from tracardi.service.storage.cache.model import load as cache_load
 
 
 
@@ -67,13 +66,10 @@ class StartAction(ActionRunner):
         # Replace profile
 
         if self.config.profile_id:
-            cache_load(model=Profile, id=self.config.profile_id)
-            _profile = await profile_db.load_by_id(self.config.profile_id)
+            _profile = await load_profile(self.config.profile_id)
             if not _profile:
                 msg = f"Can not load session with id {self.config.profile_id}"
                 raise ValueError(msg)
-
-            profile = _profile.to_entity(Profile)
 
         # Replace event
 

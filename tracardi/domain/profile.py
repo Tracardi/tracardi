@@ -53,6 +53,9 @@ class Profile(Entity):
         super().__init__(**data)
         self._add_id_to_ids()
 
+    def has_consents_set(self) -> bool:
+        return 'consents' in self.aux and 'granted' in self.aux['consents'] and self.aux['consents']['granted'] is True
+
     def fill_meta_data(self):
         """
         Used to fill metadata with default current index and id.

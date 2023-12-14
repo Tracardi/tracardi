@@ -1,21 +1,18 @@
-from tracardi.service.utils.date import now_in_utc
-
 import time
-
 import logging
 import traceback
 from typing import Optional
-from tracardi.service.profile_merger import ProfileMerger
 
+from tracardi.service.tracking.storage.profile_storage import load_profile
+from tracardi.service.utils.date import now_in_utc
+from tracardi.service.profile_merger import ProfileMerger
 from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
 from tracardi.service.storage.mysql.bootstrap.bridge import open_rest_source_bridge
 from tracardi.service.tracking.source_validation import validate_source
-from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic.operations import console_log as console_log_db
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
@@ -24,7 +21,6 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from typing import List
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.storage.cache.model import load as cache_load
 from tracardi.service.tracking.track_async import process_track_data
 
 
@@ -101,16 +97,14 @@ class Tracker:
                 await self.check_source_id(refer_source_id)
 
                 # Check if profile id exists
-                cache_load(model=Profile, id=referred_profile_id)
-                profile_record = await profile_db.load_by_id(referred_profile_id)
 
-                if profile_record is not None:
+                referred_profile = await load_profile(referred_profile_id)
+
+                if referred_profile is not None:
 
                     # Profile will be replaced. Merge old profile to new one.
-
-                    referred_profile = profile_record.to_entity(Profile)
-
                     # Merges referred profile in __tr_pid with profile existing in local storage on visited page
+
                     if tracker_payload.profile is not None:
                         # Merge profiles
                         merged_profile = await ProfileMerger.invoke_merge_profile(
@@ -187,7 +181,7 @@ class Tracker:
             source, tracker_payload,
             self.tracker_config, tracking_start, self.console_log)
 
-        if tracardi.enable_errors_on_response:
+        if result and tracardi.enable_errors_on_response:
             result['errors'] = self.console_log.get_errors()
             result['warnings'] = self.console_log.get_warnings()
 

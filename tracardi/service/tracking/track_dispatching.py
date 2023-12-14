@@ -118,8 +118,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
         )
     )
 
-    print('ux1', len(ux))
-
     # INFO! trigger_workflows will SAVE changed profile and session in the cache. For the async this is
     # enough to persist data.
 

@@ -706,6 +706,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
 }
 
 if License.has_service(SCHEDULER):
+
     installed_plugins["com_tracardi.action.v1.background.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -730,6 +731,35 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.chatwoot.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "license": ""
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.intercom.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "app_id": ""
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.livechat.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "license": ""
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.zendesk.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "script_url": "https://static.zdassets.com/ekr/snippet.js?key=<your-key>",
+            })
+    )
+
     installed_plugins["com_tracardi.action.v1.sms.twilio.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
