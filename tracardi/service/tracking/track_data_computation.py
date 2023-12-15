@@ -200,6 +200,7 @@ async def lock_and_compute_data(
             save_profile_cache(profile)
 
         if session and session.has_not_saved_changes():
+            # If saving by queue then ttl set to 30 min.
             save_session_cache(session)
 
 
