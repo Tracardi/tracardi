@@ -173,7 +173,8 @@ async def process_track_data(source: EventSource,
                     )
 
                     result["task"].append(tracker_payload.get_id())
-                    result['events'] += [event.id for event in sync_events]
+                    if tracker_payload.is_debugging_on():
+                        result['events'] += [event.id for event in sync_events]
             else:
                 # If disabled async storing or no pulsar add async events to sync and run it
                 sync_events += async_events
@@ -207,7 +208,8 @@ async def process_track_data(source: EventSource,
 
                 result['ux'] = ux
                 result['response'] = response
-                result['events'] += [event.id for event in sync_events]
+                if tracker_payload.is_debugging_on():
+                    result['events'] += [event.id for event in sync_events]
                 result["errors"] = []
 
             return result
@@ -239,10 +241,13 @@ async def process_track_data(source: EventSource,
                     storage=storage
                 ))
 
+
+
             return {
                 "task": tracker_payload.get_id(),
                 "ux": ux,
                 "response": response,
+                "events": [event.id for event in events] if tracker_payload.is_debugging_on() else [],
                 "profile": {
                     "id": get_entity_id(profile)
                 },
