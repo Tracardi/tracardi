@@ -182,8 +182,11 @@ class Tracker:
             self.tracker_config, tracking_start, self.console_log)
 
         if result and tracardi.enable_errors_on_response:
-            result['errors'] = self.console_log.get_errors()
-            result['warnings'] = self.console_log.get_warnings()
+            result['errors'] += self.console_log.get_errors()
+            result['warnings'] += self.console_log.get_warnings()
+
+            if log_handler.has_logs():
+                result['errors'] += log_handler.get_errors()
 
         return result
 

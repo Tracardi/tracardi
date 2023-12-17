@@ -29,9 +29,11 @@ class ElasticLogHandler(Handler):
         if tracardi.save_logs:
             self.collection.append(log)
 
+    def get_errors(self):
+        return [log for log in self.collection if log['level'] == "ERROR"]
+
     def has_logs(self):
-        return tracardi.save_logs is True and isinstance(self.collection, list) and (
-                len(self.collection) > 100 or (time() - self.last_save) > 30)
+        return tracardi.save_logs is True and isinstance(self.collection, list)
 
     def reset(self):
         self.collection = []

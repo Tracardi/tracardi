@@ -80,7 +80,9 @@ async def process_track_data(source: EventSource,
         # FROM THIS POINT EVENTS AND SESSION SHOULD NOT BE MUTATED
         # ----------------------------------------------
 
-        session = FrozenSession(**session.model_dump())
+        f_session = FrozenSession(**session.model_dump())
+        f_session.set_meta_data(session.get_meta_data())
+        session = f_session
 
         # Async storage
 
@@ -125,7 +127,9 @@ async def process_track_data(source: EventSource,
                 },
                 "session": {
                     "id": get_entity_id(session)
-                }
+                },
+                "errors": [],
+                "warnings": []
             }
 
             # Async events
@@ -204,6 +208,7 @@ async def process_track_data(source: EventSource,
                 result['ux'] = ux
                 result['response'] = response
                 result['events'] += [event.id for event in sync_events]
+                result["errors"] = []
 
             return result
 
@@ -234,18 +239,19 @@ async def process_track_data(source: EventSource,
                     storage=storage
                 ))
 
-        return {
-            "task": tracker_payload.get_id(),
-            "ux": ux,
-            "response": response,
-            "profile": {
-                "id": get_entity_id(profile)
-            },
-            "session": {
-                "id": get_entity_id(session)
+            return {
+                "task": tracker_payload.get_id(),
+                "ux": ux,
+                "response": response,
+                "profile": {
+                    "id": get_entity_id(profile)
+                },
+                "session": {
+                    "id": get_entity_id(session)
+                },
+                "errors": [],
+                "warnings": []
             }
-        }
 
     finally:
-        print("track_async", time.time() - tracking_start, flush=True)
-        print("---------------------", flush=True)
+        logger.info(f"Process time {time.time() - tracking_start}")

@@ -14,9 +14,9 @@
         "color": "string",
         "size": "string"
       },
-      "price": "float",
-      "quantity": "int",
-      "position": "int",
+      "price": 10.15,
+      "quantity": 2,
+      "position": 1,
       "url": {
         "image": "url",
         "page": "url"
@@ -96,8 +96,8 @@
         "color": "string",
         "size": "string"
       },
-      "price": "float",
-      "quantity": "int",
+      "price": 10.10,
+      "quantity": 1,
       "url": {
         "image": "url",
         "page": "url"
@@ -132,8 +132,8 @@
         "color": "string",
         "size": "string"
       },
-      "price": "float",
-      "quantity": "int",
+      "price": 10.10,
+      "quantity": 1,
       "url": {
         "image": "url",
         "page": "url"
@@ -314,7 +314,7 @@
       "method": "string",
       "credit_card": {
         "number": "string",
-        "expires": "string",
+        "expires": "2023-01-01 00:00:00",
         "holder": "string",
         "cvv": ""
       }
@@ -343,12 +343,12 @@
       "income": {
         "value": 0.0,
         "currency": "string",
-        "due_date": "date"
+        "due_date": "2023-01-01 00:00:00"
       },
       "cost": {
         "value": 0.0,
         "currency": "string",
-        "due_date": "date"
+        "due_date": "2023-01-01 00:00:00"
       },
       "affiliation": "string",
       "products": [
@@ -363,8 +363,8 @@
             "color": "string",
             "size": "string"
           },
-          "price": "float",
-          "quantity": "int",
+          "price": 10.10,
+          "quantity": 1,
           "url": {
             "image": "url",
             "page": "url"
@@ -527,7 +527,7 @@
       "order_id": "string",
       "value": 0,
       "currency": "string",
-      "due_date": "date"
+      "due_date": "2023-01-01 00:00:00"
     },
     "copy": {
       "data.ec.order.id":              "properties.order_id",
