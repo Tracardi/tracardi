@@ -8,10 +8,10 @@ from tracardi.domain.time import EventTime
 from tracardi.service.failover.failover_manager import FailOverManager
 
 
-def closure_true(event: Event):
+def closure_true(context, data, options):
     return True
 
-def closure_false(event: Event):
+def closure_false(context, data, options):
     return False
 
 def test_fail_over():
@@ -23,8 +23,10 @@ def test_fail_over():
         metadata=EventMetadata(time=EventTime()),
         source=Entity(id="1")
     ).model_dump() for _ in range(0, 10)]
+    context = Context(production=True)
 
-    fail_over.add(events)
+
+    fail_over.add(context, events, options={})
 
     fail_over.flush(closure_false)
     assert not fail_over.is_empty()

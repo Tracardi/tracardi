@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
@@ -26,7 +28,7 @@ class CustomMetric(BaseModel):
     value: Any = None
 
     def expired(self) -> bool:
-        return now_in_utc() > self.next
+        return now_in_utc() > self.next.replace(tzinfo=ZoneInfo('UTC'))
 
     def changed(self, value) -> bool:
         return value != self.value

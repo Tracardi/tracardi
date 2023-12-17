@@ -84,7 +84,7 @@ def test_merger_on_list_of_number_values():
     }
 
     dict_2 = {
-        "d": [2, 3]  # this overrides the int, do not know if it is correct
+        "d": [2, 3]  # merge as if the field should be list. Threat 1 as list
     }
 
     result = dict_merge(dict_1, [dict_2], MergingStrategy(
@@ -93,7 +93,7 @@ def test_merger_on_list_of_number_values():
         default_string_strategy='append'
     ))
 
-    assert set(result['d']) == {2, 3}
+    assert set(result['d']) == {1, 2, 3}
 
     # ---
 
