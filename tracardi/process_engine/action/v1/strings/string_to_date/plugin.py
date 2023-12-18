@@ -37,7 +37,7 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.strings.string_to_date.plugin',
             className=DateConverter.__name__,
             inputs=["payload"],
-            outputs=["payload", "error"],
+            outputs=["date", "error"],
             version='0.8.2',
             license="MIT + CC",
             author="Kaushik Iyer, Risto Kowaczewski",

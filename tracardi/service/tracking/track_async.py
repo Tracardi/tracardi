@@ -80,9 +80,10 @@ async def process_track_data(source: EventSource,
         # FROM THIS POINT EVENTS AND SESSION SHOULD NOT BE MUTATED
         # ----------------------------------------------
 
-        f_session = FrozenSession(**session.model_dump())
-        f_session.set_meta_data(session.get_meta_data())
-        session = f_session
+        # TODO is changed with static profile
+        # f_session = FrozenSession(**session.model_dump())
+        # f_session.set_meta_data(session.get_meta_data())
+        # session = f_session
 
         # Async storage
 
