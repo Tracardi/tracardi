@@ -362,7 +362,7 @@ class TrackerPayload(BaseModel):
 
             # Assign profile to session
 
-            session.profile.id = profile.id
+            session.profile = Entity(id=profile.id)
 
         return profile, session
 
