@@ -65,8 +65,6 @@ def save_profile_cache(profile: Optional[Profile]):
 
         index = profile.get_meta_data()
 
-        print(f"Caching with profile index {index}")
-
         try:
             if index is None:
                 raise ValueError("Empty profile index.")
@@ -88,7 +86,7 @@ def save_profile_cache(profile: Optional[Profile]):
             )
 
         except ValueError as e:
-            logger.error(f"Saving to cache filed: Detail: {str(e)}")
+            logger.error(f"Saving to cache failed: Detail: {str(e)}")
 
 
 
