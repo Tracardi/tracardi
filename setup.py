@@ -74,7 +74,7 @@ setup(
         'requests',
         'mysql-connector-python==8.0.29',
         # Com requirements
-        'weaviate-client==3.15.6',
+        'weaviate-client==3.23.2',
         'twilio==8.2.1',
         'huey',
         'pulsar-client==3.3.0'
