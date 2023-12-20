@@ -29,7 +29,7 @@ class ResourceMetadata(BaseModel):
     description: str
     traffic: str
     icon: str
-    tags: List[str]
+    tags: List[str] = []
     submit: List[str] = None
     requirements: Optional[dict] = {}
     context: Optional[dict] = {}
@@ -75,7 +75,7 @@ class ProDestinationPackage(BaseModel):
 class ProService(BaseModel):
     service: ProServicePayload
     destination: Optional[ProDestinationPackage] = None
-    plugins: List[dict] = None  # this is Plugin
+    plugins: Optional[List[dict]] = None  # this is Plugin
 
 
 class ProMicroService(ProService):

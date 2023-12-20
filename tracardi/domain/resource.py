@@ -71,7 +71,7 @@ class Resource(Entity):
                 test=pro.service.form.data,
                 production=pro.service.form.data
             ),
-            destination=DestinationConfig(**pro.destination.model_dump())
+            destination=DestinationConfig(**pro.destination.model_dump()) if pro.destination is not None else None
         )
 
 

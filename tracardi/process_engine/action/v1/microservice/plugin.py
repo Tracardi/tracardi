@@ -58,7 +58,7 @@ class MicroserviceAction(ActionRunner):
                     json=config) as remote_response:
                 result = await remote_response.json()
                 if remote_response.status != 200:
-                    return Result(port="error", value=str(result))
+                    return Result(port="error", value={"message": str(result)})
 
                 microservice_response = MicroserviceResponse(**result)
 
