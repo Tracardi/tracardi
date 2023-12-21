@@ -19,6 +19,7 @@ Version: 0.8.2
   * String to date - converts string to date
   * String replace
   * Tag Mailchimp Contact
+  * Time delay
 * Profile Metrics
 * Workers
   * Entity expiration worker (pro)
@@ -37,6 +38,7 @@ Version: 0.8.2
 * All records have insert, create, update timestamps. 
 * Info on fields updates.
 * Updates profile details page.
+* Numerous error fixes
 
 
 Version: 0.8.1
