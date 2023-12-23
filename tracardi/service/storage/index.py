@@ -21,6 +21,28 @@ class Index:
         self.single = single
         self.partitioning = 'month' if partitioning is None else partitioning
 
+    @staticmethod
+    def _get_quarter(month):
+        """
+        Get the quarter of the year based on the month.
+
+        Args:
+        month (int): The month number (1-12).
+
+        Returns:
+        int: The quarter of the year (1-4).
+        """
+        if 1 <= month <= 3:
+            return 1
+        elif 4 <= month <= 6:
+            return 2
+        elif 7 <= month <= 9:
+            return 3
+        elif 10 <= month <= 12:
+            return 4
+        else:
+            raise ValueError("Invalid month. Month should be between 1 and 12.")
+
     def _multi_index_suffix(self) -> str:
         """
         Current date suffix
@@ -37,7 +59,7 @@ class Index:
         elif self.partitioning == 'minute':
             return f"{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
         elif self.partitioning == 'quarter':
-            return f"{date.year}-q{(date.month % 4) + 1}"
+            return f"{date.year}-q{self._get_quarter(date.month)}"
         else:
             raise ValueError("Unknown partitioning. Expected: year, month, quarter, or day")
 

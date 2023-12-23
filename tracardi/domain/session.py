@@ -139,3 +139,8 @@ class Session(Entity):
         session.operation.new = True
 
         return session
+
+
+class FrozenSession(Session):
+    class Config:
+        frozen = True

@@ -9,6 +9,16 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
+    "tracardi.process_engine.action.v1.time.time_delay.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "reference_date": None,
+                "sign": "+",
+                "delay": "60"
+            },
+            resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.strings.string_replace.plugin": PluginMetadata(
         test=PluginTest(
             init={

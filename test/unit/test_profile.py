@@ -101,7 +101,7 @@ def test_data_fill():
                         "height": 0.0,
                         "weight": 0.0,
                         "shoe_number": 0.7}},
-                "contact": {"email": None, "phone": "string",
+                "contact": {"email": {}, "phone": {"main": "132435"},
                             "app": {"whatsapp": "string", "discord": "string", "slack": "string", "twitter": "string",
                                     "telegram": "string", "wechat": "string", "viber": "string", "signal": "string",
                                     "other": {}},

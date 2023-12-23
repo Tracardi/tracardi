@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 import time
 import logging
 
+from tracardi.domain.session import FrozenSession
 from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
@@ -76,8 +77,13 @@ async def process_track_data(source: EventSource,
             del tracker_payload.context['utm']
 
         # ----------------------------------------------
-        # FROM THIS POINT EVENTS SHOULD NOT BE MUTATED
+        # FROM THIS POINT EVENTS AND SESSION SHOULD NOT BE MUTATED
         # ----------------------------------------------
+
+        # TODO is changed with static profile
+        # f_session = FrozenSession(**session.model_dump())
+        # f_session.set_meta_data(session.get_meta_data())
+        # session = f_session
 
         # Async storage
 
@@ -122,7 +128,9 @@ async def process_track_data(source: EventSource,
                 },
                 "session": {
                     "id": get_entity_id(session)
-                }
+                },
+                "errors": [],
+                "warnings": []
             }
 
             # Async events
@@ -166,7 +174,8 @@ async def process_track_data(source: EventSource,
                     )
 
                     result["task"].append(tracker_payload.get_id())
-                    result['events'] += [event.id for event in sync_events]
+                    if tracker_payload.is_debugging_on():
+                        result['events'] += [event.id for event in sync_events]
             else:
                 # If disabled async storing or no pulsar add async events to sync and run it
                 sync_events += async_events
@@ -200,7 +209,9 @@ async def process_track_data(source: EventSource,
 
                 result['ux'] = ux
                 result['response'] = response
-                result['events'] += [event.id for event in sync_events]
+                if tracker_payload.is_debugging_on():
+                    result['events'] += [event.id for event in sync_events]
+                result["errors"] = []
 
             return result
 
@@ -231,18 +242,22 @@ async def process_track_data(source: EventSource,
                     storage=storage
                 ))
 
-        return {
-            "task": tracker_payload.get_id(),
-            "ux": ux,
-            "response": response,
-            "profile": {
-                "id": get_entity_id(profile)
-            },
-            "session": {
-                "id": get_entity_id(session)
+
+
+            return {
+                "task": tracker_payload.get_id(),
+                "ux": ux,
+                "response": response,
+                "events": [event.id for event in events] if tracker_payload.is_debugging_on() else [],
+                "profile": {
+                    "id": get_entity_id(profile)
+                },
+                "session": {
+                    "id": get_entity_id(session)
+                },
+                "errors": [],
+                "warnings": []
             }
-        }
 
     finally:
-        print("track_async", time.time() - tracking_start, flush=True)
-        print("---------------------", flush=True)
+        logger.info(f"Process time {time.time() - tracking_start}")

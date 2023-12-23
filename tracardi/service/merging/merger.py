@@ -74,17 +74,26 @@ def append(base, key, value, strategy: MergingStrategy):
 
             # Value types
 
-            if isinstance(value, list):
+            if isinstance(value, list):  # Value that we append or override is a list
                 if strategy.default_list_strategy == 'override':
                     base[key] = value
                 elif strategy.default_list_strategy == 'append':
+
+                    if isinstance(base[key], dict):
+                        raise ValueError(f"Can not append data to dictionary.")
+
                     validate_list_values(values=value)
-                    if isinstance(base[key], list):
+                    if isinstance(base[key], list):  # The current value is a list
                         base[key] += value
-                    elif not isinstance(base[key], (dict, object)):
+                    elif isinstance(base[key], (str, int, float, bool)):  # the current value is a primitive.
                         base[key] = [base[key]]
                         base[key] += value
-                    base[key] = list(set(value))
+                    elif isinstance(base[key], tuple):  # The current value is a list
+                        base[key] = list(base[key])  # Convert tuple to list
+                        base[key] += value  # Add value
+                    else:
+                        # Override if we do not know the type
+                        base[key] = value
 
                 else:
                     raise ValueError(f"Unknown merging strategy `{strategy.default_object_strategy}` for list.")

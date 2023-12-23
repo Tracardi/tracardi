@@ -36,7 +36,7 @@ def test_new_data_merging():
         assert merged_profile.traits['my-trait'] == 2
         assert merged_profile.traits['A'] == 5
         assert merged_profile.traits['B'] == "B"
-        assert merged_profile.traits['C'] == [1, 2]
+        assert merged_profile.traits['C'] == [1, 2]  # Here fails
         assert merged_profile.traits['D'] == [1, 2]
 
     asyncio.run(main())
@@ -49,7 +49,7 @@ def test_new_data_override_merging():
                 "id": "1",
                 "data": {
                     "pii": {"firstname": "Adam", "lastname": "Doe", },
-                    "devices": {"names": ['a', 'b', 'c']}
+                    "devices": {"push": ['a', 'b', 'c']}
                 },
                 "traits": {"custom": 1}
             }
@@ -73,6 +73,6 @@ def test_new_data_override_merging():
         assert merged_profile.data.pii.firstname == "Joe"
         assert merged_profile.data.pii.lastname == "Bee"
         assert merged_profile.traits['custom'] == 5
-        assert set(merged_profile.data.devices.names) == {'a', 'b', 'c'}
+        assert set(merged_profile.data.devices.push) == {'a', 'b', 'c'}
 
     asyncio.run(main())

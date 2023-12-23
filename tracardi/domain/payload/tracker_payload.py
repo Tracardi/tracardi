@@ -361,6 +361,10 @@ class TrackerPayload(BaseModel):
                 else:
                     session.properties = self.properties
 
+            # Assign profile to session
+
+            session.profile = Entity(id=profile.id)
+
         return profile, session
 
     def get_tracardi_data_referer(self) -> dict:

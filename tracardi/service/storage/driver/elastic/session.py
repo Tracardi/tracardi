@@ -126,13 +126,6 @@ async def count_online():
                         }
                     }
                 ]
-                # "must_not": [
-                #     {
-                #         "term": {
-                #             "source.id": source_id
-                #         }
-                #     }
-                # ]
             }
         },
         "aggs": {

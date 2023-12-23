@@ -13,11 +13,11 @@ def test_field_mapper():
         fm.batch = 1
         is_added = fm.add_field_mappings('event',
                                          [
-                                             Event(id=1, name="ev1", type="ev1", properties={"a": 1}, source=Entity(id="1"),
+                                             Event(id="1", name="ev1", type="ev1", properties={"a": 1}, source=Entity(id="1"),
                                                    metadata=EventMetadata(time=EventTime())),
-                                             Event(id=2, name="ev2", type="ev2", properties={"b": 1}, source=Entity(id="1"),
+                                             Event(id="2", name="ev2", type="ev2", properties={"b": 1}, source=Entity(id="1"),
                                                    metadata=EventMetadata(time=EventTime())),
-                                             Event(id=3, name="ev3", type="ev3", properties={"c": 1}, source=Entity(id="1"),
+                                             Event(id="3", name="ev3", type="ev3", properties={"c": 1}, source=Entity(id="1"),
                                                    metadata=EventMetadata(time=EventTime())),
                                          ])
         data = fm.get_field_mapping('event')
