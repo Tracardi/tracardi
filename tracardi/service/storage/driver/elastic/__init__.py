@@ -11,6 +11,5 @@ __all__ = [
     "session",
     "snapshot",
     "system",
-    "task",
     "user_log"
 ]

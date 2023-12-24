@@ -1,3 +1,4 @@
+from tracardi.service.storage.mysql.service.task_service import BackgroundTaskService
 from tracardi.service.utils.date import now_in_utc
 
 import asyncio
@@ -14,7 +15,6 @@ from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.domain import resource as resource_db
-from tracardi.service.storage.driver.elastic import task as task_db
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.worker.celery_worker import run_mysql_query_import_job
@@ -153,6 +153,9 @@ class MySQLQueryImporter(Importer):
             task_id=celery_task.id
         )
 
-        await task_db.upsert_task(task)
+        bts = BackgroundTaskService()
+        await bts.insert(task)
+
+        # await task_db.upsert_task(task)
 
         return task.id, celery_task.id
