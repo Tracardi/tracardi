@@ -163,17 +163,21 @@ class Event(NamedEntity):
     aux: dict = {}
 
     device: Optional[dict] = {}
-    os: Optional[dict] = {}
-    app: Optional[dict] = {}
-    hit: Optional[dict] = {}
-    # journey: Optional[dict] = {}
-    data: Optional[dict] = {}
-
     # device: Optional[Device] = Device.construct()
+
+    os: Optional[dict] = {}
     # os: Optional[OS] = OS.construct()
+
+    app: Optional[dict] = {}
     # app: Optional[Application] = Application.construct()
+
+    hit: Optional[dict] = {}
     # hit: Optional[Hit] = Hit.construct()
+
     journey: EventJourney = EventJourney.model_construct()
+    # journey: Optional[dict] = {}
+
+    data: Optional[dict] = {}
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
