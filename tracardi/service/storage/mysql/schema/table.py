@@ -53,7 +53,7 @@ class EventSourceTable(Base):
     description = Column(String(255))
     channel = Column(String(32))
     url = Column(String(255))
-    enabled = Column(Boolean)
+    enabled = Column(Boolean, default=False)
     locked = Column(Boolean)
     transitional = Column(Boolean)
     tags = Column(String(255))
@@ -96,7 +96,7 @@ class WorkflowTable(Base):
 
     lock = Column(Boolean)
     deployed = Column(Boolean, default=False)
-    debug_enabled = Column(Boolean)
+    debug_enabled = Column(Boolean, default=False)
     debug_logging_level = Column(String(32))
 
     tenant = Column(String(40))
@@ -126,7 +126,7 @@ class WorkflowTriggerTable(Base):
     source_id = Column(String(40), index=True)  # Nested 'keyword' fields
     source_name = Column(String(64))  # Nested 'text' fields with no string length mentioned
     properties = Column(JSON)  # 'object' in ES is mapped to 'JSON' in MySQL
-    enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
+    enabled = Column(Boolean, default=False)   # 'boolean' in ES is mapped to BOOLEAN in MySQL
     tags = Column(String(255), index=True)  # 'keyword' in ES defaults to 255 if no ignore_above is set
 
     __table_args__ = (
@@ -145,7 +145,7 @@ class ResourceTable(Base):
     name = Column(String(64), index=True)
     description = Column(String(255))
     credentials = Column(String(255))
-    enabled = Column(Boolean)
+    enabled = Column(Boolean, default=False)
     tags = Column(String(255), index=True)
     groups = Column(String(255))
     icon = Column(String(255))
@@ -205,11 +205,11 @@ class PluginTable(Base):
     plugin_spec_run_once_value = Column(String(64))
     plugin_spec_run_once_ttl = Column(Integer)
     plugin_spec_run_once_type = Column(String(64))
-    plugin_spec_run_once_enabled = Column(Boolean)
+    plugin_spec_run_once_enabled = Column(Boolean, default=False)
     plugin_spec_node_on_remove = Column(String(128))
     plugin_spec_node_on_create = Column(String(128))
     plugin_start = Column(Boolean)
-    settings_enabled = Column(Boolean)
+    settings_enabled = Column(Boolean, default=False)
     settings_hidden = Column(Boolean)
 
     __table_args__ = (
@@ -230,7 +230,7 @@ class DestinationTable(Base):
     destination = Column(JSON)
     condition = Column(Text)
     mapping = Column(JSON)
-    enabled = Column(Boolean)
+    enabled = Column(Boolean, default=False)
     on_profile_change_only = Column(Boolean)
     event_type_id = Column(String(40))
     event_type_name = Column(String(128))
@@ -298,7 +298,7 @@ class IdentificationPointTable(Base):
     event_type_id = Column(String(40))  # Nested 'keyword' field
     event_type_name = Column(String(128))  # Nested 'keyword' field
     fields = Column(JSON)  # 'flattened' type corresponds to JSON
-    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+    enabled = Column(Boolean, default=False)   # 'boolean' type in ES corresponds to BOOLEAN in MySQL
     settings = Column(JSON)  # 'flattened' type corresponds to JSON
 
     # Add tenant and production fields for multi-tenancy, assuming they are required
@@ -348,7 +348,7 @@ class EventValidationTable(Base):
     validation = Column(JSON)  # 'object' type in Elasticsearch
     tags = Column(String(128))  # 'keyword' type in Elasticsearch
     event_type = Column(String(64))  # 'keyword' type in Elasticsearch
-    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+    enabled = Column(Boolean, default=False)   # 'boolean' type in Elasticsearch
 
     tenant = Column(String(40))  # Additional field for multi-tenancy
     production = Column(Boolean)  # Additional field for multi-tenancy
@@ -365,7 +365,7 @@ class ConsentTypeTable(Base):
     description = Column(Text)  # 'text' type in Elasticsearch
     revokable = Column(Boolean)  # 'boolean' type in Elasticsearch
     default_value = Column(String(255))  # 'keyword' type in Elasticsearch
-    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+    enabled = Column(Boolean, default=False)   # 'boolean' type in Elasticsearch
     tags = Column(String(128))  # 'keyword' type in Elasticsearch
     required = Column(Boolean)  # 'boolean' type in Elasticsearch
     auto_revoke = Column(String(128))  # 'keyword' type in Elasticsearch
@@ -388,7 +388,7 @@ class EventReshapingTable(Base):
     event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
     event_source_id = Column(String(40))  # Nested 'keyword' type defaults to VARCHAR(255)
     event_source_name = Column(String(128))  # Nested 'keyword' type defaults to VARCHAR(255)
-    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+    enabled = Column(Boolean, default=False)   # 'boolean' type in ES corresponds to BOOLEAN in MySQL
 
     tenant = Column(String(40))  # Additional field for multi-tenancy
     production = Column(Boolean)  # Additional field for multi-tenancy
@@ -406,7 +406,7 @@ class EventMappingTable(Base):
     event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
     tags = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
     journey = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
-    enabled = Column(Boolean)  # 'boolean' in ES is the same as Boolean in MySQL
+    enabled = Column(Boolean, default=False)   # 'boolean' in ES is the same as Boolean in MySQL
     index_schema = Column(JSON)  # 'flattened' type in ES is similar to JSON in MySQL
 
     # Additional fields for multi-tenancy
@@ -427,7 +427,7 @@ class EventToProfileMappingTable(Base):
     event_type_id = Column(String(40))  # Nested 'keyword' type defaults to VARCHAR(255)
     event_type_name = Column(String(128))  # Nested 'keyword' type defaults to VARCHAR(255)
     tags = Column(String(255))  # 'keyword' type defaults to VARCHAR(255)
-    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to BOOLEAN in MySQL
+    enabled = Column(Boolean, default=False)   # 'boolean' type in ES corresponds to BOOLEAN in MySQL
     config = Column(JSON)  # 'flattened' type in ES corresponding to JSON in MySQL
     event_to_profile = Column(JSON)  # 'flattened' type in ES corresponding to JSON in MySQL
 
@@ -447,7 +447,7 @@ class EventDataComplianceTable(Base):
     event_type_id = Column(String(40))  # Nested 'keyword' field named 'id'
     event_type_name = Column(String(64))  # Nested 'keyword' field named 'name'
     settings = Column(JSON)  # 'flattened' type in Elasticsearch maps to JSON
-    enabled = Column(Boolean)  # 'boolean' type in Elasticsearch
+    enabled = Column(Boolean, default=False)   # 'boolean' type in Elasticsearch
 
     tenant = Column(String(40))  # Additional field for multi-tenancy
     production = Column(Boolean)  # Additional field for multi-tenancy
@@ -466,7 +466,7 @@ class ActivationTable(Base):
     activation_class = Column(String(128))
     audience_query = Column(Text)
     mapping = Column(JSON)
-    enabled = Column(Boolean)
+    enabled = Column(Boolean, default=False)
 
     tenant = Column(String(40))
     production = Column(Boolean)
@@ -482,10 +482,10 @@ class SegmentTable(Base):
     id = Column(String(40))  # 'keyword' type with ignore_above
     name = Column(Text)  # 'text' type in ES maps to Text in MySQL
     description = Column(Text)  # 'text' type in ES maps to Text in MySQL
-    event_type = Column(String(64))  # 'keyword' type defaults to VARCHAR(255)
-    condition = Column(Text)  # 'keyword' type in ES defaults to VARCHAR(255)
-    enabled = Column(Boolean)  # 'boolean' in ES is mapped to BOOLEAN in MySQL
-    machine_name = Column(String(128))  # 'keyword' type defaults to VARCHAR(255)
+    event_type = Column(String(64), default=None)
+    condition = Column(Text)
+    enabled = Column(Boolean, default=False)
+    machine_name = Column(String(128))
 
     tenant = Column(String(40))
     production = Column(Boolean)
@@ -546,7 +546,7 @@ class ImportTable(Base):
     description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
     module = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
     config = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
-    enabled = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
+    enabled = Column(Boolean, default=False)   # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
     transitional = Column(Boolean)  # 'boolean' type in ES corresponds to 'BOOLEAN' in MySQL
     api_url = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
     event_source_id = Column(String(40))  # Nested 'keyword' field as 'VARCHAR'
@@ -567,7 +567,7 @@ class WorkflowSegmentationTriggerTable(Base):
     timestamp = Column(DateTime)  # 'date' type in ES corresponds to 'DateTime' in MySQL
     name = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
     description = Column(Text)  # 'text' type in ES corresponds to 'VARCHAR' in MySQL
-    enabled = Column(Boolean)  # 'boolean' in ES is the same as in MySQL
+    enabled = Column(Boolean, default=False)   # 'boolean' in ES is the same as in MySQL
     type = Column(String(32))  # 'keyword' type with ignore_above as max String length
     condition = Column(String(255))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL
     operation = Column(String(32))  # 'keyword' type with ignore_above as max String length

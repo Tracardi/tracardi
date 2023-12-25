@@ -1,3 +1,5 @@
+from typing import Optional
+
 from tracardi.context import get_context
 from tracardi.domain.segment import Segment
 from tracardi.service.storage.mysql.schema.table import SegmentTable
@@ -19,7 +21,11 @@ def map_to_segment_table(segment: Segment) -> SegmentTable:
         production=context.production
     )
 
-def map_to_segment(segment_table: SegmentTable) -> Segment:
+def map_to_segment(segment_table: Optional[SegmentTable]) -> Optional[Segment]:
+
+    if not segment_table:
+        return None
+
     return Segment(
         id=segment_table.id,
         name=segment_table.name,
