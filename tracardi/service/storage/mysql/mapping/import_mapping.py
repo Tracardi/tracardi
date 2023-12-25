@@ -1,3 +1,5 @@
+from typing import Optional
+
 from tracardi.context import get_context
 from tracardi.domain.import_config import ImportConfig
 from tracardi.service.storage.mysql.schema.table import ImportTable
@@ -22,7 +24,11 @@ def map_to_import_config_table(import_config: ImportConfig) -> ImportTable:
         event_type=import_config.event_type
     )
 
-def map_to_import_config(import_table: ImportTable) -> ImportConfig:
+def map_to_import_config(import_table: Optional[ImportTable]) -> Optional[ImportConfig]:
+
+    if not import_table:
+        return None
+
     return ImportConfig(
         id=import_table.id,
         name=import_table.name,

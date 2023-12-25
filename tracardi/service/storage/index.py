@@ -292,8 +292,8 @@ class Resource(metaclass=Singleton):
                              mapping="mappings/settings-index.json"),
             "segment": Index(staging=True, multi_index=False, index="tracardi-segment",
                              mapping="mappings/segment-index.json"),
-            "import": Index(staging=False, multi_index=False, index="tracardi-import",
-                            mapping="mappings/import-index.json"),
+            # "import": Index(staging=False, multi_index=False, index="tracardi-import",
+            #                 mapping="mappings/import-index.json"),
             # "task": Index(staging=False, multi_index=False, index="tracardi-task", mapping="mappings/task-index.json"),
 
             # "event-management": Index(staging=True,
