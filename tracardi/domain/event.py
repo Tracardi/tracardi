@@ -77,7 +77,7 @@ class EventProduct(BaseModel):
     sku: Optional[str] = None
     category: Optional[str] = None
     brand: Optional[str] = None
-    variant: Optional[str] = None
+    variant: Optional[EventProductVariant] = None
     price: Optional[float] = 0
     quantity: Optional[int] = 0
     position: Optional[int] = 0
@@ -126,6 +126,7 @@ class EventPromotion(BaseModel):
 
 class EventMarketing(BaseModel):
     coupon: Optional[str] = None
+    channel: Optional[str] = None
     promotion: Optional[EventPromotion] = EventPromotion()
 
 
