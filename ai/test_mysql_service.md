@@ -34,7 +34,7 @@ class Bridge(NamedEntity):
     manual: Optional[str] = None
 ```
 
-This is the example of a service class:
+This is the example of a service class dependency:
 
 ```python
 from typing import List
@@ -303,7 +303,11 @@ class TableService:
                 await session.execute(
                     delete(table).where(where)
                 )
+```
 
+This is an example of service class.
+
+```python
 class BridgeService(TableService):
 
     async def load_all(self) -> SelectResult:
@@ -330,4 +334,182 @@ class BridgeService(TableService):
 
 ```
 
-Your task is to write a pytest test that tests the `BridgeService` class.
+Here is an example of ready pytest TEST:
+
+```python
+import pytest
+from uuid import uuid4
+
+from tracardi.context import ServerContext, Context
+from tracardi.domain.bridge import Bridge
+from tracardi.service.storage.mysql.service.bridge_service import BridgeService
+
+
+@pytest.mark.asyncio
+# Test for loading all bridges
+async def test_bridges():
+    with ServerContext(Context(production=False)):  #  this is required
+        service = BridgeService()
+        bridge_id = uuid4().hex
+        try:
+
+            await service.insert(Bridge(
+                id=bridge_id,
+                name='test',
+                type='rest'
+            ))
+
+            bridges = await service.load_all()
+            assert bridges.has_multiple_records()
+            bridge = await service.load_by_id(bridge_id)
+            assert bridge.rows.id == bridge_id
+        finally:  # Finally clean all the inserted data
+            await service.delete_by_id(bridge_id)
+            bridge = await service.load_by_id(bridge_id)
+            assert bridge.exists() is False
+```
+
+Using the above examples your task is to write full functional pytest test that tests the `DestinationService` class.
+The code of the class if below together with tabel class and domain class. Write pytest that writes tests for all
+methods but in one test. Do not forget to put: with ServerContext(Context(production=True)): before all tests it is required.
+
+```python
+import logging
+from tracardi.config import tracardi
+from tracardi.domain.destination import Destination
+from tracardi.exceptions.log_handler import log_handler
+from tracardi.service.setup.setup_resources import get_resource_types
+from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table
+from tracardi.service.storage.mysql.schema.table import DestinationTable
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.utils.select_result import SelectResult
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
+
+
+class DestinationService(TableService):
+
+
+    async def load_all(self) -> SelectResult:
+        return await self._load_all(DestinationTable)
+
+    async def load_by_id(self, destination_id: str) -> SelectResult:
+        return await self._load_by_id(DestinationTable, primary_id=destination_id)
+
+    async def delete_by_id(self, destination_id: str) -> str:
+        return await self._delete_by_id(DestinationTable, primary_id=destination_id)
+
+    async def insert(self, destination: Destination):
+        return await self._replace(DestinationTable, map_to_destination_table(destination))
+
+
+    # Custom
+
+    async def load_event_destinations(self, event_type: str, source_id: str) -> SelectResult:
+        where = where_tenant_context(
+            DestinationTable,
+            DestinationTable.enabled == True,
+            DestinationTable.on_profile_change_only == False,
+            DestinationTable.source_id == source_id,
+            DestinationTable.event_type_id == event_type,
+        )
+        return await self._select_query(DestinationTable, where=where)
+
+    async def load_profile_destinations(self) -> SelectResult:
+        where = where_tenant_context(
+            DestinationTable,
+            DestinationTable.enabled == True,
+            DestinationTable.on_profile_change_only == True
+        )
+        return await self._select_query(DestinationTable, where=where)
+
+    @staticmethod
+    def get_destination_types():
+        resource_types = get_resource_types()
+        for resource_type in resource_types:
+            if resource_type.destination is not None:
+                yield resource_type.destination.package, resource_type.dict()
+                
+
+    async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
+        if text:
+            where = where_tenant_context(
+                DestinationTable,
+                DestinationTable.name.like(f"%{text}%")
+            )
+        else:
+            where = where_tenant_context(DestinationTable)
+        return await self._select_query(DestinationTable,
+                                        where=where,
+                                        order_by=DestinationTable.name,
+                                        limit=limit,
+                                        offset=start)
+                
+
+```
+
+```python
+class DestinationConfig(BaseModel):
+    package: str
+    init: dict = {}
+    form: dict = {}
+
+    @field_validator("package")
+    @classmethod
+    def package_not_empty(cls, value):
+        if len(value) == 0:
+            raise ValueError("Destination package cannot be empty")
+        return value
+
+    def encode(self):
+        return b64_encoder(self)
+
+    @staticmethod
+    def decode(encoded_string) -> "DestinationConfig":
+        return DestinationConfig(
+            **b64_decoder(encoded_string)
+        )
+
+
+class Destination(NamedEntity):
+    description: Optional[str] = ""
+    destination: DestinationConfig
+    enabled: bool = False
+    tags: List[str] = []
+    mapping: dict = {}
+    condition: Optional[str] = ""
+    on_profile_change_only: Optional[bool] = True
+    resource: Entity
+    event_type: Optional[NamedEntity] = None
+    source: NamedEntity
+```
+
+```python
+class DestinationTable(Base):
+    __tablename__ = 'destination'
+
+    id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
+    name = Column(String(128), index=True)
+
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    description = Column(Text)
+    destination = Column(JSON)
+    condition = Column(Text)
+    mapping = Column(JSON)
+    enabled = Column(Boolean, default=False)
+    on_profile_change_only = Column(Boolean)
+    event_type_id = Column(String(40))
+    event_type_name = Column(String(128))
+    source_id = Column(String(40))
+    source_name = Column(String(128))
+    resource_id = Column(String(40), index=True)
+    tags = Column(String(255))
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+```

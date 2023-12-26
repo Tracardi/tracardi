@@ -2,7 +2,6 @@ __all__ = [
     "console_log",
     "entity",
     "event",
-    "helper",
     "log",
     "profile",
     "raw",
