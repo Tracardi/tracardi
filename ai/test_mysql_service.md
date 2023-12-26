@@ -369,147 +369,121 @@ async def test_bridges():
             assert bridge.exists() is False
 ```
 
-Using the above examples your task is to write full functional pytest test that tests the `DestinationService` class.
+Using the above examples your task is to write full functional pytest test that tests the `ConsentDataComplianceService` class.
 The code of the class if below together with tabel class and domain class. Write pytest that writes tests for all
 methods but in one test. Do not forget to put: with ServerContext(Context(production=True)): before all tests it is required.
 
 ```python
 import logging
+
 from tracardi.config import tracardi
-from tracardi.domain.destination import Destination
+from tracardi.domain.consent_field_compliance import EventDataCompliance
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.setup.setup_resources import get_resource_types
-from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table
-from tracardi.service.storage.mysql.schema.table import DestinationTable
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.mapping.event_data_compliance_mapping import map_to_event_data_compliance_table
+from tracardi.service.storage.mysql.schema.table import EventDataComplianceTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-class DestinationService(TableService):
+class ConsentDataComplianceService(TableService):
 
-
-    async def load_all(self) -> SelectResult:
-        return await self._load_all(DestinationTable)
-
-    async def load_by_id(self, destination_id: str) -> SelectResult:
-        return await self._load_by_id(DestinationTable, primary_id=destination_id)
-
-    async def delete_by_id(self, destination_id: str) -> str:
-        return await self._delete_by_id(DestinationTable, primary_id=destination_id)
-
-    async def insert(self, destination: Destination):
-        return await self._replace(DestinationTable, map_to_destination_table(destination))
-
-
-    # Custom
-
-    async def load_event_destinations(self, event_type: str, source_id: str) -> SelectResult:
-        where = where_tenant_context(
-            DestinationTable,
-            DestinationTable.enabled == True,
-            DestinationTable.on_profile_change_only == False,
-            DestinationTable.source_id == source_id,
-            DestinationTable.event_type_id == event_type,
-        )
-        return await self._select_query(DestinationTable, where=where)
-
-    async def load_profile_destinations(self) -> SelectResult:
-        where = where_tenant_context(
-            DestinationTable,
-            DestinationTable.enabled == True,
-            DestinationTable.on_profile_change_only == True
-        )
-        return await self._select_query(DestinationTable, where=where)
-
-    @staticmethod
-    def get_destination_types():
-        resource_types = get_resource_types()
-        for resource_type in resource_types:
-            if resource_type.destination is not None:
-                yield resource_type.destination.package, resource_type.dict()
-                
-
-    async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
-        if text:
+    async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
+        where = None
+        if search:
             where = where_tenant_context(
-                DestinationTable,
-                DestinationTable.name.like(f"%{text}%")
+                EventDataComplianceTable,
+                EventDataComplianceTable.name.like(f'%{search}%')
+            )
+
+        return await self._select_query(EventDataComplianceTable,
+                                        where=where,
+                                        order_by=EventDataComplianceTable.name,
+                                        limit=limit,
+                                        offset=offset)
+
+    async def load_by_id(self, data_compliance_id: str) -> SelectResult:
+        return await self._load_by_id(EventDataComplianceTable, primary_id=data_compliance_id)
+
+    async def delete_by_id(self, data_compliance_id: str) -> str:
+        return await self._delete_by_id(EventDataComplianceTable, primary_id=data_compliance_id)
+
+    async def insert(self, consent_data_compliance: EventDataCompliance):
+        return await self._replace(EventDataComplianceTable, map_to_event_data_compliance_table(consent_data_compliance))
+
+    async def load_by_event_type(self, event_type_id: str, enabled_only: bool = True):
+        if enabled_only:
+            where = where_tenant_context(
+                EventDataComplianceTable,
+                EventDataComplianceTable.event_type_id == event_type_id,
+                EventDataComplianceTable.enabled == enabled_only
             )
         else:
-            where = where_tenant_context(DestinationTable)
-        return await self._select_query(DestinationTable,
+            where = where_tenant_context(
+                EventDataComplianceTable,
+                EventDataComplianceTable.event_type_id == event_type_id
+            )
+
+        return await self._select_query(EventDataComplianceTable,
                                         where=where,
-                                        order_by=DestinationTable.name,
-                                        limit=limit,
-                                        offset=start)
+                                        order_by=EventDataComplianceTable.name)
+
                 
 
 ```
 
 ```python
-class DestinationConfig(BaseModel):
-    package: str
-    init: dict = {}
-    form: dict = {}
+from typing import List, Optional
 
-    @field_validator("package")
-    @classmethod
-    def package_not_empty(cls, value):
-        if len(value) == 0:
-            raise ValueError("Destination package cannot be empty")
-        return value
+from pydantic import BaseModel
 
-    def encode(self):
-        return b64_encoder(self)
-
-    @staticmethod
-    def decode(encoded_string) -> "DestinationConfig":
-        return DestinationConfig(
-            **b64_decoder(encoded_string)
-        )
+from tracardi.domain.entity import Entity
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.ref_value import RefValue
 
 
-class Destination(NamedEntity):
+class ConsentFieldComplianceSetting(BaseModel):
+    action: str  # Remove, Hash, Do nothing
+    field: RefValue
+    consents: List[NamedEntity]
+
+    def get_consents(self) -> set:
+        return {item.id for item in self.consents}
+
+    def complies_to_consents(self, profile_consents: set) -> bool:
+        required_consents = self.get_consents()
+        return required_consents.intersection(profile_consents) == required_consents
+
+
+class EventDataCompliance(Entity):
+    name: str
     description: Optional[str] = ""
-    destination: DestinationConfig
-    enabled: bool = False
-    tags: List[str] = []
-    mapping: dict = {}
-    condition: Optional[str] = ""
-    on_profile_change_only: Optional[bool] = True
-    resource: Entity
-    event_type: Optional[NamedEntity] = None
-    source: NamedEntity
+    event_type: NamedEntity
+    settings: List[ConsentFieldComplianceSetting]  # Flattened ES field
+    enabled: Optional[bool] = False
+
 ```
 
 ```python
-class DestinationTable(Base):
-    __tablename__ = 'destination'
+class EventDataComplianceTable(Base):
+    __tablename__ = 'event_data_compliance'
 
-    id = Column(String(40))  # 'keyword' with ignore_above maps to VARCHAR with length
-    name = Column(String(128), index=True)
+    id = Column(String(40))  # 'keyword' with 'ignore_above' 64
+    name = Column(String(128))  # 'keyword' type in Elasticsearch
+    description = Column(Text)  # 'keyword' type in Elasticsearch
+    event_type_id = Column(String(40))  # Nested 'keyword' field named 'id'
+    event_type_name = Column(String(64))  # Nested 'keyword' field named 'name'
+    settings = Column(JSON)  # 'flattened' type in Elasticsearch maps to JSON
+    enabled = Column(Boolean, default=False)   # 'boolean' type in Elasticsearch
 
-    tenant = Column(String(40))
-    production = Column(Boolean)
-
-    description = Column(Text)
-    destination = Column(JSON)
-    condition = Column(Text)
-    mapping = Column(JSON)
-    enabled = Column(Boolean, default=False)
-    on_profile_change_only = Column(Boolean)
-    event_type_id = Column(String(40))
-    event_type_name = Column(String(128))
-    source_id = Column(String(40))
-    source_name = Column(String(128))
-    resource_id = Column(String(40), index=True)
-    tags = Column(String(255))
+    tenant = Column(String(40))  # Additional field for multi-tenancy
+    production = Column(Boolean)  # Additional field for multi-tenancy
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
 ```

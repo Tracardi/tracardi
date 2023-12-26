@@ -1,14 +1,21 @@
 from uuid import uuid4
 
+import asyncio
 import pytest
 
 from tracardi.context import ServerContext, Context
 from tracardi.domain.consent_type import ConsentType
 from tracardi.service.storage.mysql.service.consent_type_service import ConsentTypeService
 
+@pytest.fixture
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 @pytest.mark.asyncio
-async def test_consent_types():
+async def test_consent_types(event_loop):
+    asyncio.set_event_loop(event_loop)
     with ServerContext(Context(production=True)):  # Required context
         service = ConsentTypeService()
         consent_type_id = str(uuid4())

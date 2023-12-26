@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from uuid import uuid4
 
@@ -5,10 +6,17 @@ from tracardi.context import ServerContext, Context
 from tracardi.domain.bridge import Bridge
 from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 
+@pytest.fixture
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 @pytest.mark.asyncio
 # Test for loading all bridges
-async def test_bridges():
+async def test_bridges(event_loop):
+    asyncio.set_event_loop(event_loop)
+
     with ServerContext(Context(production=False)):
         service = BridgeService()
         bridge_id = uuid4().hex

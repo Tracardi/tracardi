@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+import asyncio
 import pytest
 
 from tracardi.context import ServerContext, Context
@@ -7,9 +8,17 @@ from tracardi.domain.flow_action_plugin import FlowActionPlugin
 from tracardi.service.plugin.domain.register import Spec, Plugin, MetaData
 from tracardi.service.storage.mysql.service.action_plugin_service import ActionPluginService
 
+@pytest.fixture
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 @pytest.mark.asyncio
-async def test_load_all_plugins():
+async def test_load_all_plugins(event_loop):
+
+    asyncio.set_event_loop(event_loop)
+
     with ServerContext(Context(production=True)):
         service = ActionPluginService()
         plugin_id = str(uuid4())
