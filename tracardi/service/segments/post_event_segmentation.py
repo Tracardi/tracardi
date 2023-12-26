@@ -1,5 +1,5 @@
 import logging
-from typing import Callable
+from typing import Callable, List
 
 from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
@@ -32,11 +32,9 @@ async def _segment(profile, session, event_types, load_segments):
 
         # todo segments are loaded one by one - maybe it is possible to load it at once
         # todo segments are loaded event if they are disabled. It is checked later. Maybe we can filter it here.
-        segments = await load_segments(event_type, limit=500)
+        segments: List[Segment] = await load_segments(event_type, limit=500)
 
         for segment in segments:
-
-            segment = Segment(**segment)
 
             if segment.enabled is False:
                 continue
@@ -46,9 +44,9 @@ async def _segment(profile, session, event_types, load_segments):
             try:
                 condition = Condition()
                 if await condition.evaluate(segment.condition, flat_profile):
-                    segments = set(profile.segments)
-                    segments.add(segment_id)
-                    profile.segments = list(segments)
+                    _segments = set(profile.segments)
+                    _segments.add(segment_id)
+                    profile.segments = list(_segments)
                     # This needs to be done to trigger workflow. Segment is already added to the profile
                     trigger_segment_workflow(profile, session, segment_id)
 

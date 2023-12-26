@@ -1,8 +1,12 @@
 import logging
 
 from typing import List, Tuple, Optional
+
+from tracardi.domain.segment import Segment
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
+from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segment
+from tracardi.service.storage.mysql.service.segment_service import SegmentService
 from tracardi.service.tracking.destination.dispatcher import sync_destination
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
@@ -16,7 +20,6 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.segments.post_event_segmentation import post_ev_segment
-from tracardi.service.storage.driver.elastic import segment as segment_db
 from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
@@ -29,6 +32,16 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 cache = CacheManager()
+
+
+async def _load_segments(event_type, limit=500) -> List[Segment]:
+    ss = SegmentService()
+    records = await ss.load_by_event_type(event_type, limit)
+
+    if not records.exists():
+        return []
+
+    return records.map_to_objects(map_to_segment)
 
 
 async def trigger_workflows(profile: Profile,
@@ -81,7 +94,7 @@ async def trigger_workflows(profile: Profile,
         await post_ev_segment(profile,
                               session,
                               [event.type for event in events],
-                              segment_db.load_segments)
+                              _load_segments)
 
     is_wf_triggered = isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered
 

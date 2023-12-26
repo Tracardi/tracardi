@@ -41,25 +41,18 @@ class SegmentService(TableService):
         return await self._replace(SegmentTable, map_to_segment_table(segment))
 
 
-    async def load_by_name(self, name: str, only_enabled: bool = True):
-        if only_enabled:
-            where = where_tenant_context(
-                SegmentTable,
-                SegmentTable.name == name,
-                SegmentTable.enabled == only_enabled
-            )
-        else:
-            where = where_tenant_context(
-                SegmentTable,
-                SegmentTable.name == name
-            )
+    async def load_enabled(self, only_enabled: bool = True):
+        where = where_tenant_context(
+            SegmentTable,
+            SegmentTable.enabled == only_enabled
+        )
 
         return await self._select_query(SegmentTable,
                                         where=where,
                                         order_by=SegmentTable.name)
 
     async def load_by_event_type(self, event_type, limit:int=500):
-        clause = or_(SegmentTable.event_type == event_type, SegmentTable.event_type is None)
+        clause = or_(SegmentTable.event_type == event_type, SegmentTable.event_type.is_(None))
         where = where_tenant_context(
                 SegmentTable,
                 clause
@@ -68,7 +61,3 @@ class SegmentService(TableService):
         return await self._select_query(SegmentTable,
                                         where=where,
                                         limit=limit)
-
-        # return await storage_manager(index="segment"). \
-        #     load_by_query_string(f"(NOT _exists_:eventType) OR eventType: \"{event_type}\"")
-
