@@ -7,7 +7,6 @@ __all__ = [
     "profile",
     "raw",
     "session",
-    "snapshot",
     "system",
     "user_log"
 ]
