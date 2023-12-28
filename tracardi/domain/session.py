@@ -22,15 +22,15 @@ class SessionTime(Time):
 
     def __init__(self, **data: Any):
 
-        if 'timestamp' not in data:
-            data['timestamp'] = datetime.timestamp(now_in_utc())
-
         if 'duration' not in data:
             data['duration'] = 0
 
         super().__init__(**data)
 
         self.weekday = self.insert.weekday()
+
+        if self.timestamp == 0:
+            self.timestamp = datetime.timestamp(now_in_utc())
 
 
 class SessionMetadata(BaseModel):

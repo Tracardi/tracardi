@@ -24,11 +24,11 @@ def trigger_segment_add(profile: Profile, session: Session, segments: Union[List
     if isinstance(segments, list):
         for segment in segments:
             profile.segments.append(segment)
-            trigger_segment_workflow(profile, session, segment)
+            # trigger_segment_workflow(profile, session, segment)
 
     elif isinstance(segments, str):
         profile.segments.append(segments)
-        trigger_segment_workflow(profile, session, segments)
+        # trigger_segment_workflow(profile, session, segments)
 
     return profile
 

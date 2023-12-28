@@ -55,8 +55,10 @@ class AddSegmentAction(ActionRunner):
                         profile = trigger_segment_add(profile, self.session, dot[self.config.segment])
 
                     else:
-                        return Result(value={"message": "Not acceptable segmentation type. "
-                                                        "Allowed type: string or list of strings"}, port="error")
+                        return Result(value={
+                            "message": "Not acceptable segmentation type. "
+                                       "Allowed type: string or list of strings"},
+                            port="error")
                 except KeyError as e:
                     return Result(value={"message": str(e)}, port="error")
 

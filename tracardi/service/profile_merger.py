@@ -5,6 +5,7 @@ from tracardi.service.tracking.storage.profile_storage import save_profile, dele
 from tracardi.domain.profile_data import ProfileData
 
 from .tracking.cache.profile_cache import delete_profile_cache, save_profile_cache
+from .utils.date import add_utc_time_zone_if_none
 from ..context import get_context
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.driver.elastic import event as event_db
@@ -206,16 +207,28 @@ class ProfileMerger:
                 time.visit.count += profile.metadata.time.visit.count
 
                 if isinstance(time.insert, datetime) and isinstance(profile.metadata.time.insert, datetime):
+
+                    time.insert = add_utc_time_zone_if_none(time.insert)
+                    profile.metadata.time.insert = add_utc_time_zone_if_none(profile.metadata.time.insert)
+
                     # Get earlier date
                     if time.insert > profile.metadata.time.insert:
                         time.insert = profile.metadata.time.insert
 
                 if isinstance(time.visit.current, datetime) and isinstance(profile.metadata.time.visit.current,
                                                                            datetime):
+
+                    time.visit.current = add_utc_time_zone_if_none(time.visit.current)
+                    profile.metadata.time.visit.current = add_utc_time_zone_if_none(profile.metadata.time.visit.current)
+
                     if time.visit.current < profile.metadata.time.visit.current:
                         time.visit.current = profile.metadata.time.visit.current
 
                 if isinstance(time.visit.last, datetime) and isinstance(profile.metadata.time.visit.last, datetime):
+
+                    time.visit.last = add_utc_time_zone_if_none(time.visit.last)
+                    profile.metadata.time.visit.last = add_utc_time_zone_if_none(profile.metadata.time.visit.last)
+
                     if time.visit.last < profile.metadata.time.visit.last:
                         time.visit.last = profile.metadata.time.visit.last
 
