@@ -67,7 +67,8 @@ async def process_track_data(source: EventSource,
             console_log
         )
 
-        logger.info(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
+        if profile:
+            logger.info(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
 
         # Clean up
         if 'location' in tracker_payload.context:
