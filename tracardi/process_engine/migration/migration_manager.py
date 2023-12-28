@@ -91,7 +91,8 @@ class MigrationManager:
 
     async def _get_partitioned_indices(self, template_name, production: bool):
         template = fr"{self.from_version}." \
-                   fr"{self.from_tenant}.{template_name}-[0-9]{'{4}'}-[0-9]+"
+                   fr"{self.from_tenant}.{template_name}-[0-9]{4}-([0-9]{1,2}|q[1-4])"
+
         if production:
             template = f"prod-{template}"
 
@@ -125,7 +126,7 @@ class MigrationManager:
 
                     # Todo should migrate to the same partition
 
-                    to_index = f"{schema.copy_index.to_index}{re.findall(r'-[0-9]{4}-[0-9]+', from_index)[0]}"
+                    to_index = f"{schema.copy_index.to_index}{re.findall(r'(-[0-9]{4}-[0-9]{1,2}|-[0-9]{4}-q[1-4])', from_index)[0]}"
 
                     to_index = self._get_single_indices(self.to_version,
                                                         self.to_tenant,
