@@ -2,7 +2,6 @@ from tracardi.context import get_context, ServerContext, Context
 from tracardi.domain.user import User
 from tracardi.service.storage.mysql.mapping.user_mapping import map_to_user_table, map_to_user
 from tracardi.service.storage.mysql.schema.table import UserTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json
 
 
 def test_valid_user_object():
@@ -31,7 +30,7 @@ def test_valid_user_object():
         assert result.roles == ','.join(user.roles)
         assert result.disabled == user.disabled
         assert result.expiration_timestamp == user.expiration_timestamp
-        assert result.preference == to_json(user.preference)
+        assert result.preference == user.preference
 
 
 def test_all_fields_mapped():
@@ -42,7 +41,7 @@ def test_all_fields_mapped():
         full_name="John Doe",
         email="john.doe@example.com",
         roles="admin,user",
-        preference='{"key": "value"}'
+        preference={"key": "value"}
     )
 
     expected_user = User(

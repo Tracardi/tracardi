@@ -2,7 +2,7 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.destination import Destination, DestinationConfig
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.mysql.schema.table import DestinationTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
+from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
 from tracardi.context import get_context
 
 def map_to_destination_table(destination: Destination) -> DestinationTable:
@@ -15,9 +15,9 @@ def map_to_destination_table(destination: Destination) -> DestinationTable:
         production=context.production,
 
         description=destination.description or "",
-        destination=to_json(destination.destination),
+        destination=from_model(destination.destination),
         condition=destination.condition or "",
-        mapping=to_json(destination.mapping),
+        mapping=destination.mapping,
         enabled=destination.enabled,
         on_profile_change_only=destination.on_profile_change_only,
         event_type_id=destination.event_type.id if destination.event_type else None,
@@ -34,9 +34,9 @@ def map_to_destination(destination_table: DestinationTable) -> Destination:
         id=destination_table.id,
         name=destination_table.name,
         description=destination_table.description or "",
-        destination=from_json(destination_table.destination, DestinationConfig),
+        destination=to_model(destination_table.destination, DestinationConfig),
         condition=destination_table.condition or "",
-        mapping=from_json(destination_table.mapping),
+        mapping=destination_table.mapping,
         enabled=destination_table.enabled if destination_table.enabled is not None else False,
         on_profile_change_only=destination_table.on_profile_change_only if destination_table.on_profile_change_only is not None else True,
         event_type=NamedEntity(

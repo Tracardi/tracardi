@@ -33,9 +33,9 @@ def test_valid_flow_record():
         assert workflow_table.description == "This is flow 1"
         assert workflow_table.type == "collection"
         assert workflow_table.projects == "General"
-        assert workflow_table.draft =="draft_flow_1"
-        assert workflow_table.prod == "prod_flow_1"
-        assert workflow_table.backup == "backup_flow_1"
+        assert workflow_table.draft =="draft_flow_1".encode()
+        assert workflow_table.prod == "prod_flow_1".encode()
+        assert workflow_table.backup == "backup_flow_1".encode()
         assert workflow_table.lock == True
         assert workflow_table.deployed == False
         assert workflow_table.production

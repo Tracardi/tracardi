@@ -106,7 +106,7 @@ Do not write any explanation only full code.
 
 # Elasticsearch index name
 
-task
+settings
 
 # Elasticsearch index mapping
 
@@ -124,31 +124,31 @@ task
     "dynamic": "strict",
     "properties": {
       "id": {
-        "type": "keyword", "ignore_above": 64
+        "type": "keyword",
+        "ignore_above": 48
       },
       "timestamp": {
         "type": "date"
       },
-      "status": {
-        "type": "keyword"
-      },
       "name": {
         "type": "keyword"
+      },
+      "description": {
+        "type": "text"
       },
       "type": {
         "type": "keyword"
       },
-      "progress": {
-        "type": "double"
+      "enabled": {
+        "type": "boolean"
       },
-      "task_id": {
-        "type": "keyword"
+      "content": {
+        "type": "object",
+        "dynamic": "true",
+        "enabled": false
       },
-      "params": {
+      "config": {
         "type": "flattened"
-      },
-      "event_type": {
-        "type": "keyword"
       }
     }
   },

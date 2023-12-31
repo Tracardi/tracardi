@@ -5,7 +5,7 @@ from tracardi.domain.ref_value import RefValue
 from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile_table, \
     map_to_event_to_profile
 from tracardi.service.storage.mysql.schema.table import EventToProfileMappingTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json
+from tracardi.service.storage.mysql.utils.serilizer import from_model
 
 
 def test_event_to_profile_table():
@@ -34,8 +34,8 @@ def test_event_to_profile_table():
         assert result.event_type_name == "Test Event Type"
         assert result.tags == "tag1,tag2"
         assert result.enabled is True
-        assert result.config == '{"key": "value"}'
-        assert result.event_to_profile == to_json([prof_map])
+        assert result.config == {"key": "value"}
+        assert result.event_to_profile == from_model([prof_map])
         assert result.production == get_context().production
 
 
@@ -49,8 +49,8 @@ def test_event_to_profile():
         event_type_name="Test Event Type",
         tags="tag1,tag2",
         enabled=True,
-        config='{"key": "value"}',
-        event_to_profile='[{"event": {"value": "event1", "ref": true}, "op": 1, "profile": {"value": "profile1", "ref": true}}]',
+        config={"key": "value"},
+        event_to_profile=[{"event": {"value": "event1", "ref": True}, "op": 1, "profile": {"value": "profile1", "ref": True}}],
         tenant="test",
         production=True
     )

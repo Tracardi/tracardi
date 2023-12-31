@@ -1,7 +1,6 @@
 from tracardi.context import get_context
 from tracardi.domain.task import Task
 from tracardi.service.storage.mysql.schema.table import TaskTable
-from tracardi.service.storage.mysql.utils.serilizer import from_json, to_json
 
 
 def map_to_task_table(task: Task) -> TaskTable:
@@ -17,7 +16,7 @@ def map_to_task_table(task: Task) -> TaskTable:
         type=task.type,
         progress=task.progress,
         task_id=task.task_id,
-        params=to_json(task.params),
+        params=task.params,
     )
 
 
@@ -30,5 +29,5 @@ def map_to_task(task_table: TaskTable) -> Task:
         type=task_table.type,
         progress=task_table.progress,
         task_id=task_table.task_id,
-        params=from_json(task_table.params),
+        params=task_table.params,
     )

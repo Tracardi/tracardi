@@ -5,7 +5,7 @@ from tracardi.domain.ref_value import RefValue
 from tracardi.service.storage.mysql.mapping.identificcation_point_mapping import map_to_identification_point_table, \
     map_to_identification_point
 from tracardi.service.storage.mysql.schema.table import IdentificationPointTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
+from tracardi.service.storage.mysql.utils.serilizer import to_json, from_model
 
 
 def test_returns_instance_of_identification_point_table():
@@ -36,9 +36,9 @@ def test_returns_instance_of_identification_point_table():
         assert result.source_name == identification_point.source.name
         assert result.event_type_id == identification_point.event_type.id
         assert result.event_type_name == identification_point.event_type.name
-        assert result.fields == to_json(identification_point.fields)
+        assert result.fields == from_model(identification_point.fields)
         assert result.enabled is False
-        assert result.settings == to_json(identification_point.settings)
+        assert result.settings == identification_point.settings
 
 def test_correctly_map_identification_point_table_to_identification_point():
     fields = [
@@ -56,8 +56,8 @@ def test_correctly_map_identification_point_table_to_identification_point():
         source_name="Source",
         event_type_id="789",
         event_type_name="Event",
-        fields=to_json(fields),
-        settings='{"conflict_aux_field": "conflict"}'
+        fields=from_model(fields),
+        settings={"conflict_aux_field": "conflict"}
     )
 
     identification_point = map_to_identification_point(identification_point_table)

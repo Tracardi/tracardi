@@ -3,7 +3,6 @@ from typing import Optional
 from tracardi.context import get_context
 from tracardi.domain.import_config import ImportConfig
 from tracardi.service.storage.mysql.schema.table import ImportTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
 from tracardi.domain.named_entity import NamedEntity
 
 def map_to_import_config_table(import_config: ImportConfig) -> ImportTable:
@@ -15,7 +14,7 @@ def map_to_import_config_table(import_config: ImportConfig) -> ImportTable:
         name=import_config.name,
         description=import_config.description or "",
         module=import_config.module,
-        config=to_json(import_config.config),
+        config=import_config.config,
         enabled=import_config.enabled,
         transitional=False,
         api_url=import_config.api_url,
@@ -34,7 +33,7 @@ def map_to_import_config(import_table: Optional[ImportTable]) -> Optional[Import
         name=import_table.name,
         description=import_table.description or "",
         module=import_table.module,
-        config=from_json(import_table.config),
+        config=import_table.config,
         enabled=import_table.enabled,
         api_url=import_table.api_url,
         event_source=NamedEntity(id=import_table.event_source_id, name=import_table.event_source_name),

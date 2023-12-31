@@ -90,7 +90,7 @@
 'data.anonymous', 
 'active', 
 'segments', 
-'traits.xxx', 
+'traits',
 'stats.views', 
 'stats.visits', 
 'operation.merge', 

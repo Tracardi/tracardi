@@ -29,7 +29,7 @@ def test_same_fields():
             description="This is a test report",
             tags='Tag1,Tag2',
             index="profile",
-            query='{"field": "value"}',
+            query={"field": "value"},
             enabled=True,
             tenant="test_tenant",
             production=True
@@ -52,7 +52,7 @@ def test_correct_mapping():
             description="This is a test report",
             tags="Tag1,Tag2",
             index="profile",
-            query='{"param1": "{{param1}}", "param2": "{{param2}}"}',
+            query={"param1": "{{param1}}", "param2": "{{param2}}"},
             enabled=True,
             tenant="test",
             production=True

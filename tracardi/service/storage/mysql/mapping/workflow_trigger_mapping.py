@@ -26,7 +26,7 @@ def map_to_workflow_trigger_table(workflow_trigger: Rule) -> WorkflowTriggerTabl
         segment_name=workflow_trigger.segment.name if workflow_trigger.segment else None,
         source_id=workflow_trigger.source.id if workflow_trigger.source else None,
         source_name=workflow_trigger.source.name if workflow_trigger.source else None,
-        properties=to_json(workflow_trigger.properties) if workflow_trigger.properties else None,
+        properties=workflow_trigger.properties,
         enabled=workflow_trigger.enabled,
         tags=",".join(workflow_trigger.tags) if workflow_trigger.tags else None,
 
@@ -46,7 +46,7 @@ def map_to_workflow_trigger_rule(trigger_table: WorkflowTriggerTable) -> Rule:
         flow=NamedEntity(id=trigger_table.flow_id, name=trigger_table.flow_name) if trigger_table.flow_id else None,
         segment=NamedEntity(id=trigger_table.segment_id, name=trigger_table.segment_name) if trigger_table.segment_id else None,
         source=NamedEntity(id=trigger_table.source_id, name=trigger_table.source_name) if trigger_table.source_id else None,
-        properties=json.loads(trigger_table.properties) if trigger_table.properties else None,
+        properties=trigger_table.properties,
         enabled=trigger_table.enabled if trigger_table.enabled is not None else False,
         tags=trigger_table.tags.split(",") if trigger_table.tags else None
     )

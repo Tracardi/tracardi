@@ -1,8 +1,6 @@
 from tracardi.service.storage.mysql.schema.table import EventSourceTable
 from tracardi.domain.event_source import EventSource
-from tracardi.service.storage.mysql.utils.serilizer import to_json
 from tracardi.context import get_context
-from tracardi.service.storage.mysql.utils.serilizer import from_json
 from tracardi.domain.named_entity import NamedEntity
 
 from datetime import datetime
@@ -29,7 +27,7 @@ def map_to_event_source_table(event_source: EventSource) -> EventSourceTable:
         manual=event_source.manual,
         locked=event_source.locked or False,
         synchronize_profiles=event_source.synchronize_profiles or True,
-        config=to_json(event_source.config) if event_source.config else None,
+        config=event_source.config,
 
         tenant = context.tenant,
         production = context.production,
@@ -69,6 +67,6 @@ def map_to_event_source(event_source_table: EventSourceTable) -> EventSource:
         manual=event_source_table.manual,
         locked=event_source_table.locked or False,
         synchronize_profiles=event_source_table.synchronize_profiles or True,
-        config=from_json(event_source_table.config) if event_source_table.config else None
+        config=event_source_table.config
     )
 

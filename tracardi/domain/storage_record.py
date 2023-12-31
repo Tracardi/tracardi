@@ -192,8 +192,8 @@ class StorageRecords(dict):
             "result": hits
         }
 
-    def transform_hits(self, func: Callable) -> None:
-        self._hits = [{**hit, "_source": func(hit["_source"])} for hit in self._hits]
+    # def transform_hits(self, func: Callable) -> None:
+    #     self._hits = [{**hit, "_source": func(hit["_source"])} for hit in self._hits]
 
     @staticmethod
     def _make_domain_object(domain_object: Type[T], record: StorageRecord) -> T:

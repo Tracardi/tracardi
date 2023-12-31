@@ -2,7 +2,7 @@ from tracardi.context import get_context
 from tracardi.domain.bridge import Bridge
 from tracardi.service.plugin.domain.register import Form
 from tracardi.service.storage.mysql.schema.table import BridgeTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
+from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
 
 
 def map_to_bridge_table(bridge: Bridge) -> BridgeTable:
@@ -13,8 +13,8 @@ def map_to_bridge_table(bridge: Bridge) -> BridgeTable:
         name=bridge.name,
         description=bridge.description,
         type=bridge.type,
-        config=to_json(bridge.config),
-        form=to_json(bridge.form),
+        config=bridge.config,
+        form=from_model(bridge.form),
         manual=bridge.manual
     )
 
@@ -26,7 +26,7 @@ def map_to_bridge(bridge_table: BridgeTable) -> Bridge:
         name=bridge_table.name,
         description=bridge_table.description,
         type=bridge_table.type,
-        config=from_json(bridge_table.config),
-        form=from_json(bridge_table.form, Form),
+        config=bridge_table.config,
+        form=to_model(bridge_table.form, Form),
         manual=bridge_table.manual
     )

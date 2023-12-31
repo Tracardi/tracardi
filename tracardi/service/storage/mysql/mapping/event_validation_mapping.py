@@ -1,7 +1,8 @@
 from tracardi.context import get_context
 from tracardi.domain.event_validator import EventValidator, ValidationSchema
 from tracardi.service.storage.mysql.schema.table import EventValidationTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
+from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
+
 
 def map_to_event_validation_table(event_validator: EventValidator) -> EventValidationTable:
 
@@ -12,8 +13,8 @@ def map_to_event_validation_table(event_validator: EventValidator) -> EventValid
         production=context.production,
         name=event_validator.name,
         description=event_validator.description,
-        validation=to_json(event_validator.validation),  # Serialization of the ValidationSchema object
-        tags=",".join(event_validator.tags),  # Tags list converted to a comma-separated string
+        validation=from_model(event_validator.validation),
+        tags=",".join(event_validator.tags),
         event_type=event_validator.event_type,
         enabled=event_validator.enabled or False
     )
@@ -25,6 +26,6 @@ def map_to_event_validation(table: EventValidationTable) -> EventValidator:
         description=table.description,
         event_type=table.event_type,
         tags=table.tags.split(",") if table.tags else [],  # Convert string back to list
-        validation=from_json(table.validation, ValidationSchema) if table.validation else None,
+        validation=to_model(table.validation, ValidationSchema) if table.validation else None,
         enabled=table.enabled or False
     )

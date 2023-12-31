@@ -32,7 +32,7 @@ def test_maps_task_to_task_table_with_all_fields_correctly_filled():
             type="import",
             progress=0.5,
             task_id="456",
-            params='{"param1": "value1", "param2": "value2"}'
+            params={"param1": "value1", "param2": "value2"}
         )
 
         # Act
@@ -57,7 +57,7 @@ def test_correctly_map_fields():
         type="import",
         progress=0.5,
         task_id="456",
-        params='{"param1": "value1", "param2": "value2"}'
+        params={"param1": "value1", "param2": "value2"}
     )
 
     expected_task = Task(

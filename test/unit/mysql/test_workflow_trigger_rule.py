@@ -61,7 +61,7 @@ def test_valid_rule_mapping():
         assert trigger_table.segment_name == "Segment 1"
         assert trigger_table.source_id == "source_1"
         assert trigger_table.source_name == "Source 1"
-        assert trigger_table.properties == '{"property1": "value1", "property2": "value2"}'
+        assert trigger_table.properties == {"property1": "value1", "property2": "value2"}
         assert trigger_table.enabled is True
         assert trigger_table.tags == "Tag1,Tag2"
         assert trigger_table.production == True
@@ -84,7 +84,7 @@ def test_valid_trigger_table():
         segment_name="Test Segment",
         source_id="def",
         source_name="Test Source",
-        properties=to_json({"key": "value"}),
+        properties={"key": "value"},
         enabled=True,
         tags="tag1,tag2"
     )

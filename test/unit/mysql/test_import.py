@@ -33,7 +33,7 @@ def test_map_import_table_to_import_config():
             name="Test Import",
             description="This is a test import",
             module="test_module",
-            config="{}",
+            config={},
             enabled=True,
             transitional=False,
             api_url="http://test.com",

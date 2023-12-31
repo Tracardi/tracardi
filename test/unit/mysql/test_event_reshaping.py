@@ -4,6 +4,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping_table, \
     map_to_event_reshaping
 from tracardi.service.storage.mysql.schema.table import EventReshapingTable
+from tracardi.service.storage.mysql.utils.serilizer import from_model
 
 
 def test_map_to_event_reshaping_table_mapping():
@@ -29,7 +30,7 @@ def test_map_to_event_reshaping_table_mapping():
         assert result.event_type == "test_event"
         assert result.event_source_id == "456"
         assert result.event_source_name == "Test Event Source"
-        assert result.reshaping == ReshapeSchema(reshape_schema=EventReshapeDefinition()).model_dump_json()
+        assert result.reshaping == from_model(ReshapeSchema(reshape_schema=EventReshapeDefinition()))
         assert result.enabled is False
         assert result.tags == "tag1,tag2"
         assert result.description == "Test description"
@@ -41,7 +42,7 @@ def test_correctly_map_fields():
         id="123",
         name="Test Reshaping",
         description="Test description",
-        reshaping=reshaping.model_dump_json(),
+        reshaping=from_model(reshaping),
         tags="tag1,tag2",
         event_type="test_event",
         event_source_id="456",

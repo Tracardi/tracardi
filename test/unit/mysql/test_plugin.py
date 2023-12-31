@@ -8,6 +8,7 @@ from tracardi.service.plugin.domain.register import Spec, Form, FormGroup, FormF
     Documentation, PortDoc, Plugin, MicroserviceConfig, MicroserviceServer, MicroservicePlugin
 from tracardi.service.storage.mysql.mapping.plugin_mapping import map_to_plugin_table, map_to_flow_action_plugin
 from tracardi.service.storage.mysql.schema.table import PluginTable
+from tracardi.service.storage.mysql.utils.serilizer import from_model
 
 
 def test_to_plugin_mapping():
@@ -69,8 +70,8 @@ def test_to_plugin_mapping():
         plugin_spec_module="my_module",
         plugin_spec_inputs='input1,input2',
         plugin_spec_outputs='output1,output2',
-        plugin_spec_microservice=config.model_dump_json(),
-        plugin_spec_init='{"param1": "value1", "param2": "value2"}',
+        plugin_spec_microservice=from_model(config),
+        plugin_spec_init={"param1": "value1", "param2": "value2"},
         plugin_spec_skip=False,
         plugin_spec_block_flow=False,
         plugin_spec_run_in_background=True,
@@ -78,7 +79,7 @@ def test_to_plugin_mapping():
         plugin_spec_on_connection_error_repeat=3,
         plugin_spec_append_input_payload=True,
         plugin_spec_join_input_payload=False,
-        plugin_spec_form=form.model_dump_json(),
+        plugin_spec_form=from_model(form),
         plugin_spec_manual="This is the manual",
         plugin_spec_author="John Doe",
         plugin_spec_license="MIT",

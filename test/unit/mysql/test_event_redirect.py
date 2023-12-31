@@ -30,7 +30,7 @@ def test_correct_mapping():
         assert result.source_id == event_redirect.source.id
         assert result.source_name == event_redirect.source.name
         assert result.event_type == event_redirect.event_type
-        assert result.props == '{"param1": "value1", "param2": "value2"}'
+        assert result.props == {"param1": "value1", "param2": "value2"}
         assert result.tags == "tag1,tag2"
 
 

@@ -6,7 +6,6 @@ from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source_table, map_to_event_source
 from tracardi.service.storage.mysql.schema.table import EventSourceTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json
 
 
 def test_create_instance_with_required_parameters():
@@ -67,7 +66,7 @@ def test_mapping_event_source_to_table():
         assert event_source_table.manual == event_source.manual
         assert event_source_table.locked == event_source.locked
         assert event_source_table.synchronize_profiles == event_source.synchronize_profiles
-        assert event_source_table.config == to_json(event_source.config)
+        assert event_source_table.config == event_source.config
         assert event_source_table.tenant == get_context().tenant
         assert event_source_table.production == get_context().production
         assert event_source_table.update.date() == datetime.now().date()
@@ -95,7 +94,7 @@ def test_returns_instance_with_all_attributes():
         tags="test_tag1,test_tag2",
         groups="test_group1,test_group2",
         manual="test_manual",
-        config='{"key": "value"}'
+        config={"key": "value"}
     )
     event_source = map_to_event_source(event_source_table)
     assert isinstance(event_source, EventSource)

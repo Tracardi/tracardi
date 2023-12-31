@@ -2,7 +2,6 @@ from tracardi.context import get_context
 from tracardi.domain.event_redirect import EventRedirect
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.mysql.schema.table import EventRedirectTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
 
 def map_to_event_redirect_table(event_redirect: EventRedirect) -> EventRedirectTable:
     context = get_context()
@@ -16,7 +15,7 @@ def map_to_event_redirect_table(event_redirect: EventRedirect) -> EventRedirectT
         source_id=event_redirect.source.id,
         source_name=event_redirect.source.name,
         event_type=event_redirect.event_type,
-        props=to_json(event_redirect.props),
+        props=event_redirect.props,
         tags=",".join(event_redirect.tags) if event_redirect.tags else ""  # Convert list of tags to a comma-separated string
     )
 
@@ -28,6 +27,6 @@ def map_to_event_redirect(event_redirect_table: EventRedirectTable) -> EventRedi
         url=event_redirect_table.url,
         source=NamedEntity(id=event_redirect_table.source_id, name=event_redirect_table.source_name),
         event_type=event_redirect_table.event_type,
-        props=from_json(event_redirect_table.props),
+        props=event_redirect_table.props,
         tags=event_redirect_table.tags.split(",") if event_redirect_table.tags else []  # Convert comma-separated string back to list
     )

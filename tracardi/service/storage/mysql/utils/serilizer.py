@@ -13,7 +13,7 @@ def to_json(data) -> str:
     return json.dumps(data, default=str)
 
 
-def from_json(json_data: str, model: Optional[Type] = None):
+def from_json(json_data: str, model: Optional[Type[BaseModel]] = None):
 
     if json_data is None:
         return None
@@ -26,7 +26,26 @@ def from_json(json_data: str, model: Optional[Type] = None):
     if model is None:
         return data
 
+    return to_model(data, model)
+
+
+def to_model(data, model: Type[BaseModel]):
+
+    if not data:
+        return data
+
     if isinstance(data, list):
         return [model(**item) for item in data]
 
     return model(**data)
+
+
+def from_model(data) -> Optional[dict | List[dict]]:
+
+    if not data:
+        return data
+
+    if isinstance(data, list):
+        return [item.model_dump(mode='json') for item in data]
+
+    return data.model_dump(mode='json')

@@ -3,6 +3,7 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.destination import Destination, DestinationConfig
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table
+from tracardi.service.storage.mysql.utils.serilizer import from_model
 
 
 def test_maps_destination_to_table():
@@ -29,9 +30,9 @@ def test_maps_destination_to_table():
         assert result.name == "My Destination"
         assert result.production == True
         assert result.description == "This is a test destination"
-        assert result.destination == DestinationConfig(package="package", init={"a": 1}).model_dump_json()
+        assert result.destination == from_model(DestinationConfig(package="package", init={"a": 1}))
         assert result.condition == "event@id exists"
-        assert result.mapping == '{"field1": "value1", "field2": "value2"}'
+        assert result.mapping == {"field1": "value1", "field2": "value2"}
         assert result.enabled is True
         assert result.on_profile_change_only is False
         assert result.event_type_id == "event_type_1"

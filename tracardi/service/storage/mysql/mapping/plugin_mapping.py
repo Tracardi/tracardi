@@ -12,7 +12,7 @@ from tracardi.service.plugin.domain.register import (
     RunOnce,
     NodeEvents, Documentation)
 from tracardi.service.storage.mysql.schema.table import PluginTable
-from tracardi.service.storage.mysql.utils.serilizer import to_json, from_json
+from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
 
 
 def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
@@ -43,9 +43,9 @@ def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
         plugin_metadata_pro=plugin.plugin.metadata.pro or False,
         plugin_metadata_commercial=plugin.plugin.metadata.commercial or False,
         plugin_metadata_remote=plugin.plugin.metadata.remote or False,
-        plugin_metadata_documentation=to_json(plugin.plugin.metadata.documentation) if plugin.plugin.metadata.documentation else None,
+        plugin_metadata_documentation=from_model(plugin.plugin.metadata.documentation) if plugin.plugin.metadata.documentation else None,
         plugin_metadata_frontend=plugin.plugin.metadata.frontend or False,
-        plugin_metadata_emits_event=to_json(plugin.plugin.metadata.emits_event),
+        plugin_metadata_emits_event=plugin.plugin.metadata.emits_event,
         plugin_metadata_purpose=",".join(plugin.plugin.metadata.purpose or ""),
 
         plugin_spec_id=plugin.plugin.spec.id,
@@ -53,8 +53,8 @@ def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
         plugin_spec_module=plugin.plugin.spec.module,
         plugin_spec_inputs=','.join(plugin.plugin.spec.inputs or []),
         plugin_spec_outputs=','.join(plugin.plugin.spec.outputs or []),
-        plugin_spec_microservice=to_json(plugin.plugin.spec.microservice),
-        plugin_spec_init=to_json(plugin.plugin.spec.init),
+        plugin_spec_microservice=from_model(plugin.plugin.spec.microservice),
+        plugin_spec_init=plugin.plugin.spec.init,
         plugin_spec_skip=plugin.plugin.spec.skip or False,
         plugin_spec_block_flow=plugin.plugin.spec.block_flow or False,
         plugin_spec_run_in_background=plugin.plugin.spec.run_in_background or False,
@@ -62,11 +62,11 @@ def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
         plugin_spec_on_connection_error_repeat=plugin.plugin.spec.on_connection_error_repeat or 1,
         plugin_spec_append_input_payload=plugin.plugin.spec.append_input_payload or False,
         plugin_spec_join_input_payload=plugin.plugin.spec.join_input_payload or False,
-        plugin_spec_form=to_json(plugin.plugin.spec.form),
+        plugin_spec_form=from_model(plugin.plugin.spec.form),
         plugin_spec_manual=plugin.plugin.spec.manual,
         plugin_spec_author=plugin.plugin.spec.author,
         plugin_spec_license=plugin.plugin.spec.license or 'MIT',
-        plugin_spec_version=plugin.plugin.spec.version or '0.8.2',
+        plugin_spec_version=plugin.plugin.spec.version or '0.9.0',
         plugin_spec_run_once_value=plugin.plugin.spec.run_once.value or "",
         plugin_spec_run_once_ttl=plugin.plugin.spec.run_once.ttl or 0,
         plugin_spec_run_once_type=plugin.plugin.spec.run_once.type or "value",
@@ -84,8 +84,8 @@ def map_to_spec(table: PluginTable) -> Spec:
         module=table.plugin_spec_module,
         inputs=table.plugin_spec_inputs.split(','),  # List
         outputs=table.plugin_spec_outputs.split(','),  # List
-        init=from_json(table.plugin_spec_init, dict),
-        microservice=from_json(table.plugin_spec_microservice, MicroserviceConfig),
+        init=table.plugin_spec_init,
+        microservice=to_model(table.plugin_spec_microservice, MicroserviceConfig),
         skip=table.plugin_spec_skip,
         block_flow=table.plugin_spec_block_flow,
         run_in_background=table.plugin_spec_run_in_background,
@@ -93,7 +93,7 @@ def map_to_spec(table: PluginTable) -> Spec:
         on_connection_error_repeat=table.plugin_spec_on_connection_error_repeat,
         append_input_payload=table.plugin_spec_append_input_payload,
         join_input_payload=table.plugin_spec_join_input_payload,
-        form=from_json(table.plugin_spec_form, Form),
+        form=to_model(table.plugin_spec_form, Form),
         manual=table.plugin_spec_manual,
         author=table.plugin_spec_author,
         license=table.plugin_spec_license,
@@ -121,7 +121,7 @@ def map_to_plugin_metadata(table: PluginTable) -> MetaData:
         width=table.plugin_metadata_width,
         height=table.plugin_metadata_height,
         icon=table.plugin_metadata_icon,
-        documentation=from_json(table.plugin_metadata_documentation,
+        documentation=to_model(table.plugin_metadata_documentation,
                                 Documentation) if table.plugin_metadata_documentation else None,
         group=table.plugin_metadata_group.split(",") if table.plugin_metadata_group else [],
         tags=table.plugin_metadata_tags.split(",") if table.plugin_metadata_tags else  [],
@@ -129,8 +129,7 @@ def map_to_plugin_metadata(table: PluginTable) -> MetaData:
         commercial=table.plugin_metadata_commercial or False,
         remote=table.plugin_metadata_remote or False,
         frontend=table.plugin_metadata_frontend or False,
-        emits_event=from_json(table.plugin_metadata_emits_event,
-                              dict) if table.plugin_metadata_emits_event else {},
+        emits_event=table.plugin_metadata_emits_event if table.plugin_metadata_emits_event else {},
         purpose=table.plugin_metadata_purpose.split(",") if table.plugin_metadata_purpose else []
     )
 

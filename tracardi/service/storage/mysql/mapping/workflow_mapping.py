@@ -2,7 +2,6 @@ from tracardi.context import get_context
 from tracardi.domain.flow import FlowRecord
 from tracardi.domain.flow_meta_data import FlowMetaData
 from tracardi.service.storage.mysql.schema.table import WorkflowTable
-from tracardi.service.storage.mysql.utils.serilizer import from_json, to_json
 
 
 def map_to_workflow_table(flow_record: FlowRecord) -> WorkflowTable:

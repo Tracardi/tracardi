@@ -7,11 +7,12 @@ from tracardi.service.storage.mysql.schema.table import EventValidationTable
 
 def test_valid_event_validator():
     with ServerContext(Context(production=True)):
+        v = ValidationSchema(json_schema={}, condition="event@id exists")
         event_validator = EventValidator(
             id="123",
             name="Test Validator",
             event_type="test.event",
-            validation=ValidationSchema(json_schema={}, condition="event@id exists")
+            validation=v
         )
         result = map_to_event_validation_table(event_validator)
 
@@ -19,7 +20,7 @@ def test_valid_event_validator():
         assert result.id == "123"
         assert result.name == "Test Validator"
         assert result.event_type == "test.event"
-        assert result.validation == event_validator.validation.model_dump_json()
+        assert result.validation == v.model_dump(mode='json')
         assert result.tags == ""
         assert result.enabled is False
 
@@ -28,7 +29,7 @@ def test_correctly_map_fields():
             id="123",
             name="Test",
             description="Test description",
-            validation='{"json_schema": {}}',
+            validation={"json_schema": {}},
             tags="tag1,tag2",
             event_type="event_type",
             enabled=False
