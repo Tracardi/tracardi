@@ -43,7 +43,7 @@ def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
         plugin_metadata_pro=plugin.plugin.metadata.pro or False,
         plugin_metadata_commercial=plugin.plugin.metadata.commercial or False,
         plugin_metadata_remote=plugin.plugin.metadata.remote or False,
-        plugin_metadata_documentation=from_model(plugin.plugin.metadata.documentation) if plugin.plugin.metadata.documentation else None,
+        plugin_metadata_documentation=from_model(plugin.plugin.metadata.documentation),
         plugin_metadata_frontend=plugin.plugin.metadata.frontend or False,
         plugin_metadata_emits_event=plugin.plugin.metadata.emits_event,
         plugin_metadata_purpose=",".join(plugin.plugin.metadata.purpose or ""),
@@ -121,15 +121,14 @@ def map_to_plugin_metadata(table: PluginTable) -> MetaData:
         width=table.plugin_metadata_width,
         height=table.plugin_metadata_height,
         icon=table.plugin_metadata_icon,
-        documentation=to_model(table.plugin_metadata_documentation,
-                                Documentation) if table.plugin_metadata_documentation else None,
+        documentation=to_model(table.plugin_metadata_documentation, Documentation),
         group=table.plugin_metadata_group.split(",") if table.plugin_metadata_group else [],
         tags=table.plugin_metadata_tags.split(",") if table.plugin_metadata_tags else  [],
         pro=table.plugin_metadata_pro,
         commercial=table.plugin_metadata_commercial or False,
         remote=table.plugin_metadata_remote or False,
         frontend=table.plugin_metadata_frontend or False,
-        emits_event=table.plugin_metadata_emits_event if table.plugin_metadata_emits_event else {},
+        emits_event=table.plugin_metadata_emits_event,
         purpose=table.plugin_metadata_purpose.split(",") if table.plugin_metadata_purpose else []
     )
 
