@@ -7,11 +7,11 @@ from com_tracardi.service.tracking.queue.pulsar_topics import EVENT_TOPIC
 pulsar_logger = logging.getLogger('pulsar')
 pulsar_logger.setLevel(logging.DEBUG)
 
-token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiJ9.OcONdDoPgl1eiC-lfXPLU5Fu4uEyzMLnsASw-HC9JOxST-sv8t9aZwMkGP0bqqy4r7Ln2QJSFe_IDiVeu6leB_37VD9tKB-cANsKZidSsrKTu5DzVS9XsEy0Gr5PR38mqLx6WPlUcNLh-SvyHHUrnaBDQUQfujOaz1Fr0LbHVbS5Wm9mOk_ZIALQEEJ6r2SRjCxe1DLP11K68-Ih0HTI3wSwMpaAGW3EE00AS5m0Yurx1FSr4JCjQ3tlmgkuEgpvxYPQfigmPvHGs95szdA1JbW6vjoT9b_wQIW00F8A3cLbmXtVeFNuyCQwToW35svPsDitExhd_-METouThhtZfg"
+token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiJ9.lkLZkhoRTS7S11iehntprBA13PjcdDCihanssiSaS0rAHZeJOsCcCKa1XIPZZHbv0SmYwmv4YTIKf7NMSzuI-J0iO9br5caJh_1L3LhUTlsbaWybh7sQPF2rFyEFXa68ojTccjXOk8lWVUg0p3An9q_MMb4jDYND3K89CxRQpwhCPWmF_9Cw4cZJM252NYtSMsVyCkRZsCgu1Zco9GePPlMBrE9MtYpTaIRUuD4MQrunjC9kjWIVgxCEM3wf7B-A8bU_0dDuD5g2WWCsJ_Z-_9T2ucQqglcatrGnsOC0zCmSzmbGDe4372eGo6aak-4kbL3CZ0QnS36Tuji8T1ucHw"
 client = pulsar.Client(
-    'pulsar://135.181.100.250:6650',
+    'pulsar://192.168.1.178:6650',
     authentication=pulsar.AuthenticationToken(token),
-    connection_timeout_ms=1000,
+    connection_timeout_ms=6000,
     logger=pulsar_logger,
     listener_name='external'
 )
@@ -20,7 +20,7 @@ consumer = client.subscribe(EVENT_TOPIC,
                         )
 
 while True:
-    msg = consumer.receive(timeout_millis=1000*10)  # Realising consumer every 15 min.
+    msg = consumer.receive(timeout_millis=1000*30)  # Realising consumer every 15 min.
     payload = msg.data()
     print(payload)
     consumer.acknowledge(msg)
