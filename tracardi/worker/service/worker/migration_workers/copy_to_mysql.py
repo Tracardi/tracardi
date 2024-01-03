@@ -135,9 +135,6 @@ async def copy_to_mysql(celery_job, schema: MigrationSchema, elastic_host: str, 
 
                         table_data = domain_object_mapping_to_table(domain_object)
 
-                        print(context.tenant)
-                        table_data.tenant = context.tenant
-
                         print(domain_type, table_data)
                     except Exception as e:
                         print(domain_type, record)
