@@ -6,7 +6,7 @@ import logging
 
 from tracardi.context import Context
 from tracardi.worker.domain.migration_schema import MigrationSchema
-from tracardi.worker.misc.task_progress import task_create
+from tracardi.worker.misc.task_progress import task_create, task_status
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
@@ -92,6 +92,9 @@ async def reindex_to_one_index(schema: MigrationSchema, url: str, context: Conte
                         error = f"Migration task {task_response['task']['node']}:{task_response['task']['id']} " \
                                 f"from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` " \
                                 f"FAILED due to {task_response}. "
+
+                        await task_status(task_id, 'error', error)
+
                         raise MigrationError(error)
                     break
 

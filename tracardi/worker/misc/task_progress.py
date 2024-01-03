@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import uuid4
 
 from tracardi.domain.task import Task
@@ -85,13 +86,14 @@ async def task_finish(task_id: str):
         logger.error(msg=f"Could not finish task with ID \"{task_id}\" due to an error: {str(e)}")
 
 
-async def task_status(task_id: str, status):
+async def task_status(task_id: str, status, message: Optional[str] = None):
     try:
 
         bts = BackgroundTaskService()
 
         await bts.update_by_id(task_id, {
-            "status": status
+            "status": status,
+            "message": message
         })
 
         logger.info(msg=f"Successfully changed status for task ID \"{task_id}\"")
