@@ -12,21 +12,19 @@ async def add_task(name: str, job, params=None):
     if params is None:
         params = {}
 
+    bts = BackgroundTaskService()
+    await bts.insert(Task(
+        id=job.request.id,
+        name=name,
+        timestamp=now_in_utc(),
+        status="pending",
+        progress=0,
+        type="upgrade",
+        params=params,
+        task_id=job.request.id
+    ))
+    logger.info(msg=f"Successfully added task name \"{name}\"")
 
-    try:
-        bts = BackgroundTaskService()
-        await bts.insert(Task(
-            id=job.request.id,
-            name=name,
-            timestamp=now_in_utc(),
-            status="pending",
-            progress=0,
-            type="upgrade",
-            params=params,
-            task_id=job.request.id
-        ))
-        logger.info(msg=f"Successfully added task name \"{name}\"")
-
-    except Exception as e:
-        logger.error(msg=f"Could not add task with Name \"{name}\" due to an error: {str(e)}")
+    # except Exception as e:
+    #     logger.error(msg=f"Could not add task with name \"{name}\" due to an error: {str(e)}")
 

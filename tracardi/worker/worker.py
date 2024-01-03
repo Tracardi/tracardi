@@ -2,11 +2,15 @@ import logging
 
 import asyncio
 
+from huey import RedisHuey
+
+from tracardi.service.storage.redis_connection_pool import get_redis_connection_pool
+
 import tracardi.worker.service.worker.migration_workers as migration_workers
-from celery import Celery
 
 from tracardi.context import Context, ServerContext
 from tracardi.worker.config import redis_config
+# from tracardi.worker.service.async_job import run_async_task
 from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
 from tracardi.worker.service.worker.mysql_worker import MysqlConnectionConfig, MySQLImporter
 from tracardi.worker.service.worker.mysql_query_worker import MysqlConnectionConfig as MysqlQueryConnConfig, MySQLQueryImporter
@@ -16,14 +20,13 @@ from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.add_task import add_task
 
-
-celery = Celery(
-    __name__,
-    broker=redis_config.get_redis_with_password(),
-    backend=redis_config.get_redis_with_password()
-)
+queue = RedisHuey('upgrade',
+                  connection_pool=get_redis_connection_pool(redis_config),
+                  results=False
+                  )
 
 logger = logging.getLogger(__name__)
+
 
 
 def import_mysql_table_data(celery_job, import_config, credentials):
@@ -114,42 +117,34 @@ async def migrate_data(celery_job, schemas, elastic_host, context: Context):
 
     print(await asyncio.gather(*tasks))
 
-
-
-
-@celery.task(bind=True)
-def run_mysql_import_job(self, import_config, credentials):
-    import_mysql_table_data(self, import_config, credentials)
-
-
-@celery.task(bind=True)
-def run_elastic_import_job(self, import_config, credentials):
-    import_elastic_data(self, import_config, credentials)
-
-
-@celery.task(bind=True)
-def run_mysql_query_import_job(self, import_config, credentials):
-    import_mysql_data_with_query(self, import_config, credentials)
-
+# @run_async_task
+# @queue.task()
 async def _run_migration_job(self, schemas, elastic_host, context: Context):
     with ServerContext(context):
         return await migrate_data(self, schemas, elastic_host, context)
 
+
+@queue.task(retries=1)
+def run_mysql_import_job(self, import_config, credentials):
+    import_mysql_table_data(self, import_config, credentials)
+
+
+@queue.task(retries=1)
+def run_elastic_import_job(self, import_config, credentials):
+    import_elastic_data(self, import_config, credentials)
+
+
+@queue.task(retries=1)
+def run_mysql_query_import_job(self, import_config, credentials):
+    import_mysql_data_with_query(self, import_config, credentials)
+
 """
 This is start job
 """
-@celery.task(bind=True)
-def run_migration_job(self, schemas, elastic_host, context: dict):
+@queue.task(retries=1)
+async def run_migration_job(self, schemas, elastic_host, context: dict):
     print("started")
     context = Context.from_dict(context)
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    result = loop.run_until_complete(_run_migration_job(self, schemas, elastic_host, context))
-    loop.close()
+    await _run_migration_job(self, schemas, elastic_host, context)
     print("finished")
-    return result
 
-# @celery.task(bind=True)
-# def run_migration_worker(self, worker_func, schema, elastic_host, context: dict):
-#     context = Context.from_dict(context)
-#     asyncio.run(_run_migration_worker(self, worker_func, schema, elastic_host, context))
