@@ -1,6 +1,5 @@
 from tracardi.context import Context, ServerContext
 from tracardi.worker.domain.migration_schema import MigrationSchema
-from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.task_progress import task_create
 from time import sleep
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError

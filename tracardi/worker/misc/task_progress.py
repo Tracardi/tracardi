@@ -1,12 +1,26 @@
 from uuid import uuid4
 
 from tracardi.domain.task import Task
+from tracardi.service.storage.mysql.mapping.task_mapping import map_to_task
 from tracardi.service.storage.mysql.service.task_service import BackgroundTaskService
 from tracardi.service.utils.date import now_in_utc
 import logging
 
 
 logger = logging.getLogger(__name__)
+
+
+async def task_load(task_id: str) -> Task:
+
+    try:
+
+        bts = BackgroundTaskService()
+        record = await bts.load_by_id(task_id)
+        return record.map_to_object(map_to_task)
+
+    except Exception as e:
+        logger.error(msg=f"Could not add task with ID \"{task_id}\" due to an error: {str(e)}")
+
 
 
 async def task_create(type: str, name: str, params=None):

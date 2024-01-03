@@ -29,8 +29,8 @@ class BackgroundTaskService(TableService):
                                         limit=limit,
                                         offset=offset)
 
-    async def load_by_id(self, plugin_id: str) -> SelectResult:
-        return await self._load_by_id(TaskTable, primary_id=plugin_id)
+    async def load_by_id(self, background_task_id: str) -> SelectResult:
+        return await self._load_by_id(TaskTable, primary_id=background_task_id)
 
     async def delete_by_id(self, background_task_id: str) -> str:
         return await self._delete_by_id(TaskTable, primary_id=background_task_id)

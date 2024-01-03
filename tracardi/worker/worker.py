@@ -17,7 +17,6 @@ from tracardi.worker.service.worker.mysql_query_worker import MysqlConnectionCon
 from tracardi.worker.service.import_dispatcher import ImportDispatcher
 from tracardi.worker.domain.import_config import ImportConfig
 from tracardi.worker.domain.migration_schema import MigrationSchema
-from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.task_progress import task_create, task_progress, task_finish
 
 queue = RedisHuey('upgrade',
@@ -82,7 +81,7 @@ async def _run_migration_worker(worker_func, schema, elastic_host, context: Cont
     #   * schema: MigrationSchema,
     #   * elastic_url: str, task_index: str
     #   * context
-    print(worker_function)
+
     await worker_function(MigrationSchema(**schema), elastic_host, context)
 
 async def migrate_data(schemas, elastic_host, context: Context):

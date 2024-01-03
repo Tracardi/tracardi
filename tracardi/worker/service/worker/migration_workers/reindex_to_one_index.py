@@ -6,7 +6,6 @@ import logging
 
 from tracardi.context import Context
 from tracardi.worker.domain.migration_schema import MigrationSchema
-from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.task_progress import task_create
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient

@@ -20,6 +20,6 @@ class Task(NamedEntity):
     @field_validator("status")
     @classmethod
     def validate_status(cls, value):
-        if value not in ("pending", "running", "error", "done", "cancelled"):
-            raise ValueError(f"Status must be one of: pending, running, error, done, cancelled. {value} given.")
+        if value not in ("none", "pending", "running", "error", "done", "cancelled"):
+            raise ValueError(f"Status must be one of: none, pending, running, error, done, cancelled. {value} given.")
         return value
