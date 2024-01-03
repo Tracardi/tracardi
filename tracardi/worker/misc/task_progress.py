@@ -67,6 +67,20 @@ async def task_progress(task_id: str, progress: int):
 
 
 async def task_finish(task_id: str):
-    await task_progress(task_id, 100)
+    try:
+
+        bts = BackgroundTaskService()
+
+        await bts.update_by_id(task_id, {
+            "progress": 100,
+            "status": "done"
+        })
+
+        logger.info(msg=f"Successfully updated task ID \"{task_id}\"")
+
+        return task_id
+
+    except Exception as e:
+        logger.error(msg=f"Could not add task with ID \"{task_id}\" due to an error: {str(e)}")
 
 
