@@ -1,4 +1,5 @@
 import logging
+
 from tracardi.config import tracardi
 from tracardi.domain.setting import Setting
 
@@ -18,7 +19,7 @@ from tracardi.domain.identification_point import IdentificationPoint
 from tracardi.domain.import_config import ImportConfig
 from tracardi.domain.live_segment import WorkflowSegmentationTrigger
 from tracardi.domain.report import Report
-from tracardi.domain.resource import Resource
+from tracardi.domain.resource import Resource, ResourceRecord
 from tracardi.domain.rule import Rule
 from tracardi.domain.segment import Segment
 from tracardi.domain.task import Task
@@ -43,7 +44,7 @@ from tracardi.service.storage.mysql.mapping.segment_trigger_mapping import map_t
 from tracardi.service.storage.mysql.mapping.setting_mapping import map_to_settings_table
 from tracardi.service.storage.mysql.mapping.task_mapping import map_to_task_table
 from tracardi.service.storage.mysql.mapping.user_mapping import map_to_user_table
-from tracardi.service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
+from tracardi.service.storage.mysql.mapping.workflow_mapping import map_to_workflow_table
 from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_to_workflow_trigger_table
 from tracardi.service.storage.mysql.schema.table import BridgeTable, ConsentTypeTable, SegmentTable, \
     IdentificationPointTable, EventMappingTable, EventSourceTable, EventDataComplianceTable, EventReshapingTable, \
@@ -61,34 +62,36 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
+def resource_converter(resource_record: ResourceRecord) -> Resource:
+    return resource_record.decode()
 
 class_mapping = {
-    "bridge": (Bridge, BridgeTable, map_to_bridge_table),
-    "consent-type": (ConsentType, ConsentTypeTable, map_to_consent_type_table),
-    "segment": (Segment, SegmentTable, map_to_segment_table),
-    "identification-point": (IdentificationPoint, IdentificationPointTable, map_to_identification_point),
-    # "events-tags": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table),  # todo check
-    "event-source": (EventSource, EventSourceTable, map_to_event_source_table),
-    "consent-data-compliance": (EventDataCompliance, EventDataComplianceTable, map_to_event_data_compliance_table),
-    "event-reshaping": (EventReshapingSchema, EventReshapingTable, map_to_event_reshaping_table),
-    # "tracardi-pro": (None, TracardiProTable, None), # todo check
-    "task": (Task, TaskTable, map_to_task_table),
+    "bridge": (Bridge, BridgeTable, map_to_bridge_table, None),
+    "consent-type": (ConsentType, ConsentTypeTable, map_to_consent_type_table, None),
+    "segment": (Segment, SegmentTable, map_to_segment_table, None),
+    "identification-point": (IdentificationPoint, IdentificationPointTable, map_to_identification_point, None),
+    # "events-tags": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None),  # todo check
+    "event-source": (EventSource, EventSourceTable, map_to_event_source_table, None),
+    "consent-data-compliance": (EventDataCompliance, EventDataComplianceTable, map_to_event_data_compliance_table, None),
+    "event-reshaping": (EventReshapingSchema, EventReshapingTable, map_to_event_reshaping_table, None),
+    # "tracardi-pro": (None, TracardiProTable, None, None), # todo check
+    "task": (Task, TaskTable, map_to_task_table, None),
     "live-segment": (
-        WorkflowSegmentationTrigger, WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table),
-    "event-management": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table),
-    "user": (User, UserTable, map_to_user_table),
-    "destination": (Destination, DestinationTable, map_to_destination_table),
-    "event-redirect": (EventRedirect, EventRedirectTable, map_to_event_redirect_table),
-    # "content": (Content, ContentTable, map_to_content),
-    "report": (Report, ReportTable, map_to_report_table),
-    "event_to_profile": (EventToProfile, EventToProfileMappingTable, map_to_event_to_profile_table),
-    "rule": (Rule, WorkflowTriggerTable, map_to_workflow_trigger_table),
-    "resource": (Resource, ResourceTable, map_to_resource_table),
-    "flow": (FlowRecord, WorkflowTable, map_to_workflow_record),
-    "import": (ImportConfig, ImportTable, map_to_import_config_table),
-    "event-validation": (EventValidator, EventValidationTable, map_to_event_validation_table),
-    # "version": (None, VersionTable, None),
-    "setting": (Setting, SettingTable, map_to_settings_table),
+        WorkflowSegmentationTrigger, WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table, None),
+    "event-management": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None),
+    "user": (User, UserTable, map_to_user_table, None),
+    "destination": (Destination, DestinationTable, map_to_destination_table, None),
+    "event-redirect": (EventRedirect, EventRedirectTable, map_to_event_redirect_table, None),
+    # "content": (Content, ContentTable, map_to_content, None),
+    "report": (Report, ReportTable, map_to_report_table, None),
+    "event_to_profile": (EventToProfile, EventToProfileMappingTable, map_to_event_to_profile_table, None),
+    "rule": (Rule, WorkflowTriggerTable, map_to_workflow_trigger_table, None),
+    "resource": (ResourceRecord, ResourceTable, map_to_resource_table, resource_converter),
+    "flow": (FlowRecord, WorkflowTable, map_to_workflow_table, None),
+    "import": (ImportConfig, ImportTable, map_to_import_config_table, None),
+    "event-validation": (EventValidator, EventValidationTable, map_to_event_validation_table, None),
+    # "version": (None, VersionTable, None, None),
+    "setting": (Setting, SettingTable, map_to_settings_table, None),
 }
 
 
@@ -109,7 +112,7 @@ async def copy_to_mysql(celery_job, schema: MigrationSchema, elastic_host: str, 
             return
 
 
-        domain_type, object_table, domain_object_mapping_to_table = class_mapping[storage_class]
+        domain_type, object_table, domain_object_mapping_to_table, converter = class_mapping[storage_class]
 
         chunk = 100
         moved_records = 0
@@ -124,10 +127,24 @@ async def copy_to_mysql(celery_job, schema: MigrationSchema, elastic_host: str, 
 
                 for number, record in enumerate(records_to_move):  # Type: int,StorageRecord
 
-                    domain_object = record.to_entity(domain_type)
-                    table_data = domain_object_mapping_to_table(domain_object)
+                    try:
+                        domain_object = record.to_entity(domain_type, set_metadata=False)
+
+                        if converter is not None:
+                            domain_object = converter(domain_object)
+
+                        table_data = domain_object_mapping_to_table(domain_object)
+
+                        print(context.tenant)
+                        table_data.tenant = context.tenant
+
+                        print(domain_type, table_data)
+                    except Exception as e:
+                        print(domain_type, record)
+                        exit()
+
                     ts = TableService()
-                    await ts._replace(object_table, table_data)
+                    print('xxx', await ts._replace(object_table, table_data))
 
                     # Update progress
                     update_progress(celery_job, moved_records + number + 1, doc_count)
