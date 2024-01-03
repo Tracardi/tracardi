@@ -71,7 +71,7 @@ setup(
         'faker==18.4.0',
         'faker-commerce==1.0.3',
         'SQLAlchemy==2.0.23',
-        'speedict==0.3.12'
+        'speedict==0.3.12',
         # Worker requirements
         'mysql-connector-python==8.0.29',
         'requests',
