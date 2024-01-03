@@ -63,7 +63,7 @@ async def task_progress(task_id: str, progress: int):
         return task_id
 
     except Exception as e:
-        logger.error(msg=f"Could not add task with ID \"{task_id}\" due to an error: {str(e)}")
+        logger.error(msg=f"Could not update task with ID \"{task_id}\" due to an error: {str(e)}")
 
 
 async def task_finish(task_id: str):
@@ -76,11 +76,11 @@ async def task_finish(task_id: str):
             "status": "done"
         })
 
-        logger.info(msg=f"Successfully updated task ID \"{task_id}\"")
+        logger.info(msg=f"Successfully finished task ID \"{task_id}\"")
 
         return task_id
 
     except Exception as e:
-        logger.error(msg=f"Could not add task with ID \"{task_id}\" due to an error: {str(e)}")
+        logger.error(msg=f"Could not finish task with ID \"{task_id}\" due to an error: {str(e)}")
 
 
