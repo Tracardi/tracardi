@@ -53,7 +53,7 @@ from tracardi.service.storage.mysql.schema.table import BridgeTable, ConsentType
     SettingTable
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.worker.domain.migration_schema import MigrationSchema
-from tracardi.worker.misc.task_progress import task_create, task_progress, task_finish
+from tracardi.worker.misc.task_progress import task_create, task_progress, task_finish, task_status
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
 
@@ -134,9 +134,11 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                         table_data = domain_object_mapping_to_table(domain_object)
 
                         print(domain_type, table_data)
+
                     except Exception as e:
+                        await task_status(task_id, 'error')
                         print(domain_type, record)
-                        exit()
+                        continue
 
                     ts = TableService()
                     await ts._replace(object_table, table_data)

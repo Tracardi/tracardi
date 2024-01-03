@@ -55,7 +55,8 @@ async def task_progress(task_id: str, progress: int):
         bts = BackgroundTaskService()
 
         await bts.update_by_id(task_id, {
-            "progress": progress
+            "progress": progress,
+            "status": "running"
         })
 
         logger.info(msg=f"Successfully updated task ID \"{task_id}\"")
@@ -73,7 +74,7 @@ async def task_finish(task_id: str):
 
         await bts.update_by_id(task_id, {
             "progress": 100,
-            "status": "done"
+            "status": "finished"
         })
 
         logger.info(msg=f"Successfully finished task ID \"{task_id}\"")
@@ -84,3 +85,18 @@ async def task_finish(task_id: str):
         logger.error(msg=f"Could not finish task with ID \"{task_id}\" due to an error: {str(e)}")
 
 
+async def task_status(task_id: str, status):
+    try:
+
+        bts = BackgroundTaskService()
+
+        await bts.update_by_id(task_id, {
+            "status": status
+        })
+
+        logger.info(msg=f"Successfully changed status for task ID \"{task_id}\"")
+
+        return task_id
+
+    except Exception as e:
+        logger.error(msg=f"Could not change status for task with ID \"{task_id}\" due to an error: {str(e)}")

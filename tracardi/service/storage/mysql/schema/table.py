@@ -598,6 +598,7 @@ class TaskTable(Base):
     progress = Column(Float)
     task_id = Column(String(40))
     params = Column(JSON)
+    message = Column(Text)
 
     tenant = Column(String(40))
     production = Column(Boolean)

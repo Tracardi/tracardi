@@ -17,6 +17,7 @@ def map_to_task_table(task: Task) -> TaskTable:
         progress=task.progress,
         task_id=task.task_id,
         params=task.params,
+        message=task.message
     )
 
 
@@ -30,4 +31,5 @@ def map_to_task(task_table: TaskTable) -> Task:
         progress=task_table.progress,
         task_id=task_table.task_id,
         params=task_table.params,
+        message=task_table.message
     )
