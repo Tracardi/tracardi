@@ -5,6 +5,7 @@ from tracardi.domain.metadata import Metadata
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 from tracardi.domain.time import Time
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import WorkflowTriggerTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json
 
@@ -48,5 +49,5 @@ def map_to_workflow_trigger_rule(trigger_table: WorkflowTriggerTable) -> Rule:
         source=NamedEntity(id=trigger_table.source_id, name=trigger_table.source_name) if trigger_table.source_id else None,
         properties=trigger_table.properties,
         enabled=trigger_table.enabled if trigger_table.enabled is not None else False,
-        tags=trigger_table.tags.split(",") if trigger_table.tags else None
+        tags=split_list(trigger_table.tags)
     )

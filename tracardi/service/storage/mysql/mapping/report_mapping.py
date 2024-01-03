@@ -1,3 +1,4 @@
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import ReportTable
 from tracardi.domain.report import Report
 from tracardi.context import get_context
@@ -22,7 +23,7 @@ def map_to_report(report_table: ReportTable) -> Report:
         id=report_table.id,
         name=report_table.name,
         description=report_table.description,
-        tags=report_table.tags.split(','),
+        tags=split_list(report_table.tags),
         index=report_table.index,
         query=report_table.query,
         enabled=report_table.enabled

@@ -1,6 +1,7 @@
 from tracardi.domain.entity import Entity
 from tracardi.domain.destination import Destination, DestinationConfig
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import DestinationTable
 from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
 from tracardi.context import get_context
@@ -50,5 +51,5 @@ def map_to_destination(destination_table: DestinationTable) -> Destination:
         resource=Entity(
             id=destination_table.resource_id or ""
         ),
-        tags=destination_table.tags.split(',') if destination_table.tags else []
+        tags=split_list(destination_table.tags)
     )

@@ -93,6 +93,15 @@ class Context:
             "version": self.version
         }
 
+    @staticmethod
+    def from_dict(context: dict) -> 'Context':
+        return Context(
+            production=context.get('production', False),
+            user=context.get('user', None),
+            tenant=context.get('tenant'),
+            host=context.get('host'),
+            version=context.get('version')
+        )
 
 class ContextManager(metaclass=Singleton):
 

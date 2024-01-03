@@ -1,7 +1,7 @@
 import logging
 
 from tracardi.config import tracardi
-from tracardi.context import get_context
+from tracardi.context import get_context, Context
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
@@ -50,7 +50,8 @@ class MigrationManager:
         ("080", "08x"): "080_to_08x",
         ("08x", "0820"): "08x_to_082x",  # from 0.8.1 to 0.8.2
         ("08x", "082x"): "08x_to_082x",
-        ("082x", "0820"): "082x_to_0820"
+        ("082x", "0820"): "082x_to_0820",
+        ("0820", "09x"): "0820_to_09x"
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,
@@ -82,6 +83,12 @@ class MigrationManager:
         ) as f:
             return [MigrationSchema(**schema) for schema in json.load(f) if isinstance(schema, dict)]  # avoid comments
 
+
+    @staticmethod
+    def _get_static_indices(version: str, tenant: str, index: str, production: bool) -> str:
+        index = f"static-{version}.{tenant}.{index}"
+        return index
+
     @staticmethod
     def _get_single_indices(version: str, tenant: str, index: str, production: bool) -> str:
         index = f"{version}.{tenant}.{index}"
@@ -90,8 +97,7 @@ class MigrationManager:
         return index
 
     async def _get_partitioned_indices(self, template_name, production: bool):
-        template = fr"{self.from_version}." \
-                   fr"{self.from_tenant}.{template_name}-[0-9]{4}-([0-9]{1,2}|q[1-4])"
+        template = fr"{self.from_version}.{self.from_tenant}.{template_name}-[0-9]{{4}}-([0-9]{{1,2}}|q[1-4]|year)"
 
         if production:
             template = f"prod-{template}"
@@ -114,7 +120,23 @@ class MigrationManager:
         set_of_schemas_to_migrate = []
 
         for schema in schemas:
-            if schema.copy_index.multi is True:
+            if schema.copy_index.static is True:
+
+                schema.copy_index.from_index = self._get_static_indices(
+                    self.from_version,
+                    self.from_tenant,
+                    schema.copy_index.from_index,
+                    production=context.production)
+
+                schema.copy_index.to_index = self._get_static_indices(
+                    self.to_version,
+                    self.to_tenant,
+                    schema.copy_index.to_index,
+                    production=context.production)
+
+                set_of_schemas_to_migrate.append(schema)
+
+            elif schema.copy_index.multi is True:
 
                 # Todo - now multi indices can have different suffixes, not only month
 
@@ -126,7 +148,13 @@ class MigrationManager:
 
                     # Todo should migrate to the same partition
 
-                    to_index = f"{schema.copy_index.to_index}{re.findall(r'(-[0-9]{4}-[0-9]{1,2}|-[0-9]{4}-q[1-4])', from_index)[0]}"
+                    match_indices = re.findall(r'(-[0-9]{4}-[0-9]{1,2}|-[0-9]{4}-q[1-4]|-[0-9]{4}-year)', from_index)
+
+                    if len(match_indices) == 0:
+                        logger.error(f"Could not find multi indices for {from_index}")
+                        continue
+
+                    to_index = f"{schema.copy_index.to_index}{match_indices[0]}"
 
                     to_index = self._get_single_indices(self.to_version,
                                                         self.to_tenant,
@@ -172,9 +200,15 @@ class MigrationManager:
         # TODO Warning disabled - save installation info in redis.
         warn = self.from_version in tracardi.version.upgrades
 
+        # Change the destination if `copy-to-mysql`
+
+        for schema in set_of_schemas_to_migrate:
+            if schema.worker == 'copy_to_mysql':
+                schema.copy_index.to_index = f"Table: {schema.params['mysql']}"
+
         return {"warn": warn, "schemas": set_of_schemas_to_migrate}
 
-    async def start_migration(self, ids: List[str], elastic_host: str) -> None:
+    async def start_migration(self, ids: List[str], elastic_host: str, context: Context) -> None:
 
         customized_schemas = await self.get_available_schemas()
         final_schemas = [schema.model_dump() for schema in customized_schemas["schemas"] if schema.id in ids]
@@ -182,11 +216,9 @@ class MigrationManager:
         if not final_schemas:
             return
 
-        def add_to_celery(given_schemas: List, elastic: str, task_index_name: str):
+        def add_to_celery(given_schemas: List, elastic_host: str):
             # todo replace celery
-            return run_migration_job.delay(given_schemas, elastic, task_index_name)
-
-        task_index = Resource().get_index_constant("task").get_write_index()
+            return run_migration_job.delay(given_schemas, elastic_host, context.dict())
 
         # Run in executor
 
@@ -194,7 +226,7 @@ class MigrationManager:
             max_workers=1,
         )
         loop = asyncio.get_running_loop()
-        blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host, task_index)]
+        blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host)]
         completed, pending = await asyncio.wait(blocking_tasks)
         celery_task = completed.pop().result()
 

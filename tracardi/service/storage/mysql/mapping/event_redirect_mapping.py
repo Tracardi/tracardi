@@ -1,6 +1,7 @@
 from tracardi.context import get_context
 from tracardi.domain.event_redirect import EventRedirect
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import EventRedirectTable
 
 def map_to_event_redirect_table(event_redirect: EventRedirect) -> EventRedirectTable:
@@ -28,5 +29,5 @@ def map_to_event_redirect(event_redirect_table: EventRedirectTable) -> EventRedi
         source=NamedEntity(id=event_redirect_table.source_id, name=event_redirect_table.source_name),
         event_type=event_redirect_table.event_type,
         props=event_redirect_table.props,
-        tags=event_redirect_table.tags.split(",") if event_redirect_table.tags else []  # Convert comma-separated string back to list
+        tags=split_list(event_redirect_table.tags)  # Convert comma-separated string back to list
     )

@@ -516,28 +516,28 @@ class ReportTable(Base):
     )
 
 
-class ContentTable(Base):
-    __tablename__ = 'content'
-
-    id = Column(String(48))
-    profile_id = Column(String(40))
-    timestamp = Column(DateTime)
-    type = Column(String(64))
-    url = Column(String(255))
-    source = Column(String(128))
-    author = Column(String(96))
-    copyright = Column(String(128))
-    content = Column(BLOB)
-    text = Column(Text)
-    properties = Column(JSON)
-    traits = Column(JSON)
-
-    tenant = Column(String(40))
-    production = Column(Boolean)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
-    )
+# class ContentTable(Base):
+#     __tablename__ = 'content'
+#
+#     id = Column(String(48))
+#     profile_id = Column(String(40))
+#     timestamp = Column(DateTime)
+#     type = Column(String(64))
+#     url = Column(String(255))
+#     source = Column(String(128))
+#     author = Column(String(96))
+#     copyright = Column(String(128))
+#     content = Column(BLOB)
+#     text = Column(Text)
+#     properties = Column(JSON)
+#     traits = Column(JSON)
+#
+#     tenant = Column(String(40))
+#     production = Column(Boolean)
+#
+#     __table_args__ = (
+#         PrimaryKeyConstraint('id', 'tenant', 'production'),
+#     )
 
 
 class ImportTable(Base):

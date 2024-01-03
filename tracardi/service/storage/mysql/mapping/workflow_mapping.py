@@ -1,6 +1,7 @@
 from tracardi.context import get_context
 from tracardi.domain.flow import FlowRecord
 from tracardi.domain.flow_meta_data import FlowMetaData
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import WorkflowTable
 
 
@@ -38,7 +39,7 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         name=workflow_table.name,
         description=workflow_table.description,
         type=workflow_table.type,
-        projects=workflow_table.projects.split(",") if workflow_table.projects else [],
+        projects=split_list(workflow_table.projects),
         draft=workflow_table.draft.decode(),
         production=workflow_table.prod.decode(),
         backup=workflow_table.backup.decode(),
@@ -53,5 +54,5 @@ def map_to_workflow_record_meta(workflow_table: WorkflowTable) -> FlowMetaData:
         name=workflow_table.name,
         description=workflow_table.description,
         type=workflow_table.type,
-        projects=workflow_table.projects.split(",") if workflow_table.projects else []
+        projects=split_list(workflow_table.projects)
     )

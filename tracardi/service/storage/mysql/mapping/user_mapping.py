@@ -1,5 +1,6 @@
 from tracardi.context import get_context
 from tracardi.domain.user import User
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import UserTable
 
 
@@ -25,7 +26,7 @@ def map_to_user(user_table: UserTable) -> User:
         password=user_table.password,
         full_name=user_table.full_name,
         email=user_table.email,
-        roles=user_table.roles.split(',') if user_table.roles else [],  # Convert comma-separated string back to list
+        roles=split_list(user_table.roles),  # Convert comma-separated string back to list
         disabled=user_table.disabled if user_table.disabled is not None else False,
         expiration_timestamp=user_table.expiration_timestamp,
         preference=user_table.preference

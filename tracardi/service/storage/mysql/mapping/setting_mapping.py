@@ -1,4 +1,3 @@
-from com_tracardi.domain.metric import Metric
 from tracardi.context import get_context
 from tracardi.service.storage.mysql.schema.table import SettingTable
 from tracardi.domain.setting import Setting
@@ -33,13 +32,4 @@ def map_to_setting(settings_table: SettingTable) -> Setting:
         config=settings_table.config
     )
 
-def map_to_metric(settings_table: SettingTable) -> Metric:
-    return Metric(
-        id=settings_table.id,
-        name=settings_table.name,
-        timestamp=settings_table.timestamp,
-        description=settings_table.description or "",
-        enabled=settings_table.enabled,
-        content=settings_table.content,
-        config=settings_table.config
-    )
+

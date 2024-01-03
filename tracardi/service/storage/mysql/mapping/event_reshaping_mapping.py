@@ -1,6 +1,7 @@
 from tracardi.context import get_context
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema, ReshapeSchema
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import EventReshapingTable
 from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
 
@@ -29,7 +30,7 @@ def map_to_event_reshaping(event_reshaping_table: EventReshapingTable) -> EventR
         name=event_reshaping_table.name,
         description=event_reshaping_table.description,
         reshaping=to_model(event_reshaping_table.reshaping, ReshapeSchema),
-        tags=event_reshaping_table.tags.split(',') if event_reshaping_table.tags else [],
+        tags=split_list(event_reshaping_table.tags),
         event_type=event_reshaping_table.event_type,
         event_source=NamedEntity(id=event_reshaping_table.event_source_id, name=event_reshaping_table.event_source_name),
         enabled=event_reshaping_table.enabled if event_reshaping_table.enabled is not None else False  # Set default value for bool

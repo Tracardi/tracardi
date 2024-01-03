@@ -1,5 +1,6 @@
 from tracardi.context import get_context
 from tracardi.domain.event_type_metadata import EventTypeMetadata
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import EventMappingTable
 
 
@@ -27,7 +28,7 @@ def map_to_event_mapping(event_mapping_table: EventMappingTable) -> EventTypeMet
         name=event_mapping_table.name,
         description=event_mapping_table.description or "",
         event_type=event_mapping_table.event_type,
-        tags=event_mapping_table.tags.split(","),
+        tags=split_list(event_mapping_table.tags),
         journey=event_mapping_table.journey,
         enabled=event_mapping_table.enabled if event_mapping_table.enabled is not None else False,
         index_schema=event_mapping_table.index_schema,

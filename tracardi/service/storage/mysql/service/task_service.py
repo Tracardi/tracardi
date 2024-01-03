@@ -56,7 +56,7 @@ class BackgroundTaskService(TableService):
         return await self._select_query(TaskTable,
                                         columns=columns,
                                         where=where,
-                                        order_by=TaskTable.name,
+                                        order_by=TaskTable.timestamp.desc(),
                                         limit=limit,
                                         offset=offset,
                                         one_record=False)

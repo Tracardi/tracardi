@@ -1,5 +1,6 @@
 from tracardi.context import get_context
 from tracardi.domain.event_validator import EventValidator, ValidationSchema
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import EventValidationTable
 from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
 
@@ -25,7 +26,7 @@ def map_to_event_validation(table: EventValidationTable) -> EventValidator:
         name=table.name,
         description=table.description,
         event_type=table.event_type,
-        tags=table.tags.split(",") if table.tags else [],  # Convert string back to list
+        tags=split_list(table.tags),  # Convert string back to list
         validation=to_model(table.validation, ValidationSchema) if table.validation else None,
         enabled=table.enabled or False
     )

@@ -2,6 +2,7 @@ from typing import Optional
 
 from tracardi.context import get_context
 from tracardi.domain.segment import Segment
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import SegmentTable
 
 
@@ -30,7 +31,7 @@ def map_to_segment(segment_table: Optional[SegmentTable]) -> Optional[Segment]:
         id=segment_table.id,
         name=segment_table.name,
         description=segment_table.description,
-        eventType=segment_table.event_type.split(',') if segment_table.event_type else [],
+        eventType=split_list(segment_table.event_type),
         condition=segment_table.condition,
         enabled=segment_table.enabled,
         machine_name=segment_table.machine_name

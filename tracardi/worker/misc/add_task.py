@@ -1,33 +1,32 @@
-from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
-from datetime import datetime
+from tracardi.domain.task import Task
+from tracardi.service.storage.mysql.service.task_service import BackgroundTaskService
+from tracardi.service.utils.date import now_in_utc
 import logging
-from tracardi.worker.domain.storage_record import StorageRecord, RecordMetadata
 
 
 logger = logging.getLogger(__name__)
 
 
-def add_task(elastic_host: str, task_index: str, name: str, job, params=None):
+async def add_task(name: str, job, params=None):
 
     if params is None:
         params = {}
+
+
     try:
-        with ElasticClient(hosts=[elastic_host]) as client:
-            task = StorageRecord({
-                    "id": job.request.id,
-                    "name": name,
-                    "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
-                    "status": "PROGRESS",
-                    "type": "upgrade",
-                    "progress": 0.,
-                    "event_type": "missing",
-                    "params": params,
-                    "task_id": job.request.id
-            })
-            task.set_meta_data(RecordMetadata(id=task["id"], index=task_index))
-            client.upsert(task_index, task, "")
-            logger.info(msg=f"Successfully added task with ID {job.request.id}")
+        bts = BackgroundTaskService()
+        await bts.insert(Task(
+            id=job.request.id,
+            name=name,
+            timestamp=now_in_utc(),
+            status="pending",
+            progress=0,
+            type="upgrade",
+            params=params,
+            task_id=job.request.id
+        ))
+        logger.info(msg=f"Successfully added task name \"{name}\"")
 
     except Exception as e:
-        logger.info(msg=f"Could not add task with ID {job.request.id} due to an error: {str(e)}")
+        logger.error(msg=f"Could not add task with Name \"{name}\" due to an error: {str(e)}")
 

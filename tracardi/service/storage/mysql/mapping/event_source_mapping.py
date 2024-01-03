@@ -1,3 +1,4 @@
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import EventSourceTable
 from tracardi.domain.event_source import EventSource
 from tracardi.context import get_context
@@ -49,7 +50,7 @@ def map_to_event_source_table(event_source: EventSource) -> EventSourceTable:
 def map_to_event_source(event_source_table: EventSourceTable) -> EventSource:
     return EventSource(
         id=event_source_table.id,
-        type=event_source_table.type.split(',') if event_source_table.type else [],
+        type=split_list(event_source_table.type),
         bridge=NamedEntity(
             id=event_source_table.bridge_id,
             name=event_source_table.bridge_name
@@ -60,8 +61,8 @@ def map_to_event_source(event_source_table: EventSourceTable) -> EventSource:
         channel=event_source_table.channel,
         enabled=event_source_table.enabled or True,
         transitional=event_source_table.transitional or False,
-        tags=event_source_table.tags.split(',') if event_source_table.tags else [],
-        groups=event_source_table.groups.split(',') if event_source_table.groups else [],
+        tags=split_list(event_source_table.tags),
+        groups=split_list(event_source_table.groups),
         permanent_profile_id=event_source_table.permanent_profile_id or False,
         requires_consent=event_source_table.requires_consent or False,
         manual=event_source_table.manual,

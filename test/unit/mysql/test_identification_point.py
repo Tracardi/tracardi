@@ -2,7 +2,7 @@ from tracardi.context import ServerContext, Context
 from tracardi.domain.identification_point import IdentificationPoint, IdentificationField
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.ref_value import RefValue
-from tracardi.service.storage.mysql.mapping.identificcation_point_mapping import map_to_identification_point_table, \
+from tracardi.service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point_table, \
     map_to_identification_point
 from tracardi.service.storage.mysql.schema.table import IdentificationPointTable
 from tracardi.service.storage.mysql.utils.serilizer import to_json, from_model

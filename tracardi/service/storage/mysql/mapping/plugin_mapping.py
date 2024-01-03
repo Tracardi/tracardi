@@ -11,6 +11,7 @@ from tracardi.service.plugin.domain.register import (
     Form,
     RunOnce,
     NodeEvents, Documentation)
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import PluginTable
 from tracardi.service.storage.mysql.utils.serilizer import to_model, from_model
 
@@ -82,8 +83,8 @@ def map_to_spec(table: PluginTable) -> Spec:
     return Spec(
         className=table.plugin_spec_class_name,
         module=table.plugin_spec_module,
-        inputs=table.plugin_spec_inputs.split(','),  # List
-        outputs=table.plugin_spec_outputs.split(','),  # List
+        inputs=split_list(table.plugin_spec_inputs),  # List
+        outputs=split_list(table.plugin_spec_outputs),  # List
         init=table.plugin_spec_init,
         microservice=to_model(table.plugin_spec_microservice, MicroserviceConfig),
         skip=table.plugin_spec_skip,
@@ -116,20 +117,20 @@ def map_to_plugin_metadata(table: PluginTable) -> MetaData:
         name=table.plugin_metadata_name,
         desc=table.plugin_metadata_desc,
         brand=table.plugin_metadata_brand,
-        keywords=table.plugin_metadata_keywords.split(",") if table.plugin_metadata_keywords else [],
+        keywords=split_list(table.plugin_metadata_keywords),
         type=table.plugin_metadata_type,
         width=table.plugin_metadata_width,
         height=table.plugin_metadata_height,
         icon=table.plugin_metadata_icon,
         documentation=to_model(table.plugin_metadata_documentation, Documentation),
-        group=table.plugin_metadata_group.split(",") if table.plugin_metadata_group else [],
-        tags=table.plugin_metadata_tags.split(",") if table.plugin_metadata_tags else  [],
+        group=split_list(table.plugin_metadata_group),
+        tags=split_list(table.plugin_metadata_tags),
         pro=table.plugin_metadata_pro,
         commercial=table.plugin_metadata_commercial or False,
         remote=table.plugin_metadata_remote or False,
         frontend=table.plugin_metadata_frontend or False,
         emits_event=table.plugin_metadata_emits_event,
-        purpose=table.plugin_metadata_purpose.split(",") if table.plugin_metadata_purpose else []
+        purpose=split_list(table.plugin_metadata_purpose)
     )
 
 def map_to_plugin(table: PluginTable) -> Plugin:

@@ -3,6 +3,7 @@ from datetime import datetime
 from tracardi.context import get_context
 from tracardi.domain.resource import Resource, ResourceCredentials
 from tracardi.service.secrets import encrypt
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import ResourceTable
 from tracardi.service.secrets import decrypt
 from tracardi.domain.destination import DestinationConfig
@@ -36,9 +37,9 @@ def map_to_resource(resource_table: ResourceTable) -> Resource:
         timestamp=resource_table.timestamp,
         description=resource_table.description,
         type=resource_table.type,
-        tags=resource_table.tags.split(",") if resource_table.tags else [],
+        tags=split_list(resource_table.tags),
         destination=destination,
-        groups=resource_table.groups.split(",") if resource_table.groups else [],
+        groups=split_list(resource_table.groups),
         icon=resource_table.icon,
         enabled=resource_table.enabled,
         credentials=ResourceCredentials(**credentials)

@@ -87,6 +87,7 @@ async def check_indices_mappings_consistency():
 
     es = ElasticClient.instance()
     for key, index in Resource().resources.items():  # type: str, Index
+
         system_mapping_file = index.get_mapping()
 
         with open(system_mapping_file) as file:

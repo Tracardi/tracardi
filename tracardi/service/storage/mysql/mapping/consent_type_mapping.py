@@ -1,5 +1,6 @@
 from tracardi.context import get_context
 from tracardi.domain.consent_type import ConsentType
+from tracardi.service.storage.mysql.mapping.utils import split_list
 from tracardi.service.storage.mysql.schema.table import ConsentTypeTable
 
 def map_to_consent_type_table(consent_type: ConsentType) -> ConsentTypeTable:
@@ -26,7 +27,7 @@ def map_to_consent_type(consent_type_table: ConsentTypeTable) -> ConsentType:
         revokable=consent_type_table.revokable if consent_type_table.revokable is not None else False,
         default_value=consent_type_table.default_value,
         enabled=consent_type_table.enabled if consent_type_table.enabled is not None else True,
-        tags=consent_type_table.tags.split(",") if consent_type_table.tags else [],  # Convert comma-separated string back to list
+        tags=split_list(consent_type_table.tags),  # Convert comma-separated string back to list
         required=consent_type_table.required if consent_type_table.required is not None else False,
         auto_revoke=consent_type_table.auto_revoke
     )

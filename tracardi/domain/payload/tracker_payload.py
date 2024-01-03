@@ -31,7 +31,7 @@ from ..entity import Entity
 from ..profile import Profile
 from ...exceptions.log_handler import log_handler
 
-from ...service.storage.mysql.mapping.identificcation_point_mapping import map_to_identification_point
+from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
 from ...service.storage.mysql.service.idetification_point_service import IdentificationPointService
 
 if License.has_service(LICENSE):

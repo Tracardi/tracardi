@@ -4,6 +4,7 @@ from datetime import datetime
 from time import sleep
 import logging
 
+from tracardi.context import Context
 from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.add_task import add_task
@@ -31,7 +32,7 @@ def _get_partitioning_suffix(partitioning) -> str:
     else:
         raise ValueError("Unknown partitioning. Expected: year, month, quarter, or day")
 
-def reindex_to_one_index(celery_job, schema: MigrationSchema, url: str, task_index: str):
+async def reindex_to_one_index(celery_job, schema: MigrationSchema, url: str, context: Context):
 
     if not 'replace' in schema.params and 'partitioning' not in schema.params:
         logging.info(f"Migration from `{schema.copy_index.from_index}` FAILED. Wrong configuration. "
@@ -42,9 +43,7 @@ def reindex_to_one_index(celery_job, schema: MigrationSchema, url: str, task_ind
     pattern = schema.params['replace']
     schema.copy_index.to_index = re.sub(pattern, partition, schema.copy_index.to_index)
 
-    add_task(
-        url,
-        task_index,
+    await add_task(
         f"Migration of \"{schema.copy_index.from_index}\" to \"{schema.copy_index.to_index}\"",
         celery_job,
         schema.model_dump()
