@@ -8,11 +8,10 @@ import logging
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
 
-async def reindex(celery_job, schema: MigrationSchema, url: str, context: Context):
+async def reindex(schema: MigrationSchema, url: str, context: Context):
     with ServerContext(context):
         await add_task(
             f"Migration of \"{schema.copy_index.from_index}\"",
-            celery_job,
             schema.model_dump()
         )
 
@@ -61,9 +60,9 @@ async def reindex(celery_job, schema: MigrationSchema, url: str, context: Contex
                         break
 
                     status = task_response["task"]["status"]
-                    update_progress(celery_job, status["updated"] + status["created"], status["total"])
+                    # update_progress(celery_job, status["updated"] + status["created"], status["total"])
                     sleep(3)
 
                 logging.info(f"Migration from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` COMPLETED.")
 
-                update_progress(celery_job, 100)
+                # update_progress(celery_job, 100)

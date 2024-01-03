@@ -9,7 +9,7 @@ from tracardi.service.storage.redis_connection_pool import get_redis_connection_
 import tracardi.worker.service.worker.migration_workers as migration_workers
 
 from tracardi.context import Context, ServerContext
-from tracardi.worker.config import redis_config
+from tracardi.config import redis_config
 # from tracardi.worker.service.async_job import run_async_task
 from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
 from tracardi.worker.service.worker.mysql_worker import MysqlConnectionConfig, MySQLImporter
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def import_mysql_table_data(celery_job, import_config, credentials):
+def import_mysql_table_data(import_config, credentials):
     import_config = ImportConfig(**import_config)
     webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
 
@@ -38,10 +38,11 @@ def import_mysql_table_data(celery_job, import_config, credentials):
                                 webhook_url=webhook_url)
 
     for progress, batch in importer.run(import_config.api_url):
-        update_progress(celery_job, progress)
+        # update_progress(celery_job, progress)
+        pass
 
 
-def import_elastic_data(celery_job, import_config, credentials):
+def import_elastic_data(import_config, credentials):
     import_config = ImportConfig(**import_config)
     webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
 
@@ -50,10 +51,11 @@ def import_elastic_data(celery_job, import_config, credentials):
                                 webhook_url=webhook_url)
 
     for progress, batch in importer.run(import_config.api_url):
-        update_progress(celery_job, progress)
+        pass
+        # update_progress(celery_job, progress)
 
 
-def import_mysql_data_with_query(celery_job, import_config, credentials):
+def import_mysql_data_with_query(import_config, credentials):
     import_config = ImportConfig(**import_config)
     webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
 
@@ -64,9 +66,10 @@ def import_mysql_data_with_query(celery_job, import_config, credentials):
     )
 
     for progress, batch in importer.run(import_config.api_url):
-        update_progress(celery_job, progress)
+        # update_progress(celery_job, progress)
+        pass
 
-async def _run_migration_worker(self, worker_func, schema, elastic_host, context: Context):
+async def _run_migration_worker(worker_func, schema, elastic_host, context: Context):
     worker_function = getattr(migration_workers, worker_func, None)
 
     if worker_function is None:
@@ -81,9 +84,9 @@ async def _run_migration_worker(self, worker_func, schema, elastic_host, context
     #   * elastic_url: str, task_index: str
     #   * elastic_task_index - this is for saving progress
     print(worker_function)
-    await worker_function(self, MigrationSchema(**schema), elastic_host, context)
+    await worker_function(MigrationSchema(**schema), elastic_host, context)
 
-async def migrate_data(celery_job, schemas, elastic_host, context: Context):
+async def migrate_data(schemas, elastic_host, context: Context):
     logger.info(f"Migration starts for elastic: {elastic_host}")
 
     schemas = [MigrationSchema(**schema) for schema in schemas]
@@ -93,15 +96,15 @@ async def migrate_data(celery_job, schemas, elastic_host, context: Context):
     for schema in schemas:
         logger.info(f"Scheduled migration of {schema.copy_index.from_index} to {schema.copy_index.to_index}")
 
-    update_progress(celery_job, progress, total)
+    # update_progress(celery_job, progress, total)
 
     # Adds task to database
-    await add_task("Migration plan orchestrator", celery_job)
+    await add_task("Migration plan orchestrator")
 
     tasks = []
     for schema in schemas:
 
-        coro = _run_migration_worker(celery_job,schema.worker, schema.model_dump(), elastic_host, context)
+        coro = _run_migration_worker(schema.worker, schema.model_dump(), elastic_host, context)
 
         try:
             if schema.asynchronous is True:
@@ -112,39 +115,39 @@ async def migrate_data(celery_job, schemas, elastic_host, context: Context):
             logger.error(f"Task failed {str(e)}")
 
         progress += 1
-        if celery_job:
-            celery_job.update_state(state="PROGRESS", meta={"current": progress, "total": total})
+        # if celery_job:
+        #     celery_job.update_state(state="PROGRESS", meta={"current": progress, "total": total})
 
     print(await asyncio.gather(*tasks))
 
 # @run_async_task
 # @queue.task()
-async def _run_migration_job(self, schemas, elastic_host, context: Context):
+async def _run_migration_job(schemas, elastic_host, context: Context):
     with ServerContext(context):
-        return await migrate_data(self, schemas, elastic_host, context)
+        return await migrate_data(schemas, elastic_host, context)
 
 
 @queue.task(retries=1)
-def run_mysql_import_job(self, import_config, credentials):
-    import_mysql_table_data(self, import_config, credentials)
+def run_mysql_import_job(import_config, credentials):
+    import_mysql_table_data(import_config, credentials)
 
 
 @queue.task(retries=1)
-def run_elastic_import_job(self, import_config, credentials):
-    import_elastic_data(self, import_config, credentials)
+def run_elastic_import_job(import_config, credentials):
+    import_elastic_data(import_config, credentials)
 
 
 @queue.task(retries=1)
-def run_mysql_query_import_job(self, import_config, credentials):
-    import_mysql_data_with_query(self, import_config, credentials)
+def run_mysql_query_import_job(import_config, credentials):
+    import_mysql_data_with_query(import_config, credentials)
 
 """
 This is start job
 """
 @queue.task(retries=1)
-async def run_migration_job(self, schemas, elastic_host, context: dict):
+async def run_migration_job(schemas, elastic_host, context: dict):
     print("started")
     context = Context.from_dict(context)
-    await _run_migration_job(self, schemas, elastic_host, context)
+    await _run_migration_job(schemas, elastic_host, context)
     print("finished")
 

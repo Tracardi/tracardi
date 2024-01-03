@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from tracardi.domain.task import Task
 from tracardi.service.storage.mysql.service.task_service import BackgroundTaskService
 from tracardi.service.utils.date import now_in_utc
@@ -7,21 +9,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def add_task(name: str, job, params=None):
+async def add_task(name: str, params=None):
 
     if params is None:
         params = {}
 
     bts = BackgroundTaskService()
+    task_id = str(uuid4())
     await bts.insert(Task(
-        id=job.request.id,
+        id=task_id,
         name=name,
         timestamp=now_in_utc(),
         status="pending",
         progress=0,
         type="upgrade",
         params=params,
-        task_id=job.request.id
+        task_id=task_id
     ))
     logger.info(msg=f"Successfully added task name \"{name}\"")
 

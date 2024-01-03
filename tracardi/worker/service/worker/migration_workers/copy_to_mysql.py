@@ -95,14 +95,13 @@ class_mapping = {
 }
 
 
-async def copy_to_mysql(celery_job, schema: MigrationSchema, elastic_host: str, context: Context):
+async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Context):
     if schema.copy_index.multi is True:
         raise ValueError('Multi index can not be copied to mysql.')
 
     with ServerContext(context):
         await add_task(
             f"Migration of \"{schema.copy_index.from_index}\" to mysql table \"{schema.copy_index.to_index}\"",
-            celery_job,
             schema.model_dump()
         )
 
@@ -123,7 +122,7 @@ async def copy_to_mysql(celery_job, schema: MigrationSchema, elastic_host: str, 
                     start=moved_records,
                     size=chunk
             ):
-                update_progress(celery_job, 0, doc_count := client.count(schema.copy_index.from_index))
+                # update_progress(celery_job, 0, doc_count := client.count(schema.copy_index.from_index))
 
                 for number, record in enumerate(records_to_move):  # Type: int,StorageRecord
 
@@ -144,8 +143,8 @@ async def copy_to_mysql(celery_job, schema: MigrationSchema, elastic_host: str, 
                     print('xxx', await ts._replace(object_table, table_data))
 
                     # Update progress
-                    update_progress(celery_job, moved_records + number + 1, doc_count)
+                    # update_progress(celery_job, moved_records + number + 1, doc_count)
 
                 moved_records += chunk
 
-        update_progress(celery_job, 100)
+        # update_progress(celery_job, 100)

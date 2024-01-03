@@ -32,7 +32,7 @@ def _get_partitioning_suffix(partitioning) -> str:
     else:
         raise ValueError("Unknown partitioning. Expected: year, month, quarter, or day")
 
-async def reindex_to_one_index(celery_job, schema: MigrationSchema, url: str, context: Context):
+async def reindex_to_one_index(schema: MigrationSchema, url: str, context: Context):
 
     if not 'replace' in schema.params and 'partitioning' not in schema.params:
         logging.info(f"Migration from `{schema.copy_index.from_index}` FAILED. Wrong configuration. "
@@ -45,7 +45,6 @@ async def reindex_to_one_index(celery_job, schema: MigrationSchema, url: str, co
 
     await add_task(
         f"Migration of \"{schema.copy_index.from_index}\" to \"{schema.copy_index.to_index}\"",
-        celery_job,
         schema.model_dump()
     )
 
@@ -97,9 +96,9 @@ async def reindex_to_one_index(celery_job, schema: MigrationSchema, url: str, co
                     break
 
                 status = task_response["task"]["status"]
-                update_progress(celery_job, status["updated"] + status["created"], status["total"])
+                # update_progress(celery_job, status["updated"] + status["created"], status["total"])
                 sleep(3)
 
             logging.info(f"Migration from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` COMPLETED.")
 
-            update_progress(celery_job, 100)
+            # update_progress(celery_job, 100)
