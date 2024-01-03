@@ -10,7 +10,7 @@ import tracardi.worker.service.worker.migration_workers as migration_workers
 
 from tracardi.context import Context, ServerContext
 from tracardi.config import redis_config
-# from tracardi.worker.service.async_job import run_async_task
+from tracardi.worker.service.async_job import run_async_task
 from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
 from tracardi.worker.service.worker.mysql_worker import MysqlConnectionConfig, MySQLImporter
 from tracardi.worker.service.worker.mysql_query_worker import MysqlConnectionConfig as MysqlQueryConnConfig, MySQLQueryImporter
@@ -120,8 +120,7 @@ async def migrate_data(schemas, elastic_host, context: Context):
 
     print(await asyncio.gather(*tasks))
 
-# @run_async_task
-# @queue.task()
+@run_async_task
 async def _run_migration_job(schemas, elastic_host, context: Context):
     with ServerContext(context):
         return await migrate_data(schemas, elastic_host, context)
@@ -145,9 +144,9 @@ def run_mysql_query_import_job(import_config, credentials):
 This is start job
 """
 @queue.task(retries=1)
-async def run_migration_job(schemas, elastic_host, context: dict):
+def run_migration_job(schemas, elastic_host, context: dict):
     print("started")
     context = Context.from_dict(context)
-    await _run_migration_job(schemas, elastic_host, context)
+    _run_migration_job(schemas, elastic_host, context)
     print("finished")
 

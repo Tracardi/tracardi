@@ -8,14 +8,11 @@ import json
 
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_client import ElasticClient
-from tracardi.worker.celery_worker import run_migration_job
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
 from hashlib import sha1
 from pathlib import Path
 from tracardi.domain.version import Version
 import re
-from tracardi.service.storage.index import Resource
+from tracardi.worker.worker import run_migration_job
 from typing import Union
 
 logger = logging.getLogger(__name__)
@@ -217,23 +214,25 @@ class MigrationManager:
         if not final_schemas:
             return
 
-        def add_to_celery(given_schemas: List, elastic_host: str):
-            # todo replace celery
-            return run_migration_job.delay(given_schemas, elastic_host, context.dict())
+        # def add_to_celery(given_schemas: List, elastic_host: str):
+        #     # todo replace celery
+        #     return run_migration_job(given_schemas, elastic_host, context.dict())
 
-        # Run in executor
+        run_migration_job(final_schemas, elastic_host, context.dict())
 
-        executor = ThreadPoolExecutor(
-            max_workers=1,
-        )
-        loop = asyncio.get_running_loop()
-        blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host)]
-        completed, pending = await asyncio.wait(blocking_tasks)
-        celery_task = completed.pop().result()
+        # # Run in executor
+        #
+        # executor = ThreadPoolExecutor(
+        #     max_workers=1,
+        # )
+        # loop = asyncio.get_running_loop()
+        # blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host)]
+        # completed, pending = await asyncio.wait(blocking_tasks)
+        # celery_task = completed.pop().result()
 
         await self.save_version_update()
 
-        return celery_task.id
+        # return celery_task.id
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
