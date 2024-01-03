@@ -17,6 +17,7 @@ REDIS_HOST=192.168.1.110 ELASTIC_VERIFY_CERTS=no ELASTIC_HOST=http://192.168.1.1
 docker run \
 -e ELASTIC_HOST=http://192.168.1.110:9200 \
 -e REDIS_HOST=redis://192.168.1.110:6379 \
+-e MYSQL_DATABASE_URI=mysql+aiomysql://root:root@192.168.1.110/ \
 -e LOGGING_LEVEL=info \
 tracardi/worker:0.9.0-dev
 ```

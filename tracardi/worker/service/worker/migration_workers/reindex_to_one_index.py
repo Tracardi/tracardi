@@ -7,7 +7,7 @@ import logging
 from tracardi.context import Context
 from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.update_progress import update_progress
-from tracardi.worker.misc.add_task import add_task
+from tracardi.worker.misc.task_progress import task_create
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
@@ -43,7 +43,8 @@ async def reindex_to_one_index(schema: MigrationSchema, url: str, context: Conte
     pattern = schema.params['replace']
     schema.copy_index.to_index = re.sub(pattern, partition, schema.copy_index.to_index)
 
-    await add_task(
+    task_id = await task_create(
+        "upgrade",
         f"Migration of \"{schema.copy_index.from_index}\" to \"{schema.copy_index.to_index}\"",
         schema.model_dump()
     )

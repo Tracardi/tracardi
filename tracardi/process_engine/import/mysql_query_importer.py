@@ -1,15 +1,11 @@
-from tracardi.service.storage.mysql.service.task_service import BackgroundTaskService
-from tracardi.service.utils.date import now_in_utc
-
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import Tuple
-from uuid import uuid4
 
 import aiomysql
 
 from tracardi.domain.import_config import ImportConfig
-from tracardi.domain.task import Task
+from tracardi.worker.misc.task_progress import task_create
 from .importer import Importer
 from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
@@ -17,7 +13,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.domain import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.mysql.query.model.connection import Connection
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
-from tracardi.worker.celery_worker import run_mysql_query_import_job
+from tracardi.worker.worker import run_mysql_query_import_job
 
 
 class MySQLQueryImportConfig(BaseModel):
@@ -125,37 +121,19 @@ class MySQLQueryImporter(Importer):
 
     async def run(self, task_name, import_config: ImportConfig) -> Tuple[str, str]:
 
-        def add_to_celery(import_config: ImportConfig, credentials):
-            # todo replace celery
-            return run_mysql_query_import_job.delay(
-                import_config.model_dump(),
-                credentials
-            )
-
         config = MySQLQueryImportConfig(**import_config.config)
         resource = await resource_db.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
 
-        executor = ThreadPoolExecutor(
-            max_workers=1,
-        )
-        loop = asyncio. get_running_loop()
-        blocking_tasks = [loop.run_in_executor(executor, add_to_celery, import_config, credentials)]
-        completed, pending = await asyncio.wait(blocking_tasks)
-        celery_task = completed.pop().result()
-
-        task = Task(
-            timestamp=now_in_utc(),
-            id=str(uuid4()),
-            name=task_name if task_name else import_config.name,
-            type="import",
-            params=import_config.model_dump(),
-            task_id=celery_task.id
+        run_mysql_query_import_job(
+            import_config.model_dump(),
+            credentials
         )
 
-        bts = BackgroundTaskService()
-        await bts.insert(task)
+        task_id = await task_create(
+            "import",
+            task_name if task_name else import_config.name,
+            import_config.model_dump()
+        )
 
-        # await task_db.upsert_task(task)
-
-        return task.id, celery_task.id
+        return task_id, task_id

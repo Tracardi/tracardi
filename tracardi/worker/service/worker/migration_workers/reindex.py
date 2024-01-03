@@ -1,7 +1,7 @@
 from tracardi.context import Context, ServerContext
 from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.update_progress import update_progress
-from tracardi.worker.misc.add_task import add_task
+from tracardi.worker.misc.task_progress import task_create
 from time import sleep
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
 import logging
@@ -10,7 +10,8 @@ from tracardi.worker.service.worker.migration_workers.utils.client import Elasti
 
 async def reindex(schema: MigrationSchema, url: str, context: Context):
     with ServerContext(context):
-        await add_task(
+        task_id = await task_create(
+            "upgrade",
             f"Migration of \"{schema.copy_index.from_index}\"",
             schema.model_dump()
         )

@@ -53,8 +53,7 @@ from tracardi.service.storage.mysql.schema.table import BridgeTable, ConsentType
     SettingTable
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.worker.domain.migration_schema import MigrationSchema
-from tracardi.worker.misc.update_progress import update_progress
-from tracardi.worker.misc.add_task import add_task
+from tracardi.worker.misc.task_progress import task_create, task_progress, task_finish
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
 
@@ -100,7 +99,8 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
         raise ValueError('Multi index can not be copied to mysql.')
 
     with ServerContext(context):
-        await add_task(
+        task_id = await task_create(
+            "upgrade",
             f"Migration of \"{schema.copy_index.from_index}\" to mysql table \"{schema.copy_index.to_index}\"",
             schema.model_dump()
         )
@@ -122,7 +122,6 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                     start=moved_records,
                     size=chunk
             ):
-                # update_progress(celery_job, 0, doc_count := client.count(schema.copy_index.from_index))
 
                 for number, record in enumerate(records_to_move):  # Type: int,StorageRecord
 
@@ -140,11 +139,10 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                         exit()
 
                     ts = TableService()
-                    print('xxx', await ts._replace(object_table, table_data))
+                    await ts._replace(object_table, table_data)
 
-                    # Update progress
-                    # update_progress(celery_job, moved_records + number + 1, doc_count)
+                    await task_progress(task_id, record)  # It is progress for each chunk
 
                 moved_records += chunk
 
-        # update_progress(celery_job, 100)
+        await task_finish(task_id)

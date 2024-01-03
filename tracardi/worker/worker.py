@@ -18,7 +18,7 @@ from tracardi.worker.service.import_dispatcher import ImportDispatcher
 from tracardi.worker.domain.import_config import ImportConfig
 from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.update_progress import update_progress
-from tracardi.worker.misc.add_task import add_task
+from tracardi.worker.misc.task_progress import task_create, task_progress, task_finish
 
 queue = RedisHuey('upgrade',
                   connection_pool=get_redis_connection_pool(redis_config),
@@ -79,10 +79,9 @@ async def _run_migration_worker(worker_func, schema, elastic_host, context: Cont
 
     # Runs all workers defined in worker.service.worker.migration_workers.__init__
     # All have defined interface of:
-    #   * celery_job,
     #   * schema: MigrationSchema,
     #   * elastic_url: str, task_index: str
-    #   * elastic_task_index - this is for saving progress
+    #   * context
     print(worker_function)
     await worker_function(MigrationSchema(**schema), elastic_host, context)
 
@@ -96,10 +95,9 @@ async def migrate_data(schemas, elastic_host, context: Context):
     for schema in schemas:
         logger.info(f"Scheduled migration of {schema.copy_index.from_index} to {schema.copy_index.to_index}")
 
-    # update_progress(celery_job, progress, total)
-
     # Adds task to database
-    await add_task("Migration plan orchestrator")
+
+    task_id = await task_create("upgrade", "Migration plan orchestrator")
 
     tasks = []
     for schema in schemas:
@@ -115,10 +113,11 @@ async def migrate_data(schemas, elastic_host, context: Context):
             logger.error(f"Task failed {str(e)}")
 
         progress += 1
-        # if celery_job:
-        #     celery_job.update_state(state="PROGRESS", meta={"current": progress, "total": total})
+        await task_progress(task_id, int(progress / total))
 
-    print(await asyncio.gather(*tasks))
+    await asyncio.gather(*tasks)
+
+    await task_finish(task_id)
 
 @run_async_task
 async def _run_migration_job(schemas, elastic_host, context: Context):
@@ -145,8 +144,6 @@ This is start job
 """
 @queue.task(retries=1)
 def run_migration_job(schemas, elastic_host, context: dict):
-    print("started")
     context = Context.from_dict(context)
     _run_migration_job(schemas, elastic_host, context)
-    print("finished")
 

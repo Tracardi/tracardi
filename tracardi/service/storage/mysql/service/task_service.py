@@ -36,6 +36,10 @@ class BackgroundTaskService(TableService):
         return await self._delete_by_id(TaskTable, primary_id=background_task_id)
 
 
+    async def update_by_id(self, background_task_id: str, data: dict) -> str:
+        return await self._update_by_id(TaskTable, background_task_id, data)
+
+
     async def insert(self, background_task: Task):
         return await self._replace(TaskTable, map_to_task_table(background_task))
 

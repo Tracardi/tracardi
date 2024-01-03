@@ -209,30 +209,15 @@ class MigrationManager:
     async def start_migration(self, ids: List[str], elastic_host: str, context: Context) -> None:
 
         customized_schemas = await self.get_available_schemas()
-        final_schemas = [schema.model_dump() for schema in customized_schemas["schemas"] if schema.id in ids]
+        selected_schemas_for_migration = [schema.model_dump() for schema in customized_schemas["schemas"] if schema.id in ids]
 
-        if not final_schemas:
+        if not selected_schemas_for_migration:
             return
 
-        # def add_to_celery(given_schemas: List, elastic_host: str):
-        #     # todo replace celery
-        #     return run_migration_job(given_schemas, elastic_host, context.dict())
-
-        run_migration_job(final_schemas, elastic_host, context.dict())
-
-        # # Run in executor
-        #
-        # executor = ThreadPoolExecutor(
-        #     max_workers=1,
-        # )
-        # loop = asyncio.get_running_loop()
-        # blocking_tasks = [loop.run_in_executor(executor, add_to_celery, final_schemas, elastic_host)]
-        # completed, pending = await asyncio.wait(blocking_tasks)
-        # celery_task = completed.pop().result()
+        run_migration_job(selected_schemas_for_migration, elastic_host, context.dict())
 
         await self.save_version_update()
 
-        # return celery_task.id
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
