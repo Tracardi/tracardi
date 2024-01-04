@@ -133,11 +133,9 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
 
                         table_data = domain_object_mapping_to_table(domain_object)
 
-                        print(domain_type, table_data)
-
                     except Exception as e:
-                        await task_status(task_id, 'error')
-                        print(domain_type, record)
+                        await task_status(task_id, 'error', str(e))
+                        logger.error(str(e))
                         continue
 
                     ts = TableService()

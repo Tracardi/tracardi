@@ -67,7 +67,9 @@ async def reindex(schema: MigrationSchema, url: str, context: Context):
                         break
 
                     status = task_response["task"]["status"]
-                    await task_progress(task_id, int(((status["updated"] + status["created"]) / status["total"]) * 100))
+                    progress = int(((status["updated"] + status["created"]) / status["total"]) * 100)
+                    print(progress)
+                    await task_progress(task_id, progress)
                     sleep(3)
 
                 logging.info(f"Migration from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` COMPLETED.")
