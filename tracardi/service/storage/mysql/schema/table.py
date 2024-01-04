@@ -547,7 +547,7 @@ class ImportTable(Base):
     name = Column(String(128))
     description = Column(Text)
     module = Column(String(255))
-    config = Column(String(255))
+    config = Column(JSON)
     enabled = Column(Boolean, default=False)
     transitional = Column(Boolean)
     api_url = Column(String(255))

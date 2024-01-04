@@ -27,35 +27,61 @@ queue = RedisHuey('upgrade',
 logger = logging.getLogger(__name__)
 
 
+@run_async_task
+async def import_mysql_table_data(task_name:str, import_config: dict, credentials, context: Context):
+    with ServerContext(context):
+        import_config = ImportConfig(**import_config)
 
-def import_mysql_table_data(import_config, credentials):
+        task_id = await task_create(
+            "import",
+            task_name if task_name else import_config.name,
+            import_config.model_dump(mode='json')
+        )
+
+        webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
+
+        importer = ImportDispatcher(MysqlConnectionConfig(**credentials),
+                                    importer=MySQLImporter(**import_config.config),
+                                    webhook_url=webhook_url)
+
+        for progress, batch in importer.run(import_config.api_url):
+            await task_progress(task_id, progress)
+
+        await task_finish(task_id)
+
+
+@run_async_task
+async def import_elastic_data(task_name:str, import_config, credentials, context: Context):
+    with ServerContext(context):
+        import_config = ImportConfig(**import_config)
+
+        task_id = await task_create(
+            "import",
+            task_name if task_name else import_config.name,
+            import_config.model_dump(mode='json')
+        )
+
+        webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
+
+        importer = ImportDispatcher(ElasticCredentials(**credentials),
+                                    importer=ElasticImporter(**import_config.config),
+                                    webhook_url=webhook_url)
+
+        for progress, batch in importer.run(import_config.api_url):
+            await task_progress(task_id, progress)
+
+        await task_finish(task_id)
+
+@run_async_task
+async def import_mysql_data_with_query(task_name:str, import_config, credentials, context: Context):
     import_config = ImportConfig(**import_config)
-    webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
 
-    importer = ImportDispatcher(MysqlConnectionConfig(**credentials),
-                                importer=MySQLImporter(**import_config.config),
-                                webhook_url=webhook_url)
+    task_id = await task_create(
+        "import",
+        task_name if task_name else import_config.name,
+        import_config.model_dump(mode='json')
+    )
 
-    for progress, batch in importer.run(import_config.api_url):
-        # update_progress(celery_job, progress)
-        pass
-
-
-def import_elastic_data(import_config, credentials):
-    import_config = ImportConfig(**import_config)
-    webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
-
-    importer = ImportDispatcher(ElasticCredentials(**credentials),
-                                importer=ElasticImporter(**import_config.config),
-                                webhook_url=webhook_url)
-
-    for progress, batch in importer.run(import_config.api_url):
-        pass
-        # update_progress(celery_job, progress)
-
-
-def import_mysql_data_with_query(import_config, credentials):
-    import_config = ImportConfig(**import_config)
     webhook_url = f"/collect/{import_config.event_type}/{import_config.event_source.id}"
 
     importer = ImportDispatcher(
@@ -65,8 +91,9 @@ def import_mysql_data_with_query(import_config, credentials):
     )
 
     for progress, batch in importer.run(import_config.api_url):
-        # update_progress(celery_job, progress)
-        pass
+        await task_progress(task_id, progress)
+
+    await task_finish(task_id)
 
 async def _run_migration_worker(worker_func, schema, elastic_host, context: Context):
     worker_function = getattr(migration_workers, worker_func, None)
@@ -125,13 +152,13 @@ async def _run_migration_job(schemas, elastic_host, context: Context):
 
 
 @queue.task(retries=1)
-def run_mysql_import_job(import_config, credentials):
-    import_mysql_table_data(import_config, credentials)
+def run_mysql_import_job(task_name: str, import_config, credentials, context: Context):
+    import_mysql_table_data(task_name, import_config, credentials, context)
 
 
 @queue.task(retries=1)
-def run_elastic_import_job(import_config, credentials):
-    import_elastic_data(import_config, credentials)
+def run_elastic_import_job(task_name: str, import_config, credentials, context: Context):
+    import_elastic_data(task_name, import_config, credentials, context)
 
 
 @queue.task(retries=1)

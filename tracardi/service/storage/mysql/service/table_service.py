@@ -3,7 +3,7 @@ from typing import Optional, Type, Any
 from sqlalchemy.dialects.mysql import insert
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
 from sqlalchemy.future import select
-from sqlalchemy import and_, delete, inspect, update, Column, Table, text, Select
+from sqlalchemy import and_, delete, inspect, update, Column, text, Select
 from sqlalchemy.sql import func
 
 
@@ -211,6 +211,7 @@ class TableService:
                 primary_keys = [key.name for key in inspect(table).primary_key]
                 update_dict = {key: value for key, value in data.items() if key not in primary_keys}
                 upsert_stmt = stmt.on_duplicate_key_update(**update_dict)
+
                 await session.execute(upsert_stmt)
                 await session.commit()
 

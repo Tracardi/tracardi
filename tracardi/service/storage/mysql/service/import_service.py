@@ -37,5 +37,6 @@ class ImportService(TableService):
         return await self._delete_by_id(ImportTable, primary_id=import_id)
 
     async def insert(self, import_config: ImportConfig):
-        return await self._replace(ImportTable, map_to_import_config_table(import_config))
+        table = map_to_import_config_table(import_config)
+        return await self._replace(ImportTable, table)
 

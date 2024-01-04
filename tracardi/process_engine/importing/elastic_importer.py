@@ -9,6 +9,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.domain import resource as resource_db
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.worker.worker import run_elastic_import_job
+from ...context import get_context
 
 
 class ElasticIndexImportConfig(BaseModel):
@@ -70,7 +71,7 @@ class ElasticIndexImporter(Importer):
             )
         ])])
 
-    async def run(self, task_name, import_config: ImportConfig) -> Tuple[str, str]:
+    async def run(self, task_name, import_config: ImportConfig):
 
         config = ElasticIndexImportConfig(**import_config.config)
         resource = await resource_db.load(config.source.id)
@@ -79,15 +80,8 @@ class ElasticIndexImporter(Importer):
         # Run via huey
 
         run_elastic_import_job(
+            task_name,
             import_config.model_dump(mode='json'),
-            credentials
+            credentials,
+            get_context()
         )
-
-        # Save task
-        task_id = await task_create(
-            "import",
-            task_name if task_name else import_config.name,
-            import_config.model_dump()
-        )
-
-        return task_id, task_id
