@@ -133,15 +133,17 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
 
                         table_data = domain_object_mapping_to_table(domain_object)
 
+                        ts = TableService()
+                        await ts._replace(object_table, table_data)
+
                     except Exception as e:
                         await task_status(task_id, 'error', str(e))
                         logger.error(str(e))
                         continue
 
-                    ts = TableService()
-                    await ts._replace(object_table, table_data)
+                    # Progress
 
-                    await task_progress(task_id, record)  # It is progress for each chunk
+                    await task_progress(task_id, number)  # It is progress for each chunk
 
                 moved_records += chunk
 
