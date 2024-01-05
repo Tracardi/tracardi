@@ -9,7 +9,7 @@
     <a href="https://docs.tracardi.com" rel="dofollow"><strong>Explore Tracardi Documentation</strong></a> ·
     <a href="https://opencollective.com/tracardi-cdp">⭐️ Support the project</a> ·
     <a href="https://join.slack.com/t/tracardi/shared_invite/zt-1bpf35skl-8Fr5FX5a6cji7tX18JNNDA">👨‍💻 Join the community</a> ·
-    <a href="https://bit.ly/3pbdbPR">:tv: Watch tutorials on YOUTUBE</a>
+    <a href="https://youtube.com/@tracardi">:tv: Watch tutorials on YOUTUBE</a>
    <br/>
   </p>
   
@@ -39,7 +39,7 @@ Tracardi __collects data from customer journeys__ and assigns it to a profile, a
 
 ## ⭐️ Screenshots
 
-[![flow-1](https://user-images.githubusercontent.com/16271564/220199377-2b84168f-7e43-49ac-9560-998722589749.png)](https://www.youtube.com/watch?v=p_FOh7K828o)
+[![flow-1](https://user-images.githubusercontent.com/16271564/220199377-2b84168f-7e43-49ac-9560-998722589749.png)](https://youtu.be/JrzFAfyctKw)
 
 ## ✨ Features!
 
