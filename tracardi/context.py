@@ -84,10 +84,10 @@ class Context:
             return (self.production, self.tenant) == (other.production, other.tenant)
         return False
 
-    def dict(self) -> dict:
+    def dict(self, without_user:bool=False) -> dict:
         return {
             "production": self.production,
-            "user": self.user.model_dump(mode='json') if isinstance(self.user, BaseModel) else None,
+            "user": self.user.model_dump(mode='json') if not without_user and isinstance(self.user, BaseModel) else None,
             "tenant": self.tenant,
             "host": self.host,
             "version": self.version
