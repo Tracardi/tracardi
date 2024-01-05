@@ -12,7 +12,7 @@ async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Optio
 
     session_id = get_entity_id(tracker_payload.session)
 
-    if session_id is None:
+    if session_id is None or session_id.strip() == "":
 
         # Artificial session
 
