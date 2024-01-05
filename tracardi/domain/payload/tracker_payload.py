@@ -396,17 +396,18 @@ class TrackerPayload(BaseModel):
             # Get first event type and match identification point for it
             _identification = valid_identification_points[0]
             event_payload = next(self.get_event_payloads_by_type(_identification.event_type.id))
-            flat_properties = dotty({"properties": event_payload})
+            flat_properties = dotty({"properties": event_payload.properties})
             find_profile_by_fields = []
             for field in _identification.fields:
                 if field.event_property.ref and field.profile_trait.ref:
                     if field.event_property.value not in flat_properties:
                         raise AssertionError(f"While creating new profile Tracardi was forced to load data by merging "
                                              f"key because identification must be performed on new profile. "
-                                             f"We encountered missing data issue for property "
-                                             f"[{field.event_property.value}] in the event property. "
+                                             f"We encountered missing data issue for event property "
+                                             f"[{field.event_property.value}]. "
                                              f"Identification point [{_identification.name}] has it defined as customer "
                                              f"merging key but the event has only the properties {flat_properties}.")
+
                         # error
                     find_profile_by_fields.append(
                         (field.profile_trait.value, flat_properties[field.event_property.value]))
