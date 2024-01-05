@@ -70,6 +70,7 @@ setup(
         'user-agents==2.2.0',
         'faker==18.4.0',
         'faker-commerce==1.0.3',
+        'speedict==0.3.12',
         # Worker requirements
         'requests',
         'mysql-connector-python==8.0.29',
