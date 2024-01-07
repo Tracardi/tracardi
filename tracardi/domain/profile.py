@@ -13,9 +13,13 @@ from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
+from ..config import tracardi
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
 from ..service.utils.date import now_in_utc
+from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
+    PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
+from ..service.utils.hasher import hash_id
 
 
 class ConsentRevoke(BaseModel):
@@ -57,6 +61,49 @@ class Profile(Entity):
 
     def has_consents_set(self) -> bool:
         return 'consents' in self.aux and 'granted' in self.aux['consents'] and self.aux['consents']['granted'] is True
+
+    def has_hashed_email_id(self, type: str = None) -> bool:
+
+        if type is None:
+            type = self.data.contact.email.email_types()
+
+        for id in self.ids:
+            if id.startswith(type):
+                return True
+        return False
+
+    def add_hashed_ids(self):
+        ids_len = len(self.ids)
+        if tracardi.hash_id_webhook:
+            if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
+                self.ids.append(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
+            if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
+                self.ids.append(hash_id(self.data.contact.email.main, PREFIX_EMAIL_MAIN))
+            if self.data.contact.email.has_private() and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
+                self.ids.append(hash_id(self.data.contact.email.private, PREFIX_EMAIL_PRIVATE))
+
+            if self.data.contact.phone.has_business() and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
+                self.ids.append(hash_id(self.data.contact.phone.business, PREFIX_PHONE_BUSINESS))
+            if self.data.contact.phone.has_main() and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
+                self.ids.append(hash_id(self.data.contact.phone.main, PREFIX_PHONE_MAIN))
+            if self.data.contact.phone.has_mobile() and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
+                self.ids.append(hash_id(self.data.contact.phone.mobile, PREFIX_PHONE_MOBILE))
+            if self.data.contact.phone.has_whatsapp() and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
+                self.ids.append(hash_id(self.data.contact.phone.whatsapp, PREFIX_PHONE_WHATSUP))
+
+            # Update if new data
+            if len(self.ids) > ids_len:
+                self.mark_for_update()
+
+    def has_hashed_phone_id(self, type: str = None) -> bool:
+
+        if type is None:
+            type = self.data.contact.phone.phone_types()
+
+        for id in self.ids:
+            if id.startswith(type):
+                return True
+        return False
 
     def fill_meta_data(self):
         """

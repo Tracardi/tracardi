@@ -3,6 +3,13 @@ from typing import Optional, Union, List, Any
 from pydantic import BaseModel
 from tracardi.domain.geo import Geo
 
+PREFIX_EMAIL_MAIN = "emm-"
+PREFIX_EMAIL_BUSINESS =  "emb-"
+PREFIX_EMAIL_PRIVATE =  "emp-"
+PREFIX_PHONE_MAIN = "phm-"
+PREFIX_PHONE_BUSINESS = "phb-"
+PREFIX_PHONE_MOBILE = "pho-"
+PREFIX_PHONE_WHATSUP = "pwa-"
 
 def force_lists(props: List[str], data):
     for prop in props:
@@ -74,12 +81,37 @@ class ProfilePhone(BaseModel):
     mobile: Optional[str] = None
     whatsapp: Optional[str] = None
 
+    def phone_types(self) -> tuple:
+        return PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
+
+    def has_business(self) -> bool:
+        return bool(self.business)
+
+    def has_main(self) -> bool:
+        return bool(self.main)
+
+    def has_mobile(self) -> bool:
+        return bool(self.mobile)
+
+    def has_whatsapp(self) -> bool:
+        return bool(self.whatsapp)
 
 class ProfileEmail(BaseModel):
     main: Optional[str] = None
     private: Optional[str] = None
     business: Optional[str] = None
 
+    def email_types(self) -> tuple:
+        return PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, PREFIX_EMAIL_BUSINESS
+
+    def has_business(self) -> bool:
+        return bool(self.business)
+
+    def has_main(self) -> bool:
+        return bool(self.main)
+
+    def has_private(self) -> bool:
+        return bool(self.private)
 
 class ProfileContact(BaseModel):
     email: Optional[ProfileEmail] = ProfileEmail()
@@ -88,9 +120,16 @@ class ProfileContact(BaseModel):
     address: Optional[ProfileContactAddress] = ProfileContactAddress()
     confirmations: List[str] = []
 
-    def has_contact(self):
-        return self.email or self.phone.mobile or self.phone.whatsapp or self.app.has_contact()
+    def has_contact(self) -> bool:
+        return (self.has_email()
+                or self.has_phone()
+                or self.app.has_contact())
 
+    def has_email(self) -> bool:
+        return bool(self.email.main or self.email.business or self.email.private)
+
+    def has_phone(self) -> bool:
+        return bool(self.phone.main or self.phone.business or self.phone.mobile or self.phone.whatsapp)
 
 class ProfileIdentifier(BaseModel):
     id: Optional[str] = None
