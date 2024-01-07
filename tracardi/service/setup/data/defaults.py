@@ -48,9 +48,9 @@ open_webhook_source_bridge = Bridge(
     form=Form(groups=[
         FormGroup(
             name="API Webhook Bridge Configuration",
-            description="A webhook typically gathers data without creating a profile or session. However, "
-                        "if you want to create a profile and session for the collected data, you can set up the "
-                        "configuration for it here.",
+            description="The webhook bridge usually collects data without connection to a profile or session. "
+                        "But, if you need to make a profile and session for the data it collects, and you want "
+                        "to make sure that it matches an existing profile, you should set up matching details below.",
             fields=[
                 FormField(
                     id="generate_profile",
@@ -63,42 +63,51 @@ open_webhook_source_bridge = Bridge(
                 ),
                 FormField(
                     id="identify_profile_by",
-                    name="Identify Profile ID by",
-                    description="Define how the profile will be identified. If e-mail or phone is selected then id will be created as a hash.",
+                    name="Identification method",
+                    description="Select the method to identify the profile. If 'e-mail' or 'phone' is "
+                                "chosen, a Profile will be identified by the 'e-mail' or 'phone'. "
+                                "The exact location of the data should be defined in 'Set Profile ID from Payload' field. "
+                                "Selecting 'nothing' means no Profile ID will be matched. If 'custom ID' is "
+                                "selected, the Profile ID will be the same as the payload value referenced in "
+                                "the 'Set Profile ID from Payload' field.",
                     component=FormComponent(
                         type="select",
                         props={
                             "label": "Profile identified by",
                             "items": {
-                                "": "Not identified",
-                                "e-mail": 'E-Mail',
-                                "phone": "Phone",
-                                "id": "Custom Id"
+                                "none": "No Reference",
+                                "e-mail": 'Main E-Mail',
+                                "phone": "Main Phone",
+                                "id": "Custom ID"
                             }
                         }
                     )
                 ),
                 FormField(
                     id="replace_profile_id",
-                    name="Set profile ID",
-                    description="This setting will only work when `Create session and profile` is enabled. "
-                                "If you intend to substitute or set the Profile ID with data from the payload, "
-                                "you can either use the path defined below or leave the field blank if you don't wish "
-                                "to set any profile or want it to have a random ID. It is crucial to ensure "
-                                "that the Profile ID is secure and not easily predictable since simple Profile "
-                                "IDs may pose security threats.",
-                    component=FormComponent(type="text", props={"label": "Set profile"})
+                    name="Set Profile ID from Payload",
+                    description="To set the Profile ID, type the location of Profile ID Identifier in payload below or leave "
+                                "the field blank if you don't wish "
+                                "to set any profile or want it to have a random ID. "
+                                "If 'Custom ID' is chosen as identification method, then enter the location where the Profile ID "
+                                "is stored in payload the; ID will be used as is without modification. "
+                                "For 'e-mail' or 'phone' options,  enter the location where e-mail or phone is stored; "
+                                "the system automatically generates a secure, hash-based Profile ID from the data in "
+                                "the payload. It will automatically load profile for the e-mail of phone defined "
+                                "in payload. "
+                                "This setting will only work when `Create session and profile` is enabled. ",
+                    component=FormComponent(type="text", props={"label": "Reference to Profile ID in webhook payload"})
                 ),
                 FormField(
                     id="replace_session_id",
-                    name="Set session ID",
+                    name="Set Session ID from Payload",
                     description="This setting will only work when `Create session and profile` is enabled. "
                                 "If you intend to substitute or set the Session ID with information from the payload, "
                                 "you can either use the data provided below or leave it blank if you don't wish "
                                 "to set any session or want it to have a random ID. It is crucial to ensure "
                                 "that the Session ID is secure and not easily predictable since simple Session "
                                 "IDs may pose security threats.",
-                    component=FormComponent(type="text", props={"label": "Set session"})
+                    component=FormComponent(type="text", props={"label": "Reference to Session ID in webhook payload"})
                 )
             ])
     ])

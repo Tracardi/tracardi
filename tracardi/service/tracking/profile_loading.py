@@ -125,6 +125,7 @@ async def load_profile_and_session(
         )
 
     # Check if necessary hashed ID are present and add missing
-    profile.add_hashed_ids()
+    if profile is not None:
+        profile.add_hashed_ids()
 
     return profile, session
