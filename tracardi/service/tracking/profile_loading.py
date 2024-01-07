@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Tuple
 
 from tracardi.domain.console import Console
+
 from tracardi.domain.session import Session
 from tracardi.config import tracardi
 from tracardi.exceptions.exception import DuplicatedRecordException
@@ -122,5 +123,8 @@ async def load_profile_and_session(
             tracker_payload.profile_less,
             console_log
         )
+
+    # Check if necessary hashed ID are present and add missing
+    profile.add_hashed_ids()
 
     return profile, session

@@ -42,7 +42,8 @@ open_webhook_source_bridge = Bridge(
     config={
         "generate_profile": False,
         "replace_profile_id": "",
-        "replace_session_id": ""
+        "replace_session_id": "",
+        "identify_profile_by": None
     },
     form=Form(groups=[
         FormGroup(
@@ -61,11 +62,28 @@ open_webhook_source_bridge = Bridge(
                     component=FormComponent(type="bool", props={"label": "Create profile and session"})
                 ),
                 FormField(
+                    id="identify_profile_by",
+                    name="Identify Profile ID by",
+                    description="Define how the profile will be identified. If e-mail or phone is selected then id will be created as a hash.",
+                    component=FormComponent(
+                        type="select",
+                        props={
+                            "label": "Profile identified by",
+                            "items": {
+                                "": "Not identified",
+                                "e-mail": 'E-Mail',
+                                "phone": "Phone",
+                                "id": "Custom Id"
+                            }
+                        }
+                    )
+                ),
+                FormField(
                     id="replace_profile_id",
                     name="Set profile ID",
                     description="This setting will only work when `Create session and profile` is enabled. "
-                                "If you intend to substitute or set the Profile ID with information from the payload, "
-                                "you can either use the data provided below or leave it blank if you don't wish "
+                                "If you intend to substitute or set the Profile ID with data from the payload, "
+                                "you can either use the path defined below or leave the field blank if you don't wish "
                                 "to set any profile or want it to have a random ID. It is crucial to ensure "
                                 "that the Profile ID is secure and not easily predictable since simple Profile "
                                 "IDs may pose security threats.",
