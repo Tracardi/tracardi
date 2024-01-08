@@ -15,14 +15,14 @@ PREFIX_PHONE_FIELDS = 'data.contact.phone'
 PREFIX_EMAIL_FIELDS = 'data.contact.mail'
 
 FIELD_TO_PROPERTY_MAPPING = {
-    'data.contact.phone.main': lambda profile: (profile.data.contact.phone.main, PREFIX_PHONE_MAIN),
-    'data.contact.phone.business': lambda profile: (profile.data.contact.phone.business,PREFIX_PHONE_BUSINESS),
-    'data.contact.phone.whatsapp': lambda profile: (profile.data.contact.phone.whatsapp,PREFIX_PHONE_WHATSUP),
-    'data.contact.phone.mobile': lambda profile: (profile.data.contact.phone.mobile,PREFIX_PHONE_MOBILE),
+    'profile@data.contact.phone.main': lambda profile: (profile.data.contact.phone.main, PREFIX_PHONE_MAIN),
+    'profile@data.contact.phone.business': lambda profile: (profile.data.contact.phone.business,PREFIX_PHONE_BUSINESS),
+    'profile@data.contact.phone.whatsapp': lambda profile: (profile.data.contact.phone.whatsapp,PREFIX_PHONE_WHATSUP),
+    'profile@data.contact.phone.mobile': lambda profile: (profile.data.contact.phone.mobile,PREFIX_PHONE_MOBILE),
 
-    'data.contact.email.main': lambda profile: (profile.data.contact.email.main,PREFIX_EMAIL_MAIN),
-    'data.contact.email.private': lambda profile: (profile.data.contact.email.private, PREFIX_EMAIL_PRIVATE),
-    'data.contact.email.business': lambda profile: (profile.data.contact.email.business, PREFIX_EMAIL_BUSINESS),
+    'profile@data.contact.email.main': lambda profile: (profile.data.contact.email.main,PREFIX_EMAIL_MAIN),
+    'profile@data.contact.email.private': lambda profile: (profile.data.contact.email.private, PREFIX_EMAIL_PRIVATE),
+    'profile@data.contact.email.business': lambda profile: (profile.data.contact.email.business, PREFIX_EMAIL_BUSINESS),
 }
 
 

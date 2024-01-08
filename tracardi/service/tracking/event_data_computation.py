@@ -80,7 +80,7 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: FlatProfile)
     return flat_event
 
 
-async def default_mapping_event_and_profile(flat_event: Dotty,
+async def event_to_profile_mapping(flat_event: Dotty,
                                             flat_profile: FlatProfile,
                                             session:Session,
                                             source: EventSource,
@@ -219,7 +219,7 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, flat_profile, field_timestamp_monitor = await default_mapping_event_and_profile(
+            flat_event, flat_profile, field_timestamp_monitor = await event_to_profile_mapping(
                 flat_event,
                 flat_profile,
                 session,
@@ -297,6 +297,5 @@ async def compute_events(events: List[EventPayload],
             logger.error(message)
             if not tracardi.skip_errors_on_profile_mapping:
                 raise e
-
 
     return event_objects, session, profile, field_timestamp_monitor

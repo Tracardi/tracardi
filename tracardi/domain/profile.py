@@ -84,7 +84,9 @@ class Profile(Entity):
         self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
 
         # Add new hashed Id
-        self.ids.append(hash_id(value, prefix))
+        value = value.strip()
+        if value:
+            self.ids.append(hash_id(value, prefix))
 
     def add_hashed_ids(self):
         ids_len = len(self.ids)
@@ -302,7 +304,18 @@ class FlatProfile(Dotty):
             if 'ids' not in self or self['ids'] is None:
                 self['ids'] = []
 
-            self['ids'].append(hash_id(value, prefix))
+            # Remove old
+            self['ids'] = [hid for hid in self['ids'] if not hid.startswith(prefix)]
+
+            value = value.strip()
+            if value:
+                # Add new
+                # Can not simply append. Must reassign
+                ids = self['ids']
+                ids.append(hash_id(value, prefix))
+
+                # Assign to replace value
+                self['ids'] = ids
 
     def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldTimestampMonitor):
         for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():  # type: str, list
