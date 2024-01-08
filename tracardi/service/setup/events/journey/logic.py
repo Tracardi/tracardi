@@ -1,14 +1,13 @@
-from tracardi.domain.event import Event
-from tracardi.domain.profile import Profile
+from dotty_dict import Dotty
 
 
-def page_view(event: Event, profile: Profile):
-    if profile.metadata.time.visit.count <= 1:
+def page_view(event: Dotty, profile: Dotty):
+    if profile.get('metadata.time.visit.count', 0) <= 1:
         return "awareness"
     return "consideration"
 
 
-def session_opened(event: Event, profile: Profile):
-    if profile.metadata.time.visit.count <= 1:
+def session_opened(event: Dotty, profile: Dotty):
+    if profile.get('metadata.time.visit.count',0) <= 1:
         return "awareness"
     return "consideration"

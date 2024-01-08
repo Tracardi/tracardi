@@ -18,7 +18,7 @@ class StorageRecord(dict):
 
     @staticmethod
     def build_from_base_model(model: BaseModel, exclude=None) -> 'StorageRecord':
-        return StorageRecord(**model.dict(exclude=exclude))
+        return StorageRecord(**model.model_dump(exclude=exclude))
 
     def __init__(self, *args, **kwargs):
         super(StorageRecord, self).__init__(*args, **kwargs)

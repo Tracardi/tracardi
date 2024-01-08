@@ -1,5 +1,6 @@
+from tracardi.service.utils.date import now_in_utc
 from tracardi.service.storage.factory import storage_manager
-from datetime import datetime
+
 
 
 async def load_logs(start: int = 0, limit: int = 100, query_string: str = None):
@@ -23,6 +24,6 @@ async def add_log(email: str, successful: bool):
         {
             "email": email,
             "successful": successful,
-            "timestamp": datetime.utcnow()
+            "timestamp": now_in_utc()
         }
     )

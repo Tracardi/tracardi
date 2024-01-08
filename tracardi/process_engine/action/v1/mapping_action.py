@@ -12,6 +12,8 @@ class Config(PluginConfig):
     case_sensitive: bool
     mapping: Dict[str, Any]
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator('mapping')
     def validate_mapping(cls, value, values):
         if not value:
@@ -58,7 +60,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["result"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="mapping_action",
             init={

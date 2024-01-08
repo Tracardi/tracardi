@@ -68,7 +68,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["success", "error"],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="fetch_from_influxdb_action",
             init={

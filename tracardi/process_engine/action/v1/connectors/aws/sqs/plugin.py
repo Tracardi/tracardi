@@ -36,7 +36,7 @@ class AwsSqsAction(ActionRunner):
 
                 if isinstance(self.aws_config.message_attributes, str) and len(self.aws_config.message_attributes):
                     attributes = MessageAttributes(json.loads(self.aws_config.message_attributes))
-                    attributes = attributes.dict()
+                    attributes = attributes.as_dict()
                     result = await client.send_message(QueueUrl=self.aws_config.queue_url,
                                                        MessageBody=self.aws_config.message.content,
                                                        DelaySeconds=self.aws_config.delay_seconds,
@@ -67,7 +67,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["result", "error"],
             version='0.7.0',
-            license="MIT",
+            license="MIT + CC",
             author="Bart Dobrosielski, Risto Kowaczewski",
         ),
         metadata=MetaData(

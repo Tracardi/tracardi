@@ -15,7 +15,7 @@ class IncreaseVisitsAction(ActionRunner):
             if self.profile.stats is None:
                 self.profile.stats = ProfileStats()
 
-            if self.session is not None and self.session.is_new():
+            if self.session is not None and self.session.operation.new:
                 self.profile.increase_visits()
 
         return Result(port="payload", value=payload)
@@ -32,7 +32,7 @@ def register() -> Plugin:
             init=None,
             manual="increase_visits_action",
             version='0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

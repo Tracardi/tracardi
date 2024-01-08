@@ -14,9 +14,9 @@
         "color": "string",
         "size": "string"
       },
-      "price": "float",
-      "quantity": "int",
-      "position": "int",
+      "price": 10.15,
+      "quantity": 2,
+      "position": 1,
       "url": {
         "image": "url",
         "page": "url"
@@ -96,8 +96,8 @@
         "color": "string",
         "size": "string"
       },
-      "price": "float",
-      "quantity": "int",
+      "price": 10.10,
+      "quantity": 1,
       "url": {
         "image": "url",
         "page": "url"
@@ -132,8 +132,8 @@
         "color": "string",
         "size": "string"
       },
-      "price": "float",
-      "quantity": "int",
+      "price": 10.10,
+      "quantity": 1,
       "url": {
         "image": "url",
         "page": "url"
@@ -314,7 +314,7 @@
       "method": "string",
       "credit_card": {
         "number": "string",
-        "expires": "string",
+        "expires": "2023-01-01 00:00:00",
         "holder": "string",
         "cvv": ""
       }
@@ -341,14 +341,14 @@
     "properties": {
       "id": "string",
       "income": {
-        "value": "float",
-        "revenue": "float"
+        "value": 0.0,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
       },
       "cost": {
-        "shipping": "float",
-        "tax": "float",
-        "discount": "float",
-        "other": "float"
+        "value": 0.0,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
       },
       "affiliation": "string",
       "products": [
@@ -363,8 +363,8 @@
             "color": "string",
             "size": "string"
           },
-          "price": "float",
-          "quantity": "int",
+          "price": 10.10,
+          "quantity": 1,
           "url": {
             "image": "url",
             "page": "url"
@@ -375,8 +375,13 @@
     "copy": {
       "data.ec.order.id":      "properties.id",
       "data.ec.order.status":  "properties.status",
-      "data.ec.order.income":  "properties.income",
-      "data.ec.order.cost":    "properties.cost"
+      "data.ec.order.income.value":  "properties.income.value",
+      "data.ec.order.income.currency":  "properties.income.currency",
+      "data.ec.order.income.due_date":  "properties.income.due_date",
+      "data.ec.order.cost.value":    "properties.cost.value",
+      "data.ec.order.cost.currency":    "properties.cost.currency",
+      "data.ec.order.cost.due_date":    "properties.cost.due_date"
+
     },
     "tags": [
       "entity:order"
@@ -520,12 +525,16 @@
     },
     "properties": {
       "order_id": "string",
-      "value": 0
+      "value": 0,
+      "currency": "string",
+      "due_date": "2023-01-01 00:00:00"
     },
     "copy": {
       "data.ec.order.id":              "properties.order_id",
       "data.ec.order.status":          "properties.status",
-      "data.ec.order.income.revenue":  "properties.value"
+      "data.ec.order.income.value":    "properties.value",
+      "data.ec.order.income.currency":    "properties.currency",
+      "data.ec.order.income.due_date":    "properties.due_date"
     },
     "tags": [
       "entity:order"

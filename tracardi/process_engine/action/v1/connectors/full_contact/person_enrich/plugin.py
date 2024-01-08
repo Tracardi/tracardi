@@ -45,7 +45,7 @@ class FullContactAction(ActionRunner):
             ) as client:
 
                 mapper = DictTraverser(dot)
-                payload = mapper.reshape(reshape_template=self.config.pii.dict())
+                payload = mapper.reshape(reshape_template=self.config.pii.model_dump())
 
                 async with client.request(
                         method="POST",

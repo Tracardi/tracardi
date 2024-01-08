@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from typing import Optional
 
 from tracardi.domain.content import Content
@@ -21,13 +21,15 @@ class Message(BaseModel):
     reply_to: Optional[str] = None
     message: Content
 
-    @validator("title")
+    @field_validator("title")
+    @classmethod
     def title_must_not_be_empty(cls, value):
         if len(value) < 1:
             raise ValueError("Title can not be empty.")
         return value
 
-    @validator("message")
+    @field_validator("message")
+    @classmethod
     def message_must_not_be_empty(cls, value):
         if len(value.content) < 1:
             raise ValueError("Message can not be empty.")

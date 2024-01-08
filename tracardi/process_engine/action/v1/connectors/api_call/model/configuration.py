@@ -22,8 +22,10 @@ class Method(str, Enum):
 
 class Content(BaseModel):
     type: str
-    content: Optional[str]
+    content: Optional[str] = None
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("content")
     def validate_content(cls, value, values):
         if 'type' in values and values['type'] == 'application/json':

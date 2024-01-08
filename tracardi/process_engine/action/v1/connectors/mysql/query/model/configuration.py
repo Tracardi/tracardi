@@ -1,5 +1,5 @@
 from typing import List, Any
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -11,13 +11,15 @@ class Configuration(PluginConfig):
     data: List[Any] = []
     timeout: int = None
 
-    @validator("query")
+    @field_validator("query")
+    @classmethod
     def must_not_be_empty(cls, value):
         if len(value) < 2:
             raise ValueError("Sql must not be empty.")
         return value
 
-    @validator("type")
+    @field_validator("type")
+    @classmethod
     def must_have_certain_value(cls, value):
         allowed_values = ['select', 'insert', 'delete', 'call', 'create']
         if value not in allowed_values:

@@ -11,16 +11,18 @@ def register() -> Plugin:
             className='NovuTriggerAction',
             inputs=['payload'],
             outputs=['response', 'error'],
-            version="0.8.0",
-            license="MIT",
+            version="0.8.2",
+            license="MIT + CC",
             author="Mateusz Zitaruk, Risto Kowaczewski",
             init={
                 "source": {"id": "", "name": ""},
                 "template": {"id": "", "name": ""},
                 "subscriber_id": "profile@id",
-                "recipient_email": "profile@data.contact.email",
+                "recipient_email": "profile@data.contact.email.main",
                 "payload": "{}",
-                "hash": False
+                "hash": False,
+                "upsert_subscriber": True,
+                "tenant": {"id": "", "name": ""},
             },
             manual="novu_plugin_action",
             form=Form(
@@ -35,12 +37,26 @@ def register() -> Plugin:
                                 component=FormComponent(type="resource", props={"label": "resource", "tag": "novu"})
                             ),
                             FormField(
+                                id="tenant",
+                                name="Novu tenant",
+                                description="Select Novu tenant.",
+                                component=FormComponent(type="autocomplete", props={
+                                    "label": "Tenant",
+                                    "endpoint": {
+                                        "url": Endpoint.url(
+                                            'tracardi.process_engine.action.v1.connectors.novu.trigger.plugin',
+                                            'get_tenants'),
+                                        "method": "post"
+                                    },
+                                })
+                            ),
+                            FormField(
                                 id="template",
-                                name="Novu template name",
-                                description="Type the template name defined in Novu. This template will be used to send"
+                                name="Novu message workflow",
+                                description="Select the workflow defined in Novu. This workflow will be used to send"
                                             " a message.",
                                 component=FormComponent(type="autocomplete", props={
-                                    "label": "Template name",
+                                    "label": "Workflow name",
                                     "endpoint": {
                                         "url": Endpoint.url(
                                             'tracardi.process_engine.action.v1.connectors.novu.trigger.plugin',
@@ -54,6 +70,13 @@ def register() -> Plugin:
                                 name="Subscriber ID",
                                 description="Type path to subscriber ID. By default we use profile id.",
                                 component=FormComponent(type="dotPath", props={"label": "Subscriber ID"})
+                            ),
+                            FormField(
+                                id="upsert_subscriber",
+                                name="Add Profile to Novu if not exists",
+                                description="Select if profile should be added as subscriber if it does not exist. "
+                                            "Subscriber ID will be used to identify profile.",
+                                component=FormComponent(type="bool", props={"label": "Add profile to novu"})
                             ),
                             FormField(
                                 id="hash",
@@ -71,14 +94,14 @@ def register() -> Plugin:
                                 id="recipient_email",
                                 name="Recipient e-mail address",
                                 description="Please type a reference path to e-mail address. By default we set it to "
-                                            "profile@data.contact.email.",
+                                            "profile@data.contact.email.main",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail address"})
                             ),
                             FormField(
                                 id="payload",
                                 name="Data",
                                 description="Please type the data you would like to use within template. "
-                                            "You may use the reference to data e.g. profile@pii.name. Please look for "
+                                            "You may use the reference to data e.g. profile@data.pii.firstname. Please look for "
                                             "the term \"Object template\" in documentation for more details.",
                                 component=FormComponent(type="json", props={"label": "Data"})
                             )
@@ -91,7 +114,7 @@ def register() -> Plugin:
             name="Trigger message",
             desc="Creates and sends notification to chosen recipient.",
             brand="Novu",
-            icon="message",
+            icon="entity",
             tags=['email','chat', 'sms'],
             group=["Novu"],
             documentation=Documentation(

@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -8,7 +8,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Configuration(PluginConfig):
-    uix_mf_source: AnyHttpUrl = "http://localhost:8686"
+    uix_mf_source: str = "http://localhost:8686"  # AnyHttpUrl
     title: str = ""
     message: str = ""
     cta_button: str = ""
@@ -22,13 +22,15 @@ class Configuration(PluginConfig):
     position_x: str = "right"
     position_y: str = "bottom"
 
-    @validator("message")
+    @field_validator("message")
+    @classmethod
     def should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Message should not be empty")
         return value
 
-    @validator("cta_button")
+    @field_validator("cta_button")
+    @classmethod
     def cta_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("CTA should not be empty")
@@ -94,7 +96,7 @@ def register() -> Plugin:
                 "uix_mf_source": "http://localhost:8686"
             },
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             form=Form(groups=[
                 FormGroup(

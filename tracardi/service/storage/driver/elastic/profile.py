@@ -1,9 +1,10 @@
-from typing import Tuple, Union
+from typing import Union, Tuple
 
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
+from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
@@ -78,25 +79,9 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
     return await storage_manager('profile').load_all(start, limit, sort)
 
 
-async def deduplicate_profile(profile_id):
-    _duplicated_profiles = await load_duplicates(profile_id)  # 1st records is the newest
-    valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
-    profile = valid_profile_record.to_entity(Profile)
-
-    if len(_duplicated_profiles) == 1:
-        # If 1 then there is no duplication
-        return profile
-
-    # We have duplicated records. Delete all but first profile.
-    for _profile_record in _duplicated_profiles[1:]:  # type: StorageRecord
-        if _profile_record.has_meta_data():
-            sm = storage_manager('profile')
-            await sm.delete(profile_id, index=_profile_record.get_meta_data().index)
-
-    return profile
-
-
-async def load_profile_without_identification(tracker_payload, is_static=False) -> Optional[Profile]:
+async def load_profile_without_identification(tracker_payload,
+                                              is_static=False,
+                                              console_log: Optional[ConsoleLog] = None) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     @throws DuplicatedRecordException
@@ -106,39 +91,40 @@ async def load_profile_without_identification(tracker_payload, is_static=False) 
 
     profile_id = tracker_payload.profile.id
 
-    try:
-        profile_record = await load_by_id(profile_id)
+    profile_record = await load_by_id(profile_id)
 
-        if profile_record is None:
+    if profile_record is None:
 
-            # Static profiles can be None as they need to be created if does not exist.
-            # Static means the profile id was given in the track payload
+        # Static profiles can be None as they need to be created if does not exist.
+        # Static means the profile id was given in the track payload
 
-            if is_static:
-                return Profile(id=tracker_payload.profile.id)
+        if is_static:
+            return Profile(id=tracker_payload.profile.id)
 
-            return None
+        return None
 
-        profile = Profile.create(profile_record)
+    profile = Profile.create(profile_record)
 
-        return profile
-
-    except DuplicatedRecordException:
-        return await deduplicate_profile(profile_id)
+    return profile
 
 
-async def load_profiles_to_merge(merge_key_values: List[tuple], limit=1000) -> List[Profile]:
-    profiles = await storage_manager('profile').load_by_values(merge_key_values, limit=limit)
+async def load_profiles_to_merge(merge_key_values: List[tuple],
+                                 condition: str='must',
+                                 limit=1000) -> List[Profile]:
+    profiles = await storage_manager('profile').load_by_values(
+        merge_key_values,
+        condition=condition,
+        limit=limit)
     return [profile.to_entity(Profile) for profile in profiles]
 
 
-async def save(profile: Union[Profile, List[Profile]], refresh_after_save=False):
-    if isinstance(profile, list):
+async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
+    if isinstance(profile, (list, set)):
         for _profile in profile:
             if isinstance(_profile, Profile):
-                _profile.metadata.time.update = datetime.utcnow()
+                _profile.mark_for_update()
     elif isinstance(profile, Profile):
-        profile.metadata.time.update = datetime.utcnow()
+        profile.mark_for_update()
     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
     if refresh_after_save or elastic.refresh_profiles_after_save:
         await storage_manager('profile').flush()
@@ -167,8 +153,8 @@ async def bulk_delete_by_id(ids: List[str]):
     return await sm.bulk_delete(ids)
 
 
-def scan(query: dict = None):
-    return storage_manager('profile').scan(query)
+def scan(query: dict = None, batch: int = 1000):
+    return storage_manager('profile').scan(query, batch)
 
 
 def query(query: dict = None):
@@ -195,19 +181,6 @@ async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],
                                  sort_by: Optional[List[ElasticFiledSort]] = None,
                                  limit: int = 20) -> StorageRecords:
     return await raw_db.load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
-
-
-async def load_duplicates(id: str):
-    return await storage_manager('profile').query({
-        "query": {
-            "term": {
-                '_id': id
-            }
-        },
-        "sort": [
-            {"metadata.time.insert": "desc"}
-        ]
-    })
 
 
 async def load_profiles_by_segments(segments: List[str], condition: str = 'must'):

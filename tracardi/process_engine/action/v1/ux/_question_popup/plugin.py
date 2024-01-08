@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.notation.dot_template import DotTemplate
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -21,37 +21,43 @@ class Config(PluginConfig):
     popup_lifetime: str
     dark_theme: bool
 
-    @validator("popup_lifetime")
+    @field_validator("popup_lifetime")
+    @classmethod
     def validate_popup_lifetime(cls, value):
         if value is None or len(value) == 0 or not value.isnumeric():
             raise ValueError("This field must contain an integer.")
         return value
 
-    @validator("uix_source")
+    @field_validator("uix_source")
+    @classmethod
     def validate_uix_source(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("api_url")
+    @field_validator("api_url")
+    @classmethod
     def validate_api_url(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("left_button_text")
+    @field_validator("left_button_text")
+    @classmethod
     def validate_left_button_text(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("right_button_text")
+    @field_validator("right_button_text")
+    @classmethod
     def validate_right_button_text(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
         return value
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def validate_event_type(cls, value):
         if value is None or len(value) == 0:
             raise ValueError("This field cannot be empty.")
@@ -112,7 +118,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="question_popup_action",
             init={

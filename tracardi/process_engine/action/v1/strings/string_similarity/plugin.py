@@ -33,7 +33,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version="0.7.3",
-            license="MIT",
+            license="MIT + CC",
             author="Mateusz Zitaruk",
             init={
                 "first_string": "",

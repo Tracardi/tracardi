@@ -1,11 +1,72 @@
 from typing import Dict
-from tracardi.service.license import VALIDATOR, License, SCHEDULER
+from tracardi.service.license import License, SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
-    "tracardi.process_engine.action.v1.internal.tag_event.plugin": PluginMetadata(
-        test=PluginTest(init={"tags": "tag1,tag2"}, resource=None),
+    "tracardi.process_engine.action.v1.time.time_delay.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "reference_date": None,
+                "sign": "+",
+                "delay": "60"
+            },
+            resource=None)
+    ),
+
+    "tracardi.process_engine.action.v1.strings.string_replace.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "field": "profile@",
+                "find": "",
+                "replace": ""
+            },
+            resource=None)
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "resource": {
+                    "id": "1",
+                    "name": "1"
+                },
+                "message": "text",
+                "recipient": "a",
+                "sender": "b"
+            },
+            resource={
+                "api_key": "api_key",
+                "username": "username",
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.clicksend.sendsms.registry"
+    ),
+
+    "tracardi.process_engine.action.v1.list.operations_on_sets.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "set1": "",
+                "set2": "",
+                "operation": "intersection"
+            }, resource=None),
+    ),
+
+    "tracardi.process_engine.action.v1.list.find_max_value.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "source": "abc"
+            }, resource=None),
+    ),
+
+    "tracardi.process_engine.action.v1.strings.string_to_date.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "string": "abc"
+            }, resource=None),
+    ),
+
+    "tracardi.process_engine.action.v1.strings.string_stripper.plugin": PluginMetadata(
+        test=PluginTest(init={
+                "string": "abc",
+                "to_remove": "a",
+            }, resource=None),
     ),
 
     "tracardi.process_engine.action.v1.time.last_profile_visit.plugin": PluginMetadata(
@@ -95,16 +156,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.inject_action": PluginMetadata(
         test=PluginTest(init={'destination': 'payload', 'value': '{}'},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.increase_views_action": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.increase_visits_action": PluginMetadata(
-        test=PluginTest(init={},
                         resource=None)
     ),
 
@@ -208,7 +259,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.operations.merge_profiles_action": PluginMetadata(
-        test=PluginTest(init={'mergeBy': ['profile@data.contact.email']},
+        test=PluginTest(init={'mergeBy': ['profile@data.contact.email.main']},
                         resource=None)
     ),
 
@@ -218,11 +269,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.operations.discard_profile_update_action": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.operations.update_event_action": PluginMetadata(
         test=PluginTest(init={},
                         resource=None)
     ),
@@ -296,21 +342,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.traits.field_type_action": PluginMetadata(
         test=PluginTest(init={'field': "profile@id"},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.events.event_discarder.plugin": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.profiles.profile_discarder.plugin": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.sessions.session_discarder.plugin": PluginMetadata(
-        test=PluginTest(init={},
                         resource=None)
     ),
 
@@ -562,7 +593,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.internal.inject_profile_by_field.plugin": PluginMetadata(
-        test=PluginTest(init={'field': "data.contact.email", 'value': 'test@test.com'},
+        test=PluginTest(init={'field': "data.contact.email.main", 'value': 'test@test.com'},
                         resource=None)
     ),
 
@@ -614,18 +645,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.consents.require_consents_action.plugin": PluginMetadata(
         test=PluginTest(init={'consent_ids': [], 'require_all': False},
                         resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.flow.postpone_event.plugin": PluginMetadata(
-        test=PluginTest(init={
-            'event_type': 'type',
-            'source': {
-                'id': 'x',
-                'name': 'x'
-            },
-            'event_properties': '{}',
-            'delay': 60},
-            resource=None)
     ),
 
     "tracardi.process_engine.action.v1.contains_string_action": PluginMetadata(
@@ -696,12 +715,8 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 }
 
-if License.has_service(VALIDATOR):
-    installed_plugins["com_tracardi.action.v1.validator.plugin"] = PluginMetadata(
-        test=PluginTest(init={'validation_schema': {}}, resource=None)
-    )
-
 if License.has_service(SCHEDULER):
+
     installed_plugins["com_tracardi.action.v1.background.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -726,6 +741,35 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.chatwoot.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "license": ""
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.intercom.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "app_id": ""
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.livechat.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "license": ""
+            })
+    )
+
+    installed_plugins["com_tracardi.action.v1.ux.chats.zendesk.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "script_url": "https://static.zdassets.com/ekr/snippet.js?key=<your-key>",
+            })
+    )
+
     installed_plugins["com_tracardi.action.v1.sms.twilio.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -1041,6 +1085,24 @@ test_plugins: Dict[str, PluginMetadata] = {
                 "api_key": "api_key"
             }),
         plugin_registry="tracardi.process_engine.action.v1.connectors.sms77.sendsms.registry"
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "resource": {
+                    "id": "1",
+                    "name": "1"
+                },
+                "message": "text",
+                "recipient": "a",
+                "sender": "b"
+            },
+            resource={
+                "api_key": "api_key",
+                "username": "username",
+            }),
+        plugin_registry="tracardi.process_engine.action.v1.connectors.clicksend.sendsms.registry"
     ),
 
     "tracardi.process_engine.action.v1.connectors.influxdb.send.plugin": PluginMetadata(
@@ -1396,7 +1458,7 @@ test_plugins: Dict[str, PluginMetadata] = {
     ),
     "tracardi.process_engine.action.v1.connectors.novu.trigger.plugin": PluginMetadata(
         test=PluginTest(
-            init={'payload': '{}', 'recipient_email': 'profile@data.contact.email', 'source': {'id': '', 'name': ''},
+            init={'payload': '{}', 'recipient_email': 'profile@data.contact.email.main', 'source': {'id': '', 'name': ''},
                   'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
             resource={
                 "token": "token"
@@ -1564,6 +1626,22 @@ test_plugins: Dict[str, PluginMetadata] = {
                 "public_key": "<client-public-key>",
                 "private_key": "<client-private-key>",
                 "api_url": "<url-of-mautic-instance>"
+            })
+    ),
+
+    "tracardi.process_engine.action.v1.connectors.mailchimp.tag_contact.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                'tags': "test",
+                'email': 'test@test.com',
+                'list_id': "None",
+                'source': {
+                    'id': "None",
+                    'name': "None"
+                }
+            },
+            resource={
+                "token": "<token>"
             })
     ),
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 from uuid import uuid4
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import EventSession
@@ -25,15 +25,14 @@ class AddEmptyProfileAction(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        now = datetime.utcnow()
+        now = now_in_utc()
         profile = Profile(
             id=str(uuid4()),
             metadata=ProfileMetadata(
                 time=ProfileTime(
-                    insert=now,
                     visit=ProfileVisit(
                         count=1,
-                        current=datetime.utcnow()
+                        current=now
                     )
                 )
             ),
@@ -59,8 +58,7 @@ class AddEmptyProfileAction(ActionRunner):
         session = Session(
             id=str(uuid4()),
             profile=Entity(id=profile.id),
-            metadata=SessionMetadata(
-                time=SessionTime(insert=datetime.utcnow(), timestamp=datetime.timestamp(datetime.utcnow()))),
+            metadata=SessionMetadata(time=SessionTime()),
             operation=Operation(update=True)
         )
 
@@ -96,7 +94,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             version='0.8.0',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="internal/add_empty_profile",
             init={

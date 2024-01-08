@@ -129,7 +129,7 @@ def register() -> Plugin:
             ),
             version="0.7.4",
             author="Risto Kowaczewski",
-            license="MIT",
+            license="MIT + CC",
             manual="discord_webhook_action"
         ),
         metadata=MetaData(

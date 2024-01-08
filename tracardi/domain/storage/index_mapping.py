@@ -5,7 +5,7 @@ class IndexMapping:
         self.field_collection = {}
 
     def _flatten_dict(self, data, keystring=''):
-        if type(data) == dict and len(data) > 0:
+        if isinstance(data, dict) and len(data) > 0:
             keystring = keystring + '.' if keystring else keystring
             for k in data:
                 yield from self._flatten_dict(data[k], keystring + str(k))

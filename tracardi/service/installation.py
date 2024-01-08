@@ -1,4 +1,4 @@
-import datetime
+import asyncio
 import logging
 import os
 from uuid import uuid4
@@ -7,19 +7,15 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
-from tracardi.context import ServerContext, get_context
+from tracardi.context import ServerContext, get_context, Context
 from tracardi.domain.credentials import Credentials
-from tracardi.domain.event_source import EventSource
-from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.user import User
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
-from tracardi.service.setup.data.defaults import open_rest_source_bridge
-from tracardi.service.setup.setup_indices import create_schema, install_default_data, run_on_start, add_ids
+from tracardi.service.setup.setup_indices import create_schema, install_default_data, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.driver.elastic import system as system_db
-from tracardi.service.storage.driver.elastic import event_source as event_source_db
 from tracardi.service.storage.driver.elastic import user as user_db
 from tracardi.service.storage.index import Resource
 
@@ -42,10 +38,12 @@ async def check_installation():
     # Missing admin
     existing_aliases = [idx[1] for idx in indices if idx[0] == 'existing_alias']
     index = Resource().get_index_constant('user')
-    if index.get_index_alias() in existing_aliases:
-        admins = await user_db.search_by_role('admin')
-    else:
-        admins = None
+
+    with ServerContext(get_context().switch_context(False)):
+        if index.get_index_alias() in existing_aliases:
+            admins = await user_db.search_by_role('admin')
+        else:
+            admins = None
 
     has_admin_account = admins is not None and admins.total > 0
 
@@ -56,7 +54,18 @@ async def check_installation():
 
             logger.info(f"Authorizing `{context.tenant}` for installation at {mtm.auth_endpoint}.")
 
-            await mtm.authorize(tracardi.multi_tenant_manager_api_key)
+            try:
+                await mtm.authorize(tracardi.multi_tenant_manager_api_key)
+            except asyncio.exceptions.TimeoutError:
+                message = (f"Authorizing failed for tenant `{context.tenant}`. "
+                           f"Could not reach Tenant Management Service.")
+                logger.warning(message)
+                return {
+                    "schema_ok": False,
+                    "admin_ok": False,
+                    "form_ok": False,
+                    "warning": message
+                }
 
             tenant = await mtm.is_tenant_allowed(context.tenant)
             if not tenant:
@@ -76,7 +85,7 @@ async def check_installation():
     }
 
 
-async def install_system(credentials: Credentials, update_plugins_on_start_up):
+async def install_system(credentials: Credentials):
     if tracardi.multi_tenant:
         if not License.has_license():
             raise PermissionError("Installation forbidden. Multi-tenant installation is not "
@@ -147,6 +156,7 @@ async def install_system(credentials: Credentials, update_plugins_on_start_up):
 
             if not await user_db.check_if_exists(credentials.username):
                 await user_db.add_user(user)
+                await user_db.refresh()
                 logger.info("Default admin account created.")
 
             staging_install_result['admin'] = True
@@ -155,44 +165,26 @@ async def install_system(credentials: Credentials, update_plugins_on_start_up):
             logger.warning("There is at least one admin account. New admin account not created.")
             staging_install_result['admin'] = True
 
-        if staging_install_result['admin'] is True and update_plugins_on_start_up is not False:
-            logger.info(
-                f"Updating plugins on startup due to: UPDATE_PLUGINS_ON_STARTUP={update_plugins_on_start_up}")
-            staging_install_result['plugins'] = await install_default_plugins()
+        # Demo
+        if os.environ.get("DEMO", 'no') == 'yes':
+
+            # Demo
+
+            for i in range(0, 100):
+                payload = generate_payload(source=tracardi.demo_source)
+
+                await track_event(
+                    TrackerPayload(**payload),
+                    "0.0.0.0",
+                    allowed_bridges=['internal', 'rest'])
 
     # Install production
     with ServerContext(get_context().switch_context(production=True)):
         production_install_result = await _install()
 
-    # Demo
-    if os.environ.get("DEMO", None) == 'yes':
-
-        # Demo
-
-        event_source = EventSource(
-            id=open_rest_source_bridge.id,
-            type=["internal"],
-            name="Test random data",
-            channel="Internal",
-            description="Internal event source for random data.",
-            bridge=NamedEntity(**open_rest_source_bridge.dict()),
-            timestamp=datetime.datetime.utcnow(),
-            tags=["internal"],
-            groups=["Internal"]
-        )
-
-        await raw_db.bulk_upsert(
-            Resource().get_index_constant('event-source').get_write_index(),
-            list(add_ids([event_source.dict()])))
-
-        await event_source_db.refresh()
-
-        for i in range(0, 100):
-            payload = generate_payload(source=open_rest_source_bridge.id)
-
-            await track_event(
-                TrackerPayload(**payload),
-                "0.0.0.0",
-                allowed_bridges=['internal'])
+    logger.info(f"Installing plugins on startup")
+    installed_plugins = await install_default_plugins()
+    staging_install_result['plugins'] = installed_plugins
+    production_install_result['plugins'] = installed_plugins
 
     return staging_install_result, production_install_result

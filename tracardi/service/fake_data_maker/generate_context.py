@@ -1,4 +1,3 @@
-from pprint import pprint
 from random import randint, choice
 from urllib import parse
 
@@ -43,7 +42,8 @@ def make_fake_session_context():
             "county": geo[3],
             "postal": None,
             "latitude": geo[0],
-            "longitude": geo[1]
+            "longitude": geo[1],
+            "location": (geo[1],geo[0])
         },
         "device": {
             "name": "Other",

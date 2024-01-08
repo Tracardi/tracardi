@@ -7,7 +7,7 @@ with open("README.md", "r",encoding="utf-8") as fh:
 
 setup(
     name='tracardi',
-    version='0.8.1',
+    version='0.8.2-dev',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -16,7 +16,7 @@ setup(
     packages=['tracardi'],
     install_requires=[
         'pip>=21.2.4',
-        'pydantic==1.10.11',
+        'pydantic>=2.3.0',
         'aiohttp[speedups]',
         'redis',
         'aioredis',
@@ -33,7 +33,7 @@ setup(
         'pytimeparse',
         'barcodenumber',
         'astral==2.2',
-        'jsonschema==4.16.0',
+        'jsonschema==4.3.3',  # old version 4.16.0
         'python-dateutil==2.8.2',
         'mailchimp-transactional',
         'email-validator',
@@ -70,9 +70,15 @@ setup(
         'user-agents==2.2.0',
         'faker==18.4.0',
         'faker-commerce==1.0.3',
+        'speedict==0.3.12',
         # Worker requirements
         'requests',
-        'mysql-connector-python==8.0.29'
+        'mysql-connector-python==8.0.29',
+        # Com requirements
+        'weaviate-client==3.23.2',
+        'twilio==8.2.1',
+        'huey',
+        'pulsar-client==3.3.0'
 
     ],
     classifiers=[

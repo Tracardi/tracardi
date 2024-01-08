@@ -34,7 +34,7 @@ class WeatherAction(ActionRunner):
             result.wind_speed = weather.current.wind_speed
             result.description = weather.current.description
 
-            return Result(port="weather", value=result.dict())
+            return Result(port="weather", value=result.model_dump())
 
         except Exception as e:
             self.console.error(str(e))
@@ -50,7 +50,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["weather", "error"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="weather_action",
             init={

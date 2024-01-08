@@ -5,7 +5,9 @@ from typing import List, Dict, Callable, Any, Union, Tuple
 
 class PoolManager:
 
-    def __init__(self, name, max_pool,
+    def __init__(self,
+                 name,
+                 max_pool,
                  on_pool_purge: Callable[[Union[Dict, List], Tuple], Any] = None,
                  on_append=None,
                  pass_pool_as_dict=False,

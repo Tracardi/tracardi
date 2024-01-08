@@ -3,6 +3,13 @@ from typing import Optional, Union, List, Any
 from pydantic import BaseModel
 from tracardi.domain.geo import Geo
 
+PREFIX_EMAIL_MAIN = "emm-"
+PREFIX_EMAIL_BUSINESS =  "emb-"
+PREFIX_EMAIL_PRIVATE =  "emp-"
+PREFIX_PHONE_MAIN = "phm-"
+PREFIX_PHONE_BUSINESS = "phb-"
+PREFIX_PHONE_MOBILE = "pho-"
+PREFIX_PHONE_WHATSUP = "pwa-"
 
 def force_lists(props: List[str], data):
     for prop in props:
@@ -33,7 +40,7 @@ class ProfileAttribute(BaseModel):
 class ProfilePII(BaseModel):
     firstname: Optional[str] = None
     lastname: Optional[str] = None
-    name: Optional[str] = None
+    display_name: Optional[str] = None
     birthday: Optional[datetime] = None
     language: Optional[ProfileLanguage] = ProfileLanguage()
     gender: Optional[str] = None
@@ -53,6 +60,11 @@ class ProfileContactApp(BaseModel):
     signal: Optional[str] = None
     other: Optional[dict] = {}
 
+    def has_contact(self) -> bool:
+        return bool(
+            self.whatsapp or self.discord or self.slack or self.twitter or
+            self.telegram or self.wechat or self.viber or self.signal)
+
 
 class ProfileContactAddress(BaseModel):
     town: Optional[str] = None
@@ -63,13 +75,61 @@ class ProfileContactAddress(BaseModel):
     other: Optional[str] = None
 
 
+class ProfilePhone(BaseModel):
+    main: Optional[str] = None
+    business: Optional[str] = None
+    mobile: Optional[str] = None
+    whatsapp: Optional[str] = None
+
+    def phone_types(self) -> tuple:
+        return PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
+
+    def has_business(self) -> bool:
+        return bool(self.business)
+
+    def has_main(self) -> bool:
+        return bool(self.main)
+
+    def has_mobile(self) -> bool:
+        return bool(self.mobile)
+
+    def has_whatsapp(self) -> bool:
+        return bool(self.whatsapp)
+
+class ProfileEmail(BaseModel):
+    main: Optional[str] = None
+    private: Optional[str] = None
+    business: Optional[str] = None
+
+    def email_types(self) -> tuple:
+        return PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, PREFIX_EMAIL_BUSINESS
+
+    def has_business(self) -> bool:
+        return bool(self.business)
+
+    def has_main(self) -> bool:
+        return bool(self.main)
+
+    def has_private(self) -> bool:
+        return bool(self.private)
+
 class ProfileContact(BaseModel):
-    email: Optional[str] = None
-    phone: Optional[str] = None
+    email: Optional[ProfileEmail] = ProfileEmail()
+    phone: Optional[ProfilePhone] = ProfilePhone()
     app: Optional[ProfileContactApp] = ProfileContactApp()
     address: Optional[ProfileContactAddress] = ProfileContactAddress()
     confirmations: List[str] = []
 
+    def has_contact(self) -> bool:
+        return (self.has_email()
+                or self.has_phone()
+                or self.app.has_contact())
+
+    def has_email(self) -> bool:
+        return bool(self.email.main or self.email.business or self.email.private)
+
+    def has_phone(self) -> bool:
+        return bool(self.phone.main or self.phone.business or self.phone.mobile or self.phone.whatsapp)
 
 class ProfileIdentifier(BaseModel):
     id: Optional[str] = None
@@ -77,7 +137,7 @@ class ProfileIdentifier(BaseModel):
     passport: Optional[str] = None
     credit_card: Optional[str] = None
     token: Optional[str] = None
-    coupons: Optional[List[str]] = None
+    coupons: Optional[str | List[str]] = None
 
 
 class ProfileSocialMedia(BaseModel):
@@ -133,11 +193,12 @@ class ProfileJob(BaseModel):
 
 class ProfileMetrics(BaseModel):
     ltv: Optional[float] = 0
-    ltcosc: Optional[int] = 0   # Live Time Check-Out Started Counter
+    ltcosc: Optional[int] = 0  # Live Time Check-Out Started Counter
     ltcocc: Optional[int] = 0  # Live Time Check-Out Completed Counter
     ltcop: Optional[float] = 0  # Live Time Check-Out Percentage
     ltcosv: Optional[float] = 0  # Live Time Check-Out Started Value
     ltcocv: Optional[float] = 0  # Live Time Check-Out Completed Value
+    next: Optional[datetime] = None
     custom: Optional[dict] = {}
 
 
@@ -164,11 +225,13 @@ class LastGeo(BaseModel):
 
 
 class ProfileDevices(BaseModel):
-    names: Optional[List[str]] = []
+    push: Optional[List[str]] = []
+    other: Optional[List[str]] = []
     last: Optional[LastGeo] = LastGeo()
 
 
 class ProfileData(BaseModel):
+    anonymous: Optional[bool] = None
     pii: Optional[ProfilePII] = ProfilePII()
     contact: Optional[ProfileContact] = ProfileContact()
     identifier: Optional[ProfileIdentifier] = ProfileIdentifier()
@@ -178,3 +241,6 @@ class ProfileData(BaseModel):
     job: Optional[ProfileJob] = ProfileJob()
     metrics: Optional[ProfileMetrics] = ProfileMetrics()
     loyalty: Optional[ProfileLoyalty] = ProfileLoyalty()
+
+    def compute_anonymous_field(self):
+        self.anonymous = not self.contact.has_contact()

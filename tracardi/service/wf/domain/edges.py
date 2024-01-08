@@ -1,4 +1,4 @@
-from .edge import Edge
+from .edge import Edge  # noqa: F401
 
 
 class Edges(dict):

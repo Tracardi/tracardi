@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 from logging import Handler, LogRecord
 from time import time
 from tracardi.config import tracardi
@@ -16,7 +16,7 @@ class ElasticLogHandler(Handler):
 
     def emit(self, record: LogRecord):
         log = {
-            "date": datetime.utcnow(),
+            "date": now_in_utc(),
             "message": record.msg,
             "logger": record.name,
             "file": record.filename,
@@ -29,9 +29,11 @@ class ElasticLogHandler(Handler):
         if tracardi.save_logs:
             self.collection.append(log)
 
+    def get_errors(self):
+        return [log for log in self.collection if log['level'] == "ERROR"]
+
     def has_logs(self):
-        return tracardi.save_logs is True and isinstance(self.collection, list) and (
-                len(self.collection) > 100 or (time() - self.last_save) > 30)
+        return tracardi.save_logs is True and isinstance(self.collection, list)
 
     def reset(self):
         self.collection = []

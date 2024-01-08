@@ -54,8 +54,9 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["visit", "error"],
             version='0.7.3',
-            license="MIT",
-            author="Risto Kowaczewski"
+            license="MIT + CC",
+            author="Risto Kowaczewski",
+            manual='last_profile_visit_time'
         ),
         metadata=MetaData(
             name='Last profile visit time',

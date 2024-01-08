@@ -82,7 +82,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="mongo_query_action",
             init={

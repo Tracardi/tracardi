@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.domain.profile import Profile
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
@@ -13,8 +13,10 @@ from tracardi.service.plugin.domain.config import PluginConfig
 class MergeProfileConfiguration(PluginConfig):
     mergeBy: List[str]
 
-    @validator("mergeBy")
+    @field_validator("mergeBy")
+    @classmethod
     def list_must_not_be_empty(cls, value):
+        # Merge by keys must exist and come from profile
         if not len(value) > 0:
             raise ValueError("Field mergeBy is empty and has no effect on merging. "
                              "Add merging key or remove this action from flow.")
@@ -32,7 +34,6 @@ def validate(config: dict) -> MergeProfileConfiguration:
 
 
 class MergeProfilesAction(ActionRunner):
-
     merge_key: List[str]
 
     async def set_up(self, init):
@@ -40,9 +41,9 @@ class MergeProfilesAction(ActionRunner):
         self.merge_key = [key.lower() for key in config.mergeBy]
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        if self.debug is True:
-            self.console.warning("Profiles are not merged when in debug mode.")
         if isinstance(self.profile, Profile):
+            # TODO LOOK for self.profile.operation.needs_merging()
+            # TODO operation can be overwritten by update form cache. maybe mrege here not at the end of workflow.
             self.profile.operation.merge = self.merge_key
         else:
             if self.event.metadata.profile_less is True:
@@ -59,22 +60,24 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.operations.merge_profiles_action',
+            module=__name__,
             className='MergeProfilesAction',
             inputs=["payload"],
             outputs=["payload", "error"],
             init={"mergeBy": []},
-            version="0.8.0",
+            version="0.8.2",
             form=Form(groups=[
                 FormGroup(
                     fields=[
                         FormField(
                             id="mergeBy",
                             name="Merge by fields",
-                            description="Provide a list of fields that can identify user. For example profile@data.contact.email. "
+                            description="Provide a list of fields that can identify user. For example profile@data.contact.email.main. "
                                         "These fields will be treated as primary keys for merging. Profiles will be "
                                         "grouped by this value and merged.",
-                            component=FormComponent(type="listOfDotPaths", props={"label": "condition"})
+                            component=FormComponent(type="listOfDotPaths", props={"label": "condition",
+                                                                                  "defaultSourceValue": "profile"
+                                                                                  })
                         )
                     ]
                 ),

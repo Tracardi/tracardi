@@ -1,20 +1,20 @@
 from typing import List
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-
-from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 
 
 class DeleteTraitConfiguration(PluginConfig):
     delete: List[str]
 
-    @validator("delete")
+    @field_validator("delete")
+    @classmethod
     def list_must_not_be_empty(cls, value):
         if not len(value) > 0:
             raise ValueError("List to delete must not be empty.")
@@ -36,10 +36,13 @@ class DeleteTraitAction(ActionRunner):
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
 
         for value in self.config.delete:
+            if value.startswith("event@"):
+                self.console.warning(f"Could not delete value {value}, it is an event property and events "
+                                     f"can not be changed in workflow.")
             try:
                 del dot[value]
             except KeyError as e:
-                self.console.warning("Could not delete value {} due to error: {}".format(value, str(e)))
+                self.console.warning(f"Could not delete value {value}, it is missing, details: {repr(e)}")
 
         if self.event.metadata.profile_less is False:
             profile = Profile(**dot.profile)
@@ -49,10 +52,8 @@ class DeleteTraitAction(ActionRunner):
             session = Session(**dot.session)
             self.session.replace(session)
 
-        event = Event(**dot.event)
-        self.event.replace(event)
-
         self.update_profile()
+        save_profile_cache(self.profile)
 
         return Result(port="payload", value=payload)
 
@@ -81,8 +82,9 @@ def register() -> Plugin:
                 ),
             ]),
             version='0.1',
-            license="MIT",
-            author="Risto Kowaczewski"
+            license="MIT + CC",
+            author="Risto Kowaczewski",
+            manual='delete_data'
         ),
         metadata=MetaData(
             name='Delete data',

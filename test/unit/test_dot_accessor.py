@@ -1,6 +1,14 @@
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 
+def test_wrong_source():
+    dot = DotAccessor(profile={"a": {"id": 10, "c": {"d": 20}}})
+    try:
+        assert dot["payload@a.id"] == 10
+    except Exception:
+        assert True
+
+
 def test_should_access_object_with_dollar():
     dot = DotAccessor(profile={"a": {"$id": 10, "$c": {"d": 20}}})
     assert dot["profile@a.$id"] == 10
@@ -9,6 +17,7 @@ def test_should_access_object_with_dollar():
 
 def test_should_validate_dot_notation():
     assert not DotAccessor.validate("invalid@dot.notation")
+    assert DotAccessor.validate("event@properties.event-data.recipient")
     assert DotAccessor.validate("payload@dot.0.notation")
     assert DotAccessor.validate("payload@dot.0.$")
     assert DotAccessor.validate("payload@dot.0.*")

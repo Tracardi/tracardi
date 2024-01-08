@@ -1,5 +1,5 @@
 from tracardi.domain.named_entity import NamedEntity
-from pydantic import validator
+from pydantic import field_validator
 from typing import List
 from tracardi.service.secrets import encrypt, decrypt
 import json
@@ -24,7 +24,8 @@ class Report(NamedEntity):
     query: dict
     tags: List[str]
 
-    @validator("index")
+    @field_validator("index")
+    @classmethod
     def validate_entity(cls, value):
         if value not in ("profile", "session", "event", "entity"):
             raise ValueError(f"Entity has to be one of: profile, session, event, entity. `{value}` given.")

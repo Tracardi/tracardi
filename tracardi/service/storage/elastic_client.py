@@ -8,6 +8,7 @@ from ssl import create_default_context
 from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.pool_manager import PoolManager
 
@@ -24,18 +25,9 @@ class ElasticClient:
     def __init__(self, **kwargs):
         self._cache = {}
         self._client = AsyncElasticsearch(**kwargs)
-        if elastic.save_pool > 0:
-            pool = PoolManager("es-bulk-save", max_pool=elastic.save_pool, on_pool_purge=self._bulk_save)
-            self.pool = pool
 
-    async def _bulk_save(self, bulk, attr):
-        success, errors = await helpers.async_bulk(self._client, bulk)
-        if errors:
-            logger.error(f"Errors from pool {errors}")
 
     async def close(self):
-        if elastic.save_pool > 0 and self.pool:
-            await self.pool.purge()
         await self._client.close()
 
     async def get(self, index, id):
@@ -135,15 +127,10 @@ class ElasticClient:
 
             repeats -= 1
 
-    async def insert(self, index, records) -> BulkInsertResult:
-        if elastic.save_pool > 0:
-            return await self.insert_via_pool(index, records)
-        return await self.insert_bulk(index, records)
-
-    async def insert_bulk(self, index, records, repeats: int = 3) -> BulkInsertResult:
+    async def insert(self, index, records, repeats: int = 3) -> BulkInsertResult:
 
         if not isinstance(records, list):
-            raise ValueError("Bulk insert expects payload to be list.")
+            raise ValueError("Insert expects payload to be list.")
 
         bulk = []
         ids = []
@@ -178,6 +165,7 @@ class ElasticClient:
             except Exception as e:
                 last_exception = e
                 logger.error(f"Bulk insert error: {str(e)}")
+                print(get_traceback(e))
                 await asyncio.sleep(1)
 
             repeats -= 1
@@ -185,38 +173,6 @@ class ElasticClient:
         return BulkInsertResult(
             saved=0,
             errors=[str(last_exception) if last_exception is not None else "Could not save data."],
-            ids=ids
-        )
-
-    async def insert_via_pool(self, index, records) -> BulkInsertResult:
-
-        if not isinstance(records, list):
-            raise ValueError("Insert expects payload to be list.")
-
-        ids = []
-        self.pool.set_ttl(asyncio.get_running_loop(), ttl=elastic.save_pool_ttl)
-        for record in records:
-
-            if '_id' in record:
-                _id = record['_id']
-                del (record['_id'])
-            else:
-                _id = str(uuid4())
-                if 'id' in record and _id != record['id']:
-                    record['id'] = _id
-
-            ids.append(_id)
-            record = {
-                "_index": index,
-                '_id': _id,
-                "_source": record
-            }
-
-            await self.pool.append(record)
-
-        return BulkInsertResult(
-            saved=1,
-            errors=[],
             ids=ids
         )
 
@@ -362,6 +318,7 @@ class ElasticClient:
             return ElasticClient(**kwargs)
 
         if _singleton is None:
+            logger.info("ElasticSearch singleton created...")
             _singleton = get_elastic_client()
 
         return _singleton

@@ -5,6 +5,7 @@ from tracardi.service.plugin.domain.result import Result
 from .model.config import Config, Token
 from tracardi.process_engine.action.v1.connectors.mailchimp.service.mailchimp_audience_editor import MailChimpAudienceEditor
 from tracardi.service.storage.driver.elastic import resource as resource_db
+from ..endpoints import Endpoint
 
 
 def validate(config: dict):
@@ -31,7 +32,7 @@ class MailChimpAudienceRemover(ActionRunner):
         emails = dot[self.config.email]
         emails = emails if isinstance(emails, list) else [emails]
         results = [
-            await self._delete_or_archive(list_id=self.config.list_id, email_address=email) for email in emails
+            await self._delete_or_archive(list_id=self.config.list_id.id, email_address=email) for email in emails
         ]
         for result in results:
             if result is not None:
@@ -51,15 +52,18 @@ def register() -> Plugin:
             className='MailChimpAudienceRemover',
             inputs=["payload"],
             outputs=["response", "error"],
-            version='0.6.0.1',
-            license="MIT",
-            author="Dawid Kruk",
+            version='0.8.2',
+            license="MIT + CC",
+            author="Dawid Kruk, Risto Kowaczewski",
             init={
                 "source": {
                     "id": None,
                     "name": None
                 },
-                "list_id": None,
+                "list_id": {
+                    "id": None,
+                    "name": None
+                },
                 "email": None,
                 "delete": False
             },
@@ -77,9 +81,17 @@ def register() -> Plugin:
                             ),
                             FormField(
                                 id="list_id",
-                                name="ID of your e-mail list (audience)",
-                                description="Please type in your MailChimp audience ID.",
-                                component=FormComponent(type="text", props={"label": "Audience ID"})
+                                name="Mailchimp audience",
+                                description="Please select your MailChimp audience.",
+                                component=FormComponent(type="autocomplete", props={
+                                    "label": "Audience",
+                                    "endpoint": {
+                                        "url": Endpoint.url(
+                                            'tracardi.process_engine.action.v1.connectors.mailchimp.endpoints',
+                                            'get_audiences'),
+                                        "method": "post"
+                                    },
+                                })
                             ),
                             FormField(
                                 id="email",
@@ -87,7 +99,7 @@ def register() -> Plugin:
                                 description="Please provide path to contact's e-mail address.",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "data.contact.email"
+                                                                               "defaultPathValue": "data.contact.email.main"
                                                                                })
                             ),
                         ]

@@ -84,7 +84,7 @@ def register() -> Plugin:
             ]),
             manual="string_validator_action",
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Patryk Migaj, Risto Kowaczewski"
 
         ),

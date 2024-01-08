@@ -1,5 +1,5 @@
 from typing import List, Optional, Iterator, Dict
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 
 import tracardi.service.wf
 from tracardi.domain.entity import Entity
@@ -38,8 +38,7 @@ class Node(Entity):
     remote: bool = False
     graph: Graph = Graph()
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def get_input_edges(self) -> PortToPortEdges:
         return self.graph.in_edges

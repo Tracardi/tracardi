@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -11,19 +11,22 @@ class Config(PluginConfig):
     from_date: str
     to_date: Optional[str] = None
 
-    @validator('project_id')
+    @field_validator('project_id')
+    @classmethod
     def validate_project_id(cls, value):
         if len(value) == 0 or not value.isnumeric():
             raise ValueError("Project ID must be a number.")
         return int(value)
 
-    @validator('funnel_id')
+    @field_validator('funnel_id')
+    @classmethod
     def validate_funnel_id(cls, value):
         if len(value) == 0 or not value.isnumeric():
             raise ValueError("Funnel ID must be a number.")
         return int(value)
 
-    @validator("from_date")
+    @field_validator("from_date")
+    @classmethod
     def validate_from_date(cls, value):
         if len(value) == 0:
             raise ValueError("This field cannot be empty")
@@ -35,7 +38,8 @@ class MixPanelCredentials(BaseModel):
     password: str
     server_prefix: str
 
-    @validator("server_prefix")
+    @field_validator("server_prefix")
+    @classmethod
     def validate_server_prefix(cls, value):
         if value.lower() not in ("us", "eu"):
             raise ValueError("Server prefix value must be either US or EU.")

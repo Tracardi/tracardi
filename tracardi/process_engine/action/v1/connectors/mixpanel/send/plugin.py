@@ -24,7 +24,7 @@ class MixPanelSender(ActionRunner):
 
         self.config = config
         self.client = MixPanelAPIClient(
-            **resource.credentials.get_credentials(self, MixPanelCredentials).dict()
+            **resource.credentials.get_credentials(self, MixPanelCredentials).model_dump()
         )
         self.client.set_retries(self.node.on_connection_error_repeat)
 
@@ -65,7 +65,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["success", "error"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="send_to_mixpanel_action",
             init={

@@ -27,6 +27,7 @@ class JoinPayloads(ActionRunner):
         )
 
     async def run(self, payload: dict, in_edge: Edge = None) -> Result:
+        # Return joined input payloads. Payloads can be transformed by the `Reshape output payload` schema.
         return Result(port="payload", value=payload)
 
 
@@ -39,7 +40,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.7.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={
                 "reshape": "{}",

@@ -10,8 +10,10 @@ from tracardi.service.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int
 from tracardi.service.utils.validators import is_valid_url
 
-VERSION = os.environ.get('_DEBUG_VERSION', '0.8.1')
+VERSION = os.environ.get('_DEBUG_VERSION', '0.8.2-dev')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
+
+logger = logging.getLogger(__name__)
 
 
 def _get_logging_level(level: str) -> int:
@@ -37,12 +39,15 @@ class MemoryCacheConfig:
         self.event_metadata_cache_ttl = get_env_as_int('EVENT_METADATA_CACHE_TTL', 2)
         self.event_destination_cache_ttl = get_env_as_int('EVENT_DESTINATION_CACHE_TTL', 2)
         self.profile_destination_cache_ttl = get_env_as_int('PROFILE_DESTINATION_CACHE_TTL', 2)
+        self.data_compliance_cache_ttl = get_env_as_int('DATA_COMPLIANCE_CACHE_TTL', 2)
+        self.trigger_rule_cache_ttl = get_env_as_int('TRIGGER_RULE_CACHE_TTL', 5)
 
 
 class ElasticConfig:
 
     def __init__(self, env):
         self.env = env
+        self.unset_credentials = env.get('UNSET_CREDENTIALS', "no") == 'yes'
         self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
         self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
         self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
@@ -57,20 +62,18 @@ class ElasticConfig:
         self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
         self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
 
-        self.refresh_profiles_after_save = (env['ELASTIC_REFRESH_PROFILES_AFTER_SAVE'].lower() == 'yes') \
-            if 'ELASTIC_REFRESH_PROFILES_AFTER_SAVE' in env else False
+        self.refresh_profiles_after_save = env.get('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'no').lower() == 'yes'
 
         self.host = self.get_host()
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
         self.query_timeout = get_env_as_int('ELASTIC_QUERY_TIMEOUT', 12)
-        self.save_pool = get_env_as_int('ELASTIC_SAVE_POOL', 0)
-        self.save_pool_ttl = get_env_as_int('ELASTIC_SAVE_POOL_TTL', 5)
         self.logging_level = _get_logging_level(
             env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 
-        self._unset_credentials()
+        if self.unset_credentials:
+            self._unset_credentials()
 
     def get_host(self):
         hosts = self.env.get('ELASTIC_HOST', 'http://localhost:9200')
@@ -112,16 +115,20 @@ class RedisConfig:
             self.host = self.host.split(":")[0]
 
     def get_redis_with_password(self):
-        return self.get_redis_uri(self.redis_host, password=self.redis_password)
+        if self.redis_password:
+            return self.get_redis_uri(self.redis_host, password=self.redis_password)
+        return self.get_redis_uri(self.redis_host)
 
     @staticmethod
     def get_redis_uri(host, user=None, password=None, protocol="redis", database="0"):
         if not host.startswith('redis://'):
-            host = f"{protocol}://{host}/{database}"
+            host = f"{protocol}://{host}"
+
         if user and password:
-            return f"{protocol}://{user}:{password}@{host[8:]}/{database}"
+            host = f"{protocol}://{user}:{password}@{host[8:]}/{database}"
         elif password:
-            return f"{protocol}://:{password}@{host[8:]}/{database}"
+            host = f"{protocol}://:{password}@{host[8:]}/{database}"
+
         return host
 
 
@@ -135,21 +142,37 @@ class TracardiConfig(metaclass=Singleton):
     def __init__(self, env):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
-        self.track_debug = (env['TRACK_DEBUG'].lower() == 'yes') if 'TRACK_DEBUG' in env else False
+        self.track_debug = env.get('TRACK_DEBUG', 'no').lower() == 'yes'
         self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
         self.enable_event_destinations = env.get('ENABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
         self.enable_profile_destinations = env.get('ENABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
-        self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
         self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
+        self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
+        self.enable_event_validation = env.get('ENABLE_EVENT_VALIDATION', 'yes').lower() == 'yes'
+        self.enable_event_reshaping = env.get('ENABLE_EVENT_RESHAPING', 'yes').lower() == 'yes'
+        self.enable_event_source_check = env.get('ENABLE_EVENT_SOURCE_CHECK', 'yes').lower() == 'yes'
+        self.enable_profile_immediate_flush = env.get('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes').lower() == 'yes'
+        self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
+        self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
+        self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
+        self.enable_field_update_log = env.get('ENABLE_FIELD_UPDATE_LOG', 'yes').lower() == 'yes'
+
+        self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
+
+        self.lock_on_data_computation = env.get('LOCK_ON_DATA_COMPUTATION', 'yes') == 'yes'
+
+        # Temporary flag
+        self.new_collector = env.get('NEW_COLLECTOR', 'yes').lower() == 'yes'
+
+        self.profile_cache_ttl = get_env_as_int('PROFILE_CACHE_TTL', 60)
+        self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 60)
 
         # Not used now
-        self.cache_profiles = env.get('CACHE_PROFILE', 'no').lower() == 'yes'
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
         self.sync_profile_tracks_wait = get_env_as_int('SYNC_PROFILE_TRACKS_WAIT', 1)
-        self.postpone_destination_sync = get_env_as_int('POSTPONE_DESTINATION_SYNC', 20)
         self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
-        self.query_language = env.get('QUERY_LANGUAGE', 'kql')
+        self.query_language = env.get('QUERY_LANGUAGE', 'tql')
         self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
         self.tracardi_pro_port = get_env_as_int('TRACARDI_PRO_PORT', 40000)
         self.tracardi_scheduler_host = env.get('TRACARDI_SCHEDULER_HOST', 'scheduler.tracardi.com')
@@ -159,26 +182,45 @@ class TracardiConfig(metaclass=Singleton):
         self.multi_tenant = env.get('MULTI_TENANT', "no") == 'yes'
         self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
+        self.expose_gui_api = env.get('EXPOSE_GUI_API', 'yes').lower() == "yes"
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
         self.internal_source = f"@internal-{random_hash[:20]}"
-        self.cardio_source = f"@heartbeats-{random_hash[:20]}"
         self.segmentation_source = f"@segmentation-{random_hash[:20]}"
+        self.demo_source = f"@demo-{random_hash[:20]}"
+
+        self.event_partitioning = env.get('EVENT_PARTITIONING', 'month')
+        self.profile_partitioning = env.get('PROFILE_PARTITIONING', 'quarter')
+        self.session_partitioning = env.get('SESSION_PARTITIONING', 'quarter')
+        self.entity_partitioning = env.get('ITEM_PARTITIONING', 'quarter')
+        self.item_partitioning = env.get('ITEM_PARTITIONING', 'year')
+        self.log_partitioning = env.get('LOG_PARTITIONING', 'month')
+        self.dispatch_log_partitioning = env.get('DISPATCH_LOG_PARTITIONING', 'month')
+        self.console_log_partitioning = env.get('CONSOLE_LOG_PARTITIONING', 'month')
+        self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
+        self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
+        self.hash_id_webhook = env.get('HASH_ID_WEBHOOK', None)
+
         self._config = None
         self._unset_secrets()
 
         if self.multi_tenant and (self.multi_tenant_manager_url is None or self.multi_tenant_manager_api_key is None):
             if self.multi_tenant_manager_url is None:
-                raise AssertionError('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
+                logger.warning('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
                                      'the MULTI_TENANT_MANAGER_URL or set MULTI_TENANT to "no"')
 
             if self.multi_tenant_manager_api_key is None:
-                raise AssertionError('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
+                logger.warning('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
                                      'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"')
 
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
-            raise AssertionError('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
+            logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
+
+        if self.hash_id_webhook and len(self.hash_id_webhook) < 20:
+            logger.warning('Security risk. Env HASH_ID_WEBHOOK is too short. It must be at least 20 chars long.')
+
+
 
     @property
     def config(self) -> YamlConfig:

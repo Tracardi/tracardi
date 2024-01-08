@@ -7,6 +7,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
+from tracardi.service.plugin.domain.result import Result
 
 
 class ReshapeTemplate(BaseModel):
@@ -64,7 +65,7 @@ class ActionRunner:
 
     def update_profile(self):
         if isinstance(self.profile, Profile):
-            self.profile.operation.update = True
+            self.profile.mark_for_update()
         else:
             if self.event.metadata.profile_less is True:
                 self.console.warning("Can not update profile when processing profile less events.")
@@ -87,3 +88,8 @@ class ActionRunner:
     def join_output(self) -> bool:
         return isinstance(self.join, JoinSettings) and self.join.merge is True
 
+    def get_error_result(self, message, port) -> Result:
+        self.console.error(message)
+        return Result(port=port, value={
+            "message": message
+        })

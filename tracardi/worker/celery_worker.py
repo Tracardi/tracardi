@@ -1,4 +1,5 @@
 import logging
+import tracardi.worker.service.worker.migration_workers as migration_workers
 from celery import Celery
 from tracardi.worker.config import redis_config
 from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
@@ -7,7 +8,6 @@ from tracardi.worker.service.worker.mysql_query_worker import MysqlConnectionCon
 from tracardi.worker.service.import_dispatcher import ImportDispatcher
 from tracardi.worker.domain.import_config import ImportConfig
 from tracardi.worker.domain.migration_schema import MigrationSchema
-import tracardi.worker.service.worker.migration_workers as migration_workers
 from tracardi.worker.misc.update_progress import update_progress
 from tracardi.worker.misc.add_task import add_task
 
@@ -78,11 +78,11 @@ def migrate_data(celery_job, schemas, elastic_host, task_index):
     for schema in schemas:
 
         if schema.asynchronous is True:
-            result = run_migration_worker.delay(schema.worker, schema.dict(), elastic_host, task_index)
+            result = run_migration_worker.delay(schema.worker, schema.model_dump(), elastic_host, task_index)
             logger.info(f"Running worker {schema.worker} as job {result}")
         else:
-            sync_chain = run_migration_worker.s(schema.worker, schema.dict(), elastic_host, task_index) if sync_chain \
-                is None else sync_chain | run_migration_worker.s(schema.worker, schema.dict(), elastic_host, task_index)
+            sync_chain = run_migration_worker.s(schema.worker, schema.model_dump(), elastic_host, task_index) if sync_chain \
+                is None else sync_chain | run_migration_worker.s(schema.worker, schema.model_dump(), elastic_host, task_index)
 
         progress += 1
         if celery_job:

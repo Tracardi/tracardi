@@ -52,7 +52,7 @@ op_contains: op_field_sig CONTAINS_TERMINAL op_value_sig
 op_startswith: op_field_sig STARTSWITH_TERMINAL op_value_sig
 op_endswith: op_field_sig ENDSWITH_TERMINAL op_value_sig
 
-OP: /(!=|<=|>=|=>|=<|==|>|<)/
+OP: /(!=|<=|>=|=>|=<|==|=|>|<)/
 
 // FIELDS FOR CONDITION
 

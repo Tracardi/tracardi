@@ -1,3 +1,5 @@
+from tracardi.service.utils.date import now_in_utc
+
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -24,7 +26,7 @@ class TimeDiffCalculator(ActionRunner):
         try:
             if isinstance(date, str):
                 if date == 'now':
-                    date = datetime.utcnow()
+                    date = now_in_utc()
                 else:
                     date = parser.parse(date)
             elif not isinstance(date, datetime):
@@ -60,8 +62,9 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["time_difference"],
             version='0.6.0.1',
-            license="MIT",
-            author="Dawid Kruk",
+            license="MIT + CC",
+            author="Dawid Kruk, Risto Kowaczewski",
+            manual='time_difference',
             init={
                 "reference_date": None,
                 "now": "now"

@@ -46,7 +46,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="summarization_action"
         ),

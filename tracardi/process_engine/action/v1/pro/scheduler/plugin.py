@@ -1,6 +1,8 @@
+from tracardi.service.utils.date import now_in_utc
+
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import tracardi.config
 from tracardi.domain.scheduler_config import SchedulerConfig
@@ -37,8 +39,7 @@ class SchedulerPlugin(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
             client = SchedulerClient(tracardi.config.tracardi.tracardi_scheduler_host)
-            schedule_at = datetime.utcnow() + timedelta(seconds=self.config.postpone)
-            schedule_at = f'{str(schedule_at)}+00:00'
+            schedule_at = now_in_utc() + timedelta(seconds=self.config.postpone)
 
             properties = json.loads(self.config.properties)
             dot = self._get_dot_accessor(payload)

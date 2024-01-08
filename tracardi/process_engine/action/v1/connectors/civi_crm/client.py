@@ -2,7 +2,7 @@ import json
 import ssl
 import aiohttp
 import certifi
-from pydantic import BaseModel, AnyHttpUrl
+from pydantic import BaseModel
 from tracardi.service.tracardi_http_client import HttpClient
 
 
@@ -13,7 +13,7 @@ class CiviCRMClientException(Exception):
 class CiviClientCredentials(BaseModel):
     api_key: str
     site_key: str
-    api_url: AnyHttpUrl
+    api_url: str # AnyHttpUrl
 
 
 class CiviCRMClient:

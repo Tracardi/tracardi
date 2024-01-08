@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -12,7 +12,8 @@ class Config(PluginConfig):
     field: str
     prefix: str
 
-    @validator("prefix")
+    @field_validator("prefix")
+    @classmethod
     def if_prefix_is_empty(cls, value):
         if value == "":
             raise ValueError("Prefix cannot be empty")
@@ -53,7 +54,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["true", "false"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Mateusz Zitaruk",
             init={
                 "field": "",

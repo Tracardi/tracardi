@@ -52,7 +52,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["found", "not_found"],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             init={
                 "event_type": {"id": "@current", "name": "@current"},

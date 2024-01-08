@@ -6,7 +6,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 
-from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -16,6 +15,8 @@ class Configuration(PluginConfig):
     append: Optional[Dict[str, Any]] = {}
     remove: Optional[Dict[str, Union[Any, List[Any]]]] = {}
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("remove")
     def validate_remove(cls, value, values):
         if 'append' not in values and 'remove' not in values:
@@ -88,15 +89,6 @@ class AppendTraitAction(ActionRunner):
                 self.console.warning("Profile changes were discarded in node `Append/Remove Trait`. "
                                      "This event is profile less so there is no profile.")
 
-        try:
-            event = Event(**dot.event)
-        except ValidationError as e:
-            self.console.error(f"Event could not be updated. Some values where set incorrectly. "
-                               f"Please see the error {str(e)}")
-            return Result(port="error", value=payload)
-
-        self.event.replace(event)
-
         if 'id' in dot.session:
             try:
                 session = Session(**dot.session)
@@ -130,7 +122,7 @@ def register() -> Plugin:
                 }
             },
             version='0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="append_remove_trait_action"
         ),

@@ -13,11 +13,11 @@ from tracardi.service.wf.domain.error_debug_info import ErrorDebugInfo
 from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
-from tracardi.service.plugin.domain.console import Log
 from .debugger import Debugger
 from ..config import tracardi
 from ..domain.console import Console
 from ..domain.entity import Entity
+from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow
 from ..domain.flow_invoke_result import FlowInvokeResult
 from ..domain.payload.tracker_payload import TrackerPayload
@@ -48,7 +48,7 @@ class RulesEngine:
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload) -> RuleInvokeResult:
+    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
 
         source_id = tracker_payload.source.id
         flow_task_store = defaultdict(list)
@@ -78,10 +78,10 @@ class RulesEngine:
                         module=__name__,
                         class_name=RulesEngine.__name__,
                         type="error",
-                        message=f"Rule to workflow does not exist. This may happen when you debug a workflow that "
-                                f"has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
-                                f"that gets rescheduled and it could not find the routing to the workflow. "
-                                f"Set a routing rule and this error will be solved automatically."
+                        message="Rule to workflow does not exist. This may happen when you debug a workflow that "
+                                "has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
+                                "that gets rescheduled and it could not find the routing to the workflow. "
+                                "Set a routing rule and this error will be solved automatically."
                     )
                     self.console_log.append(console)
                     continue
@@ -120,16 +120,16 @@ class RulesEngine:
                     continue
 
                 if not rule.enabled:
-                    logger.info(f"Rule {rule.name}:{rule.id} skipped. Rule is disabled.")
+                    logger.info(f"Trigger rule `{rule.name}:{rule.id}` skipped. Trigger is disabled.")
                     continue
 
-                logger.info(f"Running rule {rule.name}:{rule.id}")
+                logger.info(f"Triggering rule `{rule.name}:{rule.id}`")
 
                 try:
 
                     # Loads flow for given rule
 
-                    flow = await load_flow_callable(rule.flow.id)  # type: Flow
+                    flow: Flow = await load_flow_callable(rule.flow.id)
 
                 except Exception as e:
                     logger.error(str(e))
@@ -141,7 +141,7 @@ class RulesEngine:
                             name=rule.flow.name,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=103)]
                         ),
-                        event=Entity(id=event.id)
+                        event=WfEntity(id=event.id)
                     )
                     debugger[event.type].append({rule.name: debug_info})
                     continue
@@ -165,12 +165,22 @@ class RulesEngine:
                         # Debugging can be controlled from tracker payload.
 
                         flow_task = asyncio.create_task(
-                            workflow.invoke(flow, event, self.profile, self.session, ux, debug=tracker_payload.debug))
+                            workflow.invoke(flow,
+                                            event,
+                                            self.profile,
+                                            self.session,
+                                            ux,
+                                            debug=debug
+                                            )
+                        )
+
+                        # Append to task store to be awaited latter
+
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
                     else:
                         logger.warning(f"Workflow {rule.flow.id} skipped. Event source id is not equal "
-                                       f"to rule source id.")
+                                       f"to trigger rule source id.")
                 else:
                     # todo FlowHistory is empty
                     workflow = WorkFlow(
@@ -182,13 +192,17 @@ class RulesEngine:
                     # Preliminary tests showed no issues but on heavy load we do not know if
                     # the test is still valid and every thing is ok. Solution is to remove create_task.
                     flow_task = asyncio.create_task(
-                        workflow.invoke(flow, event, self.profile, self.session, ux, debug=False))
+                        workflow.invoke(flow, event, self.profile, self.session, ux, debug=debug)
+                    )
+
+                    # Append flows to flow_task store
                     flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
         # Run flows and report async
 
         post_invoke_events = {}
         flow_responses = []
+        changed_field_timestamps: List[dict] = []
         for event_type, tasks in flow_task_store.items():
             for flow_id, event_id, rule_name, task in tasks:  # type: str, str, str, Task
                 try:
@@ -200,24 +214,13 @@ class RulesEngine:
                     log_list = flow_invoke_result.log_list
                     post_invoke_event = flow_invoke_result.event
 
+                    changed_field_timestamps += flow_invoke_result.flow.get_changes()
+
                     flow_responses.append(flow_invoke_result.flow.response)
                     post_invoke_events[post_invoke_event.id] = post_invoke_event
 
                     # Store logs in one console log
-                    for log in log_list:  # type: Log
-                        console = Console(
-                            origin="node",
-                            event_id=event_id,
-                            flow_id=flow_id,
-                            profile_id=log.profile_id,
-                            node_id=log.node_id,
-                            module=log.module,
-                            class_name=log.class_name,
-                            type=log.type,
-                            message=log.message,
-                            traceback=log.traceback
-                        )
-                        self.console_log.append(console)
+                    self.console_log.append_event_log_list(event_id, flow_id, log_list)
 
                 except Exception as e:
                     # todo log error
@@ -236,24 +239,27 @@ class RulesEngine:
 
                     debug_info = DebugInfo(
                         timestamp=time(),
+                        event=WfEntity(id=event_id),
                         flow=FlowDebugInfo(
                             id=rule.flow.name,
                             name=rule.flow.name,
                             error=[ErrorDebugInfo(msg=str(e), file=__file__, line=86)]
-                        ),
-                        event=Entity(id=event_id)
+                        )
                     )
 
                 debugger[event_type].append({rule_name: debug_info})
 
         ran_event_types = list(flow_task_store.keys())
 
-        return RuleInvokeResult(debugger,
-                                ran_event_types,
-                                post_invoke_events,
-                                invoked_rules,
-                                invoked_flows,
-                                flow_responses)
+        return RuleInvokeResult(
+            debugger,
+            ran_event_types,
+            post_invoke_events,
+            invoked_rules,
+            invoked_flows,
+            flow_responses,
+            changed_field_timestamps
+        )
 
     def _get_merging_keys_and_values(self):
         merge_key_values = self.profile.get_merge_key_values()

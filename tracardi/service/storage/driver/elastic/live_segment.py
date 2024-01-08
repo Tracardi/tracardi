@@ -6,7 +6,7 @@ from tracardi.service.storage.factory import storage_manager
 
 async def load_segments(event_type, limit=500) -> StorageRecords:
     return await storage_manager(index="segment"). \
-        load_by_query_string("(NOT _exists_:eventType) OR eventType: \"{}\"".format(event_type, limit))
+        load_by_query_string("(NOT _exists_:eventType) OR eventType: \"{}\"".format(event_type))
 
 
 async def load_all(start: int = 0, limit: int = 100) -> StorageRecords:

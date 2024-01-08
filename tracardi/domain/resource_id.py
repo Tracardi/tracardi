@@ -1,10 +1,11 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 
 class ResourceId(BaseModel):
     id: str
 
-    @validator("id")
+    @field_validator("id")
+    @classmethod
     def id_not_empty(cls, value):
         if not value:
             raise ValueError("Resource must not be empty.")

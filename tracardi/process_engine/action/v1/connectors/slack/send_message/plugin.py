@@ -51,7 +51,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="send_to_slack_channel_action",
             init={

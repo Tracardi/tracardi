@@ -5,7 +5,8 @@
   "template": {
     "settings": {
       "number_of_shards": %%SHARDS%%,
-      "number_of_replicas": %%REPLICAS%%
+      "number_of_replicas": %%REPLICAS%%,
+      "index.mapping.total_fields.limit": 2000
     },
     "mappings": {
       "_meta": {
@@ -16,7 +17,8 @@
       "date_detection": false,
       "properties": {
         "id": {
-          "type": "keyword", "ignore_above": 64
+          "type": "keyword",
+          "ignore_above": 64
         },
         "ids": {
           "type": "keyword"
@@ -31,9 +33,20 @@
             "aux": {
               "type": "flattened"
             },
+            "system": {
+              "type": "flattened"
+            },
+            "fields": {
+              "type": "object",
+              "enabled": false
+            },
             "time": {
               "properties": {
                 "insert": {
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                },
+                "create": {
                   "type": "date",
                   "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
@@ -69,6 +82,9 @@
         },
         "data": {
           "properties": {
+            "anonymous": {
+              "type": "boolean"
+            },
             "media": {
               "properties": {
                 "image": {
@@ -115,7 +131,7 @@
                 "lastname": {
                   "type": "keyword"
                 },
-                "name": {
+                "display_name": {
                   "type": "keyword"
                 },
                 "birthday": {
@@ -195,10 +211,40 @@
             "contact": {
               "properties": {
                 "email": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "private": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    }
+                  }
                 },
                 "phone": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "mobile": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "whatsapp": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -326,7 +372,8 @@
             },
             "devices": {
               "properties": {
-                "names": {"type": "keyword", "ignore_above": 32},
+                "push": {"type": "keyword", "ignore_above": 40},
+                "other": {"type": "keyword", "ignore_above": 40},
                 "last": {
                   "properties": {
                     "geo": {
@@ -356,6 +403,10 @@
                         },
                         "longitude": {
                           "type": "float"
+                        },
+                        "location": {
+                          "ignore_malformed": true,
+                          "type": "geo_point"
                         },
                         "postal": {
                           "type": "keyword",
@@ -387,8 +438,13 @@
                 "ltcocv": {
                   "type": "float"
                 },
+                "next": {
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                },
                 "custom": {
-                  "type": "flattened"
+                  "type": "object",
+                  "dynamic": "true"
                 }
               }
             },

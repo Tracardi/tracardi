@@ -13,7 +13,7 @@ class CiviCRMConnector(DestinationInterface):
 
         credentials = self.resource.credentials.test if self.debug else self.resource.credentials.production
 
-        client = CiviCRMClient(**CiviClientCredentials(**credentials).dict())
+        client = CiviCRMClient(**CiviClientCredentials(**credentials).model_dump())
 
         await client.add_contact(data)
 

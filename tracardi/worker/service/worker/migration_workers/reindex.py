@@ -13,7 +13,7 @@ def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):
         task_index,
         f"Migration of \"{schema.copy_index.from_index}\"",
         celery_job,
-        schema.dict()
+        schema.model_dump()
     )
 
     body = {

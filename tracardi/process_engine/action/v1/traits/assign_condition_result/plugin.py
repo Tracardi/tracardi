@@ -1,10 +1,10 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.domain.profile import Profile
+from .model.config import Config
 
 
 def validate(config: dict) -> Config:
@@ -39,9 +39,9 @@ def register() -> Plugin:
             className='AssignConditionResultPlugin',
             inputs=["payload"],
             outputs=["payload"],
-            version='0.6.2',
-            license="MIT",
-            author="Dawid Kruk",
+            version='0.8.2',
+            license="MIT + CC",
+            author="Dawid Kruk, Risto Kowaczewski",
             init={
                 "conditions": {}
             },

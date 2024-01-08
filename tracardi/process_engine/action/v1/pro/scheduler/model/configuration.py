@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -10,13 +10,15 @@ class Configuration(PluginConfig):
     properties: str = "{}"
     postpone: int
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def validate_query(cls, value):
         if value is None or value == "":
             raise ValueError("This field cannot be empty")
         return value
 
-    @validator("postpone")
+    @field_validator("postpone")
+    @classmethod
     def validate_delay(cls, value):
         if value < 5:
             raise ValueError("Delay must be bigger then 5 seconds.")

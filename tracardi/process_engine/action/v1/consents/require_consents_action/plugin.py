@@ -89,7 +89,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["true", "false"],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             manual="require_consents_action",
             form=Form(
@@ -100,7 +100,7 @@ def register() -> Plugin:
                             FormField(
                                 id="consent_ids",
                                 name="IDs of required consents",
-                                description="Provide a list of IDs of consents that are required. "
+                                description="Provide a list of IDs of consents that the profile must grant. "
                                             "Press enter to add more the one consent.",
                                 component=FormComponent(type="consentTypes")
                             ),
@@ -122,7 +122,7 @@ def register() -> Plugin:
             }
         ),
         metadata=MetaData(
-            name='Require consents',
+            name='Has consents',
             desc='Checks if defined consents are granted by current profile.',
             icon='consent',
             group=["Consents"],

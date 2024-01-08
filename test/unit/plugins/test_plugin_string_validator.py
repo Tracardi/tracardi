@@ -65,7 +65,7 @@ def test_int():
         c = random.randint(1, 100000)
         a += 1
         init = {'validator': "int",
-                'data': c}
+                'data': str(c)}
         plugin = run_plugin(StringValidatorAction, init, {})
         result = plugin.output
         assert result.port == 'valid'
@@ -78,7 +78,7 @@ def test_float():
         c = random.uniform(1.0, 100000.0)
         a += 1
         init = {'validator': "float",
-                'data': c}
+                'data': str(c)}
         plugin = run_plugin(StringValidatorAction, init, {})
         result = plugin.output
         assert result.port == 'valid'

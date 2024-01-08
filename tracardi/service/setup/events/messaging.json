@@ -2,32 +2,66 @@
   {
     "name": "Messaging Started",
     "description": "Customer starts conversation/messaging. Deliver a conversation id to track the whole conversation session.",
-    "id": "Messaging-started",
+    "id": "messaging-started",
     "properties": {
       "conversation": "string",
       "type": "string",
       "sender": "string",
       "recipient": "string",
       "identity": {
-        "phone": "string",
-        "email": "string"
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
       }
     },
     "copy": {
-      "data.contact.email": "properties.identity.email",
-      "data.contact.phone": "properties.identity.phone",
+      "data.contact.email.main": "properties.identity.email.main",
+      "data.contact.email.private": "properties.identity.email.private",
+      "data.contact.email.business": "properties.identity.email.business",
+      "data.contact.phone.main": "properties.identity.phone.main",
+      "data.contact.phone.mobile": "properties.identity.phone.mobile",
+      "data.contact.phone.whatsapp": "properties.identity.phone.whatsapp",
+      "data.contact.phone.business": "properties.identity.phone.business",
       "data.message.conversation": "properties.conversation",
       "data.message.type": "properties.type",
       "data.message.sender": "properties.sender",
       "data.message.recipient": "properties.recipient"
     },
     "profile": {
-      "data.contact.email": [
-        "data.contact.email",
+      "data.contact.email.main": [
+        "data.contact.email.main",
         "equals_if_not_exists"
       ],
-      "data.contact.phone": [
-        "data.contact.phone",
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equals_if_not_exists"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
         "equals_if_not_exists"
       ]
     }
@@ -44,13 +78,27 @@
       "sender": "string",
       "recipient": "string",
       "identity": {
-        "phone": "string",
-        "email": "string"
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
       }
     },
     "copy": {
-      "data.contact.email": "properties.identity.email",
-      "data.contact.phone": "properties.identity.phone",
+      "data.contact.email.main": "properties.identity.email.main",
+      "data.contact.email.private": "properties.identity.email.private",
+      "data.contact.email.business": "properties.identity.email.business",
+      "data.contact.phone.main": "properties.identity.phone.main",
+      "data.contact.phone.mobile": "properties.identity.phone.mobile",
+      "data.contact.phone.whatsapp": "properties.identity.phone.whatsapp",
+      "data.contact.phone.business": "properties.identity.phone.business",
       "data.message.id": "properties.id",
       "data.message.conversation": "properties.conversation",
       "data.message.type": "properties.type",
@@ -59,12 +107,32 @@
       "data.message.sender": "properties.sender"
     },
     "profile": {
-      "data.contact.email": [
-        "data.contact.email",
+      "data.contact.email.main": [
+        "data.contact.email.main",
         "equals_if_not_exists"
       ],
-      "data.contact.phone": [
-        "data.contact.phone",
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equals_if_not_exists"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
         "equals_if_not_exists"
       ]
     }
@@ -103,13 +171,27 @@
       "sender": "string",
       "recipient": "string",
       "identity": {
-        "phone": "string",
-        "email": "string"
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
       }
     },
     "copy": {
-      "data.contact.email": "properties.identity.email",
-      "data.contact.phone": "properties.identity.phone",
+      "data.contact.email.main": "properties.identity.email.main",
+      "data.contact.email.private": "properties.identity.email.private",
+      "data.contact.email.business": "properties.identity.email.business",
+      "data.contact.phone.main": "properties.identity.phone.main",
+      "data.contact.phone.mobile": "properties.identity.phone.mobile",
+      "data.contact.phone.whatsapp": "properties.identity.phone.whatsapp",
+      "data.contact.phone.business": "properties.identity.phone.business",
       "data.message.id": "properties.id",
       "data.message.conversation": "properties.conversation",
       "data.message.type": "properties.type",
@@ -118,12 +200,32 @@
       "data.message.sender": "properties.sender"
     },
     "profile": {
-      "data.contact.email": [
-        "data.contact.email",
+      "data.contact.email.main": [
+        "data.contact.email.main",
         "equals_if_not_exists"
       ],
-      "data.contact.phone": [
-        "data.contact.phone",
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equals_if_not_exists"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
         "equals_if_not_exists"
       ]
     }
@@ -140,27 +242,61 @@
       "sender": "string",
       "recipient": "string",
       "identity": {
-        "phone": "string",
-        "email": "string"
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
       }
     },
     "copy": {
       "data.message.id": "properties.id",
       "data.message.conversation": "properties.conversation",
-      "data.contact.email": "properties.identity.email",
-      "data.contact.phone": "properties.identity.phone",
+      "data.contact.email.main": "properties.identity.email.main",
+      "data.contact.email.private": "properties.identity.email.private",
+      "data.contact.email.business": "properties.identity.email.business",
+      "data.contact.phone.main": "properties.identity.phone.main",
+      "data.contact.phone.mobile": "properties.identity.phone.mobile",
+      "data.contact.phone.whatsapp": "properties.identity.phone.whatsapp",
+      "data.contact.phone.business": "properties.identity.phone.business",
       "data.message.type": "properties.type",
       "data.message.text": "properties.message",
       "data.message.recipient": "properties.recipient",
       "data.message.sender": "properties.sender"
     },
     "profile": {
-      "data.contact.email": [
-        "data.contact.email",
+      "data.contact.email.main": [
+        "data.contact.email.main",
         "equals_if_not_exists"
       ],
-      "data.contact.phone": [
-        "data.contact.phone",
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equals_if_not_exists"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
         "equals_if_not_exists"
       ]
     }
@@ -168,7 +304,7 @@
   {
     "name": "Messaging Ended",
     "description": "Customer ended conversation/messaging. Deliver a conversation id to track the whole conversation session.",
-    "id": "Messaging-ended",
+    "id": "messaging-ended",
     "properties": {
       "conversation": "string",
       "type": "string",
@@ -176,26 +312,60 @@
       "sender": "string",
       "recipient": "string",
       "identity": {
-        "phone": "string",
-        "email": "string"
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
       }
     },
     "copy": {
       "data.message.conversation": "properties.conversation",
-      "data.contact.email": "properties.identity.email",
-      "data.contact.phone": "properties.identity.phone",
+      "data.contact.email.main": "properties.identity.email.main",
+      "data.contact.email.private": "properties.identity.email.private",
+      "data.contact.email.business": "properties.identity.email.business",
+      "data.contact.phone.main": "properties.identity.phone.main",
+      "data.contact.phone.mobile": "properties.identity.phone.mobile",
+      "data.contact.phone.whatsapp": "properties.identity.phone.whatsapp",
+      "data.contact.phone.business": "properties.identity.phone.business",
       "data.message.type": "properties.type",
       "data.message.text": "properties.message",
       "data.message.recipient": "properties.recipient",
       "data.message.sender": "properties.sender"
     },
     "profile": {
-      "data.contact.email": [
-        "data.contact.email",
+      "data.contact.email.main": [
+        "data.contact.email.main",
         "equals_if_not_exists"
       ],
-      "data.contact.phone": [
-        "data.contact.phone",
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equals_if_not_exists"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equals_if_not_exists"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
         "equals_if_not_exists"
       ]
     }

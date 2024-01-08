@@ -1,6 +1,6 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -15,13 +15,15 @@ class Configuration(PluginConfig):
     from_segment: str
     to_segment: str
 
-    @validator("from_segment")
+    @field_validator("from_segment")
+    @classmethod
     def is_not_empty_from(cls, value):
         if value == "":
             raise ValueError("Segment cannot be empty")
         return value
 
-    @validator("to_segment")
+    @field_validator("to_segment")
+    @classmethod
     def is_not_empty_to(cls, value):
         if value == "":
             raise ValueError("Segment cannot be empty")
@@ -47,7 +49,7 @@ class MoveSegmentAction(ActionRunner):
                 profile.segments.remove(self.config.from_segment)
             if self.config.to_segment not in profile.segments:
                 profile.segments.append(self.config.to_segment)
-            profile.metadata.time.segmentation = datetime.utcnow()
+            profile.metadata.time.segmentation = now_in_utc()
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:

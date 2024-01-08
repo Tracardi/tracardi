@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 _local_dir = os.path.dirname(__file__)
 sys.path.append(f"{_local_dir}/../proto/stubs")
 
@@ -71,4 +72,3 @@ if __name__ == '__main__':
         context={"c": 3},
         request={"request": 1}
     )
-    print(f'{result}')

@@ -1,33 +1,31 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
 
 from .entity import Entity
 from .event_metadata import EventMetadata
-from pydantic import BaseModel, root_validator
+from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
 
 from .marketing import UTM
-# from .metadata import OS, Device, Application, Hit
 from .named_entity import NamedEntity
 from .profile_data import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
     ProfileIdentifier, ProfileContact, ProfilePII
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 from ..service.string_manager import capitalize_event_type_id
+from ..service.utils.date import now_in_utc
 
 
 class Tags(BaseModel):
     values: Tuple['str', ...] = ()
     count: int = 0
+    model_config = ConfigDict(validate_assignment=True)
 
-    class Config:
-        validate_assignment = True
-
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def total_tags(cls, values):
-        values["count"] = len(values.get("values"))
+        values["count"] = len(values.get("values", []))
         return values
 
     def add(self, tag: Union[str, List[str]]):
@@ -42,9 +40,9 @@ class Tags(BaseModel):
 
 
 class EventSession(Entity):
-    start: datetime = datetime.utcnow()
+    start: datetime = now_in_utc()
     duration: float = 0
-    tz: Optional[str] = 'utc'
+    tz: Optional[str] = None
 
 
 class EventJourney(BaseModel):
@@ -67,16 +65,10 @@ class EventCheckout(BaseModel):
     value: Optional[float] = 0
 
 
-class EventIncome(BaseModel):
+class Money(BaseModel):
     value: Optional[float] = 0
-    revenue: Optional[float] = 0
-
-
-class EventCost(BaseModel):
-    shipping: Optional[float] = 0
-    tax: Optional[float] = 0
-    discount: Optional[float] = 0
-    other: Optional[float] = 0
+    due_date: Optional[datetime] = None
+    currency: Optional[str] = None
 
 
 class EventProduct(BaseModel):
@@ -97,8 +89,10 @@ class EventOrder(BaseModel):
     id: Optional[str] = None
     status: Optional[str] = None
     currency: Optional[str] = None
-    income: Optional[EventIncome] = EventIncome()
-    cost: Optional[EventCost] = EventCost()
+    receivable: Optional[Money] = Money()
+    payable: Optional[Money] = Money()
+    income: Optional[Money] = Money()
+    cost: Optional[Money] = Money()
     affiliation: Optional[str] = None
 
 
@@ -136,17 +130,17 @@ class EventMarketing(BaseModel):
 
 
 class EventData(BaseModel):
-    pii: Optional[ProfilePII] = ProfilePII.construct()
-    contact: Optional[ProfileContact] = ProfileContact.construct()
-    identifier: Optional[ProfileIdentifier] = ProfileIdentifier.construct()
-    media: Optional[ProfileMedia] = ProfileMedia.construct()
-    preferences: Optional[ProfilePreference] = ProfilePreference.construct()
-    job: Optional[ProfileJob] = ProfileJob.construct()
-    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty.construct()
-    ec: Optional[EventEc] = EventEc.construct()
-    message: Optional[EventMessage] = EventMessage.construct()
-    payment: Optional[EventPayment] = EventPayment.construct()
-    marketing: Optional[EventMarketing] = EventMarketing.construct()
+    pii: Optional[ProfilePII] = ProfilePII.model_construct()
+    contact: Optional[ProfileContact] = ProfileContact.model_construct()
+    identifier: Optional[ProfileIdentifier] = ProfileIdentifier.model_construct()
+    media: Optional[ProfileMedia] = ProfileMedia.model_construct()
+    preferences: Optional[ProfilePreference] = ProfilePreference.model_construct()
+    job: Optional[ProfileJob] = ProfileJob.model_construct()
+    loyalty: Optional[ProfileLoyalty] = ProfileLoyalty.model_construct()
+    ec: Optional[EventEc] = EventEc.model_construct()
+    message: Optional[EventMessage] = EventMessage.model_construct()
+    payment: Optional[EventPayment] = EventPayment.model_construct()
+    marketing: Optional[EventMarketing] = EventMarketing.model_construct()
 
 
 class Event(NamedEntity):
@@ -179,14 +173,14 @@ class Event(NamedEntity):
     # os: Optional[OS] = OS.construct()
     # app: Optional[Application] = Application.construct()
     # hit: Optional[Hit] = Hit.construct()
-    journey: EventJourney = EventJourney.construct()
+    journey: EventJourney = EventJourney.model_construct()
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
         if 'type' in data and isinstance(data['type'], str):
-            data['type'] = data['type'].lower().replace(' ', '-')
+            data['type'] = data.get('type', '@missing-event-type').lower().replace(' ', '-')
         if 'name' not in data:
-            data['name'] = capitalize_event_type_id(data['type'])
+            data['name'] = capitalize_event_type_id(data.get('type', ''))
         super().__init__(**data)
 
     def replace(self, event):

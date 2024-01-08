@@ -257,3 +257,49 @@ with ServerContext(Context(production=False, tenant=namespace)):
                 index.static = False
                 write_index = index.get_write_index()
                 assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
+
+    def test_templated_index_partitioning():
+        date = datetime.now()
+        with ServerContext(Context(production=False, tenant=namespace)):
+            index = Index(multi_index=True,
+                          partitioning='quarter',
+                          static=False,
+                          index="index-name",
+                          mapping=mapping_mock)
+            write_index = index.get_write_index()
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-q{(date.month%4) + 1}"
+
+            index = Index(multi_index=True,
+                          partitioning='month',
+                          static=False,
+                          index="index-name",
+                          mapping=mapping_mock)
+            write_index = index.get_write_index()
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
+
+
+            index = Index(multi_index=True,
+                          partitioning='day',
+                          static=False,
+                          index="index-name",
+                          mapping=mapping_mock)
+            write_index = index.get_write_index()
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}/{date.day}"
+
+            index = Index(multi_index=True,
+                          partitioning='year',
+                          static=False,
+                          index="index-name",
+                          mapping=mapping_mock)
+            write_index = index.get_write_index()
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-year"
+
+            index = Index(multi_index=True,
+                          partitioning='minute',
+                          static=False,
+                          index="index-name",
+                          mapping=mapping_mock)
+            write_index = index.get_write_index()
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
+
+

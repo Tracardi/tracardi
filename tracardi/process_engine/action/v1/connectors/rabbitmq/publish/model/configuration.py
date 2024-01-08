@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from tracardi.domain.entity import Entity
 from tracardi.service.plugin.domain.config import PluginConfig
 
@@ -14,13 +14,15 @@ class QueueConfig(BaseModel):
     auto_declare: bool = True
     serializer: str = 'json'
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def name_not_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Name can not be empty")
         return value
 
-    @validator("compression")
+    @field_validator("compression")
+    @classmethod
     def validate_compression(cls, value):
         if value == "none":
             return None

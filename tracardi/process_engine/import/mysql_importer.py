@@ -1,7 +1,8 @@
+from tracardi.service.utils.date import now_in_utc
+
 import asyncio
 import re
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from typing import Tuple
 from uuid import uuid4
 
@@ -10,7 +11,7 @@ import aiomysql
 from tracardi.domain.import_config import ImportConfig
 from tracardi.domain.task import Task
 from .importer import Importer
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.driver.elastic import resource as resource_db
@@ -26,7 +27,8 @@ class MySQLImportConfig(BaseModel):
     table_name: NamedEntity
     batch: int
 
-    @validator("source", "database_name", "table_name")
+    @field_validator("source", "database_name", "table_name")
+    @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
             raise ValueError(f"This field cannot be empty.")
@@ -37,7 +39,8 @@ class TableFetcherConfig(BaseModel):
     source: NamedEntity
     database_name: NamedEntity
 
-    @validator("source", "database_name")
+    @field_validator("source", "database_name")
+    @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
             raise ValueError(f"This field cannot be empty.")
@@ -47,7 +50,8 @@ class TableFetcherConfig(BaseModel):
 class DatabaseFetcherConfig(BaseModel):
     source: NamedEntity
 
-    @validator("source")
+    @field_validator("source")
+    @classmethod
     def validate_named_entities(cls, value):
         if not value.id:
             raise ValueError(f"This field cannot be empty.")
@@ -171,11 +175,11 @@ class MySQLTableImporter(Importer):
         celery_task = completed.pop().result()
 
         task = Task(
-            timestamp=datetime.utcnow(),
+            timestamp=now_in_utc(),
             id=str(uuid4()),
             name=task_name if task_name else import_config.name,
             type="import",
-            params=import_config.dict(),
+            params=import_config.model_dump(),
             task_id=celery_task.id
         )
 

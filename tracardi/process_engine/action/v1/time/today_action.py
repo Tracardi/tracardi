@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 
 import pytz
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -12,7 +12,8 @@ from tracardi.service.plugin.domain.result import Result
 class TodayConfiguration(BaseModel):
     timezone: str
 
-    @validator('timezone')
+    @field_validator('timezone')
+    @classmethod
     def field_must_match(cls, value):
         if len(value) < 1:
             raise ValueError("Event type can not be empty.")
@@ -97,7 +98,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["payload"],
             version='0.1.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={"timezone": "session@context.time.tz"},
             manual="today_action",

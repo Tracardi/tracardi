@@ -26,7 +26,7 @@ class HtmlXpathScrapperAction(ActionRunner):
         if result:
             return Result(port="result", value={"result": result})
         self.console.warning("Could not find any data at path '{}'".format(self.config.xpath))
-        return Result(port="error", value=self.config.dict())
+        return Result(port="error", value=self.config.model_dump())
 
 
 def register() -> Plugin:
@@ -34,11 +34,11 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='HtmlXpathScrapperAction',
+            className=HtmlXpathScrapperAction.__name__,
             inputs=["payload"],
             outputs=["result", "error"],
             version='0.6.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={
                 "xpath": None,
@@ -63,6 +63,7 @@ def register() -> Plugin:
                     ]
                 )
             ]),
+            manual='xpath_html_scrapper'
 
         ),
         metadata=MetaData(

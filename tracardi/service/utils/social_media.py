@@ -6,7 +6,9 @@ class SocialMedia:
     def __init__(self):
         self.social_media_list = [('//www.facebook.com', 'facebook'), ('//facebook.com', 'facebook'),
                                   ('//twitter.com', 'twitter'), ('//www.twitter.com', 'twitter'),
-                                  ('instagram', 'instagram'), ('linkedin', 'linkedin'), ('pinterest', 'pinterest'),
+                                  ('//instagram.com', 'instagram'), ('//www.instagram.com', 'instagram'),
+                                  ('//www.linkedin.com', 'linkedin'), ('//linkedin.com', 'linkedin'),
+                                  ('pinterest', 'pinterest'),
                                   ('snapchat', 'snapchat'), ('youtube', 'youtube'), ('tiktok', 'tiktok'),
                                   ('//whatsapp.com', 'whatsapp'), ('//api.whatsapp.com', 'whatsapp'),
                                   ('//www.whatsapp.com', 'whatsapp'), ('messenger', 'messenger'), ('reddit', 'reddit'),
@@ -48,12 +50,12 @@ class SocialMedia:
         return False
 
     def filter_social_urls(self, url_list) -> List:
-        filtered_urls = []
+        filtered_urls = set()
         for url in url_list:
             social_name = self._has_social_string(url)
             if social_name:
-                filtered_urls.append((url, social_name))
-        return filtered_urls
+                filtered_urls.add((url, social_name))
+        return list(filtered_urls)
 
     def has_social_media_string(self, data) -> Union[Optional[Tuple[str, str]], List[Tuple[str, str]]]:
         if isinstance(data, list):

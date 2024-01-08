@@ -34,7 +34,7 @@ from tracardi.domain.time import Time
 
 
 def test_event_payload_time_fallback():
-    ep = EventPayload(type="text", tags=[1, 2, 3])
+    ep = EventPayload(type="text", tags=["tag1", "tag2", "tag3"])
 
     epm = EventPayloadMetadata(
         time=Time(
@@ -46,7 +46,7 @@ def test_event_payload_time_fallback():
                         source=Entity(id="1"),
                         session=Session(id="1", metadata=SessionMetadata()),
                         profile=Entity(id="1"),
-                        has_profile=True
+                        profile_less=False
                         )
 
     assert event.metadata.time.insert != datetime.datetime(2002, 1, 1, 0, 0)  # Must be now - can not be overridden
@@ -54,20 +54,20 @@ def test_event_payload_time_fallback():
 
 
 def test_event_payload_should_have_tags():
-    ep = EventPayload(type="text", tags=[1, 2, 3])
+    ep = EventPayload(type="text", tags=["tag1", "tag2", "tag3"])
 
     epm = EventPayloadMetadata(
         time=Time(
-            insert="2002-01-01 00:00:00",
-            create="2001-01-01 00:00:00"
+            insert=datetime.datetime(2002, 1, 1, 0, 0),
+            create=datetime.datetime(2002, 1, 1, 0, 0)
         )
     )
     event = ep.to_event(epm,
                         source=Entity(id="1"),
                         session=Session(id="1", metadata=SessionMetadata()),
                         profile=Entity(id="1"),
-                        has_profile=True
+                        profile_less=False
                         )
 
-    assert event.tags.values == ('1', '2', '3')
+    assert event.tags.values == ('tag1', 'tag2', 'tag3')
     assert event.tags.count == 3

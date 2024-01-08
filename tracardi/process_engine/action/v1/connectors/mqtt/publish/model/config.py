@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 from tracardi.domain.named_entity import NamedEntity
 
@@ -10,7 +10,8 @@ class Configuration(BaseModel):
     qos: str = "0"
     retain: bool = False
 
-    @validator("qos")
+    @field_validator("qos")
+    @classmethod
     def must_be_number(cls, value):
         if not value.isnumeric():
             raise ValueError("Value must be a number.")

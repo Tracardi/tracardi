@@ -40,6 +40,9 @@
                 },
                 "process_time": {
                   "type": "float"
+                },
+                "total_time": {
+                  "type": "float"
                 }
               }
             },
@@ -77,6 +80,9 @@
               "type": "boolean"
             },
             "error": {
+              "type": "boolean"
+            },
+            "merge": {
               "type": "boolean"
             },
             "instance": {
@@ -166,7 +172,11 @@
                   "type": "float"
                 },
                 "longitude": {
+                  "ignore_malformed": true,
                   "type": "float"
+                },
+                "location": {
+                  "type": "geo_point"
                 },
                 "postal": {
                   "type": "keyword",
@@ -391,7 +401,7 @@
                 "lastname": {
                   "type": "keyword"
                 },
-                "name": {
+                "display_name": {
                   "type": "keyword"
                 },
                 "birthday": {
@@ -471,10 +481,40 @@
             "contact": {
               "properties": {
                 "email": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "private": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 64
+                    }
+                  }
                 },
                 "phone": {
-                  "type": "keyword"
+                  "properties": {
+                    "main": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "business": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "mobile": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    },
+                    "whatsapp": {
+                      "type": "keyword",
+                      "ignore_above": 32
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -675,29 +715,59 @@
                       "type": "keyword",
                       "ignore_above": 32
                     },
+                    "receivable": {
+                      "properties": {
+                        "value": {
+                          "type": "float"
+                        },
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                        },
+                        "currency": {
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "payable": {
+                      "properties": {
+                        "value": {
+                          "type": "float"
+                        },
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                        },
+                        "currency": {
+                          "type": "text"
+                        }
+                      }
+                    },
                     "income": {
                       "properties": {
                         "value": {
                           "type": "float"
                         },
-                        "revenue": {
-                          "type": "float"
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                        },
+                        "currency": {
+                          "type": "text"
                         }
                       }
                     },
                     "cost": {
                       "properties": {
-                        "shipping": {
+                        "value": {
                           "type": "float"
                         },
-                        "tax": {
-                          "type": "float"
+                        "due_date": {
+                           "type": "date",
+                           "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                         },
-                        "discount": {
-                          "type": "float"
-                        },
-                        "other": {
-                          "type": "float"
+                        "currency": {
+                          "type": "text"
                         }
                       }
                     },
@@ -818,6 +888,9 @@
             "marketing": {
               "properties": {
                 "coupon": {
+                  "type": "keyword"
+                },
+                "channel": {
                   "type": "keyword"
                 },
                 "promotion": {

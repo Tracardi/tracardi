@@ -7,7 +7,7 @@ from tracardi.exceptions.exception import ExpiredException
 
 
 class CacheItem(BaseModel):
-    data: Any
+    data: Any = None
     ttl: float = 60
 
     def __init__(self, **data: Any):

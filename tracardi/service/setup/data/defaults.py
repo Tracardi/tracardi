@@ -1,8 +1,7 @@
 import os
-from datetime import datetime
 
+from tracardi.service.utils.date import now_in_utc
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
-
 from tracardi.config import tracardi
 from tracardi.domain.bridge import Bridge
 from tracardi.domain.event_source import EventSource
@@ -20,7 +19,7 @@ open_rest_source_bridge = Bridge(
     },
     form=Form(groups=[
         FormGroup(
-            name="Tracker configuration",
+            name="REST API Bridge Configuration",
             fields=[
                 FormField(
                     id="static_profile_id",
@@ -43,14 +42,15 @@ open_webhook_source_bridge = Bridge(
     config={
         "generate_profile": False,
         "replace_profile_id": "",
-        "replace_session_id": ""
+        "replace_session_id": "",
+        "identify_profile_by": None
     },
     form=Form(groups=[
         FormGroup(
-            name="Webhook configuration",
-            description="A webhook typically gathers data without creating a profile or session. However, "
-                        "if you want to create a profile and session for the collected data, you can set up the "
-                        "configuration for it here.",
+            name="API Webhook Bridge Configuration",
+            description="The webhook bridge usually collects data without connection to a profile or session. "
+                        "But, if you need to make a profile and session for the data it collects, and you want "
+                        "to make sure that it matches an existing profile, you should set up matching details below.",
             fields=[
                 FormField(
                     id="generate_profile",
@@ -62,26 +62,52 @@ open_webhook_source_bridge = Bridge(
                     component=FormComponent(type="bool", props={"label": "Create profile and session"})
                 ),
                 FormField(
+                    id="identify_profile_by",
+                    name="Identification method",
+                    description="Select the method to identify the profile. If 'e-mail' or 'phone' is "
+                                "chosen, a Profile will be identified by the 'e-mail' or 'phone'. "
+                                "The exact location of the data should be defined in 'Set Profile ID from Payload' field. "
+                                "Selecting 'nothing' means no Profile ID will be matched. If 'custom ID' is "
+                                "selected, the Profile ID will be the same as the payload value referenced in "
+                                "the 'Set Profile ID from Payload' field.",
+                    component=FormComponent(
+                        type="select",
+                        props={
+                            "label": "Profile identified by",
+                            "items": {
+                                "none": "No Reference",
+                                "e-mail": 'Main E-Mail',
+                                "phone": "Main Phone",
+                                "id": "Custom ID"
+                            }
+                        }
+                    )
+                ),
+                FormField(
                     id="replace_profile_id",
-                    name="Set profile ID",
-                    description="This setting will only work when `Create session and profile` is enabled. "
-                                "If you intend to substitute or set the Profile ID with information from the payload, "
-                                "you can either use the data provided below or leave it blank if you don't wish "
-                                "to set any profile or want it to have a random ID. It is crucial to ensure "
-                                "that the Profile ID is secure and not easily predictable since simple Profile "
-                                "IDs may pose security threats.",
-                    component=FormComponent(type="text", props={"label": "Set profile"})
+                    name="Set Profile ID from Payload",
+                    description="To set the Profile ID, type the location of Profile ID Identifier in payload below or leave "
+                                "the field blank if you don't wish "
+                                "to set any profile or want it to have a random ID. "
+                                "If 'Custom ID' is chosen as identification method, then enter the location where the Profile ID "
+                                "is stored in payload the; ID will be used as is without modification. "
+                                "For 'e-mail' or 'phone' options,  enter the location where e-mail or phone is stored; "
+                                "the system automatically generates a secure, hash-based Profile ID from the data in "
+                                "the payload. It will automatically load profile for the e-mail of phone defined "
+                                "in payload. "
+                                "This setting will only work when `Create session and profile` is enabled. ",
+                    component=FormComponent(type="text", props={"label": "Reference to Profile ID in webhook payload"})
                 ),
                 FormField(
                     id="replace_session_id",
-                    name="Set session ID",
+                    name="Set Session ID from Payload",
                     description="This setting will only work when `Create session and profile` is enabled. "
                                 "If you intend to substitute or set the Session ID with information from the payload, "
                                 "you can either use the data provided below or leave it blank if you don't wish "
                                 "to set any session or want it to have a random ID. It is crucial to ensure "
                                 "that the Session ID is secure and not easily predictable since simple Session "
                                 "IDs may pose security threats.",
-                    component=FormComponent(type="text", props={"label": "Set session"})
+                    component=FormComponent(type="text", props={"label": "Reference to Session ID in webhook payload"})
                 )
             ])
     ])
@@ -94,29 +120,30 @@ redirect_bridge = Bridge(
     id='a495159f-91be-476d-a4e5-1b2d7e005403',
     type='redirect',
     name="Redirect URL Bridge",
-    description=f"Redirects URLs and registers events.",
+    description="Redirects URLs and registers events.",
     manual=manual
 )
 
-cardio_event_source = EventSource(
-    id=f"@{tracardi.cardio_source}",
-    type=["internal"],
-    name="System Internal Source",
-    channel="Internal",
-    description="Internal event source for system heartbeats. If removed automated session closing wil not work.",
-    bridge=NamedEntity(**open_rest_source_bridge.dict()),
-    timestamp=datetime.utcnow(),
-    tags=["internal"],
-    groups=["Internal"]
+# This is how you set-up default event source
+test_event_source = EventSource(
+    id=tracardi.demo_source,
+    type=["rest"],
+    name="System Test Source",
+    channel="Test",
+    description="This is test event-source. Feel free to remove it.",
+    bridge=NamedEntity(**open_rest_source_bridge.model_dump()),
+    timestamp=now_in_utc(),
+    tags=["test"],
+    groups=["Test"]
 )
 
 default_db_data = {
     "bridge": [
-        open_rest_source_bridge.dict(),
-        open_webhook_source_bridge.dict(),
-        redirect_bridge.dict()
+        open_rest_source_bridge.model_dump(mode='json'),
+        open_webhook_source_bridge.model_dump(mode='json'),
+        redirect_bridge.model_dump(mode='json')
     ],
     'event-source': [
-        cardio_event_source.dict()
+        test_event_source.model_dump(mode='json')
     ]
 }

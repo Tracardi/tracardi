@@ -34,7 +34,8 @@ def generate_payload(source):
     def _get_event(event):
         return {
             "type": event['type'],
-            "properties": event['props']() if callable(event['props']) else event['props']
+            "properties": event['props']() if callable(event['props']) else event['props'],
+            "options": {"async": False}
         }
 
     def get_session():

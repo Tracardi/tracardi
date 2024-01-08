@@ -15,7 +15,7 @@ class NotDotNotation:
 class DotAccessor:
 
     @staticmethod
-    def validate(dot_notation: str):
+    def validate(dot_notation: str) -> bool:
         return dot_notation_regex.match(dot_notation) is not None
 
     def _convert(self, data, label):
@@ -24,7 +24,7 @@ class DotAccessor:
         elif isinstance(data, dict):
             return dotty(data)
         elif isinstance(data, BaseModel):
-            return dotty(data.dict())
+            return dotty(data.model_dump(mode="json"))
         else:
             raise ValueError("Could not convert {} to dict. Expected: None, dict or BaseModel got {}.".format(
                 label, type(data)

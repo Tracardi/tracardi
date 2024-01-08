@@ -7,6 +7,8 @@ from collections import defaultdict
 from time import time
 from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel, ValidationError
+
+from tracardi.domain.enum.event_status import PROCESSED
 from tracardi.exceptions.log_handler import log_handler
 
 from tracardi.config import tracardi
@@ -45,7 +47,7 @@ class InputEdge(BaseModel):
     id: str
     active: bool
     port: str
-    params: dict = None
+    params: Optional[dict] = None
 
 
 class InputEdges:
@@ -268,7 +270,7 @@ class GraphInvoker(BaseModel):
 
                     else:
 
-                        upstream_result_copy = upstream_result.copy(deep=True)
+                        upstream_result_copy = upstream_result.model_copy(deep=True)
 
                         # Do not trigger for None values
 
@@ -384,12 +386,16 @@ class GraphInvoker(BaseModel):
                 """ Yield results one by one """
 
                 _single_input_edge = InputEdges()
+
                 if input_edge_id is not None:
                     """ Skip if there is no input edge """
                     try:
                         _single_input_edge.add_edge(input_edge_id,
-                                                    InputEdge(id=input_edge_id, active=active, port=input_port,
-                                                              params=input_params))
+                                                    InputEdge(id=input_edge_id,
+                                                              active=active,
+                                                              port=input_port,
+                                                              params=input_params)
+                                                    )
                     except ValidationError as e:
                         raise ValueError(f"Node name `{node.name}` received data that is not a object/dictionary. "
                                          f"Data come from edge name `{edge.name}`. "
@@ -411,10 +417,18 @@ class GraphInvoker(BaseModel):
                 # todo template per port
 
                 if node.object.join.has_reshape_templates():
-                    output = json.loads(node.object.join.get_reshape_template(out_port).template)
+                    try:
+                        output = json.loads(node.object.join.get_reshape_template(out_port).template)
+                    except Exception as e:
+                        raise ValueError(f"Error in join node. Could not parse reshape schema. Details: {str(e)}.")
+
                     if output:
-                        dot = DotAccessor(node.object.profile, node.object.session,
-                                          out_payload if isinstance(out_payload, dict) else None)
+                        dot = DotAccessor(
+                            node.object.profile,
+                            node.object.session,
+                            out_payload if isinstance(out_payload, dict) else None,
+                            node.object.event
+                        )
 
                         if node.object.join.get_reshape_template(out_port).default is True:
                             template = DictTraverser(dot, default=None)
@@ -434,7 +448,7 @@ class GraphInvoker(BaseModel):
     @staticmethod
     def _add_results(task_results: ActionsResults, node: Node, result: Result) -> ActionsResults:
         for _, edge, _ in node.graph.out_edges:
-            result_copy = result.copy(deep=True)
+            result_copy = result.model_copy(deep=True)
             task_results.add(edge.id, result_copy)
         return task_results
 
@@ -531,7 +545,7 @@ class GraphInvoker(BaseModel):
                   session: Session,
                   debug_info: DebugInfo,
                   log_list: List[Log],
-                  ) -> Tuple[DebugInfo, List[Log], Profile, Session]:
+                  ) -> Tuple[DebugInfo, List[Log], Profile, Session, Event]:
 
         actions_results = ActionsResults()
         flow_start_time = debug_info.timestamp
@@ -725,13 +739,24 @@ class GraphInvoker(BaseModel):
 
                 # Collect console logs set inside plugins
                 if isinstance(node.object, ActionRunner):
+
+                    if node.object.console.warnings:
+                        event.metadata.warning = True
+
+                    if node.object.console.errors:
+                        event.metadata.error = True
+
                     for log in node.object.console.get_logs():  # type: Log
                         log_list.append(log)
 
-        return debug_info, log_list, profile, session
+        event.metadata.status = PROCESSED
+        # Sum up all process WF times
+        event.metadata.time.process_time = event.metadata.time.process_time + (time() - flow_start_time)
+
+        return debug_info, log_list, profile, session, event
 
     def serialize(self):
-        return self.dict()
+        return self.model_dump()
 
     def get_node_by_id(self, node_id) -> Node:
         for node in self.graph:

@@ -10,7 +10,7 @@ class EventSourceFetcherAction(ActionRunner):
         source = await event_source_db.load(self.event.source.id)
         if source is None:
             return Result(port="error", value={"message": "Source `{}` does not exist.".format(self.event.source.id)})
-        return Result(port="source", value=source.dict())
+        return Result(port="source", value=source.model_dump())
 
 
 def register() -> Plugin:
@@ -22,8 +22,9 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['source', 'error'],
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
+            manual='get_event_source',
             init=None
         ),
         metadata=MetaData(

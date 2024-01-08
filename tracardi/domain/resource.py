@@ -10,6 +10,7 @@ from .pro_service_form_data import ProService
 from .value_object.storage_info import StorageInfo
 from ..context import get_context
 from ..service.secrets import encrypt, decrypt
+from ..service.utils.date import now_in_utc
 
 T = TypeVar("T")
 
@@ -30,7 +31,7 @@ class ResourceCredentials(BaseModel):
 
 class Resource(Entity):
     type: str
-    timestamp: datetime
+    timestamp: Optional[datetime] = None
     name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     credentials: ResourceCredentials = ResourceCredentials()
@@ -41,7 +42,7 @@ class Resource(Entity):
     enabled: Optional[bool] = True
 
     def __init__(self, **data: Any):
-        data['timestamp'] = datetime.utcnow()
+        data['timestamp'] = now_in_utc()
         super().__init__(**data)
 
     # Persistence
@@ -61,8 +62,8 @@ class Resource(Entity):
         return Resource(
             id=str(uuid4()),
             type=pro.service.metadata.type,
-            name=pro.service.form.metadata.name,
-            description=pro.service.form.metadata.description,
+            name=pro.service.form.metadata.name or "No name provided",
+            description=pro.service.form.metadata.description or "No description provided",
             icon=pro.service.metadata.icon,
             tags=pro.service.form.metadata.tags,
             groups=[],
@@ -70,7 +71,7 @@ class Resource(Entity):
                 test=pro.service.form.data,
                 production=pro.service.form.data
             ),
-            destination=pro.destination
+            destination=DestinationConfig(**pro.destination.model_dump()) if pro.destination is not None else None
         )
 
 
@@ -87,7 +88,7 @@ class ResourceRecord(Entity):
     destination: Optional[str] = None
 
     def __init__(self, **data: Any):
-        data['timestamp'] = datetime.utcnow()
+        data['timestamp'] = now_in_utc()
         super().__init__(**data)
 
     @staticmethod

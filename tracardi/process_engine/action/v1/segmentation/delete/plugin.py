@@ -1,6 +1,6 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -14,7 +14,8 @@ from tracardi.service.plugin.domain.result import Result
 class Configuration(PluginConfig):
     segment: str
 
-    @validator("segment")
+    @field_validator("segment")
+    @classmethod
     def is_not_empty(cls, value):
         if value == "":
             raise ValueError("Segment cannot be empty")
@@ -36,7 +37,7 @@ class DeleteSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             if self.config.segment in self.profile.segments:
-                profile.metadata.time.segmentation = datetime.utcnow()
+                profile.metadata.time.segmentation = now_in_utc()
 
                 profile.segments = list(set(profile.segments))
                 profile.segments.remove(self.config.segment)
@@ -80,7 +81,8 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Delete segment',
-            desc='Deletes segment from profile.',
+            desc='Deletes profile from segment.',
+            keywords=['remove', 'unset'],
             icon='segment',
             group=["Segmentation"],
             purpose=['collection', 'segmentation'],

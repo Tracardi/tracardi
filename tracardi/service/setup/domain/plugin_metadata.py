@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class PluginTest(BaseModel):
-    init: Optional[dict]
+    init: Optional[dict] = None
     resource: Optional[dict] = None
 
 

@@ -1,9 +1,10 @@
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.factory import storage_manager
 
 
-async def save(event_to_profile: EventToProfile):
+async def save(event_to_profile: EventToProfile) -> BulkInsertResult:
     return await storage_manager("event-to-profile").upsert(event_to_profile)
 
 

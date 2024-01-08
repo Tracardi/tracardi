@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
 
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.runner import ActionRunner
@@ -30,7 +30,7 @@ class ProfileSegmentAction(ActionRunner):
             if segment in profile.segments:
                 profile.segments = list(set(profile.segments))
                 profile.segments.remove(segment)
-        profile.metadata.time.segmentation = datetime.utcnow()
+        profile.metadata.time.segmentation = now_in_utc()
         self.profile.replace(profile)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -62,7 +62,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['true', "false", "error"],
             version='0.6.0.1',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             manual="segmentation/profile_segment",
             init={

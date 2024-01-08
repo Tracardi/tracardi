@@ -45,7 +45,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["result", "error"],
             version='0.6.2',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             init={
                 "array": None

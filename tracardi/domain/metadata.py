@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from pydantic import BaseModel
 
+from tracardi.domain.entity import Entity
 from tracardi.domain.geo import Geo
 from tracardi.domain.time import Time, ProfileTime
 
@@ -9,11 +10,31 @@ from tracardi.domain.time import Time, ProfileTime
 class Metadata(BaseModel):
     time: Time
 
+class ProfileSystemIntegrations(Entity):
+    data: Optional[dict] = {}
+
+class ProfileSystemMetadata(BaseModel):
+    integrations: Optional[Dict[str, ProfileSystemIntegrations]] = {}
+    aux: Optional[dict] = {}
+    
+    def has_integration(self, system: str) -> bool:
+        return system in self.integrations and 'id' in self.integrations[system]
+    
+    def set_integration(self, system: str, id: str, data:Optional [dict]=None):
+        self.integrations[system].id = id
+        if data:
+            self.integrations[system].data = data
 
 class ProfileMetadata(BaseModel):
     time: ProfileTime
     aux: Optional[dict] = {}
     status: Optional[str] = None
+    fields: Optional[dict] = {}
+    system: Optional[ProfileSystemMetadata] = ProfileSystemMetadata()
+
+    def set_fields_timestamps(self, field_timestamp_manager):
+        for field, timestamp_data  in field_timestamp_manager.get_timestamps():
+            self.fields[field] = timestamp_data
 
 
 class OS(BaseModel):
@@ -29,7 +50,7 @@ class Device(BaseModel):
     touch: Optional[bool] = False
     ip: Optional[str] = None
     resolution: Optional[str] = None
-    geo: Optional[Geo] = Geo.construct()
+    geo: Optional[Geo] = Geo.model_construct()
     color_depth: Optional[int] = None
     orientation: Optional[str] = None
 

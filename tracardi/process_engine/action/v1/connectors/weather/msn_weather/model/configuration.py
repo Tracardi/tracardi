@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -6,7 +6,8 @@ class PluginConfiguration(PluginConfig):
     system: str = "c"
     city: str
 
-    @validator("system")
+    @field_validator("system")
+    @classmethod
     def must_be_in(cls, value):
         if value.upper() not in ['F', 'C']:
             raise ValueError("Available values are 'F' or 'C'.")

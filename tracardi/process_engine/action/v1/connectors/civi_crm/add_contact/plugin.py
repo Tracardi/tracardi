@@ -25,7 +25,7 @@ class AddCiviContactAction(ActionRunner):
         resource = await resource_db.load(config.source.id)
 
         self.config = config
-        self.client = CiviCRMClient(**resource.credentials.get_credentials(self, CiviClientCredentials).dict())
+        self.client = CiviCRMClient(**resource.credentials.get_credentials(self, CiviClientCredentials).model_dump())
         self.client.set_retries(self.node.on_connection_error_repeat)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
@@ -66,7 +66,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["success", "error"],
             version='0.6.3',
-            license="MIT",
+            license="MIT + CC",
             author="Dawid Kruk",
             # manual="add_civi_crm_contact_action",
             init={

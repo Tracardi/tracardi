@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 
 class Config(BaseModel):
@@ -6,7 +6,8 @@ class Config(BaseModel):
     default: bool = True
     type: str = 'dict'
 
-    @validator("type")
+    @field_validator("type")
+    @classmethod
     def must_have_defined_values(cls, value):
         if value.strip() not in ["list", 'dict']:
             raise ValueError("This field accepts only two values: list or dict")

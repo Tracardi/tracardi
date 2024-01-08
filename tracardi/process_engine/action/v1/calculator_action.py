@@ -1,6 +1,5 @@
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.domain.event import Event
 from tracardi.domain.session import Session
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -13,7 +12,8 @@ from tracardi.process_engine.tql.equation import MathEquation
 class CalculatorConfig(PluginConfig):
     calc_dsl: str
 
-    @validator("calc_dsl")
+    @field_validator("calc_dsl")
+    @classmethod
     def must_not_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Calculations are empty.")
@@ -25,7 +25,6 @@ def validate(config: dict):
 
 
 class CalculatorAction(ActionRunner):
-
     config: CalculatorConfig
 
     async def set_up(self, init):
@@ -47,9 +46,6 @@ class CalculatorAction(ActionRunner):
             session = Session(**dot.session)
             self.session.replace(session)
 
-        event = Event(**dot.event)
-        self.event.replace(event)
-
         return Result(port="payload", value={
             "result": results[-1],
             "variables": equation.get_variables()
@@ -69,8 +65,8 @@ def register() -> Plugin:
             init={
                 "calc_dsl": ""
             },
-            version='0.6.0.1',
-            license="MIT",
+            version='0.8.2',
+            license="MIT + CC",
             author="Risto Kowaczewski",
             form=Form(groups=[
                 FormGroup(
@@ -82,7 +78,7 @@ def register() -> Plugin:
                             id="calc_dsl",
                             name="Calculation equations",
                             description="One calculation per line. "
-                                        "Example: profile@stats.counters.my_count = profile@stats.visits + 1",
+                                        "Example: profile@aux.counters.my_count = profile@aaux.visits + 1",
                             component=FormComponent(type="textarea", props={"label": "Calculations"})
                         )
                     ]

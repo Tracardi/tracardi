@@ -1,7 +1,8 @@
-from datetime import datetime
+from tracardi.service.utils.date import now_in_utc
+
 from typing import List, Union
 
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.domain.profile import Profile
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -17,7 +18,8 @@ from tracardi.service.segments.segment_trigger import trigger_segment_add
 class Configuration(PluginConfig):
     segment: Union[str, List[str]]
 
-    @validator("segment")
+    @field_validator("segment")
+    @classmethod
     def is_not_empty(cls, value):
         if not value:
             raise ValueError("Segment cannot be empty")
@@ -39,14 +41,13 @@ class AddSegmentAction(ActionRunner):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             if self.config.segment not in self.profile.segments:
-                profile.metadata.time.segmentation = datetime.utcnow()
+                profile.metadata.time.segmentation = now_in_utc()
 
                 try:
                     dot = self._get_dot_accessor(payload)
                     if isinstance(self.config.segment, list):
                         converter = DictTraverser(dot, include_none=False)
                         segments = converter.reshape(self.config.segment)
-                        # Add segment is important here as if can trigger other workflows
                         profile = trigger_segment_add(profile, self.session, segments)
 
                     elif isinstance(self.config.segment, str):

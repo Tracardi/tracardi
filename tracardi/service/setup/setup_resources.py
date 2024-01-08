@@ -154,6 +154,16 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="clicksend",
+            name="ClickSend",
+            tags=["clicksend", "api_key"],
+            config={
+                "username": "<username>",
+                "api_key": "<api_key>"
+            },
+            manual='clicksend_resource'
+        ),
+        ResourceSettings(
             id="full-contact",
             name="FullContact",
             tags=["token", "full-contact"],
@@ -221,6 +231,7 @@ def get_resource_types() -> List[ResourceSettings]:
             name="Novu",
             tags=["token", "novu"],
             config={
+                "host": "https://api.novu.co",
                 "token": "<token>"
             },
             manual="novu_resource"
@@ -406,6 +417,24 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=['discord'],
             name='Discord',
             manual='discord_resource',
+        ),
+        ResourceSettings(
+            id='apache-pulsar',
+            config={
+                'host': '<pulsar://localhost:6650>',
+                'token': '<token>'
+            },
+            icon='pulsar',
+            tags=['pulsar', 'apache', 'queue'],
+            name='Apache Pulsar',
+            manual='apache_pulsar_resource',
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.pulsar_connector.PulsarConnector",
+                init={
+                    "topic": "<topic>",
+                    "serializer": "json"
+                }
+            )
         )
     ]
 

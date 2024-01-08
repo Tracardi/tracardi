@@ -1,10 +1,11 @@
+from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.domain.profile import Profile
-
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
+
 
 from .model.configuration import Configuration
 
@@ -26,8 +27,7 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
-            profile_records = await profile_db.load_by_id(profile_id=value)
-            profile = Profile.create(profile_records)
+            profile = await load_profile(profile_id=value)
 
             if not profile:
                 return Result(port="error", value={"message": "Could not find profile."})
@@ -52,7 +52,7 @@ class InjectProfileByField(ActionRunner):
         self.event.operation.update = True
         self.execution_graph.set_profiles(profile)
 
-        return Result(port="profile", value=profile)
+        return Result(port="profile", value=profile.model_dump(mode='json'))
 
 
 def register() -> Plugin:
@@ -63,11 +63,11 @@ def register() -> Plugin:
             className='InjectProfileByField',
             inputs=['payload'],
             outputs=['profile', 'error'],
-            version='0.7.2',
-            license="MIT",
+            version='0.8.2',
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={
-                "field": "data.contact.email",
+                "field": "data.contact.email.main",
                 "value": "event@properties.email"
             },
             manual='profile_inject_action',
@@ -81,8 +81,12 @@ def register() -> Plugin:
                             description="Select the PII profile field by which will be used to identify the profile.",
                             component=FormComponent(type="select", props={"label": "Field", "items": {
                                 "id": "Id",
-                                "data.contact.email": "E-mail",
-                                "data.contact.phone": "Phone",
+                                "data.contact.email.main": "Main E-mail",
+                                "data.contact.email.business": "Business E-mail",
+                                "data.contact.email.private": "Private E-mail",
+                                "data.contact.phone.main": "Main Phone",
+                                "data.contact.phone.mobile": "Mobile Phone",
+                                "data.contact.phone.business": "Business Phone",
                                 "data.contact.app.twitter": "Twitter handle"
                             }})
                         ),

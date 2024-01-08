@@ -1,4 +1,4 @@
-from pydantic import validator, AnyHttpUrl
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -8,31 +8,36 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Configuration(PluginConfig):
-    endpoint: AnyHttpUrl
-    uix_source: AnyHttpUrl
+    endpoint: str # AnyHttpUrl
+    uix_source: str # AnyHttpUrl
     position: str = "bottom"
     expand_height: int = 400
     enabled: bool = True
+    always_display: bool = True
 
-    @validator("uix_source")
+    @field_validator("uix_source")
+    @classmethod
     def uix_source_should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("This field should not be empty")
         return value
 
-    @validator("endpoint")
+    @field_validator("endpoint")
+    @classmethod
     def endpoint_should_no_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("This field should not be empty")
         return value
 
-    @validator("position")
+    @field_validator("position")
+    @classmethod
     def position_enum(cls, value):
         if len(value) == 0:
             raise ValueError("This field should be either [top] or [bottom]")
         return value
 
-    @validator("expand_height")
+    @field_validator("expand_height")
+    @classmethod
     def height_enum(cls, value: str):
         if isinstance(value, str) and not value.isnumeric():
             raise ValueError("This field must be a number")
@@ -51,6 +56,11 @@ class ConsentUx(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+
+        if self.config.always_display is False and self.profile.has_consents_set():
+            # If consents were already granted (set) please do not show the widget.
+            return Result(port="payload", value=payload)
+
         if self.config.enabled is True:
             self.ux.append({"tag": "div", "props": {
                 "class": "tracardi-uix-consent",
@@ -81,11 +91,13 @@ def register() -> Plugin:
                 "agree_all_event_type": "agree-all-event-type",
                 "position": "bottom",
                 "expand_height": 400,
-                "enabled": True
+                "enabled": True,
+                "always_display": True
             },
-            version='0.6.1',
-            license="MIT",
+            version='0.8.2',
+            license="MIT + CC",
             author="Risto Kowaczewski",
+            manual='show_consent_bar',
             form=Form(groups=[
                 FormGroup(
                     name="Widget Configuration",
@@ -110,6 +122,12 @@ def register() -> Plugin:
                             name="Enable widget",
                             description="Only enabled widgets are show on the page",
                             component=FormComponent(type="bool", props={"label": "Enable"})
+                        ),
+                        FormField(
+                            id="always_display",
+                            name="Display even if customer already granted consents",
+                            description="When set widget will always be visible event if the consents were granted",
+                            component=FormComponent(type="bool", props={"label": "Display always"})
                         ),
                     ],
 

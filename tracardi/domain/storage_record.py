@@ -29,7 +29,11 @@ class StorageRecord(dict):
 
     @staticmethod
     def build_from_base_model(model: BaseModel, exclude=None) -> 'StorageRecord':
-        return StorageRecord(**model.dict(exclude=exclude))
+        return StorageRecord(**model.model_dump(exclude=exclude))
+
+    @staticmethod
+    def build_from_dict(data: dict) -> 'StorageRecord':
+        return StorageRecord(**data)
 
     def __init__(self, *args, **kwargs):
         super(StorageRecord, self).__init__(*args, **kwargs)
@@ -65,7 +69,7 @@ class StorageRecord(dict):
     def serialize(self):
         return {
             "profile": self,
-            "storage": self.get_meta_data().dict()
+            "storage": self.get_meta_data().model_dump()
         }
 
 

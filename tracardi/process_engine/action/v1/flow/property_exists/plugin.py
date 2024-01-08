@@ -39,7 +39,7 @@ def register() -> Plugin:
             outputs=["true", "false"],
             version="0.8.0",
             init={
-                'property': 'profile@data.contact.email'
+                'property': 'profile@data.contact.email.main'
             },
             manual="data_exists_action",
             form=Form(groups=[

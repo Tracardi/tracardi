@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.domain.named_entity import NamedEntity
 
@@ -9,13 +9,15 @@ class Config(PluginConfig):
     event_type: NamedEntity
     offset: int
 
-    @validator("event_type")
+    @field_validator("event_type")
+    @classmethod
     def must_not_be_empty(cls, value):
         if value.id == "":
             raise ValueError("This field can not be empty")
         return value
 
-    @validator("offset")
+    @field_validator("offset")
+    @classmethod
     def validate_offset(cls, value):
         if not -10 <= value <= 0:
             raise ValueError("Offset must be an integer between -10 and 0 inclusively.")

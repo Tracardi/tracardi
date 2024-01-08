@@ -41,7 +41,7 @@ class Service(BaseModel):
 
 class License(BaseModel):
     owner: str
-    expires: int = 60 * 60 * 24
+    expires: int = time() + 60 * 60 * 24
     services: Dict[str, Service]
 
     def is_expired(self):
@@ -155,6 +155,6 @@ class License(BaseModel):
                            services={
                                key: Service(id=service['i']) for key, service in license['s'].items()
                            })
-        except ValueError as e:
-            raise ValueError("License incorrect. Please check if you paste everything form the license key.")
+        except ValueError:
+            raise ValueError("License incorrect. Please check if you paste everything from the license key.")
 

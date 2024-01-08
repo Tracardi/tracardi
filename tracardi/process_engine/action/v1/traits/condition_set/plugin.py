@@ -22,7 +22,11 @@ class ConditionSetPlugin(ActionRunner):
 
         conditions = {}
         for key, value in self.config.conditions.items():
-            conditions[key] = await condition.evaluate(value, dot)
+            try:
+                result = await condition.evaluate(value, dot)
+                conditions[key] = result
+            except Exception as e:
+                self.console.error(f"Could not parse the condition `{value}`. Got error: {str(e)}")
 
         return Result(port='result', value=conditions)
 
@@ -35,9 +39,9 @@ def register() -> Plugin:
             className='ConditionSetPlugin',
             inputs=["payload"],
             outputs=["result"],
-            version='0.6.2.1',
-            license="MIT",
-            author="Daniel Demedziuk",
+            version='0.8.2',
+            license="MIT + CC",
+            author="Daniel Demedziuk, Risto Kowaczewski",
             init={
                 'conditions': {}
             },
@@ -54,7 +58,9 @@ def register() -> Plugin:
                                 component=FormComponent(
                                     type='keyValueList',
                                     props={
-                                        'label': 'condition'
+                                        'label': 'condition',
+                                        'disableSwitching': True,
+                                        'disableCasting': True
                                     }
                                 )
                             )

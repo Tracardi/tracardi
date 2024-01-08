@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from typing import Optional, List
 from hashlib import md5
 
@@ -9,7 +9,7 @@ class Version(BaseModel):
     upgrades: List[str] = []
     production: bool = False
     config: Optional[dict] = {}
-    db_version: str = '08x'
+    db_version: str = '0820'
 
     def __init__(self, **data):
         super().__init__(**data)

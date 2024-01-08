@@ -1,3 +1,5 @@
+from tracardi.service.utils.date import now_in_utc
+
 from datetime import datetime
 
 import tzlocal
@@ -8,7 +10,7 @@ dt = datetime.now()
 print(dt.astimezone())
 print(tzlocal.get_localzone().utcoffset(dt))
 print()
-dt = datetime.utcnow()
+dt = now_in_utc()
 print(dt)
 print(dt.astimezone())
 print()

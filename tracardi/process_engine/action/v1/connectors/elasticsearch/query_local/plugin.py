@@ -74,6 +74,7 @@ def register() -> Plugin:
             version='0.8.0',
             license="MIT + CC",
             author="Risto Kowaczewski",
+            manual='query_data',
             init={
                 "index": None,
                 "query": "{\"query\":{\"match_all\":{}}}",

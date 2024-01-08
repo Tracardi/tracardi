@@ -1,5 +1,5 @@
 from time import time
-from tracardi.domain.entity import Entity
+from tracardi.service.wf.domain.entity import Entity as WfEntity
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
 from tracardi.domain.flow_invoke_result import FlowInvokeResult
@@ -21,7 +21,7 @@ class WorkFlow:
 
     def _make_dag(self, flow: Flow, debug: bool) -> GraphInvoker:
         # Convert Editor graph to exec graph
-        converter = FlowGraphConverter(flow.flowGraph.dict())
+        converter = FlowGraphConverter(flow.flowGraph.model_dump())
         dag_graph = converter.convert_to_dag_graph()
         dag = DagProcessor(dag_graph)
 
@@ -40,7 +40,7 @@ class WorkFlow:
         debug_info = DebugInfo(
             timestamp=flow_start_time,
             flow=FlowDebugInfo(id=flow.id, name=flow.name),
-            event=Entity(id=event.id)
+            event=WfEntity(id=event.id)
         )
         log_list = []
 
@@ -57,7 +57,7 @@ class WorkFlow:
             ux)
 
         if not debug_info.has_errors():
-            debug_info, log_list, profile, session = await exec_dag.run(
+            debug_info, log_list, profile, session, event = await exec_dag.run(
                 payload={},
                 event=event,
                 profile=profile,
@@ -70,7 +70,7 @@ class WorkFlow:
 
         return FlowInvokeResult(debug_info, log_list, flow, event, profile, session)
 
-    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug=False) -> FlowInvokeResult:
+    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug) -> FlowInvokeResult:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.

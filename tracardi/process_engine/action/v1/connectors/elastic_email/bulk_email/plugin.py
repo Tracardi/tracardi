@@ -95,7 +95,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Ben Ullrich",
             manual="elastic_email_bulk_action",
             init={
@@ -142,7 +142,7 @@ def register() -> Plugin:
                                             "the e-mail address itself.",
                                 component=FormComponent(type="dotPath", props={"label": "E-mail",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "data.contact.email"
+                                                                               "defaultPathValue": "data.contact.email.main"
                                                                                })
                             ),
                             FormField(

@@ -1,0 +1,178 @@
+[
+  {
+    "name": "Account Payable",
+    "description": "`Accounts Payable` means the money that your company owes to suppliers or others for goods, services, or expenses that you haven't paid yet. It's like the list of bills you need to settle. If you don't pay by the agreed-upon due date, it can become `Payable Overdue`, indicating that you've missed the payment deadline.",
+    "id": "account-payable",
+    "properties": {
+      "ledger_id": "string",
+      "payable_id": "string",
+      "order_id": "string",
+      "product_id": "string",
+      "company_id": "string",
+      "description": "string",
+      "payment": {
+        "value": 100,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      }
+    },
+    "copy": {
+      "data.ec.order.id":                 "properties.order_id",
+      "data.ec.order.payable.value":      "properties.payment.value",
+      "data.ec.order.payable.currency":   "properties.payment.currency",
+      "data.ec.order.payable.due_date":   "properties.payment.due_date"
+    },
+    "tags": [
+      "entity:order",
+      "entity:payment"
+    ],
+    "state": "purchase"
+  },
+  {
+    "name": "Account Receivable",
+    "description": "`Accounts Receivable` means the money that your company is waiting to get paid by customers who have bought something on credit or the payment is being transferred. Basically it means that someone ows you  money adn it must be paid with defined due date, otherwise it becomes `Receivable overdue` - not paid payment.",
+    "id": "account-receivable",
+    "properties": {
+      "ledger_id": "string",
+      "receivable_id": "string",
+      "order_id": "string",
+      "product_id": "string",
+      "company_id": "string",
+      "description": "string",
+      "payment": {
+        "value": 100,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      }
+    },
+    "copy": {
+      "data.ec.order.id":                    "properties.order_id",
+      "data.ec.order.receivable.value":      "properties.payment.value",
+      "data.ec.order.receivable.currency":   "properties.payment.currency",
+      "data.ec.order.receivable.due_date":   "properties.payment.due_date"
+    },
+    "tags": [
+      "entity:order",
+      "entity:payment"
+    ],
+    "state": "purchase"
+  },
+  {
+    "name": "Payment Sent",
+    "description": "Company have sent money transfer.",
+    "id": "payment-sent",
+    "properties": {
+      "ledger_id": "string",
+      "payable_id": "string",
+      "payment_id": "string",
+      "order_id": "string",
+      "product_id": "string",
+      "company_id": "string",
+      "description": "string",
+      "payment": {
+        "value": 100,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      }
+    },
+    "copy": {
+      "data.ec.order.id":              "properties.order_id",
+      "data.ec.order.cost.value":      "properties.payment.value",
+      "data.ec.order.cost.currency":   "properties.payment.currency",
+      "data.ec.order.cost.due_date":   "properties.payment.due_date"
+    },
+    "tags": [
+      "entity:order",
+      "entity:payment"
+    ],
+    "state": "purchase"
+  },
+  {
+    "name": "Payment Received",
+    "description": "Company received money transfer.",
+    "id": "payment-received",
+    "properties": {
+      "ledger_id": "string",
+      "payment_id": "string",
+      "receivable_id": "string",
+      "order_id": "string",
+      "product_id": "string",
+      "company_id": "string",
+      "description": "string",
+      "payment": {
+        "value": 100,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      }
+    },
+    "copy": {
+      "data.ec.order.id":                "properties.order_id",
+      "data.ec.order.income.value":      "properties.payment.value",
+      "data.ec.order.income.currency":   "properties.payment.currency",
+      "data.ec.order.income.due_date":   "properties.payment.due_date"
+    },
+    "tags": [
+      "entity:order",
+      "entity:payment"
+    ],
+    "state": "purchase"
+  },
+  {
+    "name": "Payable Overdue",
+    "description": "`Payable Overdue` refers to a situation where your company has an outstanding debt or financial obligation to another party, and the payment for that debt has not been made by the agreed-upon due date.",
+    "id": "payable-overdue",
+    "properties": {
+      "ledger_id": "string",
+      "payable_id": "string",
+      "order_id": "string",
+      "product_id": "string",
+      "company_id": "string",
+      "description": "string",
+      "payment": {
+        "value": 100,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      }
+    },
+    "copy": {
+      "data.ec.order.id":                 "properties.order_id",
+      "data.ec.order.payable.value":      "properties.payment.value",
+      "data.ec.order.payable.currency":   "properties.payment.currency",
+      "data.ec.order.payable.due_date":   "properties.payment.due_date"
+    },
+    "tags": [
+      "entity:order",
+      "entity:payment"
+    ],
+    "state": "purchase"
+  },
+    {
+    "name": "Receivable Overdue",
+    "description": "`Receivable Overdue` refers to a situation in which your company is owed money by another party, but the payment has not been received by the agreed-upon due date.",
+    "id": "receivable-overdue",
+    "properties": {
+      "ledger_id": "string",
+      "receivable_id": "string",
+      "order_id": "string",
+      "product_id": "string",
+      "company_id": "string",
+      "description": "string",
+      "payment": {
+        "value": 100,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      }
+    },
+    "copy": {
+      "data.ec.order.id":                 "properties.order_id",
+      "data.ec.order.receivable.value":      "properties.payment.value",
+      "data.ec.order.receivable.currency":   "properties.payment.currency",
+      "data.ec.order.receivable.due_date":   "properties.payment.due_date"
+    },
+    "tags": [
+      "entity:order",
+      "entity:payment"
+    ],
+    "state": "purchase"
+  }
+]

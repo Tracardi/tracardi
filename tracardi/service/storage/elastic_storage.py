@@ -127,7 +127,7 @@ class ElasticStorage:
 
     async def create(self, data: Union[StorageRecord, Entity, BaseModel, dict, list],
                      replace_id: bool = True, exclude=None) -> Union[BulkInsertResult, List[BulkInsertResult]]:
-        if isinstance(data, list):
+        if isinstance(data, (list, set)):
 
             if len(data) == 0:
                 return BulkInsertResult()

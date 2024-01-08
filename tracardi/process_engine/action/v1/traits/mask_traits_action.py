@@ -1,6 +1,5 @@
 from typing import List
 
-from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -35,6 +34,10 @@ class MaskTraitsAction(ActionRunner):
                 self.console.warning("Flow values can not be hashed.")
                 continue
 
+            if dot.source(trait) == 'event':
+                self.console.warning("Event values can not be modified in workflow.")
+                continue
+
             elif not dot.validate(trait) or trait not in dot:
                 self.console.warning(f"Given trait {trait} is invalid or does not exist.")
                 continue
@@ -49,9 +52,6 @@ class MaskTraitsAction(ActionRunner):
             session = Session(**dot.session)
             self.session.replace(session)
 
-        event = Event(**dot.event)
-        self.event.replace(event)
-
         return Result(port='payload', value=payload)
 
 
@@ -64,7 +64,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=['payload'],
             version='0.7.0',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={"traits": []},
             form=Form(groups=[

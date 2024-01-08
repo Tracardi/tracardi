@@ -58,7 +58,7 @@ class MicroserviceAction(ActionRunner):
                     json=config) as remote_response:
                 result = await remote_response.json()
                 if remote_response.status != 200:
-                    return Result(port="error", value=str(result))
+                    return Result(port="error", value={"message": str(result)})
 
                 microservice_response = MicroserviceResponse(**result)
 
@@ -86,7 +86,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=allowed_ports,
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Risto Kowaczewski",
             init={
 

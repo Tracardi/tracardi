@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import asyncio
 import json
 import logging
@@ -7,7 +9,7 @@ import aiohttp
 from typing import Optional
 
 from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
-from pydantic import BaseModel, AnyHttpUrl
+from pydantic import BaseModel
 
 from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
@@ -24,7 +26,7 @@ logger.addHandler(log_handler)
 
 
 class HttpCredentials(BaseModel):
-    url: AnyHttpUrl
+    url: str  # AnyHttpUrl
     username: Optional[str] = None
     password: Optional[str] = None
 
@@ -39,7 +41,15 @@ class HttpConfiguration(BaseModel):
     cookies: Optional[dict] = {}
     ssl_check: bool = True
 
+    @staticmethod
+    def _convert_params(param):
+        if isinstance(param, bool):
+            return 1 if param else 0
+        return param
+
     def get_params(self, body: dict) -> dict:
+
+        self.headers = {key.lower(): value for key, value in self.headers.items()}
 
         content_type = self.headers['content-type'] if 'content-type' in self.headers else 'application/json'
 
@@ -47,6 +57,7 @@ class HttpConfiguration(BaseModel):
 
             if self.method.lower() == 'get':
                 params = flatten(body)
+                params = {key: self._convert_params(value) for key,value in params.items() if value is not None}
                 return {
                     "params": params
                 }
@@ -85,6 +96,7 @@ class HttpConnector(DestinationInterface):
 
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 params = config.get_params(data)
+
                 async with session.request(
                         method=config.method,
                         url=url,
@@ -111,15 +123,17 @@ class HttpConnector(DestinationInterface):
                         "cookies": response.cookies
                     }
 
-                    logger.info(f"Profile destination sync response from {url}, response: {result}")
+                    logger.debug(f"Profile destination response from {url}, response: {result}")
 
                     # todo log
 
         except ClientConnectorError as e:
             logger.error(str(e))
+            raise e
 
         except asyncio.exceptions.TimeoutError as e:
             logger.error(str(e))
+            raise e
 
     async def dispatch_profile(self, data, profile: Profile, session: Session):
         await self._dispatch(data)

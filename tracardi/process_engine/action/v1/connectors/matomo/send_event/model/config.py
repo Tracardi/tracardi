@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 
-from pydantic import validator
+from pydantic import field_validator
 from tracardi.domain.named_entity import NamedEntity
 from typing import Optional, Union, Dict, Any
 from tracardi.service.plugin.domain.config import PluginConfig
@@ -19,7 +19,8 @@ class Config(PluginConfig):
     revenue: Optional[str] = None
     dimensions: Optional[Dict[str, Any]] = {}
 
-    @validator("dimensions")
+    @field_validator("dimensions")
+    @classmethod
     def validate_dimensions(cls, value):
         for key in value:
             if not key.startswith("dimension"):

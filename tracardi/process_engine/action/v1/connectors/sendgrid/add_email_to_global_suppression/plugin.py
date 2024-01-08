@@ -49,7 +49,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Ben Ullrich",
             manual="sendgrid_add_to_global_suppression",
             init={
@@ -77,7 +77,7 @@ def register() -> Plugin:
                                 description="Please type in the path to the email address for your Suppressed Contact.",
                                 component=FormComponent(type="dotPath", props={"label": "Email",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "data.contact.email"
+                                                                               "defaultPathValue": "data.contact.email.main"
                                                                                })
                             ),
 

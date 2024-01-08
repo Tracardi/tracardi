@@ -15,5 +15,5 @@ class Settings(BaseModel):
 
 class SystemSettings(BaseModel):
     label: str
-    value: Any
+    value: Any = None
     desc: str

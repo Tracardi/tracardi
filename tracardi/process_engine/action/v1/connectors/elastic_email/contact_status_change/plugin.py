@@ -51,7 +51,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Ben Ullrich",
             manual="elastic_email_change_contact_status_action",
             init={
@@ -80,7 +80,7 @@ def register() -> Plugin:
                                 description="Please type in the path to the email address for your new contact.",
                                 component=FormComponent(type="dotPath", props={"label": "Email",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "data.contact.email"
+                                                                               "defaultPathValue": "data.contact.email.main"
                                                                                })
                             ),
                             FormField(
@@ -90,7 +90,7 @@ def register() -> Plugin:
                                             "2 is unsubscribe",
                                 component=FormComponent(type="dotPath", props={"label": "Status",
                                                                                "defaultSourceValue": "profile",
-                                                                               "defaultPathValue": "pii.status"
+                                                                               "defaultPathValue": "aux.status"
                                                                                })
                             ),
                         ]

@@ -69,7 +69,7 @@ def register() -> Plugin:
                     ]
                 ),
             ]),
-            license="MIT",
+            license="MIT + CC",
             author="EMGE1, Risto Kowaczewski",
             version="0.6.0.1"
         ),

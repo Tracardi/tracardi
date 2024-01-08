@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import validator
+from pydantic import field_validator
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
@@ -13,7 +13,8 @@ class CutOutTraitConfig(PluginConfig):
     trait: str
     key: Optional[str] = None
 
-    @validator("trait")
+    @field_validator("trait")
+    @classmethod
     def trait_should_not_be_empty(cls, value):
         if len(value) == 0:
             raise ValueError("Trait should not be empty")
@@ -47,7 +48,7 @@ def register() -> Plugin:
     return Plugin(
         start=False,
         spec=Spec(
-            module='tracardi.process_engine.action.v1.traits.cut_out_trait_action',
+            module=__name__,
             className='CutOutTraitAction',
             inputs=['payload'],
             outputs=["trait"],
@@ -81,8 +82,9 @@ def register() -> Plugin:
                 )
             ]),
             version='0.8.0',
-            license="MIT",
-            author="Risto Kowaczewski"
+            license="MIT + CC",
+            author="Risto Kowaczewski",
+            manual='cut_out_data'
         ),
         metadata=MetaData(
             name='Cut out data',

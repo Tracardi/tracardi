@@ -1,4 +1,4 @@
-from datetime import datetime
+from tracardi.service.tracking.storage.profile_storage import load_profile
 from uuid import uuid4
 
 from tracardi.domain.event_metadata import EventMetadata
@@ -7,11 +7,9 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver.elastic import profile as profile_db
 from .model.configuration import Configuration
 from typing import Optional
 from tracardi.domain.event import Event
-from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.entity import Entity
 
@@ -34,14 +32,12 @@ class StartSegmentationAction(ActionRunner):
                 id=str(uuid4()),
                 type="@segmentation",
                 source=Entity(id=str(uuid4())),
-                metadata=EventMetadata(time=EventTime(insert=datetime.utcnow()), debug=self.debug)
+                metadata=EventMetadata(time=EventTime(), debug=self.debug)
             )
 
             session = Session(
                 id=str(uuid4()),
-                metadata=SessionMetadata(time=SessionTime(
-                    insert=datetime.utcnow(),
-                    timestamp=datetime.timestamp(datetime.utcnow())))
+                metadata=SessionMetadata(time=SessionTime())
             )
 
             if not self.config.profile_id:
@@ -51,7 +47,7 @@ class StartSegmentationAction(ActionRunner):
                 self.console.error(msg)
                 return None
 
-            profile = Profile.create(await profile_db.load_by_id(self.config.profile_id))
+            profile = await load_profile(self.config.profile_id)
 
             if profile is None:
                 msg = "Loaded profile is empty. Can not run segmentation without profile. "
@@ -93,8 +89,8 @@ def register() -> Plugin:
                     ]
                 ),
             ]),
-            version='0.7.3',
-            license="MIT",
+            version='0.8.2',
+            license="MIT + CC",
             author="Risto Kowaczewski"
         ),
         metadata=MetaData(

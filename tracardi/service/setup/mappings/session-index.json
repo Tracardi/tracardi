@@ -6,7 +6,7 @@
     "settings": {
     "number_of_shards": %%SHARDS%%,
     "number_of_replicas": %%REPLICAS%%,
-      "index.refresh_interval": "3s"
+    "index.refresh_interval": "3s"
     },
     "mappings": {
       "_meta": {
@@ -28,10 +28,16 @@
             "time": {
               "properties": {
                 "insert": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+                },
+                "create": {
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "update": {
-                  "type": "date"
+                  "type": "date",
+                  "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
                 },
                 "weekday": {
                   "type": "byte"
@@ -118,6 +124,10 @@
                 },
                 "longitude": {
                   "type": "float"
+                },
+                "location": {
+                  "ignore_malformed": true,
+                  "type": "geo_point"
                 },
                 "postal": {
                   "type": "keyword",

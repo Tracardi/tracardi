@@ -69,7 +69,7 @@ def register() -> Plugin:
             inputs=["payload"],
             outputs=["response", "error"],
             version='0.7.2',
-            license="MIT",
+            license="MIT + CC",
             author="Marcin Gaca, Risto Kowaczewski",
             manual="hubspot/hubspot_add_company_action",
             init={

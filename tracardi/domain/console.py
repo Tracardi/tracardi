@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, List, Optional
 from pydantic import BaseModel
 from tracardi.service.secrets import encrypt, decrypt
+from tracardi.service.utils.date import now_in_utc
 
 
 class Metadata(BaseModel):
@@ -10,7 +11,7 @@ class Metadata(BaseModel):
     def __init__(self, **data: Any):
         super().__init__(**data)
         if 'timestamp' not in data or data['timestamp'] is None:
-            self.timestamp = datetime.utcnow()
+            self.timestamp = now_in_utc()
 
 
 class ConsoleRecord(BaseModel):
@@ -29,7 +30,7 @@ class ConsoleRecord(BaseModel):
     def __init__(self, **data: Any):
         super().__init__(**data)
         if 'metadata' not in data or data['metadata'] is None:
-            self.metadata = Metadata(timestamp=datetime.utcnow())
+            self.metadata = Metadata(timestamp=now_in_utc())
 
 
 class Console(BaseModel):
@@ -48,10 +49,10 @@ class Console(BaseModel):
     def __init__(self, **data: Any):
         super().__init__(**data)
         if 'metadata' not in data or data['metadata'] is None:
-            self.metadata = Metadata(timestamp=datetime.utcnow())
+            self.metadata = Metadata(timestamp=now_in_utc())
 
     def encode_record(self) -> ConsoleRecord:
-        data = self.dict()
+        data = self.model_dump()
         data['traceback'] = encrypt(data['traceback'])
         return ConsoleRecord(**data)
 
@@ -59,3 +60,9 @@ class Console(BaseModel):
     def decode_record(data: dict):
         data['traceback'] = decrypt(data['traceback'])
         return Console(**data)
+
+    def is_error(self) -> bool:
+        return self.type == 'error'
+
+    def is_warning(self) -> bool:
+        return self.type == 'warning'

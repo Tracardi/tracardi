@@ -1,3 +1,5 @@
+from tracardi.service.utils.date import now_in_utc
+
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 
@@ -5,11 +7,9 @@ from tracardi.service.plugin.runner import ActionRunner
 class UpdateProfileAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
-        if self.debug is True:
-            self.console.warning("Profile will not be updated in debug mode. "
-                                 "Debug only test workflow and does not run "
-                                 "the whole ingestion process.")
-        self.update_profile()
+        self.profile.metadata.time.update = now_in_utc()
+        self.profile.set_updated_in_workflow()
+        self.profile.data.compute_anonymous_field()
 
 
 def register() -> Plugin:
@@ -20,7 +20,7 @@ def register() -> Plugin:
             className='UpdateProfileAction',
             inputs=["payload"],
             outputs=[],
-            version="0.6.0.1",
+            version="0.8.2",
             init=None,
             manual="update_profile_action"
         ),

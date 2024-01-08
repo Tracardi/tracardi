@@ -10,7 +10,7 @@ from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
-from typing import List, Optional, Dict, Tuple, Union
+from typing import List, Optional, Dict, Tuple, Union, Set
 from .raw import load_by_key_value_pairs
 
 import tracardi.config as config
@@ -24,7 +24,7 @@ async def load(id: str) -> Optional[StorageRecord]:
     return await storage_manager("event").load(id)
 
 
-async def save(events: List[Event], exclude=None):
+async def save(events: Union[List[Event], Set[Event]], exclude=None):
     return await storage_manager("event").upsert(events, exclude=exclude)
 
 
@@ -149,53 +149,53 @@ async def aggregate_event_by_field_within_time(profile_id,
     }
 
 
-async def heatmap_by_event_type(event_type=None):
-    query = {
-        "size": 0,
-        "aggs": {
-            "items_over_time": {
-                "date_histogram": {
-                    "min_doc_count": 1,
-                    "field": "metadata.time.insert",
-                    "fixed_interval": "1d",
-                    "extended_bounds": {
-                        "min": datetime.utcnow() - timedelta(days=1 * 365),
-                        "max": datetime.utcnow()
-                    }
-                }
-            }
-        }
-    }
+# async def heatmap_by_event_type(event_type=None):
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             "items_over_time": {
+#                 "date_histogram": {
+#                     "min_doc_count": 1,
+#                     "field": "metadata.time.insert",
+#                     "fixed_interval": "1d",
+#                     "extended_bounds": {
+#                         "min": datetime.utcnow() - timedelta(days=1 * 365),
+#                         "max": datetime.utcnow()
+#                     }
+#                 }
+#             }
+#         }
+#     }
+#
+#     if event_type is not None:
+#         query["query"] = {"term": {"type": event_type}}
+#
+#     result = await storage_manager(index="event").query(query)
+#     return result['aggregations']["items_over_time"]['buckets']
 
-    if event_type is not None:
-        query["query"] = {"term": {"type": event_type}}
 
-    result = await storage_manager(index="event").query(query)
-    return result['aggregations']["items_over_time"]['buckets']
-
-
-async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> StorageAggregateResult:
-    query = {
-        "size": 0,
-        "aggs": {
-            bucket_name: {
-                "date_histogram": {
-                    "min_doc_count": 1,
-                    "field": "metadata.time.insert",
-                    "fixed_interval": "1d",
-                    "extended_bounds": {
-                        "min": datetime.utcnow() - timedelta(days=1 * 365),
-                        "max": datetime.utcnow()
-                    }
-                }
-            }
-        }
-    }
-
-    if profile_id is not None:
-        query["query"] = {"term": {"profile.id": profile_id}}
-
-    return await storage_manager(index="event").aggregate(query, aggregate_key='key_as_string')
+# async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> StorageAggregateResult:
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             bucket_name: {
+#                 "date_histogram": {
+#                     "min_doc_count": 1,
+#                     "field": "metadata.time.insert",
+#                     "fixed_interval": "1d",
+#                     "extended_bounds": {
+#                         "min": datetime.utcnow() - timedelta(days=1 * 365),
+#                         "max": datetime.utcnow()
+#                     }
+#                 }
+#             }
+#         }
+#     }
+#
+#     if profile_id is not None:
+#         query["query"] = {"term": {"profile.id": profile_id}}
+#
+#     return await storage_manager(index="event").aggregate(query, aggregate_key='key_as_string')
 
 
 async def load_event_by_type(event_type, limit=1) -> StorageRecords:
@@ -625,11 +625,11 @@ async def get_events_by_session(session_id: str, limit: int = 100) -> StorageRec
             }
         ]
     }
-
     return await storage_manager("event").query(query)
 
 
 async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRecords:
+
     query = {
         "query": {
             "term": {
@@ -744,7 +744,7 @@ async def get_avg_process_time():
     result = await storage_manager("event").query({
         "size": 0,
         "aggs": {
-            "avg_process_time": {"avg": {"field": "metadata.time.process_time"}}
+            "avg_process_time": {"avg": {"field": "metadata.time.total_time"}}
         }
     })
 
