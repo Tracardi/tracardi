@@ -3,17 +3,21 @@ from zoneinfo import ZoneInfo
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
+
+from dotty_dict import Dotty
 from pydantic import BaseModel, ValidationError, PrivateAttr
 from dateutil import parser
 
 from .entity import Entity
 from .metadata import ProfileMetadata
-from .profile_data import ProfileData
+from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
+    FLAT_PROFILE_MAPPING
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..config import tracardi
+from ..service.change_monitoring.field_change_monitor import FieldChangeTimestampManager, FieldTimestampMonitor
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
 from ..service.utils.date import now_in_utc
@@ -72,6 +76,16 @@ class Profile(Entity):
                 return True
         return False
 
+    def replace_hashed_id(self,value: str, prefix: str):
+        if self.ids is None:
+            self.ids = []
+
+        # Remove old hashed id by prefix
+        self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
+
+        # Add new hashed Id
+        self.ids.append(hash_id(value, prefix))
+
     def add_hashed_ids(self):
         ids_len = len(self.ids)
         if tracardi.hash_id_webhook:
@@ -94,6 +108,16 @@ class Profile(Entity):
             # Update if new data
             if len(self.ids) > ids_len:
                 self.mark_for_update()
+
+    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeTimestampManager):
+        for flat_field, timestamp_data  in field_timestamp_manager.get_timestamps():
+            self.metadata.fields[flat_field] = timestamp_data
+            # If enabled hash emails and phone on field change
+            if tracardi.hash_id_webhook:
+                field_closure = FIELD_TO_PROPERTY_MAPPING.get(flat_field, None)
+                if field_closure:
+                    value, prefix = field_closure(self)
+                    self.replace_hashed_id(value, prefix)
 
     def has_hashed_phone_id(self, type: str = None) -> bool:
 
@@ -266,3 +290,24 @@ class Profile(Entity):
         profile.fill_meta_data()
         profile.operation.new = True
         return profile
+
+
+class FlatProfile(Dotty):
+
+    def add_hashed_id(self, flat_field: str):
+        field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
+        if field_closure:
+            value, prefix = field_closure(self)
+
+            if 'ids' not in self or self['ids'] is None:
+                self['ids'] = []
+
+            self['ids'].append(hash_id(value, prefix))
+
+    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldTimestampMonitor):
+        for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():  # type: str, list
+            self['metadata.fields'][flat_field] = timestamp_data
+            # If enabled hash emails and phone on field change
+            if tracardi.hash_id_webhook:
+                # Adds hashed id for email, phone, etc.
+                self.add_hashed_id(flat_field)

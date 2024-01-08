@@ -15,7 +15,7 @@ from tracardi.domain.console import Console
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.event import Event
 from tracardi.service.cache_manager import CacheManager
@@ -44,7 +44,7 @@ def _remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Dotty:
+def _auto_index_default_event_type(flat_event: Dotty, flat_profile: FlatProfile) -> Dotty:
     event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
     if event_mapping_schema is not None:
@@ -81,11 +81,11 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Do
 
 
 async def default_mapping_event_and_profile(flat_event: Dotty,
-                                            flat_profile: Dotty,
+                                            flat_profile: FlatProfile,
                                             session:Session,
                                             source: EventSource,
                                             console_log: ConsoleLog) -> Tuple[
-    Dotty, Dotty, Optional[FieldTimestampMonitor]]:
+    Dotty, FlatProfile, Optional[FieldTimestampMonitor]]:
 
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, flat_profile)
@@ -132,8 +132,8 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
         if not isinstance(flat_profile['metadata.fields'], dict):
             flat_profile['metadata.fields'] = {}
 
-        for field, timestamp_data in profile_changes.get_timestamps():
-            flat_profile['metadata.fields'][field] = timestamp_data
+        # Append field changes fo metadata.fields
+        flat_profile.set_metadata_fields_timestamps(profile_changes)
 
     return flat_event, flat_profile, profile_changes
 
@@ -196,7 +196,7 @@ async def compute_events(events: List[EventPayload],
     event_objects = []
 
     if profile:
-        flat_profile = dotty(profile.model_dump())
+        flat_profile = FlatProfile(profile.model_dump())
         profile_metadata = profile.get_meta_data()
     else:
         flat_profile = None
