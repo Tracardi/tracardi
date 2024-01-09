@@ -75,6 +75,9 @@ class WebHookBridge(ConfigurableBridge):
                                 if 'identify_profile_by' not in self.config:
                                     # Old way to handle identification
                                     profile_id = _properties[profile_id_ref]
+                                elif not tracardi.auto_profile_merging:
+                                    # Old way to handle identification
+                                    profile_id = _properties[profile_id_ref]
                                 else:
                                     # New way to handle identification
                                     if self.config['identify_profile_by'] == 'e-mail':

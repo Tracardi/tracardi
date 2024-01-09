@@ -3,7 +3,7 @@ import logging
 import asyncio
 from dotty_dict import dotty, Dotty
 
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Set
 
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
@@ -85,7 +85,9 @@ async def event_to_profile_mapping(flat_event: Dotty,
                                             session:Session,
                                             source: EventSource,
                                             console_log: ConsoleLog) -> Tuple[
-    Dotty, FlatProfile, Optional[FieldTimestampMonitor]]:
+    Dotty, FlatProfile, Optional[FieldTimestampMonitor], Set[str]]:
+
+    auto_merge_ids = set()
 
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, flat_profile)
@@ -135,9 +137,9 @@ async def event_to_profile_mapping(flat_event: Dotty,
         # Append field changes fo metadata.fields
         auto_merge_ids = flat_profile.set_metadata_fields_timestamps(profile_changes)
 
-        print(0, auto_merge_ids, flat_event['type'])
+        print(0, auto_merge_ids, flat_event['type'],bool(auto_merge_ids))
 
-    return flat_event, flat_profile, profile_changes
+    return flat_event, flat_profile, profile_changes, auto_merge_ids
 
 
 async def make_event_from_event_payload(event_payload,
@@ -204,6 +206,8 @@ async def compute_events(events: List[EventPayload],
         flat_profile = None
         profile_metadata = None
 
+    auto_merge_ids = set()
+
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
@@ -219,14 +223,20 @@ async def compute_events(events: List[EventPayload],
 
         flat_event = dotty(event.model_dump(exclude_unset=True))
 
+
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, flat_profile, field_timestamp_monitor = await event_to_profile_mapping(
+            flat_event, flat_profile, field_timestamp_monitor, _auto_merge_ids = await event_to_profile_mapping(
                 flat_event,
                 flat_profile,
                 session,
                 source,
                 console_log)
+
+            # Combine all auto merge ids
+
+            if _auto_merge_ids:
+                auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
 
         # Convert to event
         event_dict = flat_event.to_dict()
@@ -273,6 +283,8 @@ async def compute_events(events: List[EventPayload],
         try:
             profile = Profile(**flat_profile.to_dict())
             profile.set_meta_data(profile_metadata)
+            if auto_merge_ids:
+                profile.add_auto_merge_ids(auto_merge_ids)
         except Exception as e:
             message = f"It seems that there was an error when trying to add or update some information to " \
                       f"your profile. The error occurred because you tried to add a value that is not " \

@@ -43,6 +43,7 @@ async def trigger_workflows(profile: Profile,
 
     ux = []
     response = {}
+    auto_merge_ids = set()
     tracker_result = None
     field_manager = FieldChangeTimestampManager()
 
@@ -69,7 +70,10 @@ async def trigger_workflows(profile: Profile,
         # Set fields timestamps
 
         if profile:
-            profile.set_metadata_fields_timestamps(tracker_result.changed_field_timestamps)
+            _auto_merge_ids = profile.set_metadata_fields_timestamps(tracker_result.changed_field_timestamps)
+            if _auto_merge_ids:
+                auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
+
 
         # Dispatch changed profile to destination
 
@@ -90,6 +94,9 @@ async def trigger_workflows(profile: Profile,
         # Add new fields to field mapping. New fields can be created in workflow.
         add_new_field_mappings(profile, session)
 
+
+    if auto_merge_ids:
+        profile.add_auto_merge_ids(auto_merge_ids)
 
     return profile, session, events, ux, response, field_manager, is_wf_triggered
 

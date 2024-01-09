@@ -58,10 +58,21 @@ class Profile(Entity):
     data: Optional[ProfileData] = ProfileData()
 
     _updated_in_workflow: bool = PrivateAttr(False)
+    _auto_merge_ids: Optional[Set[str]] = PrivateAttr(set())
 
     def __init__(self, **data: Any):
         super().__init__(**data)
         self._add_id_to_ids()
+
+    def add_auto_merge_ids(self, auto_merge_ids: Set[str]):
+        self._auto_merge_ids = auto_merge_ids.union(self._auto_merge_ids)
+
+
+    def get_auto_merge_ids(self) -> Set[str]:
+        return self._auto_merge_ids
+
+    def need_aut_merging(self) -> bool:
+        return bool(self._auto_merge_ids)
 
     def has_consents_set(self) -> bool:
         return 'consents' in self.aux and 'granted' in self.aux['consents'] and self.aux['consents']['granted'] is True
