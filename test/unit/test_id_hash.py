@@ -5,7 +5,7 @@ from tracardi.domain.profile_data import ProfileData, PREFIX_EMAIL_BUSINESS, PRE
     PREFIX_PHONE_WHATSUP
 from tracardi.service.utils.hasher import hash_id
 
-tracardi.hash_id_webhook = "abc"
+tracardi.auto_profile_merging = "abc"
 
 def test_returns_string_with_length_40():
     value = "test"
