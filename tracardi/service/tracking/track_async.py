@@ -67,195 +67,198 @@ async def process_track_data(source: EventSource,
             console_log
         )
 
-        if profile:
-            logger.info(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
+        try:
+            if profile:
+                logger.info(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
 
-        # Clean up
-        if 'location' in tracker_payload.context:
-            del tracker_payload.context['location']
+            # Clean up
+            if 'location' in tracker_payload.context:
+                del tracker_payload.context['location']
 
-        if 'utm' in tracker_payload.context:
-            del tracker_payload.context['utm']
+            if 'utm' in tracker_payload.context:
+                del tracker_payload.context['utm']
 
-        # ----------------------------------------------
-        # FROM THIS POINT EVENTS AND SESSION SHOULD NOT BE MUTATED
-        # ----------------------------------------------
+            # ----------------------------------------------
+            # FROM THIS POINT EVENTS AND SESSION SHOULD NOT BE MUTATED
+            # ----------------------------------------------
 
-        # TODO is changed with static profile
-        # f_session = FrozenSession(**session.model_dump())
-        # f_session.set_meta_data(session.get_meta_data())
-        # session = f_session
+            # TODO is changed with static profile
+            # f_session = FrozenSession(**session.model_dump())
+            # f_session.set_meta_data(session.get_meta_data())
+            # session = f_session
 
-        # Async storage
+            # Async storage
 
-        # Get context for queue
+            # Get context for queue
 
-        dispatch_context = get_context().get_user_less_context_copy()
+            dispatch_context = get_context().get_user_less_context_copy()
 
-        if License.has_service(LICENSE):
+            if License.has_service(LICENSE):
 
-            # Queue updated fields as field update history log.
-            # Queues only updates made in mapping. Updates made in workflow are queued either
-            # in worker of after workflow.
+                # Queue updated fields as field update history log.
+                # Queues only updates made in mapping. Updates made in workflow are queued either
+                # in worker of after workflow.
 
-            if tracardi.enable_field_update_log and field_timestamp_monitor:
-                timestamp_log = field_timestamp_monitor.get_timestamps_log()
-                if timestamp_log.has_changes():
-                    field_update_log_dispatch(dispatch_context, timestamp_log.get_history_log())
+                if tracardi.enable_field_update_log and field_timestamp_monitor:
+                    timestamp_log = field_timestamp_monitor.get_timestamps_log()
+                    if timestamp_log.has_changes():
+                        field_update_log_dispatch(dispatch_context, timestamp_log.get_history_log())
 
-            # Split events into async and not async. Compute process time
+                # Split events into async and not async. Compute process time
 
-            async_events = []
-            sync_events = []
-            for event in events:
-                event.metadata.time.total_time = time.time() - tracking_start
-                is_async = event.config.get('async', True)
-                if is_async:
-                    async_events.append(event)
+                async_events = []
+                sync_events = []
+                for event in events:
+                    event.metadata.time.total_time = time.time() - tracking_start
+                    is_async = event.config.get('async', True)
+                    if is_async:
+                        async_events.append(event)
+                    else:
+                        sync_events.append(event)
+
+                # Delete events so it is no longer used by mistake. Use async_events or sync_events.
+                events = None
+
+                result = {
+                    "task": [],
+                    "ux": [],  # Async does not have ux
+                    "response": {},  # Async does not have response
+                    "events": [],
+                    "profile": {
+                        "id": get_entity_id(profile)
+                    },
+                    "session": {
+                        "id": get_entity_id(session)
+                    },
+                    "errors": [],
+                    "warnings": []
+                }
+
+                # Async events
+
+                if com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
+
+                    # Track session for visit end
+
+                    if session and session.operation.new:
+                        task = schedule_visit_end_check(
+                            dispatch_context,
+                            session,
+                            profile,
+                            source
+                        )
+                        logger.info(f"Scheduled visit end check with task {task} for profile {profile.id}. "
+                                    f"Kicks off at {datetime.utcnow()+ timedelta(seconds=60 * 5)}")
+
+                    if async_events:
+
+                        """
+                        Async processing can not do the following things:
+                        - Discard event or change as it is saved before the workflow kicks off
+                        - Save any properties such as processed_by property as processing happens in parallel to saving
+                        - Return response and ux as processing happens in parallel with response
+                        """
+
+                        # Pulsar publish
+
+                        # TODO merge profile_field_timestamps this is from mapping
+
+                        dispatch_events_wf_destinations_async(
+                            dispatch_context,
+                            source,
+                            profile,
+                            session,
+                            async_events,
+                            tracker_payload,
+                            tracker_config
+                        )
+
+                        result["task"].append(tracker_payload.get_id())
+                        if tracker_payload.is_debugging_on():
+                            result['events'] += [event.id for event in sync_events]
                 else:
-                    sync_events.append(event)
+                    # If disabled async storing or no pulsar add async events to sync and run it
+                    sync_events += async_events
 
-            # Delete events so it is no longer used by mistake. Use async_events or sync_events.
-            events = None
+                # Sync events. Events that are marked as async: false
 
-            result = {
-                "task": [],
-                "ux": [],  # Async does not have ux
-                "response": {},  # Async does not have response
-                "events": [],
-                "profile": {
-                    "id": get_entity_id(profile)
-                },
-                "session": {
-                    "id": get_entity_id(session)
-                },
-                "errors": [],
-                "warnings": []
-            }
+                if sync_events:
 
-            # Async events
+                    # Save events - should not be mutated
 
-            if com_tracardi_settings.pulsar_host and com_tracardi_settings.async_processing:
+                    storage = TrackingPersisterAsync()
+                    events_result = await storage.save_events(sync_events)
 
-                # Track session for visit end
+                    # TODO Do not know if destinations are needed here. They are also dispatched in async
 
-                if session and session.operation.new:
-                    task = schedule_visit_end_check(
-                        dispatch_context,
-                        session,
-                        profile,
-                        source
-                    )
-                    logger.info(f"Scheduled visit end check with task {task} for profile {profile.id}. "
-                                f"Kicks off at {datetime.utcnow()+ timedelta(seconds=60 * 5)}")
-
-                if async_events:
-
-                    """
-                    Async processing can not do the following things:
-                    - Discard event or change as it is saved before the workflow kicks off
-                    - Save any properties such as processed_by property as processing happens in parallel to saving
-                    - Return response and ux as processing happens in parallel with response
-                    """
-
-                    # Pulsar publish
-
-                    # TODO merge profile_field_timestamps this is from mapping
-
-                    dispatch_events_wf_destinations_async(
-                        dispatch_context,
-                        source,
-                        profile,
-                        session,
-                        async_events,
-                        tracker_payload,
-                        tracker_config
+                    profile, session, sync_events, ux, response = await (
+                        dispatch_sync_workflow_and_destinations(
+                            profile,
+                            session,
+                            sync_events,
+                            tracker_payload,
+                            console_log,
+                            # We save manually only when async processing is disabled. Disabled async it will not
+                            # be processed by async storage worker. Otherwise flusher worker saves in-memory profile
+                            # and session automatically
+                            store_in_db=com_tracardi_settings.async_processing is False,
+                            storage=storage
+                        )
                     )
 
-                    result["task"].append(tracker_payload.get_id())
+                    result['ux'] = ux
+                    result['response'] = response
                     if tracker_payload.is_debugging_on():
                         result['events'] += [event.id for event in sync_events]
+                    result["errors"] = []
+
+                return result
+
             else:
-                # If disabled async storing or no pulsar add async events to sync and run it
-                sync_events += async_events
 
-            # Sync events. Events that are marked as async: false
+                # Open-source version
 
-            if sync_events:
+                # Compute process time
 
-                # Save events - should not be mutated
+                for event in events:
+                    event.metadata.time.total_time = time.time() - tracking_start
+
+                # Save events
 
                 storage = TrackingPersisterAsync()
-                events_result = await storage.save_events(sync_events)
+                events_result = await storage.save_events(events)
 
-                # TODO Do not know if destinations are needed here. They are also dispatched in async
-
-                profile, session, sync_events, ux, response = await (
+                profile, session, events, ux, response = await (
                     dispatch_sync_workflow_and_destinations(
                         profile,
                         session,
-                        sync_events,
+                        events,
                         tracker_payload,
                         console_log,
-                        # We save manually only when async processing is disabled. Disabled async it will not
-                        # be processed by async storage worker. Otherwise flusher worker saves in-memory profile
-                        # and session automatically
-                        store_in_db=com_tracardi_settings.async_processing is False,
+                        # Save. We need to manually save the session and profile in Open-source as there is no
+                        # flusher worker and in-memory profile and session is not saved
+                        store_in_db=True,  # No cache worker for OS. mus store manually
                         storage=storage
-                    )
-                )
+                    ))
 
-                result['ux'] = ux
-                result['response'] = response
-                if tracker_payload.is_debugging_on():
-                    result['events'] += [event.id for event in sync_events]
-                result["errors"] = []
-
-            return result
-
-        else:
-
-            # Open-source version
-
-            # Compute process time
-
-            for event in events:
-                event.metadata.time.total_time = time.time() - tracking_start
-
-            # Save events
-
-            storage = TrackingPersisterAsync()
-            events_result = await storage.save_events(events)
-
-            profile, session, events, ux, response = await (
-                dispatch_sync_workflow_and_destinations(
-                    profile,
-                    session,
-                    events,
-                    tracker_payload,
-                    console_log,
-                    # Save. We need to manually save the session and profile in Open-source as there is no
-                    # flusher worker and in-memory profile and session is not saved
-                    store_in_db=True,  # No cache worker for OS. mus store manually
-                    storage=storage
-                ))
-
-
-
-            return {
-                "task": tracker_payload.get_id(),
-                "ux": ux,
-                "response": response,
-                "events": [event.id for event in events] if tracker_payload.is_debugging_on() else [],
-                "profile": {
-                    "id": get_entity_id(profile)
-                },
-                "session": {
-                    "id": get_entity_id(session)
-                },
-                "errors": [],
-                "warnings": []
-            }
-
+                return {
+                    "task": tracker_payload.get_id(),
+                    "ux": ux,
+                    "response": response,
+                    "events": [event.id for event in events] if tracker_payload.is_debugging_on() else [],
+                    "profile": {
+                        "id": get_entity_id(profile)
+                    },
+                    "session": {
+                        "id": get_entity_id(session)
+                    },
+                    "errors": [],
+                    "warnings": []
+                }
+        finally:
+            print(0, profile.has_not_saved_changes())
+            if profile.need_auto_merging():
+                print(1, profile.ids)
+                print(2, profile.get_auto_merge_ids())
     finally:
         logger.info(f"Process time {time.time() - tracking_start}")

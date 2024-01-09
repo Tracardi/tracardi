@@ -32,7 +32,7 @@ def test_add_hashed_ids_with_existing_email_ids():
     )
 
     # Invoke method
-    profile.add_hashed_ids()
+    profile.create_auto_merge_hashed_ids()
 
     # Assertions
     assert profile.has_hashed_email_id(PREFIX_EMAIL_BUSINESS) is True
@@ -57,7 +57,7 @@ def test_add_hashed_ids_with_existing_phone_ids():
     )
 
     # Invoke method
-    profile.add_hashed_ids()
+    profile.create_auto_merge_hashed_ids()
 
     # Assertions
     assert profile.has_hashed_phone_id(PREFIX_PHONE_BUSINESS) is True
@@ -71,7 +71,7 @@ def test_add_hashed_ids_with_no_existing_ids():
     profile = Profile(id='1')
 
     # Invoke method
-    profile.add_hashed_ids()
+    profile.create_auto_merge_hashed_ids()
 
     # Assertions
     assert profile.has_hashed_email_id(PREFIX_EMAIL_BUSINESS) is False
@@ -99,7 +99,7 @@ def test_add_hashed_ids_with_empty_email_ids():
     )
 
     # Invoke method
-    profile.add_hashed_ids()
+    profile.create_auto_merge_hashed_ids()
 
     # Assertions
     assert profile.has_hashed_email_id(PREFIX_EMAIL_BUSINESS) is False
@@ -124,7 +124,7 @@ def test_add_hashed_ids_with_empty_phone_ids():
     )
 
     # Invoke method
-    profile.add_hashed_ids()
+    profile.create_auto_merge_hashed_ids()
 
     # Assertions
     assert profile.has_hashed_phone_id(PREFIX_PHONE_BUSINESS) is False

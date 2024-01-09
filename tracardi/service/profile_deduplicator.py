@@ -1,22 +1,23 @@
+from typing import List
 from tracardi.domain.profile import Profile
 from tracardi.domain.storage_record import StorageRecord, RecordMetadata
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.storage.factory import storage_manager
 
 
-async def _load_duplicates(id: str):
+async def _load_duplicates(profile_ids: List[str]):
     return await storage_manager('profile').query({
         "query": {
             "bool": {
                 "should": [
                     {
-                        "term": {
-                            "ids": id
+                        "terms": {
+                            "ids": profile_ids
                         }
                     },
                     {
-                        "term": {
-                            "id": id
+                        "terms": {
+                            "id": profile_ids
                         }
                     }
                 ],
@@ -24,13 +25,19 @@ async def _load_duplicates(id: str):
             }
         },
         "sort": [
-            {"metadata.time.insert": "desc"}
+            {"metadata.time.insert": "desc"}  # todo maybe should be based on updates (but update should always exist)
         ]
     })
 
 
-async def deduplicate_profile(profile_id):
-    _duplicated_profiles = await _load_duplicates(profile_id)  # 1st records is the newest
+async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
+
+    if isinstance(profile_ids, list):
+        profile_ids = [profile_id, *profile_ids]
+    else:
+        profile_ids = [profile_id]
+
+    _duplicated_profiles = await _load_duplicates(profile_ids)  # 1st records is the newest
     valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
     first_profile = valid_profile_record.to_entity(Profile)
 
