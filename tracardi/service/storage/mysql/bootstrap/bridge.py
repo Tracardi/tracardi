@@ -57,7 +57,11 @@ open_webhook_source_bridge = Bridge(
                                 "ID for this event.",
 
                     component=FormComponent(type="bool", props={"label": "Create profile and session"})
-                ),
+                )
+            ]),
+        FormGroup(
+            name="Use Auto Profile Merging",
+            fields=[
                 FormField(
                     id="identify_profile_by",
                     name="Identification method",
