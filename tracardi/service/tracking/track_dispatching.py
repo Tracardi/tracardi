@@ -82,7 +82,7 @@ async def trigger_workflows(profile: Profile,
         # Set fields timestamps
 
         if profile:
-            profile.metadata.set_fields_timestamps(tracker_result.changed_field_timestamps)
+            profile.set_metadata_fields_timestamps(tracker_result.changed_field_timestamps)
 
         # Dispatch changed profile to destination
 

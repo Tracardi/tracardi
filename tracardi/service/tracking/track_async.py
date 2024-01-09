@@ -98,7 +98,6 @@ async def process_track_data(source: EventSource,
             # Queues only updates made in mapping. Updates made in workflow are queued either
             # in worker of after workflow.
 
-
             if tracardi.enable_field_update_log and field_timestamp_monitor:
                 timestamp_log = field_timestamp_monitor.get_timestamps_log()
                 if timestamp_log.has_changes():
@@ -158,7 +157,6 @@ async def process_track_data(source: EventSource,
                     - Save any properties such as processed_by property as processing happens in parallel to saving
                     - Return response and ux as processing happens in parallel with response
                     """
-                    print('async', [e.type for e in async_events], dispatch_context)
 
                     # Pulsar publish
 
@@ -189,7 +187,6 @@ async def process_track_data(source: EventSource,
 
                 storage = TrackingPersisterAsync()
                 events_result = await storage.save_events(sync_events)
-                print("save_sync_result", events_result, get_context())
 
                 # TODO Do not know if destinations are needed here. They are also dispatched in async
 

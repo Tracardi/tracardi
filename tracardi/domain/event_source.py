@@ -2,15 +2,13 @@ from datetime import datetime
 from typing import Optional, Union, List, Any
 
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.entity import Entity
 from tracardi.service.utils.date import now_in_utc
 
 
-class EventSource(Entity):
+class EventSource(NamedEntity):
     type: List[str]
     bridge: NamedEntity
     timestamp: Optional[datetime]
-    name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     channel: Optional[str] = ""
     enabled: Optional[bool] = True

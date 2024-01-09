@@ -11,6 +11,32 @@ PREFIX_PHONE_BUSINESS = "phb-"
 PREFIX_PHONE_MOBILE = "pho-"
 PREFIX_PHONE_WHATSUP = "pwa-"
 
+PREFIX_PHONE_FIELDS = 'data.contact.phone'
+PREFIX_EMAIL_FIELDS = 'data.contact.mail'
+
+FIELD_TO_PROPERTY_MAPPING = {
+    'profile@data.contact.phone.main': lambda profile: (profile.data.contact.phone.main, PREFIX_PHONE_MAIN),
+    'profile@data.contact.phone.business': lambda profile: (profile.data.contact.phone.business,PREFIX_PHONE_BUSINESS),
+    'profile@data.contact.phone.whatsapp': lambda profile: (profile.data.contact.phone.whatsapp,PREFIX_PHONE_WHATSUP),
+    'profile@data.contact.phone.mobile': lambda profile: (profile.data.contact.phone.mobile,PREFIX_PHONE_MOBILE),
+
+    'profile@data.contact.email.main': lambda profile: (profile.data.contact.email.main,PREFIX_EMAIL_MAIN),
+    'profile@data.contact.email.private': lambda profile: (profile.data.contact.email.private, PREFIX_EMAIL_PRIVATE),
+    'profile@data.contact.email.business': lambda profile: (profile.data.contact.email.business, PREFIX_EMAIL_BUSINESS),
+}
+
+
+FLAT_PROFILE_MAPPING = {
+    'data.contact.phone.main': lambda flat_profile: (flat_profile['data.contact.phone.main'], PREFIX_PHONE_MAIN),
+    'data.contact.phone.business': lambda flat_profile: (flat_profile['data.contact.phone.business'], PREFIX_PHONE_BUSINESS),
+    'data.contact.phone.whatsapp': lambda flat_profile: (flat_profile['data.contact.phone.whatsapp'], PREFIX_PHONE_WHATSUP),
+    'data.contact.phone.mobile': lambda flat_profile: (flat_profile['data.contact.phone.mobile'], PREFIX_PHONE_MOBILE),
+
+    'data.contact.email.main': lambda flat_profile: (flat_profile['data.contact.email.main'], PREFIX_EMAIL_MAIN),
+    'data.contact.email.private': lambda flat_profile: (flat_profile['data.contact.email.private'], PREFIX_EMAIL_PRIVATE),
+    'data.contact.email.business': lambda flat_profile: (flat_profile['data.contact.email.business'], PREFIX_EMAIL_BUSINESS),
+}
+
 def force_lists(props: List[str], data):
     for prop in props:
         if prop in data and data[prop] is not None and not isinstance(data[prop], list):

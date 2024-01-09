@@ -55,8 +55,8 @@ async def _load_profile_and_deduplicate(
 
     except DuplicatedRecordException as e:
 
-        message = (f"Profile duplication error. "
-                   f"An error occurred when loading profile ID; {profile_id} "
+        message = (f"Profile duplication warning. "
+                   f"An issue occurred when loading profile ID; {profile_id} "
                    f"Details: Profile {profile_id} needs deduplication. {repr(e)}")
 
         logger.warning(message)

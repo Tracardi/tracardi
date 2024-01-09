@@ -6,22 +6,18 @@ import json
 import logging
 from hashlib import sha1
 from datetime import datetime, timedelta
-from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator, Dict
+from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator
 from uuid import uuid4
 
 from dotty_dict import dotty
 from pydantic import PrivateAttr, BaseModel
 
-from tracardi.exceptions.exception_service import get_traceback
-from tracardi.service.utils.getters import get_entity_id
-
 from tracardi.config import tracardi
-from ..profile_data import PREFIX_EMAIL_MAIN, PREFIX_PHONE_MAIN
+
 from ...service.cache_manager import CacheManager
 from ...service.console_log import ConsoleLog
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
-from ..console import Console
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..identification_point import IdentificationPoint
@@ -35,7 +31,6 @@ from ...exceptions.log_handler import log_handler
 from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
 from ...service.storage.mysql.service.idetification_point_service import IdentificationPointService
 from tracardi.service.storage.driver.elastic import identification as identification_db
-from ...service.utils.hasher import hash_id
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
@@ -113,122 +108,18 @@ class TrackerPayload(BaseModel):
     def scheduled_event_config(self) -> ScheduledEventConfig:
         return ScheduledEventConfig(flow_id=self._scheduled_flow_id, node_id=self._scheduled_node_id)
 
-    def _replace_profile(self, profile_id):
+    def replace_profile(self, profile_id):
         self.profile = Entity(id=profile_id)
         self.profile_less = False
         self.options.update({"saveProfile": True})
 
-    def _replace_session(self, session_id):
+    def replace_session(self, session_id):
         self.session = Entity(id=session_id)
         self.profile_less = False
         self.options.update({"saveSession": True})
 
     def get_timestamp(self) -> float:
         return self._timestamp
-
-    def generate_profile_and_session_for_webhook(self, console_log: list) -> bool:
-
-        """
-
-        Returns True if profile or session generated
-
-        :param console_log:
-        :return:
-
-        """
-        if isinstance(self.source, EventSource):
-
-            if 'webhook' in self.source.type:
-                if self.source.config is not None:
-                    if 'generate_profile' in self.source.config:
-                        if self.source.config['generate_profile'] is True:
-
-                            if 'replace_session_id' in self.source.config:
-                                try:
-                                    session_id_ref = self.source.config['replace_session_id'].strip()
-                                    if bool(session_id_ref):
-                                        # Webhooks have only one event, so it is save to get it from self.events[0]
-                                        session_id = self.events[0].properties[session_id_ref]
-                                        self._replace_session(session_id)
-                                except KeyError as e:
-                                    message = f"Could not generate set session for a webhook. " \
-                                              f"Event stays session-less. " \
-                                              f"Probable reason: Missing data: {str(e)}"
-                                    logger.error(message)
-                                    console_log.append(Console(
-                                        flow_id=None,
-                                        node_id=None,
-                                        event_id=None,
-                                        profile_id=get_entity_id(self.profile),
-                                        origin='tracker',
-                                        class_name=__name__,
-                                        module=__name__,
-                                        type='error',
-                                        message=message,
-                                        traceback=get_traceback(e)
-                                    ))
-
-                            if 'replace_profile_id' in self.source.config:
-                                try:
-                                    profile_id_ref = self.source.config['replace_profile_id'].strip()
-
-                                    # If exists
-                                    if bool(profile_id_ref):
-
-                                        # Webhooks have only one event, so it is save to get it from self.events[0]
-                                        _properties = self.events[0].properties
-                                        _profile_id_value = _properties[profile_id_ref]
-
-                                        if 'identify_profile_by' not in self.source.config:
-                                            # Old way to handle identification
-                                            profile_id = _properties[profile_id_ref]
-                                        else:
-                                            # New way to handle identification
-                                            if self.source.config['identify_profile_by'] == 'e-mail':
-                                                profile_id = hash_id(_profile_id_value, PREFIX_EMAIL_MAIN)
-
-                                            elif self.source.config['identify_profile_by'] == 'phone':
-                                                profile_id = hash_id(_profile_id_value, PREFIX_PHONE_MAIN)
-
-                                            elif self.source.config['identify_profile_by'] == 'id':
-                                                profile_id = _profile_id_value
-
-                                            else:
-                                                profile_id = None
-
-                                        if profile_id is not  None:
-                                            self._replace_profile(profile_id)
-
-                                except KeyError as e:
-                                    message = f"Could not generate profile and session for a webhook. " \
-                                              f"Event stays profile-less. " \
-                                              f"Probable reason: Missing data: {str(e)}"
-                                    logger.error(message)
-                                    console_log.append(Console(
-                                        flow_id=None,
-                                        node_id=None,
-                                        event_id=None,
-                                        profile_id=get_entity_id(self.profile),
-                                        origin='tracker',
-                                        class_name=__name__,
-                                        module=__name__,
-                                        type='error',
-                                        message=message,
-                                        traceback=get_traceback(e)
-                                    ))
-
-                            if not self.profile:
-                                self._replace_profile(str(uuid4()))
-
-                            if not self.session:
-                                self._replace_session(str(uuid4()))
-
-                            return True
-        else:
-            logger.error("Can't generate profile. Method _generate_profile_and_session used before "
-                         "EventSource was created.")
-
-        return False
 
     def has_type(self, event_type):
         for event_payload in self.events:

@@ -9,7 +9,7 @@ from tracardi.domain.console import Console
 from tracardi.domain.event import Event
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.event_to_profile import EventToProfile
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
@@ -86,10 +86,10 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 async def map_event_to_profile(
         custom_mapping_schemas: List[EventToProfile],
         flat_event: Dotty,
-        flat_profile: Dotty,
+        flat_profile: FlatProfile,
         session: Session,
         source: EventSource,
-        console_log: ConsoleLog) -> Tuple[Dotty, FieldTimestampMonitor]:
+        console_log: ConsoleLog) -> Tuple[FlatProfile, FieldTimestampMonitor]:
 
     # Default event types mappings
 
