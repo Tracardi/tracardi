@@ -133,7 +133,9 @@ async def event_to_profile_mapping(flat_event: Dotty,
             flat_profile['metadata.fields'] = {}
 
         # Append field changes fo metadata.fields
-        flat_profile.set_metadata_fields_timestamps(profile_changes)
+        auto_merge_ids = flat_profile.set_metadata_fields_timestamps(profile_changes)
+
+        print(0, auto_merge_ids, flat_event['type'])
 
     return flat_event, flat_profile, profile_changes
 

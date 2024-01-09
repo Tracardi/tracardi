@@ -76,19 +76,7 @@ class Profile(Entity):
                 return True
         return False
 
-    def replace_hashed_id(self,value: str, prefix: str):
-        if self.ids is None:
-            self.ids = []
-
-        # Remove old hashed id by prefix
-        self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
-
-        # Add new hashed Id
-        value = value.strip()
-        if value:
-            self.ids.append(hash_id(value, prefix))
-
-    def add_hashed_ids(self):
+    def create_auto_merge_hashed_ids(self):
         ids_len = len(self.ids)
         if tracardi.auto_profile_merging:
             if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
@@ -111,15 +99,37 @@ class Profile(Entity):
             if len(self.ids) > ids_len:
                 self.mark_for_update()
 
-    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeTimestampManager):
+    def add_auto_merge_hashed_id(self, flat_field) -> Optional[str]:
+        field_closure = FIELD_TO_PROPERTY_MAPPING.get(flat_field, None)
+        if field_closure:
+            value, prefix = field_closure(self)
+
+            if self.ids is None:
+                self.ids = []
+
+            # Remove old hashed id by prefix
+            self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
+
+            # Add new hashed Id
+            value = value.strip()
+            if value:
+                hashed_value = hash_id(value, prefix)
+                self.ids.append(hashed_value)
+                return hashed_value
+
+        return None
+
+    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeTimestampManager) -> Set[str]:
+        added_hashed_ids = set()
         for flat_field, timestamp_data  in field_timestamp_manager.get_timestamps():
             self.metadata.fields[flat_field] = timestamp_data
             # If enabled hash emails and phone on field change
             if tracardi.auto_profile_merging:
-                field_closure = FIELD_TO_PROPERTY_MAPPING.get(flat_field, None)
-                if field_closure:
-                    value, prefix = field_closure(self)
-                    self.replace_hashed_id(value, prefix)
+                added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
+                if added_hashed_id:
+                    added_hashed_ids.add(added_hashed_id)
+
+        return added_hashed_ids
 
     def has_hashed_phone_id(self, type: str = None) -> bool:
 
@@ -296,7 +306,7 @@ class Profile(Entity):
 
 class FlatProfile(Dotty):
 
-    def add_hashed_id(self, flat_field: str):
+    def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
         field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
         if field_closure:
             value, prefix = field_closure(self)
@@ -312,15 +322,24 @@ class FlatProfile(Dotty):
                 # Add new
                 # Can not simply append. Must reassign
                 ids = self['ids']
-                ids.append(hash_id(value, prefix))
+                new_hash_id = hash_id(value, prefix)
+                ids.append(new_hash_id)
 
                 # Assign to replace value
-                self['ids'] = ids
+                self['ids'] = list(set(ids))
 
-    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldTimestampMonitor):
+                return new_hash_id
+
+        return None
+
+    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldTimestampMonitor) -> Set[str]:
+        added_ids = set()
         for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():  # type: str, list
             self['metadata.fields'][flat_field] = timestamp_data
             # If enabled hash emails and phone on field change
             if tracardi.auto_profile_merging:
                 # Adds hashed id for email, phone, etc.
-                self.add_hashed_id(flat_field)
+                added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
+                if added_hashed_id:
+                    added_ids.add(added_hashed_id)
+        return added_ids
