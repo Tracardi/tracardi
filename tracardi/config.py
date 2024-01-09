@@ -212,7 +212,7 @@ class TracardiConfig(metaclass=Singleton):
         self.console_log_partitioning = env.get('CONSOLE_LOG_PARTITIONING', 'month')
         self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
         self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
-        self.hash_id_webhook = env.get('HASH_ID_WEBHOOK', None)
+        self.auto_profile_merging = env.get('AUTO_PROFILE_MERGING', None)
 
         self._config = None
         self._unset_secrets()
@@ -229,8 +229,8 @@ class TracardiConfig(metaclass=Singleton):
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
             logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
 
-        if self.hash_id_webhook and len(self.hash_id_webhook) < 20:
-            logger.warning('Security risk. Env HASH_ID_WEBHOOK is too short. It must be at least 20 chars long.')
+        if self.auto_profile_merging and len(self.auto_profile_merging) < 20:
+            logger.warning('Security risk. Env AUTO_PROFILE_MERGING is too short. It must be at least 20 chars long.')
 
 
 
