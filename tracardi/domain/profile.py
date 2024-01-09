@@ -71,7 +71,7 @@ class Profile(Entity):
     def get_auto_merge_ids(self) -> Set[str]:
         return self._auto_merge_ids
 
-    def need_aut_merging(self) -> bool:
+    def need_auto_merging(self) -> bool:
         return bool(self._auto_merge_ids)
 
     def has_consents_set(self) -> bool:

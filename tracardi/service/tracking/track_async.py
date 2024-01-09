@@ -256,7 +256,8 @@ async def process_track_data(source: EventSource,
                     "warnings": []
                 }
         finally:
-            if profile.need_aut_merging():
+            print(0, profile.has_not_saved_changes())
+            if profile.need_auto_merging():
                 print(1, profile.ids)
                 print(2, profile.get_auto_merge_ids())
     finally:
