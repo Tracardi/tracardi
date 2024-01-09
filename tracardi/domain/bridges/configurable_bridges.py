@@ -72,9 +72,13 @@ class WebHookBridge(ConfigurableBridge):
                                 _properties = tracker_payload.events[0].properties
                                 _profile_id_value = _properties[profile_id_ref]
 
-                                if 'identify_profile_by' not in self.config:
+                                profile_id = None
+                                if not tracardi.auto_profile_merging:
                                     # Old way to handle identification
-                                    profile_id = _properties[profile_id_ref]
+                                    profile_id = _profile_id_value
+                                elif 'identify_profile_by' not in self.config:
+                                    # Old way to handle identification
+                                    profile_id = _profile_id_value
                                 else:
                                     # New way to handle identification
                                     if self.config['identify_profile_by'] == 'e-mail':
@@ -85,9 +89,6 @@ class WebHookBridge(ConfigurableBridge):
 
                                     elif self.config['identify_profile_by'] == 'id':
                                         profile_id = _profile_id_value
-
-                                    else:
-                                        profile_id = None
 
                                 if profile_id is not None:
                                     tracker_payload.replace_profile(profile_id)
