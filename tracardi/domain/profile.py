@@ -370,3 +370,39 @@ class FlatProfile(Dotty):
                 if added_hashed_id:
                     added_ids.add(added_hashed_id)
         return added_ids
+
+
+    def increase_interest(self, interest, value=1):
+
+        interest_key = f'interests.{interest}'
+        _existing_interest_value = self.get(interest_key, None)
+
+        if _existing_interest_value:
+            # Convert if string
+            if isinstance(_existing_interest_value, str) and _existing_interest_value.isnumeric():
+                _existing_interest_value = float(_existing_interest_value)
+
+            if isinstance(_existing_interest_value, (int, float)):
+                self[interest_key] += value
+
+        else:
+            self[interest_key] = value
+
+    def decrease_interest(self, interest, value=1):
+
+        interest_key = f'interests.{interest}'
+        _existing_interest_value = self.get(interest_key, None)
+
+        if _existing_interest_value:
+            # Convert if string
+            if isinstance(_existing_interest_value, str) and _existing_interest_value.isnumeric():
+                _existing_interest_value = float(_existing_interest_value)
+
+            if isinstance(_existing_interest_value, (int, float)):
+                self[interest_key] -= value
+
+        else:
+            self[interest_key] = -value
+
+
+

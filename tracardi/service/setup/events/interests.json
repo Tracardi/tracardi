@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Increase Interest",
+    "description": "Increase interest for current profile.",
+    "id": "increase-interest",
+    "properties": {
+      "interest": "string",
+      "value": 1.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "state": "call:tracardi.service.setup.events.interests.logic,increase_interest"
+  },
+  {
+    "name": "Decrease Interest",
+    "description": "Decrease interest for current profile.",
+    "id": "decrease-interest",
+    "properties": {
+      "interest": "string",
+      "value": 1.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "state": "call:tracardi.service.setup.events.interests.logic,decrease_interest"
+  }
+]
