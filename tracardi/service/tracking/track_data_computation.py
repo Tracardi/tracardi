@@ -147,10 +147,6 @@ def _save_profile_and_session(profile: Profile, session: Session):
     # Update only when needed
 
     if profile and profile.has_not_saved_changes():
-
-        if profile.need_auto_merging():
-            profile.set_aux_auto_merge(profile.get_auto_merge_ids())
-
         save_profile_cache(profile)
 
     if session and session.has_not_saved_changes():

@@ -3,7 +3,6 @@ import logging
 from pydantic import BaseModel
 
 from tracardi.config import tracardi
-from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result

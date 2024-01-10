@@ -60,6 +60,9 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
 def save_profile_cache(profile: Optional[Profile]):
     if profile:
 
+        if profile.need_auto_merging():
+            profile.set_aux_auto_merge(profile.get_auto_merge_ids())
+
         context = get_context()
         key = get_profile_key_namespace(profile.id, context)
 
@@ -122,6 +125,11 @@ def merge_with_cache_profile(profile: Profile, context: Context) -> Profile:
     return merge_profiles(base_profile=_cache_profile, profile=profile)
 
 
+def merge_with_cache_and_save_profile(profile: Profile, context: Context):
+    profile = merge_with_cache_profile(profile, context)
+    return save_profile_cache(profile)
+
+
 async def lock_merge_with_cache_and_save_profile(profile: Profile, context: Context, lock_name=None):
     async with GlobalMutexLock(
             get_entity_id(profile),
@@ -130,6 +138,4 @@ async def lock_merge_with_cache_and_save_profile(profile: Profile, context: Cont
             redis=_redis,
             name=lock_name
     ):
-        profile = merge_with_cache_profile(profile, context)
-
-        return save_profile_cache(profile)
+        return merge_with_cache_and_save_profile(profile, context)

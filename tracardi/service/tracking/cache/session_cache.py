@@ -14,8 +14,10 @@ from tracardi.service.utils.getters import get_entity_id
 redis_cache = RedisCache(ttl=None)
 _redis = RedisClient()
 
+
 def get_session_key_namespace(session_id: str, context: Context) -> str:
     return f"{Collection.session}{context.context_abrv()}:{get_cache_prefix(session_id[0:2])}:"
+
 
 def load_session_cache(session_id: str, context: Context):
     key_namespace = get_session_key_namespace(session_id, context)
@@ -74,6 +76,11 @@ def merge_with_cache_session(session: Session, context: Context) -> Session:
     return merge_sessions(base_session=_cache_session, session=session)
 
 
+def merge_with_cache_and_save_session(session: Session, context: Context):
+    session = merge_with_cache_session(session, context)
+    return save_session_cache(session)
+
+
 async def lock_merge_with_cache_and_save_session(session: Session, context: Context, lock_name=None):
     async with GlobalMutexLock(
             get_entity_id(session),
@@ -82,6 +89,4 @@ async def lock_merge_with_cache_and_save_session(session: Session, context: Cont
             redis=_redis,
             name=lock_name
     ):
-        session = merge_with_cache_session(session, context)
-
-        return save_session_cache(session)
+        return merge_with_cache_and_save_session(session, context)
