@@ -71,6 +71,12 @@ class Profile(Entity):
     def get_auto_merge_ids(self) -> Set[str]:
         return self._auto_merge_ids
 
+    def set_aux_auto_merge(self, auto_merge_ids: Set[str]):
+        if 'auto_merge' not in self.metadata.system.aux or not isinstance(self.metadata.system.aux['auto_merge'], (set, list)):
+            self.metadata.system.aux['auto_merge'] = auto_merge_ids
+        else:
+            self.metadata.system.aux['auto_merge'] = list(set(self.metadata.system.aux['auto_merge']).union(auto_merge_ids))
+
     def need_auto_merging(self) -> bool:
         return bool(self._auto_merge_ids)
 
@@ -115,18 +121,25 @@ class Profile(Entity):
         if field_closure:
             value, prefix = field_closure(self)
 
+            value = value.strip().lower()
+
             if self.ids is None:
                 self.ids = []
 
-            # Remove old hashed id by prefix
-            self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
-
             # Add new hashed Id
-            value = value.strip()
+
             if value:
                 hashed_value = hash_id(value, prefix)
+
+                # Do not add value if exists
+                if hashed_value in self.ids:
+                    return None
+
+                 # Remove old hashed id by prefix
+                self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
+
                 self.ids.append(hashed_value)
-                return hashed_value
+                return flat_field
 
         return None
 
@@ -322,24 +335,27 @@ class FlatProfile(Dotty):
         if field_closure:
             value, prefix = field_closure(self)
 
+            value = value.strip().lower()
+
             if 'ids' not in self or self['ids'] is None:
                 self['ids'] = []
 
-            # Remove old
-            self['ids'] = [hid for hid in self['ids'] if not hid.startswith(prefix)]
-
-            value = value.strip()
             if value:
                 # Add new
                 # Can not simply append. Must reassign
-                ids = self['ids']
                 new_hash_id = hash_id(value, prefix)
-                ids.append(new_hash_id)
 
+                # Do not add value if exists
+                if new_hash_id in self['ids']:
+                    return None
+
+                # Remove old
+                ids = [hid for hid in self['ids'] if not hid.startswith(prefix)]
+                ids.append(new_hash_id)
                 # Assign to replace value
                 self['ids'] = list(set(ids))
 
-                return new_hash_id
+                return flat_field
 
         return None
 
