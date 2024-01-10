@@ -15,7 +15,7 @@
       "data.marketing.promotion.id":   "properties.id",
       "data.marketing.promotion.name": "properties.name"
     },
-    "tags": [],
+    "tags": ["event:behavioral"],
     "state": "awareness"
   },
     {
@@ -34,7 +34,7 @@
       "data.marketing.promotion.id":    "properties.id",
       "data.marketing.promotion.name":  "properties.name"
     },
-    "tags": [],
+    "tags": ["event:behavioral"],
     "state": "awareness"
   }
 ]

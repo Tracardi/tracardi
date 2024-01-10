@@ -69,8 +69,8 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
         if isinstance(state, str):
             if state.startswith("call:"):
                 state = default_event_call_function(call_string=state, event=flat_event, profile=flat_profile)
-
-            flat_event['journey.state'] = state
+            if state:
+                flat_event['journey.state'] = state
 
     tags = get_default_mappings_for(flat_event['type'], 'tags')
     if tags:
