@@ -30,7 +30,7 @@
       "data.pii.firstname":     ["data.pii.firstname", "equal"],
       "data.pii.lastname":      ["data.pii.lastname", "equal"]
     },
-    "tags": ["entity:profile"],
+    "tags": ["entity:profile","event:behavioral"],
     "state": "consideration"
   },
   {
@@ -65,7 +65,7 @@
       "data.pii.firstname":     ["data.pii.firstname", "equal"],
       "data.pii.lastname":      ["data.pii.lastname", "equal"]
     },
-    "tags": ["entity:profile"],
+    "tags": ["entity:profile","event:behavioral"],
     "state": "consideration"
   },
   {
@@ -76,7 +76,7 @@
       "email": "string",
       "login": "string"
     },
-    "tags": ["entity:profile"],
+    "tags": ["entity:profile","event:behavioral"],
     "state": "retention"
   },
   {

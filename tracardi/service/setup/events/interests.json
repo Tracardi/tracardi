@@ -10,7 +10,15 @@
     "tags": [
       "event:behavioral"
     ],
-    "state": "call:tracardi.service.setup.events.interests.logic,increase_interest"
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,increase_interest"
+        ]
+      ]
+    }
   },
   {
     "name": "Decrease Interest",
@@ -23,7 +31,15 @@
     "tags": [
       "event:behavioral"
     ],
-    "state": "call:tracardi.service.setup.events.interests.logic,decrease_interest"
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,decrease_interest"
+        ]
+      ]
+    }
   },
   {
     "name": "Reset Interest",
@@ -36,7 +52,14 @@
     "tags": [
       "event:behavioral"
     ],
-    "state": "call:tracardi.service.setup.events.interests.logic,reset_interest",
-    "logic_description": "Reset interest for current profile to defined value."
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,reset_interest"
+        ]
+      ]
+    }
   }
 ]

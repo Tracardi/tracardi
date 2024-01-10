@@ -1,12 +1,5 @@
-import logging
-
 from dotty_dict import Dotty
-
-from tracardi.config import tracardi
 from tracardi.domain.profile import FlatProfile
-from tracardi.exceptions.log_handler import log_handler
-
-
 
 
 def _get_interest_and_value(event: Dotty):
