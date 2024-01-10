@@ -405,4 +405,6 @@ class FlatProfile(Dotty):
             self[interest_key] = -value
 
 
-
+    def reset_interest(self, interest, value=0):
+        interest_key = f'interests.{interest}'
+        self[interest_key] = value

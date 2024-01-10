@@ -1,6 +1,12 @@
+import logging
+
 from dotty_dict import Dotty
 
+from tracardi.config import tracardi
 from tracardi.domain.profile import FlatProfile
+from tracardi.exceptions.log_handler import log_handler
+
+
 
 
 def _get_interest_and_value(event: Dotty):
@@ -23,3 +29,8 @@ def decrease_interest(event: Dotty, profile: FlatProfile):
     interest, value = _get_interest_and_value(event)
     if isinstance(interest, str):
         profile.decrease_interest(interest, value)
+
+def reset_interest(event: Dotty, profile: FlatProfile):
+    interest, value = _get_interest_and_value(event)
+    if isinstance(interest, str):
+        profile.reset_interest(interest, value)
