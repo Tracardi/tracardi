@@ -2,6 +2,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Optional, List
 
+from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -89,6 +90,8 @@ async def event_destination_dispatch(load_destination_task: Callable,
             if session is None:
                 logger.warning(f"Dispatching event without session. New session created.")
                 session = Session.new()
+                if profile:
+                    session.profile = Entity(id=profile.id)
 
             logger.info(f"Dispatching event with destination class {destination_class}.")
             await destination_instance.dispatch_event(reshaped_data, profile=profile, session=session, event=ev)

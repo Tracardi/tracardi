@@ -2,6 +2,7 @@ from typing import Tuple, Optional
 
 from uuid import uuid4
 
+from tracardi.domain.entity import Entity
 from tracardi.service.tracking.storage.session_storage import load_session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import Session
@@ -23,17 +24,12 @@ async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Optio
         session_id = str(uuid4())
 
         session = Session.new(id=session_id)
+        if isinstance(tracker_payload.profile, Entity):
+            session.profile = Entity(id=tracker_payload.profile.id)
 
         # Set session to tracker payload
 
         tracker_payload.force_session(session)
-
-        # TODO remove after 12-2023
-        # # Do not save
-        #
-        # tracker_payload.options.update({
-        #     "saveSession": False
-        # })
 
         return session, tracker_payload
 

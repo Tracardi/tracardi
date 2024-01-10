@@ -130,13 +130,15 @@ class Session(Entity):
         )
 
     @staticmethod
-    def new(id: Optional[str] = None) -> 'Session':
+    def new(id: Optional[str] = None, profile_id: str=None) -> 'Session':
         session = Session(
             id=str(uuid.uuid4()) if not id else id,
             metadata=SessionMetadata()
         )
         session.fill_meta_data()
         session.operation.new = True
+        if profile_id is not None:
+            session.profile = Entity(id=profile_id)
 
         return session
 

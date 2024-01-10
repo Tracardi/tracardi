@@ -123,6 +123,7 @@ class Tracker:
                     # If no session create one
                     if tracker_payload.session is None:
                         tracker_payload.session = Session.new()
+                        tracker_payload.session.profile = Entity(id=referred_profile_id)
 
                 else:
                     logger.warning(f"Referred Tracardi Profile Id {referred_profile_id} is invalid.")

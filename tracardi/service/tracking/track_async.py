@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 import time
 import logging
 
-from tracardi.domain.session import FrozenSession
+# from tracardi.domain.session import FrozenSession
 from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
@@ -256,7 +256,7 @@ async def process_track_data(source: EventSource,
                     "warnings": []
                 }
         finally:
-            print(0, profile.has_not_saved_changes())
+            print(0, profile.has_not_saved_changes(), profile.need_auto_merging())
             if profile.need_auto_merging():
                 print(1, profile.ids)
                 print(2, profile.get_auto_merge_ids())

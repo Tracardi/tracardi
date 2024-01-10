@@ -63,7 +63,7 @@ def register() -> Plugin:
                         FormField(
                             id="interest",
                             name="Interest name",
-                            description="Please type interest name.",
+                            description="Please type interest name. You can reference the name form payload, or event properties if needed.",
                             component=FormComponent(type="dotPath", props={"label": "Interest name"})
                         ),
                         FormField(

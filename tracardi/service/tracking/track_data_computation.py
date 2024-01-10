@@ -38,7 +38,6 @@ async def compute_data(tracker_payload: TrackerPayload,
                        source: EventSource,
                        console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
 Optional[FieldTimestampMonitor]]:
-
     # We need profile and session before async
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
@@ -143,12 +142,23 @@ Optional[FieldTimestampMonitor]]:
     return profile, session, events, tracker_payload, field_timestamp_monitor
 
 
+def _save_profile_and_session(profile: Profile, session: Session):
+
+    # Update only when needed
+
+    if profile and profile.has_not_saved_changes():
+        save_profile_cache(profile)
+
+    if session and session.has_not_saved_changes():
+        save_session_cache(session)
+
+
 async def lock_and_compute_data(
         tracker_payload: TrackerPayload,
         tracker_config: TrackerConfig,
         source: EventSource,
-        console_log: ConsoleLog) -> Tuple[Profile, Session, List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
-
+        console_log: ConsoleLog) -> Tuple[
+    Profile, Session, List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
     if tracardi.lock_on_data_computation:
         _redis = RedisClient()
         async with (
@@ -177,13 +187,7 @@ async def lock_and_compute_data(
             # MUST BE INSIDE MUTEX
             # Update only when needed
 
-            if profile and profile.has_not_saved_changes():
-                save_profile_cache(profile)
-
-            if session and session.has_not_saved_changes():
-                save_session_cache(session)
-
-
+            _save_profile_and_session(profile, session)
 
     else:
 
@@ -194,14 +198,6 @@ async def lock_and_compute_data(
             console_log
         )
 
-        # Update only when needed
-
-        if profile and profile.has_not_saved_changes():
-            save_profile_cache(profile)
-
-        if session and session.has_not_saved_changes():
-            # If saving by queue then ttl set to 30 min.
-            save_session_cache(session)
-
+        _save_profile_and_session(profile, session)
 
     return profile, session, events, tracker_payload, field_timestamp_monitor
