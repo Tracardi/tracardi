@@ -73,7 +73,7 @@ class Profile(Entity):
 
     def set_aux_auto_merge(self, auto_merge_ids: Set[str]):
         if 'auto_merge' not in self.metadata.system.aux or not isinstance(self.metadata.system.aux['auto_merge'], (set, list)):
-            self.metadata.system.aux['auto_merge'] = auto_merge_ids
+            self.metadata.system.aux['auto_merge'] = list(auto_merge_ids)
         else:
             self.metadata.system.aux['auto_merge'] = list(set(self.metadata.system.aux['auto_merge']).union(auto_merge_ids))
 
