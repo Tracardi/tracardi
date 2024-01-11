@@ -21,7 +21,7 @@
       "data.loyalty.card.issuer":   ["data.loyalty.card.issuer", "equal"],
       "data.loyalty.card.expires":  ["data.loyalty.card.expires", "equal"]
     },
-    "tags": ["entity:profile"],
+    "tags": ["event:operational"],
     "state": "retention"
   },
   {
@@ -40,7 +40,7 @@
       "data.loyalty.card.issuer":   [null, "delete"],
       "data.loyalty.card.expires":  [null, "delete"]
     },
-    "tags": ["entity:profile"],
+    "tags": ["event:operational"],
     "state": "retention"
   }
 ]

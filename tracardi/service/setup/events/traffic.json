@@ -35,7 +35,7 @@
     "copy": {
       "hit.query":   "properties.query"
     },
-    "tags": ["activity:browsing", "activity:search", "entity:product", "event:behavioral"],
+    "tags": ["activity:browsing", "activity:browsing:search", "event:operational"],
     "state": "awareness"
   },
   {
@@ -50,7 +50,7 @@
       "hit.category":  "properties.category",
       "hit.query":     "properties.query"
     },
-    "tags": ["activity:browsing", "activity:search", "event:behavioral"]
+    "tags": ["activity:browsing:search", "event:behavioral"]
   },
   {
     "name": "Page View",

@@ -33,7 +33,7 @@
       "data.ec.product.quantity": "properties.quantity",
       "data.ec.product.position": "properties.position"
     },
-    "tags": ["activity:browsing", "entity:product","event:behavioral"],
+    "tags": ["activity:browsing", "event:behavioral"],
     "state": "awareness"
   },
   {
@@ -66,7 +66,7 @@
       "data.ec.product.variant":   "properties.variant",
       "data.ec.product.price":     "properties.price"
     },
-    "tags": ["activity:browsing", "entity:product", "event:behavioral"],
+    "tags": ["activity:browsing", "event:behavioral"],
     "state": "awareness"
   },
   {
@@ -113,7 +113,7 @@
       "data.ec.product.price":    "properties.price",
       "data.ec.product.quantity": "properties.quantity"
     },
-    "tags": ["entity:product", "event:behavioral"],
+    "tags": ["event:behavioral"],
     "state": "consideration"
   },
   {
@@ -149,7 +149,7 @@
       "data.ec.product.price":     "properties.price",
       "data.ec.product.quantity":  "properties.quantity"
     },
-    "tags": ["entity:product","event:behavioral"],
+    "tags": ["event:behavioral"],
     "state": "consideration"
   },
   {
@@ -195,7 +195,7 @@
       ]
     },
     "tags": [
-      "entity:order"
+      "event:behavioural"
     ],
     "state": "purchase"
   },
@@ -236,7 +236,7 @@
       ]
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   },
@@ -257,7 +257,7 @@
       "data.ec.checkout.status": "properties.status"
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   },
@@ -307,7 +307,7 @@
       ]
     },
     "tags": [
-      "entity:order"
+      "event:behavioral"
     ],
     "state": "purchase"
   },
@@ -333,7 +333,7 @@
       "data.payment.credit_card.holder":   "properties.credit_card.holder"
     },
     "tags": [
-      "entity:order"
+      "event:behavioral"
     ],
     "state": "purchase"
   },
@@ -390,7 +390,7 @@
 
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   },
@@ -410,7 +410,7 @@
       "data.ec.order.status": "properties.status"
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   },
@@ -430,7 +430,7 @@
       "data.ec.order.status":  "properties.status"
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   },
@@ -450,7 +450,7 @@
       "data.ec.order.status": "properties.status"
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   },
@@ -467,7 +467,7 @@
       "data.ec.order.status":  "properties.string"
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   },
@@ -484,7 +484,7 @@
       "data.marketing.channel":  "properties.media"
     },
     "tags": [
-      "entity:product"
+      "event:behavioral"
     ],
     "state": "advocacy"
   },
@@ -503,7 +503,7 @@
       "data.ec.product.rate":   "properties.rate"
     },
     "tags": [
-      "entity:product"
+      "event:behavioral"
     ],
     "state": "retention"
   },
@@ -518,7 +518,7 @@
       "data.ec.product.id": "properties.id"
     },
     "tags": [
-      "entity:product"
+      "event:behavioral"
     ],
     "state": "retention"
   },
@@ -543,7 +543,7 @@
       "data.ec.order.income.due_date":    "properties.due_date"
     },
     "tags": [
-      "entity:order"
+      "event:operational"
     ],
     "state": "purchase"
   }

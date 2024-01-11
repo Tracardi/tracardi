@@ -5,8 +5,7 @@
     "id": "session-opened",
     "properties": {},
     "tags": [
-      "event:internal",
-      "entity:session"
+      "event:system"
     ],
     "state": "call:tracardi.service.setup.events.journey.logic,session_opened"
   },
@@ -16,8 +15,7 @@
     "id": "visit-started",
     "properties": {},
     "tags": [
-      "event:internal",
-      "entity:session"
+      "event:system"
     ]
   },
     {
@@ -26,8 +24,7 @@
     "id": "visit-ended",
     "properties": {},
     "tags": [
-      "event:internal",
-      "entity:session"
+      "event:system"
     ]
   },
   {
@@ -36,8 +33,7 @@
     "id": "profile-created",
     "properties": {},
     "tags": [
-      "event:internal",
-      "entity:profile"
+      "event:system"
     ],
     "state": "awareness"
   },
@@ -49,8 +45,7 @@
       "reason": "string"
     },
     "tags": [
-      "event:internal",
-      "entity:profile"
+      "event:system"
     ]
   },
   {
@@ -59,8 +54,7 @@
     "id": "profile-archived",
     "properties": {},
     "tags": [
-      "event:internal",
-      "entity:profile"
+      "event:system"
     ]
   }
 ]
