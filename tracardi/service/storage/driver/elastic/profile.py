@@ -10,6 +10,17 @@ from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
 
 
+async def load_profiles_for_auto_merge() -> StorageRecords:
+    query = {
+      "query": {
+        "exists": {
+          "field": "metadata.system.aux.auto_merge"
+        }
+      }
+    }
+
+    return await storage_manager('profile').query(query)
+
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
     """
     @throws DuplicatedRecordException

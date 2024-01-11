@@ -33,7 +33,8 @@ async def _load_duplicates(profile_ids: List[str]):
 async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
 
     if isinstance(profile_ids, list):
-        profile_ids = [profile_id, *profile_ids]
+        set(profile_ids).add(profile_id)
+        profile_ids = list(profile_ids)
     else:
         profile_ids = [profile_id]
 
