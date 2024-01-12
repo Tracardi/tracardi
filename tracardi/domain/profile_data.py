@@ -163,7 +163,7 @@ class ProfileIdentifier(BaseModel):
     passport: Optional[str] = None
     credit_card: Optional[str] = None
     token: Optional[str] = None
-    coupons: Optional[str | List[str]] = None
+    coupons: Optional[Union[str,List[str]]] = None
 
 
 class ProfileSocialMedia(BaseModel):
