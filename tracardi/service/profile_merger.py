@@ -352,6 +352,8 @@ class ProfileMerger:
 
             await _delete_profiles(records_to_delete)
 
+            #todo remove profiles also from cache
+
             # Replace current profile with merged profile
             profile.replace(merged_profile)
 

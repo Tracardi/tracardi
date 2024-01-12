@@ -121,6 +121,7 @@ class WebHookBridge(ConfigurableBridge):
                     if not tracker_payload.profile:
                         tracker_payload.replace_profile(str(uuid4()))
 
+                    # Create random if does not exist
                     if not tracker_payload.session:
                         tracker_payload.replace_session(str(uuid4()))
 
