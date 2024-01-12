@@ -256,9 +256,10 @@ async def process_track_data(source: EventSource,
                     "warnings": []
                 }
         finally:
-            print(0, profile.has_not_saved_changes(), profile.need_auto_merging())
-            if profile.need_auto_merging():
-                print(1, profile.ids)
-                print(2, profile.get_auto_merge_ids())
+            # print(0, profile.has_not_saved_changes(), profile.need_auto_merging())
+            if profile and profile.need_auto_merging():
+                pass
+            #     print(1, profile.ids)
+            #     print(2, profile.get_auto_merge_ids())
     finally:
         logger.info(f"Process time {time.time() - tracking_start}")
