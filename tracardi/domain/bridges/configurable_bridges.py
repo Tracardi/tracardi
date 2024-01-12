@@ -37,16 +37,17 @@ class WebHookBridge(ConfigurableBridge):
                 if self.config['generate_profile'] is True:
 
                     if 'replace_session_id' in self.config:
+                        # Webhooks have only one event, so it is save to get it from tracker_payload.events[0]
+                        _properties = tracker_payload.events[0].properties
                         try:
                             session_id_ref = self.config['replace_session_id'].strip()
                             if bool(session_id_ref):
-                                # Webhooks have only one event, so it is save to get it from tracker_payload.events[0]
-                                session_id = tracker_payload.events[0].properties[session_id_ref]
+                                session_id = _properties[session_id_ref]
                                 tracker_payload.replace_session(session_id)
                         except KeyError as e:
                             message = f"Could not generate set session for a webhook. " \
                                       f"Event stays session-less. " \
-                                      f"Probable reason: Missing event properties: {str(e)}"
+                                      f"Probable reason: Missing event properties. Expecting {str(e)} in {_properties}"
                             logger.error(message)
                             console_log.append(Console(
                                 flow_id=None,
@@ -62,6 +63,7 @@ class WebHookBridge(ConfigurableBridge):
                             ))
 
                     if 'replace_profile_id' in self.config:
+                        _properties = tracker_payload.events[0].properties
                         try:
                             profile_id_ref = self.config['replace_profile_id'].strip()
 
@@ -69,7 +71,7 @@ class WebHookBridge(ConfigurableBridge):
                             if bool(profile_id_ref):
 
                                 # Webhooks have only one event, so it is save to get it from self.events[0]
-                                _properties = tracker_payload.events[0].properties
+
                                 _profile_id_value = _properties[profile_id_ref]
 
                                 if 'identify_profile_by' not in self.config:
@@ -98,7 +100,7 @@ class WebHookBridge(ConfigurableBridge):
                         except KeyError as e:
                             message = f"Could not generate profile and session for a webhook. " \
                                       f"Event stays profile-less. " \
-                                      f"Probable reason: Missing event properties: {str(e)}"
+                                      f"Probable reason:  Missing event properties. Expecting {str(e)} in {_properties}"
                             logger.error(message)
                             console_log.append(Console(
                                 flow_id=None,
