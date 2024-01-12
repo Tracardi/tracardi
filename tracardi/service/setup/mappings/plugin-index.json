@@ -19,7 +19,16 @@
           "time": {
             "properties": {
               "insert": {
-                "type": "date"
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+              },
+              "create": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
+              },
+              "update": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
               }
             }
           }
