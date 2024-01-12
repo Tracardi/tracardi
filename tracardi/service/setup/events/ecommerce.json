@@ -415,26 +415,6 @@
     "state": "purchase"
   },
   {
-    "id": "order-dispatched",
-    "name": "Order Dispatched",
-    "description": "Order dispatched from warehouse",
-    "const": {
-      "status": "dispatched"
-    },
-    "properties": {
-      "id": "string",
-      "status": "string"
-    },
-    "copy": {
-      "data.ec.order.id":      "properties.id",
-      "data.ec.order.status":  "properties.status"
-    },
-    "tags": [
-      "event:operational"
-    ],
-    "state": "purchase"
-  },
-  {
     "id": "order-delivered",
     "name": "Order Delivered",
     "description": "Order delivered to customer",

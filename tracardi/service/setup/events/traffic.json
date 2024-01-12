@@ -74,7 +74,7 @@
     "properties": {
       "category": "string"
     },
-    "traits": {
+    "copy": {
       "hit.category": "properties.category"
     },
     "tags": ["activity:printing", "event:behavioral"],
@@ -88,7 +88,7 @@
       "name": "string",
       "category": "string"
     },
-    "traits": {
+    "copy": {
       "hit.name":      "properties.name",
       "hit.category":  "properties.category"
     },
