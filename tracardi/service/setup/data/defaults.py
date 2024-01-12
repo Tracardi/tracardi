@@ -43,7 +43,7 @@ open_webhook_source_bridge = Bridge(
         "generate_profile": False,
         "replace_profile_id": "",
         "replace_session_id": "",
-        "identify_profile_by": None
+        "identify_profile_by": "none"
     },
     form=Form(groups=[
         FormGroup(
@@ -79,7 +79,7 @@ open_webhook_source_bridge = Bridge(
                         props={
                             "label": "Profile identified by",
                             "items": {
-                                "none": "No Reference",
+                                "none": "No Reference - Identification Disabled",
                                 "e-mail": 'Main E-Mail',
                                 "phone": "Main Phone",
                                 "id": "Custom ID"

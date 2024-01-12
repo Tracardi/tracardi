@@ -2,6 +2,8 @@ import logging
 from typing import Optional, Tuple
 from uuid import uuid4
 
+from dotty_dict import Dotty
+
 from tracardi.config import tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.named_entity import NamedEntity
@@ -38,16 +40,16 @@ class WebHookBridge(ConfigurableBridge):
 
                     if 'replace_session_id' in self.config:
                         # Webhooks have only one event, so it is save to get it from tracker_payload.events[0]
-                        _properties = tracker_payload.events[0].properties
+                        flat_properties = Dotty(tracker_payload.events[0].properties)
                         try:
                             session_id_ref = self.config['replace_session_id'].strip()
                             if bool(session_id_ref):
-                                session_id = _properties[session_id_ref]
+                                session_id = flat_properties[session_id_ref]
                                 tracker_payload.replace_session(session_id)
                         except KeyError as e:
                             message = f"Could not generate set session for a webhook. " \
                                       f"Event stays session-less. " \
-                                      f"Probable reason: Missing event properties. Expecting {str(e)} in {_properties}"
+                                      f"Probable reason: Missing event properties. Expecting {str(e)} in {flat_properties}"
                             logger.error(message)
                             console_log.append(Console(
                                 flow_id=None,
@@ -63,7 +65,7 @@ class WebHookBridge(ConfigurableBridge):
                             ))
 
                     if 'replace_profile_id' in self.config:
-                        _properties = tracker_payload.events[0].properties
+                        flat_properties = Dotty(tracker_payload.events[0].properties)
                         try:
                             profile_id_ref = self.config['replace_profile_id'].strip()
 
@@ -72,14 +74,15 @@ class WebHookBridge(ConfigurableBridge):
 
                                 # Webhooks have only one event, so it is save to get it from self.events[0]
 
-                                _profile_id_value = _properties[profile_id_ref]
+                                _profile_id_value = flat_properties[profile_id_ref]
 
-                                if 'identify_profile_by' not in self.config:
+                                if 'identify_profile_by' not in self.config or not bool(self.config['identify_profile_by']):
                                     # Old way to handle identification
-                                    profile_id = _properties[profile_id_ref]
+                                    profile_id = flat_properties[profile_id_ref]
+                                    logger.warning(f"No identification type defined. Identifying with custom ID.")
                                 elif not tracardi.auto_profile_merging:
                                     # Old way to handle identification
-                                    profile_id = _properties[profile_id_ref]
+                                    profile_id = flat_properties[profile_id_ref]
                                 else:
                                     # New way to handle identification
                                     if self.config['identify_profile_by'] == 'e-mail':
@@ -100,7 +103,7 @@ class WebHookBridge(ConfigurableBridge):
                         except KeyError as e:
                             message = f"Could not generate profile and session for a webhook. " \
                                       f"Event stays profile-less. " \
-                                      f"Probable reason:  Missing event properties. Expecting {str(e)} in {_properties}"
+                                      f"Probable reason:  Missing event properties. Expecting {str(e)} in {flat_properties}"
                             logger.error(message)
                             console_log.append(Console(
                                 flow_id=None,
