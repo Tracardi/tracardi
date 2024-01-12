@@ -1,13 +1,20 @@
+import logging
 from typing import Union, Tuple
 
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.exception import DuplicatedRecordException
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
 
 def load_profiles_for_auto_merge():
@@ -22,10 +29,6 @@ def load_profiles_for_auto_merge():
     return storage_manager('profile').scan(query, batch=1000)
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
-    """
-    @throws DuplicatedRecordException
-    """
-
     query = {
         "size": 2,
         "query": {
@@ -49,20 +52,16 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
 
     profile_records = await storage_manager('profile').query(query)
 
-    if profile_records.total > 1:
-        raise DuplicatedRecordException("Profile {} id duplicated in the database..".format(profile_id))
-
-    if profile_records == 0:
+    if profile_records.total <= 0:
         return None
+
+    if profile_records.total > 1:
+        logger.warning("Profile {} id duplicated in the database. It will be merged with APM worker.".format(profile_id))
 
     return profile_records.first()
 
 
 def load_by_ids(profile_ids: List[str], batch):
-    """
-    @throws DuplicatedRecordException
-    """
-
     query = {
         "query": {
             "bool": {
@@ -95,7 +94,6 @@ async def load_profile_without_identification(tracker_payload,
                                               console_log: Optional[ConsoleLog] = None) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
-    @throws DuplicatedRecordException
     """
     if tracker_payload.profile is None:
         return None
