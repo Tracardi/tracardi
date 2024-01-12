@@ -35,7 +35,7 @@
     "copy": {
       "hit.query":   "properties.query"
     },
-    "tags": ["activity:browsing", "activity:browsing:search", "event:operational"],
+    "tags": ["activity:browsing", "activity:browsing:search", "event:behavioral"],
     "state": "awareness"
   },
   {
