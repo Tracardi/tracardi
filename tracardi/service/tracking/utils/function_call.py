@@ -16,7 +16,11 @@ def default_event_call_function(call_string, event: Dotty, profile: Dotty):
     module = import_package(module)
     state_function = load_callable(module, function)
     try:
+        if state_function is None:
+            raise ValueError(f"Could not find function {function} in module {module}")
+
         return state_function(event, profile)
+
     except Exception as e:
         logger.error(str(e))
         return None
