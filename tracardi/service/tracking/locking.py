@@ -1,5 +1,3 @@
-import contextlib
-import inspect
 import logging
 import time
 import msgpack
@@ -19,21 +17,15 @@ BROKE = 1
 EXPIRED = 2
 RELEASED = 3
 
-unlock_tolerance = 3
-
 
 class Lock:
 
     def __init__(self, redis, key, default_lock_ttl: float):
         self._redis = redis
         self._key = key
-        self._lock_ttl = default_lock_ttl + unlock_tolerance
+        self._lock_ttl = default_lock_ttl
         self._mutex_name = None
         self._consumers = []
-        if self.is_locked():
-            self._state = LOCKED
-        else:
-            self._state = RELEASED
 
     @property
     def ttl(self):
@@ -45,32 +37,36 @@ class Lock:
 
     @property
     def state(self):
-        if not self.is_locked():
-            self._set_state(RELEASED)
+        payload = self.get_lock_metadata()
+        if not payload:
+            return RELEASED
 
-        return self._state
+        _, _, state = payload
 
-    def lock(self, mutex_name: str, lock_ttl=None):
+        return state
+
+    def lock(self, mutex_name: str):
+        self._set_lock_metadata(time.time(), mutex_name, LOCKED)
+
+    def _set_lock_metadata(self, time: float, mutex_name, state: int):
         payload = msgpack.packb((
-            time.time(),
-            mutex_name
+            time,
+            mutex_name,
+            state
         ))
-        self._redis.set(self._key, payload, ex=lock_ttl if lock_ttl else self._lock_ttl)
-        self._set_state(LOCKED)
+        self._redis.set(self._key, payload, ex=self._lock_ttl)
 
     def delete(self):
         self._redis.delete(self._key)
 
-    def unlock(self, mutex_name: str):
+    def unlock(self):
         self.delete()
-        self._set_state(RELEASED)
         self._mutex_name = None
 
     def break_in(self):
-        self._set_state(BROKE)
+        self._update_state(BROKE)
 
     def expire(self):
-        self._set_state(EXPIRED)
         self.delete()
 
     def expires(self):
@@ -79,16 +75,17 @@ class Lock:
     def is_locked(self) -> bool:
         return self._redis.exists(self._key) != 0
 
-    def get_lock_metadata(self) -> Optional[Tuple[str, str]]:
+    def get_lock_metadata(self) -> Optional[Tuple[str, str, int]]:
         payload = self._redis.get(self._key)
         if payload:
-            return msgpack.unpackb(payload)
+            return  msgpack.unpackb(payload)
+
         return None
 
     def get_locked_inside(self) -> Optional[str]:
         metadata = self.get_lock_metadata()
         if metadata:
-            _, locker = metadata
+            _, locker, _ = metadata
             return locker
         return None
 
@@ -96,8 +93,11 @@ class Lock:
     def get_key(namespace: str, entity: str, id: str):
         return f"{namespace}{entity}:{id}" if id else None
 
-    def _set_state(self, state):
-        self._state = state
+    def _update_state(self, new_state):
+        payload = self._redis.get(self._key)
+        if payload:
+            lock_time, mutex_name, state = msgpack.unpackb(payload)
+            self._set_lock_metadata(lock_time, mutex_name, new_state)
 
     def get_state(self):
         if self.state == BROKE:
@@ -110,10 +110,10 @@ class Lock:
             return 'expired'
 
     def is_broke(self) -> bool:
-        return self._state == BROKE
+        return self.state == BROKE
 
     def is_expired(self) -> bool:
-        return self._state == EXPIRED
+        return self.state == EXPIRED
 
 
 class _GlobalMutexLock:
@@ -124,7 +124,6 @@ class _GlobalMutexLock:
         self._wait = 0.05
         self._time = time.time()
         self._break_after_time = break_after_time
-        self._auto_open_after_time = self._lock.ttl - unlock_tolerance  # release 3 seconds before
 
         if self._break_after_time is None:
             self._break_after_time = self._lock.ttl + 10
@@ -144,7 +143,7 @@ class _GlobalMutexLock:
     def _get_lock_time(self) -> float:
         metadata = self._lock.get_lock_metadata()
         if metadata:
-            lock_time, _ = metadata
+            lock_time, _, _ = metadata
             return float(lock_time)
         return 0.0
 
@@ -158,10 +157,10 @@ class _GlobalMutexLock:
     def _exit(self, exc_type):
         if exc_type is not None:
             logger.info(f"Unlocking due to error.")
-            self._lock.unlock(self._name)
+            self._lock.unlock()
 
         elif self._lock.key:
-            self._lock.unlock(self._name)
+            self._lock.unlock()
             logger.debug(f"Unlocked in {time.time() - self._time}")
 
 
@@ -185,13 +184,6 @@ class GlobalMutexLock(_GlobalMutexLock):
                     logger.info(
                         f"Lock {self._lock.key} breaks. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
                     self._lock.break_in()  # Still locked but break in marked BROKE
-                    return self._lock
-
-                _expire, _time_to_expire = self._check_if_it_is_time(lock_time, grace_period=self._auto_open_after_time)
-                if _expire:  # we are approaching the expiration time
-                    logger.info(
-                        f"Lock {self._lock.key} expires after {self._auto_open_after_time}s. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
-                    self._lock.expire()  # Still locked but break in marked BROKE
                     return self._lock
 
                 logger.debug(
@@ -231,13 +223,6 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
                     logger.info(
                         f"Lock {self._lock.key} breaks. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
                     self._lock.break_in()  # Still locked but break in marked BROKE
-                    return self._lock
-
-                _expire, _time_to_expire = self._check_if_it_is_time(lock_time, grace_period=self._auto_open_after_time)
-                if _expire:  # we are approaching the expiration time
-                    logger.info(
-                        f"Lock {self._lock.key} expires after {self._auto_open_after_time}s. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
-                    self._lock.expire()  # Still locked but break in marked BROKE
                     return self._lock
 
                 logger.debug(

@@ -2,36 +2,52 @@ from time import sleep
 
 from tracardi.context import ServerContext, Context
 from tracardi.service.storage.redis_client import RedisClient
-from tracardi.service.tracking.locking import Lock, unlock_tolerance
+from tracardi.service.tracking.locking import Lock, RELEASED
 
 
 def test_lock_ttl():
     with ServerContext(Context(production=False)):
         redis = RedisClient()
         key = Lock.get_key("namespace:", "profile", "10")
-        lock = Lock(redis, key, default_lock_ttl=10)
+        lock = Lock(redis, key, default_lock_ttl=1)
         assert lock.is_locked() is False
-        lock.lock("name1", lock_ttl=1)
+        lock.lock("name1")
         assert lock.is_locked() is True
         sleep(2)
         assert lock.is_locked() is False
-        lock.unlock("name1")
+        lock.unlock()
 
 def test_lock_expires():
     with ServerContext(Context(production=False)):
         redis = RedisClient()
         key = Lock.get_key("namespace:", "profile", "10")
         lock = Lock(redis, key, default_lock_ttl=10)
-        assert lock.expires() == 10 + unlock_tolerance
+        assert lock.state == RELEASED
+        assert lock.expires() == 10
         lock.lock('name1')
-        assert lock.expires() == 10 + unlock_tolerance
+        assert lock.expires() == 10
 
 
-def test_lock_2():
+def test_lock_global_value():
     with ServerContext(Context(production=False)):
         redis = RedisClient()
         key = Lock.get_key("namespace:", "profile", "10")
-        lock = Lock(redis, key, default_lock_ttl=10)
-        lock.lock("name1", lock_ttl=1)
-        lock.lock("name2", lock_ttl=1)
-        print(lock.get_lock_metadata())
+        lock1 = Lock(redis, key, default_lock_ttl=1)
+        assert not lock1.is_locked()
+
+        lock1.lock("name1")
+
+        lock2 = Lock(redis, key, default_lock_ttl=10)
+        assert lock2.is_locked()
+        assert lock1.get_locked_inside() == lock2.get_locked_inside()
+        assert lock1.state == lock2.state
+
+        lock1.break_in()
+        assert lock1.get_locked_inside() == lock2.get_locked_inside()
+        assert lock1.state == lock2.state
+
+        lock2.unlock()
+
+        assert not lock1.is_locked()
+        assert lock1.get_locked_inside() == lock2.get_locked_inside()
+        assert lock1.state == lock2.state
