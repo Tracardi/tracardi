@@ -11,7 +11,7 @@ from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.event_data_computation import compute_events
-from tracardi.service.tracking.locking import mutex, Lock
+from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
     update_profile_visits, update_profile_time
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
@@ -168,8 +168,8 @@ async def lock_and_compute_data(
         session_lock = Lock(_redis, session_key, default_lock_ttl=3)
 
         async with (
-            mutex(profile_lock, name='lock_and_compute_data_profile'),
-            mutex(session_lock, name='lock_and_compute_data_session')
+            async_mutex(profile_lock, name='lock_and_compute_data_profile'),
+            async_mutex(session_lock, name='lock_and_compute_data_session')
         ):
 
             # Always use GlobalUpdateLock to update profile and session
