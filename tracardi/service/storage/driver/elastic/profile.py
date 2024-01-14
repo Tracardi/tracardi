@@ -1,6 +1,7 @@
 import logging
 from typing import Union, Tuple
 
+from tracardi.context import get_context
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
@@ -25,7 +26,7 @@ def load_profiles_for_auto_merge():
         }
       }
     }
-
+    print(f"Loading {query} in context {get_context()}")
     return storage_manager('profile').scan(query, batch=1000)
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
