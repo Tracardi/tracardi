@@ -11,7 +11,7 @@ from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.event_data_computation import compute_events
-from tracardi.service.tracking.locking import GlobalMutexLock
+from tracardi.service.tracking.locking import mutex, Lock
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
     update_profile_visits, update_profile_time
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
@@ -161,19 +161,16 @@ async def lock_and_compute_data(
     Profile, Session, List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
     if tracardi.lock_on_data_computation:
         _redis = RedisClient()
+        profile_key = Lock.get_key(Collection.lock_tracker, "profile", get_entity_id(tracker_payload.profile))
+        profile_lock = Lock(_redis, profile_key, default_lock_ttl=3)
+
+        session_key = Lock.get_key(Collection.lock_tracker, "session", get_entity_id(tracker_payload.session))
+        session_lock = Lock(_redis, session_key, default_lock_ttl=3)
+
         async with (
-            GlobalMutexLock(get_entity_id(tracker_payload.profile),
-                            'profile',
-                            namespace=Collection.lock_tracker,
-                            redis=_redis,
-                            name='lock_and_compute_data'
-                            ),
-            GlobalMutexLock(get_entity_id(tracker_payload.session),
-                            'session',
-                            namespace=Collection.lock_tracker,
-                            redis=_redis,
-                            name='lock_and_compute_data'
-                            )):
+            mutex(profile_lock, name='lock_and_compute_data_profile'),
+            mutex(session_lock, name='lock_and_compute_data_session')
+        ):
 
             # Always use GlobalUpdateLock to update profile and session
 

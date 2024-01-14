@@ -8,7 +8,7 @@ from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
-from tracardi.service.tracking.locking import GlobalMutexLock
+from tracardi.service.tracking.locking import Lock, mutex
 from tracardi.service.utils.getters import get_entity_id
 
 redis_cache = RedisCache(ttl=None)
@@ -82,11 +82,7 @@ def merge_with_cache_and_save_session(session: Session, context: Context):
 
 
 async def lock_merge_with_cache_and_save_session(session: Session, context: Context, lock_name=None):
-    async with GlobalMutexLock(
-            get_entity_id(session),
-            'session',
-            namespace=Collection.lock_tracker,
-            redis=_redis,
-            name=lock_name
-    ):
+    session_key = Lock.get_key(Collection.lock_tracker, "session", get_entity_id(session))
+    session_lock = Lock(_redis, session_key, default_lock_ttl=3)
+    async with mutex(session_lock, name=lock_name):
         return merge_with_cache_and_save_session(session, context)
