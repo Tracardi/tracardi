@@ -160,8 +160,6 @@ class TracardiConfig(metaclass=Singleton):
 
         self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
 
-        self.lock_on_data_computation = env.get('LOCK_ON_DATA_COMPUTATION', 'yes') == 'yes'
-
         # Temporary flag
         self.new_collector = env.get('NEW_COLLECTOR', 'yes').lower() == 'yes'
 

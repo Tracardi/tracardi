@@ -71,6 +71,9 @@ class Lock:
 
 
     def is_locked(self) -> bool:
+        if self._key is None:
+            return False
+        print(f"checking {self._key} = {self._redis.exists(self._key) != 0}")
         return self._redis.exists(self._key) != 0
 
     def get_lock_metadata(self) -> Optional[Tuple[str, str, int]]:
@@ -197,6 +200,8 @@ class GlobalMutexLock(_GlobalMutexLock):
         self._lock.lock(self._name)
 
     def __enter__(self) -> Lock:
+        if self._lock.key is None:
+            return self._lock
         self._keep_locked_for()
         return self._lock
 
@@ -223,7 +228,7 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
                     self._lock.break_in()  # Still locked but break in marked BROKE
                     return self._lock
 
-                logger.debug(
+                logger.info(
                     f"Suppressing execution of {self._lock.key}. Process {self._lock.get_locked_inside()} is using resource."
                     f"Expires in {self._lock.ttl}s. Waiting no longer then {_time_to_break}s then skipping execution."
                 )
@@ -236,6 +241,8 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
         self._lock.lock(self._name)
 
     async def __aenter__(self):
+        if self._lock.key is None:
+            return self._lock
         await self._keep_locked_for()
         return self._lock
 
