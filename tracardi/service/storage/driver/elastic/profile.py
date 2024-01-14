@@ -47,7 +47,14 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
                 ],
                 "minimum_should_match": 1
             }
-        }
+        },
+        "sort": [
+            {
+                "metadata.time.update": {
+                    "order": "desc"
+                }
+            }
+        ]
     }
 
     profile_records = await storage_manager('profile').query(query)
