@@ -69,8 +69,6 @@ class Lock:
     def expire(self):
         self.delete()
 
-    def expires(self):
-        return self._lock_ttl
 
     def is_locked(self) -> bool:
         return self._redis.exists(self._key) != 0
@@ -188,7 +186,7 @@ class GlobalMutexLock(_GlobalMutexLock):
 
                 logger.debug(
                     f"Suppressing execution of {self._lock.key}. Process {self._lock.get_locked_inside()} is using resource."
-                    f"Expires in {self._lock.expires()}s. Waiting no longer then {_time_to_break}s then skipping execution."
+                    f"Expires in {self._lock.ttl}s. Waiting no longer then {_time_to_break}s then skipping execution."
                 )
 
                 time.sleep(self._wait)
@@ -227,7 +225,7 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
 
                 logger.debug(
                     f"Suppressing execution of {self._lock.key}. Process {self._lock.get_locked_inside()} is using resource."
-                    f"Expires in {self._lock.expires()}s. Waiting no longer then {_time_to_break}s then skipping execution."
+                    f"Expires in {self._lock.ttl}s. Waiting no longer then {_time_to_break}s then skipping execution."
                 )
 
                 await asyncio.sleep(self._wait)

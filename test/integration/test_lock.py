@@ -23,9 +23,9 @@ def test_lock_expires():
         key = Lock.get_key("namespace:", "profile", "10")
         lock = Lock(redis, key, default_lock_ttl=10)
         assert lock.state == RELEASED
-        assert lock.expires() == 10
+        assert lock.ttl == 10
         lock.lock('name1')
-        assert lock.expires() == 10
+        assert lock.ttl == 10
 
 
 def test_lock_global_value():
@@ -43,6 +43,7 @@ def test_lock_global_value():
         assert lock1.state == lock2.state
 
         lock1.break_in()
+        assert lock2.is_locked()
         assert lock1.get_locked_inside() == lock2.get_locked_inside()
         assert lock1.state == lock2.state
 

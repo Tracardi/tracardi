@@ -35,14 +35,16 @@ def test_mutex_multithread_lock_break():
     with ServerContext(Context(production=False)):
         redis = RedisClient()
         key = Lock.get_key("namespace:", "profile", "10")
+        lock = Lock(redis, key, default_lock_ttl=100)
         def task1():
             try:
                 with ServerContext(Context(production=False)):
-                    lock = Lock(redis, key, default_lock_ttl=100)
+
                     with mutex(lock, name="task1") as _lock:
                         # Lock should be true because is locked
                         assert _lock.state == LOCKED
                         sleep(2)
+                        print(_lock.get_state())
                         state.append(1)
             except Exception as e:
                 print(repr(e))
@@ -51,7 +53,6 @@ def test_mutex_multithread_lock_break():
         def task2():
             try:
                 with ServerContext(Context(production=False)):
-                    lock = Lock(redis, key, default_lock_ttl=100)
                     assert lock.is_locked()
                     with mutex(lock, name="task2", break_after_time=1) as _lock:
                         assert _lock.is_locked() is True
