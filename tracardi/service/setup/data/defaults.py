@@ -34,7 +34,6 @@ open_rest_source_bridge = Bridge(
     ])
 )
 
-
 open_webhook_source_bridge = Bridge(
     id="3d8bb87e-28d1-4a38-b19c-d0c1fbb71e22",
     type="webhook",
@@ -61,18 +60,19 @@ open_webhook_source_bridge = Bridge(
                 )
             ]),
         FormGroup(
-            name="Session",
+            name="Webhook event session management",
             fields=[
                 FormField(
                     id="sticky_session",
-                    name="Keep all webhook events in one session",
-                    description="When switched on all the events collected via this bridge will be saved in one per "
-                                "profile session. This feature will work only if the [Create profile and session] "
-                                "feature is enabled. ",
+                    name="Keep all webhook events in one profile session",
+                    description="When enabled, every event gathered through this bridge will be stored in a single "
+                                "session for each profile. Conversely, if not activated, each Webhook event will "
+                                "be recorded in distinct sessions. This functionality is contingent on having the "
+                                "[Create profile and session] feature active.",
                     component=FormComponent(
                         type="bool",
                         props={
-                            "label": "Keep all webhook events in one session"
+                            "label": "Keep all webhook events in one profile session"
                         }
                     )
                 )
