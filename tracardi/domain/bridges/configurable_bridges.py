@@ -30,41 +30,45 @@ class ConfigurableBridge(NamedEntity):
         pass
 
 
-class WebHookBridge(ConfigurableBridge):
-
     @staticmethod
     async def _get_hashed_id(tracker_payload: TrackerPayload) -> Optional[str]:
 
-        event = tracker_payload.events[0]
-        flat_properties = Dotty({"properties": tracker_payload.events[0].properties})
 
-        # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys
+        for event in tracker_payload.events:
+            flat_properties = Dotty({"properties": event.properties})
+            event_type = event.type.lower()
 
-        custom_event_to_profile_mapping = await cache.event_to_profile_coping(
-            event_type=event.type,
-            ttl=memory_cache.event_to_profile_coping_ttl)
+            # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys
 
-        for item in custom_event_to_profile_mapping:
-            custom_mapping_schema = item.to_entity(EventToProfile)
-            for source, destination, _ in custom_mapping_schema.items():
-                if source in flat_properties:
-                    _merge_id = flat_properties[source]
-                    _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
-                    profile_id = hash_id(_merge_id, _prefix)
-                    return profile_id
+            custom_event_to_profile_mapping = await cache.event_to_profile_coping(
+                event_type=event_type,
+                ttl=memory_cache.event_to_profile_coping_ttl)
 
-        # Check if in default event to profile mapping for current event type, there is a mapping for merging keys
-        default_event_to_mapping_schema = get_default_mappings_for(event.type, 'copy')
-        if default_event_to_mapping_schema is not None:
+            for item in custom_event_to_profile_mapping:
+                custom_mapping_schema = item.to_entity(EventToProfile)
+                for source, destination, _ in custom_mapping_schema.items():
+                    if source in flat_properties:
+                        _merge_id = flat_properties[source]
+                        _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
+                        profile_id = hash_id(_merge_id, _prefix)
+                        return profile_id
 
-            for destination, source in default_event_to_mapping_schema.items():  # type: str, str
-                if destination in FLAT_PROFILE_FIELD_MAPPING and source in flat_properties:
-                    _merge_id = flat_properties[source]
-                    _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
-                    profile_id = hash_id(_merge_id, _prefix)
-                    return profile_id
+            # Check if in default event to profile mapping for current event type, there is a mapping for merging keys
+            default_event_to_mapping_schema = get_default_mappings_for(event_type, 'copy')
+            if default_event_to_mapping_schema is not None:
+
+                for destination, source in default_event_to_mapping_schema.items():  # type: str, str
+                    if destination in FLAT_PROFILE_FIELD_MAPPING and source in flat_properties:
+                        _merge_id = flat_properties[source]
+                        _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
+                        profile_id = hash_id(_merge_id, _prefix)
+                        return profile_id
 
         return None
+
+class WebHookBridge(ConfigurableBridge):
+
+
 
     async def configure(self, tracker_payload: TrackerPayload, tracker_config: TrackerConfig, console_log: ConsoleLog) -> Tuple[
         TrackerPayload, TrackerConfig, ConsoleLog]:
@@ -108,5 +112,13 @@ class RestApiBridge(ConfigurableBridge):
 
         if tracker_payload.source.config is not None and tracker_payload.source.config.get('static_profile_id', False):
             tracker_config.static_profile_id = True
+        else:
+            print(1, tracardi.auto_profile_merging)
+            if tracardi.auto_profile_merging:
+                # Check if there can be a hashed id generated
+                profile_id = await self._get_hashed_id(tracker_payload)
+                print(2, profile_id)
+                if profile_id:
+                    tracker_payload.replace_profile(profile_id)
 
         return tracker_payload, tracker_config, console_log
