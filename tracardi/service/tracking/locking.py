@@ -37,13 +37,18 @@ class Lock:
 
     @property
     def state(self):
-        payload = self.get_lock_metadata()
-        if not payload:
+        try:
+            payload = self.get_lock_metadata()
+            if not payload:
+                return RELEASED
+
+            _, _, state = payload
+
+            return state
+        except Exception as e:
+            logger.error(str(e))
+            self.unlock()
             return RELEASED
-
-        _, _, state = payload
-
-        return state
 
     def lock(self, mutex_name: str):
         self._set_lock_metadata(time.time(), mutex_name, LOCKED)
@@ -84,10 +89,14 @@ class Lock:
         return None
 
     def get_locked_inside(self) -> Optional[str]:
-        metadata = self.get_lock_metadata()
-        if metadata:
-            _, locker, _ = metadata
-            return locker
+        try:
+            metadata = self.get_lock_metadata()
+            if metadata:
+                _, locker, _ = metadata
+                return locker
+        except Exception as e:
+            self.unlock()
+            logger.error(str(e))
         return None
 
     @staticmethod
@@ -95,10 +104,13 @@ class Lock:
         return f"{namespace}{entity}:{id}" if id else None
 
     def _update_state(self, new_state):
-        payload = self._redis.get(self._key)
-        if payload:
-            lock_time, mutex_name, state = msgpack.unpackb(payload)
-            self._set_lock_metadata(lock_time, mutex_name, new_state)
+        try:
+            payload = self._redis.get(self._key)
+            if payload:
+                lock_time, mutex_name, state = msgpack.unpackb(payload)
+                self._set_lock_metadata(lock_time, mutex_name, new_state)
+        except Exception as e:
+            logger.error(str(e))
 
     def get_state(self):
         if self.state == BROKE:
@@ -142,10 +154,14 @@ class _GlobalMutexLock:
         return False, _time_to_act
 
     def _get_lock_time(self) -> float:
-        metadata = self._lock.get_lock_metadata()
-        if metadata:
-            lock_time, _, _ = metadata
-            return float(lock_time)
+        try:
+            metadata = self._lock.get_lock_metadata()
+            if metadata:
+                lock_time, _, _ = metadata
+                return float(lock_time)
+        except Exception as e:
+            logger.error(str(e))
+
         return 0.0
 
     def _get_locked_inside(self) -> Optional[str]:
