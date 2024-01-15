@@ -94,5 +94,33 @@
     },
     "tags": ["activity:browsing", "event:behavioral"],
     "state": "awareness"
+  },
+  {
+    "name": "Location",
+    "description": "Registers customer location.",
+    "id": "location",
+    "properties": {
+      "location": [0.0, 0.0]
+    },
+    "copy": {
+      "device.geo.location": "properties.location",
+      "device.geo.longitude":  "properties.location.0",
+      "device.geo.latitude":  "properties.latitude.1"
+    },
+    "profile": {
+      "data.devices.last.geo.latitude": [
+        "properties.location.1",
+        "equal"
+      ],
+      "data.devices.last.geo.longitude": [
+        "properties.location.0",
+        "equal"
+      ],
+      "data.devices.last.geo.location": [
+        "properties.location",
+        "equal"
+      ]
+    },
+    "tags": ["activity:locating", "event:system"]
   }
 ]

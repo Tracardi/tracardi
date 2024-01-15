@@ -257,7 +257,7 @@ async def process_track_data(source: EventSource,
                 }
         finally:
             # print(0, profile.has_not_saved_changes(), profile.need_auto_merging())
-            if profile and profile.need_auto_merging():
+            if profile and profile.metadata.system.has_merging_data():
                 pass
             #     print(1, profile.ids)
             #     print(2, profile.get_auto_merge_ids())

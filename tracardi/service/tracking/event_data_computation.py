@@ -276,7 +276,7 @@ async def compute_events(events: List[EventPayload],
             profile = Profile(**flat_profile.to_dict())
             profile.set_meta_data(profile_metadata)
             if auto_merge_ids:
-                profile.add_auto_merge_ids(auto_merge_ids)
+                profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
         except Exception as e:
             message = f"It seems that there was an error when trying to add or update some information to " \
                       f"your profile. The error occurred because you tried to add a value that is not " \

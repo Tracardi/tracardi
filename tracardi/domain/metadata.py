@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Set
 
 from pydantic import BaseModel
 
@@ -16,7 +16,22 @@ class ProfileSystemIntegrations(Entity):
 class ProfileSystemMetadata(BaseModel):
     integrations: Optional[Dict[str, ProfileSystemIntegrations]] = {}
     aux: Optional[dict] = {}
-    
+
+    def has_merging_data(self) -> bool:
+        return 'auto_merge' in self.aux and isinstance(self.aux['auto_merge'], list) and len(self.aux['auto_merge'])>0
+
+    def remove_merging_data(self):
+        del(self.aux['auto_merge'])
+
+    def set_auto_merge_fields(self, auto_merge_ids):
+        if 'auto_merge' not in self.aux or not isinstance(self.aux['auto_merge'], list):
+            self.aux['auto_merge'] = list(auto_merge_ids)
+        else:
+            self.aux['auto_merge'] = list(set(self.metadata.system.aux['auto_merge']).union(auto_merge_ids))
+
+    def get_auto_merge_fields(self):
+        return self.aux.get('auto_merge', [])
+
     def has_integration(self, system: str) -> bool:
         return system in self.integrations and 'id' in self.integrations[system]
     
