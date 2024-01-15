@@ -25,6 +25,16 @@ FIELD_TO_PROPERTY_MAPPING = {
     'profile@data.contact.email.business': lambda profile: (profile.data.contact.email.business, PREFIX_EMAIL_BUSINESS),
 }
 
+FLAT_PROFILE_FIELD_MAPPING = {
+    'data.contact.phone.main': PREFIX_PHONE_MAIN,
+    'data.contact.phone.business': PREFIX_PHONE_BUSINESS,
+    'data.contact.phone.whatsapp':PREFIX_PHONE_WHATSUP,
+    'data.contact.phone.mobile': PREFIX_PHONE_MOBILE,
+
+    'data.contact.email.main': PREFIX_EMAIL_MAIN,
+    'data.contact.email.private': PREFIX_EMAIL_PRIVATE,
+    'data.contact.email.business': PREFIX_EMAIL_BUSINESS,
+}
 
 FLAT_PROFILE_MAPPING = {
     'data.contact.phone.main': lambda flat_profile: (flat_profile['data.contact.phone.main'], PREFIX_PHONE_MAIN),

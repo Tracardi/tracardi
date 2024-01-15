@@ -51,15 +51,10 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: FlatProfile)
 
         for destination, source in event_mapping_schema.items():  # type: str, str
             try:
-
-                # if destination not in dot_event:
-                #     logger.warning(f"While indexing type {event.type}. "
-                #                    f"Property destination {destination} could not be found in event schema.")
-
                 # Skip none existing event properties.
                 if source in flat_event:
                     flat_event[destination] = flat_event[source]
-                    del flat_event[source]
+
             except KeyError:
                 pass
 
@@ -81,10 +76,10 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: FlatProfile)
 
 
 async def event_to_profile_mapping(flat_event: Dotty,
-                                            flat_profile: FlatProfile,
-                                            session:Session,
-                                            source: EventSource,
-                                            console_log: ConsoleLog) -> Tuple[
+                                   flat_profile: FlatProfile,
+                                   session: Session,
+                                   source: EventSource,
+                                   console_log: ConsoleLog) -> Tuple[
     Dotty, FlatProfile, Optional[FieldTimestampMonitor], Set[str]]:
 
     auto_merge_ids = set()
@@ -220,7 +215,6 @@ async def compute_events(events: List[EventPayload],
         )
 
         flat_event = dotty(event.model_dump(exclude_unset=True))
-
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
