@@ -101,7 +101,7 @@ class WebHookBridge(ConfigurableBridge):
 
 class RestApiBridge(ConfigurableBridge):
 
-    def configure(self, tracker_payload: TrackerPayload, tracker_config: TrackerConfig, console_log: ConsoleLog) -> Tuple[
+    async def configure(self, tracker_payload: TrackerPayload, tracker_config: TrackerConfig, console_log: ConsoleLog) -> Tuple[
         TrackerPayload, TrackerConfig, ConsoleLog]:
 
         # If REST API is configured to have static Profile ID, set it in tracker config

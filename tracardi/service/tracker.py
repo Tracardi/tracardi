@@ -187,9 +187,10 @@ class Tracker:
 
         configurable_bridge = self.get_bridge(tracker_payload)
         if configurable_bridge:
-            tracker_payload, self.tracker_config, self.console_log = await configurable_bridge.configure(tracker_payload,
-                                                                                                   self.tracker_config,
-                                                                                                   self.console_log)
+            tracker_payload, self.tracker_config, self.console_log = await configurable_bridge.configure(
+                tracker_payload,
+                self.tracker_config,
+                self.console_log)
 
         # Is source ephemeral
         if tracker_payload.source.transitional is True:
