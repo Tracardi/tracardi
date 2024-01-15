@@ -34,16 +34,14 @@ open_rest_source_bridge = Bridge(
     ])
 )
 
+
 open_webhook_source_bridge = Bridge(
     id="3d8bb87e-28d1-4a38-b19c-d0c1fbb71e22",
     type="webhook",
     name="API Webhook Bridge",
     description="API Webhook collector",
     config={
-        "generate_profile": False,
-        "replace_profile_id": "",
-        "replace_session_id": "",
-        "identify_profile_by": "none"
+        "sticky_session": True
     },
     form=Form(groups=[
         FormGroup(
@@ -63,60 +61,24 @@ open_webhook_source_bridge = Bridge(
                 )
             ]),
         FormGroup(
-            name="Use Auto Profile Merging",
+            name="Session",
             fields=[
                 FormField(
-                    id="identify_profile_by",
-                    name="Identification method",
-                    description="Select the method to identify the profile. If 'e-mail' or 'phone' is "
-                                "chosen, a Profile will be identified by the 'e-mail' or 'phone'. "
-                                "The exact location of the data should be defined in 'Set Profile ID from Payload' field. "
-                                "Selecting 'nothing' means no Profile ID will be matched. If 'custom ID' is "
-                                "selected, the Profile ID will be the same as the payload value referenced in "
-                                "the 'Set Profile ID from Payload' field.",
+                    id="sticky_session",
+                    name="Keep all webhook events in one session",
+                    description="When switched on all the events collected via this bridge will be saved in one per "
+                                "profile session. This feature will work only if the [Create profile and session] "
+                                "feature is enabled. ",
                     component=FormComponent(
-                        type="select",
+                        type="bool",
                         props={
-                            "label": "Profile identified by",
-                            "items": {
-                                "none": "No Reference - Identification Disabled",
-                                "e-mail": 'Main E-Mail',
-                                "phone": "Main Phone",
-                                "id": "Custom ID"
-                            }
+                            "label": "Keep all webhook events in one session"
                         }
                     )
-                ),
-                FormField(
-                    id="replace_profile_id",
-                    name="Set Profile ID from Payload",
-                    description="To set the Profile ID, type the location of Profile ID Identifier in payload below or leave "
-                                "the field blank if you don't wish "
-                                "to set any profile or want it to have a random ID. "
-                                "If 'Custom ID' is chosen as identification method, then enter the location where the Profile ID "
-                                "is stored in payload the; ID will be used as is without modification. "
-                                "For 'e-mail' or 'phone' options,  enter the location where e-mail or phone is stored; "
-                                "the system automatically generates a secure, hash-based Profile ID from the data in "
-                                "the payload. It will automatically load profile for the e-mail of phone defined "
-                                "in payload. "
-                                "This setting will only work when `Create session and profile` is enabled. ",
-                    component=FormComponent(type="text", props={"label": "Reference to Profile ID in webhook payload"})
-                ),
-                FormField(
-                    id="replace_session_id",
-                    name="Set Session ID from Payload",
-                    description="This setting will only work when `Create session and profile` is enabled. "
-                                "If you intend to substitute or set the Session ID with information from the payload, "
-                                "you can either use the data provided below or leave it blank if you don't wish "
-                                "to set any session or want it to have a random ID. It is crucial to ensure "
-                                "that the Session ID is secure and not easily predictable since simple Session "
-                                "IDs may pose security threats.",
-                    component=FormComponent(type="text", props={"label": "Reference to Session ID in webhook payload"})
                 )
             ])
     ])
 )
-
 with open(os.path.join(_local_dir, "manual/redirect_manual.md"), "r", encoding="utf-8") as fh:
     manual = fh.read()
 
