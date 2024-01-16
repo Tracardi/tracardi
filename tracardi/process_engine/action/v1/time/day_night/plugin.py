@@ -23,11 +23,15 @@ class DayNightAction(ActionRunner):
         latitude = dot[self.config.latitude]
         longitude = dot[self.config.longitude]
 
-        if is_day(longitude, latitude):
-            return Result(value=payload, port="day")
+        if longitude and latitude:
+            if is_day(longitude, latitude):
+                return Result(value=payload, port="day")
 
-        return Result(value=payload, port="night")
-
+            return Result(value=payload, port="night")
+        else:
+            return Result(value={
+                "message": "No location of the profile available."
+            }, port="error")
 
 def register() -> Plugin:
     return Plugin(
@@ -37,13 +41,13 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.time.day_night.plugin',
             className='DayNightAction',
             inputs=['payload'],
-            outputs=["day", "night"],
+            outputs=["day", "night", "error"],
             manual='day_night_split_action',
             init={
-                "latitude": None,
-                "longitude": None
+                "latitude": "profile@data.devices.last.geo.latitude",
+                "longitude": "profile@data.devices.last.geo.longitude"
             },
-            version="0.6.0.1",
+            version="0.8.2",
             form=Form(groups=[
                 FormGroup(
                     fields=[
@@ -68,7 +72,6 @@ def register() -> Plugin:
             desc='Splits workflow whether it is day or night in a given latitude and longitude.',
             tags=['condition'],
             icon='dark-light',
-            type="condNode",
             group=["Time"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(
@@ -78,6 +81,7 @@ def register() -> Plugin:
                 outputs={
                     "day": PortDoc(desc="Returns input payload if it is a day."),
                     "night": PortDoc(desc="Returns input payload if it is a night"),
+                    "error": PortDoc(desc="Returns error if longitude and latitude and not be found in profile."),
                 }
             )
         )
