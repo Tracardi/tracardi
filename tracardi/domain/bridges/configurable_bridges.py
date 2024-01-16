@@ -41,7 +41,7 @@ class ConfigurableBridge(NamedEntity):
             # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys
 
             custom_event_to_profile_mapping = await cache.event_to_profile_coping(
-                event_type=event_type,
+                event_type_id=event_type,
                 ttl=memory_cache.event_to_profile_coping_ttl)
 
             for item in custom_event_to_profile_mapping:
