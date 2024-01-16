@@ -1,5 +1,8 @@
 import asyncio
 import logging
+
+from dotty_dict import Dotty
+
 from tracardi.service.tracking.storage.profile_storage import save_profile, delete_profile
 
 from tracardi.domain.profile_data import ProfileData
@@ -171,6 +174,14 @@ class ProfileMerger:
         }
 
         conflicts_aux = get_conflicted_values(old_value, new_value)
+
+        # This is the fix for merging error on location
+        flat_new_values = Dotty(new_value)
+        if 'data.devices.last.geo.location' in flat_new_values:
+            del(flat_new_values['data.devices.last.geo.location'])
+            if 'data.devices.last.geo.latitude' in flat_new_values and 'data.devices.last.geo.longitude' in flat_new_values:
+                flat_new_values['data.devices.last.geo.location'] = [flat_new_values['data.devices.last.geo.latitude'], flat_new_values['data.devices.last.geo.longitude']]
+            new_value = flat_new_values.to_dict()
 
         traits = new_value['traits']
         data = ProfileData(**new_value['data'])
@@ -364,6 +375,8 @@ class ProfileMerger:
             logger.info(f"Profiles to delete {records_to_delete}.")
 
             await _delete_profiles(records_to_delete)
+
+            #todo remove profiles also from cache
 
             # Replace current profile with merged profile
             profile.replace(merged_profile)

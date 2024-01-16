@@ -187,9 +187,10 @@ class Tracker:
 
         configurable_bridge = self.get_bridge(tracker_payload)
         if configurable_bridge:
-            tracker_payload, self.tracker_config, self.console_log = configurable_bridge.configure(tracker_payload,
-                                                                                                   self.tracker_config,
-                                                                                                   self.console_log)
+            tracker_payload, self.tracker_config, self.console_log = await configurable_bridge.configure(
+                tracker_payload,
+                self.tracker_config,
+                self.console_log)
 
         # Is source ephemeral
         if tracker_payload.source.transitional is True:
@@ -237,29 +238,3 @@ class Tracker:
                                  f"{self.tracker_config.allowed_bridges} or call any `{source.type}` endpoint.")
 
         return source
-
-    # async def validate_source(self, tracker_payload: TrackerPayload) -> EventSource:
-    #
-    #     source_id = tracker_payload.source.id
-    #     ip = tracker_payload.metadata.ip
-    #
-    #     if source_id == tracardi.internal_source:
-    #         return EventSource(
-    #             id=source_id,
-    #             type=['internal'],
-    #             bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
-    #             name="Internal event source",
-    #             description="This is event source for internal events.",
-    #             channel="Internal",
-    #             transitional=False,  # ephemeral
-    #             tags=['internal'],
-    #             timestamp=now_in_utc()
-    #         )
-    #
-    #     source = await self.check_source_id(source_id)
-    #
-    #     if source is None:
-    #         raise ValueError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
-    #                          f"width payload: {tracker_payload}")
-    #
-    #     return source

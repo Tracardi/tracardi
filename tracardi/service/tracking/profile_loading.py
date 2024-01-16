@@ -27,57 +27,29 @@ async def _load_profile_and_deduplicate(
 ) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
-    @throws DuplicatedRecordException
     """
     if tracker_payload.profile is None:
         return None
 
     profile_id = tracker_payload.profile.id
 
-    try:
-        profile = await load_profile(profile_id)
+    profile = await load_profile(profile_id)
 
-        if profile is None:
+    if profile is None:
 
-            # Static profiles can be None as they need to be created if does not exist.
-            # Static means the profile id was given in the track payload
+        # Static profiles can be None as they need to be created if does not exist.
+        # Static means the profile id was given in the track payload
 
-            if is_static:
-                profile = Profile.new(id=tracker_payload.profile.id)
-                # This is new profile as we could not load it.
-                profile.operation.new = True
-                profile.operation.update = False
-                return profile
+        if is_static:
+            profile = Profile.new(id=tracker_payload.profile.id)
+            # This is new profile as we could not load it.
+            profile.operation.new = True
+            profile.operation.update = False
+            return profile
 
-            return None
+        return None
 
-        return profile
-
-    except DuplicatedRecordException as e:
-
-        message = (f"Profile duplication warning. "
-                   f"An issue occurred when loading profile ID; {profile_id} "
-                   f"Details: Profile {profile_id} needs deduplication. {repr(e)}")
-
-        logger.warning(message)
-
-        if isinstance(console_log, ConsoleLog):
-            console_log.append(
-                Console(
-                    flow_id=None,
-                    node_id=None,
-                    event_id=None,
-                    profile_id=profile_id,
-                    origin='profile',
-                    class_name='load_profile_and_deduplicate',
-                    module=__name__,
-                    type='warning',
-                    message=message,
-                    traceback=get_traceback(e)
-                )
-            )
-
-        return await deduplicate_profile(profile_id)
+    return profile
 
 
 async def load_profile_and_session(

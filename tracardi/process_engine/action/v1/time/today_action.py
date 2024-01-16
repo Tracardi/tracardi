@@ -45,14 +45,18 @@ class TodayAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        if self.config.timezone is not None:
-            time_zone = dot[self.config.timezone]
-            time_zone = pytz.timezone(time_zone)
-            local_time = datetime.now(time_zone)
-            server_time = local_time.today()
-        else:
-            local_time = datetime.today()
-            server_time = datetime.today()
+
+        try:
+            if self.config.timezone is not None:
+                time_zone = dot[self.config.timezone]
+                time_zone = pytz.timezone(time_zone)
+                local_time = datetime.now(time_zone)
+                server_time = local_time.today()
+            else:
+                local_time = datetime.today()
+                server_time = datetime.today()
+        except KeyError as e:
+            return Result(port="payload", value={"message": f"Unavailable time zone in current session. Details: {str(e)}"})
 
         return Result(port="payload", value={
             'utcTime': server_time.utcnow(),
@@ -96,8 +100,8 @@ def register() -> Plugin:
             module='tracardi.process_engine.action.v1.time.today_action',
             className='TodayAction',
             inputs=["payload"],
-            outputs=["payload"],
-            version='0.1.1',
+            outputs=["payload", "error"],
+            version='0.8.2',
             license="MIT + CC",
             author="Risto Kowaczewski",
             init={"timezone": "session@context.time.tz"},
@@ -128,7 +132,8 @@ def register() -> Plugin:
                     "payload": PortDoc(desc="This port takes any JSON-like object.")
                 },
                 outputs={
-                    "payload": PortDoc(desc="This port returns payload containing current date, time, etc.")
+                    "payload": PortDoc(desc="This port returns payload containing current date, time, etc."),
+                    "error": PortDoc(desc="This port returns error message.")
                 }
             )
         )

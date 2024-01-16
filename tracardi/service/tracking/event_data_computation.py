@@ -51,15 +51,10 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
 
         for destination, source in event_mapping_schema.items():  # type: str, str
             try:
-
-                # if destination not in dot_event:
-                #     logger.warning(f"While indexing type {event.type}. "
-                #                    f"Property destination {destination} could not be found in event schema.")
-
                 # Skip none existing event properties.
                 if source in flat_event:
                     flat_event[destination] = flat_event[source]
-                    del flat_event[source]
+
             except KeyError:
                 pass
 
@@ -281,7 +276,7 @@ async def compute_events(events: List[EventPayload],
             profile = Profile(**flat_profile.to_dict())
             profile.set_meta_data(profile_metadata)
             if auto_merge_ids:
-                profile.add_auto_merge_ids(auto_merge_ids)
+                profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
         except Exception as e:
             message = f"It seems that there was an error when trying to add or update some information to " \
                       f"your profile. The error occurred because you tried to add a value that is not " \

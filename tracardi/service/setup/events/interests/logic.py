@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dotty_dict import Dotty
 from tracardi.domain.profile import FlatProfile
 
@@ -13,17 +15,20 @@ def _get_interest_and_value(event: Dotty):
 
     return interest, value
 
-def increase_interest(event: Dotty, profile: FlatProfile):
-    interest, value = _get_interest_and_value(event)
-    if isinstance(interest, str):
-        profile.increase_interest(interest, value)
+def increase_interest(event: Dotty, profile: Optional[FlatProfile]):
+    if profile:
+        interest, value = _get_interest_and_value(event)
+        if isinstance(interest, str):
+            profile.increase_interest(interest, value)
 
-def decrease_interest(event: Dotty, profile: FlatProfile):
-    interest, value = _get_interest_and_value(event)
-    if isinstance(interest, str):
-        profile.decrease_interest(interest, value)
+def decrease_interest(event: Dotty, profile: Optional[FlatProfile]):
+    if profile:
+        interest, value = _get_interest_and_value(event)
+        if isinstance(interest, str):
+            profile.decrease_interest(interest, value)
 
-def reset_interest(event: Dotty, profile: FlatProfile):
-    interest, value = _get_interest_and_value(event)
-    if isinstance(interest, str):
-        profile.reset_interest(interest, value)
+def reset_interest(event: Dotty, profile: Optional[FlatProfile]):
+    if profile:
+        interest, value = _get_interest_and_value(event)
+        if isinstance(interest, str):
+            profile.reset_interest(interest, value)

@@ -3,6 +3,8 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.storage_record import StorageRecord, RecordMetadata
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.storage.factory import storage_manager
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
+from tracardi.service.tracking.storage.profile_storage import save_profile
 
 
 async def _load_duplicates(profile_ids: List[str]):
@@ -43,6 +45,11 @@ async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
     first_profile = valid_profile_record.to_entity(Profile)
 
     if len(_duplicated_profiles) == 1:
+        if first_profile.metadata.system.has_merging_data():
+            first_profile.metadata.system.remove_merging_data()
+            save_profile_cache(first_profile)
+            await save_profile(first_profile)
+
         # If 1 then there is no duplication
         return first_profile
 

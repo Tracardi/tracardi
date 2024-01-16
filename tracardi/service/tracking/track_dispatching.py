@@ -109,7 +109,7 @@ async def trigger_workflows(profile: Profile,
 
 
     if auto_merge_ids:
-        profile.add_auto_merge_ids(auto_merge_ids)
+        profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
 
     return profile, session, events, ux, response, field_manager, is_wf_triggered
 
