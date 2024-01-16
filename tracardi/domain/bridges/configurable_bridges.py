@@ -33,7 +33,6 @@ class ConfigurableBridge(NamedEntity):
     @staticmethod
     async def _get_hashed_id(tracker_payload: TrackerPayload) -> Optional[str]:
 
-
         for event in tracker_payload.events:
             flat_properties = Dotty({"properties": event.properties})
             event_type = event.type.lower()
