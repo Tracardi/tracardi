@@ -112,11 +112,5 @@ class RestApiBridge(ConfigurableBridge):
 
         if tracker_payload.source.config is not None and tracker_payload.source.config.get('static_profile_id', False):
             tracker_config.static_profile_id = True
-        else:
-            if tracardi.auto_profile_merging:
-                # Check if there can be a hashed id generated
-                profile_id = await self._get_hashed_id(tracker_payload)
-                if profile_id:
-                    tracker_payload.replace_profile(profile_id)
 
         return tracker_payload, tracker_config, console_log
