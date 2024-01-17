@@ -59,7 +59,7 @@ class HubSpotContactAdder(ActionRunner):
                 contact_id = result['id']
                 if not self.profile.metadata.system.has_integration('hubspot'):
                     self.profile.metadata.system.set_integration('hubspot', contact_id)
-                    self.profile.set_updated_in_workflow()
+                    self.profile.mark_for_update()
 
             return Result(port="response", value=result)
 

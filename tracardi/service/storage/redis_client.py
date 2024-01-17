@@ -86,7 +86,6 @@ class RedisClient(metaclass=Singleton):
             exat=None,
             pxat=None,
     ):
-        print(self.get_tenant_prefix(name))
         return self.client.set(self.get_tenant_prefix(name), value, ex, px, nx, xx, keepttl, get, exat, pxat)
 
     def delete(self, name):
