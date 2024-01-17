@@ -131,6 +131,8 @@ Optional[FieldTimestampMonitor]]:
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
 
+    print(session.operation)
+
     # Load profile
 
     profile, session = await load_profile_and_session(

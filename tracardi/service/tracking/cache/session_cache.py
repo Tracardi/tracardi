@@ -55,7 +55,7 @@ def save_session_cache(session: Optional[Session], session_changes: Optional[Fie
                         "production": context.production,
                         "tenant": context.tenant
                     },
-                    session.model_dump(mode="json", exclude_defaults=True),
+                    session.model_dump(mode="json", exclude_defaults=True, exclude={"operation": ...}),
                     None,
                     index.model_dump(mode="json")
                 ),

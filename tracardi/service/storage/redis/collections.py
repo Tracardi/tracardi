@@ -27,3 +27,5 @@ class Collection:
 
     browser_finger_print: str = 'profile:finger:browser'  # Cache for profile by browser fingerprint
 
+    function_cache: str = 'function'
+
