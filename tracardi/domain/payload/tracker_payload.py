@@ -514,7 +514,7 @@ class TrackerPayload(BaseModel):
         else:
             session.properties = self.properties
 
-        session.operation.new = is_new_session
+        session.set_new(is_new_session)
 
         if profile_less is False and profile is not None:
             profile.set_new(is_new_profile)

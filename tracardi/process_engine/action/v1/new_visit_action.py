@@ -10,7 +10,7 @@ class NewVisitAction(ActionRunner):
         if self.session is None:
             self.console.warning("Can not check if visit is new is session is not available.")
 
-        elif self.session.operation.new:
+        elif self.session.is_new():
             return Result(port="true", value=payload)
 
         return Result(port="false", value=payload)

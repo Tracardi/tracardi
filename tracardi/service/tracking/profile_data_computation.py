@@ -62,7 +62,7 @@ def update_profile_email_type(profile: Profile) -> Profile:
 def update_profile_visits(session: Session, profile: Profile) -> Profile:
     # Calculate only on first click in visit
 
-    if session.operation.new:
+    if session.is_new():
         profile.metadata.time.visit.set_visits_times()
         profile.metadata.time.visit.count += 1
         profile.set_updated()

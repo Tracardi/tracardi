@@ -8,6 +8,6 @@ from tracardi.domain.session import FrozenSession, Session
 def test_frozen_session():
     with ServerContext(Context(production=True)):
         session = FrozenSession(**Session.new().model_dump())
-        assert session.operation.new is True
+        assert session.is_new()
         with pytest.raises(ValidationError):
             session.id = "1"
