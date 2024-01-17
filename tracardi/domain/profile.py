@@ -315,6 +315,9 @@ class Profile(Entity):
     def needs_segmentation(self) -> bool:
         return self.operation.needs_segmentation()
 
+    def needs_merging(self):
+        return self.operation.needs_merging()
+
     @staticmethod
     def new(id: Optional[id] = None) -> 'Profile':
         """
