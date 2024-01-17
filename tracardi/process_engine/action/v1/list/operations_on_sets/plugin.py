@@ -103,8 +103,8 @@ def register() -> Plugin:
             manual="list/sets_operations"
         ),
         metadata=MetaData(
-            name="Set Operation Plugin",
-            desc='Perform set operations on two sets of data.',
+            name="Operations on sets",
+            desc='Perform some operations on two sets of data. Operations like intersection, union, etc.',
             group=["Data Processing"],
             documentation=Documentation(
                 inputs={"payload": PortDoc(desc="Input payload.")},

@@ -4,6 +4,16 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.add_integration_id_action": PluginMetadata(
+        test=PluginTest(
+            init={
+                "id": "event@properties",
+                "name": "",
+                "data": "{}"
+            },
+            resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.time.time_delay.plugin": PluginMetadata(
         test=PluginTest(
             init={
