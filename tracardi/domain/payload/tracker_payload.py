@@ -517,7 +517,7 @@ class TrackerPayload(BaseModel):
         session.operation.new = is_new_session
 
         if profile_less is False and profile is not None:
-            profile.operation.new = is_new_profile
+            profile.set_new(is_new_profile)
 
         if profile:
             # If there is fingerprinted profile and we just created new profile then load fingerprinted profile.

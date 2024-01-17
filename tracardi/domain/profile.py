@@ -63,6 +63,24 @@ class Profile(Entity):
         super().__init__(**data)
         self._add_id_to_ids()
 
+    def is_new(self) -> bool:
+        return self.operation.new
+
+    def set_new(self, flag=True):
+        self.operation.new = flag
+
+    def set_updated(self, flag=True):
+        self.operation.update = flag
+
+    def is_segmented(self, flag):
+        self.operation.segment = flag
+
+    def set_merge_key(self, merge_key):
+        self.operation.merge = merge_key
+
+    def get_merge_keys(self) -> list:
+        return self.operation.merge
+
     def has_consents_set(self) -> bool:
         return 'consents' in self.aux and 'granted' in self.aux['consents'] and self.aux['consents']['granted'] is True
 
@@ -118,7 +136,7 @@ class Profile(Entity):
                 if hashed_value in self.ids:
                     return None
 
-                 # Remove old hashed id by prefix
+                # Remove old hashed id by prefix
                 self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
 
                 self.ids.append(hashed_value)
@@ -128,7 +146,7 @@ class Profile(Entity):
 
     def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeTimestampManager) -> Set[str]:
         added_hashed_ids = set()
-        for flat_field, timestamp_data  in field_timestamp_manager.get_timestamps():
+        for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():
             self.metadata.fields[flat_field] = timestamp_data
             # If enabled hash emails and phone on field change
             if tracardi.auto_profile_merging:
@@ -289,7 +307,13 @@ class Profile(Entity):
         )
 
     def has_not_saved_changes(self) -> bool:
-        return self.operation.new or self.operation.needs_update()
+        return self.operation.new or self.needs_update()
+
+    def needs_update(self) -> bool:
+        return self.operation.needs_update()
+
+    def needs_segmentation(self) -> bool:
+        return self.operation.needs_segmentation()
 
     @staticmethod
     def new(id: Optional[id] = None) -> 'Profile':
@@ -307,7 +331,7 @@ class Profile(Entity):
             ))
         )
         profile.fill_meta_data()
-        profile.operation.new = True
+        profile.set_new()
         return profile
 
 
@@ -354,7 +378,6 @@ class FlatProfile(Dotty):
                     added_ids.add(added_hashed_id)
         return added_ids
 
-
     def increase_interest(self, interest, value=1):
 
         interest_key = f'interests.{interest}'
@@ -386,7 +409,6 @@ class FlatProfile(Dotty):
 
         else:
             self[interest_key] = -value
-
 
     def reset_interest(self, interest, value=0):
         interest_key = f'interests.{interest}'

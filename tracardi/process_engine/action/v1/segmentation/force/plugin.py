@@ -11,7 +11,7 @@ class SegmentProfileAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
-            self.profile.operation.segment = True
+            self.profile.set_segmented(True)
             self.profile.metadata.time.segmentation = now_in_utc()
         else:
             if self.event.metadata.profile_less is True:

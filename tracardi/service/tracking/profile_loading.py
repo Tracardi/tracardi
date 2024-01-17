@@ -43,8 +43,8 @@ async def _load_profile_and_deduplicate(
         if is_static:
             profile = Profile.new(id=tracker_payload.profile.id)
             # This is new profile as we could not load it.
-            profile.operation.new = True
-            profile.operation.update = False
+            profile.set_new()
+            profile.set_updated(False)
             return profile
 
         return None

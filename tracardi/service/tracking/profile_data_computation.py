@@ -41,7 +41,7 @@ def update_profile_last_geo(session: Session, profile: Profile) -> Profile:
         _geo = session.device.geo
         if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
             profile.data.devices.last.geo = _geo
-            profile.operation.update = True
+            profile.set_updated()
     return profile
 
 
@@ -55,7 +55,7 @@ def update_profile_email_type(profile: Profile) -> Profile:
                 profile.aux['email'] = {}
 
             profile.aux['email']['free'] = email_domain in free_email_domains
-            profile.operation.update = True
+            profile.set_updated()
     return profile
 
 
@@ -65,7 +65,7 @@ def update_profile_visits(session: Session, profile: Profile) -> Profile:
     if session.operation.new:
         profile.metadata.time.visit.set_visits_times()
         profile.metadata.time.visit.count += 1
-        profile.operation.update = True
+        profile.set_updated()
 
     return profile
 
