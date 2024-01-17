@@ -11,7 +11,7 @@ def test_plugin_new_profile_true():
     init = {}
     payload = {}
     profile = Profile(id="1")
-    profile.operation.new = True
+    profile.set_new()
     event = Event(
         id='1',
         type='text',
@@ -28,7 +28,7 @@ def test_plugin_new_profile_false():
     init = {}
     payload = {}
     profile = Profile(id="1")
-    profile.operation.new = False
+    profile.new(False)
     event = Event(
         id='1',
         type='text',

@@ -582,11 +582,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         })
     ),
 
-    "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginMetadata(
-        test=PluginTest(init={'value': ''},
-                        resource=None)
-    ),
-
     "tracardi.process_engine.action.v1.internal.inject_event.plugin": PluginMetadata(
         test=PluginTest(init={'event_id': "abc"},
                         resource=None)

@@ -74,7 +74,7 @@ class ActionRunner:
 
     def discard_profile_update(self):
         if isinstance(self.profile, Profile):
-            self.profile.operation.update = False
+            self.profile.set_updated(False)
         else:
             if self.event.metadata.profile_less is True:
                 self.console.warning("Can not update profile when processing profile less events.")

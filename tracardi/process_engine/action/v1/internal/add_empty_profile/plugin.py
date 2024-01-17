@@ -41,7 +41,7 @@ class AddEmptyProfileAction(ActionRunner):
 
         self.event.profile = profile
         self.event.metadata.profile_less = False
-        self.event.operation.update = True
+
         self.tracker_payload.profile_less = False
 
         self.execution_graph.set_profiles(profile)

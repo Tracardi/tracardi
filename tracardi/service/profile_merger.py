@@ -136,7 +136,7 @@ class ProfileMerger:
     @staticmethod
     def _get_merge_key_values(profile: Profile) -> List[tuple]:
         converter = DotNotationConverter(profile)
-        values = [converter.get_profile_file_value_pair(key) for key in profile.operation.merge]
+        values = [converter.get_profile_file_value_pair(key) for key in profile.get_merge_keys()]
         return values
 
     @staticmethod
@@ -316,7 +316,7 @@ class ProfileMerger:
                      allow_duplicate_ids: bool = False,
                      conflict_aux_key: str = "conflicts") -> Tuple[Optional[Profile], List[Profile]]:
         """
-        Merges profiles on keys set in profile.operation.merge. Loads profiles from database and
+        Merges profiles on keys set in profile.get_merge_keys(). Loads profiles from database and
         combines its data into current profile. Returns Profiles object with profiles to be disables.
         It does not disable profiles or saves merged profile.
         """

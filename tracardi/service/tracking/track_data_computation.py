@@ -63,7 +63,7 @@ async def _compute(source, profile, session, tracker_payload, tracker_config, co
     # Session and events computation
 
     # Is new session
-    if session.operation.new:
+    if session.is_new():
         # Compute session. Session is filled only when new
         session, profile = compute_session(
             session,

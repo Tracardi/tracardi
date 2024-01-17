@@ -251,16 +251,16 @@ async def compute_events(events: List[EventPayload],
 
             if session.metadata.status != 'active':
                 session.metadata.status = 'active'
-                session.operation.update = True
+                session.set_updated()
 
             # Add session status
             if event.type == 'visit-started':
                 session.metadata.status = 'started'
-                session.operation.update = True
+                session.set_updated()
 
             if event.type == 'visit-ended':
                 session.metadata.status = 'ended'
-                session.operation.update = True
+                session.set_updated()
 
             event.session.start = session.metadata.time.insert
             event.session.duration = session.metadata.time.duration

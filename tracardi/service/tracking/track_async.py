@@ -140,7 +140,7 @@ async def process_track_data(source: EventSource,
 
                     # Track session for visit end
 
-                    if session and session.operation.new:
+                    if session and session.is_new():
                         task = schedule_visit_end_check(
                             dispatch_context,
                             session,

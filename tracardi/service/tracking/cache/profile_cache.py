@@ -74,7 +74,7 @@ def save_profile_cache(profile: Optional[Profile]):
                         "production": context.production,
                         "tenant": context.tenant
                     },
-                    profile.model_dump(mode="json", exclude_defaults=True),
+                    profile.model_dump(mode="json", exclude_defaults=True,  exclude={"operation": ...}),
                     None,
                     index.model_dump(mode="json")
                 )

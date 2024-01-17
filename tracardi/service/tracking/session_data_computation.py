@@ -18,8 +18,6 @@ from tracardi.domain.geo import Geo
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.languages import language_countries_dict
-from tracardi.service.maxmind_geo import get_geo_maxmind_location
-from tracardi.process_engine.action.v1.connectors.maxmind.geoip.model.maxmind_geolite2_client import GeoLiteCredentials
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -96,36 +94,8 @@ async def update_device_geo(tracker_payload: TrackerPayload, session: Session) -
         # If client-side location is sent but not available in session - update session
         if _geo:
             session.device.geo = _geo
-            session.operation.update = True
+            session.set_updated()
             return session
-
-    # Still no geolocation. That means there was no 'location' sent in tracker context or
-    # it failed parsing the data. But we have device IP. If the sessions geo is empty
-    # then we need to make another try.
-    if session.device.ip and session.device.ip != '0.0.0.0':
-
-        # Check if max mind configured
-        maxmind_license_key = os.environ.get('MAXMIND_LICENSE_KEY', None)
-        maxmind_account_id = int(os.environ.get('MAXMIND_ACCOUNT_ID', 0))
-
-        if maxmind_license_key and maxmind_account_id > 0:
-            # The code checks if the session's geolocation has been assigned. If it hasn't been
-            # assigned yet, it means that the profile does not have a geolocation, which could be
-            # because the session is not new. In this case, regardless of whether the session is
-            # new or not, the code checks if the profile's geolocation is empty.
-            # If it is empty, the code proceeds to fetch the geolocation and assigns
-            # it to the profile.
-            _geo = await get_geo_maxmind_location(
-                GeoLiteCredentials(
-                    license=maxmind_license_key,
-                    accountId=maxmind_account_id),
-                ip=session.device.ip)
-
-            if _geo:
-
-                if session.device.geo.is_empty():
-                    session.device.geo = _geo
-                    session.operation.update = True
 
     return session
 
@@ -137,7 +107,7 @@ def update_session_utm_with_client_data(tracker_payload: TrackerPayload, session
         # If client-side utm is sent but not available in session - update session
         if _utm:
             session.utm = _utm
-            session.operation.update = True
+            session.set_updated()
 
     return session
 

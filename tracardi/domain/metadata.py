@@ -36,9 +36,15 @@ class ProfileSystemMetadata(BaseModel):
         return system in self.integrations and 'id' in self.integrations[system]
     
     def set_integration(self, system: str, id: str, data:Optional [dict]=None):
-        self.integrations[system].id = id
-        if data:
-            self.integrations[system].data = data
+        if data is None:
+            data = {}
+
+        if system not in self.integrations:
+            self.integrations[system] = ProfileSystemIntegrations(id = id, data=data)
+        else:
+            self.integrations[system].id = id
+            if data:
+                self.integrations[system].data = data
 
 class ProfileMetadata(BaseModel):
     time: ProfileTime

@@ -49,7 +49,7 @@ class InjectProfileByField(ActionRunner):
 
         self.event.profile = profile
         self.event.metadata.profile_less = False
-        self.event.operation.update = True
+
         self.execution_graph.set_profiles(profile)
 
         return Result(port="profile", value=profile.model_dump(mode='json'))

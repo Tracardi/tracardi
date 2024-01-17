@@ -88,6 +88,17 @@ class Session(Entity):
 
         super().__init__(**data)
 
+
+    def is_new(self) -> bool:
+        return self.operation.new
+
+    def set_new(self, flag=True):
+        self.operation.new = flag
+
+    def set_updated(self, flag=True):
+        self.operation.update = flag
+
+
     def set_updated_in_workflow(self, state=True):
         self._updated_in_workflow = state
 
@@ -136,7 +147,7 @@ class Session(Entity):
             metadata=SessionMetadata()
         )
         session.fill_meta_data()
-        session.operation.new = True
+        session.set_new()
         if profile_id is not None:
             session.profile = Entity(id=profile_id)
 
