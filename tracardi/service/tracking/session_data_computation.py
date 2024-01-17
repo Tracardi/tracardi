@@ -94,7 +94,7 @@ async def update_device_geo(tracker_payload: TrackerPayload, session: Session) -
         # If client-side location is sent but not available in session - update session
         if _geo:
             session.device.geo = _geo
-            session.operation.update = True
+            session.set_updated()
             return session
 
     return session
@@ -107,7 +107,7 @@ def update_session_utm_with_client_data(tracker_payload: TrackerPayload, session
         # If client-side utm is sent but not available in session - update session
         if _utm:
             session.utm = _utm
-            session.operation.update = True
+            session.set_updated()
 
     return session
 

@@ -60,7 +60,7 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
                 # Session can not be reopened with event type visit started.
 
                 session.metadata.status = 'started'
-                session.operation.update = True
+                session.set_updated()
                 _time = _now_utc - timedelta(seconds=1)
                 tracker_payload.events.append(
                     EventPayload(
@@ -80,7 +80,7 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
                     )
                 )
 
-            if session.operation.new:
+            if session.is_new():
                 # Add session created event to the registered events
                 _time = _now_utc - timedelta(seconds=2)
                 tracker_payload.events.append(
