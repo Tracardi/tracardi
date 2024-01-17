@@ -25,7 +25,7 @@ class AddEmptySessionAction(ActionRunner):
                 start=session.metadata.time.insert,
                 duration=session.metadata.time.duration
             )
-        self.event.operation.update = True
+
         self.execution_graph.set_sessions(session)
         await session_db.save(session)
 
