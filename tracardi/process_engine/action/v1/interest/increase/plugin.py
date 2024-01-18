@@ -39,7 +39,7 @@ class IncreaseInterestAction(ActionRunner):
             return Result(value={"message": message}, port="error")
 
         self.profile.increase_interest(interest_key, float(self.config.value))
-        self.profile.operation.update = True
+        self.profile.set_updated()
 
         return Result(port="payload", value=payload)
 
@@ -63,7 +63,7 @@ def register() -> Plugin:
                         FormField(
                             id="interest",
                             name="Interest name",
-                            description="Please type interest name.",
+                            description="Please type interest name. You can reference the name form payload, or event properties if needed.",
                             component=FormComponent(type="dotPath", props={"label": "Interest name"})
                         ),
                         FormField(

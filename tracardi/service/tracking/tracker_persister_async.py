@@ -110,7 +110,7 @@ class TrackingPersisterAsync:
 
     async def _save_profile(self, profile: Profile):
         if profile:
-            if profile and profile.has_not_saved_changes():
+            if profile.has_not_saved_changes():
 
                 results = []
                 try:

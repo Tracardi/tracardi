@@ -5,6 +5,11 @@ def test_none_to_dotty():
     a = dotty(None)
     assert bool(a) is False
 
+def test_list_in_dotty():
+    a = dotty({"id":"a", "ids": ["a"]})
+    a['ids'].append("b")
+    assert len(a['ids']) == 2
+    assert a.to_dict()['ids'] == a['ids']
 
 
 def test_spaces():

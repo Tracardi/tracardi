@@ -7,7 +7,7 @@ def test_plugin_new_visit_true():
     init = {}
     payload = {}
     session = Session(id="1", metadata=SessionMetadata())
-    session.operation.new = True
+    session.set_new()
 
     result = run_plugin(NewVisitAction, init, payload, session=session)
     assert result.output.value == payload
@@ -18,7 +18,7 @@ def test_plugin_new_visit_false():
     init = {}
     payload = {}
     session = Session(id="1", metadata=SessionMetadata())
-    session.operation.new = False
+    session.set_new(False)
 
     result = run_plugin(NewVisitAction, init, payload, session=session)
     assert result.output.value == payload

@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Set
 
 from pydantic import BaseModel
 
@@ -16,14 +16,35 @@ class ProfileSystemIntegrations(Entity):
 class ProfileSystemMetadata(BaseModel):
     integrations: Optional[Dict[str, ProfileSystemIntegrations]] = {}
     aux: Optional[dict] = {}
-    
+
+    def has_merging_data(self) -> bool:
+        return 'auto_merge' in self.aux and isinstance(self.aux['auto_merge'], list) and len(self.aux['auto_merge'])>0
+
+    def remove_merging_data(self):
+        del(self.aux['auto_merge'])
+
+    def set_auto_merge_fields(self, auto_merge_ids):
+        if 'auto_merge' not in self.aux or not isinstance(self.aux['auto_merge'], list):
+            self.aux['auto_merge'] = list(auto_merge_ids)
+        else:
+            self.aux['auto_merge'] = list(set(self.aux['auto_merge']).union(auto_merge_ids))
+
+    def get_auto_merge_fields(self):
+        return self.aux.get('auto_merge', [])
+
     def has_integration(self, system: str) -> bool:
         return system in self.integrations and 'id' in self.integrations[system]
     
     def set_integration(self, system: str, id: str, data:Optional [dict]=None):
-        self.integrations[system].id = id
-        if data:
-            self.integrations[system].data = data
+        if data is None:
+            data = {}
+
+        if system not in self.integrations:
+            self.integrations[system] = ProfileSystemIntegrations(id = id, data=data)
+        else:
+            self.integrations[system].id = id
+            if data:
+                self.integrations[system].data = data
 
 class ProfileMetadata(BaseModel):
     time: ProfileTime
@@ -31,10 +52,6 @@ class ProfileMetadata(BaseModel):
     status: Optional[str] = None
     fields: Optional[dict] = {}
     system: Optional[ProfileSystemMetadata] = ProfileSystemMetadata()
-
-    def set_fields_timestamps(self, field_timestamp_manager):
-        for field, timestamp_data  in field_timestamp_manager.get_timestamps():
-            self.fields[field] = timestamp_data
 
 
 class OS(BaseModel):

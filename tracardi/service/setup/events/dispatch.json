@@ -1,0 +1,102 @@
+[
+  {
+    "id": "order-waiting-for-dispatch",
+    "name": "Order Waiting For Dispatch",
+    "description": "Order is waiting to be dispatched from the warehouse",
+    "const": {
+      "status": "waiting-for-dispatch"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+   {
+    "id": "order-dispatched",
+    "name": "Order Dispatched",
+    "description": "Order dispatched from warehouse",
+    "const": {
+      "status": "dispatched"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+   {
+    "id": "order-dispatch-in-transit",
+    "name": "Order Dispatch In Transit",
+    "description": "Order was shipped from the warehouse and is in transit",
+    "const": {
+      "status": "order-in-transit"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+  {
+    "id": "order-awaiting-pickup",
+    "name": "Order Awaiting Pickup",
+    "description": "Package with order waits to be picked up",
+    "const": {
+      "status": "order-awaiting-pickup"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+  {
+    "id": "order-delivered",
+    "name": "Order Delivered",
+    "description": "The order has been delivered. This event signifies that the order was either delivered to the doorstep or collected from the pickup center.",
+    "const": {
+      "status": "order-delivered"
+    },
+    "properties": {
+      "id": "string",
+      "status": "order-delivered-at-door-step|order-picked-up|order-delivered"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  }
+]

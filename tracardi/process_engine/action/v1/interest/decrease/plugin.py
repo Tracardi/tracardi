@@ -39,7 +39,7 @@ class DecreaseInterestAction(ActionRunner):
             return Result(value={"message": message}, port="error")
 
         self.profile.decrease_interest(interest_key, float(self.config.value))
-        self.profile.operation.update = True
+        self.profile.set_updated()
 
         return Result(port="payload", value=payload)
 

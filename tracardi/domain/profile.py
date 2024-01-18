@@ -3,17 +3,21 @@ from zoneinfo import ZoneInfo
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
+
+from dotty_dict import Dotty
 from pydantic import BaseModel, ValidationError, PrivateAttr
 from dateutil import parser
 
 from .entity import Entity
 from .metadata import ProfileMetadata
-from .profile_data import ProfileData
+from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
+    FLAT_PROFILE_MAPPING
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..config import tracardi
+from ..service.change_monitoring.field_change_monitor import FieldChangeTimestampManager, FieldTimestampMonitor
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
 from ..service.utils.date import now_in_utc
@@ -59,6 +63,24 @@ class Profile(Entity):
         super().__init__(**data)
         self._add_id_to_ids()
 
+    def is_new(self) -> bool:
+        return self.operation.new
+
+    def set_new(self, flag=True):
+        self.operation.new = flag
+
+    def set_updated(self, flag=True):
+        self.operation.update = flag
+
+    def is_segmented(self, flag):
+        self.operation.segment = flag
+
+    def set_merge_key(self, merge_key):
+        self.operation.merge = merge_key
+
+    def get_merge_keys(self) -> list:
+        return self.operation.merge
+
     def has_consents_set(self) -> bool:
         return 'consents' in self.aux and 'granted' in self.aux['consents'] and self.aux['consents']['granted'] is True
 
@@ -72,9 +94,9 @@ class Profile(Entity):
                 return True
         return False
 
-    def add_hashed_ids(self):
+    def create_auto_merge_hashed_ids(self):
         ids_len = len(self.ids)
-        if tracardi.hash_id_webhook:
+        if tracardi.auto_profile_merging:
             if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
                 self.ids.append(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
             if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
@@ -94,6 +116,45 @@ class Profile(Entity):
             # Update if new data
             if len(self.ids) > ids_len:
                 self.mark_for_update()
+
+    def add_auto_merge_hashed_id(self, flat_field) -> Optional[str]:
+        field_closure = FIELD_TO_PROPERTY_MAPPING.get(flat_field, None)
+        if field_closure:
+            value, prefix = field_closure(self)
+
+            value = value.strip().lower()
+
+            if self.ids is None:
+                self.ids = []
+
+            # Add new hashed Id
+
+            if value:
+                hashed_value = hash_id(value, prefix)
+
+                # Do not add value if exists
+                if hashed_value in self.ids:
+                    return None
+
+                # Remove old hashed id by prefix
+                self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
+
+                self.ids.append(hashed_value)
+                return flat_field
+
+        return None
+
+    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeTimestampManager) -> Set[str]:
+        added_hashed_ids = set()
+        for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():
+            self.metadata.fields[flat_field] = timestamp_data
+            # If enabled hash emails and phone on field change
+            if tracardi.auto_profile_merging:
+                added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
+                if added_hashed_id:
+                    added_hashed_ids.add(added_hashed_id)
+
+        return added_hashed_ids
 
     def has_hashed_phone_id(self, type: str = None) -> bool:
 
@@ -246,7 +307,16 @@ class Profile(Entity):
         )
 
     def has_not_saved_changes(self) -> bool:
-        return self.operation.new or self.operation.needs_update()
+        return self.operation.new or self.needs_update()
+
+    def needs_update(self) -> bool:
+        return self.operation.needs_update()
+
+    def needs_segmentation(self) -> bool:
+        return self.operation.needs_segmentation()
+
+    def needs_merging(self):
+        return self.operation.needs_merging()
 
     @staticmethod
     def new(id: Optional[id] = None) -> 'Profile':
@@ -264,5 +334,85 @@ class Profile(Entity):
             ))
         )
         profile.fill_meta_data()
-        profile.operation.new = True
+        profile.set_new()
         return profile
+
+
+class FlatProfile(Dotty):
+
+    def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
+        field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
+        if field_closure:
+            value, prefix = field_closure(self)
+
+            value = value.strip().lower()
+
+            if 'ids' not in self or self['ids'] is None:
+                self['ids'] = []
+
+            if value:
+                # Add new
+                # Can not simply append. Must reassign
+                new_hash_id = hash_id(value, prefix)
+
+                # Do not add value if exists
+                if new_hash_id in self['ids']:
+                    return None
+
+                # Remove old
+                ids = [hid for hid in self['ids'] if not hid.startswith(prefix)]
+                ids.append(new_hash_id)
+                # Assign to replace value
+                self['ids'] = list(set(ids))
+
+                return flat_field
+
+        return None
+
+    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldTimestampMonitor) -> Set[str]:
+        added_ids = set()
+        for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():  # type: str, list
+            self['metadata.fields'][flat_field] = timestamp_data
+            # If enabled hash emails and phone on field change
+            if tracardi.auto_profile_merging:
+                # Adds hashed id for email, phone, etc.
+                added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
+                if added_hashed_id:
+                    added_ids.add(added_hashed_id)
+        return added_ids
+
+    def increase_interest(self, interest, value=1):
+
+        interest_key = f'interests.{interest}'
+        _existing_interest_value = self.get(interest_key, None)
+
+        if _existing_interest_value:
+            # Convert if string
+            if isinstance(_existing_interest_value, str) and _existing_interest_value.isnumeric():
+                _existing_interest_value = float(_existing_interest_value)
+
+            if isinstance(_existing_interest_value, (int, float)):
+                self[interest_key] += value
+
+        else:
+            self[interest_key] = value
+
+    def decrease_interest(self, interest, value=1):
+
+        interest_key = f'interests.{interest}'
+        _existing_interest_value = self.get(interest_key, None)
+
+        if _existing_interest_value:
+            # Convert if string
+            if isinstance(_existing_interest_value, str) and _existing_interest_value.isnumeric():
+                _existing_interest_value = float(_existing_interest_value)
+
+            if isinstance(_existing_interest_value, (int, float)):
+                self[interest_key] -= value
+
+        else:
+            self[interest_key] = -value
+
+    def reset_interest(self, interest, value=0):
+        interest_key = f'interests.{interest}'
+        self[interest_key] = value

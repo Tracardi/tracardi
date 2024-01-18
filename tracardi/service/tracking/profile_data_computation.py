@@ -7,9 +7,10 @@ from dotty_dict import Dotty
 from tracardi.config import tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.event import Event
+from tracardi.domain.event_compute import EventCompute
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.event_to_profile import EventToProfile
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.exceptions.exception_service import get_traceback
@@ -40,7 +41,7 @@ def update_profile_last_geo(session: Session, profile: Profile) -> Profile:
         _geo = session.device.geo
         if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
             profile.data.devices.last.geo = _geo
-            profile.operation.update = True
+            profile.set_updated()
     return profile
 
 
@@ -54,17 +55,17 @@ def update_profile_email_type(profile: Profile) -> Profile:
                 profile.aux['email'] = {}
 
             profile.aux['email']['free'] = email_domain in free_email_domains
-            profile.operation.update = True
+            profile.set_updated()
     return profile
 
 
 def update_profile_visits(session: Session, profile: Profile) -> Profile:
     # Calculate only on first click in visit
 
-    if session.operation.new:
+    if session.is_new():
         profile.metadata.time.visit.set_visits_times()
         profile.metadata.time.visit.count += 1
-        profile.operation.update = True
+        profile.set_updated()
 
     return profile
 
@@ -87,10 +88,10 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 async def map_event_to_profile(
         custom_mapping_schemas: StorageRecords,
         flat_event: Dotty,
-        flat_profile: Dotty,
+        flat_profile: FlatProfile,
         session: Session,
         source: EventSource,
-        console_log: ConsoleLog) -> Tuple[Dotty, FieldTimestampMonitor]:
+        console_log: ConsoleLog) -> Tuple[FlatProfile, FieldTimestampMonitor]:
 
     # Default event types mappings
 
@@ -258,23 +259,27 @@ async def map_event_to_profile(
                         )
                         logger.error(message)
 
-    if profile_updated_flag is True and profile_changes is not None:
+    compute_schema = get_default_mappings_for(flat_event['type'], "compute")
+    if compute_schema:
+        compute_schema = EventCompute(**compute_schema)
+
+        # Run only on change but no change
+        if compute_schema.run_on_profile_change() and profile_updated_flag is False:
+            return flat_profile, profile_changes
 
         # Compute values
 
-        compute_schema = get_default_mappings_for(flat_event['type'], 'compute')
-        if compute_schema:
-            for profile_property, compute_string in compute_schema:
-                if not compute_string.startswith("call:"):
-                    continue
+        for profile_property, compute_string in compute_schema.yield_functions():
 
-                computation_result = default_event_call_function(
-                    compute_string,
-                    event=flat_event,
-                    profile=profile_changes.flat_profile)
+            # Compute value
+            computation_result = default_event_call_function(
+                compute_string,
+                event=flat_event,
+                profile=profile_changes.flat_profile)
 
-                if profile_property is not None:
-                    profile_changes[profile_property] = computation_result
+            # Set property if defined
+            if isinstance(profile_property, str):
+                profile_changes[profile_property] = computation_result
 
         flat_profile['operation.update'] = True
 

@@ -3,6 +3,7 @@ import logging
 import traceback
 from typing import Optional
 
+from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
 from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.service.utils.date import now_in_utc
 from tracardi.service.profile_merger import ProfileMerger
@@ -22,7 +23,6 @@ from tracardi.service.cache_manager import CacheManager
 from typing import List
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracking.track_async import process_track_data
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -68,8 +68,6 @@ async def track_event(tracker_payload: TrackerPayload,
             await save_logs()
         except Exception as e:
             logger.warning(f"Could not save logs. Error: {str(e)} ")
-
-
 
 
 class Tracker:
@@ -125,6 +123,7 @@ class Tracker:
                     # If no session create one
                     if tracker_payload.session is None:
                         tracker_payload.session = Session.new()
+                        tracker_payload.session.profile = Entity(id=referred_profile_id)
 
                 else:
                     logger.warning(f"Referred Tracardi Profile Id {referred_profile_id} is invalid.")
@@ -133,6 +132,27 @@ class Tracker:
                 logger.warning(f"Referred Tracardi Source Id {refer_source_id} is invalid. "
                                f"The following error was returned {str(e)}.")
         return tracker_payload
+
+    @staticmethod
+    def get_bridge(tracker_payload: TrackerPayload) -> Optional[ConfigurableBridge]:
+        if not isinstance(tracker_payload.source, EventSource):
+            logger.error("Can't configure bridge. Method get_bridge used before "
+                         "EventSource was created.")
+
+        if 'webhook' in tracker_payload.source.type:
+            return WebHookBridge(
+                id=tracker_payload.source.id,
+                name=tracker_payload.source.name,
+                config=tracker_payload.source.config
+            )
+        elif 'rest' in tracker_payload.source.type:
+            return RestApiBridge(
+                id=tracker_payload.source.id,
+                name=tracker_payload.source.name,
+                config=tracker_payload.source.config
+            )
+
+        return None
 
     async def track_event(self, tracker_payload: TrackerPayload, tracking_start: float):
 
@@ -163,15 +183,14 @@ class Tracker:
 
         tracker_payload = await self._attach_referenced_profile(tracker_payload)
 
-        # Run only for webhooks
-        # Check if we need to generate profile and session id. Used in webhooks
-        if tracker_payload.generate_profile_and_session_for_webhook(self.console_log):
-            # Returns true if source is a webhook with generate profile id set to true
-            self.tracker_config.static_profile_id = True
+        # If there is a configurable bridge get it and set up tracker_payload and tracker_config
 
-        # If REST API is configured to have static Profile ID
-        if tracker_payload.source.config is not None and tracker_payload.source.config.get('static_profile_id', False):
-            self.tracker_config.static_profile_id = True
+        configurable_bridge = self.get_bridge(tracker_payload)
+        if configurable_bridge:
+            tracker_payload, self.tracker_config, self.console_log = await configurable_bridge.configure(
+                tracker_payload,
+                self.tracker_config,
+                self.console_log)
 
         # Is source ephemeral
         if tracker_payload.source.transitional is True:
@@ -219,29 +238,3 @@ class Tracker:
                                  f"{self.tracker_config.allowed_bridges} or call any `{source.type}` endpoint.")
 
         return source
-
-    # async def validate_source(self, tracker_payload: TrackerPayload) -> EventSource:
-    #
-    #     source_id = tracker_payload.source.id
-    #     ip = tracker_payload.metadata.ip
-    #
-    #     if source_id == tracardi.internal_source:
-    #         return EventSource(
-    #             id=source_id,
-    #             type=['internal'],
-    #             bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
-    #             name="Internal event source",
-    #             description="This is event source for internal events.",
-    #             channel="Internal",
-    #             transitional=False,  # ephemeral
-    #             tags=['internal'],
-    #             timestamp=now_in_utc()
-    #         )
-    #
-    #     source = await self.check_source_id(source_id)
-    #
-    #     if source is None:
-    #         raise ValueError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
-    #                          f"width payload: {tracker_payload}")
-    #
-    #     return source

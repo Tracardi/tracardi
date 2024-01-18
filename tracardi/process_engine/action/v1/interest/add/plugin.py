@@ -31,7 +31,7 @@ class AddInterestAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         profile = Profile(**dot.profile)
         if self.config.interest not in self.profile.interests:
-            profile.operation.update = True
+            profile.set_updated()
 
             try:
                 dot = self._get_dot_accessor(payload)

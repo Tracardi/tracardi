@@ -4,6 +4,16 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.add_integration_id_action": PluginMetadata(
+        test=PluginTest(
+            init={
+                "id": "event@properties",
+                "name": "",
+                "data": "{}"
+            },
+            resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.time.time_delay.plugin": PluginMetadata(
         test=PluginTest(
             init={
@@ -575,11 +585,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                             'access_token': '<access_token>',
                             'access_token_secret': '<access_token_secret>'
                         })
-    ),
-
-    "tracardi.process_engine.action.v1.internal.assign_profile_id.plugin": PluginMetadata(
-        test=PluginTest(init={'value': ''},
-                        resource=None)
     ),
 
     "tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin": PluginMetadata(

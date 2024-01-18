@@ -23,7 +23,7 @@
       "data.ec.order.payable.due_date":   "properties.payment.due_date"
     },
     "tags": [
-      "entity:order",
+      "event:operational",
       "entity:payment"
     ],
     "state": "purchase"
@@ -52,7 +52,7 @@
       "data.ec.order.receivable.due_date":   "properties.payment.due_date"
     },
     "tags": [
-      "entity:order",
+      "event:operational",
       "entity:payment"
     ],
     "state": "purchase"
@@ -82,7 +82,7 @@
       "data.ec.order.cost.due_date":   "properties.payment.due_date"
     },
     "tags": [
-      "entity:order",
+      "event:operational",
       "entity:payment"
     ],
     "state": "purchase"
@@ -112,7 +112,7 @@
       "data.ec.order.income.due_date":   "properties.payment.due_date"
     },
     "tags": [
-      "entity:order",
+      "event:operational",
       "entity:payment"
     ],
     "state": "purchase"
@@ -141,7 +141,7 @@
       "data.ec.order.payable.due_date":   "properties.payment.due_date"
     },
     "tags": [
-      "entity:order",
+      "event:operational",
       "entity:payment"
     ],
     "state": "purchase"
@@ -170,7 +170,7 @@
       "data.ec.order.receivable.due_date":   "properties.payment.due_date"
     },
     "tags": [
-      "entity:order",
+      "event:operational",
       "entity:payment"
     ],
     "state": "purchase"

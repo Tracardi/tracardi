@@ -70,7 +70,7 @@ async def post_ev_segment(profile: Profile, session: Session, event_types: list,
     segmentation_result = {"errors": [], "ids": []}
     try:
         # Segmentation
-        if profile.operation.needs_update() or profile.operation.needs_segmentation():
+        if profile.needs_update() or profile.needs_segmentation():
             # Segmentation runs only if profile was updated or flow forced it
             async for event_type, segment_id, error in _segment(profile,
                                                                 session,

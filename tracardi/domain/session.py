@@ -88,6 +88,17 @@ class Session(Entity):
 
         super().__init__(**data)
 
+
+    def is_new(self) -> bool:
+        return self.operation.new
+
+    def set_new(self, flag=True):
+        self.operation.new = flag
+
+    def set_updated(self, flag=True):
+        self.operation.update = flag
+
+
     def set_updated_in_workflow(self, state=True):
         self._updated_in_workflow = state
 
@@ -130,13 +141,15 @@ class Session(Entity):
         )
 
     @staticmethod
-    def new(id: Optional[str] = None) -> 'Session':
+    def new(id: Optional[str] = None, profile_id: str=None) -> 'Session':
         session = Session(
             id=str(uuid.uuid4()) if not id else id,
             metadata=SessionMetadata()
         )
         session.fill_meta_data()
-        session.operation.new = True
+        session.set_new()
+        if profile_id is not None:
+            session.profile = Entity(id=profile_id)
 
         return session
 

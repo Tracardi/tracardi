@@ -1,5 +1,4 @@
 from typing import Tuple, List, Optional
-
 from tracardi.config import tracardi
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -11,7 +10,7 @@ from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.event_data_computation import compute_events
-from tracardi.service.tracking.locking import GlobalMutexLock
+from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
     update_profile_visits, update_profile_time
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
@@ -32,26 +31,7 @@ if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
 
-
-async def compute_data(tracker_payload: TrackerPayload,
-                       tracker_config: TrackerConfig,
-                       source: EventSource,
-                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
-Optional[FieldTimestampMonitor]]:
-
-    # We need profile and session before async
-
-    session, tracker_payload = await load_or_create_session(tracker_payload)
-
-    # Load profile
-
-    profile, session = await load_profile_and_session(
-        session,
-        tracker_config,
-        tracker_payload,
-        console_log
-    )
-
+async def _compute(source, profile, session, tracker_payload, tracker_config, console_log):
     if License.has_license():
         if profile is not None:
 
@@ -83,7 +63,7 @@ Optional[FieldTimestampMonitor]]:
     # Session and events computation
 
     # Is new session
-    if session.operation.new:
+    if session.is_new():
         # Compute session. Session is filled only when new
         session, profile = compute_session(
             session,
@@ -142,66 +122,49 @@ Optional[FieldTimestampMonitor]]:
 
     return profile, session, events, tracker_payload, field_timestamp_monitor
 
+async def lock_and_compute_data(tracker_payload: TrackerPayload,
+                       tracker_config: TrackerConfig,
+                       source: EventSource,
+                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
+Optional[FieldTimestampMonitor]]:
+    # We need profile and session before async
 
-async def lock_and_compute_data(
-        tracker_payload: TrackerPayload,
-        tracker_config: TrackerConfig,
-        source: EventSource,
-        console_log: ConsoleLog) -> Tuple[Profile, Session, List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
+    session, tracker_payload = await load_or_create_session(tracker_payload)
 
-    if tracardi.lock_on_data_computation:
-        _redis = RedisClient()
-        async with (
-            GlobalMutexLock(get_entity_id(tracker_payload.profile),
-                            'profile',
-                            namespace=Collection.lock_tracker,
-                            redis=_redis,
-                            name='lock_and_compute_data'
-                            ),
-            GlobalMutexLock(get_entity_id(tracker_payload.session),
-                            'session',
-                            namespace=Collection.lock_tracker,
-                            redis=_redis,
-                            name='lock_and_compute_data'
-                            )):
+    # Load profile
 
-            # Always use GlobalUpdateLock to update profile and session
+    profile, session = await load_profile_and_session(
+        session,
+        tracker_config,
+        tracker_payload,
+        console_log
+    )
 
-            profile, session, events, tracker_payload, field_timestamp_monitor = await compute_data(
-                tracker_payload,
-                tracker_config,
-                source,
-                console_log
-            )
+    # We need profile ID to lock.
+    _redis = RedisClient()
+    profile_key = Lock.get_key(Collection.lock_tracker, "profile", get_entity_id(profile))
+    profile_lock = Lock(_redis, profile_key, default_lock_ttl=3)
 
-            # MUST BE INSIDE MUTEX
-            # Update only when needed
+    # If not profile ID then no locking
 
-            if profile and profile.has_not_saved_changes():
-                save_profile_cache(profile)
-
-            if session and session.has_not_saved_changes():
-                save_session_cache(session)
-
-
-
-    else:
-
-        profile, session, events, tracker_payload, field_timestamp_monitor = await compute_data(
-            tracker_payload,
-            tracker_config,
-            source,
-            console_log
-        )
-
+    async with async_mutex(profile_lock, name='lock_and_compute_data_profile'):
+        profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(source, profile, session,
+                                                                                            tracker_payload,
+                                                                                            tracker_config, console_log)
+        # MUST BE INSIDE MUTEX
         # Update only when needed
 
-        if profile and profile.has_not_saved_changes():
-            save_profile_cache(profile)
+        _save_profile_and_session(profile, session)
 
-        if session and session.has_not_saved_changes():
-            # If saving by queue then ttl set to 30 min.
-            save_session_cache(session)
+        return profile, session, events, tracker_payload, field_timestamp_monitor
 
 
-    return profile, session, events, tracker_payload, field_timestamp_monitor
+def _save_profile_and_session(profile: Profile, session: Session):
+
+    # Update only when needed
+
+    if profile and profile.has_not_saved_changes():
+        save_profile_cache(profile)
+
+    if session and session.has_not_saved_changes():
+        save_session_cache(session)

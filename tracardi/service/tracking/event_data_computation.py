@@ -3,7 +3,7 @@ import logging
 import asyncio
 from dotty_dict import dotty, Dotty
 
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Set
 
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import log_handler
@@ -15,7 +15,7 @@ from tracardi.domain.console import Console
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.event import Event
 from tracardi.service.cache_manager import CacheManager
@@ -44,22 +44,17 @@ def _remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Dotty:
+def _auto_index_default_event_type(flat_event: Dotty, flat_profile: FlatProfile) -> Dotty:
     event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
     if event_mapping_schema is not None:
 
         for destination, source in event_mapping_schema.items():  # type: str, str
             try:
-
-                # if destination not in dot_event:
-                #     logger.warning(f"While indexing type {event.type}. "
-                #                    f"Property destination {destination} could not be found in event schema.")
-
                 # Skip none existing event properties.
                 if source in flat_event:
                     flat_event[destination] = flat_event[source]
-                    del flat_event[source]
+
             except KeyError:
                 pass
 
@@ -69,8 +64,8 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Do
         if isinstance(state, str):
             if state.startswith("call:"):
                 state = default_event_call_function(call_string=state, event=flat_event, profile=flat_profile)
-
-            flat_event['journey.state'] = state
+            if state:
+                flat_event['journey.state'] = state
 
     tags = get_default_mappings_for(flat_event['type'], 'tags')
     if tags:
@@ -80,12 +75,14 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Dotty) -> Do
     return flat_event
 
 
-async def default_mapping_event_and_profile(flat_event: Dotty,
-                                            flat_profile: Dotty,
-                                            session:Session,
-                                            source: EventSource,
-                                            console_log: ConsoleLog) -> Tuple[
-    Dotty, Dotty, Optional[FieldTimestampMonitor]]:
+async def event_to_profile_mapping(flat_event: Dotty,
+                                   flat_profile: FlatProfile,
+                                   session: Session,
+                                   source: EventSource,
+                                   console_log: ConsoleLog) -> Tuple[
+    Dotty, FlatProfile, Optional[FieldTimestampMonitor], Set[str]]:
+
+    auto_merge_ids = set()
 
     # Default event mapping
     flat_event = _auto_index_default_event_type(flat_event, flat_profile)
@@ -132,10 +129,10 @@ async def default_mapping_event_and_profile(flat_event: Dotty,
         if not isinstance(flat_profile['metadata.fields'], dict):
             flat_profile['metadata.fields'] = {}
 
-        for field, timestamp_data in profile_changes.get_timestamps():
-            flat_profile['metadata.fields'][field] = timestamp_data
+        # Append field changes fo metadata.fields
+        auto_merge_ids = flat_profile.set_metadata_fields_timestamps(profile_changes)
 
-    return flat_event, flat_profile, profile_changes
+    return flat_event, flat_profile, profile_changes, auto_merge_ids
 
 
 async def make_event_from_event_payload(event_payload,
@@ -196,11 +193,13 @@ async def compute_events(events: List[EventPayload],
     event_objects = []
 
     if profile:
-        flat_profile = dotty(profile.model_dump())
+        flat_profile = FlatProfile(profile.model_dump())
         profile_metadata = profile.get_meta_data()
     else:
         flat_profile = None
         profile_metadata = None
+
+    auto_merge_ids = set()
 
     for event_payload in events:
 
@@ -219,12 +218,17 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, flat_profile, field_timestamp_monitor = await default_mapping_event_and_profile(
+            flat_event, flat_profile, field_timestamp_monitor, _auto_merge_ids = await event_to_profile_mapping(
                 flat_event,
                 flat_profile,
                 session,
                 source,
                 console_log)
+
+            # Combine all auto merge ids
+
+            if _auto_merge_ids:
+                auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
 
         # Convert to event
         event_dict = flat_event.to_dict()
@@ -247,16 +251,16 @@ async def compute_events(events: List[EventPayload],
 
             if session.metadata.status != 'active':
                 session.metadata.status = 'active'
-                session.operation.update = True
+                session.set_updated()
 
             # Add session status
             if event.type == 'visit-started':
                 session.metadata.status = 'started'
-                session.operation.update = True
+                session.set_updated()
 
             if event.type == 'visit-ended':
                 session.metadata.status = 'ended'
-                session.operation.update = True
+                session.set_updated()
 
             event.session.start = session.metadata.time.insert
             event.session.duration = session.metadata.time.duration
@@ -271,6 +275,8 @@ async def compute_events(events: List[EventPayload],
         try:
             profile = Profile(**flat_profile.to_dict())
             profile.set_meta_data(profile_metadata)
+            if auto_merge_ids:
+                profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
         except Exception as e:
             message = f"It seems that there was an error when trying to add or update some information to " \
                       f"your profile. The error occurred because you tried to add a value that is not " \
@@ -297,6 +303,5 @@ async def compute_events(events: List[EventPayload],
             logger.error(message)
             if not tracardi.skip_errors_on_profile_mapping:
                 raise e
-
 
     return event_objects, session, profile, field_timestamp_monitor

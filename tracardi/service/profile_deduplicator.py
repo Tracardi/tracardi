@@ -1,22 +1,25 @@
+from typing import List
 from tracardi.domain.profile import Profile
 from tracardi.domain.storage_record import StorageRecord, RecordMetadata
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.storage.factory import storage_manager
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
+from tracardi.service.tracking.storage.profile_storage import save_profile
 
 
-async def _load_duplicates(id: str):
+async def _load_duplicates(profile_ids: List[str]):
     return await storage_manager('profile').query({
         "query": {
             "bool": {
                 "should": [
                     {
-                        "term": {
-                            "ids": id
+                        "terms": {
+                            "ids": profile_ids
                         }
                     },
                     {
-                        "term": {
-                            "id": id
+                        "terms": {
+                            "id": profile_ids
                         }
                     }
                 ],
@@ -24,17 +27,29 @@ async def _load_duplicates(id: str):
             }
         },
         "sort": [
-            {"metadata.time.insert": "desc"}
+            {"metadata.time.insert": "desc"}  # todo maybe should be based on updates (but update should always exist)
         ]
     })
 
 
-async def deduplicate_profile(profile_id):
-    _duplicated_profiles = await _load_duplicates(profile_id)  # 1st records is the newest
+async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
+
+    if isinstance(profile_ids, list):
+        set(profile_ids).add(profile_id)
+        profile_ids = list(profile_ids)
+    else:
+        profile_ids = [profile_id]
+
+    _duplicated_profiles = await _load_duplicates(profile_ids)  # 1st records is the newest
     valid_profile_record = _duplicated_profiles.first()  # type: StorageRecord
     first_profile = valid_profile_record.to_entity(Profile)
 
     if len(_duplicated_profiles) == 1:
+        if first_profile.metadata.system.has_merging_data():
+            first_profile.metadata.system.remove_merging_data()
+            save_profile_cache(first_profile)
+            await save_profile(first_profile)
+
         # If 1 then there is no duplication
         return first_profile
 

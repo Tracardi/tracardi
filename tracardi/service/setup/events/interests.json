@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Increase Interest",
+    "description": "Increase interest for current profile.",
+    "id": "increase-interest",
+    "properties": {
+      "interest": "string",
+      "value": 1.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,increase_interest"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "Decrease Interest",
+    "description": "Decrease interest for current profile.",
+    "id": "decrease-interest",
+    "properties": {
+      "interest": "string",
+      "value": 1.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,decrease_interest"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "Reset Interest",
+    "description": "Reset interest for current profile to defined value.",
+    "id": "reset-interest",
+    "properties": {
+      "interest": "string",
+      "value": 0.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,reset_interest"
+        ]
+      ]
+    }
+  }
+]

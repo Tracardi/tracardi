@@ -239,7 +239,7 @@ class WorkflowManagerAsync:
                 # TODO Does profile need rules to merge?
                 # Profile merge
                 try:
-                    if self.profile is not None and self.profile.operation.needs_merging():
+                    if self.profile is not None and self.profile.needs_merging():
                         # Profile can be None if profile_less event is processed
                         self.profile = await self.merge_profile(self.profile)
 

@@ -17,7 +17,7 @@
         "equal"
       ]
     },
-    "tags": ["entity:profile", "activity:consent"],
+    "tags": ["activity:consent"],
     "state": "awareness"
   },
   {
@@ -480,7 +480,7 @@
         "equal"
       ]
     },
-    "tags": ["entity:profile"],
+    "tags": ["event:operational"],
     "state": "awareness"
   }
 ]

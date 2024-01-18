@@ -42,9 +42,9 @@ class MergeProfilesAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
-            # TODO LOOK for self.profile.operation.needs_merging()
+            # TODO LOOK for self.profile.needs_merging()
             # TODO operation can be overwritten by update form cache. maybe mrege here not at the end of workflow.
-            self.profile.operation.merge = self.merge_key
+            self.profile.set_merge_key(self.merge_key)
         else:
             if self.event.metadata.profile_less is True:
                 self.console.warning("Can not merge profile when processing profile less events.")

@@ -8,7 +8,7 @@ class UpdateProfileAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         self.profile.metadata.time.update = now_in_utc()
-        self.profile.set_updated_in_workflow()
+        self.profile.mark_for_update()
         self.profile.data.compute_anonymous_field()
 
 
