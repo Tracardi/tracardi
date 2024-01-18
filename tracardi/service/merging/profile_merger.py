@@ -14,13 +14,13 @@ def _merge_dict(base_dict, update_dict):
     )
 
 
-def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
+def merge_profiles(base_profile: Profile, new_profile: Profile) -> Profile:
 
     try:
-        profile.data = ProfileData(
+        new_profile.data = ProfileData(
             **dict_merge(
                 base_profile.data.model_dump(mode='json'),
-                [profile.data.model_dump(mode='json')],
+                [new_profile.data.model_dump(mode='json')],
                 MergingStrategy(
                     make_lists_uniq=True,
                     no_single_value_list=False,
@@ -30,9 +30,9 @@ def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
             )
         )
 
-        profile.traits = dict_merge(
+        new_profile.traits = dict_merge(
             base_profile.traits,
-            [profile.traits],
+            [new_profile.traits],
             MergingStrategy(
                 make_lists_uniq=True,
                 no_single_value_list=False,
@@ -41,48 +41,50 @@ def merge_profiles(base_profile: Profile, profile: Profile) -> Profile:
             )
         )
 
-        profile.metadata.aux = dict_merge(
+        new_profile.metadata.aux = dict_merge(
             base_profile.metadata.aux,
-            [profile.metadata.aux],
+            [new_profile.metadata.aux],
             MergingStrategy(
                 default_number_strategy="override"
             )
         )
 
         # Copy time and visits from session. Updates to the last time
-        profile.metadata.time = base_profile.metadata.time
-        profile.metadata.time.visit = base_profile.metadata.time.visit
-        profile.metadata.status = base_profile.metadata.status
+        new_profile.metadata.time = base_profile.metadata.time
+        new_profile.metadata.time.visit = base_profile.metadata.time.visit
+        new_profile.metadata.status = base_profile.metadata.status
 
-        profile.aux = _merge_dict(
+        new_profile.aux = _merge_dict(
             base_dict=base_profile.aux,
-            update_dict=profile.aux
+            update_dict=new_profile.aux
         )
 
-        profile.consents = _merge_dict(
+        new_profile.consents = _merge_dict(
             base_dict=base_profile.consents,
-            update_dict=profile.consents
+            update_dict=new_profile.consents
         )
 
-        profile.interests = _merge_dict(
+        new_profile.interests = _merge_dict(
             base_dict=base_profile.interests,
-            update_dict=profile.interests
+            update_dict=new_profile.interests
         )
 
-        profile.segments = list_merge(
-            base=base_profile.segments,
-            new_list=profile.segments,
-            strategy=MergingStrategy(
-                make_lists_uniq=True,
-                no_single_value_list=False
-            )
-        )
+        # This sould be commented. New profile is as it is. No merging as it will keep the old segments.
+        # new_profile.segments = list_merge(
+        #     base=base_profile.segments,
+        #     new_list=new_profile.segments,
+        #     strategy=MergingStrategy(
+        #         make_lists_uniq=True,
+        #         no_single_value_list=False,
+        #         default_list_strateg='override'
+        #     )
+        # )
 
-        profile.set_meta_data(base_profile.get_meta_data())
+        new_profile.set_meta_data(base_profile.get_meta_data())
 
     except Exception as e:
         print(e)
 
     finally:
-        return profile
+        return new_profile
 
