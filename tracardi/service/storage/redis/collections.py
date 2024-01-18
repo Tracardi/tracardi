@@ -17,7 +17,7 @@ class Collection:
     profile: str = "profile:"  # HASH
     session: str = "session:"  # HASH
     lock_tracker: str = "lock:tracker:"  # HASH
-    lock_persister: str = "lock:persister:"  # HASH
+
     session_lock: str = "session:lock:"  # HASH
     profile_fields: str = "profile:fields"  # SET, Cache profile fields, properties for auto completion
     event_fields: str = "event:fields"  # SET, Cache event fields, properties for auto completion
@@ -28,4 +28,6 @@ class Collection:
     browser_finger_print: str = 'profile:finger:browser'  # Cache for profile by browser fingerprint
 
     function_cache: str = 'function'
+    lock_flusher: str = "lock:flusher:"  # HASH
+    lock_persister: str = "lock:persister:"  # HASH
 
