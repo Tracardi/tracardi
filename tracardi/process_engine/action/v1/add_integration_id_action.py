@@ -102,6 +102,7 @@ def register() -> Plugin:
                         FormField(
                             id="name",
                             name="External System Name",
+                            description="The name will be lower-cased and spaces will be replaced by hyphens.",
                             component=FormComponent(type="text", props={"label": "External System Name"})
                         ),
                         FormField(
