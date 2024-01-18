@@ -61,7 +61,10 @@ class AddIntegrationIdAction(ActionRunner):
             data = json.loads(self.config.data)
             data = traverser.reshape(data)
             # Saves in profile metadata.system.integrations external system id where the key is system name and the value is id and data.
-            self.profile.metadata.system.set_integration(self.config.name, external_id, data)
+            self.profile.metadata.system.set_integration(
+                self.config.name.lower().replace(' ', '-'),
+                external_id,
+                data)
             self.profile.mark_for_update()
             return Result(port="payload", value=payload)
         except Exception as e:
