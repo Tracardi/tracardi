@@ -29,5 +29,6 @@ def map_to_event_redirect(event_redirect_table: EventRedirectTable) -> EventRedi
         source=NamedEntity(id=event_redirect_table.source_id, name=event_redirect_table.source_name),
         event_type=event_redirect_table.event_type,
         props=event_redirect_table.props,
-        tags=split_list(event_redirect_table.tags)  # Convert comma-separated string back to list
+        tags=split_list(event_redirect_table.tags),  # Convert comma-separated string back to list
+        production=event_redirect_table.production
     )

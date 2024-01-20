@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from tracardi.domain.operations import APPEND, EQUALS, EQUALS_IF_NOT_EXISTS
 from tracardi.domain.ref_value import RefValue
 
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 
 
 class EventToProfileMap(BaseModel):
@@ -32,7 +32,7 @@ class EventToProfileMap(BaseModel):
         return not self.event.has_value() or not self.profile.has_value()
 
 
-class EventToProfile(NamedEntity):
+class EventToProfile(NamedEntityInContext):
     event_type: NamedEntity
     description: Optional[str] = "No description provided"
     enabled: Optional[bool] = False

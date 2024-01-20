@@ -41,7 +41,7 @@ def map_to_event_source_table(event_source: EventSource) -> EventSourceTable:
         endpoints_get_method=None,
         endpoints_post_url=None,  # Assuming 'endpoints_post_url' is not in EventSource, needs to be handled if present
         endpoints_post_method=None,
-        configurable=None,  # Assuming 'configurable' is not in EventSource, needs to be handled if present
+        configurable=None  # Assuming 'configurable' is not in EventSource, needs to be handled if present
 
     )
 
@@ -68,6 +68,8 @@ def map_to_event_source(event_source_table: EventSourceTable) -> EventSource:
         manual=event_source_table.manual,
         locked=event_source_table.locked or False,
         synchronize_profiles=event_source_table.synchronize_profiles or True,
-        config=event_source_table.config
+        config=event_source_table.config,
+        production=event_source_table.production,
+        running=event_source_table.running
     )
 

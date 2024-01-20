@@ -3,12 +3,12 @@ from typing import Optional, Any, List, Set
 from pydantic import field_validator, PrivateAttr
 
 from .metadata import Metadata
-from .named_entity import NamedEntity
+from .named_entity import NamedEntity, NamedEntityInContext
 from .time import Time
 from ..service.utils.date import now_in_utc
 
 
-class Rule(NamedEntity):
+class Rule(NamedEntityInContext):
 
     _schedule_node_id: str = PrivateAttr(None)
     event_type: Optional[NamedEntity] = NamedEntity(id="", name="")

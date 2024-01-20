@@ -32,5 +32,6 @@ def map_to_identification_point(identification_point_table: IdentificationPointT
         event_type=NamedEntity(id=identification_point_table.event_type_id, name=identification_point_table.event_type_name),
         fields=to_model(identification_point_table.fields, IdentificationField),
         enabled=identification_point_table.enabled if identification_point_table.enabled is not None else False,
-        settings=identification_point_table.settings
+        settings=identification_point_table.settings,
+        production=identification_point_table.production
     )

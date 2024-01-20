@@ -2,11 +2,10 @@ from pydantic import field_validator, validator
 from typing import List, Optional
 from pytimeparse import parse
 
-from tracardi.domain.entity import Entity
+from tracardi.domain.named_entity import NamedEntityInContext
 
 
-class ConsentType(Entity):
-    name: str
+class ConsentType(NamedEntityInContext):
     description: str
     revokable: bool = False
     default_value: str

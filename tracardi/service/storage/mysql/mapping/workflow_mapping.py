@@ -54,5 +54,6 @@ def map_to_workflow_record_meta(workflow_table: WorkflowTable) -> FlowMetaData:
         name=workflow_table.name,
         description=workflow_table.description,
         type=workflow_table.type,
-        projects=split_list(workflow_table.projects)
+        projects=split_list(workflow_table.projects),
+        production=workflow_table.production
     )

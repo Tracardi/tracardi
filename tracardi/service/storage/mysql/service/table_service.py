@@ -1,33 +1,42 @@
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any, Callable
 
 from sqlalchemy.dialects.mysql import insert
+
+from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
-from sqlalchemy.future import select
-from sqlalchemy import and_, delete, inspect, update, Column, text, Select
+from sqlalchemy import and_, inspect, update, Column, text
 from sqlalchemy.sql import func
 
 
 from tracardi.service.storage.mysql.schema.table import Base, tenant_only_context_filter
 from tracardi.service.storage.mysql.schema.table import tenant_context_filter
+if License.has_service(LICENSE):
+    from com_tracardi.service.mysql.query_service import MysqlQuery
+else:
+    from tracardi.service.storage.mysql.query_service import MysqlQuery
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
-def where_tenant_context(table, *clauses):
-    return and_(tenant_context_filter(table), *clauses)
+def where_tenant_context(table, *clauses) -> Callable:
+    def _wrapper():
+        return and_(tenant_context_filter(table), *clauses)
+
+    return _wrapper
 
 
-def where_only_tenant_context(table, *clauses):
-    return and_(tenant_only_context_filter(table), *clauses)
-
+def _where_only_tenant_context(table, *clauses) -> Callable:
+    def _wrapper():
+        return and_(tenant_only_context_filter(table), *clauses)
+    return _wrapper
 
 def sql_functions():
     return func
 
 
-def where_with_context(table: Type[Base], server_context:bool, *clauses):
+def where_with_context(table: Type[Base], server_context:bool, *clauses) -> Callable:
     return where_tenant_context(
         table,
         *clauses
-    ) if server_context else where_only_tenant_context(
+    ) if server_context else _where_only_tenant_context(
         table,
         *clauses
     )
@@ -37,7 +46,7 @@ def where_with_context(table: Type[Base], server_context:bool, *clauses):
 
 class TableService:
 
-    def __init__(self, echo: bool=None):
+    def __init__(self, echo: bool=False):
         self.client = AsyncMySqlEngine(echo)
         self.engine = self.client.get_engine_for_database()
 
@@ -50,39 +59,6 @@ class TableService:
                 query = text(f"SHOW TABLES LIKE '{table_name}';")
                 result = await session.execute(query)
                 return result.scalar() is not None
-
-    @staticmethod
-    def _select_clause(table: Type[Base],
-                       columns=None,
-                       where=None,
-                       order_by: Column=None,
-                       limit:int=None,
-                       offset:int=None,
-                       distinct: bool = False) -> Select[Any]:
-
-
-
-        if columns is not None:
-            _select = select(*columns)
-        else:
-            _select = select(table)
-
-        if distinct:
-            _select = _select.distinct()
-
-        if where is not None:
-            _select = _select.where(where)
-
-        if order_by is not None:
-            _select = _select.order_by(order_by)
-
-        if limit:
-            _select = _select.limit(limit)
-
-            if offset:
-                _select = _select.offset(offset)
-
-        return _select
 
 
     async def _load_all(self,
@@ -115,11 +91,11 @@ class TableService:
             # Start a new transaction
             async with session.begin():
                 # Use SQLAlchemy core to perform an asynchronous query
-                result = await session.execute(
-                    select(table).where(where)
-                )
-                # Fetch all results
-                return SelectResult(result.scalars().one_or_none())
+                return await self._select_query(
+                        table=table,
+                        where=where,
+                        one_record=True
+                    )
 
 
     async def _field_filter(self, table: Type[Base], field: Column, value, server_context:bool=True) -> SelectResult:
@@ -131,14 +107,16 @@ class TableService:
             # Start a new transaction
             async with session.begin():
                 # Use SQLAlchemy core to perform an asynchronous query
-                result = await session.execute(select(table).where(where))
-                # Fetch all results
-                return SelectResult(result.scalars().all())
+                return await self._select_query(
+                    table=table,
+                    where=where,
+                    one_record=False
+                )
 
     async def _select_query(self,
                             table: Type[Base],
                             columns = None,
-                            where = None,
+                            where: Callable = None,
                             order_by: Column=None,
                             limit:int=None,
                             offset:int=None,
@@ -150,7 +128,10 @@ class TableService:
             # Start a new transaction
             async with session.begin():
 
-                _select = self._select_clause(table,
+                # Use SQLAlchemy core to perform an asynchronous query
+
+                resource = MysqlQuery(session)
+                result = await resource.select(table,
                                               columns,
                                               where,
                                               order_by,
@@ -158,12 +139,10 @@ class TableService:
                                               offset,
                                               distinct)
 
-                # Use SQLAlchemy core to perform an asynchronous query
-                result = await session.execute(_select)
                 # Fetch all results
                 if one_record:
-                    return SelectResult(result.scalars().one_or_none())
-                return SelectResult(result.scalars().all())
+                    return SelectResult(result.one_or_none())
+                return SelectResult(result.all())
 
     async def _insert(self, table: Type[Base]) -> Optional[str]:
         local_session = self.client.get_session(self.engine)
@@ -192,12 +171,8 @@ class TableService:
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             async with session.begin():
-                stmt = (
-                    update(table)
-                    .where(where)
-                    .values(**new_data)
-                )
-                await session.execute(stmt)
+                resource = MysqlQuery(session)
+                await resource.update(table, new_data, where)
                 await session.commit()
                 return None
 
@@ -226,13 +201,15 @@ class TableService:
         async with local_session() as session:
             async with session.begin():
 
-                existing_row = (await session.execute(
-                    select(table).where(where))).scalar()
+                resource = MysqlQuery(session)
+                result = await resource.select(
+                    table=table,
+                    where=where)
 
-                if existing_row is None:
+                if result.empty():
 
                     # Add the new object to the session
-                    session.add(data)
+                    resource.insert(data)
 
                     # The actual commit happens here
                     await session.commit()
@@ -250,9 +227,8 @@ class TableService:
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             async with session.begin():
-                await session.execute(
-                    delete(table).where(where)
-                )
+                resource = MysqlQuery(session)
+                await resource.delete(table, where)
 
                 return primary_id
 
@@ -261,7 +237,6 @@ class TableService:
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             async with session.begin():
-                await session.execute(
-                    delete(table).where(where)
-                )
+                resource = MysqlQuery(session)
+                await resource.delete(table, where)
 

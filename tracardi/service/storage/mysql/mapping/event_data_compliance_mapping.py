@@ -27,7 +27,8 @@ def map_to_event_data_compliance(event_data_compliance_table: EventDataComplianc
         description=event_data_compliance_table.description or "",
         event_type=NamedEntity(id=event_data_compliance_table.event_type_id, name=event_data_compliance_table.event_type_name),
         settings=to_model(event_data_compliance_table.settings, ConsentFieldComplianceSetting),
-        enabled=event_data_compliance_table.enabled if event_data_compliance_table.enabled is not None else False
+        enabled=event_data_compliance_table.enabled if event_data_compliance_table.enabled is not None else False,
+        production=event_data_compliance_table.production
     )
 
 

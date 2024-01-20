@@ -79,6 +79,16 @@ class EventSourceTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running:bool = False
+    #
+    # def running(self):
+    #     """Getter for the public property."""
+    #     return self._running
+
+    # @running.setter
+    # def running(self, value):
+    #     """Setter for the public property."""
+    #     self._running = value
 
 class WorkflowTable(Base):
     __tablename__ = 'workflow'

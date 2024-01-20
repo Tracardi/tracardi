@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from tracardi.domain.entity import Entity
 
@@ -12,3 +12,8 @@ class NamedEntity(Entity):
 
     def is_empty(self):
         return self.id == '' or self.id is None or self.name is None or self.id == ''
+
+
+class NamedEntityInContext(NamedEntity):
+    production: Optional[bool] = False
+    running: Optional[bool] = False

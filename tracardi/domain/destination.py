@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pydantic import field_validator, BaseModel
 from tracardi.domain.entity import Entity
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.secrets import b64_decoder, b64_encoder
 
@@ -28,7 +28,7 @@ class DestinationConfig(BaseModel):
         )
 
 
-class Destination(NamedEntity):
+class Destination(NamedEntityInContext):
     description: Optional[str] = ""
     destination: DestinationConfig
     enabled: bool = False

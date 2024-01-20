@@ -32,4 +32,5 @@ def map_to_event_mapping(event_mapping_table: EventMappingTable) -> EventTypeMet
         journey=event_mapping_table.journey,
         enabled=event_mapping_table.enabled if event_mapping_table.enabled is not None else False,
         index_schema=event_mapping_table.index_schema,
+        production=event_mapping_table.production
     )

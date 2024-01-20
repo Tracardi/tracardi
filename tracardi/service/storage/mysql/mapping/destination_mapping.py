@@ -51,5 +51,6 @@ def map_to_destination(destination_table: DestinationTable) -> Destination:
         resource=Entity(
             id=destination_table.resource_id or ""
         ),
-        tags=split_list(destination_table.tags)
+        tags=split_list(destination_table.tags),
+        production=destination_table.production
     )

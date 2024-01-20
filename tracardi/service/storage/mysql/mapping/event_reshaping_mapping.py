@@ -33,5 +33,6 @@ def map_to_event_reshaping(event_reshaping_table: EventReshapingTable) -> EventR
         tags=split_list(event_reshaping_table.tags),
         event_type=event_reshaping_table.event_type,
         event_source=NamedEntity(id=event_reshaping_table.event_source_id, name=event_reshaping_table.event_source_name),
-        enabled=event_reshaping_table.enabled if event_reshaping_table.enabled is not None else False  # Set default value for bool
+        enabled=event_reshaping_table.enabled if event_reshaping_table.enabled is not None else False,  # Set default value for bool
+        production=event_reshaping_table.production
     )
