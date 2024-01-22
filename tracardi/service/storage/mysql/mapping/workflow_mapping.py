@@ -19,7 +19,7 @@ def map_to_workflow_table(flow_record: FlowRecord) -> WorkflowTable:
         projects=",".join(flow_record.projects) if flow_record.projects else "",
 
         draft=flow_record.draft.encode(),
-        prod=flow_record.production.encode(),
+        prod=flow_record.production_flow.encode(),
         backup=flow_record.backup.encode(),
 
         lock=flow_record.lock,
@@ -41,7 +41,7 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         type=workflow_table.type,
         projects=split_list(workflow_table.projects),
         draft=workflow_table.draft.decode(),
-        production=workflow_table.prod.decode(),
+        production_flow=workflow_table.prod.decode(),
         backup=workflow_table.backup.decode(),
         lock=workflow_table.lock,
         deployed=workflow_table.deployed

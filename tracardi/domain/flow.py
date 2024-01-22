@@ -76,7 +76,7 @@ class Flow(FlowGraph):
             name=self.name,
             projects=self.projects,
             draft=production,
-            production=production,
+            production_flow=production,
             lock=self.lock,
             type=self.type
         )
@@ -102,8 +102,8 @@ class Flow(FlowGraph):
             else:
                 return None
         else:
-            if record.production:
-                decrypted = decrypt(record.production)
+            if record.production_flow:
+                decrypted = decrypt(record.production_flow)
             else:
                 return None
 
@@ -309,7 +309,7 @@ class FlowRecord(NamedEntity):
     description: Optional[str] = None
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
-    production: Optional[str] = ''
+    production_flow: Optional[str] = ''
     backup: Optional[str] = ''
     lock: bool = False
     deployed: Optional[bool] = False
@@ -328,18 +328,18 @@ class FlowRecord(NamedEntity):
     def restore_production_from_backup(self):
         if not self.backup:
             raise ValueError("Back up is empty.")
-        self.production = self.backup
+        self.production_flow = self.backup
 
     def restore_draft_from_production(self):
-        if not self.production:
+        if not self.production_flow:
             raise ValueError("Production up is empty.")
-        self.draft = self.production
+        self.draft = self.production_flow
 
     def set_lock(self, lock: bool = True) -> None:
         self.lock = lock
         production_flow = self.get_production_workflow()
         production_flow.lock = lock
-        self.production = encrypt(production_flow.model_dump())
+        self.production_flow = encrypt(production_flow.model_dump())
         draft_flow = self.get_draft_workflow()
         draft_flow.lock = lock
         self.draft = encrypt(draft_flow.model_dump())

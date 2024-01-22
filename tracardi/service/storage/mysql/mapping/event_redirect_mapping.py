@@ -30,5 +30,6 @@ def map_to_event_redirect(event_redirect_table: EventRedirectTable) -> EventRedi
         event_type=event_redirect_table.event_type,
         props=event_redirect_table.props,
         tags=split_list(event_redirect_table.tags),  # Convert comma-separated string back to list
-        production=event_redirect_table.production
+        production=event_redirect_table.production,
+        running=event_redirect_table.running
     )

@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class BridgeTable(Base):
     __tablename__ = 'bridge'
 
@@ -40,7 +41,7 @@ class EventSourceTable(Base):
     channel = Column(String(32))
     url = Column(String(255))
     enabled = Column(Boolean, default=False)
-    locked = Column(Boolean)
+    locked = Column(Boolean, default=False)
     transitional = Column(Boolean)
     tags = Column(String(255))
     groups = Column(String(255))
@@ -49,8 +50,8 @@ class EventSourceTable(Base):
     configurable = Column(Boolean)
     hash = Column(String(255))
     returns_profile = Column(Boolean)
-    permanent_profile_id = Column(Boolean)
-    requires_consent = Column(Boolean)
+    permanent_profile_id = Column(Boolean, default=False)
+    requires_consent = Column(Boolean, default=False)
     synchronize_profiles = Column(Boolean)
     manual = Column(Text)
     endpoints_get_url = Column(String(255))
@@ -64,7 +65,8 @@ class EventSourceTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
-    running:bool = False
+    running: bool = False
+
 
 class WorkflowTable(Base):
     __tablename__ = 'workflow'
@@ -210,9 +212,6 @@ class DestinationTable(Base):
     id = Column(String(40))
     name = Column(String(128), index=True)
 
-    tenant = Column(String(40))
-    production = Column(Boolean)
-
     description = Column(Text)
     destination = Column(JSON)
     condition = Column(Text)
@@ -225,6 +224,9 @@ class DestinationTable(Base):
     source_name = Column(String(128))
     resource_id = Column(String(40), index=True)
     tags = Column(String(255))
+
+    tenant = Column(String(40))
+    production = Column(Boolean)
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
@@ -321,6 +323,8 @@ class EventRedirectTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False
 
 
 class EventValidationTable(Base):

@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 
 from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource

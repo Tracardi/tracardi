@@ -21,8 +21,10 @@ def tenant_only_context_filter(table: Type[Base]):
     context = get_context()
     return table.tenant == context.tenant
 
-def custom_context_filter(table: Type[Base], tenant:str, production: bool):
-    return and_(table.tenant == tenant, table.production == production)
+def custom_context_filter(table: Type[Base], tenant:str, production: bool, *clauses):
+    def _wrapper():
+        return and_(table.tenant == tenant, table.production == production, *clauses)
+    return _wrapper
 
 def tenant_context_filter(table: Type[Base]):
     context = get_context()
