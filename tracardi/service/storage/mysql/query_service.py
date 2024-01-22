@@ -35,7 +35,7 @@ class MySqlQueryResult:
 
     def empty(self) -> bool:
         if isinstance(self.data, ChunkedIteratorResult):
-            return self.data.scalars() is None
+            return self.data.first() is None
         else:
             return self.data
 
@@ -106,3 +106,7 @@ class MysqlQuery:
                                     distinct)
 
         return MySqlQueryResult(await self.session.execute(query))
+
+    def insert(self, data):
+        return self.session.add(data)
+
