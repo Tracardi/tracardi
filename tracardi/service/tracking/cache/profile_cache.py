@@ -119,7 +119,7 @@ def merge_with_cache_profile(profile: Profile, context: Context) -> Profile:
     if not _cache_profile:
         return profile
 
-    return merge_profiles(base_profile=_cache_profile, profile=profile)
+    return merge_profiles(base_profile=_cache_profile, new_profile=profile)
 
 
 def merge_with_cache_and_save_profile(profile: Profile, context: Context):

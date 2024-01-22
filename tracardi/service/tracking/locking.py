@@ -78,7 +78,6 @@ class Lock:
     def is_locked(self) -> bool:
         if self._key is None:
             return False
-        print(f"checking {self._key} = {self._redis.exists(self._key) != 0}")
         return self._redis.exists(self._key) != 0
 
     def get_lock_metadata(self) -> Optional[Tuple[str, str, int]]:
