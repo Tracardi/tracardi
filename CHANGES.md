@@ -1,8 +1,10 @@
 Version: 0.9.0
 ----------------------------------------------------------
 * MySQL as a metadata store. Migration from ElasticSearch to MySQL as metastore for app configuration. Now only big data is stored in elastic search.
-
-
+* New deployment process
+* Workers
+  * Entity expiration worker (pro)
+  * 
 Version: 0.8.2
 ----------------------------------------------------------
 * Upgrade to pytantic v2
@@ -10,6 +12,14 @@ Version: 0.8.2
   * Improved performance
   * Simpler code
   * Asynchronous workflows, destinations, etc. (pro)
+* Auto profile merging - Automates merging profiles for difference sources/channels.
+* Workers
+  * Redone the scheduler worker (pro)
+  * New distributed storage worker (pro)
+  * New in-memory storage for profiles
+  * New metrics worker (pro)
+  * Redone visit-ended worker (pro)
+  * Redone workflow async worker (pro)
 * Fixed some GUI errors
 * Preparation for KeyCloak oAuth authorisation (pro)
 * New plugins:
@@ -21,22 +31,14 @@ Version: 0.8.2
   * Tag Mailchimp Contact
   * Time delay
 * Profile Metrics
-* Workers
-  * Entity expiration worker (pro)
-  * Redone the scheduler worker (pro)
-  * New distributed storage worker (pro)
-  * New in-memory storage for profiles
-  * New metrics worker (pro)
-  * Redone visit-ended worker (pro)
-  * Redone workflow async worker (pro)
 * Configurable data partitioning
 * Preparation for configurable profile merging strategies (pro)
 * Fixing missing plugin documentation
 * Extended integration with mailchimp.
 * Time is zone aware now (no longer naive dates) - All timestamps are UTC with UTC zone. 
-* Fail over database for bigger fault tolerance (pro)
+* Fail over database for better fault tolerance (pro)
 * All records have insert, create, update timestamps. 
-* Info on fields updates.
+* Information on fields updates.
 * Updates profile details page.
 * Numerous error fixes
 
