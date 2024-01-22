@@ -1,8 +1,9 @@
 import pytest
 
 from tracardi.context import ServerContext, Context
-from tracardi.service.storage.mysql.schema.table import tenant_context_filter, Base, BridgeTable, PluginTable
-from tracardi.service.storage.mysql.service.table_service import where_tenant_context, where_with_context
+from tracardi.service.storage.mysql.schema.table import PluginTable
+from tracardi.service.storage.mysql.service.table_service import where_tenant_context, where_with_context, \
+    tenant_context_filter
 
 
 def test_table_parameter_type():
@@ -32,7 +33,7 @@ def test_where_tenant_context_positive_path():
             PluginTable.id == '1'
         )
 
-        assert str(where) == 'plugin.tenant = :tenant_1 AND plugin.production = true AND plugin.id = :id_1'
+        assert str(where()) == 'plugin.tenant = :tenant_1 AND plugin.production = true AND plugin.id = :id_1'
 
 
 def test_where_with_context_positive_path():
@@ -44,7 +45,7 @@ def test_where_with_context_positive_path():
             PluginTable.id == '1'
         )
 
-        assert str(where) == 'plugin.tenant = :tenant_1 AND plugin.production = true AND plugin.id = :id_1'
+        assert str(where()) == 'plugin.tenant = :tenant_1 AND plugin.production = true AND plugin.id = :id_1'
 
 
         where = where_with_context(
@@ -53,4 +54,4 @@ def test_where_with_context_positive_path():
             PluginTable.id == '1'
         )
 
-        assert str(where) == 'plugin.tenant = :tenant_1 AND plugin.id = :id_1'
+        assert str(where()) == 'plugin.tenant = :tenant_1 AND plugin.id = :id_1'

@@ -1,26 +1,11 @@
-from typing import Type
-
-from sqlalchemy import and_, Index, BLOB, Float
+from sqlalchemy import Index, Float
 
 from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
                         ForeignKey, PrimaryKeyConstraint, Text, Integer, UniqueConstraint)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from tracardi.context import get_context
-
 Base = declarative_base()
-
-
-def tenant_context_filter(table: Type[Base]):
-    context = get_context()
-    return and_(table.tenant == context.tenant, table.production == context.production)
-
-
-def tenant_only_context_filter(table: Type[Base]):
-    context = get_context()
-    return table.tenant == context.tenant
-
 
 class BridgeTable(Base):
     __tablename__ = 'bridge'
@@ -80,15 +65,6 @@ class EventSourceTable(Base):
     )
 
     running:bool = False
-    #
-    # def running(self):
-    #     """Getter for the public property."""
-    #     return self._running
-
-    # @running.setter
-    # def running(self, value):
-    #     """Setter for the public property."""
-    #     self._running = value
 
 class WorkflowTable(Base):
     __tablename__ = 'workflow'

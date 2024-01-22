@@ -2,19 +2,31 @@ from typing import Optional, Type, Any, Callable
 
 from sqlalchemy.dialects.mysql import insert
 
+from tracardi.context import get_context
 from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
 from sqlalchemy import and_, inspect, update, Column, text
 from sqlalchemy.sql import func
 
 
-from tracardi.service.storage.mysql.schema.table import Base, tenant_only_context_filter
-from tracardi.service.storage.mysql.schema.table import tenant_context_filter
+from tracardi.service.storage.mysql.schema.table import Base
+
 if License.has_service(LICENSE):
     from com_tracardi.service.mysql.query_service import MysqlQuery
 else:
     from tracardi.service.storage.mysql.query_service import MysqlQuery
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
+
+def tenant_only_context_filter(table: Type[Base]):
+    context = get_context()
+    return table.tenant == context.tenant
+
+def custom_context_filter(table: Type[Base], tenant:str, production: bool):
+    return and_(table.tenant == tenant, table.production == production)
+
+def tenant_context_filter(table: Type[Base]):
+    context = get_context()
+    return and_(table.tenant == context.tenant, table.production == context.production)
 
 def where_tenant_context(table, *clauses) -> Callable:
     def _wrapper():
