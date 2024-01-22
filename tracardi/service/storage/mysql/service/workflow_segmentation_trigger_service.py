@@ -22,6 +22,10 @@ class WorkflowSegmentationTriggerService(TableService):
                 WorkflowSegmentationTriggerTable,
                 WorkflowSegmentationTriggerTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(
+                WorkflowSegmentationTriggerTable
+            )
 
         return await self._select_query(WorkflowSegmentationTriggerTable,
                                         where=where,
