@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 
 
-class WorkflowSegmentationTrigger(NamedEntity):
+class WorkflowSegmentationTrigger(NamedEntityInContext):
     timestamp: Optional[datetime] = None
     description: Optional[str] = ""
     enabled: bool = True

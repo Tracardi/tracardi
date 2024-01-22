@@ -22,13 +22,6 @@ class FlowActionPluginRecord(Entity):
         super().__init__(**data)
 
     @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'action',
-            FlowActionPluginRecord
-        )
-
-    @staticmethod
     def encode(action: FlowActionPlugin) -> 'FlowActionPluginRecord':
         return FlowActionPluginRecord(
             id=action.id,

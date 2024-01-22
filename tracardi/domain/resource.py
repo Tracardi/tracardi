@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 from .destination import DestinationConfig
 from .entity import Entity
+from .named_entity import NamedEntityInContext
 from .pro_service_form_data import ProService
-from .value_object.storage_info import StorageInfo
 from ..context import get_context
 from ..service.secrets import encrypt, decrypt
 from ..service.utils.date import now_in_utc
@@ -29,10 +29,9 @@ class ResourceCredentials(BaseModel):
         return output(**self.production) if output is not None else self.production
 
 
-class Resource(Entity):
+class Resource(NamedEntityInContext):
     type: str
     timestamp: Optional[datetime] = None
-    name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     credentials: ResourceCredentials = ResourceCredentials()
     tags: Union[List[str], str] = ["general"]
@@ -44,15 +43,6 @@ class Resource(Entity):
     def __init__(self, **data: Any):
         data['timestamp'] = now_in_utc()
         super().__init__(**data)
-
-    # Persistence
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'resource',
-            Resource
-        )
 
     def is_destination(self):
         return self.destination is not None
@@ -123,15 +113,6 @@ class ResourceRecord(Entity):
             icon=self.icon,
             enabled=self.enabled,
             credentials=ResourceCredentials(**decrypted)
-        )
-
-    # Persistence
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'resource',
-            ResourceRecord
         )
 
     def is_destination(self):

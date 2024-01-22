@@ -44,7 +44,8 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         production_flow=workflow_table.prod.decode(),
         backup=workflow_table.backup.decode(),
         lock=workflow_table.lock,
-        deployed=workflow_table.deployed
+        deployed=workflow_table.deployed,
+        running=workflow_table.production
     )
 
 
@@ -55,5 +56,6 @@ def map_to_workflow_record_meta(workflow_table: WorkflowTable) -> FlowMetaData:
         description=workflow_table.description,
         type=workflow_table.type,
         projects=split_list(workflow_table.projects),
-        production=workflow_table.production
+        production=workflow_table.production,
+        running=workflow_table.running
     )

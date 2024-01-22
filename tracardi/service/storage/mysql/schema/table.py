@@ -95,6 +95,8 @@ class WorkflowTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class WorkflowTriggerTable(Base):
     __tablename__ = 'workflow_trigger'
@@ -122,6 +124,8 @@ class WorkflowTriggerTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class ResourceTable(Base):
     __tablename__ = 'resource'
@@ -143,6 +147,8 @@ class ResourceTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False
 
 
 class PluginTable(Base):
@@ -232,6 +238,9 @@ class DestinationTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
+
 
 class VersionTable(Base):
     __tablename__ = 'version'
@@ -271,6 +280,9 @@ class UserTable(Base):
         UniqueConstraint('email', 'password', name='uiq_email_password')
     )
 
+    running: bool = False
+
+
 
 Index('index_email_password', UserTable.email, UserTable.password)
 
@@ -295,6 +307,9 @@ class IdentificationPointTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False
+
 
 
 class TracardiProTable(Base):
@@ -345,6 +360,8 @@ class EventValidationTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class ConsentTypeTable(Base):
     __tablename__ = 'consent_type'
@@ -365,6 +382,8 @@ class ConsentTypeTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False
 
 
 class EventReshapingTable(Base):
@@ -387,6 +406,8 @@ class EventReshapingTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class EventMappingTable(Base):
     __tablename__ = 'event_mapping'
@@ -407,6 +428,8 @@ class EventMappingTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False
 
 
 class EventToProfileMappingTable(Base):
@@ -429,6 +452,8 @@ class EventToProfileMappingTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class EventDataComplianceTable(Base):
     __tablename__ = 'event_data_compliance'
@@ -447,6 +472,8 @@ class EventDataComplianceTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False
 
 
 class ActivationTable(Base):
@@ -467,6 +494,8 @@ class ActivationTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class SegmentTable(Base):
     __tablename__ = 'segment'
@@ -486,6 +515,8 @@ class SegmentTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class ReportTable(Base):
     __tablename__ = 'report'
@@ -504,6 +535,8 @@ class ReportTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False
 
 
 # class ContentTable(Base):
@@ -552,6 +585,8 @@ class ImportTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class WorkflowSegmentationTriggerTable(Base):
     __tablename__ = 'workflow_segmentation_trigger'
@@ -576,6 +611,8 @@ class WorkflowSegmentationTriggerTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
+
 
 class TaskTable(Base):
     __tablename__ = 'task'
@@ -597,6 +634,7 @@ class TaskTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
 
+    running: bool = False
 
 class SettingTable(Base):
     __tablename__ = 'setting'
@@ -616,3 +654,5 @@ class SettingTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
+    running: bool = False

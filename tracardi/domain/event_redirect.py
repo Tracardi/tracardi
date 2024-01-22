@@ -43,10 +43,3 @@ class EventRedirect(NamedEntityInContext):
         if not value:
             raise ValueError("Event type cannot be empty")
         return value
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'event-redirect',
-            EventRedirect
-        )

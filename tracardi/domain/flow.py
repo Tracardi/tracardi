@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from tracardi.service.wf.domain.flow_graph import FlowGraph
-from .named_entity import NamedEntity
+from .named_entity import NamedEntityInContext
 from typing import Optional, List, Any
 from pydantic import BaseModel
 from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, EdgeBundle
@@ -303,7 +303,7 @@ class PluginRecord(BaseModel):
         return Plugin.model_construct(_fields_set=self.model_fields_set, **data)
 
 
-class FlowRecord(NamedEntity):
+class FlowRecord(NamedEntityInContext):
     timestamp: Optional[datetime] = None
     deploy_timestamp: Optional[datetime] = None
     description: Optional[str] = None

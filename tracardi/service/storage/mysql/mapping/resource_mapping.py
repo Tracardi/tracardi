@@ -28,7 +28,6 @@ def map_to_resource_table(resource: Resource) -> ResourceTable:
 
 
 def map_to_resource(resource_table: ResourceTable) -> Resource:
-    print(resource_table.credentials)
     credentials = decrypt(resource_table.credentials) if resource_table.credentials else {"production": {}, "test": {}}
     destination = DestinationConfig(**decrypt(resource_table.destination)) if resource_table.destination else None
     return Resource(
@@ -42,5 +41,8 @@ def map_to_resource(resource_table: ResourceTable) -> Resource:
         groups=split_list(resource_table.groups),
         icon=resource_table.icon,
         enabled=resource_table.enabled,
-        credentials=ResourceCredentials(**credentials)
+        credentials=ResourceCredentials(**credentials),
+
+        production=resource_table.production,
+        running=resource_table.running
     )

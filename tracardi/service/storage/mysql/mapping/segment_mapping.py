@@ -34,6 +34,8 @@ def map_to_segment(segment_table: Optional[SegmentTable]) -> Optional[Segment]:
         eventType=split_list(segment_table.event_type),
         condition=segment_table.condition,
         enabled=segment_table.enabled,
-        machine_name=segment_table.machine_name
-        # Assuming tenant and production are not required in Segment constructor
+        machine_name=segment_table.machine_name,
+
+        production=segment_table.production,
+        running=segment_table.running
     )

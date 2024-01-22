@@ -36,5 +36,9 @@ def map_to_workflow_segmentation_trigger(workflow_segmentation_trigger_table: Wo
         condition=workflow_segmentation_trigger_table.condition,
         operation=workflow_segmentation_trigger_table.operation,
         segment=workflow_segmentation_trigger_table.segment,
-        code=workflow_segmentation_trigger_table.code
+        code=workflow_segmentation_trigger_table.code,
+
+        running=workflow_segmentation_trigger_table.running,
+        production=workflow_segmentation_trigger_table.production
+
     )
