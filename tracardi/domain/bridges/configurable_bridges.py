@@ -78,7 +78,7 @@ class WebHookBridge(ConfigurableBridge):
                 if self.config['generate_profile'] is True:
 
                     # Check if we can generate primary hashed ids
-                    if tracardi.auto_profile_merging:
+                    if tracardi.is_apm_on():
                         # Check if there can be a hashed id generated
                         profile_id = await self._get_hashed_id(tracker_payload)
                         if profile_id:
