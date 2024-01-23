@@ -96,7 +96,7 @@ class Profile(Entity):
 
     def create_auto_merge_hashed_ids(self):
         ids_len = len(self.ids)
-        if tracardi.auto_profile_merging:
+        if tracardi.is_apm_on():
             if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
                 self.ids.append(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
             if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
@@ -149,7 +149,7 @@ class Profile(Entity):
         for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():
             self.metadata.fields[flat_field] = timestamp_data
             # If enabled hash emails and phone on field change
-            if tracardi.auto_profile_merging:
+            if tracardi.is_apm_on():
                 added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
                 if added_hashed_id:
                     added_hashed_ids.add(added_hashed_id)
@@ -374,7 +374,7 @@ class FlatProfile(Dotty):
         for flat_field, timestamp_data in field_timestamp_manager.get_timestamps():  # type: str, list
             self['metadata.fields'][flat_field] = timestamp_data
             # If enabled hash emails and phone on field change
-            if tracardi.auto_profile_merging:
+            if tracardi.is_apm_on():
                 # Adds hashed id for email, phone, etc.
                 added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
                 if added_hashed_id:

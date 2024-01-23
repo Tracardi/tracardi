@@ -211,6 +211,7 @@ class TracardiConfig(metaclass=Singleton):
         self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
         self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
         self.auto_profile_merging = env.get('AUTO_PROFILE_MERGING', 's>a.d-kljsa87^5adh')
+        self.apm_on = env.get('APM', 'yes') == 'yes'
 
         self._config = None
         self._unset_secrets()
@@ -227,9 +228,11 @@ class TracardiConfig(metaclass=Singleton):
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
             logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
 
-        if self.auto_profile_merging and len(self.auto_profile_merging) < 20:
+        if self.apm_on and self.auto_profile_merging and len(self.auto_profile_merging) < 20:
             logger.warning('Security risk. Env AUTO_PROFILE_MERGING is too short. It must be at least 20 chars long.')
 
+    def is_apm_on(self) -> bool:
+        return self.apm_on
 
 
     @property
