@@ -16,12 +16,13 @@ logger.addHandler(log_handler)
 class WorkflowService(TableService):
 
     async def load_all(self, search: str = None, columns=None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 WorkflowTable,
                 WorkflowTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(WorkflowTable)
 
         return await self._select_query(WorkflowTable,
                                         columns=columns,

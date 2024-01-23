@@ -47,5 +47,6 @@ def map_to_workflow_trigger_rule(trigger_table: WorkflowTriggerTable) -> Rule:
         properties=trigger_table.properties,
         enabled=trigger_table.enabled if trigger_table.enabled is not None else False,
         tags=split_list(trigger_table.tags),
-        production=trigger_table.production
+        production=trigger_table.production,
+        running=trigger_table.running
     )

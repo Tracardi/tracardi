@@ -16,12 +16,13 @@ logger.addHandler(log_handler)
 class EventReshapingService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 EventReshapingTable,
                 EventReshapingTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(EventReshapingTable)
 
         return await self._select_query(EventReshapingTable,
                                         where=where,

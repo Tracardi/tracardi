@@ -29,7 +29,9 @@ def map_to_setting(settings_table: SettingTable) -> Setting:
         type=settings_table.type,
         enabled=settings_table.enabled,
         content=settings_table.content,
-        config=settings_table.config
+        config=settings_table.config,
+        production=settings_table.production,
+        running=settings_table.running
     )
 
 

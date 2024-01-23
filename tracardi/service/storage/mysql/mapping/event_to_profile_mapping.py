@@ -33,5 +33,7 @@ def map_to_event_to_profile(event_to_profile_table: EventToProfileMappingTable) 
         enabled=event_to_profile_table.enabled if event_to_profile_table.enabled is not None else False,
         config=event_to_profile_table.config,
         event_to_profile=to_model(event_to_profile_table.event_to_profile, EventToProfileMap),
-        production=event_to_profile_table.production
+
+        production=event_to_profile_table.production,
+        running=event_to_profile_table.running
     )

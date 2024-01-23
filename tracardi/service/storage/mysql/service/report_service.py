@@ -16,12 +16,13 @@ logger.addHandler(log_handler)
 class ReportService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 ReportTable,
                 ReportTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(ReportTable)
 
         return await self._select_query(ReportTable,
                                         where=where,

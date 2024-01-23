@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import Boolean, Integer, func
+from sqlalchemy import Integer, func
 
 from tracardi.config import tracardi
 from tracardi.domain.setting import Setting
@@ -18,12 +18,13 @@ logger.addHandler(log_handler)
 class SettingService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 SettingTable,
                 SettingTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(SettingTable)
 
         return await self._select_query(SettingTable,
                                         where=where,

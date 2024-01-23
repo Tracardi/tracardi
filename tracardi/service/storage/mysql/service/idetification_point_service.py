@@ -16,12 +16,13 @@ logger.addHandler(log_handler)
 class IdentificationPointService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 IdentificationPointTable,
                 IdentificationPointTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(IdentificationPointTable)
 
         return await self._select_query(IdentificationPointTable,
                                         where=where,

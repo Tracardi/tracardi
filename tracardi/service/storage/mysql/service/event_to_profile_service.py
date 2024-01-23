@@ -18,12 +18,13 @@ logger.addHandler(log_handler)
 class EventToProfileMappingService(TableService):
 
     async def load_all(self, search: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 EventToProfileMappingTable,
                 EventToProfileMappingTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(EventToProfileMappingTable)
 
         return await self._select_query(EventToProfileMappingTable,
                                         where=where,

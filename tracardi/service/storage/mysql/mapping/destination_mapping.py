@@ -52,5 +52,6 @@ def map_to_destination(destination_table: DestinationTable) -> Destination:
             id=destination_table.resource_id or ""
         ),
         tags=split_list(destination_table.tags),
-        production=destination_table.production
+        production=destination_table.production,
+        running=destination_table.running
     )

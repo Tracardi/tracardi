@@ -17,7 +17,7 @@ def map_to_event_validation_table(event_validator: EventValidator) -> EventValid
         validation=from_model(event_validator.validation),
         tags=",".join(event_validator.tags),
         event_type=event_validator.event_type,
-        enabled=event_validator.enabled or False
+        enabled=event_validator.enabled
     )
 
 def map_to_event_validation(table: EventValidationTable) -> EventValidator:
@@ -28,6 +28,8 @@ def map_to_event_validation(table: EventValidationTable) -> EventValidator:
         event_type=table.event_type,
         tags=split_list(table.tags),  # Convert string back to list
         validation=to_model(table.validation, ValidationSchema) if table.validation else None,
-        enabled=table.enabled or False,
-        production=table.production
+        enabled=table.enabled,
+
+        production=table.production,
+        running=table.running
     )

@@ -26,5 +26,7 @@ def map_to_report(report_table: ReportTable) -> Report:
         tags=split_list(report_table.tags),
         index=report_table.index,
         query=report_table.query,
-        enabled=report_table.enabled
+        enabled=report_table.enabled,
+        production=report_table.production,
+        running=report_table.running
     )

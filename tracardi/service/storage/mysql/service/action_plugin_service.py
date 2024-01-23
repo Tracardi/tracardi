@@ -5,7 +5,8 @@ from tracardi.domain.flow_action_plugin import FlowActionPlugin
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.plugin_mapping import map_to_plugin_table
 from tracardi.service.storage.mysql.schema.table import PluginTable
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context, sql_functions
+from tracardi.service.storage.mysql.service.table_service import TableService, sql_functions, \
+    where_with_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 
@@ -15,8 +16,22 @@ logger.addHandler(log_handler)
 
 class ActionPluginService(TableService):
 
-    async def load_all(self) -> SelectResult:
-        return await self._load_all(PluginTable)
+    async def load_all(self, search: str = None, limit: int=None, offset:int = None) -> SelectResult:
+        # Plugin are global and do not have production and test version
+        if search:
+            where = where_with_context(
+                PluginTable,
+                False,  # Only tenant
+                PluginTable.name.like(f'%{search}%')
+            )
+        else:
+            where = where_with_context(PluginTable, False) # Only tenant
+
+        return await self._select_query(PluginTable,
+                                        where=where,
+                                        order_by=PluginTable.plugin_metadata_name,
+                                        limit=limit,
+                                        offset=offset)
 
     async def load_by_id(self, plugin_id: str) -> SelectResult:
         return await self._load_by_id(PluginTable, primary_id=plugin_id)
@@ -31,9 +46,11 @@ class ActionPluginService(TableService):
         return await self._delete_by_id(PluginTable, primary_id=plugin_id)
 
     async def filter(self, purpose: str):
+        # Plugin are global and do not have production and test version
 
-        where = where_tenant_context(
+        where = where_with_context(
             PluginTable,
+            False,
             sql_functions().find_in_set(purpose, PluginTable.plugin_metadata_purpose)>0
         )
 

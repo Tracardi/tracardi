@@ -219,7 +219,7 @@ class TableService:
                 result = await resource.select(
                     table=table,
                     where=where)
-
+                print(1, bool(result.empty()), result.empty())
                 if result.empty():
 
                     # Add the new object to the session

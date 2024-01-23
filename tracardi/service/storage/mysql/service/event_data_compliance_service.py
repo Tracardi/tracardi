@@ -16,12 +16,13 @@ logger.addHandler(log_handler)
 class ConsentDataComplianceService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 EventDataComplianceTable,
                 EventDataComplianceTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(EventDataComplianceTable)
 
         return await self._select_query(EventDataComplianceTable,
                                         where=where,

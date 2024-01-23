@@ -33,5 +33,7 @@ def map_to_identification_point(identification_point_table: IdentificationPointT
         fields=to_model(identification_point_table.fields, IdentificationField),
         enabled=identification_point_table.enabled if identification_point_table.enabled is not None else False,
         settings=identification_point_table.settings,
-        production=identification_point_table.production
+
+        production=identification_point_table.production,
+        running=identification_point_table.running
     )

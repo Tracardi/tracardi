@@ -16,7 +16,6 @@ logger.addHandler(log_handler)
 class WorkflowSegmentationTriggerService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 WorkflowSegmentationTriggerTable,

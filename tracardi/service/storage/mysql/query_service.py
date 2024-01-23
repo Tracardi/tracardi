@@ -37,7 +37,7 @@ class MySqlQueryResult:
         if isinstance(self.data, ChunkedIteratorResult):
             return self.data.first() is None
         else:
-            return self.data
+            return not bool(self.data)
 
 class MysqlQuery:
 

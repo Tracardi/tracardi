@@ -22,12 +22,13 @@ memory_cache = MemoryCache("rules")
 class WorkflowTriggerService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 WorkflowTriggerTable,
                 WorkflowTriggerTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(WorkflowTriggerTable)
 
         return await self._select_query(WorkflowTriggerTable,
                                         where=where,

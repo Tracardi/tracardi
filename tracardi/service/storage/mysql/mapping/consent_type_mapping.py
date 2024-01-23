@@ -30,5 +30,7 @@ def map_to_consent_type(consent_type_table: ConsentTypeTable) -> ConsentType:
         tags=split_list(consent_type_table.tags),  # Convert comma-separated string back to list
         required=consent_type_table.required if consent_type_table.required is not None else False,
         auto_revoke=consent_type_table.auto_revoke,
-        production=consent_type_table.production
+
+        production=consent_type_table.production,
+        running=consent_type_table.running
     )

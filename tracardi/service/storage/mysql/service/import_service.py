@@ -5,7 +5,7 @@ from tracardi.domain.import_config import ImportConfig
 
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.import_mapping import map_to_import_config_table
-from tracardi.service.storage.mysql.schema.table import ImportTable  # Adjusted for Import
+from tracardi.service.storage.mysql.schema.table import ImportTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
 
@@ -17,12 +17,13 @@ logger.addHandler(log_handler)
 class ImportService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        where = None
         if search:
             where = where_tenant_context(
                 ImportTable,  # Adjusted for Import
                 ImportTable.name.like(f'%{search}%')
             )
+        else:
+            where = where_tenant_context(ImportTable)
 
         return await self._select_query(ImportTable,
                                         where=where,
