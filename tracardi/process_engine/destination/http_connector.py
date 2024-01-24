@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import asyncio
 import json
 import logging
