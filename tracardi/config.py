@@ -65,7 +65,7 @@ class ElasticConfig:
         self.refresh_profiles_after_save = env.get('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'no').lower() == 'yes'
 
         self.host = self.get_host()
-        self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
+        self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', 'elastic')
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
         self.query_timeout = get_env_as_int('ELASTIC_QUERY_TIMEOUT', 12)
