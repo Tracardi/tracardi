@@ -170,7 +170,6 @@ class TracardiConfig(metaclass=Singleton):
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
         self.sync_profile_tracks_wait = get_env_as_int('SYNC_PROFILE_TRACKS_WAIT', 1)
         self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
-        self.query_language = env.get('QUERY_LANGUAGE', 'tql')
         self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
         self.tracardi_pro_port = get_env_as_int('TRACARDI_PRO_PORT', 40000)
         self.tracardi_scheduler_host = env.get('TRACARDI_SCHEDULER_HOST', 'scheduler.tracardi.com')

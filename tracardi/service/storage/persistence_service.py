@@ -1,5 +1,6 @@
 import logging
 import elasticsearch
+from lark import LarkError
 from pydantic import BaseModel
 
 import tracardi.service.storage.elastic_storage as storage
@@ -146,7 +147,7 @@ class SqlSearchQueryEngine:
 
         return es_query
 
-    async def time_range(self, query: DatetimeRangePayload, query_type: str = "tql") -> QueryResult:
+    async def time_range(self, query: DatetimeRangePayload) -> QueryResult:
 
         if self.index not in self.time_fields_map:
             raise ValueError("No time_field available on `{}`".format(self.index))
@@ -155,10 +156,11 @@ class SqlSearchQueryEngine:
         min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
 
         time_field = self.time_fields_map[self.index]
-        if query_type == "tql":
+        try:
             es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
-        else:
+        except LarkError:
             es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
+
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:
@@ -167,7 +169,7 @@ class SqlSearchQueryEngine:
 
         return QueryResult(**result.dict())
 
-    async def histogram(self, query: DatetimeRangePayload, query_type, group_by: str = None) -> QueryResult:
+    async def histogram(self, query: DatetimeRangePayload, group_by: str = None) -> QueryResult:
 
         def __interval(min: datetime, max: datetime):
 
@@ -234,10 +236,9 @@ class SqlSearchQueryEngine:
         time_field = self.time_fields_map[self.index]
 
         interval, unit, format = __interval(min_date_time, max_date_time)
-
-        if query_type == "tql":
+        try:
             es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
-        else:
+        except LarkError:
             es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
 
         if group_by is None:
@@ -586,14 +587,13 @@ class PersistenceService:
         engine = SqlSearchQueryEngine(self)
         return await engine.search(query, start, limit)
 
-    async def query_by_sql_in_time_range(self, query: DatetimeRangePayload, query_type="kql") -> QueryResult:
+    async def query_by_sql_in_time_range(self, query: DatetimeRangePayload) -> QueryResult:
         engine = SqlSearchQueryEngine(self)
-        return await engine.time_range(query, query_type)
+        return await engine.time_range(query)
 
-    async def histogram_by_sql_in_time_range(self, query: DatetimeRangePayload, query_type: str = "tql",
-                                             group_by: str = None) -> QueryResult:
+    async def histogram_by_sql_in_time_range(self, query: DatetimeRangePayload, group_by: str = None) -> QueryResult:
         engine = SqlSearchQueryEngine(self)
-        return await engine.histogram(query, query_type, group_by)
+        return await engine.histogram(query, group_by)
 
     async def update_by_query(self, query: dict, conflicts: str = 'abort', wait_for_completion:bool = None):
         try:
