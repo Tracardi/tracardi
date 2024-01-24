@@ -11,9 +11,12 @@ class User(BaseModel):
     full_name: str
     email: str
     roles: List[str]
-    disabled: bool = False
+    enabled: bool = False
     preference: Optional[dict] = {}
     expiration_timestamp: Optional[int] = None
+
+    production: Optional[bool] = False
+    running: Optional[bool] = False
 
     @staticmethod
     def encode_password(password):

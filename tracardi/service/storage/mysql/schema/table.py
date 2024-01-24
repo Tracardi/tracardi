@@ -268,7 +268,7 @@ class UserTable(Base):
     full_name = Column(String(128))
     email = Column(String(128), index=True)
     roles = Column(String(255))
-    disabled = Column(Boolean)
+    enabled = Column(Boolean)
     expiration_timestamp = Column(Integer)
     preference = Column(JSON)
 

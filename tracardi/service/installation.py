@@ -178,7 +178,8 @@ async def install_system(credentials: Credentials):
                 password=User.encode_password(credentials.password),
                 roles=['admin', 'maintainer'],
                 email=credentials.username,
-                full_name="Default Admin"
+                full_name="Default Admin",
+                enabled=True
             )
 
             us = UserService()

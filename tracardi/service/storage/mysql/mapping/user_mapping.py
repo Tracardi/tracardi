@@ -14,7 +14,7 @@ def map_to_user_table(user: User) -> UserTable:
         full_name=user.full_name,
         email=user.email,
         roles=','.join(user.roles),  # Convert list of roles to a comma-separated string
-        disabled=user.disabled if user.disabled is not None else False,
+        enabled=user.enabled if user.enabled is not None else False,
         expiration_timestamp=user.expiration_timestamp,
         preference=user.preference
     )
@@ -27,7 +27,9 @@ def map_to_user(user_table: UserTable) -> User:
         full_name=user_table.full_name,
         email=user_table.email,
         roles=split_list(user_table.roles),  # Convert comma-separated string back to list
-        disabled=user_table.disabled if user_table.disabled is not None else False,
+        enabled=user_table.enabled if user_table.enabled is not None else False,
         expiration_timestamp=user_table.expiration_timestamp,
-        preference=user_table.preference
+        preference=user_table.preference,
+        production=user_table.production,
+        running=user_table.running
     )

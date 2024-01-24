@@ -19,9 +19,21 @@ logger.addHandler(log_handler)
 
 class UserService(TableService):
 
+    async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
+        if search:
+            where = where_tenant_context(
+                UserTable,
+                UserTable.full_name.like(f'%{search}%')
+            )
+        else:
+            where = where_tenant_context(UserTable)
 
-    async def load_all(self, limit:int = None, offset:int = None) -> SelectResult:
-        return await self._load_all(UserTable, limit=limit, offset=offset)
+        return await self._select_query(UserTable,
+                                        where=where,
+                                        order_by=UserTable.full_name,
+                                        limit=limit,
+                                        offset=offset)
+
 
     async def load_by_id(self, user_id: str) -> SelectResult:
         return await self._load_by_id(UserTable, primary_id=user_id)
@@ -40,7 +52,7 @@ class UserService(TableService):
             UserTable,
             UserTable.email == email,
             UserTable.password == User.encode_password(password),
-            UserTable.disabled == False
+            UserTable.enabled == True
         )
 
         records = await self._select_query(UserTable, where=where)
@@ -106,7 +118,7 @@ class UserService(TableService):
             full_name=user_payload.full_name if user_payload.full_name is not None else existing_user.full_name,
             email=user_payload.email if user_payload.email is not None else existing_user.email,
             roles=user_payload.roles if user_payload.roles is not None else existing_user.roles,
-            disabled=user_payload.disabled if user_payload.disabled is not None else existing_user.disabled,
+            enabled=user_payload.enabled if user_payload.enabled is not None else existing_user.enabled,
             preference=existing_user.preference,
             expiration_timestamp=existing_user.expiration_timestamp
         )
