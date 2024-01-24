@@ -273,15 +273,11 @@ class UserTable(Base):
     preference = Column(JSON)
 
     tenant = Column(String(40))
-    production = Column(Boolean)
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
+        PrimaryKeyConstraint('id', 'tenant'),
         UniqueConstraint('email', 'password', name='uiq_email_password')
     )
-
-    running: bool = False
-
 
 
 Index('index_email_password', UserTable.email, UserTable.password)

@@ -8,25 +8,31 @@ from tracardi.domain.user import User
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.user_mapping import map_to_user_table, map_to_user
 from tracardi.service.storage.mysql.schema.table import UserTable
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context, sql_functions
+from tracardi.service.storage.mysql.service.table_service import TableService, sql_functions, \
+    where_with_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.sha1_hasher import SHA1Encoder
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
+def _where_with_context(*clause):
+    return where_with_context(
+        UserTable,
+        False,
+        *clause
+    )
+
 class UserService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
-                UserTable,
+            where = _where_with_context(
                 UserTable.full_name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(UserTable)
+            where = _where_with_context()
 
         return await self._select_query(UserTable,
                                         where=where,
@@ -36,10 +42,10 @@ class UserService(TableService):
 
 
     async def load_by_id(self, user_id: str) -> SelectResult:
-        return await self._load_by_id(UserTable, primary_id=user_id)
+        return await self._load_by_id(UserTable, primary_id=user_id, server_context=False)
 
     async def delete_by_id(self, user_id: str) -> str:
-        return await self._delete_by_id(UserTable, primary_id=user_id)
+        return await self._delete_by_id(UserTable, primary_id=user_id, server_context=False)
 
     async def upsert(self, user: User):
         return await self._replace(UserTable, map_to_user_table(user))
@@ -48,8 +54,7 @@ class UserService(TableService):
     # Custom
 
     async def load_by_credentials(self, email: str, password: str) -> Optional[User]:
-        where = where_tenant_context(
-            UserTable,
+        where = _where_with_context(
             UserTable.email == email,
             UserTable.password == User.encode_password(password),
             UserTable.enabled == True
@@ -64,8 +69,7 @@ class UserService(TableService):
 
 
     async def load_by_role(self, role: str) -> List[User]:
-        where = where_tenant_context(
-            UserTable,
+        where = _where_with_context(
             sql_functions().find_in_set(role, UserTable.roles) > 0
         )
 
@@ -77,8 +81,7 @@ class UserService(TableService):
         return list(records.map_to_objects(map_to_user))
 
     async def load_by_name(self, name: str, start:int, limit: int) -> List[User]:
-        where = where_tenant_context(
-            UserTable,
+        where = _where_with_context(
             UserTable.full_name.like(name)
         )
 
@@ -89,8 +92,7 @@ class UserService(TableService):
         return users
 
     async def check_if_exists(self, email: str) -> bool:
-        where = where_tenant_context(
-            UserTable,
+        where = _where_with_context(
             UserTable.email == email
         )
 
@@ -100,7 +102,11 @@ class UserService(TableService):
 
     async def insert_if_none(self, user: User) -> Optional[str]:
         if self.check_if_exists(user.email):
-            return await self._insert_if_none(UserTable, map_to_user_table(user))
+            return await self._insert_if_none(
+                UserTable,
+                map_to_user_table(user),
+                server_context=False
+            )
         return None
 
     async def update_if_exist(self, user_id:str, user_payload: UserPayload) -> Tuple[bool, User]:

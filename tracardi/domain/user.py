@@ -15,9 +15,6 @@ class User(BaseModel):
     preference: Optional[dict] = {}
     expiration_timestamp: Optional[int] = None
 
-    production: Optional[bool] = False
-    running: Optional[bool] = False
-
     @staticmethod
     def encode_password(password):
         return SHA1Encoder.encode(password)

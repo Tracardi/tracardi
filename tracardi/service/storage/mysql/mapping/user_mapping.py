@@ -9,7 +9,6 @@ def map_to_user_table(user: User) -> UserTable:
     return UserTable(
         id=user.id,
         tenant=context.tenant,
-        production=context.production,
         password=user.password,
         full_name=user.full_name,
         email=user.email,
@@ -29,7 +28,5 @@ def map_to_user(user_table: UserTable) -> User:
         roles=split_list(user_table.roles),  # Convert comma-separated string back to list
         enabled=user_table.enabled if user_table.enabled is not None else False,
         expiration_timestamp=user_table.expiration_timestamp,
-        preference=user_table.preference,
-        production=user_table.production,
-        running=user_table.running
+        preference=user_table.preference
     )
