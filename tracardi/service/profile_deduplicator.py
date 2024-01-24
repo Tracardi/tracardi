@@ -61,5 +61,6 @@ async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
     for _profile_record in _duplicated_profiles:
         similar_profiles.append(_profile_record.to_entity(Profile))
 
+    # Merged profiles refresh index
     merger = ProfileMerger(profile)
     return await merger.compute_one_profile(profile, similar_profiles)

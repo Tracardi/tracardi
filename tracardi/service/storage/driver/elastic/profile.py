@@ -12,7 +12,6 @@ from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
@@ -20,14 +19,45 @@ logger.addHandler(log_handler)
 
 def load_profiles_for_auto_merge():
     query = {
-      "query": {
-        "exists": {
-          "field": "metadata.system.aux.auto_merge"
+        "query": {
+            "exists": {
+                "field": "metadata.system.aux.auto_merge"
+            }
         }
-      }
     }
-    print(f"Loading {query} in context {get_context()}")
     return storage_manager('profile').scan(query, batch=1000)
+
+
+async def load_profiles_with_duplicated_ids():
+    query = {
+        "size": 0,
+        "aggs": {
+            "duplicate_ids": {
+                "terms": {
+                    "field": "ids",
+                    "min_doc_count": 2,
+                    "size": 1000
+                },
+                "aggs": {
+                    "duplicate_documents": {
+                        "top_hits": {
+                            "_source": {
+                                "includes": ["id"]
+                            }
+                        }
+                    }
+                }
+            },
+
+        }
+    }
+
+    records = await storage_manager('profile').query(query)
+    for data in records.aggregations("duplicate_ids").buckets():
+        profile_ids = StorageRecords.build_from_elastic(data['duplicate_documents'])
+        for profile_id in profile_ids:
+            yield profile_id['id']
+
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
     query = {
@@ -64,7 +94,8 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
         return None
 
     if profile_records.total > 1:
-        logger.warning("Profile {} id duplicated in the database. It will be merged with APM worker.".format(profile_id))
+        logger.warning(
+            "Profile {} id duplicated in the database. It will be merged with APM worker.".format(profile_id))
 
     return profile_records.first()
 
@@ -126,7 +157,7 @@ async def load_profile_without_identification(tracker_payload,
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple],
-                                 condition: str='must',
+                                 condition: str = 'must',
                                  limit=1000) -> List[Profile]:
     profiles = await storage_manager('profile').load_by_values(
         merge_key_values,
