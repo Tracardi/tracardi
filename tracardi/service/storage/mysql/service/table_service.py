@@ -1,4 +1,4 @@
-from typing import Optional, Type, Any, Callable
+from typing import Optional, Type, Any, Callable, Tuple, TypeVar
 
 from sqlalchemy.dialects.mysql import insert
 
@@ -17,6 +17,8 @@ else:
     from tracardi.service.storage.mysql.query_service import MysqlQuery
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
+T = TypeVar('T')
+
 def tenant_only_context_filter(table: Type[Base]):
     context = get_context()
     return table.tenant == context.tenant
@@ -26,13 +28,13 @@ def custom_context_filter(table: Type[Base], tenant:str, production: bool, *clau
         return and_(table.tenant == tenant, table.production == production, *clauses)
     return _wrapper
 
-def tenant_context_filter(table: Type[Base]):
+def tenant_and_mode_context_filter(table: Type[Base]):
     context = get_context()
     return and_(table.tenant == context.tenant, table.production == context.production)
 
-def where_tenant_context(table, *clauses) -> Callable:
+def where_tenant_and_mode_context(table, *clauses) -> Callable:
     def _wrapper():
-        return and_(tenant_context_filter(table), *clauses)
+        return and_(tenant_and_mode_context_filter(table), *clauses)
 
     return _wrapper
 
@@ -47,7 +49,7 @@ def sql_functions():
 
 
 def where_with_context(table: Type[Base], server_context:bool, *clauses) -> Callable:
-    return where_tenant_context(
+    return where_tenant_and_mode_context(
         table,
         *clauses
     ) if server_context else _where_only_tenant_context(
@@ -93,14 +95,38 @@ class TableService:
             order_by,
             limit,
             offset,
-            distinct
+            distinct,
+            in_deployment_mode=True
         )
 
-    async def _load_by_id(self, table: Type[Base], primary_id: str, server_context:bool=True) -> SelectResult:
+
+    async def _load_by_id(self, table: Type[Base],
+                          primary_id: str,
+                          server_context:bool=True,
+                          in_deployment_mode:bool=False
+                          ) -> SelectResult:
         local_session = self.client.get_session(self.engine)
 
         where = where_with_context(table, server_context, table.id == primary_id)
 
+        async with local_session() as session:
+            # Start a new transaction
+            async with session.begin():
+                # Use SQLAlchemy core to perform an asynchronous query
+                return await self._select_query(
+                        table=table,
+                        where=where,
+                        one_record=True,
+                        in_deployment_mode=in_deployment_mode
+                    )
+
+
+    async def _custom_load_by_id(self, table: Type[Base], primary_id: str, production:bool) -> SelectResult:
+
+        context = get_context()
+        where = custom_context_filter(table, context.tenant, production, table.id == primary_id)
+
+        local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             # Start a new transaction
             async with session.begin():
@@ -135,7 +161,9 @@ class TableService:
                             limit:int=None,
                             offset:int=None,
                             distinct: bool = False,
-                            one_record:bool=False) -> SelectResult:
+                            one_record:bool=False,
+                            in_deployment_mode:bool=False
+                            ) -> SelectResult:
 
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
@@ -145,13 +173,23 @@ class TableService:
                 # Use SQLAlchemy core to perform an asynchronous query
 
                 resource = MysqlQuery(session)
-                result = await resource.select(table,
-                                              columns,
-                                              where,
-                                              order_by,
-                                              limit,
-                                              offset,
-                                              distinct)
+
+                if in_deployment_mode:
+                    result = await resource.select_with_deployed_records(table,
+                                                                         columns,
+                                                                         where,
+                                                                         order_by,
+                                                                         limit,
+                                                                         offset,
+                                                                         distinct)
+                else:
+                    result = await resource.select(table,
+                                                   columns,
+                                                   where,
+                                                   order_by,
+                                                   limit,
+                                                   offset,
+                                                   distinct)
 
                 # Fetch all results
                 if one_record:
@@ -234,7 +272,9 @@ class TableService:
                 return None
 
 
-    async def _delete_by_id(self, table: Type[Base], primary_id: str, server_context:bool=True) -> str:
+    async def _delete_by_id(self, table: Type[Base],
+                            primary_id: str,
+                            server_context:bool=True) -> bool:
 
         where = where_with_context(table, server_context, table.id == primary_id)
 
@@ -244,7 +284,30 @@ class TableService:
                 resource = MysqlQuery(session)
                 await resource.delete(table, where)
 
-                return primary_id
+        return True
+
+    async def _delete_by_id_in_deployment_mode(self,
+                                   table: Type[Base],
+                                   mapper: Callable[[Base], T],
+                                   primary_id: str,
+                                   production:bool) -> Tuple[bool, Optional[T]]:
+
+        context = get_context()
+
+        where = custom_context_filter(table, context.tenant, production, table.id == primary_id)
+
+        local_session = self.client.get_session(self.engine)
+        async with local_session() as session:
+            async with session.begin():
+                resource = MysqlQuery(session)
+                await resource.delete(table, where)
+
+        async with local_session() as session:
+            async with session.begin():
+                # Loads regardless of context (production, or test)
+                record = await self._custom_load_by_id(table, primary_id=primary_id, production=not production)
+                return True, record.map_first_to_object(mapper)
+
 
     async def _delete_query(self, table: Type[Base], where):
 

@@ -7,7 +7,7 @@ from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile_table
 from tracardi.service.storage.mysql.schema.table import EventToProfileMappingTable
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 logger = logging.getLogger(__name__)
@@ -19,12 +19,12 @@ class EventToProfileMappingService(TableService):
 
     async def load_all(self, search: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventToProfileMappingTable,
                 EventToProfileMappingTable.name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(EventToProfileMappingTable)
+            where = where_tenant_and_mode_context(EventToProfileMappingTable)
 
         return await self._select_query(EventToProfileMappingTable,
                                         where=where,
@@ -43,13 +43,13 @@ class EventToProfileMappingService(TableService):
 
     async def load_by_type(self, event_type: str, enabled_only: bool = False) -> SelectResult:
         if enabled_only:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                     EventToProfileMappingTable,
                     EventToProfileMappingTable.event_type_id == event_type,
                     EventToProfileMappingTable.enabled == True
                 )
         else:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventToProfileMappingTable,
                 EventToProfileMappingTable.event_type_id == event_type
             )

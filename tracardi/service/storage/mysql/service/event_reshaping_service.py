@@ -5,7 +5,7 @@ from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping_table
 from tracardi.service.storage.mysql.schema.table import EventReshapingTable
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 logger = logging.getLogger(__name__)
@@ -17,12 +17,12 @@ class EventReshapingService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventReshapingTable,
                 EventReshapingTable.name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(EventReshapingTable)
+            where = where_tenant_and_mode_context(EventReshapingTable)
 
         return await self._select_query(EventReshapingTable,
                                         where=where,
@@ -42,13 +42,13 @@ class EventReshapingService(TableService):
 
     async def load_by_event_type(self, event_type: str, only_enabled: bool = True):
         if only_enabled:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventReshapingTable,
                 EventReshapingTable.event_type == event_type,
                 EventReshapingTable.enabled == only_enabled
             )
         else:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventReshapingTable,
                 EventReshapingTable.event_type == event_type
             )

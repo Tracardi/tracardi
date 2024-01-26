@@ -2,8 +2,8 @@ import pytest
 
 from tracardi.context import ServerContext, Context
 from tracardi.service.storage.mysql.schema.table import PluginTable
-from tracardi.service.storage.mysql.service.table_service import where_tenant_context, where_with_context, \
-    tenant_context_filter
+from tracardi.service.storage.mysql.service.table_service import where_tenant_and_mode_context, where_with_context, \
+    tenant_and_mode_context_filter
 
 
 def test_table_parameter_type():
@@ -12,13 +12,13 @@ def test_table_parameter_type():
 
     # Assert
     with pytest.raises(Exception):
-        tenant_context_filter(table)
+        tenant_and_mode_context_filter(table)
 
 
 def test_tenant_context_filter_positive_path():
     with ServerContext(Context(production=False)):
         # Initialize
-        where = tenant_context_filter(
+        where = tenant_and_mode_context_filter(
             PluginTable
         )
 
@@ -28,7 +28,7 @@ def test_tenant_context_filter_positive_path():
 def test_where_tenant_context_positive_path():
     with ServerContext(Context(production=True)):
         # Initialize
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             PluginTable,
             PluginTable.id == '1'
         )

@@ -6,7 +6,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.event_data_compliance_mapping import map_to_event_data_compliance_table
 from tracardi.service.storage.mysql.schema.table import EventDataComplianceTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -17,12 +17,12 @@ class ConsentDataComplianceService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventDataComplianceTable,
                 EventDataComplianceTable.name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(EventDataComplianceTable)
+            where = where_tenant_and_mode_context(EventDataComplianceTable)
 
         return await self._select_query(EventDataComplianceTable,
                                         where=where,
@@ -41,13 +41,13 @@ class ConsentDataComplianceService(TableService):
 
     async def load_by_event_type(self, event_type_id: str, enabled_only: bool = True):
         if enabled_only:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventDataComplianceTable,
                 EventDataComplianceTable.event_type_id == event_type_id,
                 EventDataComplianceTable.enabled == enabled_only
             )
         else:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 EventDataComplianceTable,
                 EventDataComplianceTable.event_type_id == event_type_id
             )

@@ -6,7 +6,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point_table
 from tracardi.service.storage.mysql.schema.table import IdentificationPointTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -17,12 +17,12 @@ class IdentificationPointService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 IdentificationPointTable,
                 IdentificationPointTable.name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(IdentificationPointTable)
+            where = where_tenant_and_mode_context(IdentificationPointTable)
 
         return await self._select_query(IdentificationPointTable,
                                         where=where,
@@ -41,7 +41,7 @@ class IdentificationPointService(TableService):
         return await self._replace(IdentificationPointTable, map_to_identification_point_table(identification_point))
 
     async def load_enabled(self, limit: int = 100) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             IdentificationPointTable,
             IdentificationPointTable.enabled == True
         )
@@ -53,7 +53,7 @@ class IdentificationPointService(TableService):
         )
 
     async def load_by_event_type(self, event_type_id: str) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             IdentificationPointTable,
             IdentificationPointTable.event_type_id == event_type_id
         )

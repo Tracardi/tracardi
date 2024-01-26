@@ -8,7 +8,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.setting_mapping import map_to_settings_table
 from tracardi.service.storage.mysql.schema.table import SettingTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -19,12 +19,12 @@ class SettingService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 SettingTable,
                 SettingTable.name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(SettingTable)
+            where = where_tenant_and_mode_context(SettingTable)
 
         return await self._select_query(SettingTable,
                                         where=where,
@@ -43,7 +43,7 @@ class SettingService(TableService):
 
     async def load_new(self) -> SelectResult:
 
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             SettingTable,
             func.json_extract(SettingTable.config, '$.metric.new') == True,
             # SettingTable.config['metric']['new'].cast(Boolean) == True,
@@ -58,7 +58,7 @@ class SettingService(TableService):
         if time_based:
             # All metrics that limit time - are time based.
 
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 SettingTable,
                 func.json_extract(SettingTable.config, '$.metric.span').cast(Integer) != 0,
                 # SettingTable.config['metric']['span'].cast(Integer) != 0,
@@ -67,7 +67,7 @@ class SettingService(TableService):
 
         else:
 
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 SettingTable,
                 func.json_extract(SettingTable.config, '$.metric.span').cast(Integer) == 0,
                 # SettingTable.config['metric']['span'].cast(Integer) == 0,

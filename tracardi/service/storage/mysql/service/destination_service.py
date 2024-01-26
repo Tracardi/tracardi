@@ -5,7 +5,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.setup.setup_resources import get_resource_types
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table
 from tracardi.service.storage.mysql.schema.table import DestinationTable
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class DestinationService(TableService):
     # Custom
 
     async def load_event_destinations(self, event_type: str, source_id: str) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             DestinationTable,
             DestinationTable.enabled == True,
             DestinationTable.on_profile_change_only == False,
@@ -42,7 +42,7 @@ class DestinationService(TableService):
         return await self._select_query(DestinationTable, where=where)
 
     async def load_profile_destinations(self) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             DestinationTable,
             DestinationTable.enabled == True,
             DestinationTable.on_profile_change_only == True
@@ -59,12 +59,12 @@ class DestinationService(TableService):
 
     async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
         if text:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 DestinationTable,
                 DestinationTable.name.like(f"%{text}%")
             )
         else:
-            where = where_tenant_context(DestinationTable)
+            where = where_tenant_and_mode_context(DestinationTable)
         return await self._select_query(DestinationTable,
                                         where=where,
                                         order_by=DestinationTable.name,

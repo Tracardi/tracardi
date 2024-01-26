@@ -6,7 +6,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource_table
 from tracardi.service.storage.mysql.schema.table import ResourceTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context, sql_functions
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context, sql_functions
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
@@ -17,12 +17,12 @@ class ResourceService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 ResourceTable,
                 ResourceTable.name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(ResourceTable)
+            where = where_tenant_and_mode_context(ResourceTable)
 
         return await self._select_query(ResourceTable,
                                         where=where,
@@ -42,7 +42,7 @@ class ResourceService(TableService):
 
     async def load_by_tag(self, tag: str):
 
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             ResourceTable,
             sql_functions().find_in_set(tag, ResourceTable.tags)>0
         )
@@ -54,7 +54,7 @@ class ResourceService(TableService):
 
 
     async def load_resource_with_destinations(self) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             ResourceTable,
             ResourceTable.destination.isnot(None)
         )

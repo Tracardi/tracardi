@@ -10,7 +10,7 @@ from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_
     map_to_workflow_trigger_rule
 from tracardi.service.storage.mysql.schema.table import WorkflowTriggerTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_context
+from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.config import tracardi, memory_cache as memory_cache_config
 
@@ -23,12 +23,12 @@ class WorkflowTriggerService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
-            where = where_tenant_context(
+            where = where_tenant_and_mode_context(
                 WorkflowTriggerTable,
                 WorkflowTriggerTable.name.like(f'%{search}%')
             )
         else:
-            where = where_tenant_context(WorkflowTriggerTable)
+            where = where_tenant_and_mode_context(WorkflowTriggerTable)
 
         return await self._select_query(WorkflowTriggerTable,
                                         where=where,
@@ -44,7 +44,7 @@ class WorkflowTriggerService(TableService):
 
 
     async def delete_by_workflow_id(self, workflow_id: str) -> str:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             WorkflowTriggerTable,
             WorkflowTriggerTable.flow_id == workflow_id
         )
@@ -59,7 +59,7 @@ class WorkflowTriggerService(TableService):
                                workflow_id: str,
                                limit: int = None,
                                offset: int = None, ) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             WorkflowTriggerTable,
             WorkflowTriggerTable.flow_id == workflow_id
         )
@@ -70,7 +70,7 @@ class WorkflowTriggerService(TableService):
                                         offset=offset)
 
     async def _load_rule(self, event_type_id, source_id):
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             WorkflowTriggerTable,
             WorkflowTriggerTable.event_type_id == event_type_id,
             WorkflowTriggerTable.source_id == source_id,
@@ -132,7 +132,7 @@ class WorkflowTriggerService(TableService):
         return [(self._read_rule(event.type, rules), event) for event in events]
 
     async def load_by_event_type(self, event_type_id: str, limit: int = 100) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             WorkflowTriggerTable,
             WorkflowTriggerTable.event_type_id == event_type_id
         )
@@ -142,7 +142,7 @@ class WorkflowTriggerService(TableService):
                                         limit=limit)
 
     async def load_by_segment(self, segment_id: str, limit: int = 100) -> SelectResult:
-        where = where_tenant_context(
+        where = where_tenant_and_mode_context(
             WorkflowTriggerTable,
             WorkflowTriggerTable.segment_id == segment_id
         )
