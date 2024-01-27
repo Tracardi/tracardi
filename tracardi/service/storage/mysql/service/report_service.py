@@ -16,22 +16,10 @@ logger.addHandler(log_handler)
 class ReportService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                ReportTable,
-                ReportTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(ReportTable)
-
-        return await self._select_query(ReportTable,
-                                        where=where,
-                                        order_by=ReportTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(ReportTable, search, limit, offset)
 
     async def load_by_id(self, plugin_id: str) -> SelectResult:
-        return await self._load_by_id(ReportTable, primary_id=plugin_id)
+        return await self._load_by_id_in_deployment_mode(ReportTable, primary_id=plugin_id)
 
     async def delete_by_id(self, report_id: str) -> str:
         return await self._delete_by_id(ReportTable, primary_id=report_id)

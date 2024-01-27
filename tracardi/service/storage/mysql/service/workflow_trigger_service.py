@@ -22,22 +22,10 @@ memory_cache = MemoryCache("rules")
 class WorkflowTriggerService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                WorkflowTriggerTable,
-                WorkflowTriggerTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(WorkflowTriggerTable)
-
-        return await self._select_query(WorkflowTriggerTable,
-                                        where=where,
-                                        order_by=WorkflowTriggerTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(WorkflowTriggerTable, search, limit, offset)
 
     async def load_by_id(self, trigger_id: str) -> SelectResult:
-        return await self._load_by_id(WorkflowTriggerTable, primary_id=trigger_id)
+        return await self._load_by_id_in_deployment_mode(WorkflowTriggerTable, primary_id=trigger_id)
 
     async def delete_by_id(self, trigger_id: str) -> str:
         return await self._delete_by_id(WorkflowTriggerTable, primary_id=trigger_id)

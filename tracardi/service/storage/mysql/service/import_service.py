@@ -17,22 +17,10 @@ logger.addHandler(log_handler)
 class ImportService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                ImportTable,  # Adjusted for Import
-                ImportTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(ImportTable)
-
-        return await self._select_query(ImportTable,
-                                        where=where,
-                                        order_by=ImportTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(ImportTable, search, limit, offset)
 
     async def load_by_id(self, import_id: str) -> SelectResult:
-        return await self._load_by_id(ImportTable, primary_id=import_id)
+        return await self._load_by_id_in_deployment_mode(ImportTable, primary_id=import_id)
 
     async def delete_by_id(self, import_id: str) -> str:
         return await self._delete_by_id(ImportTable, primary_id=import_id)

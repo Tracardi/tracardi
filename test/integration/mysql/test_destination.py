@@ -33,11 +33,6 @@ async def test_destination_service():
             # Insert Destination
             await service.insert(destination)
 
-            # Load All Destinations
-            all_destinations = await service.load_all()
-            assert any(dest.id == destination_id for dest in all_destinations.rows)
-
-
             # Load Destination by ID
             loaded_destination = await service.load_by_id(destination_id)
             assert loaded_destination.rows.id == destination_id

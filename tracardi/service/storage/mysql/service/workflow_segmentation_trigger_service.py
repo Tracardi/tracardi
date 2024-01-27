@@ -16,24 +16,10 @@ logger.addHandler(log_handler)
 class WorkflowSegmentationTriggerService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                WorkflowSegmentationTriggerTable,
-                WorkflowSegmentationTriggerTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(
-                WorkflowSegmentationTriggerTable
-            )
-
-        return await self._select_query(WorkflowSegmentationTriggerTable,
-                                        where=where,
-                                        order_by=WorkflowSegmentationTriggerTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(WorkflowSegmentationTriggerTable, search, limit, offset)
 
     async def load_by_id(self, trigger_id: str) -> SelectResult:
-        return await self._load_by_id(WorkflowSegmentationTriggerTable, primary_id=trigger_id)
+        return await self._load_by_id_in_deployment_mode(WorkflowSegmentationTriggerTable, primary_id=trigger_id)
 
     async def delete_by_id(self, trigger_id: str) -> str:
         return await self._delete_by_id(WorkflowSegmentationTriggerTable, primary_id=trigger_id)

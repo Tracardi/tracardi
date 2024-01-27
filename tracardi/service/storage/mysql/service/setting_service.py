@@ -18,22 +18,10 @@ logger.addHandler(log_handler)
 class SettingService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                SettingTable,
-                SettingTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(SettingTable)
-
-        return await self._select_query(SettingTable,
-                                        where=where,
-                                        order_by=SettingTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(SettingTable, search, limit, offset)
 
     async def load_by_id(self, setting_id: str) -> SelectResult:
-        return await self._load_by_id(SettingTable, primary_id=setting_id)
+        return await self._load_by_id_in_deployment_mode(SettingTable, primary_id=setting_id)
 
     async def delete_by_id(self, setting_id: str) -> str:
         return await self._delete_by_id(SettingTable, primary_id=setting_id)

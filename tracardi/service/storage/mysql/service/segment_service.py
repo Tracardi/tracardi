@@ -18,22 +18,10 @@ logger.addHandler(log_handler)
 class SegmentService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                SegmentTable,  # Adjusted for Segment
-                SegmentTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(SegmentTable)
-
-        return await self._select_query(SegmentTable,
-                                        where=where,
-                                        order_by=SegmentTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(SegmentTable, search, limit, offset)
 
     async def load_by_id(self, plugin_id: str) -> SelectResult:
-        return await self._load_by_id(SegmentTable, primary_id=plugin_id)
+        return await self._load_by_id_in_deployment_mode(SegmentTable, primary_id=plugin_id)
 
     async def delete_by_id(self, segment_id: str) -> str:  # Adjusted for Segment
         return await self._delete_by_id(SegmentTable, primary_id=segment_id)

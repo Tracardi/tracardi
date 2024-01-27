@@ -147,7 +147,7 @@ class CacheManager(metaclass=Singleton):
 
         async def _load_event_source(source_id) -> Optional[EventSource]:
             ess = EventSourceService()
-            return (await ess.load_by_id(source_id)).map_to_object(map_to_event_source)
+            return (await ess.load_by_id_in_deployment_mode(source_id)).map_to_object(map_to_event_source)
 
         if ttl > 0:
             return await MemoryCache.cache(

@@ -460,10 +460,8 @@ async def aggregate_events_by_source(buckets_size):
     query_string = [f"id:{id}" for id in result.aggregations['by_source'][0]]
     query_string = " OR ".join(query_string)
 
-    print(query_string)
-
     ess =  EventSourceService()
-    event_source_as_named_entities = (await ess.load_all()).as_named_entities()
+    event_source_as_named_entities = (await ess.load_all_in_deployment_mode()).as_named_entities()
 
     source_names_idx = {source.id: source.name for source in event_source_as_named_entities}
     return [{"name": _get_name(source_names_idx, id), "value": count} for id, count in

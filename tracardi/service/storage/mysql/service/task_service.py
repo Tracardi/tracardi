@@ -16,22 +16,10 @@ logger.addHandler(log_handler)
 class BackgroundTaskService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                TaskTable,
-                TaskTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(TaskTable)
-
-        return await self._select_query(TaskTable,
-                                        where=where,
-                                        order_by=TaskTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(TaskTable, search, limit, offset)
 
     async def load_by_id(self, background_task_id: str) -> SelectResult:
-        return await self._load_by_id(TaskTable, primary_id=background_task_id)
+        return await self._load_by_id_in_deployment_mode(TaskTable, primary_id=background_task_id)
 
     async def delete_by_id(self, background_task_id: str) -> str:
         return await self._delete_by_id(TaskTable, primary_id=background_task_id)

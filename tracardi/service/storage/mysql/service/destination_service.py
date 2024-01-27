@@ -16,8 +16,8 @@ logger.addHandler(log_handler)
 class DestinationService(TableService):
 
 
-    async def load_all(self) -> SelectResult:
-        return await self._load_all(DestinationTable)
+    async def load_all(self, search:str, limit: int = None, offset: int = None) -> SelectResult:
+        return await self._load_all_in_deployment_mode(DestinationTable, search, limit, offset)
 
     async def load_by_id(self, destination_id: str) -> SelectResult:
         return await self._load_by_id(DestinationTable, primary_id=destination_id)
@@ -57,17 +57,17 @@ class DestinationService(TableService):
                 yield resource_type.destination.package, resource_type.dict()
                 
 
-    async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
-        if text:
-            where = where_tenant_and_mode_context(
-                DestinationTable,
-                DestinationTable.name.like(f"%{text}%")
-            )
-        else:
-            where = where_tenant_and_mode_context(DestinationTable)
-        return await self._select_query(DestinationTable,
-                                        where=where,
-                                        order_by=DestinationTable.name,
-                                        limit=limit,
-                                        offset=start)
+    # async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
+    #     if text:
+    #         where = where_tenant_and_mode_context(
+    #             DestinationTable,
+    #             DestinationTable.name.like(f"%{text}%")
+    #         )
+    #     else:
+    #         where = where_tenant_and_mode_context(DestinationTable)
+    #     return await self._select_query(DestinationTable,
+    #                                     where=where,
+    #                                     order_by=DestinationTable.name,
+    #                                     limit=limit,
+    #                                     offset=start)
                 

@@ -16,22 +16,10 @@ logger.addHandler(log_handler)
 class IdentificationPointService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                IdentificationPointTable,
-                IdentificationPointTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(IdentificationPointTable)
-
-        return await self._select_query(IdentificationPointTable,
-                                        where=where,
-                                        order_by=IdentificationPointTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(IdentificationPointTable, search, limit, offset)
 
     async def load_by_id(self, identification_point_id: str) -> SelectResult:
-        return await self._load_by_id(IdentificationPointTable, primary_id=identification_point_id)
+        return await self._load_by_id_in_deployment_mode(IdentificationPointTable, primary_id=identification_point_id)
 
     async def delete_by_id(self, identification_point_id: str) -> str:
         return await self._delete_by_id(IdentificationPointTable, primary_id=identification_point_id)

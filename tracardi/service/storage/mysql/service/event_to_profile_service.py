@@ -18,22 +18,10 @@ logger.addHandler(log_handler)
 class EventToProfileMappingService(TableService):
 
     async def load_all(self, search: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                EventToProfileMappingTable,
-                EventToProfileMappingTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(EventToProfileMappingTable)
-
-        return await self._select_query(EventToProfileMappingTable,
-                                        where=where,
-                                        order_by=EventToProfileMappingTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(EventToProfileMappingTable, search, limit, offset)
 
     async def load_by_id(self, mapping_id: str) -> SelectResult:
-        return await self._load_by_id(EventToProfileMappingTable, primary_id=mapping_id)
+        return await self._load_by_id_in_deployment_mode(EventToProfileMappingTable, primary_id=mapping_id)
 
     async def delete_by_id(self, mapping_id: str) -> str:
         return await self._delete_by_id(EventToProfileMappingTable, primary_id=mapping_id)

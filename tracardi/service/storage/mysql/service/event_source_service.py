@@ -16,50 +16,50 @@ logger.addHandler(log_handler)
 
 class EventSourceService(TableService):
 
-    async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                EventSourceTable,
-                EventSourceTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(EventSourceTable)
+    async def load_all_in_deployment_mode(self, search: str = None, limit: int = None,
+                                          offset: int = None) -> SelectResult:
+        return await self._load_all_in_deployment_mode(EventSourceTable, search, limit, offset)
 
-        return await self._select_query(EventSourceTable,
-                                        where=where,
-                                        order_by=EventSourceTable.name,
-                                        limit=limit,
-                                        offset=offset,
-                                        in_deployment_mode=True
-                                        )
-
-    async def load_by_id(self, source_id: str, in_deployment_mode:bool=False) -> SelectResult:
-        return await self._load_by_id(
+    async def load_by_id_in_deployment_mode(self, source_id: str) -> SelectResult:
+        return await self._load_by_id_in_deployment_mode(
             EventSourceTable,
-            primary_id=source_id,
-            in_deployment_mode=in_deployment_mode
+            primary_id=source_id
         )
 
-    async def load_by_tag(self, tag: str) -> SelectResult:
-        # Todo filters if only one tag
-        return await self._field_filter(
+    async def delete_by_id_in_deployment_mode(self, source_id: str) -> Tuple[
+        bool, Optional[EventSource]]:
+        return await self._delete_by_id_in_deployment_mode(
             EventSourceTable,
-            field=EventSourceTable.tags,
-            value=tag
+            map_to_event_source,
+            primary_id=source_id
         )
 
-    async def load_by_bridge(self, bridge_id: str) -> SelectResult:
-        return await self._field_filter(
-            EventSourceTable,
-            field=EventSourceTable.bridge_id,
-            value=bridge_id
-        )
+    # async def load_by_id(self, source_id: str) -> SelectResult:
+    #     return await self._load_by_id(
+    #         EventSourceTable,
+    #         primary_id=source_id
+    #     )
 
-    async def load_by_type(self, type: str) -> SelectResult:
-        return await self._field_filter(
+    # async def load_by_tag(self, tag: str) -> SelectResult:
+    #     # Todo filters if only one tag
+    #     return await self._field_filter(
+    #         EventSourceTable,
+    #         field=EventSourceTable.tags,
+    #         value=tag
+    #     )
+
+    # async def load_by_bridge(self, bridge_id: str) -> SelectResult:
+    #     where = where_tenant_and_mode_context(EventSourceTable, EventSourceTable.bridge_id == bridge_id)
+    #     return await self._select_in_deployment_mode(
+    #         EventSourceTable,
+    #         where=where
+    #     )
+
+    async def load_by_type_in_deployment_mode(self, type: str) -> SelectResult:
+        where = where_tenant_and_mode_context(EventSourceTable, EventSourceTable.type == type)
+        return await self._select_in_deployment_mode(
             EventSourceTable,
-            field=EventSourceTable.type,
-            value=type
+            where=where
         )
 
     async def load_active_by_bridge_id(self, bridge_id: str) -> SelectResult:
@@ -76,15 +76,6 @@ class EventSourceService(TableService):
         return await self._delete_by_id(
             EventSourceTable,
             primary_id=source_id)
-
-
-    async def custom_delete_by_id(self, source_id: str, production: bool) ->  Tuple[bool, Optional[EventSource]]:
-        return await self._delete_by_id_in_deployment_mode(
-            EventSourceTable,
-            map_to_event_source,
-            primary_id=source_id,
-            production=production
-        )
 
     async def insert(self, event_source: EventSource):
         return await self._insert_if_none(EventSourceTable, map_to_event_source_table(event_source))

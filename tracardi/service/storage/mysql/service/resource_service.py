@@ -16,22 +16,10 @@ logger.addHandler(log_handler)
 class ResourceService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                ResourceTable,
-                ResourceTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(ResourceTable)
-
-        return await self._select_query(ResourceTable,
-                                        where=where,
-                                        order_by=ResourceTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(ResourceTable, search, limit, offset)
 
     async def load_by_id(self, resource_id: str) -> SelectResult:
-        return await self._load_by_id(ResourceTable, primary_id=resource_id)
+        return await self._load_by_id_in_deployment_mode(ResourceTable, primary_id=resource_id)
 
     async def delete_by_id(self, resource_id: str) -> str:
         return await self._delete_by_id(ResourceTable, primary_id=resource_id)

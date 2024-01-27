@@ -18,12 +18,12 @@ logger.addHandler(log_handler)
 class BridgeService(TableService):
 
     async def load_all(self) -> SelectResult:
-        return await self._load_all(BridgeTable, server_context=False)
+        return await self.__load_all(BridgeTable, server_context=False)
 
     async def load_by_id(self, plugin_id: str) -> SelectResult:
         return await self._load_by_id(BridgeTable, primary_id=plugin_id, server_context=False)
 
-    async def delete_by_id(self, bridge_id: str) -> str:
+    async def delete_by_id(self, bridge_id: str) -> bool:
         return await self._delete_by_id(BridgeTable, primary_id=bridge_id, server_context=False)
 
 

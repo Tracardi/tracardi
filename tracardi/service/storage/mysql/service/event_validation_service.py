@@ -16,22 +16,10 @@ logger.addHandler(log_handler)
 class EventValidationService(TableService):
 
     async def load_all(self, search:str = None, limit:int=None, offset:int=None) -> SelectResult:
-        if search:
-            where = where_tenant_and_mode_context(
-                EventValidationTable,
-                EventValidationTable.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(EventValidationTable)
-
-        return await self._select_query(EventValidationTable,
-                                        where=where,
-                                        order_by=EventValidationTable.name,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._load_all_in_deployment_mode(EventValidationTable, search, limit, offset)
 
     async def load_by_id(self, event_validation_id: str) -> SelectResult:
-        return await self._load_by_id(EventValidationTable, primary_id=event_validation_id)
+        return await self._load_by_id_in_deployment_mode(EventValidationTable, primary_id=event_validation_id)
 
     async def delete_by_id(self, event_validation_id: str) -> str:
         return await self._delete_by_id(EventValidationTable, primary_id=event_validation_id)

@@ -9,7 +9,7 @@ class EventSourceFetcherAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         ess = EventSourceService()
-        source = (await ess.load_by_id(self.event.source.id)).map_to_object(map_to_event_source)
+        source = (await ess.load_by_id_in_deployment_mode(self.event.source.id)).map_to_object(map_to_event_source)
         if source is None:
             return Result(port="error", value={"message": "Source `{}` does not exist.".format(self.event.source.id)})
         return Result(port="source", value=source.model_dump())
