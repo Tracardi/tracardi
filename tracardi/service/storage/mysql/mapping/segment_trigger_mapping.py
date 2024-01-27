@@ -29,7 +29,7 @@ def map_to_workflow_segmentation_trigger(workflow_segmentation_trigger_table: Wo
         id=workflow_segmentation_trigger_table.id,
         name=workflow_segmentation_trigger_table.name,
         timestamp=workflow_segmentation_trigger_table.timestamp,
-        description=workflow_segmentation_trigger_table.description or "",  # Add default value if description not available
+        description=workflow_segmentation_trigger_table.description or "",
         enabled=workflow_segmentation_trigger_table.enabled,
         workflow=NamedEntity(id=workflow_segmentation_trigger_table.workflow_id, name=workflow_segmentation_trigger_table.workflow_name),
         type=workflow_segmentation_trigger_table.type or "workflow",

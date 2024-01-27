@@ -1,9 +1,10 @@
 import logging
+from typing import Optional, Tuple
 
 from tracardi.config import tracardi
 from tracardi.domain.resource import Resource
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource_table
+from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource_table, map_to_resource
 from tracardi.service.storage.mysql.schema.table import ResourceTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context, sql_functions
@@ -21,8 +22,9 @@ class ResourceService(TableService):
     async def load_by_id(self, resource_id: str) -> SelectResult:
         return await self._load_by_id_in_deployment_mode(ResourceTable, primary_id=resource_id)
 
-    async def delete_by_id(self, resource_id: str) -> str:
-        return await self._delete_by_id(ResourceTable, primary_id=resource_id)
+    async def delete_by_id(self, resource_id: str) -> Tuple[bool, Optional[Resource]]:
+        return await self._delete_by_id_in_deployment_mode(ResourceTable, map_to_resource,
+                                                           primary_id=resource_id)
 
     async def insert(self, resource: Resource):
         return await self._replace(ResourceTable, map_to_resource_table(resource))

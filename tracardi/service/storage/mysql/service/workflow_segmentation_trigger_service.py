@@ -1,9 +1,11 @@
 import logging
+from typing import Optional, Tuple
 
 from tracardi.config import tracardi
 from tracardi.domain.live_segment import WorkflowSegmentationTrigger
 from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.storage.mysql.mapping.segment_trigger_mapping import map_to_workflow_segmentation_trigger_table
+from tracardi.service.storage.mysql.mapping.segment_trigger_mapping import map_to_workflow_segmentation_trigger_table, \
+    map_to_workflow_segmentation_trigger
 from tracardi.service.storage.mysql.schema.table import WorkflowSegmentationTriggerTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
@@ -21,8 +23,10 @@ class WorkflowSegmentationTriggerService(TableService):
     async def load_by_id(self, trigger_id: str) -> SelectResult:
         return await self._load_by_id_in_deployment_mode(WorkflowSegmentationTriggerTable, primary_id=trigger_id)
 
-    async def delete_by_id(self, trigger_id: str) -> str:
-        return await self._delete_by_id(WorkflowSegmentationTriggerTable, primary_id=trigger_id)
+    async def delete_by_id(self, trigger_id: str) -> Tuple[bool, Optional[WorkflowSegmentationTrigger]]:
+        return await self._delete_by_id_in_deployment_mode(WorkflowSegmentationTriggerTable,
+                                                           map_to_workflow_segmentation_trigger,
+                                                           primary_id=trigger_id)
 
     async def insert(self, trigger: WorkflowSegmentationTrigger):
         return await self._replace(WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table(trigger))

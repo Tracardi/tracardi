@@ -27,8 +27,10 @@ class WorkflowTriggerService(TableService):
     async def load_by_id(self, trigger_id: str) -> SelectResult:
         return await self._load_by_id_in_deployment_mode(WorkflowTriggerTable, primary_id=trigger_id)
 
-    async def delete_by_id(self, trigger_id: str) -> str:
-        return await self._delete_by_id(WorkflowTriggerTable, primary_id=trigger_id)
+    async def delete_by_id(self, trigger_id: str) ->  Tuple[bool, Optional[Rule]]:
+        return await self._delete_by_id_in_deployment_mode(WorkflowTriggerTable,
+                                                           map_to_workflow_trigger_rule,
+                                                           primary_id=trigger_id)
 
 
     async def delete_by_workflow_id(self, workflow_id: str) -> str:
