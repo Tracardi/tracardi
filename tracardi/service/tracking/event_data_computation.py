@@ -179,6 +179,15 @@ async def make_event_from_event_payload(event_payload,
     return event
 
 
+def update_event_from_request(tracker_payload: TrackerPayload, event: Event):
+    if tracker_payload.request:
+        if isinstance(event.request, dict):
+            event.request.update(tracker_payload.request)
+        else:
+            event.request = tracker_payload.request
+
+    return event
+
 async def compute_events(events: List[EventPayload],
                          metadata,
                          source: EventSource,
@@ -237,11 +246,7 @@ async def compute_events(events: List[EventPayload],
 
         # Data that is not needed for any mapping or compliance
 
-        if tracker_payload.request:
-            if isinstance(event.request, dict):
-                event.request.update(tracker_payload.request)
-            else:
-                event.request = tracker_payload.request
+        event = update_event_from_request(tracker_payload, event)
 
         debugging = tracker_payload.is_debugging_on()
         event.metadata.debug = debugging

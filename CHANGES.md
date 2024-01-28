@@ -4,7 +4,7 @@ Version: 0.9.0
 * New deployment process
 * Workers
   * Entity expiration worker (pro)
-  * 
+
 Version: 0.8.2
 ----------------------------------------------------------
 * Upgrade to pytantic v2

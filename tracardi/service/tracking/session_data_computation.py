@@ -24,39 +24,50 @@ logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
 
-def _compute_data_from_user_agent(session: Session) -> Session:
+def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:
     try:
-        ua_string = session.context['browser']['local']['browser']['userAgent']
-        user_agent = parse(ua_string)
+        return session.context['browser']['local']['browser']['userAgent']
+    except Exception:
+        try:
+            return tracker_payload.request['headers']['user-agent']
+        except Exception:
+            return None
 
-        session.os.version = user_agent.os.version_string
-        session.os.name = user_agent.os.family
+def _compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
+    ua_string = _get_user_agent(session, tracker_payload)
+    if ua_string:
+        try:
 
-        device_type = 'mobile' if user_agent.is_mobile else \
-            'pc' if user_agent.is_pc else \
-                'tablet' if user_agent.is_tablet else \
-                    'email' if user_agent.is_email_client else None
+            user_agent = parse(ua_string)
 
-        if 'device' in session.context:
-            session.device.name = session.context['device'].get('name', user_agent.device.family)
-            session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
-            session.device.model = session.context['device'].get('model', user_agent.device.model)
-            session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
-            session.device.type = session.context['device'].get('type', device_type)
-        else:
-            session.device.name = user_agent.device.family
-            session.device.brand = user_agent.device.brand
-            session.device.model = user_agent.device.model
-            session.device.touch = user_agent.is_touch_capable
-            session.device.type = device_type
+            session.os.version = user_agent.os.version_string
+            session.os.name = user_agent.os.family
 
-        session.app.bot = user_agent.is_bot
-        session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
-        session.app.version = user_agent.browser.version_string
-        session.app.type = "browser"
+            device_type = 'mobile' if user_agent.is_mobile else \
+                'pc' if user_agent.is_pc else \
+                    'tablet' if user_agent.is_tablet else \
+                        'email' if user_agent.is_email_client else None
 
-    except Exception as e:
-        pass
+            if 'device' in session.context:
+                session.device.name = session.context['device'].get('name', user_agent.device.family)
+                session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
+                session.device.model = session.context['device'].get('model', user_agent.device.model)
+                session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
+                session.device.type = session.context['device'].get('type', device_type)
+            else:
+                session.device.name = user_agent.device.family
+                session.device.brand = user_agent.device.brand
+                session.device.model = user_agent.device.model
+                session.device.touch = user_agent.is_touch_capable
+                session.device.type = device_type
+
+            session.app.bot = user_agent.is_bot
+            session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
+            session.app.version = user_agent.browser.version_string
+            session.app.type = "browser"
+
+        except Exception:
+            pass
 
     return session
 
@@ -172,7 +183,7 @@ def compute_session(session: Session,
                     ) -> Tuple[Session, Profile]:
 
     # Compute the User Agent data
-    session = _compute_data_from_user_agent(session)
+    session = _compute_data_from_user_agent(session, tracker_payload)
 
     # Compute UTM
     session = _compute_utm(session, tracker_payload.context)
@@ -199,6 +210,13 @@ def compute_session(session: Session,
 
     try:
         session.app.language = session.context['browser']['local']['browser']['language']
+    except Exception:
+        pass
+
+    try:
+         header_from = tracker_payload.request['headers']['from']
+         if header_from == "googlebot(at)googlebot.com":
+            session.app.bot = True
     except Exception:
         pass
 
