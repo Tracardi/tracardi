@@ -156,7 +156,7 @@ class PluginTable(Base):
 
     id = Column(String(64))
     tenant = Column(String(40))
-    production = Column(Boolean)
+
     metadata_time_insert = Column(DateTime)
     metadata_time_update = Column(DateTime, nullable=True)
     metadata_time_create = Column(DateTime, nullable=True)
@@ -208,7 +208,7 @@ class PluginTable(Base):
     settings_hidden = Column(Boolean)
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
+        PrimaryKeyConstraint('id', 'tenant'),
     )
 
 

@@ -43,7 +43,7 @@ class WorkflowService(TableService):
                 WorkflowTable.type == wf_type
             )
 
-        return await self._select_query(WorkflowTable,
+        return await self._select_in_deployment_mode(WorkflowTable,
                                         columns=columns,
                                         where=where,
                                         order_by=WorkflowTable.name,

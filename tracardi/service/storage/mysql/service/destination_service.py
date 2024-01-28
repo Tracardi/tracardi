@@ -1,9 +1,11 @@
 import logging
+from typing import Tuple, Optional
+
 from tracardi.config import tracardi
 from tracardi.domain.destination import Destination
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.setup.setup_resources import get_resource_types
-from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table
+from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table, map_to_destination
 from tracardi.service.storage.mysql.schema.table import DestinationTable
 from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
@@ -20,10 +22,10 @@ class DestinationService(TableService):
         return await self._load_all_in_deployment_mode(DestinationTable, search, limit, offset)
 
     async def load_by_id(self, destination_id: str) -> SelectResult:
-        return await self._load_by_id(DestinationTable, primary_id=destination_id)
+        return await self._load_by_id_in_deployment_mode(DestinationTable, primary_id=destination_id)
 
-    async def delete_by_id(self, destination_id: str) -> str:
-        return await self._delete_by_id(DestinationTable, primary_id=destination_id)
+    async def delete_by_id(self, destination_id: str) -> Tuple[bool, Optional[Destination]]:
+        return await self._delete_by_id_in_deployment_mode(DestinationTable, map_to_destination, primary_id=destination_id)
 
     async def insert(self, destination: Destination):
         return await self._replace(DestinationTable, map_to_destination_table(destination))

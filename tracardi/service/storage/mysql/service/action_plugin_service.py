@@ -34,16 +34,16 @@ class ActionPluginService(TableService):
                                         offset=offset)
 
     async def load_by_id(self, plugin_id: str) -> SelectResult:
-        return await self._load_by_id(PluginTable, primary_id=plugin_id)
+        return await self._load_by_id(PluginTable, primary_id=plugin_id, server_context=False)
 
     async def insert(self, plugin: FlowActionPlugin) -> str:
         return await self._replace(PluginTable, map_to_plugin_table(plugin))
 
     async def update_by_id(self, data: dict, plugin_id: str):
-        return await self._update_by_id(PluginTable, primary_id=plugin_id, new_data=data)
+        return await self._update_by_id(PluginTable, primary_id=plugin_id, new_data=data, server_context=False)
 
-    async def delete_by_id(self, plugin_id):
-        return await self._delete_by_id(PluginTable, primary_id=plugin_id)
+    async def delete_by_id(self, plugin_id) -> tuple:
+        return await self._delete_by_id(PluginTable, primary_id=plugin_id, server_context=False)
 
     async def filter(self, purpose: str):
         # Plugin are global and do not have production and test version

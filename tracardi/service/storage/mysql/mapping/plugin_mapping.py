@@ -22,7 +22,6 @@ def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
         id=plugin.id,
 
         tenant=context.tenant,
-        production=context.production,
 
         metadata_time_insert=plugin.metadata.time.insert,
         metadata_time_update=plugin.metadata.time.update,

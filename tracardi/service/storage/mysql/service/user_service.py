@@ -44,10 +44,10 @@ class UserService(TableService):
     async def load_by_id(self, user_id: str) -> SelectResult:
         return await self._load_by_id(UserTable, primary_id=user_id, server_context=False)
 
-    async def delete_by_id(self, user_id: str) -> Tuple[bool, Optional[User]]:
-        return await self._delete_by_id_in_deployment_mode(UserTable, map_to_user,
-                                                           primary_id=user_id,
-                                                           server_context=False)
+    async def delete_by_id(self, user_id: str) -> tuple:
+        return await self._delete_by_id(UserTable,
+                                        primary_id=user_id,
+                                        server_context=False)
 
     async def upsert(self, user: User):
         return await self._replace(UserTable, map_to_user_table(user))
@@ -56,7 +56,7 @@ class UserService(TableService):
     # Custom
 
     async def load_by_credentials(self, email: str, password: str) -> Optional[User]:
-        where = _where_with_context(
+        where = _where_with_context( # tenant only mode
             UserTable.email == email,
             UserTable.password == User.encode_password(password),
             UserTable.enabled == True
@@ -71,7 +71,7 @@ class UserService(TableService):
 
 
     async def load_by_role(self, role: str) -> List[User]:
-        where = _where_with_context(
+        where = _where_with_context( # tenant only mode
             sql_functions().find_in_set(role, UserTable.roles) > 0
         )
 
@@ -83,7 +83,7 @@ class UserService(TableService):
         return list(records.map_to_objects(map_to_user))
 
     async def load_by_name(self, name: str, start:int, limit: int) -> List[User]:
-        where = _where_with_context(
+        where = _where_with_context( # tenant only mode
             UserTable.full_name.like(name)
         )
 
@@ -94,7 +94,7 @@ class UserService(TableService):
         return users
 
     async def check_if_exists(self, email: str) -> bool:
-        where = _where_with_context(
+        where = _where_with_context( # tenant only mode
             UserTable.email == email
         )
 

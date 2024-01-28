@@ -161,7 +161,7 @@ class TableService:
                 result = await session.execute(query)
                 return result.scalar() is not None
 
-    async def __load_all(self,
+    async def _base_load_all(self,
                         table: Type[Base],
                         columns=None,
                         order_by: Column = None,
@@ -323,7 +323,7 @@ class TableService:
     async def _delete_by_id(self,
                             table: Type[Base],
                             primary_id: str,
-                            server_context: bool = True) -> bool:
+                            server_context: bool = True) -> tuple:
 
         where = where_with_context(table, server_context, table.id == primary_id)
 
@@ -333,7 +333,7 @@ class TableService:
                 resource = MysqlQuery(session)
                 await resource.delete(table, where)
 
-        return True
+        return True, None
 
     async def _delete_query(self, table: Type[Base], where):
 
