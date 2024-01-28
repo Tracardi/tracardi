@@ -13,7 +13,7 @@ from tracardi.service.storage.mysql.schema.table import Base
 if License.has_service(LICENSE):
     from com_tracardi.service.mysql.query_service import MysqlQuery, MysqlQueryInDeploymentMode
 else:
-    from tracardi.service.storage.mysql.query_service import MysqlQuery
+    from tracardi.service.storage.mysql.query_service import MysqlQuery, MysqlQueryInDeploymentMode
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 T = TypeVar('T')

@@ -1,9 +1,20 @@
 from tracardi.context import get_context
-from typing import Type, Any, Callable, Optional
+from typing import Type, Any, Callable, Optional, Tuple
 
 from tracardi.service.storage.mysql.schema.table import Base
-from sqlalchemy import Column, Select, update, delete, ChunkedIteratorResult
+from sqlalchemy import Column, Select, update, delete, ChunkedIteratorResult, and_
 from sqlalchemy.future import select
+
+from tracardi.service.storage.mysql.utils.select_result import SelectResult
+
+
+
+
+def context_filter(table: Type[Base], tenant: str, production: bool, *clauses):
+    def _wrapper():
+        return and_(table.tenant == tenant, table.production == production, *clauses)
+
+    return _wrapper
 
 class MySqlQueryResult:
 
@@ -110,3 +121,14 @@ class MysqlQuery:
     def insert(self, data):
         return self.session.add(data)
 
+class MysqlQueryInDeploymentMode(MysqlQuery):
+
+    async def delete_by_id(self, table: Type[Base], primary_id) -> Tuple[bool, SelectResult]:
+        context = get_context()
+
+        where = context_filter(table, context.tenant, context.production, table.id == primary_id)
+        await self.session.execute(
+            delete(table).where(where())
+        )
+
+        return True, SelectResult(None)
