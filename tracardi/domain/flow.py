@@ -64,23 +64,6 @@ class Flow(FlowGraph):
 
                 start_at[0] += len(max(distance_to_nodes_map.values(), key=len)) * 200
 
-    def get_production_workflow_record(self) -> 'FlowRecord':
-
-        production = encrypt(self.model_dump(mode='json'))
-
-        return FlowRecord(
-            id=self.id,
-            timestamp=self.timestamp,
-            deploy_timestamp=self.deploy_timestamp,
-            description=self.description,
-            name=self.name,
-            projects=self.projects,
-            draft=production,
-            production_flow=production,
-            lock=self.lock,
-            type=self.type
-        )
-
     def get_empty_workflow_record(self, type: str) -> 'FlowRecord':
 
         return FlowRecord(
@@ -309,7 +292,6 @@ class FlowRecord(NamedEntityInContext):
     description: Optional[str] = None
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
-    production_flow: Optional[str] = ''
     backup: Optional[str] = ''
     lock: bool = False
     deployed: Optional[bool] = False
@@ -325,21 +307,8 @@ class FlowRecord(NamedEntityInContext):
         return Flow.build(id=id, name=self.name, description=self.description,
                           projects=self.projects, lock=self.lock)
 
-    def restore_production_from_backup(self):
-        if not self.backup:
-            raise ValueError("Back up is empty.")
-        self.production_flow = self.backup
-
-    def restore_draft_from_production(self):
-        if not self.production_flow:
-            raise ValueError("Production up is empty.")
-        self.draft = self.production_flow
-
     def set_lock(self, lock: bool = True) -> None:
         self.lock = lock
-        production_flow = self.get_production_workflow()
-        production_flow.lock = lock
-        self.production_flow = encrypt(production_flow.model_dump())
         draft_flow = self.get_draft_workflow()
         draft_flow.lock = lock
         self.draft = encrypt(draft_flow.model_dump())

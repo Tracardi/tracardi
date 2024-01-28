@@ -80,7 +80,6 @@ class WorkflowTable(Base):
     projects = Column(String(255))
 
     draft = Column(LargeBinary)
-    prod = Column(LargeBinary)
     backup = Column(LargeBinary)
 
     lock = Column(Boolean)

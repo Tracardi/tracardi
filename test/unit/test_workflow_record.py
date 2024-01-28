@@ -50,17 +50,6 @@ def test_workflow_record_via_workflow_table():
     assert flow is None
 
 
-def test_flow_to_workflow_table_mapping():
-    with ServerContext(Context(production=True)):
-        flow = Flow.new()
-        flow_record = flow.get_production_workflow_record()
-
-        table = map_to_workflow_table(flow_record)
-
-        assert table.id == flow.id
-        assert table.name == flow.name
-
-
 def test_workflow_only_from_metadata():
     flow = FlowRecord(id="1", name="test", description="", type='collection')
 

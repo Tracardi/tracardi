@@ -18,7 +18,6 @@ def test_valid_flow_record():
             type="collection",
             projects=["General"],
             draft="draft_flow_1",
-            production_flow="prod_flow_1",
             backup="backup_flow_1",
             lock=True,
         )

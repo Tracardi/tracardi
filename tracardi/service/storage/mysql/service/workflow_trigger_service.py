@@ -54,10 +54,10 @@ class WorkflowTriggerService(TableService):
             WorkflowTriggerTable.flow_id == workflow_id
         )
 
-        return await self._select_query(WorkflowTriggerTable,
-                                        where=where,
-                                        limit=limit,
-                                        offset=offset)
+        return await self._select_in_deployment_mode(WorkflowTriggerTable,
+                                                     where=where,
+                                                     limit=limit,
+                                                     offset=offset)
 
     async def _load_rule(self, event_type_id, source_id):
         where = where_tenant_and_mode_context(
