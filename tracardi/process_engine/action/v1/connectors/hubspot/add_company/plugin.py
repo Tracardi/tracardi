@@ -6,7 +6,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.domain.resource import Resource
-from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
+from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient
 
 from datetime import datetime
 
@@ -44,19 +44,20 @@ class HubSpotCompanyAdder(ActionRunner):
                 self.config.properties[key] = str(value)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        dot = self._get_dot_accessor(payload)
-        traverser = DictTraverser(dot)
-
-        self.config.properties = traverser.reshape(self.config.properties)
-        self.parse_mapping()
-
         try:
+
+            dot = self._get_dot_accessor(payload)
+            traverser = DictTraverser(dot)
+
+            self.config.properties = traverser.reshape(self.config.properties)
+            self.parse_mapping()
+
             result = await self.client.add_company(
                 self.config.properties
             )
             return Result(port="response", value=result)    
 
-        except HubSpotClientException as e:
+        except Exception as e:
             return Result(port="error", value={"message": str(e)})
 
 
