@@ -36,7 +36,7 @@ def test_workflow_record_via_workflow_table():
 
     flow_record = map_to_workflow_record(workflow_table)
 
-    flow = Flow.from_workflow_record(flow_record, 'draft')
+    flow = Flow.from_workflow_record(flow_record)
 
     assert flow.id is not None
     assert flow.timestamp is not None
@@ -45,9 +45,6 @@ def test_workflow_record_via_workflow_table():
     assert flow.flowGraph.nodes == []
     assert flow.flowGraph.edges == []
     assert flow.type == "collection"
-
-    flow = Flow.from_workflow_record(flow_record, 'production')
-    assert flow is None
 
 
 def test_workflow_only_from_metadata():

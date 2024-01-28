@@ -19,10 +19,8 @@ def map_to_workflow_table(flow_record: FlowRecord) -> WorkflowTable:
         projects=",".join(flow_record.projects) if flow_record.projects else "",
 
         draft=flow_record.draft.encode(),
-        backup=flow_record.backup.encode(),
 
         lock=flow_record.lock,
-        deployed=flow_record.deployed,
 
         tenant = context.tenant,
         production = context.production
@@ -40,9 +38,7 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         type=workflow_table.type,
         projects=split_list(workflow_table.projects),
         draft=workflow_table.draft.decode(),
-        backup=workflow_table.backup.decode(),
         lock=workflow_table.lock,
-        deployed=workflow_table.deployed,
         running=workflow_table.running
     )
 
@@ -54,6 +50,7 @@ def map_to_workflow_record_meta(workflow_table: WorkflowTable) -> FlowMetaData:
         description=workflow_table.description,
         type=workflow_table.type,
         projects=split_list(workflow_table.projects),
+
         production=workflow_table.production,
         running=workflow_table.running
     )

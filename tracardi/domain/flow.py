@@ -77,18 +77,13 @@ class Flow(FlowGraph):
         )
 
     @staticmethod
-    def from_workflow_record(record: 'FlowRecord', output) -> Optional['Flow']:
+    def from_workflow_record(record: 'FlowRecord') -> Optional['Flow']:
 
-        if output == 'draft':
-            if record.draft:
-                decrypted = decrypt(record.draft)
-            else:
-                return None
+        if record.draft:
+            decrypted = decrypt(record.draft)
         else:
-            if record.production_flow:
-                decrypted = decrypt(record.production_flow)
-            else:
-                return None
+            return None
+
 
         if 'type' not in decrypted:
             decrypted['type'] = record.type
@@ -292,16 +287,11 @@ class FlowRecord(NamedEntityInContext):
     description: Optional[str] = None
     projects: Optional[List[str]] = ["General"]
     draft: Optional[str] = ''
-    backup: Optional[str] = ''
     lock: bool = False
-    deployed: Optional[bool] = False
     type: str
 
-    def get_production_workflow(self) -> Optional['Flow']:
-        return Flow.from_workflow_record(self, output='production')
-
     def get_draft_workflow(self) -> Optional['Flow']:
-        return Flow.from_workflow_record(self, output='draft')
+        return Flow.from_workflow_record(self)
 
     def get_empty_workflow(self, id) -> 'Flow':
         return Flow.build(id=id, name=self.name, description=self.description,
