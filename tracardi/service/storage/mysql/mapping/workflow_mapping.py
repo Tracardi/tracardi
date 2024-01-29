@@ -18,7 +18,7 @@ def map_to_workflow_table(flow_record: FlowRecord) -> WorkflowTable:
         type=flow_record.type,
         projects=",".join(flow_record.projects) if flow_record.projects else "",
 
-        draft=flow_record.draft.encode(),
+        draft=flow_record.draft,
 
         lock=flow_record.lock,
 
@@ -37,7 +37,7 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         description=workflow_table.description,
         type=workflow_table.type,
         projects=split_list(workflow_table.projects),
-        draft=workflow_table.draft.decode(),
+        draft=workflow_table.draft,
         lock=workflow_table.lock,
         running=workflow_table.running
     )

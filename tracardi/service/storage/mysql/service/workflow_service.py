@@ -22,6 +22,9 @@ class WorkflowService(TableService):
     async def load_by_id(self, workflow_id: str) -> SelectResult:
         return await self._load_by_id_in_deployment_mode(WorkflowTable, primary_id=workflow_id)
 
+    async def update_by_id(self, workflow_id: str, new_data: dict) -> Optional[str]:
+        return await self._update_by_id(WorkflowTable, primary_id=workflow_id, new_data=new_data)
+
     async def delete_by_id(self, workflow_id: str) -> Tuple[bool, Optional[FlowRecord]]:
         return await self._delete_by_id_in_deployment_mode(WorkflowTable,
                                                            map_to_workflow_record,
@@ -30,7 +33,8 @@ class WorkflowService(TableService):
     async def insert(self, workflow: FlowRecord):
         return await self._replace(WorkflowTable, map_to_workflow_table(workflow))
 
-    async def load_all_by_type(self, wf_type: str, search: str = None, columns=None, limit: int = None, offset: int = None) -> SelectResult:
+    async def load_all_by_type(self, wf_type: str, search: str = None, columns=None, limit: int = None,
+                               offset: int = None) -> SelectResult:
         if search:
             where = where_tenant_and_mode_context(
                 WorkflowTable,
@@ -44,9 +48,9 @@ class WorkflowService(TableService):
             )
 
         return await self._select_in_deployment_mode(WorkflowTable,
-                                        columns=columns,
-                                        where=where,
-                                        order_by=WorkflowTable.name,
-                                        limit=limit,
-                                        offset=offset,
-                                        one_record=False)
+                                                     columns=columns,
+                                                     where=where,
+                                                     order_by=WorkflowTable.name,
+                                                     limit=limit,
+                                                     offset=offset,
+                                                     one_record=False)

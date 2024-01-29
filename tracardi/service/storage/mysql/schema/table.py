@@ -79,8 +79,7 @@ class WorkflowTable(Base):
     type = Column(String(64), default="collection", index=True)
     projects = Column(String(255))
 
-    draft = Column(LargeBinary)
-    backup = Column(LargeBinary)
+    draft = Column(JSON)
 
     lock = Column(Boolean)
     deployed = Column(Boolean, default=False)

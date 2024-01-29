@@ -79,16 +79,10 @@ class Flow(FlowGraph):
     @staticmethod
     def from_workflow_record(record: 'FlowRecord') -> Optional['Flow']:
 
-        if record.draft:
-            decrypted = decrypt(record.draft)
-        else:
-            return None
+        if 'type' not in record.draft:
+            record.draft['type'] = record.type
 
-
-        if 'type' not in decrypted:
-            decrypted['type'] = record.type
-
-        flow = Flow(**decrypted)
+        flow = Flow(**record.draft)
         flow.deploy_timestamp = record.deploy_timestamp
         flow.timestamp = record.timestamp
 
@@ -286,7 +280,7 @@ class FlowRecord(NamedEntityInContext):
     deploy_timestamp: Optional[datetime] = None
     description: Optional[str] = None
     projects: Optional[List[str]] = ["General"]
-    draft: Optional[str] = ''
+    draft: Optional[dict] = {}
     lock: bool = False
     type: str
 
@@ -296,9 +290,3 @@ class FlowRecord(NamedEntityInContext):
     def get_empty_workflow(self, id) -> 'Flow':
         return Flow.build(id=id, name=self.name, description=self.description,
                           projects=self.projects, lock=self.lock)
-
-    def set_lock(self, lock: bool = True) -> None:
-        self.lock = lock
-        draft_flow = self.get_draft_workflow()
-        draft_flow.lock = lock
-        self.draft = encrypt(draft_flow.model_dump())

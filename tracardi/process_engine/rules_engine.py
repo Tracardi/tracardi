@@ -136,7 +136,7 @@ class RulesEngine:
                     if not flow_record:
                         raise ValueError("Could not find flow `{}`".format(rule.flow.id))
 
-                    flow: Flow = flow_record.get_draft_workflow()
+                    flow: Flow = Flow.from_workflow_record(flow_record)
 
                 except Exception as e:
                     logger.error(str(e))

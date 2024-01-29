@@ -17,7 +17,7 @@ def test_valid_flow_record():
             description="This is flow 1",
             type="collection",
             projects=["General"],
-            draft="draft_flow_1",
+            draft={},
             lock=True,
         )
 
@@ -31,7 +31,7 @@ def test_valid_flow_record():
         assert workflow_table.description == "This is flow 1"
         assert workflow_table.type == "collection"
         assert workflow_table.projects == "General"
-        assert workflow_table.draft =="draft_flow_1".encode()
+        assert workflow_table.draft =="{}"
         assert workflow_table.lock == True
         assert workflow_table.deployed == False
         assert workflow_table.production
