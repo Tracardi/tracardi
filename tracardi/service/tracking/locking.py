@@ -186,6 +186,7 @@ class GlobalMutexLock(_GlobalMutexLock):
 
     def _keep_locked_for(self) -> 'Lock':
 
+        lock_time = 0.0
         if self._lock.is_locked():
             lock_time = self._get_lock_time()
 
