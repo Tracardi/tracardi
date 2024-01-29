@@ -284,9 +284,6 @@ class FlowRecord(NamedEntityInContext):
     lock: bool = False
     type: str
 
-    def get_draft_workflow(self) -> Optional['Flow']:
-        return Flow.from_workflow_record(self)
-
     def get_empty_workflow(self, id) -> 'Flow':
         return Flow.build(id=id, name=self.name, description=self.description,
                           projects=self.projects, lock=self.lock)
