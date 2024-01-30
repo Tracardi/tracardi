@@ -23,7 +23,7 @@ class BridgeService(TableService):
     async def load_by_id(self, plugin_id: str) -> SelectResult:
         return await self._load_by_id(BridgeTable, primary_id=plugin_id, server_context=False)
 
-    async def delete_by_id(self, bridge_id: str) -> bool:
+    async def delete_by_id(self, bridge_id: str) -> tuple:
         return await self._delete_by_id(BridgeTable, primary_id=bridge_id, server_context=False)
 
 
