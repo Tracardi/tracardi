@@ -1,4 +1,4 @@
-'data.loyalty.card.points', 
+['data.loyalty.card.points',
 'data.loyalty.card.expires', 
 'data.loyalty.card.issuer', 
 'data.loyalty.card.name', 
@@ -107,4 +107,4 @@
 'metadata.time.create', 
 'metadata.time.insert', 
 'ids', 
-'id'
+'id']

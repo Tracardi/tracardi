@@ -257,4 +257,4 @@ async def process_track_data(source: EventSource,
             #     print(1, profile.ids)
             #     print(2, profile.get_auto_merge_ids())
     finally:
-        logger.info(f"Process time {time.time() - tracking_start}")
+        logger.debug(f"Process time {time.time() - tracking_start}")
