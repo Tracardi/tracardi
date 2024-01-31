@@ -122,11 +122,11 @@ class HttpConnector(DestinationInterface):
                     # todo log
 
         except ClientConnectorError as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             raise e
 
         except asyncio.exceptions.TimeoutError as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             raise e
 
     async def dispatch_profile(self, data, profile: Profile, session: Session):

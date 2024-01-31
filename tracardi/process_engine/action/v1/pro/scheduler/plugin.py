@@ -76,7 +76,7 @@ class SchedulerPlugin(ActionRunner):
 
             return Result(port="response", value=response)
         except Exception as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             self.console.error(str(e))
             return Result(port="error", value={
                 "error": str(e),

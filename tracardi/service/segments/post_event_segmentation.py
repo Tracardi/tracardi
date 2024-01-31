@@ -77,8 +77,6 @@ async def post_ev_segment(profile: Profile, session: Session, event_types: list,
                     segmentation_result['errors'].append(error)
                 segmentation_result['ids'].append(segment_id)
     except Exception as e:
-        # this error is a global segmentation error
-        # todo log it.
-        logger.error(str(e))
+        logger.error(str(e), e, exc_info=True)
     finally:
         return segmentation_result

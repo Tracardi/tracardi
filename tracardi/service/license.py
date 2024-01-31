@@ -92,7 +92,7 @@ class License(BaseModel):
         license = License.get_license(license)
 
         if license.is_expired():
-            logger.error("License expired.")
+            logger.warning("License expired.")
             exit(1)
 
         return license

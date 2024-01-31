@@ -22,7 +22,7 @@ class RocksDbClient:
 
             return True
         except OSError as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             return False
 
     def open_storage(self):

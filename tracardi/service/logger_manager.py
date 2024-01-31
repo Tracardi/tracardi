@@ -16,14 +16,20 @@ async def save_logs() -> Optional[bool]:
     if not tracardi.save_logs:
         return None
 
+    # if log_handler.has_logs():
+    #     error_collection += log_handler.collection
+    #     last_error_save = time()
+    #     log_handler.reset()
+    #
+    # if len(error_collection) > 500 or time() - last_error_save > 30:
+    #     await log_db.save(error_collection)
+    #     error_collection = []
+    #     return True
+
     if log_handler.has_logs():
-        error_collection += log_handler.collection
+        await log_db.save(log_handler.collection)
         last_error_save = time()
         log_handler.reset()
-
-    if len(error_collection) > 500 or time() - last_error_save > 30:
-        await log_db.save(error_collection)
-        error_collection = []
         return True
 
     return False

@@ -127,7 +127,7 @@ class RulesEngine:
                     flow: Flow = await load_flow_callable(rule.flow.id)
 
                 except Exception as e:
-                    logger.error(str(e))
+                    logger.error(str(e), e, exc_info=True)
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(
                         timestamp=time(),

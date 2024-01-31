@@ -330,7 +330,7 @@ class TrackerPayload(BaseModel):
                 return find_profile_by_fields
             return None
         except AssertionError as e:
-            logger.error(f"Can not find property to load profile by identification data: {str(e)}")
+            logger.error(f"Can not find property to load profile by identification data: {str(e)}", e, exc_info=True)
             return None
 
     def finger_printing_enabled(self):

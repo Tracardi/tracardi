@@ -2,6 +2,7 @@ import os
 
 import logging
 
+from tracardi.service.logging.formater import CustomFormatter
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.utils.date import now_in_utc
 from logging import Handler, LogRecord
@@ -15,7 +16,6 @@ class ElasticLogHandler(Handler):
 
     def __init__(self, level=0, collection=None):
         super().__init__(level)
-
         if collection is None:
             collection = []
         self.collection = collection
@@ -47,11 +47,14 @@ class ElasticLogHandler(Handler):
 class StackInfoLogger(logging.Logger):
     def error(self, msg, *args, **kwargs):
         kwargs['stack_info'] = True
+        kwargs['exc_info'] = True
         super().error(msg, *args, **kwargs)
 
-    def warning(self, msg, *args, **kwargs):
+    def critical(self, msg, *args, **kwargs):
         kwargs['stack_info'] = True
-        super().warning(msg, *args, **kwargs)
+        kwargs['exc_info'] = True
+        super().error(msg, *args, **kwargs)
+
 
 logging.setLoggerClass(StackInfoLogger)
 logging.basicConfig(level=logging.INFO)
@@ -59,8 +62,18 @@ logging.basicConfig(level=logging.INFO)
 def get_logger(name, level=None):
     # Replace the default logger class with your custom class
     logger = logging.getLogger(name)
+    logger.propagate = False
     logger.setLevel(level or _logging_level)
+
+    # Elastic log formatter
+
     logger.addHandler(log_handler)
+
+    # Console log handler
+
+    clh = logging.StreamHandler()
+    clh.setFormatter(CustomFormatter())
+    logger.addHandler(clh)
 
     return logger
 
