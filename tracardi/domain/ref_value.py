@@ -1,15 +1,11 @@
-import logging
 from typing import Any, Optional
 
 from dotty_dict import dotty, Dotty
 from pydantic import BaseModel
 
-from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 class RefValue(BaseModel):

@@ -1,4 +1,3 @@
-import logging
 import elasticsearch
 from lark import LarkError
 from pydantic import BaseModel
@@ -6,7 +5,6 @@ from pydantic import BaseModel
 import tracardi.service.storage.elastic_storage as storage
 from typing import List, Union, Dict
 
-from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage.index_mapping import IndexMapping
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
@@ -14,7 +12,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from datetime import datetime
 from typing import Tuple, Optional
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.list_default_value import list_value_at_index
 from tracardi.service.singleton import Singleton
 from tracardi.domain.query_result import QueryResult
@@ -24,9 +22,7 @@ from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.filter_transformer import FilterTransformer
 from tracardi.service.storage.elastic_storage import ElasticStorage
 
-_logger = logging.getLogger(__name__)
-_logger.setLevel(tracardi.logging_level)
-_logger.addHandler(log_handler)
+_logger = get_logger(__name__)
 
 
 class SqlSearchQueryParser(metaclass=Singleton):

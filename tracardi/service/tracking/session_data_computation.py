@@ -1,27 +1,20 @@
-import os
-
-import logging
-
 from typing import Tuple, Optional
 
 from pydantic import ValidationError
 from user_agents import parse
 
 from tracardi.service.tracking.utils.languages import get_spoken_languages, get_continent
-from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.marketing import UTM
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.geo import Geo
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.languages import language_countries_dict
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:

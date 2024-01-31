@@ -1,10 +1,10 @@
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 from datetime import datetime
-import logging
 from tracardi.worker.domain.storage_record import StorageRecord, RecordMetadata
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def add_task(elastic_host: str, task_index: str, name: str, job, params=None):

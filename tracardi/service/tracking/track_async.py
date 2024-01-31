@@ -1,9 +1,6 @@
 from datetime import timedelta, datetime
 
 import time
-import logging
-
-# from tracardi.domain.session import FrozenSession
 from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
@@ -14,7 +11,7 @@ from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
@@ -26,9 +23,7 @@ if License.has_service(LICENSE):
     from com_tracardi.service.tracking.visti_end_dispatcher import schedule_visit_end_check
     from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 

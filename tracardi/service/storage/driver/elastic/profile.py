@@ -1,20 +1,15 @@
-import logging
 from typing import Union, Tuple
 
-from tracardi.context import get_context
 from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
-from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def load_profiles_for_auto_merge():

@@ -1,18 +1,14 @@
-import logging
 from typing import Optional, Awaitable, Union, List
 
-# import aioredis
 import redis
 
 from tracardi.context import get_context
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.singleton import Singleton
-from tracardi.config import redis_config, tracardi
+from tracardi.config import redis_config
 from tracardi.service.storage.redis_connection_pool import get_redis_connection_pool
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 # class AsyncRedisClient(metaclass=Singleton):

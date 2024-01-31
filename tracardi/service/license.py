@@ -1,4 +1,3 @@
-import logging
 import os
 from hashlib import md5
 from typing import Dict
@@ -6,14 +5,10 @@ from typing import Dict
 from pydantic import BaseModel
 from time import time
 
-from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.secrets import b64_decoder
 
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 WEBHOOK_BRIDGE = "webhojGa"
 API_BRIDGE = "kdIye85A"

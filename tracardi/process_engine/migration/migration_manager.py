@@ -1,12 +1,10 @@
-import logging
-
 from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
 
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.worker.celery_worker import run_migration_job
 import asyncio
@@ -18,9 +16,7 @@ import re
 from tracardi.service.storage.index import Resource
 from typing import Union
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 class MigrationNotFoundException(Exception):
     pass

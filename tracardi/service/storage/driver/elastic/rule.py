@@ -1,7 +1,6 @@
-import logging
 from typing import List, Tuple, Dict, Optional
 
-from tracardi.config import tracardi, memory_cache as memory_cache_config
+from tracardi.config import memory_cache as memory_cache_config
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords
 
@@ -10,12 +9,10 @@ from tracardi.domain.rule import Rule
 from tracardi.domain.event import Event
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.factory import storage_manager
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 memory_cache = MemoryCache("rules")
 

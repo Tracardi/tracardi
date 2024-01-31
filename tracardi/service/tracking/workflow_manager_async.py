@@ -1,4 +1,3 @@
-import logging
 from uuid import uuid4
 from dataclasses import dataclass
 from typing import List, Optional
@@ -10,7 +9,7 @@ from tracardi.process_engine.debugger import Debugger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.console_log import ConsoleLog
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.domain.event import Event
@@ -25,9 +24,7 @@ from tracardi.service.storage.driver.elastic import flow as flow_db
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 EQUALS = 0

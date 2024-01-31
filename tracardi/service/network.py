@@ -1,11 +1,9 @@
-import logging
 import socket
 from typing import Optional
 
-from tracardi.config import tracardi
+from tracardi.exceptions.log_handler import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
+logger = get_logger(__name__)
 
 
 def get_local_ip() -> Optional[str]:

@@ -3,7 +3,6 @@ from tracardi.service.utils.date import now_in_utc
 import time
 
 import json
-import logging
 from hashlib import sha1
 from datetime import datetime, timedelta
 from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator
@@ -13,6 +12,7 @@ from dotty_dict import dotty
 from pydantic import PrivateAttr, BaseModel
 
 from tracardi.config import tracardi
+from ...exceptions.log_handler import get_logger
 
 from ...service.cache_manager import CacheManager
 from ...service.console_log import ConsoleLog
@@ -26,7 +26,6 @@ from ..session import Session
 from ..time import Time
 from ..entity import Entity
 from ..profile import Profile
-from ...exceptions.log_handler import log_handler
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
 
@@ -34,9 +33,7 @@ if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
     from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 

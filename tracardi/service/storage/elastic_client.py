@@ -9,15 +9,13 @@ from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.pool_manager import PoolManager
+from tracardi.exceptions.log_handler import get_logger
 
 _singleton = None
 logger = logging.getLogger('elasticsearch')
 logger.setLevel(elastic.logging_level)
-logger = logging.getLogger(__name__)
-logger.setLevel(elastic.logging_level)
-logger.addHandler(log_handler)
+
+logger = get_logger(__name__)
 
 
 class ElasticClient:

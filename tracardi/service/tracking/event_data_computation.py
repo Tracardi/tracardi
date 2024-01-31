@@ -1,12 +1,10 @@
-import logging
-
 import asyncio
 from dotty_dict import dotty, Dotty
 
 from typing import List, Tuple, Optional, Set
 
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
@@ -28,9 +26,7 @@ if License.has_license():
     from com_tracardi.service.event_mapper import map_event_props_to_traits, map_events_tags_and_journey
 
 cache = CacheManager()
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def _remove_empty_dicts(dictionary):

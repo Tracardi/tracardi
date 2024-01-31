@@ -1,10 +1,7 @@
 from typing import Tuple
 
-import logging
-
 from dotty_dict import Dotty
 
-from tracardi.config import tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.event import Event
 from tracardi.domain.event_compute import EventCompute
@@ -14,7 +11,7 @@ from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
@@ -31,9 +28,7 @@ EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1
 APPEND = 2
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def update_profile_last_geo(session: Session, profile: Profile) -> Profile:

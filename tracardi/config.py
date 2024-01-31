@@ -6,6 +6,8 @@ import yaml
 
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
+from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int
 from tracardi.service.utils.validators import is_valid_url
@@ -13,22 +15,7 @@ from tracardi.service.utils.validators import is_valid_url
 VERSION = os.environ.get('_DEBUG_VERSION', '0.8.2-dev')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
-logger = logging.getLogger(__name__)
-
-
-def _get_logging_level(level: str) -> int:
-    level = level.upper()
-    if level == 'DEBUG':
-        return logging.DEBUG
-    if level == 'INFO':
-        return logging.INFO
-    if level == 'WARNING' or level == "WARN":
-        return logging.WARNING
-    if level == 'ERROR':
-        return logging.ERROR
-
-    return logging.WARNING
-
+logger = get_logger(__name__)
 
 class MemoryCacheConfig:
     def __init__(self, env):

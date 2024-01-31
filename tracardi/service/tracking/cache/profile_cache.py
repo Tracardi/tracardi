@@ -1,11 +1,8 @@
-import logging
-
 from typing import Optional, List
 
-from tracardi.config import tracardi
 from tracardi.context import get_context, Context
 from tracardi.domain.storage_record import RecordMetadata
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
@@ -15,9 +12,7 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.domain.profile import Profile
 from tracardi.service.merging.profile_merger import merge_profiles
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 redis_cache = RedisCache(ttl=None)
 _redis = RedisClient()
 

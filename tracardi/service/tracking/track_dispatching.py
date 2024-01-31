@@ -1,5 +1,3 @@
-import logging
-
 from typing import List, Tuple, Optional
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
@@ -12,7 +10,7 @@ from tracardi.service.tracking.cache.session_cache import lock_merge_with_cache_
 from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.segments.post_event_segmentation import post_ev_segment
@@ -25,9 +23,7 @@ from tracardi.domain.session import Session
 if License.has_service(LICENSE) :
     from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 

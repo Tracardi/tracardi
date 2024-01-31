@@ -1,12 +1,10 @@
 import datetime
-import logging
 
 import dateparser
 import pytimeparse
 import pytz
 
-from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.notation.dot_accessor import DotAccessor
 from typing import Union
 
@@ -15,9 +13,7 @@ from .function_transformer import FunctionTransformer
 from .transformer_namespace import TransformerNamespace
 from ..domain.missing_value import MissingValue
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 operation_mapper = {
     "between": "between",

@@ -1,11 +1,8 @@
-import logging
 from kombu import Exchange, Queue, Producer
-from tracardi.config import tracardi
 from .queue_config import QueueConfig
+from ...exceptions.log_handler import get_logger
 
-logging.basicConfig(format='%(asctime)s %(message)s')
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
+logger = get_logger(__name__)
 
 
 class QueuePublisher:

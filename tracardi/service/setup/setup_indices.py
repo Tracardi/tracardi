@@ -4,14 +4,11 @@ from typing import List, Tuple, Generator, Any
 
 from elasticsearch.exceptions import TransportError, NotFoundError
 
-from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import LICENSE, License
-from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
-import logging
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import bridges_db
@@ -25,9 +22,7 @@ index_mapping = {
     # }
 }
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def acknowledged(result):
