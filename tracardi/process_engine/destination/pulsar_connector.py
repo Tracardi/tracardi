@@ -2,22 +2,18 @@ import json
 
 import pickle
 
-import logging
 import pulsar
 from typing import Optional
 
 from pydantic import BaseModel
 
-from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from .destination_interface import DestinationInterface
 from ...domain.event import Event
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 class PulsarCredentials(BaseModel):

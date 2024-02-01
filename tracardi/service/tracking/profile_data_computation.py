@@ -1,10 +1,7 @@
 from typing import Tuple, List
 
-import logging
-
 from dotty_dict import Dotty
 
-from tracardi.config import tracardi
 from tracardi.domain.console import Console
 from tracardi.domain.event import Event
 from tracardi.domain.event_compute import EventCompute
@@ -13,7 +10,7 @@ from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
@@ -21,8 +18,10 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.tracking.utils.function_call import default_event_call_function
+from tracardi.service.tracking.utils.languages import get_continent
 from tracardi.service.utils.domains import free_email_domains
 from tracardi.service.events import copy_default_event_to_profile
+from tracardi.service.utils.languages import language_countries_dict
 
 cache = CacheManager()
 
@@ -30,9 +29,7 @@ EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1
 APPEND = 2
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def update_profile_last_geo(session: Session, profile: Profile) -> Profile:
@@ -283,3 +280,31 @@ async def map_event_to_profile(
 
 
     return flat_profile, profile_changes
+
+
+def compute_profile_aux_geo_markets(profile, session, tracker_payload):
+    if 'language' in session.context:
+        if profile:
+            profile.data.pii.language.spoken = session.context['language']
+
+    if profile and 'geo' not in profile.aux:
+        profile.aux['geo'] = {}
+
+    # Aux markets
+
+    markets = []
+    if 'language_codes' in session.context:
+        for lang_code in session.context['language_codes']:
+            if lang_code in language_countries_dict:
+                markets += language_countries_dict[lang_code]
+
+    if markets:
+        profile.aux['geo']['markets'] = markets
+
+    # Continent
+
+    continent = get_continent(tracker_payload)
+    if continent:
+        profile.aux['geo']['continent'] = continent
+
+    return profile

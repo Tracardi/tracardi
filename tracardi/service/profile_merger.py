@@ -1,6 +1,4 @@
 import asyncio
-import logging
-
 from dotty_dict import Dotty
 
 from tracardi.service.tracking.storage.profile_storage import save_profile, delete_profile
@@ -19,19 +17,17 @@ from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update
 
-from ..config import tracardi
 from ..domain.metadata import ProfileMetadata
 from ..domain.profile import Profile
 from ..domain.profile_stats import ProfileStats
 from ..domain.time import ProfileTime
-from ..exceptions.log_handler import log_handler
+from ..exceptions.log_handler import get_logger
+
 from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,

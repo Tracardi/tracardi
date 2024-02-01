@@ -1,27 +1,19 @@
-import os
-
-import logging
-
 from typing import Tuple, Optional
 
 from pydantic import ValidationError
 from user_agents import parse
 
-from tracardi.service.tracking.utils.languages import get_spoken_languages, get_continent
-from tracardi.config import tracardi
+from tracardi.service.tracking.utils.languages import get_spoken_languages
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.marketing import UTM
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.geo import Geo
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.utils.languages import language_countries_dict
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:
@@ -33,7 +25,7 @@ def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Option
         except Exception:
             return None
 
-def _compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
+def compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
     ua_string = _get_user_agent(session, tracker_payload)
     if ua_string:
         try:
@@ -149,41 +141,41 @@ def _compute_screen_size(session: Session, tracker_payload: TrackerPayload):
     return session
 
 
-def _compute_profile_geo(profile, session, tracker_payload, spoken_languages, language_codes):
-    if spoken_languages:
-        if profile:
-            profile.data.pii.language.spoken = session.context['language']
-
-    if profile and 'geo' not in profile.aux:
-        profile.aux['geo'] = {}
-
-    # Aux markets
-
-    markets = []
-    for lang_code in language_codes:
-        if lang_code in language_countries_dict:
-            markets += language_countries_dict[lang_code]
-
-    if markets:
-        profile.aux['geo']['markets'] = markets
-
-    # Continent
-
-    continent = get_continent(tracker_payload)
-    if continent:
-        profile.aux['geo']['continent'] = continent
-
-    return profile
+# def _compute_profile_geo(profile, session, tracker_payload):
+#     if 'language' in session.context:
+#         if profile:
+#             profile.data.pii.language.spoken = session.context['language']
+#
+#     if profile and 'geo' not in profile.aux:
+#         profile.aux['geo'] = {}
+#
+#     # Aux markets
+#
+#     markets = []
+#     if 'language_codes' in session.context:
+#         for lang_code in session.context['language_codes']:
+#             if lang_code in language_countries_dict:
+#                 markets += language_countries_dict[lang_code]
+#
+#     if markets:
+#         profile.aux['geo']['markets'] = markets
+#
+#     # Continent
+#
+#     continent = get_continent(tracker_payload)
+#     if continent:
+#         profile.aux['geo']['continent'] = continent
+#
+#     return profile
 
 
 def compute_session(session: Session,
-                    profile: Profile,
                     tracker_payload: TrackerPayload,
                     tracker_config: TrackerConfig
                     ) -> Tuple[Session, Profile]:
 
     # Compute the User Agent data
-    session = _compute_data_from_user_agent(session, tracker_payload)
+    session = compute_data_from_user_agent(session, tracker_payload)
 
     # Compute UTM
     session = _compute_utm(session, tracker_payload.context)
@@ -202,12 +194,6 @@ def compute_session(session: Session,
 
     session.context['ip'] = tracker_config.ip
 
-    # Compute languages
-
-    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload)
-    if spoken_languages:
-        session.context['language'] = list(set(spoken_languages))
-
     try:
         session.app.language = session.context['browser']['local']['browser']['language']
     except Exception:
@@ -220,7 +206,12 @@ def compute_session(session: Session,
     except Exception:
         pass
 
-    # Compute Profile
-    profile = _compute_profile_geo(profile, session, tracker_payload, spoken_languages, language_codes)
+    # Compute Languages
 
-    return session, profile
+    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload)
+    if spoken_languages:
+        session.context['language'] = list(set(spoken_languages))
+    if language_codes:
+        session.context['language_codes'] = list(set(language_codes))
+
+    return session

@@ -1,5 +1,4 @@
-import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from tracardi.domain.agg_result import AggResult
 from tracardi.domain.event import Event
@@ -7,7 +6,7 @@ from tracardi.domain.named_entity import NamedEntity
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple, Union, Set
@@ -16,9 +15,7 @@ from .raw import load_by_key_value_pairs
 import tracardi.config as config
 from ...mysql.service.event_source_service import EventSourceService
 
-logger = logging.getLogger(__name__)
-logger.setLevel(config.tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def load(id: str) -> Optional[StorageRecord]:

@@ -1,14 +1,9 @@
-import logging
-
 import os
 from speedict import Rdict
 
-from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 class RocksDbClient:
@@ -27,7 +22,7 @@ class RocksDbClient:
 
             return True
         except OSError as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             return False
 
     def open_storage(self):

@@ -6,17 +6,17 @@ from elasticsearch.exceptions import TransportError, NotFoundError
 
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.license import LICENSE, License
+from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
-import logging
 
 __local_dir = os.path.dirname(__file__)
 
 index_mapping = {}
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def acknowledged(result):

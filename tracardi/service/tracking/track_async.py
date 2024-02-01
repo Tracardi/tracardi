@@ -1,9 +1,6 @@
 from datetime import timedelta, datetime
 
 import time
-import logging
-
-# from tracardi.domain.session import FrozenSession
 from tracardi.service.license import License, LICENSE
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
 from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
@@ -14,7 +11,7 @@ from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
@@ -26,9 +23,7 @@ if License.has_service(LICENSE):
     from com_tracardi.service.tracking.visti_end_dispatcher import schedule_visit_end_check
     from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 
@@ -60,12 +55,17 @@ async def process_track_data(source: EventSource,
 
         # Lock profile and session for changes and compute data
 
-        profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
+        result = await lock_and_compute_data(
             tracker_payload,
             tracker_config,
             source,
             console_log
         )
+
+        if result is None:
+            return
+
+        profile, session, events, tracker_payload, field_timestamp_monitor = result
 
         try:
             if profile:
@@ -262,4 +262,4 @@ async def process_track_data(source: EventSource,
             #     print(1, profile.ids)
             #     print(2, profile.get_auto_merge_ids())
     finally:
-        logger.info(f"Process time {time.time() - tracking_start}")
+        logger.debug(f"Process time {time.time() - tracking_start}")

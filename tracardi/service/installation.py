@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 from uuid import uuid4
 
@@ -13,9 +12,11 @@ from tracardi.service.storage.mysql.service.user_service import UserService
 from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic, mysql
 from tracardi.context import ServerContext, get_context
+from tracardi.config import tracardi, elastic
+from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
 from tracardi.domain.user import User
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
@@ -29,9 +30,7 @@ if License.has_license():
         from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def check_installation():

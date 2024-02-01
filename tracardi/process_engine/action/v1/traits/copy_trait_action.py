@@ -1,8 +1,6 @@
-import logging
-
 from pydantic import BaseModel
 
-from tracardi.config import tracardi
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -16,8 +14,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_graph import FlowGraph
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
+logger = get_logger(__name__)
 
 
 class TraitsConfiguration(BaseModel):

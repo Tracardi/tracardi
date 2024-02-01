@@ -1,17 +1,13 @@
-import logging
 from typing import Optional, List, Union, Set
 
-from tracardi.config import tracardi
 from tracardi.domain.session import Session
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.factory import storage_manager
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def save_sessions(sessions: List[Session]):

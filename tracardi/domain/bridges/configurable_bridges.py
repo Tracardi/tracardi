@@ -1,4 +1,3 @@
-import logging
 from hashlib import md5
 from typing import Optional, Tuple
 from uuid import uuid4
@@ -10,16 +9,14 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.hasher import hash_id, uuid4_from_md5
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 class ConfigurableBridge(NamedEntity):

@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from asyncio import Task
 from collections import defaultdict
 from time import time
@@ -14,9 +13,7 @@ from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
 from .debugger import Debugger
-from ..config import tracardi
 from ..domain.console import Console
-from ..domain.entity import Entity
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow
 from ..domain.flow_invoke_result import FlowInvokeResult
@@ -27,14 +24,12 @@ from ..domain.session import Session
 from ..domain.rule import Rule
 from ..exceptions.exception import TracardiException
 from ..exceptions.exception_service import get_traceback
-from ..exceptions.log_handler import log_handler
+from ..exceptions.log_handler import get_logger
 from ..service.console_log import ConsoleLog
 from ..service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
 from ..service.storage.mysql.service.workflow_service import WorkflowService
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 class RulesEngine:
@@ -139,7 +134,7 @@ class RulesEngine:
                     flow: Flow = Flow.from_workflow_record(flow_record)
 
                 except Exception as e:
-                    logger.error(str(e))
+                    logger.error(str(e), e, exc_info=True)
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(
                         timestamp=time(),

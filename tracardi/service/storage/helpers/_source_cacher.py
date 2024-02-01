@@ -1,12 +1,9 @@
-import logging
-from tracardi.config import memory_cache, tracardi
+from tracardi.config import memory_cache
 from tracardi.domain.event_source import EventSource
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 

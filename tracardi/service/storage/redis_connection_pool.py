@@ -1,10 +1,9 @@
-import logging
 from tracardi.config import RedisConfig
 from redis import ConnectionPool
 
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
-logger.setLevel("INFO")
+from tracardi.exceptions.log_handler import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_redis_connection_pool(redis_config: RedisConfig) -> ConnectionPool:

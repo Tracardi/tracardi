@@ -17,6 +17,8 @@ class Context:
     tenant: Optional[str] = None
     host: Optional[str] = None
     version: Optional[str] = None
+    errors: int = 0
+    warnings: int = 0
 
     def __init__(self,
                  production: bool = None,
@@ -39,6 +41,8 @@ class Context:
         self.user = user
         self.production = tracardi.version.production if production is None else production
         self.host = host
+        self.errors = 0
+        self.warnings = 0
 
     def is_production(self) -> bool:
         return self.production

@@ -1,19 +1,15 @@
-import logging
 from typing import Optional, TypeVar, Type, Set
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
-from tracardi.config import tracardi
 from tracardi.domain.storage_record import RecordMetadata, StorageRecord
 from tracardi.domain.value_object.storage_info import StorageInfo
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.protocol.operational import Operational
 from tracardi.service.dot_notation_converter import dotter
 from tracardi.service.storage.index import Resource
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 T = TypeVar("T")
 

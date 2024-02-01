@@ -1,6 +1,5 @@
 import asyncio
 import json
-import logging
 from json import JSONDecodeError
 
 import aiohttp
@@ -9,18 +8,15 @@ from typing import Optional
 from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
 
-from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
 from .destination_interface import DestinationInterface
 from ...domain.event import Event
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 class HttpCredentials(BaseModel):
@@ -126,11 +122,11 @@ class HttpConnector(DestinationInterface):
                     # todo log
 
         except ClientConnectorError as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             raise e
 
         except asyncio.exceptions.TimeoutError as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             raise e
 
     async def dispatch_profile(self, data, profile: Profile, session: Session):

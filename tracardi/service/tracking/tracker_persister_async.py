@@ -1,18 +1,17 @@
 import asyncio
 
 import json
-import logging
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from tracardi.service.tracking.storage.event_storage import save_events
-from tracardi.service.tracking.storage.profile_storage import save_profile, load_profile
+from tracardi.service.tracking.storage.profile_storage import save_profile
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.cache_manager import CacheManager
 
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -20,9 +19,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.service.field_mappings_cache import FieldMapper
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 

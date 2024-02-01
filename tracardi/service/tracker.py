@@ -1,5 +1,4 @@
 import time
-import logging
 import traceback
 from typing import Optional
 
@@ -13,20 +12,19 @@ from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.logger_manager import save_logs
 from tracardi.service.storage.mysql.bootstrap.bridge import open_rest_source_bridge
+from tracardi.service.setup.data.defaults import open_rest_source_bridge
 from tracardi.service.tracking.source_validation import validate_source
 from tracardi.service.storage.driver.elastic.operations import console_log as console_log_db
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from typing import List
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracking.track_async import process_track_data
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 
@@ -64,8 +62,7 @@ async def track_event(tracker_payload: TrackerPayload,
         try:
             # Save console log
             await console_log_db.save_console_log(console_log)
-            # Save log
-            await save_logs()
+
         except Exception as e:
             logger.warning(f"Could not save logs. Error: {str(e)} ")
 
@@ -203,9 +200,6 @@ class Tracker:
         if result and tracardi.enable_errors_on_response:
             result['errors'] += self.console_log.get_errors()
             result['warnings'] += self.console_log.get_warnings()
-
-            if log_handler.has_logs():
-                result['errors'] += log_handler.get_errors()
 
         return result
 
