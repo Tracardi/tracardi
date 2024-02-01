@@ -20,7 +20,7 @@ def get_logger(name, level=None):
     # Replace the default logger class with your custom class
     logger = logging.getLogger(name)
     logger.propagate = False
-    logger.setLevel(level)
+    logger.setLevel(level or logging.INFO)
 
     return logger
 
