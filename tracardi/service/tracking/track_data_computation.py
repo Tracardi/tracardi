@@ -12,9 +12,9 @@ from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.event_data_computation import compute_events
 from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
-    update_profile_visits, update_profile_time
+    update_profile_visits, update_profile_time, compute_profile_aux_geo_markets
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
-    update_session_utm_with_client_data
+    update_session_utm_with_client_data, compute_data_from_user_agent
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 from tracardi.service.tracking.session_loading import load_or_create_session
 from tracardi.service.tracking.system_events import add_system_events
@@ -31,10 +31,11 @@ if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
 
-async def _compute(source, profile, session, tracker_payload, tracker_config, console_log):
-    if License.has_license():
-        if profile is not None:
+async def _compute(source, profile, session, tracker_payload, console_log):
 
+    if profile is not None:
+
+        if License.has_license():
             # Anonymize, data compliance
 
             event_payloads, compliance_errors = await event_data_compliance(
@@ -59,26 +60,11 @@ async def _compute(source, profile, session, tracker_payload, tracker_config, co
             # Save event payload
             tracker_payload.events = event_payloads
 
-    # ------------------------------------
-    # Session and events computation
+        # Profile computation
 
-    # Is new session
-    if session.is_new():
-        # Compute session. Session is filled only when new
-        session, profile = compute_session(
-            session,
-            profile,
-            tracker_payload,
-            tracker_config
-        )
+        # Compute Profile GEO Markets and continent
+        profile = compute_profile_aux_geo_markets(profile, session, tracker_payload)
 
-    # Update missing data
-    session = await update_device_geo(tracker_payload, session)
-    session = update_session_utm_with_client_data(tracker_payload, session)
-
-    # Profile computation
-
-    if profile:
         # Update profile last geo with session device geo
         profile = update_profile_last_geo(session, profile)
 
@@ -125,13 +111,34 @@ async def _compute(source, profile, session, tracker_payload, tracker_config, co
 async def lock_and_compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
-                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
-Optional[FieldTimestampMonitor]]:
+                       console_log: ConsoleLog) -> Optional[Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
+Optional[FieldTimestampMonitor]]]:
     # We need profile and session before async
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
 
-    # Load profile
+    # ------------------------------------
+    # Session computation
+
+    # Is new session
+    if session.is_new():
+        # Compute session. Session is filled only when new
+        session = compute_session(
+            session,
+            tracker_payload,
+            tracker_config
+        )
+
+    # Update missing data
+    session = await update_device_geo(tracker_payload, session)
+    session = update_session_utm_with_client_data(tracker_payload, session)
+
+    # If agent is a bot stop
+    if session.app.bot:
+        return None
+
+    # -----------------------------------
+    # Profile Loading
 
     profile, session = await load_profile_and_session(
         session,
@@ -148,9 +155,12 @@ Optional[FieldTimestampMonitor]]:
     # If not profile ID then no locking
 
     async with async_mutex(profile_lock, name='lock_and_compute_data_profile'):
-        profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(source, profile, session,
-                                                                                            tracker_payload,
-                                                                                            tracker_config, console_log)
+
+        profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(
+            source, profile, session,
+            tracker_payload,
+            console_log)
+
         # MUST BE INSIDE MUTEX
         # Update only when needed
 
