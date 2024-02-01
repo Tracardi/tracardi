@@ -16,7 +16,7 @@ def map_to_workflow_table(flow_record: FlowRecord) -> WorkflowTable:
         name=flow_record.name,
         description=flow_record.description,
         type=flow_record.type,
-        projects=",".join(flow_record.projects) if flow_record.projects else "",
+        tags=",".join(flow_record.tags) if flow_record.tags else "",
 
         draft=flow_record.draft,
 
@@ -36,7 +36,7 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         name=workflow_table.name,
         description=workflow_table.description,
         type=workflow_table.type,
-        projects=split_list(workflow_table.projects),
+        tags=split_list(workflow_table.tags),
         draft=workflow_table.draft,
         lock=workflow_table.lock,
         running=workflow_table.running
@@ -49,7 +49,7 @@ def map_to_workflow_record_meta(workflow_table: WorkflowTable) -> FlowMetaData:
         name=workflow_table.name,
         description=workflow_table.description,
         type=workflow_table.type,
-        projects=split_list(workflow_table.projects),
+        tags=split_list(workflow_table.tags),
 
         production=workflow_table.production,
         running=workflow_table.running

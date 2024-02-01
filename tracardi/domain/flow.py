@@ -29,7 +29,7 @@ class FlowSchema(BaseModel):
 
 
 class Flow(FlowGraph):
-    projects: Optional[List[str]] = ["General"]
+    tags: Optional[List[str]] = ["General"]
     lock: bool = False
     type: str
     timestamp: Optional[datetime] = None
@@ -71,7 +71,7 @@ class Flow(FlowGraph):
             timestamp=now_in_utc(),
             description=self.description,
             name=self.name,
-            projects=self.projects,
+            tags=self.tags,
             lock=self.lock,
             type=type
         )
@@ -103,9 +103,9 @@ class Flow(FlowGraph):
         )
 
     @staticmethod
-    def build(name: str, description: str = None, id=None, lock=False, projects=None, type='collection') -> 'Flow':
-        if projects is None:
-            projects = ["General"]
+    def build(name: str, description: str = None, id=None, lock=False, tags=None, type='collection') -> 'Flow':
+        if tags is None:
+            tags = ["General"]
 
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
@@ -113,7 +113,7 @@ class Flow(FlowGraph):
             name=name,
             wf_schema=FlowSchema(version=str(tracardi.version)),
             description=description,
-            projects=projects,
+            tags=tags,
             lock=lock,
             flowGraph=FlowGraphData(
                 nodes=[],
@@ -279,11 +279,14 @@ class FlowRecord(NamedEntityInContext):
     timestamp: Optional[datetime] = None
     deploy_timestamp: Optional[datetime] = None
     description: Optional[str] = None
-    projects: Optional[List[str]] = ["General"]
+    tags: Optional[List[str]] = ["General"]
     draft: Optional[dict] = {}
     lock: bool = False
     type: str
 
     def get_empty_workflow(self, id) -> 'Flow':
-        return Flow.build(id=id, name=self.name, description=self.description,
-                          projects=self.projects, lock=self.lock)
+        return Flow.build(id=id,
+                          name=self.name,
+                          description=self.description,
+                          tags=self.tags,
+                          lock=self.lock)

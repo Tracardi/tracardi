@@ -16,6 +16,9 @@ logger.addHandler(log_handler)
 
 class WorkflowService(TableService):
 
+    async def load_in_current_context(self, workflow_id):
+        return await self._load_by_id(WorkflowTable, primary_id=workflow_id)
+
     async def load_all(self, search: str = None, columns=None, limit: int = None, offset: int = None) -> SelectResult:
         return await self._load_all_in_deployment_mode(WorkflowTable, search, limit, offset, columns)
 

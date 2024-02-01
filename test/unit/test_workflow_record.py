@@ -26,7 +26,7 @@ def test_workflow_record_via_workflow_table():
         name='Test Workflow',
         description='This is a test workflow',
         type='collection',
-        projects='Project1,Project2',
+        tags='Project1,Project2',
         draft=encrypt(flow),
         prod=None,
         backup=None,

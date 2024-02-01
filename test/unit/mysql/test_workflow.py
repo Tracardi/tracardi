@@ -16,7 +16,7 @@ def test_valid_flow_record():
             name="Flow 1",
             description="This is flow 1",
             type="collection",
-            projects=["General"],
+            tags=["General"],
             draft={},
             lock=True,
         )
@@ -44,7 +44,7 @@ def test_maps_workflow_table_to_flow_record():
             name='Test Workflow',
             description='This is a test workflow',
             type='collection',
-            projects='Project1,Project2',
+            tags='Project1,Project2',
             draft='abc',
             prod='zxc',
             backup='qwe',
@@ -60,6 +60,6 @@ def test_maps_workflow_table_to_flow_record():
         assert flow_record.name == 'Test Workflow'
         assert flow_record.description == 'This is a test workflow'
         assert flow_record.type == 'collection'
-        assert flow_record.projects == ['Project1', 'Project2']
+        assert flow_record.tags == ['Project1', 'Project2']
         assert flow_record.draft == "abc"
         assert flow_record.lock is True

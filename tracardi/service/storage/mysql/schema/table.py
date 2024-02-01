@@ -77,7 +77,7 @@ class WorkflowTable(Base):
     name = Column(String(64), index=True)
     description = Column(String(255))
     type = Column(String(64), default="collection", index=True)
-    projects = Column(String(255))
+    tags = Column(String(255))
 
     draft = Column(JSON)
 

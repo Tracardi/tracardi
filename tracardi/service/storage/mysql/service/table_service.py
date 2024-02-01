@@ -67,7 +67,7 @@ def where_with_context(table: Type[Base], server_context: bool, *clauses) -> Cal
 class TableService:
 
     def __init__(self, echo: bool = False):
-        self.client = AsyncMySqlEngine(echo)
+        self.client = AsyncMySqlEngine(False)
         self.engine = self.client.get_engine_for_database()
 
     async def _select_in_deployment_mode(self,
