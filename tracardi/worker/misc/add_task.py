@@ -1,6 +1,7 @@
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 from datetime import datetime
+
+from tracardi.worker.misc.logger import get_logger
+from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 from tracardi.worker.domain.storage_record import StorageRecord, RecordMetadata
 
 
