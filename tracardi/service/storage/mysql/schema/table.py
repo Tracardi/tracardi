@@ -263,7 +263,7 @@ class UserTable(Base):
 
     id = Column(String(40))
     password = Column(String(128))
-    full_name = Column(String(128))
+    name = Column(String(128))
     email = Column(String(128), index=True)
     roles = Column(String(255))
     enabled = Column(Boolean)

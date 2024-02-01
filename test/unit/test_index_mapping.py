@@ -12,7 +12,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
     from tracardi.domain.user import User
     from tracardi.service.storage.index import Index
 
-    admin = User(id="1", password="pass", full_name="test", email="none", roles=['admin'])
+    admin = User(id="1", password="pass", name="test", email="none", roles=['admin'])
     tenant = get_context().tenant
 
     mapping_mock = {

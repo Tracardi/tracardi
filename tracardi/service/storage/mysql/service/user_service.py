@@ -29,14 +29,14 @@ class UserService(TableService):
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         if search:
             where = _where_with_context(
-                UserTable.full_name.like(f'%{search}%')
+                UserTable.name.like(f'%{search}%')
             )
         else:
             where = _where_with_context()
 
         return await self._select_query(UserTable,
                                         where=where,
-                                        order_by=UserTable.full_name,
+                                        order_by=UserTable.name,
                                         limit=limit,
                                         offset=offset)
 
@@ -84,7 +84,7 @@ class UserService(TableService):
 
     async def load_by_name(self, name: str, start:int, limit: int) -> List[User]:
         where = _where_with_context( # tenant only mode
-            UserTable.full_name.like(name)
+            UserTable.name.like(name)
         )
 
         records = await self._select_query(UserTable, where=where, limit=start, offset=limit)
@@ -123,7 +123,7 @@ class UserService(TableService):
         user = User(
             id=user_id,
             password=User.encode_password(user_payload.password) if user_payload.password is not None else existing_user.password,
-            full_name=user_payload.full_name if user_payload.full_name is not None else existing_user.full_name,
+            name=user_payload.name if user_payload.name is not None else existing_user.name,
             email=user_payload.email if user_payload.email is not None else existing_user.email,
             roles=user_payload.roles if user_payload.roles is not None else existing_user.roles,
             enabled=user_payload.enabled if user_payload.enabled is not None else existing_user.enabled,

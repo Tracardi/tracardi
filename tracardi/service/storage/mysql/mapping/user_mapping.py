@@ -10,7 +10,7 @@ def map_to_user_table(user: User) -> UserTable:
         id=user.id,
         tenant=context.tenant,
         password=user.password,
-        full_name=user.full_name,
+        name=user.name,
         email=user.email,
         roles=','.join(user.roles),  # Convert list of roles to a comma-separated string
         enabled=user.enabled if user.enabled is not None else False,
@@ -23,7 +23,7 @@ def map_to_user(user_table: UserTable) -> User:
     return User(
         id=user_table.id,
         password=user_table.password,
-        full_name=user_table.full_name,
+        name=user_table.name,
         email=user_table.email,
         roles=split_list(user_table.roles),  # Convert comma-separated string back to list
         enabled=user_table.enabled if user_table.enabled is not None else False,

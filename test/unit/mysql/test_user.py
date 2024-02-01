@@ -10,10 +10,10 @@ def test_valid_user_object():
         user = User(
             id="123",
             password="password123",
-            full_name="John Doe",
+            name="John Doe",
             email="john.doe@example.com",
             roles=["admin", "user"],
-            disabled=False,
+            enabled=True,
             expiration_timestamp=1640995200,
             preference={"key": "value"}
         )
@@ -25,7 +25,7 @@ def test_valid_user_object():
         assert result.tenant == get_context().tenant
         assert result.production == get_context().production
         assert result.password == user.password
-        assert result.full_name == user.full_name
+        assert result.name == user.name
         assert result.email == user.email
         assert result.roles == ','.join(user.roles)
         assert result.disabled == user.disabled
@@ -38,7 +38,7 @@ def test_all_fields_mapped():
     user_table = UserTable(
         id="123",
         password="password",
-        full_name="John Doe",
+        name="John Doe",
         email="john.doe@example.com",
         roles="admin,user",
         preference={"key": "value"}
@@ -47,10 +47,10 @@ def test_all_fields_mapped():
     expected_user = User(
         id="123",
         password="password",
-        full_name="John Doe",
+        name="John Doe",
         email="john.doe@example.com",
         roles=["admin", "user"],
-        disabled=False,
+        enabled=True,
         expiration_timestamp=None,
         preference={"key": "value"}
     )

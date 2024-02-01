@@ -8,7 +8,7 @@ from datetime import datetime
 class User(BaseModel):
     id: str
     password: str
-    full_name: str
+    name: str
     email: str
     roles: List[str]
     enabled: bool = False
@@ -39,7 +39,7 @@ class User(BaseModel):
             del self.preference[key]
 
     def __str__(self):
-        return f"User: {self.full_name}"
+        return f"User: {self.name}"
 
     def __repr__(self):
-        return f"User: {self.full_name}"
+        return f"User: {self.name}"
