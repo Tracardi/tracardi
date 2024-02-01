@@ -117,26 +117,6 @@ Optional[FieldTimestampMonitor]]]:
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
 
-    # ------------------------------------
-    # Session computation
-
-    # Is new session
-    if session.is_new():
-        # Compute session. Session is filled only when new
-        session = compute_session(
-            session,
-            tracker_payload,
-            tracker_config
-        )
-
-    # Update missing data
-    session = await update_device_geo(tracker_payload, session)
-    session = update_session_utm_with_client_data(tracker_payload, session)
-
-    # If agent is a bot stop
-    if session.app.bot:
-        return None
-
     # -----------------------------------
     # Profile Loading
 
@@ -146,6 +126,27 @@ Optional[FieldTimestampMonitor]]]:
         tracker_payload,
         console_log
     )
+
+    # ------------------------------------
+    # Session computation
+
+    # Is new session
+    if session:
+        if session.is_new():
+            # Compute session. Session is filled only when new
+            session = compute_session(
+                session,
+                tracker_payload,
+                tracker_config
+            )
+
+        # Update missing data
+        session = await update_device_geo(tracker_payload, session)
+        session = update_session_utm_with_client_data(tracker_payload, session)
+
+    # If agent is a bot stop
+    if session.app.bot:
+        return None
 
     # We need profile ID to lock.
     _redis = RedisClient()
