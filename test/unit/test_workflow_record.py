@@ -27,9 +27,7 @@ def test_workflow_record_via_workflow_table():
         description='This is a test workflow',
         type='collection',
         tags='Project1,Project2',
-        draft=encrypt(flow),
-        prod=None,
-        backup=None,
+        draft=flow.model_dump(mode='json'),
         lock=True,
         deployed=True
     )

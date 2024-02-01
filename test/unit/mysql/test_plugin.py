@@ -215,6 +215,5 @@ def test_correctly_map_all_fields():
         table = map_to_plugin_table(flow_plugin)
 
         assert table.id == "123"
-        assert table.production == True
         assert table.plugin_debug == False
         assert table.plugin_start is False

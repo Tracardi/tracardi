@@ -42,7 +42,7 @@ class EventSourceTable(Base):
     url = Column(String(255))
     enabled = Column(Boolean, default=False)
     locked = Column(Boolean, default=False)
-    transitional = Column(Boolean)
+    transitional = Column(Boolean, default=False)
     tags = Column(String(255))
     groups = Column(String(255))
     icon = Column(String(32))

@@ -112,6 +112,9 @@ def map_to_spec(table: PluginTable) -> Spec:
 
 
 def map_to_plugin_metadata(table: PluginTable) -> MetaData:
+
+    docs = to_model(table.plugin_metadata_documentation, Documentation)
+
     return MetaData(
         name=table.plugin_metadata_name,
         desc=table.plugin_metadata_desc,
@@ -121,7 +124,7 @@ def map_to_plugin_metadata(table: PluginTable) -> MetaData:
         width=table.plugin_metadata_width,
         height=table.plugin_metadata_height,
         icon=table.plugin_metadata_icon,
-        documentation=to_model(table.plugin_metadata_documentation, Documentation),
+        documentation=docs,
         group=split_list(table.plugin_metadata_group),
         tags=split_list(table.plugin_metadata_tags),
         pro=table.plugin_metadata_pro,

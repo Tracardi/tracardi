@@ -1,3 +1,5 @@
+import zoneinfo
+
 import datetime
 
 from tracardi.domain.entity import Entity
@@ -49,8 +51,8 @@ def test_event_payload_time_fallback():
                         profile_less=False
                         )
 
-    assert event.metadata.time.insert != datetime.datetime(2002, 1, 1, 0, 0)  # Must be now - can not be overridden
-    assert event.metadata.time.create == datetime.datetime(2001, 1, 1, 0, 0)
+    assert event.metadata.time.insert != datetime.datetime(2002, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key='UTC'))  # Must be now - can not be overridden
+    assert event.metadata.time.create == datetime.datetime(2001, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key='UTC'))
 
 
 def test_event_payload_should_have_tags():

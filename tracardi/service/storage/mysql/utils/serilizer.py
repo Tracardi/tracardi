@@ -32,7 +32,7 @@ def from_json(json_data: str, model: Optional[Type[BaseModel]] = None):
 def to_model(data, model: Type[BaseModel]):
 
     if not data:
-        return data
+        return None
 
     if isinstance(data, list):
         return [model(**item) for item in data]

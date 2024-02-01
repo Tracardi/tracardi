@@ -1,7 +1,7 @@
 import pytest
 
 from tracardi.context import ServerContext, Context
-from tracardi.service.storage.mysql.schema.table import PluginTable
+from tracardi.service.storage.mysql.schema.table import PluginTable, EventSourceTable
 from tracardi.service.storage.mysql.service.table_service import where_tenant_and_mode_context, where_with_context, \
     tenant_and_mode_context_filter
 
@@ -19,39 +19,39 @@ def test_tenant_context_filter_positive_path():
     with ServerContext(Context(production=False)):
         # Initialize
         where = tenant_and_mode_context_filter(
-            PluginTable
+            EventSourceTable
         )
 
-        assert str(where) == 'plugin.tenant = :tenant_1 AND plugin.production = false'
+        assert str(where) == 'event_source.tenant = :tenant_1 AND event_source.production = false'
 
 
 def test_where_tenant_context_positive_path():
     with ServerContext(Context(production=True)):
         # Initialize
         where = where_tenant_and_mode_context(
-            PluginTable,
-            PluginTable.id == '1'
+            EventSourceTable,
+            EventSourceTable.id == '1'
         )
 
-        assert str(where()) == 'plugin.tenant = :tenant_1 AND plugin.production = true AND plugin.id = :id_1'
+        assert str(where()) == 'event_source.tenant = :tenant_1 AND event_source.production = true AND event_source.id = :id_1'
 
 
 def test_where_with_context_positive_path():
     with ServerContext(Context(production=True)):
         # Initialize
         where = where_with_context(
-            PluginTable,
+            EventSourceTable,
             True,
-            PluginTable.id == '1'
+            EventSourceTable.id == '1'
         )
 
-        assert str(where()) == 'plugin.tenant = :tenant_1 AND plugin.production = true AND plugin.id = :id_1'
+        assert str(where()) == 'event_source.tenant = :tenant_1 AND event_source.production = true AND event_source.id = :id_1'
 
 
         where = where_with_context(
-            PluginTable,
+            EventSourceTable,
             False,
-            PluginTable.id == '1'
+            EventSourceTable.id == '1'
         )
 
-        assert str(where()) == 'plugin.tenant = :tenant_1 AND plugin.id = :id_1'
+        assert str(where()) == 'event_source.tenant = :tenant_1 AND event_source.id = :id_1'

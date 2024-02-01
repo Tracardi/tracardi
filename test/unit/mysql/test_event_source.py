@@ -95,8 +95,17 @@ def test_returns_instance_with_all_attributes():
         tags="test_tag1,test_tag2",
         groups="test_group1,test_group2",
         manual="test_manual",
-        config={"key": "value"}
+        config={"key": "value"},
+        enabled=True,
+        synchronize_profiles=True,
+        locked=False,
+        transitional=False,
+        permanent_profile_id=False,
+        requires_consent=False
     )
+
+    print(event_source_table.enabled)
+
     event_source = map_to_event_source(event_source_table)
     assert isinstance(event_source, EventSource)
     assert event_source.id == "test_id"
