@@ -12,6 +12,7 @@ def test_create_instance_with_required_parameters():
     event_source = EventSource(
         id="1",
         type=["rest"],
+        name="test",
         bridge=NamedEntity(id="1", name="API")
     )
     assert event_source.type == ["rest"]
