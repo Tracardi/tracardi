@@ -95,8 +95,10 @@ async def event_destination_dispatch(load_destination_task: Callable,
                     session.profile = Entity(id=profile.id)
 
             logger.info(f"Dispatching event with destination class {destination_class}.")
-            await destination_instance.dispatch_event(reshaped_data, profile=profile, session=session, event=ev)
-
+            try:
+                await destination_instance.dispatch_event(reshaped_data, profile=profile, session=session, event=ev)
+            except Exception as e:
+                logger.error(str(e))
 
 async def profile_destination_dispatch(load_destination_task: Callable,
                                        profile,

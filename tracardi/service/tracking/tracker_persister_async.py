@@ -3,6 +3,9 @@ import asyncio
 import json
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
+
+from tracardi.context import get_context
+from tracardi.service.tracking.cache.profile_cache import delete_profile_cache
 from tracardi.service.tracking.storage.event_storage import save_events
 from tracardi.service.tracking.storage.profile_storage import save_profile
 from tracardi.service.tracking.storage.session_storage import save_session
@@ -112,10 +115,15 @@ class TrackingPersisterAsync:
                 results = []
                 try:
                     result = await save_profile(profile)
+
                     if result.has_errors():
                         for id in result.ids:
                             self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
                     results.append(result)
+
+                    # Delete profile form cache
+                    delete_profile_cache(profile.id, get_context())
+
                 except StorageException as e:
                     message = "Could not save profile. Error: {}".format(str(e))
                     raise FieldTypeConflictException(message, rows=e.details)

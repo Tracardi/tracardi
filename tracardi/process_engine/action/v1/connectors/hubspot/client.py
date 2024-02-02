@@ -219,7 +219,7 @@ class HubSpotClient:
                         await response.json():
                     raise HubSpotClientException(await response.text())
 
-                return response.json()
+                return await response.json()
 
     @property
     def credentials(self):

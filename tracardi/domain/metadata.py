@@ -33,8 +33,11 @@ class ProfileSystemMetadata(BaseModel):
         return self.aux.get('auto_merge', [])
 
     def has_integration(self, system: str) -> bool:
-        return system in self.integrations and 'id' in self.integrations[system]
-    
+        return self.integrations and system in self.integrations and isinstance(self.integrations[system], ProfileSystemIntegrations)
+
+    def get_integration(self, system: str) -> ProfileSystemIntegrations:
+        return self.integrations[system]
+
     def set_integration(self, system: str, id: str, data:Optional [dict]=None):
         if data is None:
             data = {}

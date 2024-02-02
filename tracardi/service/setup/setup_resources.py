@@ -395,7 +395,14 @@ def get_resource_types() -> List[ResourceSettings]:
             icon="hubspot",
             tags=["hubspot"],
             name="HubSpot",
-            manual="hubspot_resource"
+            manual="hubspot_resource",
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.hubspot_connector.HubSpotConnector",
+                init={
+                    "contact_id": "<path-to-hubspot-contact-id>"
+                },
+                pro=False
+            )
         ),
         ResourceSettings(
             id='github',
