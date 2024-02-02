@@ -67,7 +67,7 @@ class AddIntegrationIdAction(ActionRunner):
             self.profile.mark_for_update()
             return Result(port="payload", value=payload)
         except Exception as e:
-            self.console.log(str(e))
+            self.console.error(str(e))
             return Result(port="error", value={
                 "message": str(e)
             })
