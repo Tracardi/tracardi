@@ -122,8 +122,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
 
     # Dispatch workflow and post eve segmentation
 
-    debug = tracker_payload.is_on('debugger', default=False)
-
     profile, session, events, ux, response, field_update_log_manager, is_wf_triggered = await (
         trigger_workflows(
             profile,
@@ -131,7 +129,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             events,
             tracker_payload,
             console_log,
-            debug
+            False
         )
     )
 
