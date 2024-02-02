@@ -196,9 +196,9 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
         # Storage must be here as destination can update profile metadata.system.integrations
 
         if store_in_db:
-                profile_and_session_result = await storage.save_profile_and_session(
-                    session,
-                    profile
-                )
+            profile_and_session_result = await storage.save_profile_and_session(
+                session,
+                profile
+            )
 
     return profile, session, events, ux, response
