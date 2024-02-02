@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 from pydantic import field_validator
 
