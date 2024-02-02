@@ -54,20 +54,21 @@ class AddIntegrationIdAction(ActionRunner):
     """
 
     async def run(self, payload: dict, in_edge=None):
-        dot = self._get_dot_accessor(payload)
-        external_id = dot[self.config.id]
-        traverser = DictTraverser(dot)
         try:
+            dot = self._get_dot_accessor(payload)
+            external_id = dot[self.config.id]
+            traverser = DictTraverser(dot)
             data = json.loads(self.config.data)
             data = traverser.reshape(data)
             # Saves in profile metadata.system.integrations external system id where the key is system name and the value is id and data.
             self.profile.metadata.system.set_integration(
                 self.config.name.lower().replace(' ', '-'),
-                external_id,
+                str(external_id),
                 data)
             self.profile.mark_for_update()
             return Result(port="payload", value=payload)
         except Exception as e:
+            self.console.error(str(e))
             return Result(port="error", value={
                 "message": str(e)
             })
