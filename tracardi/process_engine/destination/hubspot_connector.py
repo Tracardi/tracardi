@@ -27,10 +27,6 @@ class HubSpotConnector(DestinationInterface):
         if profile.data.contact.email.main:
             data["email"] = profile.data.contact.email.main
 
-        data["firstname"] = 'xxx1'
-        data["lastname"] = 'yyy1'
-        data["email"] = "xxx1@xxx.pl"
-
         # If there is any data to send
 
         if data:

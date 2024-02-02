@@ -1,6 +1,8 @@
 from typing import List
 
 from deepdiff import DeepDiff
+
+from tracardi.context import get_context
 from tracardi.service.cache_manager import CacheManager
 
 from tracardi.domain.console import Console
@@ -35,10 +37,11 @@ class DestinationOrchestrator:
                     logger.debug("Profile changed. Destination scheduled to run.")
                     try:
                         load_destination_task = cache.profile_destinations
+                        context = get_context()
                         await profile_destination_dispatch(load_destination_task,
                                                            profile=self.profile,
                                                            session=self.session,
-                                                           debug=False)
+                                                           debug=not context.production)
                     except Exception as e:
                         # todo - this appends error to the same profile - it rather should be en event error
                         self.console_log.append(Console(
