@@ -103,7 +103,7 @@ async def event_destination_dispatch(load_destination_task: Callable,
 async def profile_destination_dispatch(load_destination_task: Callable,
                                        profile,
                                        session,
-                                       debug):
+                                       debug):  # debug is used to find out which resource to use.
 
     dot = DotAccessor(profile, session)
     template = DictTraverser(dot, default=None)
