@@ -144,6 +144,7 @@ class TracardiConfig(metaclass=Singleton):
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
         self.enable_field_update_log = env.get('ENABLE_FIELD_UPDATE_LOG', 'yes').lower() == 'yes'
+        self.allow_bot_traffic = env.get('ALLOW_BOT_TRAFFIC', 'no').lower() == 'yes'
 
         self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
 

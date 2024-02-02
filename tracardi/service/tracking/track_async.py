@@ -55,21 +55,16 @@ async def process_track_data(source: EventSource,
 
         # Lock profile and session for changes and compute data
 
-        result = await lock_and_compute_data(
+        profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
             tracker_payload,
             tracker_config,
             source,
             console_log
         )
 
-        if result is None:
-            return
-
-        profile, session, events, tracker_payload, field_timestamp_monitor = result
-
         try:
             if profile:
-                logger.info(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
+                logger.debug(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
 
             # Clean up
             if 'location' in tracker_payload.context:

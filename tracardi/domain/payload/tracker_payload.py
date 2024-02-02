@@ -1,3 +1,5 @@
+from user_agents.parsers import UserAgent
+
 from tracardi.service.utils.date import now_in_utc
 
 import time
@@ -10,6 +12,7 @@ from uuid import uuid4
 
 from dotty_dict import dotty
 from pydantic import PrivateAttr, BaseModel
+from user_agents import parse
 
 from tracardi.config import tracardi
 from ...exceptions.log_handler import get_logger
@@ -57,6 +60,7 @@ class TrackerPayload(BaseModel):
     _scheduled_node_id: str = PrivateAttr(None)
     _tracardi_referer: dict = PrivateAttr({})
     _timestamp: float = PrivateAttr(None)
+    _user_agent: Optional[UserAgent] = PrivateAttr(None)
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -94,6 +98,7 @@ class TrackerPayload(BaseModel):
                 self._scheduled_node_id = self.options['scheduledNodeId']
 
         self._cached_events_as_dicts: Optional[List[dict]] = None
+        self._set_user_agent()
 
     @property
     def tracardi_referer(self):
@@ -102,6 +107,23 @@ class TrackerPayload(BaseModel):
     @property
     def scheduled_event_config(self) -> ScheduledEventConfig:
         return ScheduledEventConfig(flow_id=self._scheduled_flow_id, node_id=self._scheduled_node_id)
+
+    def _set_user_agent(self):
+        if self._user_agent is None:
+            try:
+                user_agent = self.request['headers']['user-agent']
+                self._user_agent = parse(user_agent)
+            except Exception:
+                pass
+
+    def get_user_agent(self)  -> Optional[UserAgent]:
+        return self._user_agent
+
+    def is_bot(self) -> bool:
+        _user_agent = self.get_user_agent()
+        if _user_agent:
+            return _user_agent.is_bot
+        return False
 
     def replace_profile(self, profile_id):
         self.profile = Entity(id=profile_id)
