@@ -61,11 +61,13 @@ class CopyTraitAction(ActionRunner):
 
         self.flow = flow
 
+        return dot
+
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
         mapping = self.config.traits.set
 
-        self._set_changes(dot, mapping)
+        dot = self._set_changes(dot, mapping)
 
         if self.event.metadata.profile_less is False:
             if 'traits' not in dot.profile:
