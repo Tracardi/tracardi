@@ -6,6 +6,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.destination.destination_interface import DestinationInterface
+from tracardi.service.license import License
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.domain.resource import Resource
 from tracardi.exceptions.log_handler import get_logger
@@ -46,6 +47,9 @@ async def _get_destination_dispatchers(destinations, dot, template):
 
         if resource.enabled is False:
             raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
+
+        if resource.is_destination_pro() and not License.has_license():
+            continue
 
         destination = destination.decode()
         data = template.reshape(reshape_template=destination.mapping)
