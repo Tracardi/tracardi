@@ -10,6 +10,7 @@ class DestinationConfig(BaseModel):
     package: str
     init: dict = {}
     form: dict = {}
+    pro:bool = False
 
     @field_validator("package")
     @classmethod

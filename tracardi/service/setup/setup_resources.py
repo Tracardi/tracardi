@@ -429,11 +429,37 @@ def get_resource_types() -> List[ResourceSettings]:
             name='Apache Pulsar',
             manual='apache_pulsar_resource',
             destination=DestinationData(
-                package="tracardi.process_engine.destination.pulsar_connector.PulsarConnector",
+                package="com_tracardi.destination.pulsar_connector.PulsarConnector",
                 init={
                     "topic": "<topic>",
                     "serializer": "json"
-                }
+                },
+                pro=True
+            )
+        ),
+        ResourceSettings(
+            id= "rabbitmq",
+            name= "RabbitMq",
+            tags=['rabbitmq', 'pro', 'queue', 'destination'],
+            config={
+                "uri": "amqp://localhost:5672/",
+                "port": "5672",
+                "timeout": "5",
+                "virtual_host": ""
+            },
+            destination = DestinationData(
+                package = "com_tracardi.destination.rabbitmq_connector.RabbitMqConnector",
+                init= {
+                    "queue": {
+                        "name": None,
+                        "routing_key": "routing",
+                        "queue_type": "direct",
+                        "compression": None,
+                        "auto_declare": True,
+                        "serializer": "json"
+                    }
+                },
+                pro=True
             )
         )
     ]

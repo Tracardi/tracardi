@@ -8,6 +8,7 @@ class DestinationData(BaseModel):
     package: str
     init: Optional[dict] = {}
     form: Optional[Form] = {}
+    pro: bool = False
 
 
 class ResourceSettings(NamedEntity):
