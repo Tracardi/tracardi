@@ -14,7 +14,7 @@ from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
     update_profile_visits, update_profile_time, compute_profile_aux_geo_markets
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
-    update_session_utm_with_client_data, compute_data_from_user_agent
+    update_session_utm_with_client_data
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 from tracardi.service.tracking.session_loading import load_or_create_session
 from tracardi.service.tracking.system_events import add_system_events
@@ -111,8 +111,8 @@ async def _compute(source, profile, session, tracker_payload, console_log):
 async def lock_and_compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
                        source: EventSource,
-                       console_log: ConsoleLog) -> Optional[Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
-Optional[FieldTimestampMonitor]]]:
+                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
+Optional[FieldTimestampMonitor]]:
     # We need profile and session before async
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
@@ -155,8 +155,8 @@ Optional[FieldTimestampMonitor]]]:
         session = update_session_utm_with_client_data(tracker_payload, session)
 
         # If agent is a bot stop
-        if session.app.bot:
-            return None
+        if session.app.bot and not tracardi.allow_bot_traffic:
+            raise PermissionError(f"Traffic from bot is not allowed.")
 
     # We need profile ID to lock.
     _redis = RedisClient()

@@ -2,6 +2,7 @@ from typing import Tuple, Optional
 
 from pydantic import ValidationError
 from user_agents import parse
+from user_agents.parsers import UserAgent
 
 from tracardi.service.tracking.utils.languages import get_spoken_languages
 from tracardi.domain.event_source import EventSource
@@ -16,7 +17,7 @@ from tracardi.service.tracker_config import TrackerConfig
 logger = get_logger(__name__)
 
 
-def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:
+def _get_user_agent_string(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:
     try:
         return session.context['browser']['local']['browser']['userAgent']
     except Exception:
@@ -25,12 +26,22 @@ def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Option
         except Exception:
             return None
 
-def compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
-    ua_string = _get_user_agent(session, tracker_payload)
-    if ua_string:
-        try:
+def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[UserAgent]:
+    _user_agent = tracker_payload.get_user_agent()
 
-            user_agent = parse(ua_string)
+    if _user_agent is not None:
+        return _user_agent
+
+    _user_agent_string = _get_user_agent_string(session, tracker_payload)
+    if _user_agent_string:
+        return parse(_user_agent_string)
+
+    return None
+
+def _compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
+    user_agent = _get_user_agent(session, tracker_payload)
+    if user_agent:
+        try:
 
             session.os.version = user_agent.os.version_string
             session.os.name = user_agent.os.family
@@ -141,41 +152,13 @@ def _compute_screen_size(session: Session, tracker_payload: TrackerPayload):
     return session
 
 
-# def _compute_profile_geo(profile, session, tracker_payload):
-#     if 'language' in session.context:
-#         if profile:
-#             profile.data.pii.language.spoken = session.context['language']
-#
-#     if profile and 'geo' not in profile.aux:
-#         profile.aux['geo'] = {}
-#
-#     # Aux markets
-#
-#     markets = []
-#     if 'language_codes' in session.context:
-#         for lang_code in session.context['language_codes']:
-#             if lang_code in language_countries_dict:
-#                 markets += language_countries_dict[lang_code]
-#
-#     if markets:
-#         profile.aux['geo']['markets'] = markets
-#
-#     # Continent
-#
-#     continent = get_continent(tracker_payload)
-#     if continent:
-#         profile.aux['geo']['continent'] = continent
-#
-#     return profile
-
-
 def compute_session(session: Session,
                     tracker_payload: TrackerPayload,
                     tracker_config: TrackerConfig
-                    ) -> Tuple[Session, Profile]:
+                    ) -> Session:
 
     # Compute the User Agent data
-    session = compute_data_from_user_agent(session, tracker_payload)
+    session = _compute_data_from_user_agent(session, tracker_payload)
 
     # Compute UTM
     session = _compute_utm(session, tracker_payload.context)
