@@ -1,6 +1,9 @@
 from typing import List, Tuple, Optional
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
+from tracardi.service.storage.redis.collections import Collection
+from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
 from tracardi.service.console_log import ConsoleLog
@@ -19,13 +22,14 @@ from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.utils.getters import get_entity_id
 
 if License.has_service(LICENSE) :
     from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
 logger = get_logger(__name__)
 cache = CacheManager()
-
+_redis = RedisClient()
 
 async def trigger_workflows(profile: Profile,
                             session: Session,
@@ -158,31 +162,36 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
     # We save manually only when async processing is disabled.
     # Otherwise, flusher worker saves in-memory profile and session automatically
 
-    if store_in_db:
+    # Dispatch outbound events. MUST BE LOCKED as they can change profile
 
-        profile_and_session_result = await storage.save_profile_and_session(
-            session,
-            profile
-        )
+    profile_key = Lock.get_key(Collection.lock_tracker, "profile", get_entity_id(profile))
+    profile_lock = Lock(_redis, profile_key, default_lock_ttl=5)
+    async with async_mutex(profile_lock, name="destination-dispatcher"):
 
-    # Dispatch outbound events
+        if tracardi.enable_event_destinations:
+            load_destination_task = cache.event_destination
+            await event_destination_dispatch(
+                load_destination_task,
+                profile,
+                session,
+                events,
+                tracker_payload.debug
+            )
 
-    if tracardi.enable_event_destinations:
-        load_destination_task = cache.event_destination
-        await event_destination_dispatch(
-            load_destination_task,
+        # Dispatch outbound profile
+
+        await profile_dispatcher.dispatch(
             profile,
             session,
-            events,
-            tracker_payload.debug
+            events
         )
 
-    # Dispatch outbound profile
+        # Storage must be here as destination can update profile metadata.system.integrations
 
-    await profile_dispatcher.dispatch(
-        profile,
-        session,
-        events
-    )
+        if store_in_db:
+            profile_and_session_result = await storage.save_profile_and_session(
+                session,
+                profile
+            )
 
     return profile, session, events, ux, response

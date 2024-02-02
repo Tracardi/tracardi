@@ -17,3 +17,7 @@ class DestinationInterface:
 
     async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
         pass
+
+
+    def _get_credentials(self):
+        return self.resource.credentials.test if self.debug else self.resource.credentials.production
