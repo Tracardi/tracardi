@@ -13,7 +13,8 @@ class HubSpotConnector(DestinationInterface):
 
     @staticmethod
     def _get_hash_of_values(data):
-        return sha1(f"{data.get('firstname', 'none')}-{data.get('lastname','none')}-{data.get('email','none')}".encode()).hexdigest()
+        return sha1(
+            f"{data.get('firstname', 'none')}-{data.get('lastname', 'none')}-{data.get('email', 'none')}".encode()).hexdigest()
 
     async def _dispatch(self, data, profile: Profile):
 
