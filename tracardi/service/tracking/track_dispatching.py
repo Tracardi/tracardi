@@ -178,6 +178,14 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
                 tracker_payload.debug
             )
 
+        # Storage must be here as destination may need to load profile
+
+        if store_in_db:
+            profile_and_session_result = await storage.save_profile_and_session(
+                session,
+                profile
+            )
+
         # Dispatch outbound profile
 
         await profile_dispatcher.dispatch(
@@ -185,13 +193,5 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             session,
             events
         )
-
-        # Storage must be here as destination can update profile metadata.system.integrations
-
-        if store_in_db:
-            profile_and_session_result = await storage.save_profile_and_session(
-                session,
-                profile
-            )
 
     return profile, session, events, ux, response
