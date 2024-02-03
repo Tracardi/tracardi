@@ -20,6 +20,8 @@ class HubSpotConnector(DestinationInterface):
 
     async def _dispatch(self, data, profile: Profile):
 
+        logger.info(f"Destination for {profile.id}.")
+
         credentials = self._get_credentials()
         client = HubSpotClient(credentials.get('token', None))
 
