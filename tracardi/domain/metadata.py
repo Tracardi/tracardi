@@ -10,18 +10,16 @@ from tracardi.domain.time import Time, ProfileTime
 class Metadata(BaseModel):
     time: Time
 
-class ProfileSystemIntegrations(Entity):
-    data: Optional[dict] = {}
 
 class ProfileSystemMetadata(BaseModel):
-    integrations: Optional[Dict[str, ProfileSystemIntegrations]] = {}
+    integrations: Optional[dict] = {}
     aux: Optional[dict] = {}
 
     def has_merging_data(self) -> bool:
-        return 'auto_merge' in self.aux and isinstance(self.aux['auto_merge'], list) and len(self.aux['auto_merge'])>0
+        return 'auto_merge' in self.aux and isinstance(self.aux['auto_merge'], list) and len(self.aux['auto_merge']) > 0
 
     def remove_merging_data(self):
-        del(self.aux['auto_merge'])
+        del (self.aux['auto_merge'])
 
     def set_auto_merge_fields(self, auto_merge_ids):
         if 'auto_merge' not in self.aux or not isinstance(self.aux['auto_merge'], list):
@@ -32,22 +30,6 @@ class ProfileSystemMetadata(BaseModel):
     def get_auto_merge_fields(self):
         return self.aux.get('auto_merge', [])
 
-    def has_integration(self, system: str) -> bool:
-        return self.integrations and system in self.integrations and isinstance(self.integrations[system], ProfileSystemIntegrations)
-
-    def get_integration(self, system: str) -> ProfileSystemIntegrations:
-        return self.integrations[system]
-
-    def set_integration(self, system: str, id: str, data:Optional [dict]=None):
-        if data is None:
-            data = {}
-
-        if system not in self.integrations:
-            self.integrations[system] = ProfileSystemIntegrations(id = id, data=data)
-        else:
-            self.integrations[system].id = id
-            if data:
-                self.integrations[system].data = data
 
 class ProfileMetadata(BaseModel):
     time: ProfileTime
