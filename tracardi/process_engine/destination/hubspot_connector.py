@@ -5,7 +5,9 @@ from ..action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientEx
 from ...domain.event import Event
 from ...domain.profile import Profile
 from ...domain.session import Session
+from ...exceptions.log_handler import get_logger
 
+logger= get_logger(__name__)
 
 class HubSpotConnector(DestinationInterface):
 
@@ -41,15 +43,20 @@ class HubSpotConnector(DestinationInterface):
 
                 # If data changed
                 if old_hash != new_hash:
-                    await client.update_contact(integration.id, data)
+                    response = await client.update_contact(integration.id, data)
 
                     # Update hash
                     profile.metadata.system.set_integration(self.name, integration.id, {"hash": new_hash})
                     profile.mark_for_update()
 
+                    logger.info(f"Updating in hubspot with data {data}; response {response}")
+
             else:
                 try:
                     response = await client.add_contact(data)
+
+                    logger.info(f"Adding contact to hubspot with data {data}; response {response}")
+
                     if 'id' in response:
                         profile.metadata.system.set_integration(self.name, response['id'], {"hash": new_hash})
                         profile.mark_for_update()
