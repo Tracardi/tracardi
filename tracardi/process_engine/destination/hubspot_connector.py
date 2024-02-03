@@ -7,7 +7,7 @@ from ...domain.profile import Profile
 from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
 
-logger = get_logger(__name__)
+logger= get_logger(__name__)
 
 class HubSpotConnector(DestinationInterface):
 
@@ -54,7 +54,9 @@ class HubSpotConnector(DestinationInterface):
             else:
                 try:
                     response = await client.add_contact(data)
+
                     logger.info(f"Adding contact to hubspot with data {data}; response {response}")
+
                     if 'id' in response:
                         profile.metadata.system.set_integration(self.name, response['id'], {"hash": new_hash})
                         profile.mark_for_update()
