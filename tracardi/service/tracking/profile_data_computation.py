@@ -260,8 +260,9 @@ async def map_event_to_profile(
     if compute_schema:
         compute_schema = EventCompute(**compute_schema)
 
-        # Run only on change but no change
+        # Run only on change but there was no change
         if compute_schema.run_on_profile_change() and profile_updated_flag is False:
+            # Terminate earlier
             return flat_profile, profile_changes
 
         # Compute values
@@ -277,9 +278,10 @@ async def map_event_to_profile(
             # Set property if defined
             if isinstance(profile_property, str):
                 profile_changes[profile_property] = computation_result
+                profile_updated_flag = True
 
-        flat_profile['operation.update'] = True
-
+    if profile_updated_flag is True:
+        flat_profile.mark_for_update()
 
     return flat_profile, profile_changes
 

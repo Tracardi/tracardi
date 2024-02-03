@@ -416,3 +416,8 @@ class FlatProfile(Dotty):
     def reset_interest(self, interest, value=0):
         interest_key = f'interests.{interest}'
         self[interest_key] = value
+
+
+    def mark_for_update(self):
+        self['operation.update'] = True
+        self['metadata.time.update'] = now_in_utc()
