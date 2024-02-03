@@ -224,12 +224,11 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
 
     async def _keep_locked_for(self) -> 'Lock':
 
-        if self._lock.is_locked():
-            lock_time = self._get_lock_time()
-
         while True:
             _now = time.time()
             if self._lock.is_locked():  # Key exists, when expires it will be unlocked
+
+                lock_time = self._get_lock_time()
 
                 # Check if there is a time to break the lock
                 _broke, _time_to_break = self._check_if_it_is_time(lock_time, grace_period=self._break_after_time)
