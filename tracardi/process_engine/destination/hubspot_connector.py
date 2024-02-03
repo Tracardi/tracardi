@@ -32,40 +32,42 @@ class HubSpotConnector(DestinationInterface):
 
         # If there is any data to send
 
-        if data:
+        if not data:
+            logger.info(f"No update in hubspot data is empty for profile {profile.id}.")
+            return
 
-            new_hash = self._get_hash_of_values(data)
+        new_hash = self._get_hash_of_values(data)
 
-            if profile.metadata.system.has_integration(self.name):
-                integration = profile.metadata.system.get_integration(self.name)
+        if profile.metadata.system.has_integration(self.name):
+            integration = profile.metadata.system.get_integration(self.name)
 
-                old_hash = integration.data.get('hash', None)
+            old_hash = integration.data.get('hash', None)
 
-                # If data changed
-                if old_hash != new_hash:
-                    response = await client.update_contact(integration.id, data)
+            # If data changed
+            if old_hash != new_hash:
+                response = await client.update_contact(integration.id, data)
 
-                    # Update hash
-                    profile.metadata.system.set_integration(self.name, integration.id, {"hash": new_hash})
+                # Update hash
+                profile.metadata.system.set_integration(self.name, integration.id, {"hash": new_hash})
+                profile.mark_for_update()
+
+                logger.info(f"Updating in hubspot with data {data}; response {response}")
+
+        else:
+            try:
+                response = await client.add_contact(data)
+
+                logger.info(f"Adding contact to hubspot with data {data}; response {response}")
+
+                if 'id' in response:
+                    profile.metadata.system.set_integration(self.name, response['id'], {"hash": new_hash})
                     profile.mark_for_update()
-
-                    logger.info(f"Updating in hubspot with data {data}; response {response}")
-
-            else:
-                try:
-                    response = await client.add_contact(data)
-
-                    logger.info(f"Adding contact to hubspot with data {data}; response {response}")
-
-                    if 'id' in response:
-                        profile.metadata.system.set_integration(self.name, response['id'], {"hash": new_hash})
+            except HubSpotClientException:
+                if 'email' in data:
+                    ids = await client.get_contact_ids_by_email(data["email"])
+                    if len(ids) > 0:
+                        profile.metadata.system.set_integration(self.name, ids[0], {"hash": new_hash})
                         profile.mark_for_update()
-                except HubSpotClientException:
-                    if 'email' in data:
-                        ids = await client.get_contact_ids_by_email(data["email"])
-                        if len(ids) > 0:
-                            profile.metadata.system.set_integration(self.name, ids[0], {"hash": new_hash})
-                            profile.mark_for_update()
     async def dispatch_profile(self, data, profile: Profile, session: Session):
         await self._dispatch(data, profile)
 
