@@ -43,7 +43,7 @@ class GetIntegrationIdAction(ActionRunner):
 
             if result is not None:
                 if self.config.get_ids_only:
-                    result = [item.id for item in result]
+                    result = [item.traits.get('id', None) for item in result]
                 else:
                     result = list(result)
                 return Result(port="payload", value={"result": result})
