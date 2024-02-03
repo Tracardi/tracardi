@@ -6,10 +6,10 @@ from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
 from ...service.integration_id import load_integration_id, save_integration_id
 
-logger= get_logger(__name__)
+logger = get_logger(__name__)
+
 
 class HubSpotConnector(DestinationInterface):
-
     name = 'hubspot'
 
     async def _dispatch(self, data, profile: Profile):  # Data comes from mapping
@@ -35,14 +35,27 @@ class HubSpotConnector(DestinationInterface):
         integration_ids = await load_integration_id(profile.id, self.name)
 
         if integration_ids:
+
+            logger.info(f"Found hubspot integration data {integration_ids}")
+
             # Get first
             integration = integration_ids[0]
 
-            # If data changed
-            response = await client.update_contact(integration.id, payload)
-            print(await save_integration_id(profile.id, self.name, integration.id, {}))
+            remotes_id = integration.get_first_id()
 
-            logger.info(f"Updating in hubspot with data {payload}; response {response}")
+            if remotes_id is None:
+                response = await client.add_contact(payload)
+                logger.info(f"Adding contact to hubspot with data {payload}; response {response}")
+                if 'id' in response:
+                    print(await save_integration_id(profile.id, self.name, response['id'], {}))
+            else:
+                # If data changed
+                try:
+                    response = await client.update_contact(integration.get_first_id(), payload)
+                    logger.info(f"Updating in hubspot with data {payload}; response {response}")
+                except HubSpotClientException as e:
+                    logger.warning(str(e))
+                print(await save_integration_id(profile.id, self.name, integration.id, {}))
 
         else:
             try:
@@ -57,6 +70,7 @@ class HubSpotConnector(DestinationInterface):
                     ids = await client.get_contact_ids_by_email(payload["email"])
                     if len(ids) > 0:
                         await save_integration_id(profile.id, self.name, ids[0], {})
+
     async def dispatch_profile(self, data, profile: Profile, session: Session):
         await self._dispatch(data, profile)
 
