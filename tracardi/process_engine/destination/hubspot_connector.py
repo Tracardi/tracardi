@@ -1,11 +1,10 @@
-from hashlib import sha1
-
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
 from ...domain.event import Event
 from ...domain.profile import Profile
 from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
+from ...service.integration_id import load_integration_id, save_integration_id
 
 logger= get_logger(__name__)
 
@@ -13,14 +12,7 @@ class HubSpotConnector(DestinationInterface):
 
     name = 'hubspot'
 
-    @staticmethod
-    def _get_hash_of_values(data):
-        return sha1(
-            f"{data.get('firstname', 'none')}-{data.get('lastname', 'none')}-{data.get('email', 'none')}".encode()).hexdigest()
-
     async def _dispatch(self, data, profile: Profile):  # Data comes from mapping
-
-        logger.info(f"Destination for {profile.id}.")
 
         credentials = self._get_credentials()
         client = HubSpotClient(credentials.get('token', None))
@@ -40,22 +32,17 @@ class HubSpotConnector(DestinationInterface):
             logger.info(f"No update in hubspot data is empty for profile {profile.id}.")
             return
 
-        new_hash = self._get_hash_of_values(payload)
+        integration_ids = await load_integration_id(profile.id, self.name)
 
-        if profile.metadata.system.has_integration(self.name):
-            integration = profile.metadata.system.get_integration(self.name)
-
-            old_hash = integration.data.get('hash', None)
+        if integration_ids:
+            # Get first
+            integration = integration_ids[0]
 
             # If data changed
-            if old_hash != new_hash:
-                response = await client.update_contact(integration.id, payload)
+            response = await client.update_contact(integration.id, payload)
+            print(await save_integration_id(profile.id, self.name, integration.id, {}))
 
-                # Update hash
-                profile.metadata.system.set_integration(self.name, integration.id, {"hash": new_hash})
-                profile.mark_for_update()
-
-                logger.info(f"Updating in hubspot with data {payload}; response {response}")
+            logger.info(f"Updating in hubspot with data {payload}; response {response}")
 
         else:
             try:
@@ -64,14 +51,12 @@ class HubSpotConnector(DestinationInterface):
                 logger.info(f"Adding contact to hubspot with data {payload}; response {response}")
 
                 if 'id' in response:
-                    profile.metadata.system.set_integration(self.name, response['id'], {"hash": new_hash})
-                    profile.mark_for_update()
+                    print(await save_integration_id(profile.id, self.name, response['id'], {}))
             except HubSpotClientException:
                 if 'email' in payload:
                     ids = await client.get_contact_ids_by_email(payload["email"])
                     if len(ids) > 0:
-                        profile.metadata.system.set_integration(self.name, ids[0], {"hash": new_hash})
-                        profile.mark_for_update()
+                        await save_integration_id(profile.id, self.name, ids[0], {})
     async def dispatch_profile(self, data, profile: Profile, session: Session):
         await self._dispatch(data, profile)
 
