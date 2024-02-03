@@ -187,18 +187,18 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
                 tracker_payload.debug
             )
 
-        # Dispatch outbound profile
-
-        must_dispatch = profile and tracardi.enable_profile_destinations and profile.has_not_saved_changes()
-        if must_dispatch:
-            await sync_destination(profile, session, console_log)
-
-        # Storage must be here as destination can update profile metadata.system.integrations
+        # Storage must be here as destination may need to load profile
 
         if store_in_db:
             profile_and_session_result = await storage.save_profile_and_session(
                 session,
                 profile
             )
+
+        # Dispatch outbound profile
+
+        must_dispatch = profile and tracardi.enable_profile_destinations and profile.has_not_saved_changes()
+        if must_dispatch:
+            await sync_destination(profile, session, console_log)
 
     return profile, session, events, ux, response

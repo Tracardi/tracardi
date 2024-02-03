@@ -1,3 +1,4 @@
+from tracardi.service.integration_id import save_integration_id
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -59,9 +60,7 @@ class HubSpotContactUpdater(ActionRunner):
 
             if 'id' in result:
                 contact_id = result['id']
-                if not self.profile.metadata.system.has_integration('hubspot'):
-                    self.profile.metadata.system.set_integration('hubspot', contact_id)
-                    self.profile.mark_for_update()
+                await save_integration_id(self.profile.id, 'hubspot', contact_id)
 
             return Result(port="response", value=result)
 

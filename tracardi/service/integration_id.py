@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from tracardi.domain.entity import Entity
 from tracardi.domain.entity_record import EntityRecord, EntityRecordMetadata, EntityRecordTime
@@ -7,12 +7,16 @@ from tracardi.service.storage.driver.elastic import entity as entity_db
 from tracardi.service.utils.date import now_in_utc
 
 
-async def load_integration_id(profile_id, system_name):
+async def commit_integration_ids():
+    await entity_db.refresh()
+
+
+async def load_integration_id(profile_id, system_name) -> List[RemoteSystemIntegrationId]:
     result = await entity_db.load_by_values([('type', system_name), ('profile.id', profile_id)])
     return result.to_domain_objects(RemoteSystemIntegrationId)
 
-async def save_integration_id(profile_id, system_name, remote_id, data: Optional[dict] = None):
 
+async def save_integration_id(profile_id, system_name, remote_id, data: Optional[dict] = None):
     if data is None:
         data = {}
 
