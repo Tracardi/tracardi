@@ -36,4 +36,4 @@ async def save_integration_id(profile_id, system_name, remote_id, data: Optional
         }
     )
 
-    await entity_db.upsert(record)
+    return await entity_db.upsert(record)
