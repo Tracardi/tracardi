@@ -75,6 +75,12 @@ class HubSpotConnector(DestinationInterface):
         #     payload["zip"] = profile.data.contact.address.postcode
         # if profile.data.job.position:
         #     payload["jobtitle"] = profile.data.job.position
+        # if profile.data.contact.phone.whatsapp:
+        #     payload['hs_whatsapp_phone_number'] = profile.data.contact.phone.whatsapp
+        # if profile.data.contact.phone.mobile:
+        #     payload['mobilephone'] = profile.data.contact.phone.mobile
+        # if profile.data.media.social.twitter:
+        #     payload['twitterhandle'] = profile.data.media.social.twitter
 
         if config_data:
             payload.update(config_data)
