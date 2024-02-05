@@ -12,9 +12,10 @@ async def delete_profile(id: str, index: str):
     return result
 
 
-async def save_profile(profiles: Union[Profile, List[Profile], Set[Profile]]):
+async def save_profile(profiles: Union[Profile, List[Profile], Set[Profile]], refresh: bool=True):
     result = await profile_db.save(profiles)
-    await profile_db.refresh()
+    if refresh:
+        await profile_db.refresh()
 
     return result
 
