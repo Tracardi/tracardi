@@ -162,36 +162,30 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
     # We save manually only when async processing is disabled.
     # Otherwise, flusher worker saves in-memory profile and session automatically
 
-    # Dispatch outbound events. MUST BE LOCKED as they can change profile
-
-    profile_key = Lock.get_key(Collection.lock_tracker, "profile", get_entity_id(profile))
-    profile_lock = Lock(_redis, profile_key, default_lock_ttl=5)
-    async with async_mutex(profile_lock, name="destination-dispatcher"):
-
-        if tracardi.enable_event_destinations:
-            load_destination_task = cache.event_destination
-            await event_destination_dispatch(
-                load_destination_task,
-                profile,
-                session,
-                events,
-                tracker_payload.debug
-            )
+    if tracardi.enable_event_destinations:
+        load_destination_task = cache.event_destination
+        await event_destination_dispatch(
+            load_destination_task,
+            profile,
+            session,
+            events,
+            tracker_payload.debug
+        )
 
         # Storage must be here as destination may need to load profile
 
-        if store_in_db:
-            profile_and_session_result = await storage.save_profile_and_session(
-                session,
-                profile
-            )
+    if store_in_db:
+        profile_and_session_result = await storage.save_profile_and_session(
+            session,
+            profile
+        )
 
         # Dispatch outbound profile
 
-        await profile_dispatcher.dispatch(
-            profile,
-            session,
-            events
-        )
+    await profile_dispatcher.dispatch(
+        profile,
+        session,
+        events
+    )
 
     return profile, session, events, ux, response
