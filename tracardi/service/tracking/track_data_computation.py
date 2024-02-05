@@ -31,7 +31,11 @@ if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
 
-async def _compute(source, profile, session, tracker_payload, console_log):
+async def _compute(source,
+                   profile: Optional[Profile],
+                   session: Optional[Session],
+                   tracker_payload: TrackerPayload,
+                   console_log: ConsoleLog):
 
     if profile is not None:
 
@@ -94,7 +98,7 @@ async def _compute(source, profile, session, tracker_payload, console_log):
         tracker_payload.metadata,
         source,
         session,
-        profile,
+        profile, # Profile gets converted to FlatProfile
         tracker_payload.profile_less,
         console_log,
         tracker_payload
@@ -127,37 +131,6 @@ Optional[FieldTimestampMonitor]]:
         console_log
     )
 
-    # ------------------------------------
-    # Session computation
-
-    # Is new session
-    if session:
-        if session.is_new():
-            # Compute session. Session is filled only when new
-            session = compute_session(
-                session,
-                tracker_payload,
-                tracker_config
-            )
-    if session:
-
-        # Is new session
-        if session.is_new():
-            # Compute session. Session is filled only when new
-            session = compute_session(
-                session,
-                tracker_payload,
-                tracker_config
-            )
-
-        # Update missing data
-        session = await update_device_geo(tracker_payload, session)
-        session = update_session_utm_with_client_data(tracker_payload, session)
-
-        # If agent is a bot stop
-        if session.app.bot and not tracardi.allow_bot_traffic:
-            raise PermissionError(f"Traffic from bot is not allowed.")
-
     # We need profile ID to lock.
     _redis = RedisClient()
     profile_key = Lock.get_key(Collection.lock_tracker, "profile", get_entity_id(profile))
@@ -166,6 +139,28 @@ Optional[FieldTimestampMonitor]]:
     # If not profile ID then no locking
 
     async with async_mutex(profile_lock, name='lock_and_compute_data_profile'):
+
+        # ------------------------------------
+        # Session computation
+
+        if session:
+
+            # Is new session
+            if session.is_new():
+                # Compute session. Session is filled only when new
+                session = compute_session(
+                    session,
+                    tracker_payload,
+                    tracker_config
+                )
+
+            # Update missing data
+            session = await update_device_geo(tracker_payload, session)
+            session = update_session_utm_with_client_data(tracker_payload, session)
+
+            # If agent is a bot stop
+            if session.app.bot and not tracardi.allow_bot_traffic:
+                raise PermissionError(f"Traffic from bot is not allowed.")
 
         profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(
             source, profile, session,
