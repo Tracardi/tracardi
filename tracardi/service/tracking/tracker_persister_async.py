@@ -75,31 +75,31 @@ def _get_savable_session(session: Optional[Session], profile: Profile) -> Option
 
     return None
 
-
-async def _save_profiles(self, profiles: List[Profile], _save_profile_to_db: bool):
-    if _save_profile_to_db:
-
-        _profiles_to_save = []
-
-        for profile in profiles:
-
-            if profile:
-                _profiles_to_save.append(profile)
-
-        results = []
-        try:
-            result = await save_profile(_profiles_to_save)
-            if result.has_errors():
-                for id in result.ids:
-                    self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
-            results.append(result)
-
-        except StorageException as e:
-            message = "Could not save profile. Error: {}".format(str(e))
-            raise FieldTypeConflictException(message, rows=e.details)
-
-        return results
-    return None
+#
+# async def _save_profiles(self, profiles: List[Profile], _save_profile_to_db: bool):
+#     if _save_profile_to_db:
+#
+#         _profiles_to_save = []
+#
+#         for profile in profiles:
+#
+#             if profile:
+#                 _profiles_to_save.append(profile)
+#
+#         results = []
+#         try:
+#             result = await save_profile(_profiles_to_save)
+#             if result.has_errors():
+#                 for id in result.ids:
+#                     self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
+#             results.append(result)
+#
+#         except StorageException as e:
+#             message = "Could not save profile. Error: {}".format(str(e))
+#             raise FieldTypeConflictException(message, rows=e.details)
+#
+#         return results
+#     return None
 
 
 class TrackingPersisterAsync:

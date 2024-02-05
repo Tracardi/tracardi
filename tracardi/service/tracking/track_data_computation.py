@@ -124,6 +124,8 @@ Optional[FieldTimestampMonitor]]:
     # -----------------------------------
     # Profile Loading
 
+    #TODO It can deduplicate profile so it should be in mutex
+
     profile, session = await load_profile_and_session(
         session,
         tracker_config,
