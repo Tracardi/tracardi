@@ -55,7 +55,7 @@ class HubSpotConnector(DestinationInterface):
                 print(await save_integration_id(profile_id, self.name, hubspot_id, {}))
 
     @staticmethod
-    def _prepare_payload(profile):
+    def _prepare_payload(profile, config_data):
         payload = {}
         if profile.data.pii.firstname:
             payload["firstname"] = profile.data.pii.firstname
@@ -63,12 +63,33 @@ class HubSpotConnector(DestinationInterface):
             payload["lastname"] = profile.data.pii.lastname
         if profile.data.contact.email.main:
             payload["email"] = profile.data.contact.email.main
+        if profile.data.contact.phone.main:
+            payload["phone"] = profile.data.contact.phone.main
+        # if profile.data.job.company:
+        #     payload["company"] = profile.data.job.company
+        # if profile.data.contact.address.town:
+        #     payload["city"] = profile.data.contact.address.town
+        # if profile.data.contact.address.county:
+        #     payload["state"] = profile.data.contact.address.county
+        # if profile.data.contact.address.postcode:
+        #     payload["zip"] = profile.data.contact.address.postcode
+        # if profile.data.job.position:
+        #     payload["jobtitle"] = profile.data.job.position
+        # if profile.data.contact.phone.whatsapp:
+        #     payload['hs_whatsapp_phone_number'] = profile.data.contact.phone.whatsapp
+        # if profile.data.contact.phone.mobile:
+        #     payload['mobilephone'] = profile.data.contact.phone.mobile
+        # if profile.data.media.social.twitter:
+        #     payload['twitterhandle'] = profile.data.media.social.twitter
+
+        if config_data:
+            payload.update(config_data)
 
         return payload
 
-    async def _dispatch(self, data, profile: Profile):  # Data comes from mapping
+    async def _dispatch(self, data: dict, profile: Profile):  # Data comes from mapping
 
-        payload = self._prepare_payload(profile)
+        payload = self._prepare_payload(profile, data)
 
         # If there is any data to send
         logger.info(f"Prepared data payload {payload}")
@@ -97,8 +118,8 @@ class HubSpotConnector(DestinationInterface):
             # Try to update
             await self._update_contact(payload, profile.id, hubspot_id)
 
-    async def dispatch_profile(self, data, profile: Profile, session: Session):
+    async def dispatch_profile(self, data: dict, profile: Profile, session: Session):
         await self._dispatch(data, profile)
 
-    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
+    async def dispatch_event(self, data: dict, profile: Profile, session: Session, event: Event):
         await self._dispatch(data, profile)

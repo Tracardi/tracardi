@@ -3,7 +3,7 @@ from _pulsar import InitialPosition
 
 from pulsar import Client, ConsumerType
 
-from com_tracardi.service.tracking.queue.pulsar_topics import EVENT_TOPIC
+from com_tracardi.service.tracking.queue.pulsar_topics import pulsar_topics
 from tracardi.domain.entity import Entity
 
 # Pulsar service URL
@@ -13,9 +13,10 @@ service_url = 'pulsar://localhost:6650'
 client = Client(service_url)
 
 # Create a consumer instance
-consumer = client.subscribe(EVENT_TOPIC, 'my-subscription',
+consumer = client.subscribe(pulsar_topics.event_topic,
+                            'my-subscription',
                             consumer_type=ConsumerType.Shared,
-initial_position=InitialPosition.Earliest
+                            initial_position=InitialPosition.Earliest
                             )
 
 try:

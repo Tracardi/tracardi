@@ -398,9 +398,7 @@ def get_resource_types() -> List[ResourceSettings]:
             manual="hubspot_resource",
             destination=DestinationData(
                 package="tracardi.process_engine.destination.hubspot_connector.HubSpotConnector",
-                init={
-                    "contact_id": "<path-to-hubspot-contact-id>"
-                },
+                init={},
                 pro=False
             )
         ),
