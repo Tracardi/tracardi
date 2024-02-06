@@ -58,14 +58,13 @@ async def wait_for_connection(no_of_tries=10):
 
         except elasticsearch.exceptions.ConnectionError as e:
             no_of_tries -= 1
-            logger.error(
+            logger.warning(
                 f"Could not connect to elasticsearch at {elastic.host}. Number of tries left: {no_of_tries}. "
-                f"Waiting 5s before retry.")
+                f"Waiting 5s before retry. Error details: {str(e)}")
             if _is_elastic_on_localhost():
                 logger.warning("You are trying to connect to 127.0.0.1. If this instance is running inside docker "
                                "then you can not use localhost as elasticsearch is probably outside the container. Use "
                                "external IP that docker can connect to.")
-            logger.error(f"Error details: {str(e)}")
             await asyncio.sleep(5)
 
         # todo check if this is needed when we make a single thread startup.

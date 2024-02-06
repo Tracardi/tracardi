@@ -18,11 +18,7 @@ def get_profile_key_namespace(profile_id, context):
     return f"{Collection.profile}{context.context_abrv()}:{get_cache_prefix(profile_id[0:2])}:"
 
 
-def delete_profile_cache(profile_id: str, context: Optional[Context] = None):
-
-    if context is None:
-        context = get_context()
-
+def delete_profile_cache(profile_id: str, context: Context):
     key_namespace = get_profile_key_namespace(profile_id, context)
     redis_cache.delete(
         profile_id,
@@ -30,11 +26,7 @@ def delete_profile_cache(profile_id: str, context: Optional[Context] = None):
     )
 
 
-def load_profile_cache(profile_id: str, context: Optional[Context] = None) -> Optional[Profile]:
-
-    if context is None:
-        context = get_context()
-
+def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
     key_namespace = get_profile_key_namespace(profile_id, context)
 
     if not redis_cache.has(profile_id, key_namespace):
@@ -86,15 +78,14 @@ def _save_single_profile(profile: Profile, context: Context):
         logger.error(f"Saving to cache failed: Detail: {str(e)}")
 
 
-def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]], context: Optional[Context] = None):
-    if context is None:
-        context = get_context()
+def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]], context: Context):
 
-    if isinstance(profile, Profile):
-        _save_single_profile(profile, context)
-    elif isinstance(profile, (list, set)):
-        for _profile in profile:
-            _save_single_profile(_profile, context)
-    else:
-        raise ValueError("Incorrect profile value.")
+    if profile:
 
+        if isinstance(profile, Profile):
+            _save_single_profile(profile, context)
+        elif isinstance(profile, (list, set)):
+            for _profile in profile:
+                _save_single_profile(_profile, context)
+        else:
+            raise ValueError(f"Incorrect profile value. Expected Profile or list of Profiles. Got {type(profile)}")

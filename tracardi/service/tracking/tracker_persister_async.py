@@ -83,37 +83,21 @@ class TrackingPersisterAsync:
     async def _save_profile(self, profile: Profile):
         if profile:
             if profile.has_not_saved_changes():
-
-                results = []
                 try:
-                    result = await save_profile(profile, refresh=True)
-
-                    if result.has_errors():
-                        for id in result.ids:
-                            self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
-                    results.append(result)
+                    await save_profile(profile, refresh=True)
 
                 except StorageException as e:
                     message = "Could not save profile. Error: {}".format(str(e))
                     raise FieldTypeConflictException(message, rows=e.details)
-
-                return results
         return None
 
-    async def _save_session(self, session: Session, profile: Profile):
+    async def _save_session(self, session: Session, profile: Profile) -> None:
         try:
             if session:
                 session = _get_savable_session(session, profile)
 
                 if session and session.has_not_saved_changes():
-
-                    result = await save_session(session, refresh=True)
-
-                    if result.has_errors():
-                        for id in result.ids:
-                            self.session_errors[id] = f"Error while storing session id: {id}. Details: {result.errors}"
-
-                    return result
+                    await save_session(session, refresh=True)
 
             return None
 

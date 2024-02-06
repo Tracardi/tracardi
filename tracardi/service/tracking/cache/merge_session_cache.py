@@ -19,11 +19,11 @@ async def merge_with_cache_and_save_session(session: Session, context: Context):
 
     session = merge_sessions(base_session=_cache_session, session=session)
 
-    return await save_session(session, context)
+    await save_session(session, context)
 
 
 async def lock_merge_with_cache_and_save_session(session: Session, context: Context, lock_name=None):
     session_key = Lock.get_key(Collection.lock_tracker, "session", get_entity_id(session))
     session_lock = Lock(_redis, session_key, default_lock_ttl=3)
     async with async_mutex(session_lock, name=lock_name):
-        return await merge_with_cache_and_save_session(session, context)
+        await merge_with_cache_and_save_session(session, context)

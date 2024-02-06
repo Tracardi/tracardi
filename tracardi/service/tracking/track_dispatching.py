@@ -171,7 +171,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
         # Storage must be here as destination may need to load profile
 
     if store_in_db:
-        profile_and_session_result = await storage.save_profile_and_session(
+        await storage.save_profile_and_session(
             session,
             profile
         )
