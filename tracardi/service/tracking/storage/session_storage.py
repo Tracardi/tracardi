@@ -40,7 +40,7 @@ async def save_session(sessions: Union[Session, List[Session], Set[Session]],
     if License.has_license():
         session_dispatch(sessions, context)
     else:
-        await session_db.save(sessions)
+        print(await session_db.save(sessions))
         if refresh:
             await session_db.refresh()
 
