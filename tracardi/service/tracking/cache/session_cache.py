@@ -3,13 +3,10 @@ from tracardi.context import get_context, Context
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
-from tracardi.service.merging.session_merger import merge_sessions
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
-from tracardi.service.tracking.locking import Lock, async_mutex
-from tracardi.service.utils.getters import get_entity_id
 
 redis_cache = RedisCache(ttl=None)
 _redis = RedisClient()
@@ -36,9 +33,11 @@ def load_session_cache(session_id: str, context: Context):
     return session
 
 
-def save_session_cache(session: Optional[Session], session_changes: Optional[FieldTimestampMonitor] = None):
+def save_session_cache(session: Optional[Session], context: Optional[Context] = None):
     if session:
-        context = get_context()
+
+        if context is None:
+            context = get_context()
 
         index = session.get_meta_data()
 
@@ -64,25 +63,3 @@ def save_session_cache(session: Optional[Session], session_changes: Optional[Fie
         except ValueError as e:
             print(e)
 
-
-def merge_with_cache_session(session: Session, context: Context) -> Session:
-    # Loads profile form cache and merges it with the current profile
-
-    _cache_session = load_session_cache(session.id, context)
-
-    if not _cache_session:
-        return session
-
-    return merge_sessions(base_session=_cache_session, session=session)
-
-
-def merge_with_cache_and_save_session(session: Session, context: Context):
-    session = merge_with_cache_session(session, context)
-    return save_session_cache(session)
-
-
-async def lock_merge_with_cache_and_save_session(session: Session, context: Context, lock_name=None):
-    session_key = Lock.get_key(Collection.lock_tracker, "session", get_entity_id(session))
-    session_lock = Lock(_redis, session_key, default_lock_ttl=3)
-    async with async_mutex(session_lock, name=lock_name):
-        return merge_with_cache_and_save_session(session, context)

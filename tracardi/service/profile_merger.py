@@ -5,7 +5,6 @@ from tracardi.service.tracking.storage.profile_storage import save_profile, dele
 
 from tracardi.domain.profile_data import ProfileData
 
-from .tracking.cache.profile_cache import delete_profile_cache, save_profile_cache
 from ..context import get_context
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.driver.elastic import event as event_db
@@ -50,23 +49,8 @@ async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], m
             await session_db.refresh()
 
 
-async def _save_profile(profile):
-    # Save in cache
-    save_profile_cache(profile)
-
-    # Save to database
-    await save_profile(profile)
-
-
-async def _delete_by_id(profile_id, index):
-    # Delete from database
-    await delete_profile(profile_id, index)
-    # Delete from cache
-    delete_profile_cache(profile_id, get_context())
-
-
 async def _delete_profiles(profile_ids: List[Tuple[str, RecordMetadata]]):
-    tasks = [asyncio.create_task(_delete_by_id(profile_id, metadata.index))
+    tasks = [asyncio.create_task(delete_profile(profile_id, metadata.index))
              for profile_id, metadata in profile_ids]
     return await asyncio.gather(*tasks)
 
@@ -346,7 +330,7 @@ class ProfileMerger:
                 merged_profile,
                 duplicate_profiles)
 
-            await _save_profile(merged_profile)
+            await save_profile(merged_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
             await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)

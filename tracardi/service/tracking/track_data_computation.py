@@ -7,8 +7,6 @@ from tracardi.service.change_monitoring.field_change_monitor import FieldTimesta
 from tracardi.service.license import License
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
-from tracardi.service.tracking.cache.profile_cache import save_profile_cache
-from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.event_data_computation import compute_events
 from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
@@ -17,6 +15,8 @@ from tracardi.service.tracking.session_data_computation import compute_session, 
     update_session_utm_with_client_data
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 from tracardi.service.tracking.session_loading import load_or_create_session
+from tracardi.service.tracking.storage.profile_storage import save_profile
+from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.system_events import add_system_events
 from tracardi.service.tracking.tracker_persister_async import clear_relations
 
@@ -172,17 +172,17 @@ Optional[FieldTimestampMonitor]]:
         # MUST BE INSIDE MUTEX
         # Update only when needed
 
-        _save_profile_and_session(profile, session)
+        await _save_profile_and_session(profile, session)
 
         return profile, session, events, tracker_payload, field_timestamp_monitor
 
 
-def _save_profile_and_session(profile: Profile, session: Session):
+async def _save_profile_and_session(profile: Profile, session: Session):
 
     # Update only when needed
 
     if profile and profile.has_not_saved_changes():
-        save_profile_cache(profile)
+        await save_profile(profile)
 
     if session and session.has_not_saved_changes():
-        save_session_cache(session)
+        await save_session(session)
