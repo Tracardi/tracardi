@@ -11,8 +11,6 @@ from tracardi.service.tracking.tracker_persister_async import TrackingPersisterA
 from tracardi.context import get_context
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.field_mappings_cache import add_new_field_mappings
-from tracardi.service.tracking.cache.profile_cache import lock_merge_with_cache_and_save_profile
-from tracardi.service.tracking.cache.session_cache import lock_merge_with_cache_and_save_session
 from tracardi.service.tracking.cache.merge_profile_cache import lock_merge_with_cache_and_save_profile
 from tracardi.service.tracking.cache.merge_session_cache import lock_merge_with_cache_and_save_session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
