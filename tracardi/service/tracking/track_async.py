@@ -185,7 +185,7 @@ async def process_track_data(source: EventSource,
                     events_result = await storage.save_events(sync_events)
 
                     # TODO Do not know if destinations are needed here. They are also dispatched in async
-
+                    # TODO this should be in mutex as is mutates profile
                     profile, session, sync_events, ux, response = await (
                         dispatch_sync_workflow_and_destinations(
                             profile,
@@ -223,6 +223,8 @@ async def process_track_data(source: EventSource,
                 storage = TrackingPersisterAsync()
                 events_result = await storage.save_events(events)
 
+                # TODO this should be in mutex as is mutates profile
+
                 profile, session, events, ux, response = await (
                     dispatch_sync_workflow_and_destinations(
                         profile,
@@ -232,7 +234,7 @@ async def process_track_data(source: EventSource,
                         console_log,
                         # Save. We need to manually save the session and profile in Open-source as there is no
                         # flusher worker and in-memory profile and session is not saved
-                        store_in_db=True,  # No cache worker for OS. mus store manually
+                        store_in_db=True,  # No cache worker for OS. must store manually
                         storage=storage
                     ))
 

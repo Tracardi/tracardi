@@ -26,20 +26,19 @@ async def _load_profile_and_deduplicate(
 
     profile = await load_profile(profile_id)
 
-    if profile is None:
+    if profile is not None:
+        return profile
 
-        # Static profiles can be None as they need to be created if does not exist.
-        # Static means the profile id was given in the track payload
-
-        if is_static:
-            profile = Profile.new(id=tracker_payload.profile.id)
-            # This is new profile as we could not load it.
-            profile.set_new()
-            profile.set_updated(False)
-            return profile
-
+    if not is_static:
         return None
 
+    # Static profiles can be None as they need to be created if does not exist.
+    # Static means the profile id was given in the track payload
+
+    profile = Profile.new(id=tracker_payload.profile.id)
+    # This is new profile as we could not load it.
+    profile.set_new()
+    profile.set_updated(False)
     return profile
 
 
@@ -49,7 +48,6 @@ async def load_profile_and_session(
         tracker_payload: TrackerPayload,
         console_log: ConsoleLog
 ) -> Tuple[Optional[Profile], Optional[Session]]:
-
     # Load profile
     profile_loader = _load_profile_and_deduplicate
 

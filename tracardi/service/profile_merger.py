@@ -51,23 +51,8 @@ async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], m
             await session_db.refresh()
 
 
-async def _save_profile(profile):
-    # Save in cache
-    save_profile_cache(profile)
-
-    # Save to database
-    await save_profile(profile)
-
-
-async def _delete_by_id(profile_id, index):
-    # Delete from database
-    await delete_profile(profile_id, index)
-    # Delete from cache
-    delete_profile_cache(profile_id, get_context())
-
-
 async def _delete_profiles(profile_ids: List[Tuple[str, RecordMetadata]]):
-    tasks = [asyncio.create_task(_delete_by_id(profile_id, metadata.index))
+    tasks = [asyncio.create_task(delete_profile(profile_id, metadata.index))
              for profile_id, metadata in profile_ids]
     return await asyncio.gather(*tasks)
 
@@ -214,28 +199,16 @@ class ProfileMerger:
                 time.visit.count += profile.metadata.time.visit.count
 
                 if isinstance(time.insert, datetime) and isinstance(profile.metadata.time.insert, datetime):
-
-                    time.insert = add_utc_time_zone_if_none(time.insert)
-                    profile.metadata.time.insert = add_utc_time_zone_if_none(profile.metadata.time.insert)
-
                     # Get earlier date
                     if time.insert > profile.metadata.time.insert:
                         time.insert = profile.metadata.time.insert
 
                 if isinstance(time.visit.current, datetime) and isinstance(profile.metadata.time.visit.current,
                                                                            datetime):
-
-                    time.visit.current = add_utc_time_zone_if_none(time.visit.current)
-                    profile.metadata.time.visit.current = add_utc_time_zone_if_none(profile.metadata.time.visit.current)
-
                     if time.visit.current < profile.metadata.time.visit.current:
                         time.visit.current = profile.metadata.time.visit.current
 
                 if isinstance(time.visit.last, datetime) and isinstance(profile.metadata.time.visit.last, datetime):
-
-                    time.visit.last = add_utc_time_zone_if_none(time.visit.last)
-                    profile.metadata.time.visit.last = add_utc_time_zone_if_none(profile.metadata.time.visit.last)
-
                     if time.visit.last < profile.metadata.time.visit.last:
                         time.visit.last = profile.metadata.time.visit.last
 
@@ -359,7 +332,7 @@ class ProfileMerger:
                 merged_profile,
                 duplicate_profiles)
 
-            await _save_profile(merged_profile)
+            await save_profile(merged_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
             await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)

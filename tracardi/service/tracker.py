@@ -91,6 +91,9 @@ class Tracker:
 
                 # Check if profile id exists
 
+                # TODO should be in mutex
+                # TODO ProfileMerger.invoke_merge_profile saves profile
+
                 referred_profile = await load_profile(referred_profile_id)
 
                 if referred_profile is not None:

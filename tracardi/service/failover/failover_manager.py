@@ -2,8 +2,10 @@ from time import sleep
 from uuid import uuid4
 from typing import Callable, Dict
 
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.speedb.rocksdb_clinet import RocksDbClient
 
+logger = get_logger(__name__)
 
 class FailOverManager:
 
@@ -28,7 +30,7 @@ class FailOverManager:
         return self.db_client.is_empty()
 
     def flush(self, closure: Callable):
-        print("Thread flushing failed records has started.")
+        logger.info("Thread flushing failed records has started.")
         for key, value in self.db_client.get_all_records():
 
             # Stored value always contains data and options how to send it
@@ -39,4 +41,4 @@ class FailOverManager:
             else:
                 # Wait
                 sleep(self._sleep_on_failure)
-        print("Thread flushing failed records has been finished.")
+        logger.info("Thread flushing failed records has been finished.")

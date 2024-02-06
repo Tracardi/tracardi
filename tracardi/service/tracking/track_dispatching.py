@@ -13,6 +13,8 @@ from tracardi.service.console_log import ConsoleLog
 from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.tracking.cache.profile_cache import lock_merge_with_cache_and_save_profile
 from tracardi.service.tracking.cache.session_cache import lock_merge_with_cache_and_save_session
+from tracardi.service.tracking.cache.merge_profile_cache import lock_merge_with_cache_and_save_profile
+from tracardi.service.tracking.cache.merge_session_cache import lock_merge_with_cache_and_save_session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import get_logger
@@ -23,7 +25,6 @@ from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.service.utils.getters import get_entity_id
 
 if License.has_service(LICENSE) :
     from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
@@ -149,7 +150,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             logger.info(f"Profile needs update after workflow.")
 
             await lock_merge_with_cache_and_save_profile(profile,
-                                                         context=get_context(),
                                                          lock_name="post-workflow-profile-save")
 
         if session and session.is_updated_in_workflow():
@@ -182,7 +182,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
         # Storage must be here as destination may need to load profile
 
     if store_in_db:
-        profile_and_session_result = await storage.save_profile_and_session(
+        await storage.save_profile_and_session(
             session,
             profile
         )
