@@ -110,7 +110,7 @@ def wait_for_redis_connection():
 
             if no_of_tries < 0:
                 logger.error(f"Could not connect to redis")
-                exit()
+                exit(1)
 
             _redis = RedisClient()
             if _redis.ping():

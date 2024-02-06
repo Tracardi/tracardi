@@ -52,6 +52,7 @@ class Lock:
             return RELEASED
 
     def lock(self, mutex_name: str):
+        logger.debug(f"Locking {self.key}")
         self._set_lock_metadata(time.time(), mutex_name, LOCKED)
 
     def _set_lock_metadata(self, time: float, mutex_name, state: int):
@@ -66,6 +67,7 @@ class Lock:
         self._redis.delete(self._key)
 
     def unlock(self):
+        logger.debug(f"UnLocking {self.key}")
         self.delete()
         self._mutex_name = None
 
@@ -177,7 +179,6 @@ class _GlobalMutexLock:
 
         elif self._lock.key:
             self._lock.unlock()
-            logger.debug(f"Unlocked in {time.time() - self._time}")
 
 
 class GlobalMutexLock(_GlobalMutexLock):
