@@ -1,3 +1,5 @@
+from time import sleep
+
 from typing import Optional, Awaitable, Union, List
 
 import redis
@@ -99,3 +101,22 @@ class RedisClient(metaclass=Singleton):
 
     def persist(self, key):
         return self.client.persist(key)
+
+
+def wait_for_redis_connection():
+    no_of_tries = 10
+    while True:
+        try:
+
+            if no_of_tries < 0:
+                logger.error(f"Could not connect to redis")
+                exit()
+
+            _redis = RedisClient()
+            if _redis.ping():
+                break
+
+        except redis.exceptions.ConnectionError as e:
+            logger.warning(str(e))
+            no_of_tries -= 1
+            sleep(1)
