@@ -1,3 +1,5 @@
+from time import sleep
+
 from typing import Optional, Awaitable, Union, List
 
 import redis
@@ -9,19 +11,6 @@ from tracardi.config import redis_config
 from tracardi.service.storage.redis_connection_pool import get_redis_connection_pool
 
 logger = get_logger(__name__)
-
-
-# class AsyncRedisClient(metaclass=Singleton):
-#     def __init__(self):
-#         host = redis_config.redis_host
-#         password = redis_config.redis_password
-#
-#         if password is None:
-#             self.client = aioredis.from_url(host)
-#         else:
-#             self.client = aioredis.from_url(host, password=password)
-#
-#         logger.info(f"Redis at {host} connected.")
 
 
 class RedisClient(metaclass=Singleton):
@@ -112,3 +101,22 @@ class RedisClient(metaclass=Singleton):
 
     def persist(self, key):
         return self.client.persist(key)
+
+
+def wait_for_redis_connection():
+    no_of_tries = 10
+    while True:
+        try:
+
+            if no_of_tries < 0:
+                logger.error(f"Could not connect to redis")
+                exit()
+
+            _redis = RedisClient()
+            if _redis.ping():
+                break
+
+        except redis.exceptions.ConnectionError as e:
+            logger.warning(str(e))
+            no_of_tries -= 1
+            sleep(1)
