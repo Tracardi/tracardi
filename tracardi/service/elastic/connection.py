@@ -79,7 +79,7 @@ async def wait_for_connection(no_of_tries=10):
         return
 
     logger.error(f"Could not connect to elasticsearch at {elastic.host}")
-    exit()
+    exit(1)
 
 
 async def wait_for_bridge_install(bridge) -> bool:
