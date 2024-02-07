@@ -7,7 +7,7 @@ from tracardi.domain.session import Session
 from tracardi.service.storage.driver.elastic import session as session_db
 
 if License.has_license():
-    from com_worker.tracker.dispatchers.pulsar.session_disaptcher import session_dispatch
+    from com_tracardi.dispatchers.pulsar.session_disaptcher import session_dispatch
 
 
 async def load_session(session_id: str,
