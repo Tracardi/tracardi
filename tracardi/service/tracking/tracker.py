@@ -1,6 +1,8 @@
 import time
+
+from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
-from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations
+from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations_and_save_data
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
 from tracardi.domain.event_source import EventSource
@@ -16,11 +18,11 @@ cache = CacheManager()
 
 
 async def os_tracker(source: EventSource,
-                             tracker_payload: TrackerPayload,
-                             tracker_config: TrackerConfig,
-                             tracking_start: float,
-                             console_log: ConsoleLog
-                             ):
+                     tracker_payload: TrackerPayload,
+                     tracker_config: TrackerConfig,
+                     tracking_start: float,
+                     console_log: ConsoleLog
+                     ):
     try:
 
         if not tracker_payload.events:
@@ -58,13 +60,16 @@ async def os_tracker(source: EventSource,
 
             # Save events
 
+            _, _, _events_not_ephemeral = remove_ephemeral_data(
+                tracker_payload, profile, session, events)
+
             storage = TrackingPersisterAsync()
             await storage.save_events(events)
 
             # TODO this should be in mutex as is mutates profile
 
             profile, session, events, ux, response = await (
-                dispatch_sync_workflow_and_destinations(
+                dispatch_sync_workflow_and_destinations_and_save_data(
                     profile,
                     session,
                     events,

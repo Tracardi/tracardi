@@ -29,7 +29,6 @@ class PushoverAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
-            print('pushover')
             async with HttpClient(self.node.on_connection_error_repeat) as client:
 
                 dot = self._get_dot_accessor(payload)

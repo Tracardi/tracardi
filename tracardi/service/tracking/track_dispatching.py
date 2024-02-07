@@ -2,6 +2,7 @@ from typing import List, Tuple, Optional
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
 from tracardi.service.console_log import ConsoleLog
@@ -98,14 +99,14 @@ async def trigger_workflows(profile: Profile,
     return profile, session, events, ux, response, field_manager, is_wf_triggered
 
 
-async def dispatch_sync_workflow_and_destinations(profile: Profile,
-                                                  session: Session,
-                                                  events: List[Event],
-                                                  tracker_payload: TrackerPayload,
-                                                  console_log: ConsoleLog,
-                                                  store_in_db:bool,
-                                                  storage: TrackingPersisterAsync
-                                                  ) -> Tuple[
+async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile,
+                                                                session: Session,
+                                                                events: List[Event],
+                                                                tracker_payload: TrackerPayload,
+                                                                console_log: ConsoleLog,
+                                                                store_in_db: bool,
+                                                                storage: TrackingPersisterAsync
+                                                                ) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
 
     # This is MUST BE FIRST BEFORE WORKFLOW
@@ -168,15 +169,19 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             tracker_payload.debug
         )
 
-        # Storage must be here as destination may need to load profile
+    # Storage must be here as destination may need to load profile
+
+    _profile_not_ephemeral, _session_not_ephemeral, _events_not_ephemeral = remove_ephemeral_data(tracker_payload,
+                                                                                                  profile, session,
+                                                                                                  events)
 
     if store_in_db:
         await storage.save_profile_and_session(
-            session,
-            profile
+            _session_not_ephemeral,
+            _profile_not_ephemeral
         )
 
-        # Dispatch outbound profile
+    # Dispatch outbound profile
 
     await profile_dispatcher.dispatch(
         profile,
