@@ -103,7 +103,7 @@ class UserService(TableService):
         return records.exists()
 
     async def insert_if_none(self, user: User) -> Optional[str]:
-        if await self.check_if_exists(user.email):
+        if not await self.check_if_exists(user.email):
             return await self._insert_if_none(
                 UserTable,
                 map_to_user_table(user),

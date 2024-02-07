@@ -19,6 +19,8 @@ async def get_indices_status():
             _template = index.get_prefixed_template_name()
             if not await es.exists_index_template(_template):
                 yield "missing_template", _template
+            else:
+                yield "existing_template", _template
 
             # Alias
 
@@ -32,6 +34,8 @@ async def get_indices_status():
 
             if not has_alias:
                 yield "missing_alias", _alias
+            else:
+                yield "existing_alias", _alias
 
         else:
 

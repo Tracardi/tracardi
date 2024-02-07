@@ -181,14 +181,9 @@ async def install_system(credentials: Credentials):
                 enabled=True
             )
 
+            # Add admin
             us = UserService()
-
-            if await us.insert_if_none(user):
-                logger.info("Default admin account created.")
-
-            # if not await user_db.check_if_exists(credentials.username):
-            #     await user_db.add_user(user)
-            #     logger.info("Default admin account created.")
+            await us.insert_if_none(user)
 
             staging_install_result['admin'] = True
 
