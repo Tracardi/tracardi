@@ -53,11 +53,13 @@ class Index:
         elif self.partitioning == 'year':
             return f"{date.year}-year"
         elif self.partitioning == 'day':
-            return f"{date.year}-{date.month}/{date.day}"
+            return f"{date.year}-{date.month}{date.day}"
         elif self.partitioning == 'hour':
-            return f"{date.year}-{date.month}/{date.day}/{date.hour}"
+            return f"{date.year}-{date.month}{date.day}{date.hour}"
         elif self.partitioning == 'minute':
-            return f"{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
+            return f"{date.year}-{date.month}{date.day}{date.hour}{date.minute}"
+        elif self.partitioning == 'second':
+            return f"{date.year}-{date.month}{date.day}{date.hour}{date.minute}{date.second}"
         elif self.partitioning == 'quarter':
             return f"{date.year}-q{self._get_quarter(date.month)}"
         else:

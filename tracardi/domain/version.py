@@ -10,6 +10,7 @@ class Version(BaseModel):
     production: bool = False
     config: Optional[dict] = {}
     db_version: str = '09x'
+    installed: bool = False
 
     def __init__(self, **data):
         super().__init__(**data)

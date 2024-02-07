@@ -189,7 +189,7 @@ class TracardiConfig(metaclass=Singleton):
         self.segmentation_source = f"@segmentation-{random_hash[:20]}"
         self.demo_source = f"@demo-{random_hash[:20]}"
 
-        self.event_partitioning = env.get('EVENT_PARTITIONING', 'month')
+        self.event_partitioning = env.get('EVENT_PARTITIONING', 'second')
         self.profile_partitioning = env.get('PROFILE_PARTITIONING', 'quarter')
         self.session_partitioning = env.get('SESSION_PARTITIONING', 'quarter')
         self.entity_partitioning = env.get('ITEM_PARTITIONING', 'quarter')

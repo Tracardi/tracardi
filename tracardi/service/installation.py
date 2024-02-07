@@ -2,6 +2,7 @@ import asyncio
 import os
 from uuid import uuid4
 
+from tracardi.domain.installation_status import InstallationStatus
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.license import License, MULTI_TENANT, LICENSE
 from tracardi.service.storage.mysql.bootstrap.bridge import os_default_bridges
@@ -33,7 +34,7 @@ if License.has_license():
 logger = get_installation_logger(__name__)
 
 
-async def check_installation():
+async def check_installation() -> InstallationStatus:
     """
     Returns list of missing and updated indices
     """
@@ -43,12 +44,12 @@ async def check_installation():
     ds = DatabaseService()
 
     if not await ds.exists(mysql.mysql_database):
-        return {
+        return InstallationStatus(**{
             "schema_ok": False,
             "admin_ok": False,
             "form_ok": False,
             "warning": None
-        }
+        })
 
     is_schema_ok, indices = await system_db.is_schema_ok()
 
@@ -76,29 +77,29 @@ async def check_installation():
                 message = (f"Authorizing failed for tenant `{context.tenant}`. "
                            f"Could not reach Tenant Management Service.")
                 logger.warning(message)
-                return {
+                return InstallationStatus(**{
                     "schema_ok": False,
                     "admin_ok": False,
                     "form_ok": False,
                     "warning": message
-                }
+                })
 
             tenant = await mtm.is_tenant_allowed(context.tenant)
             if not tenant:
                 logger.warning(f"Authorizing failed for tenant `{context.tenant}`.")
-                return {
+                return InstallationStatus(**{
                     "schema_ok": False,
                     "admin_ok": False,
                     "form_ok": False,
                     "warning": f"Tenant [{context.tenant}] not allowed."
-                }
+                })
 
-    return {
+    return InstallationStatus(**{
         "schema_ok": is_schema_ok,
         "admin_ok": has_admin_account,
         "form_ok": True,
         "warning": None
-    }
+    })
 
 
 async def install_system(credentials: Credentials):

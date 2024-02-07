@@ -30,7 +30,8 @@ async def save_logs() -> Optional[bool]:
 
     if log_handler.has_logs():
         try:
-            await log_db.save(log_handler.collection)
+            if tracardi.version.installed:
+                await log_db.save(log_handler.collection)
         except Exception:
             logger.warning(f"Could not save log to elastic search.")
         last_error_save = time()
