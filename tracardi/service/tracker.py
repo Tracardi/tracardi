@@ -3,6 +3,7 @@ import traceback
 from typing import Optional
 
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
+from tracardi.service.license import License
 from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.service.utils.date import now_in_utc
 from tracardi.service.profile_merger import ProfileMerger
@@ -20,7 +21,10 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from typing import List
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.tracking.track_async import process_track_data
+if License.has_license():
+    from com_tracardi.service.tracking.tracker import com_tracker
+else:
+    from tracardi.service.tracking.tracker import os_tracker
 
 logger = get_logger(__name__)
 cache = CacheManager()
@@ -197,9 +201,14 @@ class Tracker:
         if tracker_payload.source.transitional is True:
             tracker_payload.set_ephemeral()
 
-        result = await process_track_data(
-            source, tracker_payload,
-            self.tracker_config, tracking_start, self.console_log)
+        if License.has_license():
+            result = await com_tracker(
+                source, tracker_payload,
+                self.tracker_config, tracking_start, self.console_log)
+        else:
+            result = await os_tracker(
+                source, tracker_payload,
+                self.tracker_config, tracking_start, self.console_log)
 
         if result and tracardi.enable_errors_on_response:
             result['errors'] += self.console_log.get_errors()
