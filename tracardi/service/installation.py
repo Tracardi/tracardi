@@ -9,7 +9,7 @@ from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
 from tracardi.domain.user import User
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.exceptions.log_handler import get_installation_logger
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, install_default_data, run_on_start
@@ -22,7 +22,7 @@ if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
 
-logger = get_logger(__name__)
+logger = get_installation_logger(__name__)
 
 
 async def check_installation():
