@@ -1,5 +1,4 @@
 import time
-import traceback
 from typing import Optional
 
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
@@ -56,7 +55,6 @@ async def track_event(tracker_payload: TrackerPayload,
         return result
 
     except Exception as e:
-        traceback.print_exc()
         logger.error(str(e))
         raise e
 
@@ -161,7 +159,7 @@ class Tracker:
         if tracker_payload.is_bot() and not tracardi.allow_bot_traffic:
             raise PermissionError(f"Traffic from bot is not allowed.")
 
-        # Trim ids - spaces are frequent issues
+            # Trim ids - spaces are frequent issues
 
         if tracker_payload.source:
             tracker_payload.source.id = str(tracker_payload.source.id).strip()
