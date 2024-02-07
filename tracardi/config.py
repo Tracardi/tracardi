@@ -157,6 +157,8 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
         self.enable_field_update_log = env.get('ENABLE_FIELD_UPDATE_LOG', 'yes').lower() == 'yes'
         self.allow_bot_traffic = env.get('ALLOW_BOT_TRAFFIC', 'no').lower() == 'yes'
+        self.keep_profile_in_cache_for = get_env_as_int('KEEP_PROFILE_IN_CACHE_FOR', 60*60)
+        self.keep_session_in_cache_for = get_env_as_int('KEEP_SESSION_IN_CACHE_FOR', 30 * 60)
 
         self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
 

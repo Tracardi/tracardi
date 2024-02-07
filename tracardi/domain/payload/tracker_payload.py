@@ -92,7 +92,7 @@ class TrackerPayload(BaseModel):
         if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
             if isinstance(self.options['scheduledFlowId'], str) and isinstance(self.options['scheduledNodeId'], str):
                 if len(self.events) > 1:
-                    raise ValueError("Scheduled events may have only one event per tracker payload.")
+                    raise ValueError(f"Scheduled events may have only one event per tracker payload. Expected one event got {self.get_event_types()}")
                 if self.source.id[0] != "@":
                     raise ValueError("Scheduled events must be send via internal scheduler event source.")
                 self._scheduled_flow_id = self.options['scheduledFlowId']
@@ -144,6 +144,9 @@ class TrackerPayload(BaseModel):
             if event_payload.type == event_type:
                 return True
         return False
+
+    def get_event_types(self) -> List[str]:
+        return [event_payload.type for event_payload in self.events]
 
     def get_event_payloads_by_type(self, event_type) -> Generator[EventPayload, Any, None]:
         for event_payload in self.events:

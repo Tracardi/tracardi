@@ -2,7 +2,7 @@ import asyncio
 
 import json
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 
 from tracardi.service.tracking.storage.event_storage import save_events
 from tracardi.service.tracking.storage.profile_storage import save_profile
@@ -22,28 +22,6 @@ from tracardi.service.field_mappings_cache import FieldMapper
 
 logger = get_logger(__name__)
 cache = CacheManager()
-
-
-def clear_relations(tracker_payload, profile: Profile, session: Session, events: List[Event]) -> Tuple[Profile, Session, List[Event]]:
-
-    _save_session_flag = tracker_payload.is_on('saveSession', default=True)
-    _save_events_flag = tracker_payload.is_on('saveEvents', default=True)
-    _save_profile_flag = tracker_payload.is_on('saveProfile', default=True)
-
-    if not _save_events_flag:
-        events = []
-
-    if not _save_session_flag:
-        session = None
-        for event in events:
-            event.session = None
-
-    if not _save_profile_flag:
-        profile = None
-        for event in events:
-            event.profile = None
-
-    return profile, session, events
 
 
 def _get_savable_session(session: Optional[Session], profile: Profile) -> Optional[Session]:
@@ -171,4 +149,3 @@ class TrackingPersisterAsync:
         ]
 
         return await asyncio.gather(*coroutines)
-

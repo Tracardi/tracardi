@@ -1,4 +1,6 @@
 from typing import Optional, List, Union
+
+from tracardi.config import tracardi
 from tracardi.context import Context
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
@@ -8,7 +10,7 @@ from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
 
-redis_cache = RedisCache(ttl=None)
+redis_cache = RedisCache(ttl=tracardi.keep_session_in_cache_for)
 _redis = RedisClient()
 logger = get_logger(__name__)
 

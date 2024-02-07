@@ -18,7 +18,6 @@ from tracardi.service.tracking.session_loading import load_or_create_session
 from tracardi.service.tracking.storage.profile_storage import save_profile
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.system_events import add_system_events
-from tracardi.service.tracking.tracker_persister_async import clear_relations
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -35,7 +34,7 @@ async def _compute(source,
                    profile: Optional[Profile],
                    session: Optional[Session],
                    tracker_payload: TrackerPayload,
-                   console_log: ConsoleLog):
+                   console_log: ConsoleLog) -> Tuple[Optional[Profile], Optional[Session],List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
 
     if profile is not None:
 
@@ -104,10 +103,6 @@ async def _compute(source,
         tracker_payload
     )
 
-    # Clear profile,etc if not saving data.
-
-    profile, session, events = clear_relations(tracker_payload, profile, session, events)
-
     # Caution: After clear session can become None if set sessionSave = False
 
     return profile, session, events, tracker_payload, field_timestamp_monitor
@@ -165,7 +160,9 @@ Optional[FieldTimestampMonitor]]:
                 raise PermissionError(f"Traffic from bot is not allowed.")
 
         profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(
-            source, profile, session,
+            source,
+            profile,
+            session,
             tracker_payload,
             console_log)
 

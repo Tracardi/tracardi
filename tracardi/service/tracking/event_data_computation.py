@@ -287,6 +287,7 @@ async def compute_events(events: List[EventPayload],
                       f"the original data you sent was not copied because it did not meet the " \
                       f"requirements of the profile. " \
                       f"Details: {repr(e)}."
+            logger.error(message)
             console_log.append(
                 Console(
                     flow_id=None,

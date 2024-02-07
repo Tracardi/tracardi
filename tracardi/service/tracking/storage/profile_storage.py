@@ -7,7 +7,7 @@ from tracardi.domain.profile import Profile
 from tracardi.service.storage.driver.elastic import profile as profile_db
 
 if License.has_license():
-    from com_worker.tracker.dispatchers.pulsar.profile_dispatcher import profile_dispatch
+    from com_tracardi.dispatchers.pulsar.profile_dispatcher import profile_dispatch
 
 async def delete_profile(id: str,
                          index: str,
