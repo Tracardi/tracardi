@@ -9,14 +9,14 @@ from tracardi.domain.time import Time
 from tracardi.service.setup.setup_plugins import test_plugins, installed_plugins
 
 from tracardi.domain.settings import Settings
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.exceptions.log_handler import get_installation_logger
 from tracardi.service.module_loader import load_callable, import_package
 from tracardi.service.plugin.domain.register import Plugin
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata
 from tracardi.service.storage.mysql.service.action_plugin_service import ActionPluginService
 
 __local_dir = os.path.dirname(__file__)
-logger = get_logger(__name__)
+logger = get_installation_logger(__name__)
 
 
 async def install_plugin(module):

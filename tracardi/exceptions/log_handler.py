@@ -78,4 +78,19 @@ def get_logger(name, level=None):
     return logger
 
 
+def get_installation_logger(name, level=None):
+    # Replace the default logger class with your custom class
+    logger = logging.getLogger(name)
+    logger.propagate = False
+    logger.setLevel(level or _logging_level)
+
+    # Console log handler
+
+    clh = logging.StreamHandler()
+    clh.setFormatter(CustomFormatter())
+    logger.addHandler(clh)
+
+    return logger
+
+
 log_handler = ElasticLogHandler()
