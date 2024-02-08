@@ -189,7 +189,7 @@ class MigrationManager:
                 if await es.exists_index(schema.copy_index.from_index):
                     set_of_schemas_to_migrate.append(schema)
                 else:
-                    logger.error(f"Can't find the index {schema.copy_index.from_index}")
+                    logger.warning(f"Can't find the index {schema.copy_index.from_index}. Migration for this index will be stopped.")
 
         # TODO Warning disabled - save installation info in redis.
         warn = self.from_version in tracardi.version.upgrades

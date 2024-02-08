@@ -1,6 +1,5 @@
 import logging
 
-from tracardi.config import tracardi
 from tracardi.domain.setting import Setting
 
 from tracardi.context import Context, ServerContext
@@ -58,7 +57,7 @@ from tracardi.worker.service.worker.migration_workers.utils.client import Elasti
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
+logger.setLevel(logging.INFO)
 logger.addHandler(log_handler)
 
 def resource_converter(resource_record: ResourceRecord) -> Resource:
@@ -107,7 +106,7 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
 
         storage_class = schema.params['mysql']
         if storage_class not in class_mapping:
-            logger.error(f'Could not find class {storage_class}')
+            logger.warning(f'Could not find class {storage_class}. Data not migrated.')
             return
 
 
@@ -134,7 +133,7 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                         table_data = domain_object_mapping_to_table(domain_object)
 
                         ts = TableService()
-                        await ts._replace(object_table, table_data)
+                        result = await ts._replace(object_table, table_data)
 
                     except Exception as e:
                         await task_status(task_id, 'error', str(e))
@@ -148,3 +147,5 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                 moved_records += chunk
 
         await task_finish(task_id)
+
+        print(f"Data migrated from {schema.copy_index.from_index}")
