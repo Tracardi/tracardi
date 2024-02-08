@@ -261,7 +261,8 @@
       "script": null
     },
     "params": {
-      "mysql": "flow"
+      "mysql": "flow",
+      "version": "0.9.0-rc1"
     },
     "worker": "copy_to_mysql",
     "asynchronous": true

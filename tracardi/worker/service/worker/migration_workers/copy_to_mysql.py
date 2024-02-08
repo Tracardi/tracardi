@@ -21,6 +21,7 @@ from tracardi.domain.report import Report
 from tracardi.domain.resource import Resource, ResourceRecord
 from tracardi.domain.rule import Rule
 from tracardi.domain.segment import Segment
+from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.task import Task
 from tracardi.domain.user import User
 from tracardi.exceptions.log_handler import log_handler
@@ -52,44 +53,69 @@ from tracardi.service.storage.mysql.schema.table import BridgeTable, ConsentType
     SettingTable
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.worker.domain.migration_schema import MigrationSchema
+from tracardi.worker.misc.base_64 import b64_decoder
 from tracardi.worker.misc.task_progress import task_create, task_progress, task_finish, task_status
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(log_handler)
 
-def resource_converter(resource_record: ResourceRecord) -> Resource:
+
+def resource_converter(resource_record: ResourceRecord, params: dict) -> Resource:
     return resource_record.decode()
 
+
+def destination_record_converter(record: StorageRecord, params: dict) -> StorageRecord:
+    record['destination'] = b64_decoder(record['destination'])
+    record['mapping'] = b64_decoder(record['mapping'])
+
+    return record
+
+
+def flow_record_converter(record: StorageRecord, params: dict) -> StorageRecord:
+    record['production'] = False
+    record['draft'] = b64_decoder(record['draft'])
+    record['draft']['wf_schema']['version'] = params['version']
+    record['draft']['wf_schema']['server_version'] = params['version']
+    return record
+
+def user_record_converter(record: StorageRecord, params: dict) -> StorageRecord:
+    record['name'] = record.get('full_name',"Unknown")
+    record['enabled'] = not record.get('disabled', True)
+    return record
+
+
+
 class_mapping = {
-    "bridge": (Bridge, BridgeTable, map_to_bridge_table, None),
-    "consent-type": (ConsentType, ConsentTypeTable, map_to_consent_type_table, None),
-    "segment": (Segment, SegmentTable, map_to_segment_table, None),
-    "identification-point": (IdentificationPoint, IdentificationPointTable, map_to_identification_point, None),
-    # "events-tags": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None),  # todo check
-    "event-source": (EventSource, EventSourceTable, map_to_event_source_table, None),
-    "consent-data-compliance": (EventDataCompliance, EventDataComplianceTable, map_to_event_data_compliance_table, None),
-    "event-reshaping": (EventReshapingSchema, EventReshapingTable, map_to_event_reshaping_table, None),
-    # "tracardi-pro": (None, TracardiProTable, None, None), # todo check
-    "task": (Task, TaskTable, map_to_task_table, None),
+    "bridge": (Bridge, BridgeTable, map_to_bridge_table, None, None),
+    "consent-type": (ConsentType, ConsentTypeTable, map_to_consent_type_table, None, None),
+    "segment": (Segment, SegmentTable, map_to_segment_table, None, None),
+    "identification-point": (IdentificationPoint, IdentificationPointTable, map_to_identification_point, None, None),
+    # "events-tags": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None, None),  # todo check
+    "event-source": (EventSource, EventSourceTable, map_to_event_source_table, None, None),
+    "consent-data-compliance": (
+    EventDataCompliance, EventDataComplianceTable, map_to_event_data_compliance_table, None, None),
+    "event-reshaping": (EventReshapingSchema, EventReshapingTable, map_to_event_reshaping_table, None, None),
+    # "tracardi-pro": (None, TracardiProTable, None, None, None), # todo check
+    "task": (Task, TaskTable, map_to_task_table, None, None),
     "live-segment": (
-        WorkflowSegmentationTrigger, WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table, None),
-    "event-management": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None),
-    "user": (User, UserTable, map_to_user_table, None),
-    "destination": (Destination, DestinationTable, map_to_destination_table, None),
-    "event-redirect": (EventRedirect, EventRedirectTable, map_to_event_redirect_table, None),
-    # "content": (Content, ContentTable, map_to_content, None),
-    "report": (Report, ReportTable, map_to_report_table, None),
-    "event_to_profile": (EventToProfile, EventToProfileMappingTable, map_to_event_to_profile_table, None),
-    "rule": (Rule, WorkflowTriggerTable, map_to_workflow_trigger_table, None),
-    "resource": (ResourceRecord, ResourceTable, map_to_resource_table, resource_converter),
-    "flow": (FlowRecord, WorkflowTable, map_to_workflow_table, None),
-    "import": (ImportConfig, ImportTable, map_to_import_config_table, None),
-    "event-validation": (EventValidator, EventValidationTable, map_to_event_validation_table, None),
-    # "version": (None, VersionTable, None, None),
-    "setting": (Setting, SettingTable, map_to_settings_table, None),
+        WorkflowSegmentationTrigger, WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table, None,
+        None),
+    "event-management": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None, None),
+    "user": (User, UserTable, map_to_user_table, user_record_converter, None),
+    "destination": (Destination, DestinationTable, map_to_destination_table, destination_record_converter, None),
+    "event-redirect": (EventRedirect, EventRedirectTable, map_to_event_redirect_table, None, None),
+    # "content": (Content, ContentTable, map_to_content, None, None),
+    "report": (Report, ReportTable, map_to_report_table, None, None),
+    "event_to_profile": (EventToProfile, EventToProfileMappingTable, map_to_event_to_profile_table, None, None),
+    "rule": (Rule, WorkflowTriggerTable, map_to_workflow_trigger_table, None, None),
+    "resource": (ResourceRecord, ResourceTable, map_to_resource_table, None, resource_converter),
+    "flow": (FlowRecord, WorkflowTable, map_to_workflow_table, flow_record_converter, None),
+    "import": (ImportConfig, ImportTable, map_to_import_config_table, None, None),
+    "event-validation": (EventValidator, EventValidationTable, map_to_event_validation_table, None, None),
+    # "version": (None, VersionTable, None, None, None),
+    "setting": (Setting, SettingTable, map_to_settings_table, None, None),
 }
 
 
@@ -109,8 +135,8 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
             logger.warning(f'Could not find class {storage_class}. Data not migrated.')
             return
 
-
-        domain_type, object_table, domain_object_mapping_to_table, converter = class_mapping[storage_class]
+        domain_type, object_table, domain_object_mapping_to_table, record_converter, domain_converter = class_mapping[
+            storage_class]
 
         chunk = 100
         moved_records = 0
@@ -125,10 +151,15 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                 for number, record in enumerate(records_to_move):  # Type: int,StorageRecord
 
                     try:
-                        domain_object = record.to_entity(domain_type, set_metadata=False)
 
-                        if converter is not None:
-                            domain_object = converter(domain_object)
+                        if record_converter is not None:
+                            record = record_converter(record, schema.params)
+
+                        domain_object = record.to_entity(domain_type, set_metadata=False)
+                        print(type(domain_object))
+
+                        if domain_converter is not None:
+                            domain_object = domain_converter(domain_object, schema.params)
 
                         table_data = domain_object_mapping_to_table(domain_object)
 
