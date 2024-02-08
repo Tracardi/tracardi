@@ -24,7 +24,7 @@ from tracardi.domain.segment import Segment
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.task import Task
 from tracardi.domain.user import User
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_installation_logger
 from tracardi.service.storage.mysql.mapping.bridge_mapping import map_to_bridge_table
 from tracardi.service.storage.mysql.mapping.consent_type_mapping import map_to_consent_type_table
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table
@@ -57,10 +57,7 @@ from tracardi.worker.misc.base_64 import b64_decoder
 from tracardi.worker.misc.task_progress import task_create, task_progress, task_finish, task_status
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logger.addHandler(log_handler)
-
+logger = get_installation_logger(__name__, level=logging.INFO)
 
 def resource_converter(resource_record: ResourceRecord, params: dict) -> Resource:
     return resource_record.decode()
@@ -156,7 +153,6 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                             record = record_converter(record, schema.params)
 
                         domain_object = record.to_entity(domain_type, set_metadata=False)
-                        print(type(domain_object))
 
                         if domain_converter is not None:
                             domain_object = domain_converter(domain_object, schema.params)
@@ -179,4 +175,4 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
 
         await task_finish(task_id)
 
-        print(f"Data migrated from {schema.copy_index.from_index}")
+        logger.info(f"Data migrated from {schema.copy_index.from_index}")
