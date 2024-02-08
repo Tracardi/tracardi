@@ -347,6 +347,10 @@ class Resource(metaclass=Singleton):
                 map = index.prepare_mappings(map, index)
                 yield index, map
 
+    def get_template_name(self, index) -> str:
+        log_index = self[index]
+        return log_index.get_prefixed_template_name()
+
     def __getitem__(self, item) -> Index:
         if item in self.resources:
             return self.resources[item]
