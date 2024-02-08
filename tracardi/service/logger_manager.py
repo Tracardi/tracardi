@@ -1,6 +1,6 @@
-from elasticsearch.helpers import BulkIndexError
+from tracardi.context import get_context
+from tracardi.domain.installation_status import installation_status
 from time import time
-
 from typing import Optional
 
 from tracardi.config import tracardi
@@ -30,7 +30,10 @@ async def save_logs() -> Optional[bool]:
 
     if log_handler.has_logs():
         try:
-            await log_db.save(log_handler.collection)
+            if await installation_status.has_logs_index(get_context().tenant):
+                await log_db.save(log_handler.collection)
+            else:
+                logger.warning("Logs index is not available. Probably system is not installed or being installed or the index went missing.")
         except Exception:
             logger.warning(f"Could not save log to elastic search.")
         last_error_save = time()
