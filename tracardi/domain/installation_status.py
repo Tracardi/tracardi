@@ -4,7 +4,6 @@ from typing import List, Optional, Dict
 from pydantic import BaseModel
 
 from tracardi.service.license import License, MULTI_TENANT
-from tracardi.service.installation import check_installation
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.elastic_client import ElasticClient
 from tracardi.config import tracardi

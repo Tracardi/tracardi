@@ -1,4 +1,3 @@
-import asyncio
 import os
 from uuid import uuid4
 
@@ -14,72 +13,13 @@ from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, install_default_data, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
-from tracardi.service.storage.driver.elastic import system as system_db
 from tracardi.service.storage.driver.elastic import user as user_db
 from tracardi.service.storage.index import Resource
 
 if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
-
 logger = get_installation_logger(__name__)
-
-
-async def check_installation():
-    """
-    Returns list of missing and updated indices
-    """
-
-    is_schema_ok, indices = await system_db.is_schema_ok()
-
-    # Missing admin
-    existing_aliases = [idx[1] for idx in indices if idx[0] == 'existing_alias']
-    index = Resource().get_index_constant('user')
-
-    with ServerContext(get_context().switch_context(False)):
-        if index.get_index_alias() in existing_aliases:
-            admins = await user_db.search_by_role('admin')
-        else:
-            admins = None
-
-    has_admin_account = admins is not None and admins.total > 0
-
-    if tracardi.multi_tenant and (not is_schema_ok or not has_admin_account):
-        if License.has_service(MULTI_TENANT):
-            mtm = MultiTenantManager()
-            context = get_context()
-
-            logger.info(f"Authorizing `{context.tenant}` for installation at {mtm.auth_endpoint}.")
-
-            try:
-                await mtm.authorize(tracardi.multi_tenant_manager_api_key)
-            except asyncio.exceptions.TimeoutError:
-                message = (f"Authorizing failed for tenant `{context.tenant}`. "
-                           f"Could not reach Tenant Management Service.")
-                logger.warning(message)
-                return {
-                    "schema_ok": False,
-                    "admin_ok": False,
-                    "form_ok": False,
-                    "warning": message
-                }
-
-            tenant = await mtm.is_tenant_allowed(context.tenant)
-            if not tenant:
-                logger.warning(f"Authorizing failed for tenant `{context.tenant}`.")
-                return {
-                    "schema_ok": False,
-                    "admin_ok": False,
-                    "form_ok": False,
-                    "warning": f"Tenant [{context.tenant}] not allowed."
-                }
-
-    return {
-        "schema_ok": is_schema_ok,
-        "admin_ok": has_admin_account,
-        "form_ok": True,
-        "warning": None
-    }
 
 
 async def install_system(credentials: Credentials):
