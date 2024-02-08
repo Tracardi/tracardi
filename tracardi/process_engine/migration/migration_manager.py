@@ -44,8 +44,7 @@ class MigrationManager:
         ("08x", "0820"): "08x_to_082x",  # from 0.8.1 to 0.8.2
         ("08x", "082x"): "08x_to_082x",
         ("082x", "0820"): "082x_to_0820",
-        # ("0820", "09x"): "0820_to_09x",
-        ("0820", "09x"): "0820_to_xxx"
+        ("0820", "09x"): "0820_to_09x",
     }
 
     def __init__(self, from_version: str, to_version: str, from_prefix: Optional[str] = None,

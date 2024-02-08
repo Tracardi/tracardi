@@ -296,20 +296,6 @@
     "asynchronous": true
   },
   {
-    "id": "5425c363afa8f668b504b8e0e5c8fe96fd617089",
-    "copy_index": {
-      "from_index": "tracardi-version",
-      "to_index": "tracardi-version",
-      "multi": false,
-      "script": null
-    },
-    "params": {
-      "mysql": "version"
-    },
-    "worker": "copy_to_mysql",
-    "asynchronous": true
-  },
-  {
     "id": "ea4ee378dbe1c87b2a269eda3fd2035a38b293e3",
     "copy_index": {
       "from_index": "tracardi-setting",

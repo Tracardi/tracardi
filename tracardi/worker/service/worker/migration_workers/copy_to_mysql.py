@@ -59,25 +59,29 @@ from tracardi.worker.service.worker.migration_workers.utils.client import Elasti
 
 logger = get_installation_logger(__name__, level=logging.INFO)
 
-def resource_converter(resource_record: ResourceRecord, params: dict) -> Resource:
+def resource_converter(resource_record: ResourceRecord, schema: MigrationSchema) -> Resource:
     return resource_record.decode()
 
 
-def destination_record_converter(record: StorageRecord, params: dict) -> StorageRecord:
+def destination_record_converter(record: StorageRecord, schema: MigrationSchema) -> StorageRecord:
     record['destination'] = b64_decoder(record['destination'])
     record['mapping'] = b64_decoder(record['mapping'])
 
     return record
 
 
-def flow_record_converter(record: StorageRecord, params: dict) -> StorageRecord:
-    record['production'] = False
-    record['draft'] = b64_decoder(record['draft'])
-    record['draft']['wf_schema']['version'] = params['version']
-    record['draft']['wf_schema']['server_version'] = params['version']
+def report_record_converter(record: StorageRecord, schema: MigrationSchema) -> StorageRecord:
+    record['query'] = b64_decoder(record['query'])
     return record
 
-def user_record_converter(record: StorageRecord, params: dict) -> StorageRecord:
+def flow_record_converter(record: StorageRecord, schema: MigrationSchema) -> StorageRecord:
+    record['production'] = False
+    record['draft'] = b64_decoder(record['draft'])
+    record['draft']['wf_schema']['version'] = schema.params['version']
+    record['draft']['wf_schema']['server_version'] = schema.params['version']
+    return record
+
+def user_record_converter(record: StorageRecord, schema: MigrationSchema) -> StorageRecord:
     record['name'] = record.get('full_name',"Unknown")
     record['enabled'] = not record.get('disabled', True)
     return record
@@ -103,15 +107,13 @@ class_mapping = {
     "user": (User, UserTable, map_to_user_table, user_record_converter, None),
     "destination": (Destination, DestinationTable, map_to_destination_table, destination_record_converter, None),
     "event-redirect": (EventRedirect, EventRedirectTable, map_to_event_redirect_table, None, None),
-    # "content": (Content, ContentTable, map_to_content, None, None),
-    "report": (Report, ReportTable, map_to_report_table, None, None),
+    "report": (Report, ReportTable, map_to_report_table, report_record_converter, None),
     "event_to_profile": (EventToProfile, EventToProfileMappingTable, map_to_event_to_profile_table, None, None),
     "rule": (Rule, WorkflowTriggerTable, map_to_workflow_trigger_table, None, None),
     "resource": (ResourceRecord, ResourceTable, map_to_resource_table, None, resource_converter),
     "flow": (FlowRecord, WorkflowTable, map_to_workflow_table, flow_record_converter, None),
     "import": (ImportConfig, ImportTable, map_to_import_config_table, None, None),
     "event-validation": (EventValidator, EventValidationTable, map_to_event_validation_table, None, None),
-    # "version": (None, VersionTable, None, None, None),
     "setting": (Setting, SettingTable, map_to_settings_table, None, None),
 }
 
@@ -150,12 +152,12 @@ async def copy_to_mysql(schema: MigrationSchema, elastic_host: str, context: Con
                     try:
 
                         if record_converter is not None:
-                            record = record_converter(record, schema.params)
+                            record = record_converter(record, schema)
 
                         domain_object = record.to_entity(domain_type, set_metadata=False)
 
                         if domain_converter is not None:
-                            domain_object = domain_converter(domain_object, schema.params)
+                            domain_object = domain_converter(domain_object, schema)
 
                         table_data = domain_object_mapping_to_table(domain_object)
 

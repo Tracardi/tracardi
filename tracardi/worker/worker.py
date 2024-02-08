@@ -4,6 +4,7 @@ import asyncio
 
 from huey import RedisHuey
 
+from tracardi.exceptions.log_handler import get_installation_logger
 from tracardi.service.storage.redis_connection_pool import get_redis_connection_pool
 
 import tracardi.worker.service.worker.migration_workers as migration_workers
@@ -24,8 +25,7 @@ queue = RedisHuey('upgrade',
                   results=False
                   )
 
-logger = logging.getLogger(__name__)
-
+logger = get_installation_logger(__name__, level=logging.INFO)
 
 @run_async_task
 async def import_mysql_table_data(task_name:str, import_config: dict, credentials, context: Context):
@@ -172,4 +172,5 @@ This is start job
 def run_migration_job(schemas, elastic_host, context: dict):
     context = Context.from_dict(context)
     _run_migration_job(schemas, elastic_host, context)
+    logger.info("Migration finished")
 

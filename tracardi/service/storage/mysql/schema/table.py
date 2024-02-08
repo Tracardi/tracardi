@@ -240,22 +240,22 @@ class DestinationTable(Base):
 
 
 
-class VersionTable(Base):
-    __tablename__ = 'version'
-
-    id = Column(String(40))
-    version = Column(String(255))
-    name = Column(String(255))
-    prev_version = Column(JSON)
-    upgrades = Column(String(255))
-    config = Column(JSON)
-
-    tenant = Column(String(40))
-    production = Column(Boolean)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant'),
-    )
+# class VersionTable(Base):
+#     __tablename__ = 'version'
+#
+#     id = Column(String(40))
+#     version = Column(String(255))
+#     name = Column(String(255))
+#     prev_version = Column(JSON)
+#     upgrades = Column(String(255))
+#     config = Column(JSON)
+#
+#     tenant = Column(String(40))
+#     production = Column(Boolean)
+#
+#     __table_args__ = (
+#         PrimaryKeyConstraint('id', 'tenant'),
+#     )
 
 
 class UserTable(Base):
