@@ -1,18 +1,13 @@
-import asyncio
 import os
 from uuid import uuid4
 
-from tracardi.domain.installation_status import InstallationStatus
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.license import License, MULTI_TENANT, LICENSE
 from tracardi.service.storage.mysql.bootstrap.bridge import os_default_bridges
 from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
-from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.service.storage.mysql.service.user_service import UserService
 from tracardi.service.tracker import track_event
-from tracardi.config import tracardi, elastic, mysql
-from tracardi.context import ServerContext, get_context
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
@@ -22,84 +17,15 @@ from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
-from tracardi.service.storage.driver.elastic import system as system_db
 from tracardi.service.storage.index import Resource
 
 if License.has_license():
     from com_tracardi.db.bootstrap.default_bridges import commercial_default_bridges
+
     if License.has_service(MULTI_TENANT):
         from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
-
 logger = get_installation_logger(__name__)
-
-
-async def check_installation() -> InstallationStatus:
-    """
-    Returns list of missing and updated indices
-    """
-
-    # Check MYSQL database exists
-
-    ds = DatabaseService()
-
-    if not await ds.exists(mysql.mysql_database):
-        return InstallationStatus(**{
-            "schema_ok": False,
-            "admin_ok": False,
-            "form_ok": False,
-            "warning": None
-        })
-
-    is_schema_ok, indices = await system_db.is_schema_ok()
-
-    ts = TableService()
-
-    if await ts.exists('user'):
-        with ServerContext(get_context().switch_context(False)):
-            us = UserService()
-            admin_records = await us.load_by_role('admin')
-    else:
-        admin_records = []
-
-    has_admin_account = len(admin_records) > 0
-
-    if tracardi.multi_tenant and (not is_schema_ok or not has_admin_account):
-        if License.has_service(MULTI_TENANT):
-            mtm = MultiTenantManager()
-            context = get_context()
-
-            logger.info(f"Authorizing `{context.tenant}` for installation at {mtm.auth_endpoint}.")
-
-            try:
-                await mtm.authorize(tracardi.multi_tenant_manager_api_key)
-            except asyncio.exceptions.TimeoutError:
-                message = (f"Authorizing failed for tenant `{context.tenant}`. "
-                           f"Could not reach Tenant Management Service.")
-                logger.warning(message)
-                return InstallationStatus(**{
-                    "schema_ok": False,
-                    "admin_ok": False,
-                    "form_ok": False,
-                    "warning": message
-                })
-
-            tenant = await mtm.is_tenant_allowed(context.tenant)
-            if not tenant:
-                logger.warning(f"Authorizing failed for tenant `{context.tenant}`.")
-                return InstallationStatus(**{
-                    "schema_ok": False,
-                    "admin_ok": False,
-                    "form_ok": False,
-                    "warning": f"Tenant [{context.tenant}] not allowed."
-                })
-
-    return InstallationStatus(**{
-        "schema_ok": is_schema_ok,
-        "admin_ok": has_admin_account,
-        "form_ok": True,
-        "warning": None
-    })
 
 
 async def install_system(credentials: Credentials):
@@ -162,7 +88,6 @@ async def install_system(credentials: Credentials):
     await BridgeService.bootstrap(default_bridges=os_default_bridges)
     if License.has_service(LICENSE):
         await BridgeService.bootstrap(default_bridges=commercial_default_bridges)
-
 
     # Install staging
     with ServerContext(get_context().switch_context(production=False)):

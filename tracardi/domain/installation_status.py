@@ -4,15 +4,18 @@ from typing import List, Optional, Dict
 from pydantic import BaseModel
 
 from tracardi.service.license import License, MULTI_TENANT
-from tracardi.service.installation import check_installation
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.elastic_client import ElasticClient
-from tracardi.config import tracardi
+from tracardi.config import tracardi, mysql
 from tracardi.context import ServerContext, get_context, Context
 from tracardi.exceptions.log_handler import get_installation_logger
 from tracardi.service.storage.driver.elastic import system as system_db
-from tracardi.service.storage.driver.elastic import user as user_db
 from tracardi.service.storage.index import Resource
+
+from tracardi.service.storage.mysql.service.database_service import DatabaseService
+from tracardi.service.storage.mysql.service.table_service import TableService
+from tracardi.service.storage.mysql.service.user_service import UserService
+
 
 if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
@@ -20,24 +23,35 @@ if License.has_license() and License.has_service(MULTI_TENANT):
 logger = get_installation_logger(__name__)
 
 
-async def check_installation():
+async def check_installation() -> dict:
     """
     Returns list of missing and updated indices
     """
 
+    # Check MYSQL database exists
+
+    ds = DatabaseService()
+
+    if not await ds.exists(mysql.mysql_database):
+        return {
+            "schema_ok": False,
+            "admin_ok": False,
+            "form_ok": False,
+            "warning": None
+        }
+
     is_schema_ok, indices = await system_db.is_schema_ok()
 
-    # Missing admin
-    existing_aliases = [idx[1] for idx in indices if idx[0] == 'existing_alias']
-    index = Resource().get_index_constant('user')
+    ts = TableService()
 
-    with ServerContext(get_context().switch_context(False)):
-        if index.get_index_alias() in existing_aliases:
-            admins = await user_db.search_by_role('admin')
-        else:
-            admins = None
+    if await ts.exists('user'):
+        with ServerContext(get_context().switch_context(False)):
+            us = UserService()
+            admin_records = await us.load_by_role('admin')
+    else:
+        admin_records = []
 
-    has_admin_account = admins is not None and admins.total > 0
+    has_admin_account = len(admin_records) > 0
 
     if tracardi.multi_tenant and (not is_schema_ok or not has_admin_account):
         if License.has_service(MULTI_TENANT):
