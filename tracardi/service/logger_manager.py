@@ -30,7 +30,7 @@ async def save_logs() -> Optional[bool]:
 
     if log_handler.has_logs():
         try:
-            if await installation_status.has_logs_index(get_context().tenant):
+            if await installation_status.has_logs_index(get_context()):
                 await log_db.save(log_handler.collection)
             else:
                 logger.warning("Logs index is not available. Probably system is not installed or being installed or the index went missing.")
