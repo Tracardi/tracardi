@@ -135,7 +135,7 @@ class ResourceTable(Base):
     timestamp = Column(DateTime)
     name = Column(String(64), index=True)
     description = Column(String(255))
-    credentials = Column(String(255))
+    credentials = Column(Text)
     enabled = Column(Boolean, default=False)
     tags = Column(String(255), index=True)
     groups = Column(String(255))
@@ -309,9 +309,15 @@ class IdentificationPointTable(Base):
 class TracardiProTable(Base):
     __tablename__ = 'tracardi_pro'
 
-    id = Column(String(40), primary_key=True)
+    id = Column(String(40))
     token = Column(String(255))
 
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
 
 class EventRedirectTable(Base):
     __tablename__ = 'event_redirect'
