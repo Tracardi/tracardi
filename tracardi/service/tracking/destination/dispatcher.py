@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from tracardi.domain import ExtraInfo
 from tracardi.service.cache_manager import CacheManager
 
 from tracardi.config import tracardi
@@ -30,16 +31,15 @@ async def sync_destination(profile: Optional[Profile], session: Session, console
                                                    debug=False)
             except Exception as e:
                 # todo - this appends error to the same profile - it rather should be en event error
-                console_log.append(Console(
-                    flow_id=None,
-                    node_id=None,
-                    event_id=None,
-                    profile_id=get_entity_id(profile),
-                    origin='destination',
-                    class_name='sync_destination',
-                    module=__name__,
-                    type='error',
-                    message=str(e),
-                    traceback=get_traceback(e)
-                ))
-                logger.error(str(e))
+                logger.error(
+                    str(e),
+                    extra=ExtraInfo.exact(
+                        flow_id=None,
+                        node_id=None,
+                        event_id=None,
+                        profile_id=get_entity_id(profile),
+                        origin='profile-destination',
+                        package=__name__,
+                        traceback=get_traceback(e)
+                    )
+                )

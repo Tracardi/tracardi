@@ -661,7 +661,7 @@ class GraphInvoker(BaseModel):
                                     node_id=None,
                                     module=node.object.console.module,
                                     class_name=node.object.console.class_name,
-                                    type='info',
+                                    type='debug',
                                     message=f"Node `{node_debug_info.name}` edge {input_edge_id} executed without errors."
                                 )
                             )

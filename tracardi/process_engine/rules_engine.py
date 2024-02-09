@@ -2,7 +2,7 @@ import asyncio
 from asyncio import Task
 from collections import defaultdict
 from time import time
-from typing import Dict, List, Tuple, Optional
+from typing import List, Tuple, Optional
 from tracardi.service.license import License
 
 from tracardi.domain.event import Event
@@ -13,6 +13,7 @@ from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
 from .debugger import Debugger
+from ..domain import ExtraInfo
 from ..domain.console import Console
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow
@@ -22,7 +23,6 @@ from ..domain.profile import Profile
 from ..domain.rule_invoke_result import RuleInvokeResult
 from ..domain.session import Session
 from ..domain.rule import Rule
-from ..exceptions.exception import TracardiException
 from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import get_logger
 from ..service.console_log import ConsoleLog
@@ -67,21 +67,20 @@ class RulesEngine:
             for rule in rules:
 
                 if rule is None:
-                    console = Console(
-                        origin="rule",
-                        event_id=event.id,
-                        flow_id=None,
-                        node_id=None,
-                        profile_id=self.profile.id,
-                        module=__name__,
-                        class_name=RulesEngine.__name__,
-                        type="error",
-                        message="Rule to workflow does not exist. This may happen when you debug a workflow that "
-                                "has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
-                                "that gets rescheduled and it could not find the routing to the workflow. "
-                                "Set a routing rule and this error will be solved automatically."
+                    logger.error(
+                        "Rule to workflow does not exist. This may happen when you debug a workflow that "
+                        "has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
+                        "that gets rescheduled and it could not find the routing to the workflow. "
+                        "Set a routing rule and this error will be solved automatically.",
+                        extra=ExtraInfo.build(
+                            origin="rule",
+                            event_id=event.id,
+                            flow_id=None,
+                            node_id=None,
+                            profile_id=self.profile.id,
+                            object=self,
+                        )
                     )
-                    self.console_log.append(console)
                     continue
 
                 # this is main roles loop
@@ -100,19 +99,18 @@ class RulesEngine:
                             continue
                     invoked_flows.append(rule.flow.id)
                 except Exception as e:
-                    console = Console(
-                        origin="rule",
-                        event_id=event.id,
-                        flow_id=None,
-                        node_id=None,
-                        profile_id=None,
-                        module=__name__,
-                        class_name='RulesEngine',
-                        type="error",
-                        message=f"Rule '{rule_name}:{rule.id}' validation error: {str(e)}",
-                        traceback=get_traceback(e)
+                    logger.error(
+                        f"Rule '{rule_name}:{rule.id}' validation error: {str(e)}",
+                        extra=ExtraInfo.build(
+                            origin="rule",
+                            event_id=event.id,
+                            flow_id=None,
+                            node_id=None,
+                            profile_id=None,
+                            object=self,
+                            traceback=get_traceback(e)
+                        )
                     )
-                    self.console_log.append(console)
                     continue
 
                 if not rule.enabled:
@@ -221,23 +219,25 @@ class RulesEngine:
                     flow_responses.append(flow_invoke_result.flow.response)
                     post_invoke_events[post_invoke_event.id] = post_invoke_event
 
+                    # TODO remove
                     # Store logs in one console log
                     self.console_log.append_event_log_list(event_id, flow_id, log_list)
 
+                    # Store logs in central log
+                    flow_invoke_result.register_logs_in_logger()
+
                 except Exception as e:
-                    # todo log error
-                    console = Console(
-                        origin="workflow",
-                        event_id=event_id,
-                        node_id=None,  # We do not know node id here as WF did not start
-                        flow_id=flow_id,
-                        module='tracardi.process_engine.rules_engine',
-                        class_name="RulesEngine",
-                        type="error",
-                        message=repr(e),
-                        traceback=get_traceback(e)
+                    logger.error(
+                        repr(e),
+                        extra=ExtraInfo.build(
+                            origin="workflow",
+                            event_id=event_id,
+                            node_id=None,  # We do not know node id here as WF did not start
+                            flow_id=flow_id,
+                            object=self,
+                            traceback=get_traceback(e)
+                        )
                     )
-                    self.console_log.append(console)
 
                     debug_info = DebugInfo(
                         timestamp=time(),

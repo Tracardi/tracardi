@@ -3,13 +3,13 @@ from dotty_dict import dotty, Dotty
 
 from typing import List, Tuple, Optional, Set
 
+from tracardi.domain import ExtraInfo
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.config import memory_cache, tracardi
-from tracardi.domain.console import Console
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -156,18 +156,15 @@ async def make_event_from_event_payload(event_payload,
 
     if event_payload.validation is not None and event_payload.validation.error is True:
         event.metadata.valid = False
-
-        console_log.append(
-            Console(
+        logger.error(
+            event_payload.validation.message,
+            extra=ExtraInfo.exact(
                 flow_id=None,
                 node_id=None,
                 event_id=event.id,
                 profile_id=get_entity_id(profile),
-                origin='event',
-                class_name='compute_events',
-                module=__name__,
-                type='error',
-                message=event_payload.validation.message,
+                origin='event-computation',
+                package=__name__,
                 traceback=event_payload.validation.trace
             )
         )
@@ -287,22 +284,18 @@ async def compute_events(events: List[EventPayload],
                       f"the original data you sent was not copied because it did not meet the " \
                       f"requirements of the profile. " \
                       f"Details: {repr(e)}."
-            logger.error(message)
-            console_log.append(
-                Console(
+            logger.error(
+                message,
+                extra=ExtraInfo.exact(
                     flow_id=None,
                     node_id=None,
                     event_id=None,
                     profile_id=flat_profile.get('id', None),
-                    origin='event',
-                    class_name='map_event_to_profile',
-                    module=__name__,
-                    type='error',
-                    message=message,
+                    origin='event-computation',
                     traceback=get_traceback(e)
                 )
             )
-            logger.error(message)
+
             if not tracardi.skip_errors_on_profile_mapping:
                 raise e
 

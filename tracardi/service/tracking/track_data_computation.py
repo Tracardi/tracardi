@@ -41,15 +41,12 @@ async def _compute(source,
         if License.has_license():
             # Anonymize, data compliance
 
-            event_payloads, compliance_errors = await event_data_compliance(
+            event_payloads = await event_data_compliance(
                 profile,
                 event_payloads=tracker_payload.events)
 
             # Reassign events as there may be changes
             tracker_payload.events = event_payloads
-
-            for error in compliance_errors:
-                console_log.append(error)
 
             # Merge profile on identification points
 

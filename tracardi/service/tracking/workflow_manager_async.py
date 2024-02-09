@@ -1,6 +1,8 @@
 from uuid import uuid4
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
+
+from tracardi.domain import ExtraInfo
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 
@@ -192,21 +194,18 @@ class WorkflowManagerAsync:
 
                 except Exception as e:
                     message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
-                    self.console_log.append(
-                        Console(
+                    logger.error(
+                        message,
+                        extra=ExtraInfo.build(
                             flow_id=None,
                             node_id=None,
                             event_id=None,
                             profile_id=get_entity_id(self.profile),
                             origin='profile',
-                            class_name='invoke_track_process_step_2',
-                            module=__name__,
-                            type='error',
-                            message=message,
+                            object=self,
                             traceback=get_traceback(e)
                         )
                     )
-                    logger.error(message)
 
                 # TODO Does profile need rules to merge?
                 # Profile merge
@@ -217,21 +216,19 @@ class WorkflowManagerAsync:
 
                 except Exception as e:
                     message = 'Profile merging returned an error `{}`'.format(str(e))
-                    logger.error(message)
-                    self.console_log.append(
-                        Console(
+                    logger.error(
+                        message,
+                        extra=ExtraInfo.build(
                             flow_id=None,
                             node_id=None,
                             event_id=None,
                             profile_id=get_entity_id(self.profile),
                             origin='profile',
-                            class_name='invoke_track_process_step_2',
-                            module=__name__,
-                            type='error',
-                            message=message,
+                            object=self,
                             traceback=get_traceback(e)
                         )
                     )
+
             else:
                 logger.debug(f"No routing rules found for workflow.")
 

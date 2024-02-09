@@ -1,5 +1,7 @@
 from typing import Tuple
 
+from tracardi.domain import ExtraInfo
+
 
 class Log:
 
@@ -21,6 +23,29 @@ class Log:
         return f"Node: {self.node_id}, class: {self.class_name}, module: {self.module}, " \
                f"type: {self.type}, message: {self.message}"
 
+    def to_extra(self) -> dict:
+        return ExtraInfo.exact(
+            origin="workflow",
+            class_name=self.class_name,
+            package=self.module,
+            event_id=None,
+            profile_id=self.profile_id,
+            flow_id=self.flow_id,
+            node_id=self.node_id
+        )
+
+    def is_error(self) -> bool:
+        return self.type == 'error'
+
+    def is_waring(self) -> bool:
+        return self.type == 'warning'
+
+    def is_debug(self) -> bool:
+        return self.type == 'debug'
+
+    def is_info(self) -> bool:
+        return self.type == 'info'
+
 
 class ConsoleStatus:
     errors = 0
@@ -33,12 +58,16 @@ class Console:
     def __init__(self, class_name, module, flow_id=None, profile_id=None, node_id=None):
         self.module = module
         self.class_name = class_name
+        self.debugs = []
         self.infos = []
         self.errors = []
         self.warnings = []
         self.node_id = node_id
         self.flow_id = flow_id
         self.profile_id = profile_id
+
+    def debug(self, item: str):
+        self.debugs.append(item)
 
     def log(self, item: str):
         self.infos.append(item)
@@ -50,7 +79,7 @@ class Console:
         self.warnings.append(item)
 
     def get_logs(self) -> Tuple[Log]:
-        for type, logs in zip(["info", "warning", "error"], [self.infos, self.warnings, self.errors]):
+        for type, logs in zip(["debug", "info", "warning", "error"], [self.debugs, self.infos, self.warnings, self.errors]):
             for message in logs:
                 yield Log(self.module,
                           self.class_name,
