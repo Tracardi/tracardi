@@ -656,3 +656,19 @@ class SettingTable(Base):
     )
 
     running: bool = False
+
+
+
+class ConfigurationTable(Base):
+    __tablename__ = 'configuration'
+
+    id = Column(String(40))
+    timestamp = Column(DateTime)
+    name = Column(String(128))
+    config = Column(JSON)
+
+    tenant = Column(String(40))
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant'),
+    )
