@@ -14,7 +14,6 @@ from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
 from .debugger import Debugger
 from ..domain import ExtraInfo
-from ..domain.console import Console
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow
 from ..domain.flow_invoke_result import FlowInvokeResult
@@ -25,7 +24,6 @@ from ..domain.session import Session
 from ..domain.rule import Rule
 from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import get_logger
-from ..service.console_log import ConsoleLog
 from ..service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
 from ..service.storage.mysql.service.workflow_service import WorkflowService
 
@@ -37,11 +35,9 @@ class RulesEngine:
     def __init__(self,
                  session: Session,
                  profile: Optional[Profile],
-                 events_rules: List[Tuple[List[Rule], Event]],
-                 console_log: ConsoleLog
+                 events_rules: List[Tuple[List[Rule], Event]]
                  ):
 
-        self.console_log = console_log
         self.session = session
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
@@ -218,10 +214,6 @@ class RulesEngine:
 
                     flow_responses.append(flow_invoke_result.flow.response)
                     post_invoke_events[post_invoke_event.id] = post_invoke_event
-
-                    # TODO remove
-                    # Store logs in one console log
-                    self.console_log.append_event_log_list(event_id, flow_id, log_list)
 
                     # Store logs in central log
                     flow_invoke_result.register_logs_in_logger()

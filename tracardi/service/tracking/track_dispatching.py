@@ -10,7 +10,6 @@ from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.tracking.cache.merge_profile_cache import lock_merge_with_cache_and_save_profile
 from tracardi.service.tracking.cache.merge_session_cache import lock_merge_with_cache_and_save_session
@@ -46,7 +45,6 @@ async def trigger_workflows(profile: Profile,
                             session: Session,
                             events: List[Event],
                             tracker_payload: TrackerPayload,
-                            console_log: ConsoleLog,
                             debug: bool) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeTimestampManager, bool]:
 
@@ -60,7 +58,6 @@ async def trigger_workflows(profile: Profile,
 
     if tracardi.enable_workflow:
         tracking_manager = WorkflowManagerAsync(
-            console_log,
             tracker_payload,
             field_manager,
             profile,
@@ -116,7 +113,6 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
                                                                 session: Session,
                                                                 events: List[Event],
                                                                 tracker_payload: TrackerPayload,
-                                                                console_log: ConsoleLog,
                                                                 store_in_db: bool,
                                                                 storage: TrackingPersisterAsync
                                                                 ) -> Tuple[
@@ -130,7 +126,6 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
             session,
             events,
             tracker_payload,
-            console_log,
             False
         )
     )
@@ -194,6 +189,6 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
 
     must_dispatch = profile and tracardi.enable_profile_destinations and profile.has_not_saved_changes()
     if must_dispatch:
-        await sync_destination(profile, session, console_log)
+        await sync_destination(profile, session)
 
     return profile, session, events, ux, response

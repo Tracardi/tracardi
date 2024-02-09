@@ -22,7 +22,6 @@ from tracardi.service.tracking.system_events import add_system_events
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 
@@ -33,8 +32,8 @@ if License.has_license():
 async def _compute(source,
                    profile: Optional[Profile],
                    session: Optional[Session],
-                   tracker_payload: TrackerPayload,
-                   console_log: ConsoleLog) -> Tuple[Optional[Profile], Optional[Session],List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
+                   tracker_payload: TrackerPayload
+                   ) -> Tuple[Optional[Profile], Optional[Session],List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
 
     if profile is not None:
 
@@ -54,8 +53,7 @@ async def _compute(source,
 
             profile, event_payloads = await identify_and_merge_profile(profile,
                                                                        identification_points,
-                                                                       tracker_payload.events,
-                                                                       console_log)
+                                                                       tracker_payload.events)
 
             # Save event payload
             tracker_payload.events = event_payloads
@@ -96,7 +94,6 @@ async def _compute(source,
         session,
         profile, # Profile gets converted to FlatProfile
         tracker_payload.profile_less,
-        console_log,
         tracker_payload
     )
 
@@ -106,8 +103,7 @@ async def _compute(source,
 
 async def lock_and_compute_data(tracker_payload: TrackerPayload,
                        tracker_config: TrackerConfig,
-                       source: EventSource,
-                       console_log: ConsoleLog) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
+                       source: EventSource) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
 Optional[FieldTimestampMonitor]]:
     # We need profile and session before async
 
@@ -121,8 +117,7 @@ Optional[FieldTimestampMonitor]]:
     profile, session = await load_profile_and_session(
         session,
         tracker_config,
-        tracker_payload,
-        console_log
+        tracker_payload
     )
 
     # We need profile ID to lock.
@@ -160,8 +155,7 @@ Optional[FieldTimestampMonitor]]:
             source,
             profile,
             session,
-            tracker_payload,
-            console_log)
+            tracker_payload)
 
         # MUST BE INSIDE MUTEX
         # Update only when needed

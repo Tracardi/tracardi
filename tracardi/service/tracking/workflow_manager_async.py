@@ -10,9 +10,7 @@ from tracardi.config import tracardi
 from tracardi.process_engine.debugger import Debugger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
-from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -40,7 +38,6 @@ class TrackerResult:
     changed_field_timestamps: FieldChangeTimestampManager
     session: Optional[Session] = None
     profile: Optional[Profile] = None
-    console_log: Optional[ConsoleLog] = None
     response: Optional[dict] = None
     debugger: Optional[Debugger] = None
     ux: Optional[list] = None
@@ -63,7 +60,6 @@ class TrackerResult:
 class WorkflowManagerAsync:
 
     def __init__(self,
-                 console_log: ConsoleLog,
                  tracker_payload: TrackerPayload,
                  field_timestamps: FieldChangeTimestampManager,
                  profile: Optional[Profile] = None,
@@ -74,7 +70,6 @@ class WorkflowManagerAsync:
         self.tracker_payload = tracker_payload
         self.profile = profile
         self.session = session
-        self.console_log = console_log
         self.profile_copy = None
         self.has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
 
@@ -156,8 +151,7 @@ class WorkflowManagerAsync:
                 rules_engine = RulesEngine(
                     self.session,
                     self.profile,
-                    events_rules=event_trigger_rules,
-                    console_log=self.console_log
+                    events_rules=event_trigger_rules
                 )
 
                 # Invoke rules engine
@@ -256,7 +250,6 @@ class WorkflowManagerAsync:
                 profile=self.profile,
                 events=events,
                 tracker_payload=self.tracker_payload,
-                console_log=self.console_log,
                 response=flow_responses.merge(),
                 debugger=debugger,
                 ux=ux,

@@ -14,7 +14,6 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.tracking.utils.function_call import default_event_call_function
@@ -86,8 +85,7 @@ async def map_event_to_profile(
         flat_event: Dotty,
         flat_profile: FlatProfile,
         session: Session,
-        source: EventSource,
-        console_log: ConsoleLog) -> Tuple[FlatProfile, FieldTimestampMonitor]:
+        source: EventSource) -> Tuple[FlatProfile, FieldTimestampMonitor]:
 
     # Default event types mappings
 

@@ -9,7 +9,6 @@ from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 
@@ -20,8 +19,7 @@ cache = CacheManager()
 async def os_tracker(source: EventSource,
                      tracker_payload: TrackerPayload,
                      tracker_config: TrackerConfig,
-                     tracking_start: float,
-                     console_log: ConsoleLog
+                     tracking_start: float
                      ):
     try:
 
@@ -34,8 +32,7 @@ async def os_tracker(source: EventSource,
         profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
             tracker_payload,
             tracker_config,
-            source,
-            console_log
+            source
         )
 
         try:
@@ -74,7 +71,6 @@ async def os_tracker(source: EventSource,
                     session,
                     events,
                     tracker_payload,
-                    console_log,
                     # Save. We need to manually save the session and profile in Open-source as there is no
                     # flusher worker and in-memory profile and session is not saved
                     store_in_db=True,  # No cache worker for OS. must store manually

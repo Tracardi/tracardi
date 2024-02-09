@@ -2,7 +2,6 @@ from typing import Optional, Tuple
 
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
@@ -13,9 +12,7 @@ logger = get_logger(__name__)
 
 async def _load_profile_and_deduplicate(
         tracker_payload,
-        is_static=False,
-        console_log: Optional[ConsoleLog] = None
-) -> Optional[Profile]:
+        is_static=False) -> Optional[Profile]:
     """
     Loads current profile. If profile was merged then it loads merged profile.
     """
@@ -45,8 +42,7 @@ async def _load_profile_and_deduplicate(
 async def load_profile_and_session(
         session: Session,
         tracker_config: TrackerConfig,
-        tracker_payload: TrackerPayload,
-        console_log: ConsoleLog
+        tracker_payload: TrackerPayload
 ) -> Tuple[Optional[Profile], Optional[Session]]:
     # Load profile
     profile_loader = _load_profile_and_deduplicate
@@ -59,8 +55,7 @@ async def load_profile_and_session(
         profile, session = await tracker_payload.get_static_profile_and_session(
             session,
             profile_loader,  # Loads from memory if possible
-            tracker_payload.profile_less,
-            console_log
+            tracker_payload.profile_less
         )
 
         # Profile exists but was merged
@@ -81,8 +76,7 @@ async def load_profile_and_session(
         profile, session = await tracker_payload.get_profile_and_session(
             session,
             profile_loader,  # Loads from memory if possible
-            tracker_payload.profile_less,
-            console_log
+            tracker_payload.profile_less
         )
 
     # Check if necessary hashed ID are present and add missing

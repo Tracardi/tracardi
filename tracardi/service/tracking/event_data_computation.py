@@ -17,7 +17,6 @@ from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.event import Event
 from tracardi.service.cache_manager import CacheManager
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
 from tracardi.service.utils.getters import get_entity_id
@@ -74,8 +73,7 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
 async def event_to_profile_mapping(flat_event: Dotty,
                                             flat_profile: Optional[FlatProfile],
                                             session:Session,
-                                            source: EventSource,
-                                            console_log: ConsoleLog) -> Tuple[
+                                            source: EventSource) -> Tuple[
     Dotty, Optional[FlatProfile], Optional[FieldTimestampMonitor], Set[str]]:
 
     auto_merge_ids = set()
@@ -102,8 +100,7 @@ async def event_to_profile_mapping(flat_event: Dotty,
 
         # Map event properties to traits
         flat_event = map_event_props_to_traits(flat_event,
-                                               custom_event_mapping,
-                                               console_log)
+                                               custom_event_mapping)
 
         # Add event tags and add journey tag
         flat_event = map_events_tags_and_journey(flat_event,
@@ -117,8 +114,7 @@ async def event_to_profile_mapping(flat_event: Dotty,
             flat_event,
             flat_profile,
             session,
-            source,
-            console_log)
+            source)
 
         # Add fields timestamps
 
@@ -136,8 +132,7 @@ async def make_event_from_event_payload(event_payload,
                                         session,
                                         source,
                                         metadata,
-                                        profile_less,
-                                        console_log) -> Event:
+                                        profile_less) -> Event:
 
     # Get event
     event = event_payload.to_event(
@@ -187,7 +182,6 @@ async def compute_events(events: List[EventPayload],
                          session: Session,
                          profile: Optional[Profile],
                          profile_less: bool,
-                         console_log: ConsoleLog,
                          tracker_payload: TrackerPayload
                          ) -> Tuple[List[Event], Session, Optional[Profile], Optional[FieldTimestampMonitor]]:
 
@@ -212,8 +206,7 @@ async def compute_events(events: List[EventPayload],
             session,
             source,
             metadata,
-            profile_less,
-            console_log
+            profile_less
         )
 
         flat_event = dotty(event.model_dump(exclude_unset=True))
@@ -224,8 +217,7 @@ async def compute_events(events: List[EventPayload],
                 flat_event,
                 flat_profile,
                 session,
-                source,
-                console_log)
+                source)
 
             # Combine all auto merge ids
 

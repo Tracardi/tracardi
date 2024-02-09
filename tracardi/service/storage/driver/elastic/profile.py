@@ -4,7 +4,6 @@ from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
@@ -123,32 +122,32 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
     return await storage_manager('profile').load_all(start, limit, sort)
 
 
-async def load_profile_without_identification(tracker_payload,
-                                              is_static=False,
-                                              console_log: Optional[ConsoleLog] = None) -> Optional[Profile]:
-    """
-    Loads current profile. If profile was merged then it loads merged profile.
-    """
-    if tracker_payload.profile is None:
-        return None
-
-    profile_id = tracker_payload.profile.id
-
-    profile_record = await load_by_id(profile_id)
-
-    if profile_record is None:
-
-        # Static profiles can be None as they need to be created if does not exist.
-        # Static means the profile id was given in the track payload
-
-        if is_static:
-            return Profile(id=tracker_payload.profile.id)
-
-        return None
-
-    profile = Profile.create(profile_record)
-
-    return profile
+# async def load_profile_without_identification(tracker_payload,
+#                                               is_static=False,
+#                                               console_log: Optional[ConsoleLog] = None) -> Optional[Profile]:
+#     """
+#     Loads current profile. If profile was merged then it loads merged profile.
+#     """
+#     if tracker_payload.profile is None:
+#         return None
+#
+#     profile_id = tracker_payload.profile.id
+#
+#     profile_record = await load_by_id(profile_id)
+#
+#     if profile_record is None:
+#
+#         # Static profiles can be None as they need to be created if does not exist.
+#         # Static means the profile id was given in the track payload
+#
+#         if is_static:
+#             return Profile(id=tracker_payload.profile.id)
+#
+#         return None
+#
+#     profile = Profile.create(profile_record)
+#
+#     return profile
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple],

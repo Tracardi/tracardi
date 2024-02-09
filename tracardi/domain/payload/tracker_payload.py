@@ -18,7 +18,6 @@ from tracardi.config import tracardi
 from ...exceptions.log_handler import get_logger
 
 from ...service.cache_manager import CacheManager
-from ...service.console_log import ConsoleLog
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..event_metadata import EventPayloadMetadata
@@ -267,9 +266,8 @@ class TrackerPayload(BaseModel):
     async def get_static_profile_and_session(
             self,
             session: Session,
-            profile_loader: Callable[['TrackerPayload', bool, Optional[ConsoleLog]], Awaitable],
-            profile_less: bool,
-            console_log: Optional[ConsoleLog] = None
+            profile_loader: Callable[['TrackerPayload', bool], Awaitable],
+            profile_less: bool
     ) -> Tuple[Optional[Profile], Session]:
 
         if profile_less:
@@ -278,9 +276,10 @@ class TrackerPayload(BaseModel):
             if not self.profile or not self.profile.id:
                 raise ValueError("Can not use static profile id without profile.id.")
 
-            profile = await profile_loader(self,
-                                           True,  # is_static is set to true
-                                           console_log)
+            profile = await profile_loader(
+                self,
+                True  # is_static is set to true
+            )
 
             # Create empty profile if the profile id does nto point to any profile in database.
             if not profile:
@@ -368,9 +367,8 @@ class TrackerPayload(BaseModel):
     async def get_profile_and_session(
             self,
             session: Optional[Session],
-            profile_loader: Callable[['TrackerPayload', bool, Optional[ConsoleLog]], Awaitable],
-            profile_less,
-            console_log: Optional[ConsoleLog] = None
+            profile_loader: Callable[['TrackerPayload', bool], Awaitable],
+            profile_less
     ) -> Tuple[Optional[Profile], Session]:
 
         """
@@ -448,8 +446,8 @@ class TrackerPayload(BaseModel):
                     # ID exists, load profile from storage
                     profile: Optional[Profile] = await profile_loader(
                         self,
-                        False,  # Not static profile ID
-                        console_log)
+                        False  # Not static profile ID
+                        )
 
                     if profile is None:
                         # Profile id delivered but profile does not exist in storage.
@@ -493,8 +491,8 @@ class TrackerPayload(BaseModel):
 
                     profile: Optional[Profile] = await profile_loader(
                         copy_of_tracker_payload,  # Not static profile ID
-                        False,
-                        console_log)
+                        False
+                    )
 
                     # Reassign events that can be mutated
                     self.events = copy_of_tracker_payload.events
@@ -557,8 +555,7 @@ class TrackerPayload(BaseModel):
 
                         fp_profile: Optional[Profile] = await profile_loader(
                             copy_of_tracker_payload,
-                            False,  # Not static profile ID
-                            console_log
+                            False  # Not static profile ID
                         )
 
                         # Reassign events that can be mutated
