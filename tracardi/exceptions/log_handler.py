@@ -42,6 +42,7 @@ class ElasticLogHandler(Handler):
             "profile_id": self._get(record, "profile_id", None),
             "flow_id": self._get(record, "flow_id", None),
             "node_id": self._get(record, "node_id", None),
+            "user_id": self._get(record, "user_id", None),
         }
 
         if _save_logs_on:

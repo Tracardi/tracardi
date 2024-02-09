@@ -310,18 +310,6 @@
     "asynchronous": true
   },
   {
-    "id": "23a50c2a87657ea6216cfd8f27a22d07447c5115",
-    "copy_index": {
-      "from_index": "tracardi-user-log",
-      "to_index": "tracardi-user-log",
-      "multi": true,
-      "script": null
-    },
-    "worker": "reindex",
-    "conflicts": null,
-    "asynchronous": false
-  },
-  {
     "id": "644178dbc088c3ca1e705967e644355684cb0459",
     "copy_index": {
       "from_index": "tracardi-log",
@@ -338,18 +326,6 @@
     "copy_index": {
       "from_index": "tracardi-session",
       "to_index": "tracardi-session",
-      "multi": true,
-      "script": null
-    },
-    "worker": "reindex",
-    "conflicts": null,
-    "asynchronous": false
-  },
-  {
-    "id": "a567b8eae5a59fa8c5cbf2414e934c2f02aac810",
-    "copy_index": {
-      "from_index": "tracardi-console-log",
-      "to_index": "tracardi-console-log",
       "multi": true,
       "script": null
     },
