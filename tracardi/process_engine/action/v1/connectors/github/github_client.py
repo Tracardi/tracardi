@@ -33,6 +33,18 @@ class GitHubClient:
             async with await self._http_get(client, url) as response:
                 return await _transform_response(response)
 
+    async def list_files(self, path):
+        url = f'{self._get_repo_url()}/contents/{path}'
+        async with await self._new_client() as client:
+            async with await self._http_get(client, url) as response:
+                return await _transform_response(response)
+
+    async def list_file_commits(self, filepath):
+        url = f"{self._get_repo_url()}/commits?path={filepath}"
+        async with await self._new_client() as client:
+            async with await self._http_get(client, url) as response:
+                return await _transform_response(response)
+
     async def get_issue(self, issue_id):
         issue_id = _normalize_issue_id(issue_id)
         url = f'{self._get_repo_url()}/issues/{issue_id}'

@@ -38,6 +38,30 @@
         },
         "stack_info": {
           "type": "keyword"
+        },
+        "event_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "profile_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "flow_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "node_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "origin": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "class_name": {
+          "type": "keyword"
+        },
+        "module": {
+          "type": "text"
+        },
+        "type": {
+          "type": "keyword"
         }
       }
     },

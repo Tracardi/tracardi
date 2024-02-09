@@ -50,6 +50,8 @@ class MicroserviceAction(ActionRunner):
                            f"?service_id={service_id}" \
                            f"&action_id={action_id}"
 
+        print(config['init'])
+
         async with aiohttp.ClientSession(headers={
             'Authorization': f"Bearer {microservice_credentials.token}"
         }) as client:
@@ -88,9 +90,7 @@ def register() -> Plugin:
             version='0.7.2',
             license="MIT + CC",
             author="Risto Kowaczewski",
-            init={
-
-            }
+            init={}
         ),
         metadata=MetaData(
             name='Microservice',
