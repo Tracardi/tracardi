@@ -1,8 +1,8 @@
 import pytest
 
 from tracardi.context import ServerContext, Context
-from tracardi.service.storage.mysql.schema.table import PluginTable, EventSourceTable
-from tracardi.service.storage.mysql.service.table_service import where_tenant_and_mode_context, where_with_context, \
+from tracardi.service.storage.mysql.schema.table import EventSourceTable
+from tracardi.service.storage.mysql.service.table_filtering import where_tenant_and_mode_context, where_with_context, \
     tenant_and_mode_context_filter
 
 

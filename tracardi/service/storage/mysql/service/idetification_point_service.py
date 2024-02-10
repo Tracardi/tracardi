@@ -8,7 +8,8 @@ from tracardi.service.storage.mysql.mapping.identification_point_mapping import 
     map_to_identification_point
 from tracardi.service.storage.mysql.schema.table import IdentificationPointTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
+from tracardi.service.storage.mysql.service.table_service import TableService
+from tracardi.service.storage.mysql.service.table_filtering import where_tenant_and_mode_context
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

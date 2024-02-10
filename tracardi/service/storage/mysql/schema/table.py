@@ -427,6 +427,51 @@ class EventMappingTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        UniqueConstraint('event_type', name='uiq_event_type')
+    )
+
+    running: bool = False
+
+class EventPropertiesTable(Base):
+    __tablename__ = 'event_properties'
+
+    id = Column(String(40))
+    event_type = Column(String(40), ForeignKey('event_mapping.event_type')) # sign-in
+    field_path = Column(String(255), index=True) # properties.email
+    field_type = Column(String(40))  # string
+    traits_field = Column(String(255), nullable=True)  # event_to_traits
+
+    # Additional fields for multi-tenancy
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('ix_event_type_fields', 'event_type', 'field_path'),
+        UniqueConstraint('event_type', 'field_path', name='uiq_event_type')
+    )
+
+    running: bool = False
+
+
+class EventPropertiesToEntityMappingTable(Base):
+    __tablename__ = 'event_properties_to_entity_mapping'
+
+    id = Column(String(40))
+    event_type = Column(String(40), ForeignKey('event_properties.event_type'))  # sign-in
+    property_field_path = Column(String(255), ForeignKey('event_properties.field_path'))  # properties.email
+    entity_name = Column(String(64))  # e.g. profile
+    field_path = Column(String(255))  # data.pii.email.main
+    field_type = Column(String(40))   # string
+    converter  = Column(String(40))   # lower
+
+    # Additional fields for multi-tenancy
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('ix_event_type_fields', 'event_type', 'property_field_path'),
     )
 
     running: bool = False

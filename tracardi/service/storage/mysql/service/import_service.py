@@ -8,7 +8,7 @@ from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.import_mapping import map_to_import_config_table, map_to_import_config
 from tracardi.service.storage.mysql.schema.table import ImportTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
+from tracardi.service.storage.mysql.service.table_service import TableService
 
 logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)

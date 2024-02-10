@@ -10,7 +10,8 @@ from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_
     map_to_workflow_trigger_rule
 from tracardi.service.storage.mysql.schema.table import WorkflowTriggerTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-from tracardi.service.storage.mysql.service.table_service import TableService, where_tenant_and_mode_context
+from tracardi.service.storage.mysql.service.table_service import TableService
+from tracardi.service.storage.mysql.service.table_filtering import where_tenant_and_mode_context
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.config import tracardi, memory_cache as memory_cache_config
 
