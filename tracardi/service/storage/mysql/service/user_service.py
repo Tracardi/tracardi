@@ -2,7 +2,7 @@ from typing import Optional, List, Tuple
 
 import logging
 
-from app.api.domain.user_payload import UserPayload
+from tracardi.domain.user_payload import UserPayload
 from tracardi.config import tracardi
 from tracardi.domain.user import User
 from tracardi.exceptions.log_handler import log_handler

@@ -18,6 +18,7 @@ IMAP_BRIDGE = "imap7sd1"
 RABBITMQ_BRIDGE = "rabYa25d"
 KAFKA_BRIDGE = "kaff43sA"
 MQTT_BRIDGE = "mqtt1kse"
+PULSAR_BRIDGE = "apuls33r"
 
 SCHEDULER = "scheda75"
 VALIDATOR = "vali34k0"
