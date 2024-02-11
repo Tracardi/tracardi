@@ -1,5 +1,6 @@
 from tracardi.config import tracardi
 from tracardi.context import get_context, Context
+from tracardi.domain import ExtraInfo
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
@@ -104,9 +105,12 @@ class MigrationManager:
         tenant = context.tenant
 
         if self.get_current_db_version_prefix(tracardi.version) != self.to_version or tenant != self.to_tenant:
-            raise ValueError(f"Installed system version is {tracardi.version.db_version} for tenant {tenant}, "
-                             f"but migration script is for version {self.to_version} for "
-                             f"tenant {self.to_tenant}.")
+            message = f"Installed system version is {tracardi.version.db_version} for tenant {tenant}, " \
+                      f"but migration script is for version {self.to_version} for " \
+                      f"tenant {self.to_tenant}."
+            logger.error(message,
+                         extra=ExtraInfo.build(object=self, origin="migration", error_number="M0002"))
+            return {"warn": message, "schemas": []}
 
         schemas = self._get_migration_schemas_for_current_version()
 
@@ -144,7 +148,14 @@ class MigrationManager:
                     match_indices = re.findall(r'(-[0-9]{4}-[0-9]{1,2}|-[0-9]{4}-q[1-4]|-[0-9]{4}-year)', from_index)
 
                     if len(match_indices) == 0:
-                        logger.error(f"Could not find multi indices for {from_index}")
+                        logger.error(
+                            f"Could not find multi indices for {from_index}",
+                            extra=ExtraInfo.build(
+                                object=self,
+                                origin="migration",
+                                error_number="M0003"
+                            )
+                        )
                         continue
 
                     to_index = f"{schema.copy_index.to_index}{match_indices[0]}"
@@ -188,7 +199,14 @@ class MigrationManager:
                 if await es.exists_index(schema.copy_index.from_index):
                     set_of_schemas_to_migrate.append(schema)
                 else:
-                    logger.warning(f"Can't find the index {schema.copy_index.from_index}. Migration for this index will be stopped.")
+                    logger.warning(
+                        f"Can't find the index {schema.copy_index.from_index}. Migration for this index will be stopped.",
+                        extra=ExtraInfo.build(
+                            object=self,
+                            origin="migration",
+                            error_number="M0001"
+                        )
+                    )
 
         # TODO Warning disabled - save installation info in redis.
         warn = self.from_version in tracardi.version.upgrades

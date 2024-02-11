@@ -62,6 +62,9 @@
         },
         "module": {
           "type": "text"
+        },
+        "error_number": {
+          "type": "keyword"
         }
       }
     },

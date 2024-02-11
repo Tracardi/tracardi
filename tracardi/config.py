@@ -4,6 +4,7 @@ from hashlib import md5
 
 import yaml
 
+from tracardi.domain import ExtraInfo
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 from tracardi.exceptions.log_handler import get_logger
@@ -227,17 +228,26 @@ class TracardiConfig(metaclass=Singleton):
         if self.multi_tenant and (self.multi_tenant_manager_url is None or self.multi_tenant_manager_api_key is None):
             if self.multi_tenant_manager_url is None:
                 logger.warning('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
-                               'the MULTI_TENANT_MANAGER_URL or set MULTI_TENANT to "no"')
+                               'the MULTI_TENANT_MANAGER_URL or set MULTI_TENANT to "no"',
+                               extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0001")
+                               )
 
             if self.multi_tenant_manager_api_key is None:
                 logger.warning('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
-                               'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"')
+                               'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"',
+                               extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0002")
+                               )
 
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
-            logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
+            logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.',
+                           extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0003")
+                           )
 
         if self.apm_on and self.auto_profile_merging and len(self.auto_profile_merging) < 20:
-            logger.warning('Security risk. Env AUTO_PROFILE_MERGING is too short. It must be at least 20 chars long.')
+            logger.warning(
+                'Security risk. Env AUTO_PROFILE_MERGING is too short. It must be at least 20 chars long.',
+                extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0004")
+            )
 
     def is_apm_on(self) -> bool:
         return self.apm_on
