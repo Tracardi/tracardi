@@ -1,13 +1,18 @@
+from asyncio import sleep
+
+from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, Type, Callable, Tuple, TypeVar
 
 from sqlalchemy.dialects.mysql import insert
 
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
-from sqlalchemy import inspect, update, Column, text
+from sqlalchemy import inspect, update, Column
 
 from tracardi.service.storage.mysql.schema.table import Base
 from tracardi.service.storage.mysql.service.table_filtering import where_with_context, where_tenant_and_mode_context
+from sqlalchemy.sql import text
 
 if License.has_service(LICENSE):
     from com_tracardi.service.mysql.query_service import MysqlQuery, MysqlQueryInDeploymentMode
@@ -16,6 +21,25 @@ else:
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 T = TypeVar('T')
+logger = get_logger(__name__)
+
+async def wait_for_mysql_connection():
+    ts = TableService(True)
+    retries = 0
+    while True:
+        retries += 1
+
+        if retries == 5:
+            logger.error(f"Mysql not available. Exiting...")
+            exit(1)
+
+        try:
+            version = await ts.select_version()
+            logger.info(f"Connected to Mysql {version}")
+            return version
+        except SQLAlchemyError as e:
+            logger.warning(f"Waiting for Mysql connection. Try: {retries} {str(e)}")
+            await sleep(5)
 
 class TableService:
 
@@ -295,3 +319,12 @@ class TableService:
             async with session.begin():
                 resource = MysqlQuery(session)
                 await resource.delete(table, where)
+
+
+    async def select_version(self):
+
+        local_session = self.client.get_session(self.engine)
+        async with local_session() as session:
+            async with session.begin():
+                result = await session.execute(text("SELECT VERSION();"))
+                return result.fetchone()

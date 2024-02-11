@@ -34,13 +34,32 @@ class MysqlConfig:
 
     def __init__(self, env):
         self.env = env
-        self.mysql_database_uri = env.get('MYSQL_DATABASE_URI', "mysql+aiomysql://root:root@localhost/")
+        self.mysql_host = env.get('MYSQL_HOST', "localhost")
+        self.mysql_username = env.get('MYSQL_USERNAME', "root")
+        self.mysql_password = env.get('MYSQL_PASSWORD', "root")
+        self.mysql_schema = env.get('MYSQL_SCHEMA', "mysql+aiomysql://")
+        self.mysql_port = env.get('MYSQL_PORT', 3306)
         self.mysql_database = env.get('MYSQL_DATABASE', "tracardi")
         self.mysql_echo = env.get('MYSQL_ECHO', "no") == "yes"
 
-        self.mysql_database_uri = self.mysql_database_uri.strip(" /")
         self.mysql_database = self.mysql_database.strip(" /")
 
+        self.mysql_database_uri = self._uri()
+        self.mysql_database_uri = self.mysql_database_uri.strip(" /")
+
+
+    def _uri(self):
+        if self.mysql_username and self.mysql_password:
+            _creds = f"{self.mysql_username}:{self.mysql_password}"
+        elif self.mysql_username:
+            _creds = f"{self.mysql_username}:"
+        else:
+            _creds = ""
+
+        if _creds:
+            return f"{self.mysql_schema}{_creds}@{self.mysql_host}:{self.mysql_port}"
+        else:
+            return f"{self.mysql_schema}{self.mysql_host}:{self.mysql_port}"
 
 class ElasticConfig:
 
