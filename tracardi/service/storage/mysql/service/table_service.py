@@ -5,6 +5,7 @@ from typing import Optional, Type, Callable, Tuple, TypeVar
 
 from sqlalchemy.dialects.mysql import insert
 
+from tracardi.config import mysql
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
@@ -34,6 +35,7 @@ async def wait_for_mysql_connection():
             exit(1)
 
         try:
+            print(mysql.mysql_database_uri)
             version = await ts.select_version()
             logger.info(f"Connected to Mysql {version}")
             return version
