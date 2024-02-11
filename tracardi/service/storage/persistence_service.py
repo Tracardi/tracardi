@@ -160,7 +160,7 @@ class SqlSearchQueryEngine:
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:
-            _logger.error("Could not filter {}. Reason: {}".format(es_query, str(e)))
+            _logger.warning("Could not filter data using {}. Possible reason - wrong filter query typed by user. Details: {}".format(es_query, str(e)))
             return QueryResult(total=0, result=[])
 
         return QueryResult(**result.dict())

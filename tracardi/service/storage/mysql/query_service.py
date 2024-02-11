@@ -1,13 +1,11 @@
 from tracardi.context import get_context
-from typing import Type, Any, Callable, Optional, Tuple
-
 from tracardi.service.storage.mysql.schema.table import Base
-from sqlalchemy import Column, Select, update, delete, ChunkedIteratorResult, and_
-from sqlalchemy.future import select
-
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
+from typing import Type, Any, Callable, Optional, Tuple
 
+from sqlalchemy import Column, Select, update, delete, ChunkedIteratorResult, and_
+from sqlalchemy.future import select
 
 
 def context_filter(table: Type[Base], tenant: str, production: bool, *clauses):
