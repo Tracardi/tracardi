@@ -15,6 +15,7 @@ from pydantic import PrivateAttr, BaseModel
 from user_agents import parse
 
 from tracardi.config import tracardi
+from .. import ExtraInfo
 from ...exceptions.log_handler import get_logger
 
 from ...service.cache_manager import CacheManager
@@ -355,7 +356,10 @@ class TrackerPayload(BaseModel):
                 return find_profile_by_fields
             return None
         except AssertionError as e:
-            logger.error(f"Can not find property to load profile by identification data: {str(e)}", e, exc_info=True)
+            logger.error(f"Can not find property to load profile by identification data: {str(e)}", e,
+                         exc_info=True,
+                         extra=ExtraInfo.build(origin="collector", object=self, error_number="T0001")
+                         )
             return None
 
     def finger_printing_enabled(self):

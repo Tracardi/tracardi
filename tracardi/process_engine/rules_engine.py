@@ -26,6 +26,7 @@ from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import get_logger
 from ..service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
 from ..service.storage.mysql.service.workflow_service import WorkflowService
+from ..service.utils.getters import get_entity_id
 
 logger = get_logger(__name__)
 
@@ -73,8 +74,9 @@ class RulesEngine:
                             event_id=event.id,
                             flow_id=None,
                             node_id=None,
-                            profile_id=self.profile.id,
+                            profile_id=get_entity_id(self.profile),
                             object=self,
+                            error_number="R0001"
                         )
                     )
                     continue
@@ -100,11 +102,12 @@ class RulesEngine:
                         extra=ExtraInfo.build(
                             origin="rule",
                             event_id=event.id,
-                            flow_id=None,
+                            flow_id=rule.flow.id,
                             node_id=None,
-                            profile_id=None,
+                            profile_id=get_entity_id(self.profile),
                             object=self,
-                            traceback=get_traceback(e)
+                            traceback=get_traceback(e),
+                            error_number="R0002"
                         )
                     )
                     continue
@@ -128,7 +131,18 @@ class RulesEngine:
                     flow: Flow = Flow.from_workflow_record(flow_record)
 
                 except Exception as e:
-                    logger.error(str(e), e, exc_info=True)
+                    logger.error(str(e), e,
+                                 extra=ExtraInfo.build(
+                                     origin="rule",
+                                     event_id=event.id,
+                                     flow_id=rule.flow.id,
+                                     node_id=None,
+                                     profile_id=get_entity_id(self.profile),
+                                     object=self,
+                                     traceback=get_traceback(e),
+                                     error_number="R0003"
+                                 ),
+                                 exc_info=True)
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(
                         timestamp=time(),
@@ -226,8 +240,10 @@ class RulesEngine:
                             event_id=event_id,
                             node_id=None,  # We do not know node id here as WF did not start
                             flow_id=flow_id,
+                            profile_id=get_entity_id(self.profile),
                             object=self,
-                            traceback=get_traceback(e)
+                            traceback=get_traceback(e),
+                            error_number="R0003"
                         )
                     )
 
