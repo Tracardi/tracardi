@@ -71,7 +71,7 @@ class MigrationManager:
             )
 
         with open(
-                f"{Path(__file__).parent}/schemas/{filename}.json",
+                f"{Path(__file__).parent}/elastic/{filename}.json",
                 mode="r"
         ) as f:
             return [MigrationSchema(**schema) for schema in json.load(f) if isinstance(schema, dict)]  # avoid comments
