@@ -1,11 +1,7 @@
-from asyncio import sleep
-
-from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, Type, Callable, Tuple, TypeVar
 
 from sqlalchemy.dialects.mysql import insert
 
-from tracardi.config import mysql
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
@@ -24,24 +20,6 @@ from tracardi.service.storage.mysql.utils.select_result import SelectResult
 T = TypeVar('T')
 logger = get_logger(__name__)
 
-async def wait_for_mysql_connection():
-    ts = TableService(True)
-    retries = 0
-    while True:
-        retries += 1
-
-        if retries == 5:
-            logger.error(f"Mysql not available. Exiting...")
-            exit(1)
-
-        try:
-            print(mysql.mysql_database_uri)
-            version = await ts.select_version()
-            logger.info(f"Connected to Mysql {version}")
-            return version
-        except SQLAlchemyError as e:
-            logger.warning(f"Waiting for Mysql connection. Try: {retries} {str(e)}")
-            await sleep(5)
 
 class TableService:
 
@@ -141,13 +119,13 @@ class TableService:
                 return result.scalar() is not None
 
     async def _base_load_all(self,
-                        table: Type[Base],
-                        columns=None,
-                        order_by: Column = None,
-                        limit: int = None,
-                        offset: int = None,
-                        distinct: bool = False,
-                        server_context: bool = True) -> SelectResult:
+                             table: Type[Base],
+                             columns=None,
+                             order_by: Column = None,
+                             limit: int = None,
+                             offset: int = None,
+                             distinct: bool = False,
+                             server_context: bool = True) -> SelectResult:
 
         where = where_with_context(table, server_context)
 
@@ -322,11 +300,11 @@ class TableService:
                 resource = MysqlQuery(session)
                 await resource.delete(table, where)
 
-
     async def select_version(self):
 
         local_session = self.client.get_session(self.engine)
         async with local_session() as session:
             async with session.begin():
                 result = await session.execute(text("SELECT VERSION();"))
-                return result.fetchone()
+                # return result.fetchone()
+                print(result)

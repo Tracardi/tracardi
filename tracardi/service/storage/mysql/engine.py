@@ -12,7 +12,8 @@ class AsyncMySqlEngine(metaclass=Singleton):
         self.engines = {}
         self.echo = mysql.mysql_echo if echo is None else echo
 
-    def get_session(self, async_engine):
+    @staticmethod
+    def get_session(async_engine):
         return sessionmaker(
             bind=async_engine,
             class_=AsyncSession,
