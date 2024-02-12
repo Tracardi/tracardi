@@ -299,12 +299,3 @@ class TableService:
             async with session.begin():
                 resource = MysqlQuery(session)
                 await resource.delete(table, where)
-
-    async def select_version(self):
-
-        local_session = self.client.get_session(self.engine)
-        async with local_session() as session:
-            async with session.begin():
-                result = await session.execute(text("SELECT VERSION();"))
-                # return result.fetchone()
-                print(result)

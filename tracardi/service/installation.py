@@ -7,6 +7,7 @@ from tracardi.service.storage.mysql.bootstrap.bridge import os_default_bridges
 from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
 from tracardi.service.storage.mysql.service.user_service import UserService
+from tracardi.service.storage.mysql.service.version_service import VersionService
 from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
@@ -136,6 +137,13 @@ async def install_system(credentials: Credentials):
 
     logger.info(f"Installing plugins on startup")
     installed_plugins = await install_default_plugins()
+
+
+    # Install version in Mysql
+
+    vs = VersionService()
+    await vs.upsert(tracardi.version)
+
     staging_install_result['plugins'] = installed_plugins
     production_install_result['plugins'] = installed_plugins
 

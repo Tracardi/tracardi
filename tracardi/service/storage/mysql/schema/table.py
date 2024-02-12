@@ -243,9 +243,6 @@ class DestinationTable(Base):
 class VersionTable(Base):
     __tablename__ = 'version'
 
-    id = Column(String(40))
-    timestamp = Column(DateTime)
-
     es_schema_version = Column(String(64))
     api_version = Column(String(64))
     mysql_schema_version = Column(String(64))
@@ -253,29 +250,9 @@ class VersionTable(Base):
     tenant = Column(String(40))
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant'),
+        PrimaryKeyConstraint('tenant', 'api_version'),
     )
 
-class VersionUpgradeTable(Base):
-    __tablename__ = 'version_upgrade'
-
-    id = Column(String(40))
-    timestamp = Column(DateTime)
-
-    version_id = Column(String(40), ForeignKey('version.id'))
-
-    es_schema_version = Column(String(64))
-    api_version = Column(String(64))
-    mysql_schema_version = Column(String(64))
-
-    status = Column(String(64))
-    result = Column(JSON)
-
-    tenant = Column(String(40))
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant'),
-    )
 
 class UserTable(Base):
     __tablename__ = 'user'
