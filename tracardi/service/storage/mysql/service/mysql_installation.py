@@ -18,22 +18,25 @@ async def wait_for_mysql_connection():
                                  class_=AsyncSession,
                                  expire_on_commit=False)
 
-    retries = 0
-    while True:
-        retries += 1
+    try:
+        retries = 0
+        while True:
+            retries += 1
 
-        if retries == 5:
-            logger.error(f"Mysql not available. Exiting...")
-            exit(1)
+            if retries == 5:
+                logger.error(f"Mysql not available. Exiting...")
+                exit(1)
 
-        try:
-            async with async_session() as session:
-                # Perform the query asynchronously
-                result = await session.execute(text("SELECT VERSION();"))
-                # Fetch the result
-                result = result.fetchone()
-                logger.info(f"Connected to Mysql {result}")
-                return result
-        except SQLAlchemyError as e:
-            logger.warning(f"Waiting for Mysql connection. Try: {retries} {str(e)}")
-            await sleep(5)
+            try:
+                async with async_session() as session:
+                    # Perform the query asynchronously
+                    result = await session.execute(text("SELECT VERSION();"))
+                    # Fetch the result
+                    result = result.fetchone()
+                    logger.info(f"Connected to Mysql {result}")
+                    return result
+            except SQLAlchemyError as e:
+                logger.warning(f"Waiting for Mysql connection. Try: {retries} {str(e)}")
+                await sleep(5)
+    finally:
+        await engine.dispose()
