@@ -1,13 +1,10 @@
 import asyncio
-import logging
-
 from dotty_dict import Dotty
 
 from tracardi.service.tracking.storage.profile_storage import save_profile, delete_profile
 
 from tracardi.domain.profile_data import ProfileData
 
-from .tracking.cache.profile_cache import delete_profile_cache, save_profile_cache
 from ..context import get_context
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.driver.elastic import event as event_db
@@ -18,19 +15,17 @@ from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update
 
-from ..config import tracardi
 from ..domain.metadata import ProfileMetadata
 from ..domain.profile import Profile
 from ..domain.profile_stats import ProfileStats
 from ..domain.time import ProfileTime
-from ..exceptions.log_handler import log_handler
+from ..exceptions.log_handler import get_logger
+
 from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
@@ -54,23 +49,8 @@ async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], m
             await session_db.refresh()
 
 
-async def _save_profile(profile):
-    # Save in cache
-    save_profile_cache(profile)
-
-    # Save to database
-    await save_profile(profile)
-
-
-async def _delete_by_id(profile_id, index):
-    # Delete from database
-    await delete_profile(profile_id, index)
-    # Delete from cache
-    delete_profile_cache(profile_id, get_context())
-
-
 async def _delete_profiles(profile_ids: List[Tuple[str, RecordMetadata]]):
-    tasks = [asyncio.create_task(_delete_by_id(profile_id, metadata.index))
+    tasks = [asyncio.create_task(delete_profile(profile_id, metadata.index))
              for profile_id, metadata in profile_ids]
     return await asyncio.gather(*tasks)
 
@@ -350,7 +330,7 @@ class ProfileMerger:
                 merged_profile,
                 duplicate_profiles)
 
-            await _save_profile(merged_profile)
+            await save_profile(merged_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
             await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)

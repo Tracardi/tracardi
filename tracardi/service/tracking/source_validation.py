@@ -1,20 +1,16 @@
 from typing import Optional
 
-import logging
-
 from tracardi.config import tracardi, memory_cache
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
-from tracardi.exceptions.exception import UnauthorizedException
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.setup.data.defaults import open_rest_source_bridge
+from tracardi.service.utils.date import now_in_utc
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 
@@ -35,14 +31,14 @@ async def _check_source_id(allowed_bridges, source_id) -> Optional[EventSource]:
     if source is not None:
 
         if not source.enabled:
-            raise ValueError("Event source disabled.")
+            raise PermissionError("Event source disabled.")
 
         if not source.is_allowed(allowed_bridges):
-            raise ValueError(f"This endpoint allows only bridges of "
-                             f"types {allowed_bridges}, but the even source "
-                             f"`{source.name}`.`{source_id}` has types `{source.type}`. "
-                             f"Change bridge type in event source `{source.name}` to one that has endpoint type "
-                             f"{allowed_bridges} or call any `{source.type}` endpoint.")
+            raise PermissionError(f"This endpoint allows only bridges of "
+                                        f"types {allowed_bridges}, but the even source "
+                                        f"`{source.name}`.`{source_id}` has types `{source.type}`. "
+                                        f"Change bridge type in event source `{source.name}` to one that has endpoint type "
+                                        f"{allowed_bridges} or call any `{source.type}` endpoint.")
 
     return source
 
@@ -54,6 +50,7 @@ async def _validate_source(tracker_payload: TrackerPayload, allowed_bridges) -> 
     if source_id == tracardi.internal_source:
         return EventSource(
             id=source_id,
+            timestamp=now_in_utc(),
             type=['internal'],
             bridge=NamedEntity(id=open_rest_source_bridge.id, name=open_rest_source_bridge.name),
             name="Internal event source",
@@ -66,7 +63,7 @@ async def _validate_source(tracker_payload: TrackerPayload, allowed_bridges) -> 
     source = await _check_source_id(allowed_bridges, source_id)
 
     if source is None:
-        raise UnauthorizedException(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
+        raise PermissionError(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
                          f"width payload: {tracker_payload}")
 
     return source
@@ -75,7 +72,7 @@ async def _validate_source(tracker_payload: TrackerPayload, allowed_bridges) -> 
 def _get_internal_source(tracker_config: TrackerConfig, tracker_payload: TrackerPayload):
     if tracker_config.internal_source.id != tracker_payload.source.id:
         msg = f"Invalid event source `{tracker_payload.source.id}`"
-        raise UnauthorizedException(msg)
+        raise PermissionError(msg)
     return tracker_config.internal_source
 
 

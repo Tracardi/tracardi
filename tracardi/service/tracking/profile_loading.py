@@ -1,23 +1,14 @@
-import logging
 from typing import Optional, Tuple
 
-from tracardi.domain.console import Console
-
 from tracardi.domain.session import Session
-from tracardi.config import tracardi
-from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.profile_deduplicator import deduplicate_profile
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.service.tracking.storage.profile_storage import load_profile
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def _load_profile_and_deduplicate(
@@ -35,20 +26,19 @@ async def _load_profile_and_deduplicate(
 
     profile = await load_profile(profile_id)
 
-    if profile is None:
+    if profile is not None:
+        return profile
 
-        # Static profiles can be None as they need to be created if does not exist.
-        # Static means the profile id was given in the track payload
-
-        if is_static:
-            profile = Profile.new(id=tracker_payload.profile.id)
-            # This is new profile as we could not load it.
-            profile.set_new()
-            profile.set_updated(False)
-            return profile
-
+    if not is_static:
         return None
 
+    # Static profiles can be None as they need to be created if does not exist.
+    # Static means the profile id was given in the track payload
+
+    profile = Profile.new(id=tracker_payload.profile.id)
+    # This is new profile as we could not load it.
+    profile.set_new()
+    profile.set_updated(False)
     return profile
 
 
@@ -58,7 +48,6 @@ async def load_profile_and_session(
         tracker_payload: TrackerPayload,
         console_log: ConsoleLog
 ) -> Tuple[Optional[Profile], Optional[Session]]:
-
     # Load profile
     profile_loader = _load_profile_and_deduplicate
 

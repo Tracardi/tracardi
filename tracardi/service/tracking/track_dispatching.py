@@ -1,18 +1,18 @@
-import logging
-
 from typing import List, Tuple, Optional
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
+from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.context import get_context
 from tracardi.service.console_log import ConsoleLog
 from tracardi.service.field_mappings_cache import add_new_field_mappings
-from tracardi.service.tracking.cache.profile_cache import lock_merge_with_cache_and_save_profile
-from tracardi.service.tracking.cache.session_cache import lock_merge_with_cache_and_save_session
+from tracardi.service.tracking.cache.merge_profile_cache import lock_merge_with_cache_and_save_profile
+from tracardi.service.tracking.cache.merge_session_cache import lock_merge_with_cache_and_save_session
 from tracardi.service.tracking.destination.destination_dispatcher import ProfileDestinationDispatcher
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.segments.post_event_segmentation import post_ev_segment
@@ -25,11 +25,9 @@ from tracardi.domain.session import Session
 if License.has_service(LICENSE) :
     from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
-
+_redis = RedisClient()
 
 async def trigger_workflows(profile: Profile,
                             session: Session,
@@ -101,14 +99,14 @@ async def trigger_workflows(profile: Profile,
     return profile, session, events, ux, response, field_manager, is_wf_triggered
 
 
-async def dispatch_sync_workflow_and_destinations(profile: Profile,
-                                                  session: Session,
-                                                  events: List[Event],
-                                                  tracker_payload: TrackerPayload,
-                                                  console_log: ConsoleLog,
-                                                  store_in_db:bool,
-                                                  storage: TrackingPersisterAsync
-                                                  ) -> Tuple[
+async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile,
+                                                                session: Session,
+                                                                events: List[Event],
+                                                                tracker_payload: TrackerPayload,
+                                                                console_log: ConsoleLog,
+                                                                store_in_db: bool,
+                                                                storage: TrackingPersisterAsync
+                                                                ) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
 
     # This is MUST BE FIRST BEFORE WORKFLOW
@@ -117,8 +115,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
 
     # Dispatch workflow and post eve segmentation
 
-    debug = tracker_payload.is_on('debugger', default=False)
-
     profile, session, events, ux, response, field_update_log_manager, is_wf_triggered = await (
         trigger_workflows(
             profile,
@@ -126,7 +122,7 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             events,
             tracker_payload,
             console_log,
-            debug
+            False
         )
     )
 
@@ -144,7 +140,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             logger.info(f"Profile needs update after workflow.")
 
             await lock_merge_with_cache_and_save_profile(profile,
-                                                         context=get_context(),
                                                          lock_name="post-workflow-profile-save")
 
         if session and session.is_updated_in_workflow():
@@ -164,15 +159,6 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
     # We save manually only when async processing is disabled.
     # Otherwise, flusher worker saves in-memory profile and session automatically
 
-    if store_in_db:
-
-        profile_and_session_result = await storage.save_profile_and_session(
-            session,
-            profile
-        )
-
-    # Dispatch outbound events
-
     if tracardi.enable_event_destinations:
         load_destination_task = cache.event_destination
         await event_destination_dispatch(
@@ -181,6 +167,18 @@ async def dispatch_sync_workflow_and_destinations(profile: Profile,
             session,
             events,
             tracker_payload.debug
+        )
+
+    # Storage must be here as destination may need to load profile
+
+    _profile_not_ephemeral, _session_not_ephemeral, _events_not_ephemeral = remove_ephemeral_data(tracker_payload,
+                                                                                                  profile, session,
+                                                                                                  events)
+
+    if store_in_db:
+        await storage.save_profile_and_session(
+            _session_not_ephemeral,
+            _profile_not_ephemeral
         )
 
     # Dispatch outbound profile

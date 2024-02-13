@@ -1,17 +1,14 @@
 import asyncio
-import logging
 
 import elasticsearch
 
 from tracardi.config import tracardi, elastic
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.driver.elastic import system as system_db
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.driver.elastic import bridge as bridge_db
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def _is_elastic_on_localhost():
@@ -61,14 +58,13 @@ async def wait_for_connection(no_of_tries=10):
 
         except elasticsearch.exceptions.ConnectionError as e:
             no_of_tries -= 1
-            logger.error(
+            logger.warning(
                 f"Could not connect to elasticsearch at {elastic.host}. Number of tries left: {no_of_tries}. "
-                f"Waiting 5s before retry.")
+                f"Waiting 5s before retry. Error details: {str(e)}")
             if _is_elastic_on_localhost():
                 logger.warning("You are trying to connect to 127.0.0.1. If this instance is running inside docker "
                                "then you can not use localhost as elasticsearch is probably outside the container. Use "
                                "external IP that docker can connect to.")
-            logger.error(f"Error details: {str(e)}")
             await asyncio.sleep(5)
 
         # todo check if this is needed when we make a single thread startup.
@@ -83,7 +79,7 @@ async def wait_for_connection(no_of_tries=10):
         return
 
     logger.error(f"Could not connect to elasticsearch at {elastic.host}")
-    exit()
+    exit(1)
 
 
 async def wait_for_bridge_install(bridge) -> bool:

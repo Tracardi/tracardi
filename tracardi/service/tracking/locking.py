@@ -1,16 +1,17 @@
-import logging
 import time
 import msgpack
 import asyncio
 
 from typing import Union, Tuple, Optional
 
-from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.domain.profile import Profile
+from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.storage.redis.collections import Collection
+from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.tracking.storage.profile_storage import load_profile
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
+_redis = RedisClient()
 
 LOCKED = 0
 BROKE = 1
@@ -51,6 +52,7 @@ class Lock:
             return RELEASED
 
     def lock(self, mutex_name: str):
+        logger.debug(f"Locking {self.key}")
         self._set_lock_metadata(time.time(), mutex_name, LOCKED)
 
     def _set_lock_metadata(self, time: float, mutex_name, state: int):
@@ -65,6 +67,7 @@ class Lock:
         self._redis.delete(self._key)
 
     def unlock(self):
+        logger.debug(f"UnLocking {self.key}")
         self.delete()
         self._mutex_name = None
 
@@ -74,7 +77,6 @@ class Lock:
     def expire(self):
         self.delete()
 
-
     def is_locked(self) -> bool:
         if self._key is None:
             return False
@@ -83,7 +85,7 @@ class Lock:
     def get_lock_metadata(self) -> Optional[Tuple[str, str, int]]:
         payload = self._redis.get(self._key)
         if payload:
-            return  msgpack.unpackb(payload)
+            return msgpack.unpackb(payload)
 
         return None
 
@@ -177,15 +179,13 @@ class _GlobalMutexLock:
 
         elif self._lock.key:
             self._lock.unlock()
-            logger.debug(f"Unlocked in {time.time() - self._time}")
-
-
 
 
 class GlobalMutexLock(_GlobalMutexLock):
 
     def _keep_locked_for(self) -> 'Lock':
 
+        lock_time = 0.0
         if self._lock.is_locked():
             lock_time = self._get_lock_time()
 
@@ -223,16 +223,16 @@ class GlobalMutexLock(_GlobalMutexLock):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._exit(exc_type)
 
+
 class AsyncGlobalMutexLock(_GlobalMutexLock):
 
     async def _keep_locked_for(self) -> 'Lock':
 
-        if self._lock.is_locked():
-            lock_time = self._get_lock_time()
-
         while True:
             _now = time.time()
             if self._lock.is_locked():  # Key exists, when expires it will be unlocked
+
+                lock_time = self._get_lock_time()
 
                 # Check if there is a time to break the lock
                 _broke, _time_to_break = self._check_if_it_is_time(lock_time, grace_period=self._break_after_time)
@@ -264,12 +264,79 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self._exit(exc_type)
 
-def mutex(lock: Lock, name: str, break_after_time: Union[int, float] = None, raise_error_when_locked:bool = False):
+
+class AsyncProfileMutex(_GlobalMutexLock):
+
+    def __init__(self, profile_id: str, name: str, break_after_time: Union[int, float] = None,
+                 raise_error_when_locked: bool = False):
+        self.profile_id = profile_id
+        profile_key = Lock.get_key(Collection.lock_tracker, "profile", profile_id)
+        profile_lock = Lock(_redis, profile_key, default_lock_ttl=3)
+        if profile_lock.is_locked() and raise_error_when_locked:
+            raise BlockingIOError(
+                f"Profile {profile_lock.key} is locked. Currently locked by (Running process): "
+                f"{profile_lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
+
+        super().__init__(profile_lock, name, break_after_time)
+
+    async def _keep_locked_for(self) -> 'Lock':
+
+        while True:
+            _now = time.time()
+            if self._lock.is_locked():  # Key exists, when expires it will be unlocked
+
+                lock_time = self._get_lock_time()
+
+                # Check if there is a time to break the lock
+                _broke, _time_to_break = self._check_if_it_is_time(lock_time, grace_period=self._break_after_time)
+                if _broke:  # Time is up
+                    # We are fed up waiting
+                    logger.info(
+                        f"Lock {self._lock.key} breaks. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
+                    self._lock.break_in()  # Still locked but break in marked BROKE
+                    return self._lock
+
+                logger.info(
+                    f"Suppressing execution of {self._lock.key}. Process {self._lock.get_locked_inside()} is using resource."
+                    f"Expires in {self._lock.ttl}s. Waiting no longer then {_time_to_break}s then skipping execution."
+                )
+
+                await asyncio.sleep(self._wait)
+
+                continue
+            break
+
+        self._lock.lock(self._name)
+
+    async def __aenter__(self) -> Optional[Profile]:
+        if self._lock.key is None:
+            return await load_profile(self.profile_id)
+        await self._keep_locked_for()
+        return await load_profile(self.profile_id)
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        self._exit(exc_type)
+
+
+def mutex(lock: Lock, name: str, break_after_time: Union[int, float] = None, raise_error_when_locked: bool = False):
     if lock.is_locked() and raise_error_when_locked:
-        raise BlockingIOError(f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
+        raise BlockingIOError(
+            f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
     return GlobalMutexLock(lock, name, break_after_time)
 
-def async_mutex(lock: Lock, name: str, break_after_time: Union[int, float] = None, raise_error_when_locked:bool = False):
+
+def async_mutex(lock: Lock,
+                name: str,
+                break_after_time: Union[int, float] = None,
+                raise_error_when_locked: bool = False):
     if lock.is_locked() and raise_error_when_locked:
-        raise BlockingIOError(f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
+        raise BlockingIOError(
+            f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
     return AsyncGlobalMutexLock(lock, name, break_after_time)
+
+
+def profile_mutex(profile_id: str,
+                  name: str,
+                  break_after_time: Union[int, float] = None,
+                  raise_error_when_locked: bool = False):
+    return AsyncProfileMutex(profile_id, name, break_after_time, raise_error_when_locked)

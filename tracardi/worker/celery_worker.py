@@ -1,7 +1,8 @@
-import logging
 import tracardi.worker.service.worker.migration_workers as migration_workers
 from celery import Celery
+
 from tracardi.worker.config import redis_config
+from tracardi.worker.misc.logger import get_logger
 from tracardi.worker.service.worker.elastic_worker import ElasticImporter, ElasticCredentials
 from tracardi.worker.service.worker.mysql_worker import MysqlConnectionConfig, MySQLImporter
 from tracardi.worker.service.worker.mysql_query_worker import MysqlConnectionConfig as MysqlQueryConnConfig, MySQLQueryImporter
@@ -18,7 +19,7 @@ celery = Celery(
     backend=redis_config.get_redis_with_password()
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def import_mysql_table_data(celery_job, import_config, credentials):
@@ -117,8 +118,8 @@ def run_migration_worker(self, worker_func, schema, elastic_host, task_index):
     worker_function = getattr(migration_workers, worker_func, None)
 
     if worker_function is None:
-        logger.log(level=logging.ERROR, msg=f"No migration worker defined for name {schema.worker}. "
-                                            f"Skipping migration with name {schema.name}")
+        logger.error(f"No migration worker defined for name {schema.worker}. "
+                     f"Skipping migration with name {schema.name}")
         return
 
     # Runs all workers defined in worker.service.worker.migration_workers.__init__

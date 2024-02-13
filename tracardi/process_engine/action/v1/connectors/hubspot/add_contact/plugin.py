@@ -1,3 +1,4 @@
+from tracardi.service.integration_id import save_integration_id
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -6,8 +7,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.domain.resource import Resource
-from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
-
+from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient
 from datetime import datetime
 
 
@@ -44,26 +44,25 @@ class HubSpotContactAdder(ActionRunner):
                 self.config.properties[key] = str(value)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        dot = self._get_dot_accessor(payload)
-        traverser = DictTraverser(dot)
-
-        self.config.properties = traverser.reshape(self.config.properties)
-        self.parse_mapping()
-
         try:
+
+            dot = self._get_dot_accessor(payload)
+            traverser = DictTraverser(dot)
+
+            self.config.properties = traverser.reshape(self.config.properties)
+            self.parse_mapping()
+
             result = await self.client.add_contact(
                 self.config.properties
             )
 
             if 'id' in result:
                 contact_id = result['id']
-                if not self.profile.metadata.system.has_integration('hubspot'):
-                    self.profile.metadata.system.set_integration('hubspot', contact_id)
-                    self.profile.mark_for_update()
+                await save_integration_id(self.profile.id, 'hubspot', contact_id)
 
             return Result(port="response", value=result)
 
-        except HubSpotClientException as e:
+        except Exception as e:
             return Result(port="error", value={"message": str(e)})
 
 

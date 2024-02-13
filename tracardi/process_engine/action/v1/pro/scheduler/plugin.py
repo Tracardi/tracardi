@@ -1,12 +1,11 @@
 from tracardi.service.utils.date import now_in_utc
 
 import json
-import logging
 from datetime import timedelta
 
 import tracardi.config
 from tracardi.domain.scheduler_config import SchedulerConfig
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.action.v1.pro.scheduler.model.configuration import Configuration
 from tracardi.process_engine.action.v1.pro.scheduler.service.schedule_client import SchedulerClient
 from tracardi.service.notation.dict_traverser import DictTraverser
@@ -14,10 +13,7 @@ from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.config.tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def validate(config: dict) -> Configuration:
@@ -80,7 +76,7 @@ class SchedulerPlugin(ActionRunner):
 
             return Result(port="response", value=response)
         except Exception as e:
-            logger.error(str(e))
+            logger.error(str(e), e, exc_info=True)
             self.console.error(str(e))
             return Result(port="error", value={
                 "error": str(e),

@@ -57,6 +57,9 @@ class Resource(Entity):
     def is_destination(self):
         return self.destination is not None
 
+    def is_destination_pro(self) -> bool:
+        return self.destination and self.destination.pro
+
     @staticmethod
     def from_pro_service(pro: ProService) -> 'Resource':
         return Resource(

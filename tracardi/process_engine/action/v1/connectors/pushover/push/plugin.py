@@ -1,4 +1,6 @@
 import urllib.parse
+
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
@@ -7,6 +9,7 @@ from tracardi.service.notation.dot_template import DotTemplate
 from .model.pushover_config import PushOverConfiguration, PushOverAuth
 from tracardi.service.tracardi_http_client import HttpClient
 
+logger = get_logger(__name__)
 
 def validate(config: dict) -> PushOverConfiguration:
     return PushOverConfiguration(**config)
@@ -26,7 +29,6 @@ class PushoverAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         try:
-
             async with HttpClient(self.node.on_connection_error_repeat) as client:
 
                 dot = self._get_dot_accessor(payload)
@@ -46,8 +48,9 @@ class PushoverAction(ActionRunner):
 
                     if response.status != 200:
                         result = await response.json()
-                        self.console.error(f"Could not connect to Pushover API. Error port triggered with the "
-                                           f"response {result}")
+                        message = f"Could not connect to Pushover API. Error port triggered with the response {result}"
+                        logger.error(message)
+                        self.console.error(message)
                         return Result(port="error", value={
                             "message": "Could not connect to Pushover API.",
                             "status": response.status,

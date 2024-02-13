@@ -1,18 +1,14 @@
-import logging
 from typing import Callable
 
-from tracardi.config import tracardi
 from tracardi.domain.profile import Profile
 from tracardi.domain.segment import Segment
 from tracardi.domain.session import Session
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.segments.segment_trigger import trigger_segment_workflow
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def _segment(profile, session, event_types, load_segments):
@@ -81,8 +77,6 @@ async def post_ev_segment(profile: Profile, session: Session, event_types: list,
                     segmentation_result['errors'].append(error)
                 segmentation_result['ids'].append(segment_id)
     except Exception as e:
-        # this error is a global segmentation error
-        # todo log it.
-        logger.error(str(e))
+        logger.error(str(e), e, exc_info=True)
     finally:
         return segmentation_result

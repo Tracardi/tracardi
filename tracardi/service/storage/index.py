@@ -261,7 +261,7 @@ class Resource(metaclass=Singleton):
                                       partitioning=tracardi.field_change_log_partitioning,
                                       index="tracardi-field-update-log",
                                       mapping="mappings/field-update-log-index.json"),
-            "user": Index(staging=False,
+            "user": Index(staging=True,
                           multi_index=False,
                           index="tracardi-user",
                           mapping="mappings/user-index.json"),
@@ -350,6 +350,10 @@ class Resource(metaclass=Singleton):
                 map = file.read()
                 map = index.prepare_mappings(map, index)
                 yield index, map
+
+    def get_template_name(self, index) -> str:
+        log_index = self[index]
+        return log_index.get_prefixed_template_name()
 
     def __getitem__(self, item) -> Index:
         if item in self.resources:

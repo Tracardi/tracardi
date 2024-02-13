@@ -1,12 +1,10 @@
-import logging
-
 import asyncio
 from dotty_dict import dotty, Dotty
 
 from typing import List, Tuple, Optional, Set
 
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
@@ -28,9 +26,7 @@ if License.has_license():
     from com_tracardi.service.event_mapper import map_event_props_to_traits, map_events_tags_and_journey
 
 cache = CacheManager()
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 def _remove_empty_dicts(dictionary):
@@ -179,6 +175,15 @@ async def make_event_from_event_payload(event_payload,
     return event
 
 
+def update_event_from_request(tracker_payload: TrackerPayload, event: Event):
+    if tracker_payload.request:
+        if isinstance(event.request, dict):
+            event.request.update(tracker_payload.request)
+        else:
+            event.request = tracker_payload.request
+
+    return event
+
 async def compute_events(events: List[EventPayload],
                          metadata,
                          source: EventSource,
@@ -237,11 +242,7 @@ async def compute_events(events: List[EventPayload],
 
         # Data that is not needed for any mapping or compliance
 
-        if tracker_payload.request:
-            if isinstance(event.request, dict):
-                event.request.update(tracker_payload.request)
-            else:
-                event.request = tracker_payload.request
+        event = update_event_from_request(tracker_payload, event)
 
         debugging = tracker_payload.is_debugging_on()
         event.metadata.debug = debugging
@@ -286,6 +287,7 @@ async def compute_events(events: List[EventPayload],
                       f"the original data you sent was not copied because it did not meet the " \
                       f"requirements of the profile. " \
                       f"Details: {repr(e)}."
+            logger.error(message)
             console_log.append(
                 Console(
                     flow_id=None,

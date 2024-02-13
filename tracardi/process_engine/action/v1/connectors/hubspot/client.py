@@ -77,7 +77,7 @@ class HubSpotClient:
 
         async with HttpClient(self.retries, [200, 401], headers=self.auth_headers) as session:
             async with session.post(
-                url= f"{self.api_url}/contacts/v1/lists/{list_id}/add",
+                    url=f"{self.api_url}/contacts/v1/lists/{list_id}/add",
                     json=data
             ) as response:
 
@@ -219,7 +219,7 @@ class HubSpotClient:
                         await response.json():
                     raise HubSpotClientException(await response.text())
 
-                return response.json()
+                return await response.json()
 
     @property
     def credentials(self):

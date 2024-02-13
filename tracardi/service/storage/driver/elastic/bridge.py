@@ -1,16 +1,12 @@
-import logging
 from typing import Optional
 
-from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.bridge import Bridge
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.factory import storage_manager
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def load_all(sort=None) -> StorageRecords:

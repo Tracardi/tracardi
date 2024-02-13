@@ -7,18 +7,17 @@ from tracardi.service.change_monitoring.field_change_monitor import FieldTimesta
 from tracardi.service.license import License
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
-from tracardi.service.tracking.cache.profile_cache import save_profile_cache
-from tracardi.service.tracking.cache.session_cache import save_session_cache
 from tracardi.service.tracking.event_data_computation import compute_events
 from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
-    update_profile_visits, update_profile_time
+    update_profile_visits, update_profile_time, compute_profile_aux_geo_markets
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
     update_session_utm_with_client_data
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 from tracardi.service.tracking.session_loading import load_or_create_session
+from tracardi.service.tracking.storage.profile_storage import save_profile
+from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.system_events import add_system_events
-from tracardi.service.tracking.tracker_persister_async import clear_relations
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -31,10 +30,15 @@ if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
 
-async def _compute(source, profile, session, tracker_payload, tracker_config, console_log):
-    if License.has_license():
-        if profile is not None:
+async def _compute(source,
+                   profile: Optional[Profile],
+                   session: Optional[Session],
+                   tracker_payload: TrackerPayload,
+                   console_log: ConsoleLog) -> Tuple[Optional[Profile], Optional[Session],List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
 
+    if profile is not None:
+
+        if License.has_license():
             # Anonymize, data compliance
 
             event_payloads, compliance_errors = await event_data_compliance(
@@ -59,26 +63,11 @@ async def _compute(source, profile, session, tracker_payload, tracker_config, co
             # Save event payload
             tracker_payload.events = event_payloads
 
-    # ------------------------------------
-    # Session and events computation
+        # Profile computation
 
-    # Is new session
-    if session.is_new():
-        # Compute session. Session is filled only when new
-        session, profile = compute_session(
-            session,
-            profile,
-            tracker_payload,
-            tracker_config
-        )
+        # Compute Profile GEO Markets and continent
+        profile = compute_profile_aux_geo_markets(profile, session, tracker_payload)
 
-    # Update missing data
-    session = await update_device_geo(tracker_payload, session)
-    session = update_session_utm_with_client_data(tracker_payload, session)
-
-    # Profile computation
-
-    if profile:
         # Update profile last geo with session device geo
         profile = update_profile_last_geo(session, profile)
 
@@ -108,15 +97,11 @@ async def _compute(source, profile, session, tracker_payload, tracker_config, co
         tracker_payload.metadata,
         source,
         session,
-        profile,
+        profile, # Profile gets converted to FlatProfile
         tracker_payload.profile_less,
         console_log,
         tracker_payload
     )
-
-    # Clear profile,etc if not saving data.
-
-    profile, session, events = clear_relations(tracker_payload, profile, session, events)
 
     # Caution: After clear session can become None if set sessionSave = False
 
@@ -131,7 +116,10 @@ Optional[FieldTimestampMonitor]]:
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
 
-    # Load profile
+    # -----------------------------------
+    # Profile Loading
+
+    #TODO It can deduplicate profile so it should be in mutex
 
     profile, session = await load_profile_and_session(
         session,
@@ -148,23 +136,50 @@ Optional[FieldTimestampMonitor]]:
     # If not profile ID then no locking
 
     async with async_mutex(profile_lock, name='lock_and_compute_data_profile'):
-        profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(source, profile, session,
-                                                                                            tracker_payload,
-                                                                                            tracker_config, console_log)
+
+        # ------------------------------------
+        # Session computation
+
+        if session:
+
+            # Is new session
+            if session.is_new():
+                # Compute session. Session is filled only when new
+                session = compute_session(
+                    session,
+                    tracker_payload,
+                    tracker_config
+                )
+
+            # Update missing data
+            session = await update_device_geo(tracker_payload, session)
+            session = update_session_utm_with_client_data(tracker_payload, session)
+
+            # If agent is a bot stop
+            if session.app.bot and not tracardi.allow_bot_traffic:
+                raise PermissionError(f"Traffic from bot is not allowed.")
+
+        profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(
+            source,
+            profile,
+            session,
+            tracker_payload,
+            console_log)
+
         # MUST BE INSIDE MUTEX
         # Update only when needed
 
-        _save_profile_and_session(profile, session)
+        await _save_profile_and_session(profile, session)
 
         return profile, session, events, tracker_payload, field_timestamp_monitor
 
 
-def _save_profile_and_session(profile: Profile, session: Session):
+async def _save_profile_and_session(profile: Profile, session: Session):
 
     # Update only when needed
 
     if profile and profile.has_not_saved_changes():
-        save_profile_cache(profile)
+        await save_profile(profile)
 
     if session and session.has_not_saved_changes():
-        save_session_cache(session)
+        await save_session(session)

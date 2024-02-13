@@ -1,14 +1,12 @@
 import glob
 import json
-import logging
 import os
 from typing import Optional, Tuple
 
 from dotty_dict import dotty
 
-from tracardi.config import tracardi
 from tracardi.context import ServerContext, get_context
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.string_manager import capitalize_event_type_id
@@ -16,9 +14,7 @@ from tracardi.service.string_manager import capitalize_event_type_id
 _local_dir = os.path.dirname(__file__)
 _predefined_event_types = {}
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 # def call_function(call_string, event: Dotty, profile: Dotty):

@@ -1,18 +1,14 @@
-import logging
 from typing import List
 from uuid import uuid4
 
 from pydantic import ValidationError
 
-from tracardi.config import tracardi
 from tracardi.domain.session import Session
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def correct_session(session_id) -> List[str]:

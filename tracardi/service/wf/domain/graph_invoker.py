@@ -1,7 +1,6 @@
 import asyncio
 import inspect
 import json
-import logging
 from collections import defaultdict
 
 from time import time
@@ -9,9 +8,8 @@ from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel, ValidationError
 
 from tracardi.domain.enum.event_status import PROCESSED
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 
-from tracardi.config import tracardi
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
@@ -38,9 +36,7 @@ from ...notation.dot_accessor import DotAccessor
 from ...utils.getters import get_entity_id
 from ...value_threshold_manager import ValueThresholdManager
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 class InputEdge(BaseModel):

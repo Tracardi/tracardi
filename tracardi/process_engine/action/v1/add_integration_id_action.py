@@ -1,8 +1,8 @@
 import json
-from typing import Optional
 
 from pydantic import field_validator
 
+from tracardi.service.integration_id import save_integration_id
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -54,20 +54,19 @@ class AddIntegrationIdAction(ActionRunner):
     """
 
     async def run(self, payload: dict, in_edge=None):
-        dot = self._get_dot_accessor(payload)
-        external_id = dot[self.config.id]
-        traverser = DictTraverser(dot)
         try:
+            dot = self._get_dot_accessor(payload)
+            external_id = dot[self.config.id]
+            traverser = DictTraverser(dot)
             data = json.loads(self.config.data)
             data = traverser.reshape(data)
-            # Saves in profile metadata.system.integrations external system id where the key is system name and the value is id and data.
-            self.profile.metadata.system.set_integration(
-                self.config.name.lower().replace(' ', '-'),
-                external_id,
-                data)
-            self.profile.mark_for_update()
+            system_name = self.config.name.lower().replace(" ","-")
+
+            await save_integration_id(self.profile.id, system_name, external_id, data)
+
             return Result(port="payload", value=payload)
         except Exception as e:
+            self.console.error(str(e))
             return Result(port="error", value={
                 "message": str(e)
             })
@@ -78,7 +77,7 @@ def register() -> Plugin:
         start=False,
         spec=Spec(
             module=__name__,
-            className='AddIntegrationIdAction',
+            className=AddIntegrationIdAction.__name__,
             inputs=["payload"],
             outputs=["payload", "error"],
             version='0.8.2',
@@ -116,8 +115,8 @@ def register() -> Plugin:
             ]),
         ),
         metadata=MetaData(
-            name='Add Integration Id',
-            desc='Link profile with their corresponding identities in an external systems.',
+            name='Save Integration Id',
+            desc='Save external system ID for current profile.',
             group=["Operations"],
             purpose=['collection', 'segmentation'],
             documentation=Documentation(

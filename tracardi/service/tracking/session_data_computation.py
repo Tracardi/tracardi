@@ -1,62 +1,76 @@
-import os
-
-import logging
-
 from typing import Tuple, Optional
 
 from pydantic import ValidationError
 from user_agents import parse
+from user_agents.parsers import UserAgent
 
-from tracardi.service.tracking.utils.languages import get_spoken_languages, get_continent
-from tracardi.config import tracardi
+from tracardi.service.tracking.utils.languages import get_spoken_languages
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.marketing import UTM
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.geo import Geo
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.utils.languages import language_countries_dict
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
-def _compute_data_from_user_agent(session: Session) -> Session:
+def _get_user_agent_string(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:
     try:
-        ua_string = session.context['browser']['local']['browser']['userAgent']
-        user_agent = parse(ua_string)
+        return session.context['browser']['local']['browser']['userAgent']
+    except Exception:
+        try:
+            return tracker_payload.request['headers']['user-agent']
+        except Exception:
+            return None
 
-        session.os.version = user_agent.os.version_string
-        session.os.name = user_agent.os.family
+def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[UserAgent]:
+    _user_agent = tracker_payload.get_user_agent()
 
-        device_type = 'mobile' if user_agent.is_mobile else \
-            'pc' if user_agent.is_pc else \
-                'tablet' if user_agent.is_tablet else \
-                    'email' if user_agent.is_email_client else None
+    if _user_agent is not None:
+        return _user_agent
 
-        if 'device' in session.context:
-            session.device.name = session.context['device'].get('name', user_agent.device.family)
-            session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
-            session.device.model = session.context['device'].get('model', user_agent.device.model)
-            session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
-            session.device.type = session.context['device'].get('type', device_type)
-        else:
-            session.device.name = user_agent.device.family
-            session.device.brand = user_agent.device.brand
-            session.device.model = user_agent.device.model
-            session.device.touch = user_agent.is_touch_capable
-            session.device.type = device_type
+    _user_agent_string = _get_user_agent_string(session, tracker_payload)
+    if _user_agent_string:
+        return parse(_user_agent_string)
 
-        session.app.bot = user_agent.is_bot
-        session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
-        session.app.version = user_agent.browser.version_string
-        session.app.type = "browser"
+    return None
 
-    except Exception as e:
-        pass
+def _compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
+    user_agent = _get_user_agent(session, tracker_payload)
+    if user_agent:
+        try:
+
+            session.os.version = user_agent.os.version_string
+            session.os.name = user_agent.os.family
+
+            device_type = 'mobile' if user_agent.is_mobile else \
+                'pc' if user_agent.is_pc else \
+                    'tablet' if user_agent.is_tablet else \
+                        'email' if user_agent.is_email_client else None
+
+            if 'device' in session.context:
+                session.device.name = session.context['device'].get('name', user_agent.device.family)
+                session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
+                session.device.model = session.context['device'].get('model', user_agent.device.model)
+                session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
+                session.device.type = session.context['device'].get('type', device_type)
+            else:
+                session.device.name = user_agent.device.family
+                session.device.brand = user_agent.device.brand
+                session.device.model = user_agent.device.model
+                session.device.touch = user_agent.is_touch_capable
+                session.device.type = device_type
+
+            session.app.bot = user_agent.is_bot
+            session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
+            session.app.version = user_agent.browser.version_string
+            session.app.type = "browser"
+
+        except Exception:
+            pass
 
     return session
 
@@ -138,41 +152,13 @@ def _compute_screen_size(session: Session, tracker_payload: TrackerPayload):
     return session
 
 
-def _compute_profile_geo(profile, session, tracker_payload, spoken_languages, language_codes):
-    if spoken_languages:
-        if profile:
-            profile.data.pii.language.spoken = session.context['language']
-
-    if profile and 'geo' not in profile.aux:
-        profile.aux['geo'] = {}
-
-    # Aux markets
-
-    markets = []
-    for lang_code in language_codes:
-        if lang_code in language_countries_dict:
-            markets += language_countries_dict[lang_code]
-
-    if markets:
-        profile.aux['geo']['markets'] = markets
-
-    # Continent
-
-    continent = get_continent(tracker_payload)
-    if continent:
-        profile.aux['geo']['continent'] = continent
-
-    return profile
-
-
 def compute_session(session: Session,
-                    profile: Profile,
                     tracker_payload: TrackerPayload,
                     tracker_config: TrackerConfig
-                    ) -> Tuple[Session, Profile]:
+                    ) -> Session:
 
     # Compute the User Agent data
-    session = _compute_data_from_user_agent(session)
+    session = _compute_data_from_user_agent(session, tracker_payload)
 
     # Compute UTM
     session = _compute_utm(session, tracker_payload.context)
@@ -191,18 +177,24 @@ def compute_session(session: Session,
 
     session.context['ip'] = tracker_config.ip
 
-    # Compute languages
-
-    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload)
-    if spoken_languages:
-        session.context['language'] = list(set(spoken_languages))
-
     try:
         session.app.language = session.context['browser']['local']['browser']['language']
     except Exception:
         pass
 
-    # Compute Profile
-    profile = _compute_profile_geo(profile, session, tracker_payload, spoken_languages, language_codes)
+    try:
+         header_from = tracker_payload.request['headers']['from']
+         if header_from == "googlebot(at)googlebot.com":
+            session.app.bot = True
+    except Exception:
+        pass
 
-    return session, profile
+    # Compute Languages
+
+    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload)
+    if spoken_languages:
+        session.context['language'] = list(set(spoken_languages))
+    if language_codes:
+        session.context['language_codes'] = list(set(language_codes))
+
+    return session

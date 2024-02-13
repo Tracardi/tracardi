@@ -1,9 +1,10 @@
+from user_agents.parsers import UserAgent
+
 from tracardi.service.utils.date import now_in_utc
 
 import time
 
 import json
-import logging
 from hashlib import sha1
 from datetime import datetime, timedelta
 from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator
@@ -11,8 +12,10 @@ from uuid import uuid4
 
 from dotty_dict import dotty
 from pydantic import PrivateAttr, BaseModel
+from user_agents import parse
 
 from tracardi.config import tracardi
+from ...exceptions.log_handler import get_logger
 
 from ...service.cache_manager import CacheManager
 from ...service.console_log import ConsoleLog
@@ -26,7 +29,6 @@ from ..session import Session
 from ..time import Time
 from ..entity import Entity
 from ..profile import Profile
-from ...exceptions.log_handler import log_handler
 
 from tracardi.service.storage.driver.elastic import identification as identification_db
 
@@ -34,9 +36,7 @@ if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
     from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 
@@ -60,6 +60,7 @@ class TrackerPayload(BaseModel):
     _scheduled_node_id: str = PrivateAttr(None)
     _tracardi_referer: dict = PrivateAttr({})
     _timestamp: float = PrivateAttr(None)
+    _user_agent: Optional[UserAgent] = PrivateAttr(None)
 
     source: Union[EventSource, Entity]  # When read from a API then it is Entity then is replaced by EventSource
     session: Optional[Entity] = None
@@ -90,13 +91,14 @@ class TrackerPayload(BaseModel):
         if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
             if isinstance(self.options['scheduledFlowId'], str) and isinstance(self.options['scheduledNodeId'], str):
                 if len(self.events) > 1:
-                    raise ValueError("Scheduled events may have only one event per tracker payload.")
+                    raise ValueError(f"Scheduled events may have only one event per tracker payload. Expected one event got {self.get_event_types()}")
                 if self.source.id[0] != "@":
                     raise ValueError("Scheduled events must be send via internal scheduler event source.")
                 self._scheduled_flow_id = self.options['scheduledFlowId']
                 self._scheduled_node_id = self.options['scheduledNodeId']
 
         self._cached_events_as_dicts: Optional[List[dict]] = None
+        self._set_user_agent()
 
     @property
     def tracardi_referer(self):
@@ -105,6 +107,23 @@ class TrackerPayload(BaseModel):
     @property
     def scheduled_event_config(self) -> ScheduledEventConfig:
         return ScheduledEventConfig(flow_id=self._scheduled_flow_id, node_id=self._scheduled_node_id)
+
+    def _set_user_agent(self):
+        if self._user_agent is None:
+            try:
+                user_agent = self.request['headers']['user-agent']
+                self._user_agent = parse(user_agent)
+            except Exception:
+                pass
+
+    def get_user_agent(self)  -> Optional[UserAgent]:
+        return self._user_agent
+
+    def is_bot(self) -> bool:
+        _user_agent = self.get_user_agent()
+        if _user_agent:
+            return _user_agent.is_bot
+        return False
 
     def replace_profile(self, profile_id):
         self.profile = Entity(id=profile_id)
@@ -124,6 +143,9 @@ class TrackerPayload(BaseModel):
             if event_payload.type == event_type:
                 return True
         return False
+
+    def get_event_types(self) -> List[str]:
+        return [event_payload.type for event_payload in self.events]
 
     def get_event_payloads_by_type(self, event_type) -> Generator[EventPayload, Any, None]:
         for event_payload in self.events:
@@ -333,7 +355,7 @@ class TrackerPayload(BaseModel):
                 return find_profile_by_fields
             return None
         except AssertionError as e:
-            logger.error(f"Can not find property to load profile by identification data: {str(e)}")
+            logger.error(f"Can not find property to load profile by identification data: {str(e)}", e, exc_info=True)
             return None
 
     def finger_printing_enabled(self):

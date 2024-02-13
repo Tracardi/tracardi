@@ -24,7 +24,7 @@ class Config(PluginConfig):
 
     @field_validator("delay")
     @classmethod
-    def available_values(cls, value):
+    def delay_values(cls, value):
         value = value.strip()
         if not value.isnumeric():
             raise ValueError("Please provide numeric value.")

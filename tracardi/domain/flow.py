@@ -10,13 +10,12 @@ from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, EdgeBundle
 from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents, MicroserviceConfig
 
 from ..config import tracardi
+from ..exceptions.log_handler import get_logger
 from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
-import logging
 
 from ..service.utils.date import now_in_utc
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
+logger = get_logger(__name__)
 
 
 class FlowSchema(BaseModel):
@@ -172,7 +171,7 @@ class SpecRecord(BaseModel):
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.8.2-dev'
+    version: Optional[str] = '0.8.2'
 
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':

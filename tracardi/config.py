@@ -6,29 +6,16 @@ import yaml
 
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
+from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int
 from tracardi.service.utils.validators import is_valid_url
 
-VERSION = os.environ.get('_DEBUG_VERSION', '0.8.2-dev')
+VERSION = os.environ.get('_DEBUG_VERSION', '0.8.2')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
-logger = logging.getLogger(__name__)
-
-
-def _get_logging_level(level: str) -> int:
-    level = level.upper()
-    if level == 'DEBUG':
-        return logging.DEBUG
-    if level == 'INFO':
-        return logging.INFO
-    if level == 'WARNING' or level == "WARN":
-        return logging.WARNING
-    if level == 'ERROR':
-        return logging.ERROR
-
-    return logging.WARNING
-
+logger = get_logger(__name__)
 
 class MemoryCacheConfig:
     def __init__(self, env):
@@ -65,7 +52,7 @@ class ElasticConfig:
         self.refresh_profiles_after_save = env.get('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'no').lower() == 'yes'
 
         self.host = self.get_host()
-        self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', None)
+        self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', 'elastic')
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
         self.query_timeout = get_env_as_int('ELASTIC_QUERY_TIMEOUT', 12)
@@ -157,6 +144,9 @@ class TracardiConfig(metaclass=Singleton):
         self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
         self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
         self.enable_field_update_log = env.get('ENABLE_FIELD_UPDATE_LOG', 'yes').lower() == 'yes'
+        self.allow_bot_traffic = env.get('ALLOW_BOT_TRAFFIC', 'no').lower() == 'yes'
+        self.keep_profile_in_cache_for = get_env_as_int('KEEP_PROFILE_IN_CACHE_FOR', 60*60)
+        self.keep_session_in_cache_for = get_env_as_int('KEEP_SESSION_IN_CACHE_FOR', 30 * 60)
 
         self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
 
@@ -170,7 +160,6 @@ class TracardiConfig(metaclass=Singleton):
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
         self.sync_profile_tracks_wait = get_env_as_int('SYNC_PROFILE_TRACKS_WAIT', 1)
         self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
-        self.query_language = env.get('QUERY_LANGUAGE', 'tql')
         self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
         self.tracardi_pro_port = get_env_as_int('TRACARDI_PRO_PORT', 40000)
         self.tracardi_scheduler_host = env.get('TRACARDI_SCHEDULER_HOST', 'scheduler.tracardi.com')
@@ -199,6 +188,7 @@ class TracardiConfig(metaclass=Singleton):
         self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
         self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
         self.auto_profile_merging = env.get('AUTO_PROFILE_MERGING', 's>a.d-kljsa87^5adh')
+        self.apm_on = env.get('APM', 'yes') == 'yes'
 
         self._config = None
         self._unset_secrets()
@@ -215,9 +205,11 @@ class TracardiConfig(metaclass=Singleton):
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
             logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
 
-        if self.auto_profile_merging and len(self.auto_profile_merging) < 20:
+        if self.apm_on and self.auto_profile_merging and len(self.auto_profile_merging) < 20:
             logger.warning('Security risk. Env AUTO_PROFILE_MERGING is too short. It must be at least 20 chars long.')
 
+    def is_apm_on(self) -> bool:
+        return self.apm_on
 
 
     @property

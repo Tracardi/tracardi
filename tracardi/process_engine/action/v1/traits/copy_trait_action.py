@@ -1,8 +1,6 @@
-import logging
-
 from pydantic import BaseModel
 
-from tracardi.config import tracardi
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -16,8 +14,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_graph import FlowGraph
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
+logger = get_logger(__name__)
 
 
 class TraitsConfiguration(BaseModel):
@@ -40,10 +37,7 @@ class CopyTraitAction(ActionRunner):
     async def set_up(self, init):
         self.config = validate(init)
 
-    async def run(self, payload: dict, in_edge=None) -> Result:
-        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
-        mapping = self.config.traits.set
-
+    def _set_changes(self, dot,  mapping):
         flow: FlowGraph = self.flow
 
         for destination, value in mapping.items():
@@ -64,6 +58,14 @@ class CopyTraitAction(ActionRunner):
                     destination,
                     dot[destination]  # Use dot destination as it has computed values for `1`, `true`
                 )
+
+        self.flow = flow
+
+    async def run(self, payload: dict, in_edge=None) -> Result:
+        dot = self._get_dot_accessor(payload if isinstance(payload, dict) else None)
+        mapping = self.config.traits.set
+
+        self._set_changes(dot, mapping)
 
         if self.event.metadata.profile_less is False:
             if 'traits' not in dot.profile:

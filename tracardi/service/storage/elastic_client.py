@@ -9,15 +9,13 @@ from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import log_handler
-from tracardi.service.pool_manager import PoolManager
+from tracardi.exceptions.log_handler import get_logger
 
 _singleton = None
 logger = logging.getLogger('elasticsearch')
 logger.setLevel(elastic.logging_level)
-logger = logging.getLogger(__name__)
-logger.setLevel(elastic.logging_level)
-logger.addHandler(log_handler)
+
+logger = get_logger(__name__)
 
 
 class ElasticClient:
@@ -165,7 +163,6 @@ class ElasticClient:
             except Exception as e:
                 last_exception = e
                 logger.error(f"Bulk insert error: {str(e)}")
-                print(get_traceback(e))
                 await asyncio.sleep(1)
 
             repeats -= 1
@@ -265,6 +262,17 @@ class ElasticClient:
 
     async def get_snapshot_status(self, repo, snapshot, params=None):
         return await self._client.snapshot.status(repository=repo, snapshot=snapshot, params=params)
+
+
+    async def auto_create_index(self, flag):
+        settings = {
+            "persistent": {
+                "action.auto_create_index": f"{flag}"
+            }
+        }
+
+        # Update the cluster settings
+        return await self._client.cluster.put_settings(body=settings)
 
     @staticmethod
     def get_elastic_config(elastic_config: ElasticConfig):

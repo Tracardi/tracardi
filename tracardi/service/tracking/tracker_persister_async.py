@@ -1,18 +1,18 @@
 import asyncio
 
 import json
-import logging
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
+
 from tracardi.service.tracking.storage.event_storage import save_events
-from tracardi.service.tracking.storage.profile_storage import save_profile, load_profile
+from tracardi.service.tracking.storage.profile_storage import save_profile
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.value_object.save_result import SaveResult
 from tracardi.service.cache_manager import CacheManager
 
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -20,32 +20,8 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception import StorageException, FieldTypeConflictException
 from tracardi.service.field_mappings_cache import FieldMapper
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
-
-
-def clear_relations(tracker_payload, profile: Profile, session: Session, events: List[Event]) -> Tuple[Profile, Session, List[Event]]:
-
-    _save_session_flag = tracker_payload.is_on('saveSession', default=True)
-    _save_events_flag = tracker_payload.is_on('saveEvents', default=True)
-    _save_profile_flag = tracker_payload.is_on('saveProfile', default=True)
-
-    if not _save_events_flag:
-        events = []
-
-    if not _save_session_flag:
-        session = None
-        for event in events:
-            event.session = None
-
-    if not _save_profile_flag:
-        profile = None
-        for event in events:
-            event.profile = None
-
-    return profile, session, events
 
 
 def _get_savable_session(session: Optional[Session], profile: Profile) -> Optional[Session]:
@@ -76,32 +52,6 @@ def _get_savable_session(session: Optional[Session], profile: Profile) -> Option
     return None
 
 
-async def _save_profiles(self, profiles: List[Profile], _save_profile_to_db: bool):
-    if _save_profile_to_db:
-
-        _profiles_to_save = []
-
-        for profile in profiles:
-
-            if profile:
-                _profiles_to_save.append(profile)
-
-        results = []
-        try:
-            result = await save_profile(_profiles_to_save)
-            if result.has_errors():
-                for id in result.ids:
-                    self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
-            results.append(result)
-
-        except StorageException as e:
-            message = "Could not save profile. Error: {}".format(str(e))
-            raise FieldTypeConflictException(message, rows=e.details)
-
-        return results
-    return None
-
-
 class TrackingPersisterAsync:
 
     def __init__(self):
@@ -111,35 +61,21 @@ class TrackingPersisterAsync:
     async def _save_profile(self, profile: Profile):
         if profile:
             if profile.has_not_saved_changes():
-
-                results = []
                 try:
-                    result = await save_profile(profile)
-                    if result.has_errors():
-                        for id in result.ids:
-                            self.profile_errors[id] = f"Error while storing profile id: {id}. Details: {result.errors}"
-                    results.append(result)
+                    await save_profile(profile, refresh=True)
+
                 except StorageException as e:
                     message = "Could not save profile. Error: {}".format(str(e))
                     raise FieldTypeConflictException(message, rows=e.details)
-
-                return results
         return None
 
-    async def _save_session(self, session: Session, profile: Profile):
+    async def _save_session(self, session: Session, profile: Profile) -> None:
         try:
             if session:
                 session = _get_savable_session(session, profile)
 
                 if session and session.has_not_saved_changes():
-
-                    result = await save_session(session)
-
-                    if result.has_errors():
-                        for id in result.ids:
-                            self.session_errors[id] = f"Error while storing session id: {id}. Details: {result.errors}"
-
-                    return result
+                    await save_session(session, refresh=True)
 
             return None
 
@@ -213,4 +149,3 @@ class TrackingPersisterAsync:
         ]
 
         return await asyncio.gather(*coroutines)
-

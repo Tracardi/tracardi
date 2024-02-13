@@ -1,7 +1,7 @@
 Version: 0.9.0
 ----------------------------------------------------------
 * MySQL as a metadata store. Migration from ElasticSearch to MySQL as metastore for app configuration. Now only big data is stored in elastic search.
-
+* Entity expiration worker (pro)
 
 Version: 0.8.2
 ----------------------------------------------------------
@@ -20,9 +20,8 @@ Version: 0.8.2
   * String replace
   * Tag Mailchimp Contact
   * Time delay
-* Profile Metrics
+* Profile Metrics (pro)
 * Workers
-  * Entity expiration worker (pro)
   * Redone the scheduler worker (pro)
   * New distributed storage worker (pro)
   * New in-memory storage for profiles

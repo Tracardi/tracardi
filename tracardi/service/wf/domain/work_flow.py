@@ -1,4 +1,6 @@
 from time import time
+
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
@@ -11,6 +13,7 @@ from ..utils.dag_error import DagGraphError
 from ..utils.dag_processor import DagProcessor
 from ..utils.flow_graph_converter import FlowGraphConverter
 
+logger = get_logger(__name__)
 
 class WorkFlow:
 
@@ -33,7 +36,9 @@ class WorkFlow:
                 return dag.make_execution_dag(start_nodes=dag.find_scheduled_nodes(node_ids=[node_id]), debug=debug)
             return dag.make_execution_dag(start_nodes=dag.find_start_nodes(), debug=debug)
         except DagGraphError as e:
-            raise DagGraphError("Flow `{}` returned the following error: `{}`".format(flow.id, str(e)))
+            message = "Flow `{}` returned the following error: `{}`".format(flow.id, str(e))
+            logger.error(message)
+            raise DagGraphError(message)
 
     async def _run(self, exec_dag: GraphInvoker, flow: Flow, event: Event, profile, session, ux: list):
         flow_start_time = time()

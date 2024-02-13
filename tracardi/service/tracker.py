@@ -1,9 +1,8 @@
 import time
-import logging
-import traceback
 from typing import Optional
 
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
+from tracardi.service.license import License
 from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.service.utils.date import now_in_utc
 from tracardi.service.profile_merger import ProfileMerger
@@ -11,22 +10,22 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.service.logger_manager import save_logs
 from tracardi.service.setup.data.defaults import open_rest_source_bridge
 from tracardi.service.tracking.source_validation import validate_source
 from tracardi.service.storage.driver.elastic.operations import console_log as console_log_db
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import memory_cache, tracardi
 from tracardi.domain.event_source import EventSource
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from typing import List
 from tracardi.service.console_log import ConsoleLog
-from tracardi.service.tracking.track_async import process_track_data
+if License.has_license():
+    from com_tracardi.service.tracking.tracker import com_tracker
+else:
+    from tracardi.service.tracking.tracker import os_tracker
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 cache = CacheManager()
 
 
@@ -56,7 +55,6 @@ async def track_event(tracker_payload: TrackerPayload,
         return result
 
     except Exception as e:
-        traceback.print_exc()
         logger.error(str(e))
         raise e
 
@@ -64,8 +62,7 @@ async def track_event(tracker_payload: TrackerPayload,
         try:
             # Save console log
             await console_log_db.save_console_log(console_log)
-            # Save log
-            await save_logs()
+
         except Exception as e:
             logger.warning(f"Could not save logs. Error: {str(e)} ")
 
@@ -95,6 +92,9 @@ class Tracker:
                 await self.check_source_id(refer_source_id)
 
                 # Check if profile id exists
+
+                # TODO should be in mutex
+                # TODO ProfileMerger.invoke_merge_profile saves profile
 
                 referred_profile = await load_profile(referred_profile_id)
 
@@ -156,7 +156,10 @@ class Tracker:
 
     async def track_event(self, tracker_payload: TrackerPayload, tracking_start: float):
 
-        # Trim ids - spaces are frequent issues
+        if tracker_payload.is_bot() and not tracardi.allow_bot_traffic:
+            raise PermissionError(f"Traffic from bot is not allowed.")
+
+            # Trim ids - spaces are frequent issues
 
         if tracker_payload.source:
             tracker_payload.source.id = str(tracker_payload.source.id).strip()
@@ -196,16 +199,18 @@ class Tracker:
         if tracker_payload.source.transitional is True:
             tracker_payload.set_ephemeral()
 
-        result = await process_track_data(
-            source, tracker_payload,
-            self.tracker_config, tracking_start, self.console_log)
+        if License.has_license():
+            result = await com_tracker(
+                source, tracker_payload,
+                self.tracker_config, tracking_start, self.console_log)
+        else:
+            result = await os_tracker(
+                source, tracker_payload,
+                self.tracker_config, tracking_start, self.console_log)
 
         if result and tracardi.enable_errors_on_response:
             result['errors'] += self.console_log.get_errors()
             result['warnings'] += self.console_log.get_warnings()
-
-            if log_handler.has_logs():
-                result['errors'] += log_handler.get_errors()
 
         return result
 
