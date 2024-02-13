@@ -332,6 +332,7 @@ class ProfileMerger:
                 merged_profile,
                 duplicate_profiles)
 
+            # Auto refresh db
             await save_profile(merged_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
@@ -344,8 +345,6 @@ class ProfileMerger:
             logger.info(f"Profiles to delete {records_to_delete}.")
 
             await _delete_profiles(records_to_delete)
-
-            #todo remove profiles also from cache
 
             # Replace current profile with merged profile
             profile.replace(merged_profile)
