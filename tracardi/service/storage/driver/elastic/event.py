@@ -222,6 +222,20 @@ async def aggregate_profile_events_by_field(profile_id: str, field: str, bucket_
 
     return await aggregate_profile_events(profile_id, aggregate_query)
 
+async def aggregate_events_by_profile_id_and_events(profile_query: dict):
+    query = {
+        "size": 0,
+        "query": profile_query,
+        "aggs": {
+            bucket_name: {
+                "terms": {
+                    "field": field,
+                    "size": size,
+                }
+            }
+        }
+    }
+
 
 async def aggregate_profile_events(profile_id: str, aggregate_query: dict) -> StorageAggregateResult:
     query = {
