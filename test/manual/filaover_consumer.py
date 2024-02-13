@@ -1,10 +1,7 @@
 import json
-from _pulsar import InitialPosition
-
-from pulsar import Client, ConsumerType
+from pulsar import Client, ConsumerType, InitialPosition
 
 from com_tracardi.service.tracking.queue.pulsar_topics import pulsar_topics
-from tracardi.domain.entity import Entity
 
 # Pulsar service URL
 service_url = 'pulsar://localhost:6650'
