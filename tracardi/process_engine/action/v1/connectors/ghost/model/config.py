@@ -6,9 +6,10 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 class Configuration(PluginConfig):
     source: NamedEntity
-    tweet: str
+    label: str
+    uuid: str
 
-    @field_validator("uuid")
+    @field_validator('uuid')
     @classmethod
     def must_not_be_emty(cls, value):
         if value.strip() == "":

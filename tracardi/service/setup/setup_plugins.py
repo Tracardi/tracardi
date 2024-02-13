@@ -718,6 +718,14 @@ installed_plugins: Dict[str, PluginMetadata] = {
             init={'index': 'index', 'query': '{"query":{"match_all":{}}}'},
             resource=None)
     ),
+
+    "tracardi.process_engine.action.v1.connectors.ghost.plugin": PluginMetadata(
+        test=PluginTest(init={'uuid': '', 'label': ''},
+                        resource={
+                            "api_url": "<api-url>",
+                            "api_key": "<api-key>"
+                        })
+    ),
 }
 
 if License.has_service(SCHEDULER):
