@@ -19,7 +19,7 @@ def map_to_workflow_table(flow_record: FlowRecord) -> WorkflowTable:
         tags=",".join(flow_record.tags) if flow_record.tags else "",
 
         draft=flow_record.draft,
-
+        file_name=flow_record.file_name,
         lock=flow_record.lock,
 
         tenant = context.tenant,
@@ -37,6 +37,7 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         description=workflow_table.description,
         type=workflow_table.type,
         tags=split_list(workflow_table.tags),
+        file_name=workflow_table.file_name,
         draft=workflow_table.draft,
         lock=workflow_table.lock,
         running=workflow_table.running

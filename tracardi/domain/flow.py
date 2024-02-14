@@ -279,6 +279,7 @@ class FlowRecord(NamedEntityInContext):
     deploy_timestamp: Optional[datetime] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = ["General"]
+    file_name: Optional[str] = None
     draft: Optional[dict] = {}
     lock: bool = False
     type: str

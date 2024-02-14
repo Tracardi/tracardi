@@ -81,6 +81,8 @@ class WorkflowTable(Base):
 
     draft = Column(JSON)
 
+    file_name = Column(String(64))
+
     lock = Column(Boolean)
     deployed = Column(Boolean, default=False)
     debug_enabled = Column(Boolean, default=False)
