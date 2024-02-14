@@ -8,3 +8,4 @@ class Subscription(NamedEntityInContext):
     enabled: bool = False
     tags: List[str] = []
     topic: str
+    token: str

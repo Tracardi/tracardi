@@ -725,6 +725,7 @@ class SubscriptionTable(Base):
     enabled = Column(Boolean, default=False)
     tags = Column(String(128))
     topic = Column(String(128))
+    token = Column(String(64))
 
     tenant = Column(String(40))
     production = Column(Boolean)

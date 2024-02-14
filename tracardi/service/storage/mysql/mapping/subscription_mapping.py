@@ -13,7 +13,8 @@ def map_to_subscription_table(subscription: Subscription) -> SubscriptionTable:
         description=subscription.description,
         enabled=subscription.enabled,
         tags=",".join(subscription.tags) if subscription.tags else "",
-        topic=subscription.topic
+        topic=subscription.topic,
+        token=subscription.token
     )
 
 
@@ -25,6 +26,7 @@ def map_to_subscription(subscription_table: SubscriptionTable) -> Subscription:
         enabled=subscription_table.enabled,
         tags=subscription_table.tags.split(",") if subscription_table.tags else [],
         topic=subscription_table.topic,
+        token=subscription_table.token,
 
         production=subscription_table.production,
         running=subscription_table.running
