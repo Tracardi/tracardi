@@ -713,3 +713,24 @@ class ConfigurationTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant'),
     )
+
+
+class SubscriptionTable(Base):
+    __tablename__ = 'subscription'
+
+    id = Column(String(40))
+    timestamp = Column(DateTime)
+    name = Column(String(128))
+    description = Column(Text)
+    enabled = Column(Boolean, default=False)
+    tags = Column(String(128))
+    topic = Column(String(128))
+
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+    running: bool = False
