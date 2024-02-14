@@ -481,7 +481,8 @@ def get_resource_types() -> List[ResourceSettings]:
                 package="tracardi.process_engine.destination.ghost_connector.GhostConnector",
                 init={
                     "uuid": "<uuid>",
-                    "label": "<label>"
+                    "label_add": "<label-to-add>",
+                    "label_remove": "<label-to-remove>"
                 }
             )
         )

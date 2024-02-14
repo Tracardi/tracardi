@@ -6,7 +6,8 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 class Configuration(PluginConfig):
     source: NamedEntity
-    label: str
+    label_add: str
+    label_remove: str
     uuid: str
 
     @field_validator('uuid')

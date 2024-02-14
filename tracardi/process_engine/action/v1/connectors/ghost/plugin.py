@@ -58,9 +58,13 @@ class GhostAction(ActionRunner):
 
             ghost_id = member['members'][0]['id']
             labels = list(map(lambda x: x['name'], list(member['members'][0]['labels'])))
-
-            if dot[self.config.label] not in labels:
-                labels.append(dot[self.config.label])
+    
+            if ( dot[self.config.label_add] not in labels and dot[self.config.label_add]!='' ) or \
+                ( dot[self.config.label_remove] in labels and dot[self.config.label_remove]!='' ) :
+                if dot[self.config.label_add] not in labels and dot[self.config.label_add]!='':
+                    labels.append(dot[self.config.label_add])
+                if dot[self.config.label_remove] in labels and dot[self.config.label_remove]!='':
+                    labels.remove(dot[self.config.label_remove])
 
                 async with HttpClient(
                         1,
@@ -115,11 +119,20 @@ def register() -> Plugin:
                             })
                         ),
                         FormField(
-                            id="label",
-                            name="Label",
+                            id="label_add",
+                            name="Label_Add",
                             description="Label to be added to the Ghost member.",
                             component=FormComponent(type="dotPath", props={
-                                "label": "Label",
+                                "label": "Label_Add",
+                                "defaultSourceValue": "payload"
+                            })
+                        ),
+                        FormField(
+                            id="label_remove",
+                            name="Label_Remove",
+                            description="Label to be removed from the Ghost member.",
+                            component=FormComponent(type="dotPath", props={
+                                "label": "Label_Remove",
                                 "defaultSourceValue": "payload"
                             })
                         )
