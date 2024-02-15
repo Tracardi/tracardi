@@ -123,48 +123,37 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class SettingsTable(Base):
-    __tablename__ = 'settings'
+class ConfigurationTable(Base):
+    __tablename__ = 'configuration'
 
-    id = Column(String(40))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL, with ignore_above
-    timestamp = Column(DateTime)  # 'date' type in ES is the same as 'DATETIME' in MySQL
-    name = Column(String(128))  # 'keyword' type in ES corresponds to 'VARCHAR' in MySQL, default length 255
-    description = Column(Text)  
-    type = Column(String(64)) 
-    enabled = Column(Boolean, default=False) 
-    content = Column(JSON) 
-    config = Column(JSON) 
+    id = Column(String(40))
+    timestamp = Column(DateTime)
+    name = Column(String(128))
+    properties = Column(JSON)
 
     tenant = Column(String(40))
-    production = Column(Boolean)
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
+        PrimaryKeyConstraint('id', 'tenant'),
     )
+
 ```
 
-and it to the corresponding object `Setting` that has the following schema:
+and it to the corresponding object `Configuration` that has the following schema:
 
 ```python
-from datetime import datetime
-from typing import Optional, Any
-
-from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.utils.date import now_in_utc
-
-
-class Setting(NamedEntity):
-    timestamp: Optional[datetime] = None
-    description: Optional[str] = ""
-    enabled: Optional[bool] = False
-    type: str
-    content: dict
-    config: dict
+class Configuration(NamedEntity):
+    timestamp: datetime
+    properties: dict
 
     def __init__(self, **data: Any):
+        if 'id' not in data:
+            data['id'] = str(uuid4())
+        if 'timestamp' not in data:
+            data['timestamp'] = now_in_utc()
+
         super().__init__(**data)
-        if self.timestamp is None:
-            self.timestamp = now_in_utc()
+
 
 ```
 

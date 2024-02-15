@@ -737,3 +737,42 @@ class SubscriptionTable(Base):
     )
 
     running: bool = False
+
+
+
+class TestTable(Base):
+    __tablename__ = 'test'
+
+    id = Column(String(40))
+    timestamp = Column(DateTime)
+    name = Column(String(128))
+    event_source_id = Column(String(40))
+    event_source_name = Column(String(128))
+    event_type_id = Column(String(40))
+    event_type_name = Column(String(64))
+    profile_id = Column(String(40))
+    session_id = Column(String(40))
+    asynchronous = Column(Boolean)
+    properties = Column(JSON)
+    context = Column(JSON)
+
+    tenant = Column(String(40))
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant'),
+    )
+
+
+class ConfigurationTable(Base):
+    __tablename__ = 'configuration'
+
+    id = Column(String(40))
+    timestamp = Column(DateTime)
+    name = Column(String(128))
+    properties = Column(JSON)
+
+    tenant = Column(String(40))
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant'),
+    )
