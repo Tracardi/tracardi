@@ -21,12 +21,14 @@ from tracardi.service.storage.mysql.utils.select_result import SelectResult
 T = TypeVar('T')
 logger = get_logger(__name__)
 
+client = AsyncMySqlEngine()
+engine = client.get_engine_for_database()
 
 class TableService(metaclass=Singleton):
 
     def __init__(self, echo: bool = False):
-        self.client = AsyncMySqlEngine(echo)
-        self.engine = self.client.get_engine_for_database()
+        self.client = client
+        self.engine = engine
 
     async def _select_in_deployment_mode(self,
                                          table: Type[Base],
