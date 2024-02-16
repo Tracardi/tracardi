@@ -462,7 +462,7 @@ class TrackerPayload(BaseModel):
                         # Create new profile
                         is_new_profile = True
 
-                        logger.info(
+                        logger.debug(
                             "No merged profile. New profile created at UTC {} with id {}".format(
                                 profile.metadata.time.insert,
                                 profile.id))
