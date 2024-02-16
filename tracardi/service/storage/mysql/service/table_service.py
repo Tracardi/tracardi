@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import insert
 
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import License, LICENSE
+from tracardi.service.singleton import Singleton
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
 from sqlalchemy import inspect, update, Column
 
@@ -21,7 +22,7 @@ T = TypeVar('T')
 logger = get_logger(__name__)
 
 
-class TableService:
+class TableService(metaclass=Singleton):
 
     def __init__(self, echo: bool = False):
         self.client = AsyncMySqlEngine(echo)
