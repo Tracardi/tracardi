@@ -701,22 +701,6 @@ class SettingTable(Base):
     running: bool = False
 
 
-
-class ConfigurationTable(Base):
-    __tablename__ = 'configuration'
-
-    id = Column(String(40))
-    timestamp = Column(DateTime)
-    name = Column(String(128))
-    config = Column(JSON)
-
-    tenant = Column(String(40))
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant'),
-    )
-
-
 class SubscriptionTable(Base):
     __tablename__ = 'subscription'
 
@@ -762,17 +746,39 @@ class TestTable(Base):
         PrimaryKeyConstraint('id', 'tenant'),
     )
 
-
 class ConfigurationTable(Base):
     __tablename__ = 'configuration'
 
     id = Column(String(40))
     timestamp = Column(DateTime)
     name = Column(String(128))
-    properties = Column(JSON)
+    description = Column(Text)
+    enabled = Column(Boolean, default=False)
+    tags = Column(String(128))
+    config = Column(JSON)
 
     tenant = Column(String(40))
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant'),
     )
+
+
+class AudienceTable(Base):
+    __tablename__ = 'audience'
+
+    id = Column(String(40), primary_key=True)
+    name = Column(String(128), index=True, nullable=False)
+    description = Column(Text)
+    enabled = Column(Boolean, default=False)
+    tags = Column(Text)  # Serialized list
+    join = Column(JSON)
+
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+    running: bool = False

@@ -123,36 +123,72 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class ConfigurationTable(Base):
-    __tablename__ = 'configuration'
+class AudienceTable(Base):
+    __tablename__ = 'audience'
 
-    id = Column(String(40))
-    timestamp = Column(DateTime)
-    name = Column(String(128))
-    properties = Column(JSON)
+    id = Column(String(40), primary_key=True)
+    name = Column(String(128), index=True, nullable=False)
+    description = Column(Text)
+    enabled = Column(Boolean, default=False)
+    tags = Column(Text)  # Serialized list
+    join = Column(JSON)
 
-    tenant = Column(String(40))
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant'),
-    )
-
+    tenant = Column(String(40), nullable=False)
+    production = Column(Boolean, default=False)
+    running = Column(Boolean, default=False)
 ```
 
 and it to the corresponding object `Configuration` that has the following schema:
 
 ```python
-class Configuration(NamedEntity):
-    timestamp: datetime
-    properties: dict
+from typing import Optional, List
+from pydantic import BaseModel, field_validator
 
-    def __init__(self, **data: Any):
-        if 'id' not in data:
-            data['id'] = str(uuid4())
-        if 'timestamp' not in data:
-            data['timestamp'] = now_in_utc()
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.ref_value import RefValue
 
-        super().__init__(**data)
+
+from typing import Optional, List
+from pydantic import BaseModel, field_validator
+
+from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.ref_value import RefValue
+
+
+class AudienceAggregate(BaseModel):
+    aggr: str
+    by_field: RefValue
+    save_as: str
+
+class DependentEntity(BaseModel):
+    type: str
+    event_type: Optional[NamedEntity] = None
+    where: Optional[str] = ""
+
+class AudienceGroupBy(BaseModel):
+    entity: Optional[DependentEntity] = None
+    group_by: Optional[List[AudienceAggregate]] = []
+    group_where: Optional[str] = ""
+
+    def is_empty(self) -> bool:
+        return self.entity is None or (self.group_where == "" and not self.group_by)
+
+    def __hash__(self):
+        return hash(f"{self}")
+
+
+class Audience(NamedEntity):
+    description: Optional[str] = ""
+    enabled: bool = False
+    tags: List[str] = []
+    join: List[AudienceGroupBy] = []
+
+    @field_validator("name")
+    @classmethod
+    def name_not_empty(cls, value):
+        if not value:
+            raise ValueError("Name can not be empty")
+        return value
 
 
 ```

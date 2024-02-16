@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from typing import Any
+from typing import Any, Optional, List
 
 from datetime import datetime
 
@@ -10,7 +10,10 @@ from tracardi.service.utils.date import now_in_utc
 
 class Configuration(NamedEntity):
     timestamp: datetime
-    properties: dict
+    config: dict
+    description: Optional[str] = ""
+    enabled: bool = False
+    tags: Optional[List[str]] = []
 
     def __init__(self, **data: Any):
         if 'id' not in data:
