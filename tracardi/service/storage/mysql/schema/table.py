@@ -767,11 +767,12 @@ class ConfigurationTable(Base):
 class AudienceTable(Base):
     __tablename__ = 'audience'
 
-    id = Column(String(40), primary_key=True)
-    name = Column(String(128), index=True, nullable=False)
+    id = Column(String(40))
+    name = Column(String(128))
     description = Column(Text)
     enabled = Column(Boolean, default=False)
-    tags = Column(Text)  # Serialized list
+    tags = Column(Text)
+    filter = Column(Text)
     join = Column(JSON)
 
     tenant = Column(String(40))
