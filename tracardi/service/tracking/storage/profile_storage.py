@@ -75,7 +75,7 @@ async def store_profile(profiles: Union[Profile, List[Profile], Set[Profile]],
     if context is None:
         context = get_context()
 
-    print(await profile_db.save(profiles, refresh_after_save=refresh))
+    await profile_db.save(profiles, refresh_after_save=refresh)
 
     if cache:
         save_profile_cache(profiles, context)
