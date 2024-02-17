@@ -94,7 +94,8 @@ def register() -> Plugin:
             version='0.8.2',
             init={
                 "uuid": "",
-                "label": ""
+                "label_add": "",
+                "label_remove": ""
             },
             form=Form(groups=[
                 FormGroup(
