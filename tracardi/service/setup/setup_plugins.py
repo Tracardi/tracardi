@@ -445,6 +445,14 @@ installed_plugins: Dict[str, PluginMetadata] = {
                   'uix_source': 'http://localhost:8686'},
             resource=None)
     ),
+    "tracardi.process_engine.action.v1.ux.custom_js.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "attributes": "{}",
+                "content": ""
+            },
+            resource=None)
+    ),
 
     "tracardi.process_engine.action.v1.connectors.html.fetch.plugin": PluginMetadata(
         test=PluginTest(
