@@ -94,7 +94,7 @@ def register() -> Plugin:
                             id="segment",
                             name="Segment name",
                             description="Please type segment name.",
-                            component=FormComponent(type="text", props={"label": "Segment name"})
+                            component=FormComponent(type="dotPath", props={"label": "Segment name"})
                         )
                     ]
                 )]
