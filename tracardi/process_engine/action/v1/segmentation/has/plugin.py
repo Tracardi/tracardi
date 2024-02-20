@@ -56,6 +56,7 @@ def register() -> Plugin:
             init={
                 "segment": ""
             },
+            manual="segmentation/has_segment_action",
             form=Form(groups=[
                 FormGroup(
                     name="Segment",
