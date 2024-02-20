@@ -140,7 +140,7 @@ class StorageRecords(dict):
         if key is None:
             return StorageAggregates(self._aggregations) if self._aggregations is not None else None
         if self._aggregations is None or key not in self._aggregations:
-            raise ValueError(f"Aggregation {key} not available.")
+            raise ValueError(f"Aggregation `{key}` not available. No aggregation set for this query")
         return StorageAggregate(**self._aggregations[key])
 
     @staticmethod
