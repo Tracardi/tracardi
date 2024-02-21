@@ -37,3 +37,9 @@ class DatabaseService:
 
         # Create a new async engine instance with the database selected
         await self._create_tables()
+
+    async def drop(self, database_name):
+        engine = self.client.get_engine()
+        async with engine.connect() as conn:
+            await conn.execute(text(f"DROP DATABASE IF EXISTS `{database_name}`;"))
+            await conn.commit()
