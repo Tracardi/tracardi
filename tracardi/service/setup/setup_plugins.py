@@ -726,6 +726,12 @@ installed_plugins: Dict[str, PluginMetadata] = {
             init={'index': 'index', 'query': '{"query":{"match_all":{}}}'},
             resource=None)
     ),
+    
+"tracardi.process_engine.action.v1.group_and_rank_interests_action": PluginMetadata(
+        test=PluginTest(init={'interests': 'profile@interests', 'segment_mapping': '{}','segments_to_apply':''},
+        resource=None)
+    ),
+    
 }
 
 if License.has_service(SCHEDULER):
