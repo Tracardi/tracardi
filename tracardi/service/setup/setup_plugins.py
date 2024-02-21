@@ -728,7 +728,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
 
     "tracardi.process_engine.action.v1.connectors.ghost.plugin": PluginMetadata(
-        test=PluginTest(init={'uuid': '', 'label-add': '', 'label-remove': ''},
+        test=PluginTest(init={'uuid': ''},
                         resource={
                             "api_url": "<api-url>",
                             "api_key": "<api-key>"

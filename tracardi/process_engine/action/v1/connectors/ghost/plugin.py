@@ -14,6 +14,7 @@ import aiohttp
 import certifi
 from tracardi.service.tracardi_http_client import HttpClient
 
+from tracardi.domain.profile import Profile
 
 def validate(config):
     return Configuration(**config)
@@ -31,6 +32,7 @@ class GhostAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
+        profile = Profile(**dot.profile)
 
         _id, secret = self.credentials.api_key.split(':')
         iat = int(date.now().timestamp())
@@ -58,14 +60,17 @@ class GhostAction(ActionRunner):
 
             ghost_id = member['members'][0]['id']
             labels = list(map(lambda x: x['name'], list(member['members'][0]['labels'])))
+            labels.sort()
+            
+            profile_segments = profile.segments
+            profile_segments.sort()
+            
+            print (labels)
+            print (profile_segments)
+            
+            if labels != profile_segments:
+                labels = profile.segments
     
-            if ( dot[self.config.label_add] not in labels and dot[self.config.label_add]!='' ) or \
-                ( dot[self.config.label_remove] in labels and dot[self.config.label_remove]!='' ) :
-                if dot[self.config.label_add] not in labels and dot[self.config.label_add]!='':
-                    labels.append(dot[self.config.label_add])
-                if dot[self.config.label_remove] in labels and dot[self.config.label_remove]!='':
-                    labels.remove(dot[self.config.label_remove])
-
                 async with HttpClient(
                         1,
                         200,
@@ -78,7 +83,7 @@ class GhostAction(ActionRunner):
                     ) as response:
                         response = await response.json()
 
-            return Result(port='response', value=payload)
+            return Result(port='result', value={'labels':labels})
         except Exception as e:
             return Result(value={"message": str(e)}, port="error")
 
@@ -93,9 +98,7 @@ def register() -> Plugin:
             outputs=["result", "error"],
             version='0.8.2',
             init={
-                "uuid": "",
-                "label_add": "",
-                "label_remove": ""
+                "uuid": ""
             },
             form=Form(groups=[
                 FormGroup(
@@ -116,24 +119,6 @@ def register() -> Plugin:
                             description="Ghost member UUID.",
                             component=FormComponent(type="dotPath", props={
                                 "label": "UUID",
-                                "defaultSourceValue": "payload"
-                            })
-                        ),
-                        FormField(
-                            id="label_add",
-                            name="Label_Add",
-                            description="Label to be added to the Ghost member.",
-                            component=FormComponent(type="dotPath", props={
-                                "label": "Label_Add",
-                                "defaultSourceValue": "payload"
-                            })
-                        ),
-                        FormField(
-                            id="label_remove",
-                            name="Label_Remove",
-                            description="Label to be removed from the Ghost member.",
-                            component=FormComponent(type="dotPath", props={
-                                "label": "Label_Remove",
                                 "defaultSourceValue": "payload"
                             })
                         )
