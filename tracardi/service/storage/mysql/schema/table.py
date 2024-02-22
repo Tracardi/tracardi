@@ -525,6 +525,7 @@ class ActivationTable(Base):
     id = Column(String(40))
     name = Column(String(128))
     description = Column(Text)
+    tags = Column(String(255))
     activation_class = Column(String(128))
     audience_query = Column(Text)
     mapping = Column(JSON)

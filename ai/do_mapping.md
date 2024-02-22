@@ -123,73 +123,40 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class AudienceTable(Base):
-    __tablename__ = 'audience'
+class ActivationTable(Base):
+    __tablename__ = 'activation'
 
-    id = Column(String(40), primary_key=True)
-    name = Column(String(128), index=True, nullable=False)
+    id = Column(String(40))
+    name = Column(String(128))
     description = Column(Text)
+    activation_class = Column(String(128))
+    audience_query = Column(Text)
+    mapping = Column(JSON)
     enabled = Column(Boolean, default=False)
-    tags = Column(Text)  # Serialized list
-    join = Column(JSON)
 
-    tenant = Column(String(40), nullable=False)
-    production = Column(Boolean, default=False)
-    running = Column(Boolean, default=False)
+    tenant = Column(String(40))
+    production = Column(Boolean)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'tenant', 'production'),
+    )
+
+    running: bool = False
 ```
 
-and it to the corresponding object `Configuration` that has the following schema:
+and it to the corresponding object `Activation` that has the following schema:
 
 ```python
-from typing import Optional, List
-from pydantic import BaseModel, field_validator
-
-from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.ref_value import RefValue
+from typing import Optional
+from tracardi.domain.named_entity import NamedEntityInContext
 
 
-from typing import Optional, List
-from pydantic import BaseModel, field_validator
-
-from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.ref_value import RefValue
-
-
-class AudienceAggregate(BaseModel):
-    aggr: str
-    by_field: RefValue
-    save_as: str
-
-class DependentEntity(BaseModel):
-    type: str
-    event_type: Optional[NamedEntity] = None
-    where: Optional[str] = ""
-
-class AudienceGroupBy(BaseModel):
-    entity: Optional[DependentEntity] = None
-    group_by: Optional[List[AudienceAggregate]] = []
-    group_where: Optional[str] = ""
-
-    def is_empty(self) -> bool:
-        return self.entity is None or (self.group_where == "" and not self.group_by)
-
-    def __hash__(self):
-        return hash(f"{self}")
-
-
-class Audience(NamedEntity):
+class Activation(NamedEntityInContext):
     description: Optional[str] = ""
+    activation_class: str
+    audience_query: str
+    mapping: Optional[dict] = {}
     enabled: bool = False
-    tags: List[str] = []
-    join: List[AudienceGroupBy] = []
-
-    @field_validator("name")
-    @classmethod
-    def name_not_empty(cls, value):
-        if not value:
-            raise ValueError("Name can not be empty")
-        return value
-
 
 ```
 
