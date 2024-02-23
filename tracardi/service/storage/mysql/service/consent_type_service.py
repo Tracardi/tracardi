@@ -32,15 +32,14 @@ class ConsentTypeService(TableService):
         return await self._insert_if_none(ConsentTypeTable, map_to_consent_type_table(consent_type))
 
 
-    async def load_keys(self, limit: int = None, offset: int = None) -> SelectResult:
+    async def load_enabled(self, limit: int = None, offset: int = None) -> SelectResult:
         where = where_tenant_and_mode_context(
             ConsentTypeTable,
             ConsentTypeTable.enabled == True
         )
 
-        return await self._select_query(
+        return await self._select_in_deployment_mode(
             ConsentTypeTable,
-            columns=[ConsentTypeTable.id],
             where=where,
             limit=limit,
             offset=offset,

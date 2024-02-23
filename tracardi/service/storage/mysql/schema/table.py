@@ -102,8 +102,6 @@ class WorkflowTriggerTable(Base):
     __tablename__ = 'workflow_trigger'
 
     id = Column(String(40))
-    tenant = Column(String(40))
-    production = Column(Boolean)
     name = Column(String(150), index=True)
     description = Column(String(255))
     type = Column(String(64))
@@ -119,6 +117,9 @@ class WorkflowTriggerTable(Base):
     properties = Column(JSON)
     enabled = Column(Boolean, default=False)
     tags = Column(String(255), index=True)
+
+    tenant = Column(String(40))
+    production = Column(Boolean)
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
