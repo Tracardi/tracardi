@@ -10,13 +10,14 @@ from tracardi.domain.yaml_config import YamlConfig
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.singleton import Singleton
-from tracardi.service.utils.environment import get_env_as_int
+from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
 from tracardi.service.utils.validators import is_valid_url
 
 VERSION = os.environ.get('_DEBUG_VERSION', '0.9.0-rc2')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
 logger = get_logger(__name__)
+
 
 class MemoryCacheConfig:
     def __init__(self, env):
@@ -66,7 +67,7 @@ class ElasticConfig:
 
     def __init__(self, env):
         self.env = env
-        self.unset_credentials = env.get('UNSET_CREDENTIALS', "no") == 'yes'
+        self.unset_credentials = get_env_as_bool('UNSET_CREDENTIALS', "off")
         self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
         self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
         self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
@@ -79,9 +80,9 @@ class ElasticConfig:
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None
         self.maxsize = get_env_as_int('ELASTIC_MAX_CONN', 25)
         self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
-        self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
+        self.verify_certs = get_env_as_bool('ELASTIC_VERIFY_CERTS', 'off')
 
-        self.refresh_profiles_after_save = env.get('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'no').lower() == 'yes'
+        self.refresh_profiles_after_save = get_env_as_bool('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'off')
 
         self.host = self.get_host()
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', 'elastic')
@@ -163,27 +164,27 @@ class TracardiConfig(metaclass=Singleton):
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = env.get('TRACK_DEBUG', 'no').lower() == 'yes'
         self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
-        self.enable_event_destinations = env.get('ENABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
-        self.enable_profile_destinations = env.get('ENABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
-        self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
-        self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
-        self.enable_event_validation = env.get('ENABLE_EVENT_VALIDATION', 'yes').lower() == 'yes'
-        self.enable_event_reshaping = env.get('ENABLE_EVENT_RESHAPING', 'yes').lower() == 'yes'
-        self.enable_event_source_check = env.get('ENABLE_EVENT_SOURCE_CHECK', 'yes').lower() == 'yes'
-        self.enable_profile_immediate_flush = env.get('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes').lower() == 'yes'
-        self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
-        self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
-        self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
-        self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
-        self.enable_field_update_log = env.get('ENABLE_FIELD_UPDATE_LOG', 'yes').lower() == 'yes'
-        self.allow_bot_traffic = env.get('ALLOW_BOT_TRAFFIC', 'no').lower() == 'yes'
+        self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'no')
+        self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'no')
+        self.enable_segmentation_wf_triggers = get_env_as_bool('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no')
+        self.enable_workflow = get_env_as_bool('ENABLE_WORKFLOW', 'yes')
+        self.enable_event_validation = get_env_as_bool('ENABLE_EVENT_VALIDATION', 'yes')
+        self.enable_event_reshaping = get_env_as_bool('ENABLE_EVENT_RESHAPING', 'yes')
+        self.enable_event_source_check = get_env_as_bool('ENABLE_EVENT_SOURCE_CHECK', 'yes')
+        self.enable_profile_immediate_flush = get_env_as_bool('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes')
+        self.enable_identification_point = get_env_as_bool('ENABLE_IDENTIFICATION_POINT', 'yes')
+        self.enable_post_event_segmentation = get_env_as_bool('ENABLE_POST_EVENT_SEGMENTATION', 'yes')
+        self.system_events = get_env_as_bool('SYSTEM_EVENTS', 'yes')
+        self.enable_errors_on_response = get_env_as_bool('ENABLE_ERRORS_ON_RESPONSE', 'yes')
+        self.enable_field_update_log = get_env_as_bool('ENABLE_FIELD_UPDATE_LOG', 'yes')
+        self.allow_bot_traffic = get_env_as_bool('ALLOW_BOT_TRAFFIC', 'no')
         self.keep_profile_in_cache_for = get_env_as_int('KEEP_PROFILE_IN_CACHE_FOR', 60*60)
         self.keep_session_in_cache_for = get_env_as_int('KEEP_SESSION_IN_CACHE_FOR', 30 * 60)
 
-        self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
+        self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
         # Temporary flag
-        self.new_collector = env.get('NEW_COLLECTOR', 'yes').lower() == 'yes'
+        self.new_collector = get_env_as_bool('NEW_COLLECTOR', 'yes')
 
         self.profile_cache_ttl = get_env_as_int('PROFILE_CACHE_TTL', 60)
         self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 60)
@@ -198,10 +199,10 @@ class TracardiConfig(metaclass=Singleton):
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
-        self.multi_tenant = env.get('MULTI_TENANT', "no") == 'yes'
+        self.multi_tenant = get_env_as_bool('MULTI_TENANT', "no")
         self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
-        self.expose_gui_api = env.get('EXPOSE_GUI_API', 'yes').lower() == "yes"
+        self.expose_gui_api = get_env_as_bool('EXPOSE_GUI_API', 'yes')
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
@@ -220,7 +221,7 @@ class TracardiConfig(metaclass=Singleton):
         self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
         self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
         self.auto_profile_merging = env.get('AUTO_PROFILE_MERGING', 's>a.d-kljsa87^5adh')
-        self.apm_on = env.get('APM', 'yes') == 'yes'
+        self.apm_on = get_env_as_bool('APM', 'yes')
 
         self._config = None
         self._unset_secrets()
