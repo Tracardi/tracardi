@@ -530,8 +530,8 @@ class ActivationTable(Base):
     activation_type_id = Column(String(40))
     activation_type_name = Column(String(255))
     audience_query = Column(Text)
-    mapping = Column(JSON)
     enabled = Column(Boolean, default=False)
+    config = Column(JSON)
 
     tenant = Column(String(40))
     production = Column(Boolean)
