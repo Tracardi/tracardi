@@ -528,8 +528,9 @@ class ActivationTable(Base):
     description = Column(Text)
     tags = Column(String(255))
     activation_type_id = Column(String(40))
-    activation_type_name = Column(String(255))
-    audience_query = Column(Text)
+    activation_type_name = Column(String(128))
+    audience_id = Column(String(40))
+    audience_name = Column(String(128))
     enabled = Column(Boolean, default=False)
     config = Column(JSON)
 

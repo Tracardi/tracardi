@@ -96,13 +96,11 @@ class TableService(metaclass=Singleton):
                                            offset: int = None,
                                            columns=None
                                            ) -> SelectResult:
+        and_clauses = []
         if search:
-            where = where_tenant_and_mode_context(
-                table,
-                table.name.like(f'%{search}%')
-            )
-        else:
-            where = where_tenant_and_mode_context(table)
+            and_clauses.append(table.name.like(f'%{search}%'))
+
+        where = where_tenant_and_mode_context(table, *and_clauses)
 
         return await self._select_in_deployment_mode(table,
                                                      where=where,

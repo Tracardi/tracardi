@@ -11,12 +11,16 @@ class SelectResult:
     def __init__(self, rows):
         self.rows = rows
 
-    def map_to_objects(self, mapper: Callable[[Base], T]) -> Generator[T, None, None]:
+    def map_to_objects(self, mapper: Callable[[Base], T], filter:Callable[[Base], T]=None) -> Generator[T, None, None]:
         if not isinstance(self.rows, list):
             yield mapper(self.rows)
         else:
             for row in self.rows:
-                yield mapper(row)
+                if filter:
+                    if filter(row):
+                        yield mapper(row)
+                else:
+                    yield mapper(row)
 
     def map_to_object(self, mapper: Callable[[Base], T]) -> Optional[T]:
         if self.rows:
