@@ -26,8 +26,10 @@ class ResourceCredentials(BaseModel):
 
         if plugin.debug is True or not get_context().production:
             return output(**self.test) if output is not None else self.test
-        return output(**self.production) if output is not None else self.production
+        return self.get_production_credentials(output)
 
+    def get_production_credentials(self, output: Type[T] = None) -> Union[T, dict]:
+        return output(**self.production) if output is not None else self.production
 
 class Resource(NamedEntityInContext):
     type: str

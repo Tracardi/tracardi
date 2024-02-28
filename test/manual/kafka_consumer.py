@@ -7,7 +7,7 @@ from aiokafka.helpers import create_ssl_context
 async def consume():
     ssl_context = create_ssl_context()  # todo from config
     consumer = AIOKafkaConsumer(
-        'test-trc',  # todo from config
+        'topic1',  # todo from config
         bootstrap_servers='localhost:9092',  # todo from config
         # ssl_context=ssl_context,
         # security_protocol='SASL_SSL',  # todo from config
@@ -21,9 +21,13 @@ async def consume():
 
     await consumer.start()
     try:
+        i = 0
+        print("start")
         async for msg in consumer:
+            i += 1
+            print(i)
             print("consumed: ", msg.topic, msg.partition, msg.offset,
-                  msg.key, msg.value, msg.timestamp)
+                  msg.key, msg.value, msg.timestamp, msg.headers)
     finally:
         # Will leave consumer group; perform autocommit if enabled.
         await consumer.stop()

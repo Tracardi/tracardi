@@ -118,6 +118,18 @@ def load_by_ids(profile_ids: List[str], batch):
     return storage_manager('profile').scan(query, batch)
 
 
+async def load_by_primary_ids(profile_ids: List[str], size):
+    query = {
+        "size": size,
+        "query": {
+            "terms": {
+                "id": profile_ids
+            }
+        }
+    }
+    return await storage_manager('profile').query(query)
+
+
 async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
     return await storage_manager('profile').load_all(start, limit, sort)
 
