@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from uuid import uuid4
 
 from typing import Any, Optional, List
@@ -9,7 +10,7 @@ from tracardi.service.utils.date import now_in_utc
 
 
 class Configuration(NamedEntity):
-    timestamp: datetime
+    timestamp: Optional[datetime] = None
     config: dict
     description: Optional[str] = ""
     enabled: bool = False
@@ -18,7 +19,9 @@ class Configuration(NamedEntity):
     def __init__(self, **data: Any):
         if 'id' not in data:
             data['id'] = str(uuid4())
-        if 'timestamp' not in data:
+        if data.get('timestamp', None) is None:
             data['timestamp'] = now_in_utc()
 
         super().__init__(**data)
+
+
