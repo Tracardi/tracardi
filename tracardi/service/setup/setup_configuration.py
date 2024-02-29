@@ -7,7 +7,9 @@ available_configuration_list = {
         id=GITHUB_CONFIGURATION,
         name="Github configuration",
         config={
-            "token": ""
+            "token": "",
+            "repo_owner": "",
+            "repo_name": ""
         },
         description="Repository on GitHub to store Tracardi workflows.",
         enabled=True,

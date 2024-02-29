@@ -24,4 +24,13 @@ class Configuration(NamedEntity):
 
         super().__init__(**data)
 
+    def get_token(self):
+        return self.config.get("token", None)
+
+    def get_repo_name(self):
+        return self.config.get("repo_name", None)
+
+    def get_repo_owner(self):
+        return self.config.get("repo_owner", None)
+
 

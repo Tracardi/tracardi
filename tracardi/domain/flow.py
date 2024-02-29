@@ -33,6 +33,7 @@ class Flow(FlowGraph):
     type: str
     timestamp: Optional[datetime] = None
     deploy_timestamp: Optional[datetime] = None
+    file_name: Optional[str] = None
     wf_schema: FlowSchema = FlowSchema()
 
     def arrange_nodes(self):
@@ -84,6 +85,8 @@ class Flow(FlowGraph):
         flow = Flow(**record.draft)
         flow.deploy_timestamp = record.deploy_timestamp
         flow.timestamp = record.timestamp
+        flow.file_name = record.file_name
+        flow.id = record.id
 
         if not flow.timestamp:
             flow.timestamp = now_in_utc()
