@@ -9,7 +9,7 @@ available_configuration_list = {
         config={
             "token": ""
         },
-        description="Github where Tracardi stores workflows.",
+        description="Repository on GitHub to store Tracardi workflows.",
         enabled=True,
         tags=['github']
     )
