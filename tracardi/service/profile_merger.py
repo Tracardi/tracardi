@@ -5,8 +5,6 @@ from tracardi.service.tracking.storage.profile_storage import save_profile, dele
 
 from tracardi.domain.profile_data import ProfileData
 
-from .tracking.cache.profile_cache import delete_profile_cache, save_profile_cache
-from .utils.date import add_utc_time_zone_if_none
 from ..context import get_context
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.driver.elastic import event as event_db
@@ -29,6 +27,9 @@ from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_
 
 logger = get_logger(__name__)
 
+
+def get_profile_primary_id(profile: Profile) -> str:
+    return profile.id
 
 async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
                                                               duplicate_profiles: List[Profile]) -> Profile:
@@ -74,7 +75,6 @@ class ProfileMerger:
     @staticmethod
     async def invoke_merge_profile(profile: Optional[Profile],
                                    merge_by: List[Tuple[str, str]],  # Field: value
-                                   conflict_aux_key: str = "conflicts",
                                    condition:str ='must',
                                    limit: int = 2000) -> Optional[Profile]:
 
@@ -110,7 +110,7 @@ class ProfileMerger:
                 logger.info("No profiles to merge")
                 return None
 
-            return await ProfileMerger.compute_one_profile(profile, similar_profiles, conflict_aux_key)
+            return await ProfileMerger.compute_one_profile(profile, similar_profiles)
 
         return None
 
@@ -172,7 +172,6 @@ class ProfileMerger:
     def _get_merged_profile(self,
                             similar_profiles: List[Profile],
                             merging_strategy: MergingStrategy,
-                            conflict_aux_key: str = "conflicts",
                             merge_stats: bool = True,
                             merge_time: bool = True
                             ) -> Profile:
@@ -241,11 +240,11 @@ class ProfileMerger:
                     interests[interest] = 0
                 interests[interest] += profile.interests[interest]
 
-        self.current_profile.aux[conflict_aux_key] = conflicts_aux
+        # self.current_profile.aux["conflicts"] = conflicts_aux
 
         profile = Profile(
             metadata=ProfileMetadata(time=time),
-            id=self.current_profile.id,
+            id=get_profile_primary_id(self.current_profile),
             ids=self.current_profile.ids,
             stats=stats if merge_stats else self.current_profile.stats,
             traits=traits,
@@ -261,29 +260,24 @@ class ProfileMerger:
 
         return profile
 
-    async def merge(self,
-                    similar_profiles: List[Profile],
-                    conflict_aux_key: str = "conflicts") -> Tuple[Optional[Profile], List[Profile]]:
+    async def merge(self, similar_profiles: List[Profile]) -> Tuple[Optional[Profile], List[Profile]]:
+
         return await self._merge(
             similar_profiles,
-            allow_duplicate_ids=False,
-            conflict_aux_key=conflict_aux_key
+            allow_duplicate_ids=False
         )
 
     async def deduplicate(self,
-                          similar_profiles: List[Profile],
-                          conflict_aux_key: str = "conflicts"
-                          ) -> Tuple[Optional[Profile], List[Profile]]:
+                          similar_profiles: List[Profile]) -> Tuple[Optional[Profile], List[Profile]]:
         return await self._merge(
             similar_profiles,
-            allow_duplicate_ids=True,
-            conflict_aux_key=conflict_aux_key
+            allow_duplicate_ids=True
         )
 
     async def _merge(self,
                      similar_profiles: List[Profile],
-                     allow_duplicate_ids: bool = False,
-                     conflict_aux_key: str = "conflicts") -> Tuple[Optional[Profile], List[Profile]]:
+                     allow_duplicate_ids: bool = False
+                     ) -> Tuple[Optional[Profile], List[Profile]]:
         """
         Merges profiles on keys set in profile.get_merge_keys(). Loads profiles from database and
         combines its data into current profile. Returns Profiles object with profiles to be disables.
@@ -308,23 +302,20 @@ class ProfileMerger:
             merging_strategy = MergingStrategy()
             merged_profile = self._get_merged_profile(
                 profiles_to_merge,
-                merging_strategy,
-                conflict_aux_key=conflict_aux_key)
+                merging_strategy
+            )
 
             # merged_profile.ids += profiles_to_merge
 
         return merged_profile, profiles_to_merge
 
     @staticmethod
-    async def compute_one_profile(profile: Optional[Profile], similar_profiles: List[Profile],
-                                  conflict_aux_key: str = "conflicts"):
+    async def compute_one_profile(profile: Optional[Profile], similar_profiles: List[Profile]):
 
         merger = ProfileMerger(profile)
 
         # Merge
-        merged_profile, duplicate_profiles = await merger.merge(
-            similar_profiles,
-            conflict_aux_key=conflict_aux_key)
+        merged_profile, duplicate_profiles = await merger.merge(similar_profiles)
 
         if merged_profile:
             # Copy ids

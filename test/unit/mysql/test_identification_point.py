@@ -57,7 +57,7 @@ def test_correctly_map_identification_point_table_to_identification_point():
         event_type_id="789",
         event_type_name="Event",
         fields=from_model(fields),
-        settings={"conflict_aux_field": "conflict"}
+        settings={}
     )
 
     identification_point = map_to_identification_point(identification_point_table)
@@ -72,4 +72,3 @@ def test_correctly_map_identification_point_table_to_identification_point():
     assert len(identification_point.fields) == 1
     assert identification_point.fields == fields
     assert identification_point.enabled is False
-    assert identification_point.settings["conflict_aux_field"] == "conflict"

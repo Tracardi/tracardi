@@ -17,4 +17,4 @@ class IdentificationPoint(NamedEntityInContext):
     event_type: NamedEntity
     fields: List[IdentificationField]
     enabled: bool = False
-    settings: Optional[dict] = {"conflict_aux_field": "conflict"}
+    settings: Optional[dict] = {}
