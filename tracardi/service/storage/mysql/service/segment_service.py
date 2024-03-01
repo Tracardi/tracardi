@@ -39,9 +39,10 @@ class SegmentService(TableService):
             SegmentTable.enabled == only_enabled
         )
 
-        return await self._select_query(SegmentTable,
-                                        where=where,
-                                        order_by=SegmentTable.name)
+        return await self._select_in_deployment_mode(
+            SegmentTable,
+            where=where,
+            order_by=SegmentTable.name)
 
     async def load_by_event_type(self, event_type, limit:int=500):
         clause = or_(SegmentTable.event_type == event_type, SegmentTable.event_type.is_(None))
@@ -50,6 +51,7 @@ class SegmentService(TableService):
                 clause
             )
 
-        return await self._select_query(SegmentTable,
-                                        where=where,
-                                        limit=limit)
+        return await self._select_in_deployment_mode(
+            SegmentTable,
+            where=where,
+            limit=limit)

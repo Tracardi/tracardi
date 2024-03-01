@@ -44,7 +44,7 @@ class EventToProfileMappingService(TableService):
                 EventToProfileMappingTable.event_type_id == event_type
             )
 
-        return await self._select_query(
+        return await self._select_in_deployment_mode(
             EventToProfileMappingTable,
             where=where
         )

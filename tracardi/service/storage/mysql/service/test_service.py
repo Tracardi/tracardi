@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
+# --------------------------------------------------------
+# This Service Runs in Production and None-Production Mode
+# It is PRODUCTION CONTEXT-LESS
+# --------------------------------------------------------
 
 def _where_with_context(*clause):
     return where_with_context(

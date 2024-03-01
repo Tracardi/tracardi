@@ -42,11 +42,11 @@ class EventMappingService(TableService):
                 EventMappingTable,
                 EventMappingTable.event_type == event_type
             )
-
-        return await self._select_query(EventMappingTable,
-                                        where=where,
-                                        order_by=EventMappingTable.name
-                                        )
+        print("load_by_event_type ")
+        return await self._select_in_deployment_mode(EventMappingTable,
+                                                     where=where,
+                                                     order_by=EventMappingTable.name
+                                                     )
 
     async def load_by_event_type_id(self, event_type_id: str, only_enabled: bool = True) -> SelectResult:
         if only_enabled:
@@ -60,9 +60,9 @@ class EventMappingService(TableService):
                 EventMappingTable,
                 EventMappingTable.event_type == event_type_id
             )
-
-        return await self._select_query(EventMappingTable,
-                                        where=where,
-                                        order_by=EventMappingTable.name,
-                                        one_record=True
-                                        )
+        print("load_by_event_type_id ")
+        return await self._select_in_deployment_mode(EventMappingTable,
+                                                     where=where,
+                                                     order_by=EventMappingTable.name,
+                                                     one_record=True
+                                                     )

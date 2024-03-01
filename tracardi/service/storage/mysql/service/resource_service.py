@@ -38,7 +38,7 @@ class ResourceService(TableService):
             sql_functions().find_in_set(tag, ResourceTable.tags)>0
         )
 
-        return await self._select_query(
+        return await self._select_in_deployment_mode(
             ResourceTable,
             where=where
         )

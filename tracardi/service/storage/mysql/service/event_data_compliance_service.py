@@ -43,6 +43,6 @@ class ConsentDataComplianceService(TableService):
                 EventDataComplianceTable.event_type_id == event_type_id
             )
 
-        return await self._select_query(EventDataComplianceTable,
-                                        where=where,
-                                        order_by=EventDataComplianceTable.name)
+        return await self._select_in_deployment_mode(EventDataComplianceTable,
+                                                     where=where,
+                                                     order_by=EventDataComplianceTable.name)

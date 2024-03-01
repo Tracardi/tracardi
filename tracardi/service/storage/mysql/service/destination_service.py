@@ -42,7 +42,7 @@ class DestinationService(TableService):
             DestinationTable.source_id == source_id,
             DestinationTable.event_type_id == event_type,
         )
-        return await self._select_query(DestinationTable, where=where)
+        return await self._select_in_deployment_mode(DestinationTable, where=where)
 
     async def load_profile_destinations(self) -> SelectResult:
         where = where_tenant_and_mode_context(
@@ -50,7 +50,7 @@ class DestinationService(TableService):
             DestinationTable.enabled == True,
             DestinationTable.on_profile_change_only == True
         )
-        return await self._select_query(DestinationTable, where=where)
+        return await self._select_in_deployment_mode(DestinationTable, where=where)
 
     @staticmethod
     def get_destination_types():
@@ -58,19 +58,4 @@ class DestinationService(TableService):
         for resource_type in resource_types:
             if resource_type.destination is not None:
                 yield resource_type.destination.package, resource_type.dict()
-                
 
-    # async def filter(self, text: str, start: int=None, limit: int=None) -> SelectResult:
-    #     if text:
-    #         where = where_tenant_and_mode_context(
-    #             DestinationTable,
-    #             DestinationTable.name.like(f"%{text}%")
-    #         )
-    #     else:
-    #         where = where_tenant_and_mode_context(DestinationTable)
-    #     return await self._select_query(DestinationTable,
-    #                                     where=where,
-    #                                     order_by=DestinationTable.name,
-    #                                     limit=limit,
-    #                                     offset=start)
-                

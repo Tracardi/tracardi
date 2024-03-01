@@ -37,7 +37,7 @@ class IdentificationPointService(TableService):
             IdentificationPointTable,
             IdentificationPointTable.enabled == True
         )
-        return await self._select_query(
+        return await self._select_in_deployment_mode(
             IdentificationPointTable,
             where=where,
             limit=limit,
@@ -49,7 +49,7 @@ class IdentificationPointService(TableService):
             IdentificationPointTable,
             IdentificationPointTable.event_type_id == event_type_id
         )
-        return await self._select_query(
+        return await self._select_in_deployment_mode(
             IdentificationPointTable,
             where=where
         )

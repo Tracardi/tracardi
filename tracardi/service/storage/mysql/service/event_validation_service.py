@@ -45,6 +45,7 @@ class EventValidationService(TableService):
                 EventValidationTable.event_type == event_type
             )
 
-        return await self._select_query(EventValidationTable,
-                                        where=where,
-                                        order_by=EventValidationTable.name)
+        return await self._select_in_deployment_mode(
+            EventValidationTable,
+            where=where,
+            order_by=EventValidationTable.name)

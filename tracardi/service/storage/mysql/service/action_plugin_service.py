@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
+# --------------------------------------------------------
+# This Service Runs in Production and None-Production Mode
+# It is PRODUCTION CONTEXT-LESS
+# --------------------------------------------------------
+
 class ActionPluginService(TableService):
 
     async def load_all(self, search: str = None, limit: int=None, offset:int = None) -> SelectResult:

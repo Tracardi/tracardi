@@ -40,6 +40,7 @@ class WorkflowSegmentationTriggerService(TableService):
             WorkflowSegmentationTriggerTable.enabled == True
         )
 
-        return await self._select_query(WorkflowSegmentationTriggerTable,
-                                        where=where,
-                                        limit=limit)
+        return await self._select_in_deployment_mode(
+            WorkflowSegmentationTriggerTable,
+            where=where,
+            limit=limit)

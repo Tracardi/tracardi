@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
+# --------------------------------------------------------
+# This Service Runs in Production and None-Production Mode
+# It is PRODUCTION CONTEXT-LESS
+# --------------------------------------------------------
 
 class VersionService(TableService):
 

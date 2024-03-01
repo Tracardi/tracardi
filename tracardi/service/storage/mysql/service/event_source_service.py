@@ -35,27 +35,6 @@ class EventSourceService(TableService):
             primary_id=source_id
         )
 
-    # async def load_by_id(self, source_id: str) -> SelectResult:
-    #     return await self._load_by_id(
-    #         EventSourceTable,
-    #         primary_id=source_id
-    #     )
-
-    # async def load_by_tag(self, tag: str) -> SelectResult:
-    #     # Todo filters if only one tag
-    #     return await self._field_filter(
-    #         EventSourceTable,
-    #         field=EventSourceTable.tags,
-    #         value=tag
-    #     )
-
-    # async def load_by_bridge(self, bridge_id: str) -> SelectResult:
-    #     where = where_tenant_and_mode_context(EventSourceTable, EventSourceTable.bridge_id == bridge_id)
-    #     return await self._select_in_deployment_mode(
-    #         EventSourceTable,
-    #         where=where
-    #     )
-
     async def load_by_type_in_deployment_mode(self, type: str) -> SelectResult:
         where = where_tenant_and_mode_context(EventSourceTable, EventSourceTable.type == type)
         return await self._select_in_deployment_mode(
@@ -64,6 +43,7 @@ class EventSourceService(TableService):
         )
 
     async def load_active_by_bridge_id(self, bridge_id: str) -> SelectResult:
+        # It is PRODUCTION CONTEXT-LESS
         return await self._select_query(
             EventSourceTable,
             where=where_tenant_and_mode_context(
@@ -73,15 +53,11 @@ class EventSourceService(TableService):
             )
         )
 
-    async def delete_by_id(self, source_id: str) -> bool:
-        return await self._delete_by_id(
-            EventSourceTable,
-            primary_id=source_id)
-
     async def insert(self, event_source: EventSource):
         return await self._insert_if_none(EventSourceTable, map_to_event_source_table(event_source))
 
     async def lock_by_bridge_id(self, bridge_id: str, lock):
+        # It is PRODUCTION CONTEXT-LESS
         return await self._update_query(
             EventSourceTable,
             where=(

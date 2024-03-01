@@ -87,6 +87,8 @@ async def _compute(source,
     # events, session, profile = None, None, []
     # Profile has fields timestamps updated
 
+    # Function compute_events also maps events to profile
+
     events, session, profile, field_timestamp_monitor = await compute_events(
         tracker_payload.events,  # All events with system events, and validation information
         tracker_payload.metadata,

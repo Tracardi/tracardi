@@ -41,7 +41,7 @@ class SettingService(TableService):
             SettingTable.enabled == True
         )
 
-        return await self._select_query(
+        return await self._select_in_deployment_mode(
             SettingTable,
             where=where)
 
@@ -65,6 +65,6 @@ class SettingService(TableService):
                 SettingTable.enabled == True
             )
 
-        return await self._select_query(
+        return await self._select_in_deployment_mode(
             SettingTable,
             where=where)

@@ -44,6 +44,6 @@ class EventReshapingService(TableService):
                 EventReshapingTable.event_type == event_type
             )
 
-        return await self._select_query(EventReshapingTable,
-                                        where=where,
-                                        order_by=EventReshapingTable.name)
+        return await self._select_in_deployment_mode(EventReshapingTable,
+                                                     where=where,
+                                                     order_by=EventReshapingTable.name)
