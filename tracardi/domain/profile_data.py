@@ -3,6 +3,8 @@ from typing import Optional, Union, List, Any
 from pydantic import BaseModel
 from tracardi.domain.geo import Geo
 
+# Settings For Auto Profile Merging (APM)
+
 PREFIX_EMAIL_MAIN = "emm-"
 PREFIX_EMAIL_BUSINESS =  "emb-"
 PREFIX_EMAIL_PRIVATE =  "emp-"
@@ -10,11 +12,14 @@ PREFIX_PHONE_MAIN = "phm-"
 PREFIX_PHONE_BUSINESS = "phb-"
 PREFIX_PHONE_MOBILE = "pho-"
 PREFIX_PHONE_WHATSUP = "pwa-"
+PREFIX_IDENTIFIER_ID = "iid-"
 
 PREFIX_PHONE_FIELDS = 'data.contact.phone'
 PREFIX_EMAIL_FIELDS = 'data.contact.mail'
 
 FIELD_TO_PROPERTY_MAPPING = {
+    'profile@data.identifier.id': lambda profile: (profile.data.identifier.id, PREFIX_IDENTIFIER_ID),
+
     'profile@data.contact.phone.main': lambda profile: (profile.data.contact.phone.main, PREFIX_PHONE_MAIN),
     'profile@data.contact.phone.business': lambda profile: (profile.data.contact.phone.business,PREFIX_PHONE_BUSINESS),
     'profile@data.contact.phone.whatsapp': lambda profile: (profile.data.contact.phone.whatsapp,PREFIX_PHONE_WHATSUP),
@@ -26,6 +31,8 @@ FIELD_TO_PROPERTY_MAPPING = {
 }
 
 FLAT_PROFILE_FIELD_MAPPING = {
+    'data.identifier.id': PREFIX_IDENTIFIER_ID,
+
     'data.contact.phone.main': PREFIX_PHONE_MAIN,
     'data.contact.phone.business': PREFIX_PHONE_BUSINESS,
     'data.contact.phone.whatsapp':PREFIX_PHONE_WHATSUP,
@@ -37,6 +44,8 @@ FLAT_PROFILE_FIELD_MAPPING = {
 }
 
 FLAT_PROFILE_MAPPING = {
+    'data.identifier.id': lambda flat_profile: (flat_profile['data.identifier.id'], PREFIX_IDENTIFIER_ID),
+
     'data.contact.phone.main': lambda flat_profile: (flat_profile['data.contact.phone.main'], PREFIX_PHONE_MAIN),
     'data.contact.phone.business': lambda flat_profile: (flat_profile['data.contact.phone.business'], PREFIX_PHONE_BUSINESS),
     'data.contact.phone.whatsapp': lambda flat_profile: (flat_profile['data.contact.phone.whatsapp'], PREFIX_PHONE_WHATSUP),
