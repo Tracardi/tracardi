@@ -11,7 +11,7 @@ from dateutil import parser
 from .entity import Entity
 from .metadata import ProfileMetadata
 from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
-    FLAT_PROFILE_MAPPING
+    FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
@@ -94,9 +94,28 @@ class Profile(Entity):
                 return True
         return False
 
+    def has_hashed_id(self) -> bool:
+        for id in self.ids:
+            if id.startswith(PREFIX_IDENTIFIER_ID):
+                return True
+        return False
+
+    def has_hashed_pk(self) -> bool:
+        for id in self.ids:
+            if id.startswith(PREFIX_IDENTIFIER_ID):
+                return True
+        return False
+
     def create_auto_merge_hashed_ids(self):
         ids_len = len(self.ids)
         if tracardi.is_apm_on():
+
+            if self.data.identifier.pk and not self.has_hashed_pk():
+                self.ids.append(hash_id(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
+
+            if self.data.identifier.id and not self.has_hashed_id():
+                self.ids.append(hash_id(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
+
             if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
                 self.ids.append(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
             if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):

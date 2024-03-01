@@ -95,6 +95,7 @@
         "business": "string"
       },
       "id": "string",
+      "pk": "string",
       "token": "string",
       "passport": "string",
       "login": "string",
@@ -125,6 +126,7 @@
       "data.contact.phone.whatsapp": "properties.phone.whatsapp",
       "data.pii.firstname":          "properties.firstname",
       "data.pii.lastname":           "properties.lastname",
+      "data.identifier.pk":          "properties.pk",
       "data.identifier.id":          "properties.id",
       "data.identifier.token":       "properties.login",
       "data.identifier.passport":    "properties.passport",
@@ -146,6 +148,7 @@
       "data.contact.phone.business":  ["data.contact.phone.business", "equal"],
       "data.contact.phone.mobile":    ["data.contact.phone.mobile", "equal"],
       "data.contact.phone.whatsapp":  ["data.contact.phone.whatsapp", "equal"],
+      "data.identifier.pk":           ["data.identifier.pk", "equal"],
       "data.identifier.id":           ["data.identifier.id", "equal"],
       "data.identifier.token":        ["data.identifier.token", "equal"],
       "data.identifier.passport":     ["data.identifier.passport", "equal"],

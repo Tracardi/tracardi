@@ -460,6 +460,10 @@
                   "type": "keyword",
                   "ignore_above": 64
                 },
+                "pk": {
+                  "type": "keyword",
+                  "ignore_above": 64
+                },
                 "badge": {
                   "type": "keyword",
                   "ignore_above": 64

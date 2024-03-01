@@ -13,11 +13,13 @@ PREFIX_PHONE_BUSINESS = "phb-"
 PREFIX_PHONE_MOBILE = "pho-"
 PREFIX_PHONE_WHATSUP = "pwa-"
 PREFIX_IDENTIFIER_ID = "iid-"
+PREFIX_IDENTIFIER_PK = "ipk-"
 
 PREFIX_PHONE_FIELDS = 'data.contact.phone'
 PREFIX_EMAIL_FIELDS = 'data.contact.mail'
 
 FIELD_TO_PROPERTY_MAPPING = {
+    'profile@data.identifier.pk': lambda profile: (profile.data.identifier.pk, PREFIX_IDENTIFIER_PK),
     'profile@data.identifier.id': lambda profile: (profile.data.identifier.id, PREFIX_IDENTIFIER_ID),
 
     'profile@data.contact.phone.main': lambda profile: (profile.data.contact.phone.main, PREFIX_PHONE_MAIN),
@@ -31,6 +33,7 @@ FIELD_TO_PROPERTY_MAPPING = {
 }
 
 FLAT_PROFILE_FIELD_MAPPING = {
+    'data.identifier.pk': PREFIX_IDENTIFIER_PK,
     'data.identifier.id': PREFIX_IDENTIFIER_ID,
 
     'data.contact.phone.main': PREFIX_PHONE_MAIN,
@@ -44,6 +47,7 @@ FLAT_PROFILE_FIELD_MAPPING = {
 }
 
 FLAT_PROFILE_MAPPING = {
+    'data.identifier.pk': lambda flat_profile: (flat_profile['data.identifier.pk'], PREFIX_IDENTIFIER_PK),
     'data.identifier.id': lambda flat_profile: (flat_profile['data.identifier.id'], PREFIX_IDENTIFIER_ID),
 
     'data.contact.phone.main': lambda flat_profile: (flat_profile['data.contact.phone.main'], PREFIX_PHONE_MAIN),
@@ -178,6 +182,7 @@ class ProfileContact(BaseModel):
 
 class ProfileIdentifier(BaseModel):
     id: Optional[str] = None
+    pk: Optional[str] = None
     badge: Optional[str] = None
     passport: Optional[str] = None
     credit_card: Optional[str] = None

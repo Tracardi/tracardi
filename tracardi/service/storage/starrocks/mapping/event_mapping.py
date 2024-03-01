@@ -112,6 +112,7 @@ def map_to_event_table(event: Event) -> EventTable:
         data_pii_attributes_weight=event.data.pii.attributes.weight if event.data and event.data.pii and event.data.pii.attributes else None,
         data_pii_attributes_shoe_number=event.data.pii.attributes.shoe_number if event.data and event.data.pii and event.data.pii.attributes else None,
         data_identifier_id=event.data.identifier.id if event.data and event.data.identifier else None,
+        data_identifier_pk=event.data.identifier.pk if event.data and event.data.identifier else None,
         data_identifier_badge=event.data.identifier.badge if event.data and event.data.identifier else None,
         data_identifier_passport=event.data.identifier.passport if event.data and event.data.identifier else None,
         data_identifier_credit_card=event.data.identifier.credit_card if event.data and event.data.identifier else None,
@@ -352,6 +353,7 @@ def map_to_event(event_table: EventTable) -> Event:
             ),
             identifier=ProfileIdentifier(
                 id=event_table.data_identifier_id,
+                pk=event_table.data_identifier_pk,
                 badge=event_table.data_identifier_badge,
                 passport=event_table.data_identifier_passport,
                 credit_card=event_table.data_identifier_credit_card,

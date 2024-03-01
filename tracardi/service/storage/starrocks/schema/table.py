@@ -118,6 +118,7 @@ class EventTable(Base):
     data_pii_attributes_shoe_number = Column(Float)
 
     data_identifier_id = Column(String(64))
+    data_identifier_pk = Column(String(64))
     data_identifier_badge = Column(String(64))
     data_identifier_passport = Column(String(32))
     data_identifier_credit_card = Column(String(24))
@@ -292,6 +293,7 @@ class ProfileTable(Base):
     data_pii_attributes_shoe_number = Column(Float)
 
     data_identifier_id = Column(String(64))
+    data_identifier_pk = Column(String(64))
     data_identifier_badge = Column(String(64))
     data_identifier_passport = Column(String(32))
     data_identifier_credit_card = Column(String(24))
