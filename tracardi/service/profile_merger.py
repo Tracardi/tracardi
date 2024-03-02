@@ -6,6 +6,7 @@ from tracardi.service.tracking.storage.profile_storage import save_profile, dele
 from tracardi.domain.profile_data import ProfileData
 
 from ..context import get_context
+from ..domain import ExtraInfo
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
@@ -26,10 +27,6 @@ from ..service.dot_notation_converter import DotNotationConverter
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
 logger = get_logger(__name__)
-
-
-def get_profile_primary_id(profile: Profile) -> str:
-    return profile.id
 
 async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
                                                               duplicate_profiles: List[Profile]) -> Profile:
@@ -110,7 +107,7 @@ class ProfileMerger:
                 logger.info("No profiles to merge")
                 return None
 
-            return await ProfileMerger.compute_one_profile(profile, similar_profiles)
+            return await ProfileMerger(profile).compute_one_profile(similar_profiles)
 
         return None
 
@@ -244,7 +241,7 @@ class ProfileMerger:
 
         profile = Profile(
             metadata=ProfileMetadata(time=time),
-            id=get_profile_primary_id(self.current_profile),
+            id=self.current_profile.id,
             ids=self.current_profile.ids,
             stats=stats if merge_stats else self.current_profile.stats,
             traits=traits,
@@ -280,7 +277,7 @@ class ProfileMerger:
                      ) -> Tuple[Optional[Profile], List[Profile]]:
         """
         Merges profiles on keys set in profile.get_merge_keys(). Loads profiles from database and
-        combines its data into current profile. Returns Profiles object with profiles to be disables.
+        combines its data into current profile. Returns Profiles object with profiles to be disabled.
         It does not disable profiles or saves merged profile.
         """
 
@@ -309,15 +306,18 @@ class ProfileMerger:
 
         return merged_profile, profiles_to_merge
 
-    @staticmethod
-    async def compute_one_profile(profile: Optional[Profile], similar_profiles: List[Profile]):
-
-        merger = ProfileMerger(profile)
+    async def compute_one_profile(self, similar_profiles: List[Profile]):
 
         # Merge
-        merged_profile, duplicate_profiles = await merger.merge(similar_profiles)
+        merged_profile, duplicate_profiles = await self.merge(similar_profiles)
+
+        # Update events and sessions to mark the new merged profile
 
         if merged_profile:
+
+            logger.info(f"Updating events and session during merge. Setting primary ID to {merged_profile.id}.",
+                        extra=ExtraInfo.build(origin="merging", object=self))
+
             # Copy ids
             merged_profile = await _copy_duplicated_profiles_ids_to_merged_profile_ids(
                 merged_profile,
@@ -333,14 +333,13 @@ class ProfileMerger:
             records_to_delete: List[Tuple[str, RecordMetadata]] = [(profile.id, profile.get_meta_data())
                                                                    for profile in duplicate_profiles]
 
-            logger.info(f"Profiles to delete {records_to_delete}.")
+            logger.debug(f"Profiles to delete {records_to_delete}.",
+                         extra=ExtraInfo.build(origin="merging", object=self))
 
             await _delete_profiles(records_to_delete)
 
             # Replace current profile with merged profile
-            profile.replace(merged_profile)
-
-            return profile
+            return merged_profile
 
         else:
             logger.info("No need to merge")

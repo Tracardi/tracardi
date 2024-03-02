@@ -42,7 +42,7 @@ class EventMappingService(TableService):
                 EventMappingTable,
                 EventMappingTable.event_type == event_type
             )
-        print("load_by_event_type ")
+
         return await self._select_in_deployment_mode(EventMappingTable,
                                                      where=where,
                                                      order_by=EventMappingTable.name
@@ -60,7 +60,6 @@ class EventMappingService(TableService):
                 EventMappingTable,
                 EventMappingTable.event_type == event_type_id
             )
-        print("load_by_event_type_id ")
         return await self._select_in_deployment_mode(EventMappingTable,
                                                      where=where,
                                                      order_by=EventMappingTable.name,
