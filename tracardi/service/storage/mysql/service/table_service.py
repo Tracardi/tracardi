@@ -21,7 +21,7 @@ from tracardi.service.storage.mysql.utils.select_result import SelectResult
 T = TypeVar('T')
 logger = get_logger(__name__)
 
-client = AsyncMySqlEngine(True)
+client = AsyncMySqlEngine()
 engine = client.get_engine_for_database()
 
 class TableService(metaclass=Singleton):
