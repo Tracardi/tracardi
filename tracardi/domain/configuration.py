@@ -15,6 +15,7 @@ class Configuration(NamedEntity):
     description: Optional[str] = ""
     enabled: bool = False
     tags: Optional[List[str]] = []
+    ttl: Optional[int] = 0
 
     def __init__(self, **data: Any):
         if 'id' not in data:

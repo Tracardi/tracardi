@@ -25,7 +25,6 @@ from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAI
     PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
 from ..service.utils.hasher import hash_id
 
-
 class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
 

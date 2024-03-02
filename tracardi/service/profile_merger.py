@@ -26,6 +26,7 @@ from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
+
 logger = get_logger(__name__)
 
 async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
@@ -242,6 +243,7 @@ class ProfileMerger:
         profile = Profile(
             metadata=ProfileMetadata(time=time),
             id=self.current_profile.id,
+            primary_id=self.current_profile.primary_id,
             ids=self.current_profile.ids,
             stats=stats if merge_stats else self.current_profile.stats,
             traits=traits,

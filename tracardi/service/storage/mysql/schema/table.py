@@ -760,6 +760,7 @@ class ConfigurationTable(Base):
     enabled = Column(Boolean, default=False)
     tags = Column(String(128))
     config = Column(JSON)
+    ttl = Column(Integer, default=0)
 
     tenant = Column(String(40))
 

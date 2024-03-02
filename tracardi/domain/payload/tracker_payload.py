@@ -27,7 +27,7 @@ from ..identification_point import IdentificationPoint
 from ..payload.event_payload import EventPayload
 from ..session import Session
 from ..time import Time
-from ..entity import Entity
+from ..entity import Entity, PrimaryEntity
 from ..profile import Profile
 
 from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
@@ -67,7 +67,7 @@ class TrackerPayload(BaseModel):
     session: Optional[Entity] = None
 
     metadata: Optional[EventPayloadMetadata] = None
-    profile: Optional[Entity] = None
+    profile: Optional[PrimaryEntity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
     request: Optional[dict] = {}

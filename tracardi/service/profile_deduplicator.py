@@ -61,4 +61,4 @@ async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
 
     # Merged profiles refresh index
     merger = ProfileMerger(profile)
-    return await merger.compute_one_profile(profile, similar_profiles)
+    return await merger.compute_one_profile(similar_profiles)

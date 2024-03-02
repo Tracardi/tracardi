@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, Union
 
-from tracardi.domain.entity import Entity, NullableEntity
+from tracardi.domain.entity import Entity, NullableEntity, PrimaryEntity, NullablePrimaryEntity
 from tracardi.domain.time import Time
 from tracardi.domain.value_object.storage_info import StorageInfo
 
@@ -17,7 +17,7 @@ class EntityRecordMetadata(BaseModel):
 
 
 class EntityRecord(Entity):
-    profile: Union[Entity, NullableEntity]
+    profile: Union[PrimaryEntity, NullablePrimaryEntity]
     metadata: Optional[EntityRecordMetadata] = EntityRecordMetadata()
     type: str
     properties: Optional[dict] = {}

@@ -33,6 +33,9 @@ class NullableEntity(Creatable):
     id: Optional[str] = None
 
 
+class NullablePrimaryEntity(NullableEntity):
+    primary_id: Optional[str] = None
+
 class Entity(Creatable):
     id: str
     _metadata: Optional[RecordMetadata] = PrivateAttr(None)
