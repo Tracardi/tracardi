@@ -1,6 +1,6 @@
 from tracardi.service.utils.date import now_in_utc
 from uuid import uuid4
-from tracardi.domain.entity import Entity
+from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event import EventSession
 from tracardi.domain.metadata import ProfileMetadata
 from tracardi.domain.profile import Profile
@@ -57,7 +57,7 @@ class AddEmptyProfileAction(ActionRunner):
 
         session = Session(
             id=str(uuid4()),
-            profile=Entity(id=profile.id),
+            profile=PrimaryEntity(id=profile.id),
             metadata=SessionMetadata(time=SessionTime()),
             operation=Operation(update=True)
         )
