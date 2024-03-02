@@ -3,7 +3,7 @@ from tracardi.domain.profile_data import ProfileMedia, ProfilePII, ProfileLangua
     ProfileContactApp, ProfileContactAddress, ProfileJob, ProfileCompany, ProfilePreference, ProfileLoyalty, \
     ProfileLoyaltyCard
 
-from tracardi.domain.entity import Entity
+from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event import Event, EventSession, EventData, EventEc, EventProduct, EventProductVariant, \
     EventCheckout, EventOrder, Money, EventMessage, EventPayment, EventCreditCard, EventMarketing, EventPromotion, \
     EventJourney, Tags
@@ -312,7 +312,7 @@ def map_to_event(event_table: EventTable) -> Event:
             duration=event_table.session_duration,
             tz=event_table.session_tz
         ),
-        profile=Entity(id=event_table.profile_id),
+        profile=PrimaryEntity(id=event_table.profile_id),
         entity=Entity(id=event_table.entity_id),
         aux=event_table.aux,
         trash=event_table.trash,
