@@ -103,3 +103,7 @@ class Entity(Creatable):
 
     def __eq__(self, other):
         return self.id == other.id if isinstance(other, Entity) else False
+
+
+class PrimaryEntity(Entity):
+    primary_id: Optional[str] = None

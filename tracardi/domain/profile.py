@@ -8,7 +8,7 @@ from dotty_dict import Dotty
 from pydantic import BaseModel, ValidationError, PrivateAttr
 from dateutil import parser
 
-from .entity import Entity
+from .entity import PrimaryEntity
 from .metadata import ProfileMetadata
 from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
     FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
@@ -42,7 +42,7 @@ class CustomMetric(BaseModel):
         return value != self.value
 
 
-class Profile(Entity):
+class Profile(PrimaryEntity):
     ids: Optional[List[str]] = []
     metadata: Optional[ProfileMetadata] = ProfileMetadata(
         time=ProfileTime()
@@ -264,6 +264,7 @@ class Profile(Entity):
             profile.segments = list(set(profile.segments))
 
             self.id = profile.id
+            self.primary_id = profile.primary_id
             self.ids = profile.ids
             self.metadata = profile.metadata
             self.operation = profile.operation

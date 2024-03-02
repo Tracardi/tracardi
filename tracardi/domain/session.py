@@ -5,7 +5,7 @@ from typing import Optional, Any
 
 from pydantic import ConfigDict, BaseModel, PrivateAttr
 
-from .entity import Entity
+from .entity import Entity, PrimaryEntity
 from .marketing import UTM
 from .metadata import OS, Device, Application
 from .time import Time
@@ -64,7 +64,7 @@ class SessionContext(dict):
 class Session(Entity):
     metadata: SessionMetadata
     operation: Operation = Operation()
-    profile: Optional[Entity] = None
+    profile: Optional[PrimaryEntity] = None
 
     device: Optional[Device] = Device()
     os: Optional[OS] = OS()

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
 
-from .entity import Entity
+from .entity import Entity, PrimaryEntity
 from .event_metadata import EventMetadata
 from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
@@ -156,7 +156,7 @@ class Event(NamedEntity):
 
     source: Entity
     session: Optional[EventSession] = None
-    profile: Optional[Entity] = None
+    profile: Optional[PrimaryEntity] = None
     context: Optional[dict] = {}
     request: Optional[dict] = {}
     config: Optional[dict] = {}
