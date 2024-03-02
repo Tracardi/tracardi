@@ -149,7 +149,7 @@ class Session(Entity):
         session.fill_meta_data()
         session.set_new()
         if profile_id is not None:
-            session.profile = Entity(id=profile_id)
+            session.profile = PrimaryEntity(id=profile_id)
 
         return session
 

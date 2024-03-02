@@ -42,6 +42,14 @@ async def check_installation() -> dict:
 
     is_schema_ok, indices = await system_db.is_schema_ok()
 
+    if is_schema_ok is False:
+        return {
+            "schema_ok": False,
+            "admin_ok": None,
+            "form_ok": None,
+            "warning": None
+        }
+
     ts = TableService()
 
     if await ts.exists('user'):
@@ -93,8 +101,8 @@ async def check_installation() -> dict:
 
 class SystemInstallationStatus(BaseModel):
     schema_ok: bool = False
-    admin_ok: bool = False
-    form_ok: bool = False
+    admin_ok: Optional[bool] = None
+    form_ok: Optional[bool] = None
     warning: Optional[List[str]] = None
 
     @staticmethod
