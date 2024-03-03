@@ -167,6 +167,21 @@ class ProfileMerger:
 
         return traits, data, conflicts_aux
 
+    def _get_primary_id(self, all_profiles) ->Optional[str]:
+        primary_id = None
+        for profile in all_profiles:
+
+            if profile.primary_id is None:
+                # No primary id skip
+                continue
+
+            if primary_id is None:
+                primary_id = profile.primary_id
+            elif primary_id != profile.primary_id:
+                logger.warning(f"Primary ID conflict while merging {primary_id}, {profile.primary_id}.")
+
+        return primary_id
+
     def _get_merged_profile(self,
                             similar_profiles: List[Profile],
                             merging_strategy: MergingStrategy,
@@ -175,6 +190,10 @@ class ProfileMerger:
                             ) -> Profile:
 
         all_profiles = [self.current_profile] + similar_profiles
+
+        # Get primary ID
+
+        primary_id = self._get_primary_id(all_profiles)
 
         # Merge traits and piis
 
@@ -243,7 +262,7 @@ class ProfileMerger:
         profile = Profile(
             metadata=ProfileMetadata(time=time),
             id=self.current_profile.id,
-            primary_id=self.current_profile.primary_id,
+            primary_id=primary_id,
             ids=self.current_profile.ids,
             stats=stats if merge_stats else self.current_profile.stats,
             traits=traits,
@@ -256,6 +275,7 @@ class ProfileMerger:
         )
 
         profile.set_meta_data(self.current_profile.get_meta_data())
+        profile.mark_for_update()
 
         return profile
 
@@ -304,8 +324,6 @@ class ProfileMerger:
                 merging_strategy
             )
 
-            # merged_profile.ids += profiles_to_merge
-
         return merged_profile, profiles_to_merge
 
     async def compute_one_profile(self, similar_profiles: List[Profile]):
@@ -324,6 +342,8 @@ class ProfileMerger:
             merged_profile = await _copy_duplicated_profiles_ids_to_merged_profile_ids(
                 merged_profile,
                 duplicate_profiles)
+
+            merged_profile.metadata.system.remove_merging_data()
 
             # Auto refresh db
             await save_profile(merged_profile, refresh=True)
