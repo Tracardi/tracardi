@@ -1,6 +1,6 @@
 from sqlalchemy import Index, Float
 
-from sqlalchemy import (Column, String, DateTime, Boolean, JSON, LargeBinary,
+from sqlalchemy import (Column, String, DateTime, Boolean, JSON,
                         ForeignKey, PrimaryKeyConstraint, Text, Integer, UniqueConstraint)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship

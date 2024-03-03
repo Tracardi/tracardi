@@ -1,0 +1,1 @@
+docker build . --rm --no-cache --progress=plain -f docker.migration.Dockerfile -t tracardi/migration:0.9.0-dev
