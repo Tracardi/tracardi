@@ -13,7 +13,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.utils.hasher import hash_id, uuid4_from_md5
+from tracardi.service.utils.hasher import uuid4_from_md5, hash_pk
 
 logger = get_logger(__name__)
 cache = CacheManager()
@@ -45,7 +45,7 @@ class ConfigurableBridge(NamedEntity):
                     if source in flat_properties:
                         _merge_id = flat_properties[source]
                         _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
-                        profile_id = hash_id(_merge_id, _prefix)
+                        profile_id = hash_pk(_merge_id, _prefix)
                         return profile_id
 
             # Check if in default event to profile mapping for current event type, there is a mapping for merging keys
@@ -56,7 +56,7 @@ class ConfigurableBridge(NamedEntity):
                     if destination in FLAT_PROFILE_FIELD_MAPPING and source in flat_properties:
                         _merge_id = flat_properties[source]
                         _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
-                        profile_id = hash_id(_merge_id, _prefix)
+                        profile_id = hash_pk(_merge_id, _prefix)
                         return profile_id
 
         return None

@@ -24,7 +24,7 @@ from ..service.license import License
 from ..service.utils.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
-from ..service.utils.hasher import hash_id
+from ..service.utils.hasher import hash_pk, hash_pk_guid, has_pk_guid
 
 if License.has_license():
     from com_tracardi.service.profile.primary_key import set_primary_key
@@ -119,26 +119,26 @@ class Profile(PrimaryEntity):
         if tracardi.is_apm_on():
 
             if self.data.identifier.pk and not self.has_hashed_pk():
-                self.ids.append(hash_id(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
+                self.ids.append(hash_pk(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
 
             if self.data.identifier.id and not self.has_hashed_id():
-                self.ids.append(hash_id(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
+                self.ids.append(hash_pk(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
 
             if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
-                self.ids.append(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
+                self.ids.append(hash_pk(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
             if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
-                self.ids.append(hash_id(self.data.contact.email.main, PREFIX_EMAIL_MAIN))
+                self.ids.append(hash_pk(self.data.contact.email.main, PREFIX_EMAIL_MAIN))
             if self.data.contact.email.has_private() and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
-                self.ids.append(hash_id(self.data.contact.email.private, PREFIX_EMAIL_PRIVATE))
+                self.ids.append(hash_pk(self.data.contact.email.private, PREFIX_EMAIL_PRIVATE))
 
             if self.data.contact.phone.has_business() and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
-                self.ids.append(hash_id(self.data.contact.phone.business, PREFIX_PHONE_BUSINESS))
+                self.ids.append(hash_pk(self.data.contact.phone.business, PREFIX_PHONE_BUSINESS))
             if self.data.contact.phone.has_main() and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
-                self.ids.append(hash_id(self.data.contact.phone.main, PREFIX_PHONE_MAIN))
+                self.ids.append(hash_pk(self.data.contact.phone.main, PREFIX_PHONE_MAIN))
             if self.data.contact.phone.has_mobile() and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
-                self.ids.append(hash_id(self.data.contact.phone.mobile, PREFIX_PHONE_MOBILE))
+                self.ids.append(hash_pk(self.data.contact.phone.mobile, PREFIX_PHONE_MOBILE))
             if self.data.contact.phone.has_whatsapp() and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
-                self.ids.append(hash_id(self.data.contact.phone.whatsapp, PREFIX_PHONE_WHATSUP))
+                self.ids.append(hash_pk(self.data.contact.phone.whatsapp, PREFIX_PHONE_WHATSUP))
 
             # Update if new data
             if len(self.ids) > ids_len:
@@ -157,16 +157,14 @@ class Profile(PrimaryEntity):
             # Add new hashed Id
 
             if value:
-                hashed_value = hash_id(value, prefix)
+                hashed_pk_guid = hash_pk_guid(value, prefix)
 
                 # Do not add value if exists
-                if hashed_value in self.ids:
+                if has_pk_guid(hashed_pk_guid, self.ids):
                     return None
 
-                # Remove old hashed id by prefix
-                self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
-
-                self.ids.append(hashed_value)
+                self.ids.append(hash_pk(value, prefix, hashed_pk_guid))
+                
                 return flat_field
 
         return None
@@ -381,15 +379,14 @@ class FlatProfile(Dotty):
             if value:
                 # Add new
                 # Can not simply append. Must reassign
-                new_hash_id = hash_id(value, prefix)
+                hashed_pk_guid = hash_pk_guid(value, prefix)
 
                 # Do not add value if exists
-                if new_hash_id in self['ids']:
+                if has_pk_guid(hashed_pk_guid, self['ids']):
                     return None
 
-                # Remove old
-                ids = [hid for hid in self['ids'] if not hid.startswith(prefix)]
-                ids.append(new_hash_id)
+                ids = self['ids']
+                ids.append(hash_pk(value, prefix, hashed_pk_guid))
                 # Assign to replace value
                 self['ids'] = list(set(ids))
 
