@@ -127,8 +127,10 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
             else:
                 logger.error(message)
 
+    # TODO Many force index creations
+
     # Check if alias exists
-    if not await raw_db.exists_alias(alias_index, index=None):
+    if not await raw_db.exists_alias(alias_index, index=target_index):
         # Check if it points to target index
 
         try:
@@ -147,6 +149,8 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
                 raise ConnectionError(f"Could not create alias {alias_index} to target index {target_index}.")
 
             aliases_created.append(alias_index)
+    else:
+        logger.debug(f"Alias {alias_index} exists.")
 
     return indices_created, templates_created, aliases_created
 

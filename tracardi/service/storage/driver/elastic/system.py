@@ -1,8 +1,10 @@
 from typing import Tuple
 
 from tracardi.context import ServerContext, get_context
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.indices_manager import get_indices_status
 
+logger = get_logger(__name__)
 
 def get_missing(indices, type) -> list:
     return [idx[1] for idx in indices if idx[0] == type]
@@ -25,5 +27,8 @@ async def is_schema_ok() -> Tuple[bool, list]:
     missing_templates = get_missing(_indices, type='missing_template')
 
     is_schema_ok = not missing_indices and not missing_aliases and not missing_templates
+
+    if not is_schema_ok:
+        logger.warning(f"Missing schemas: Indices {missing_indices}, Aliases: {missing_aliases}, Templates: {missing_templates}")
 
     return is_schema_ok, _indices

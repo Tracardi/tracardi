@@ -3,6 +3,7 @@ import asyncio
 from typing import List, Optional, Dict
 from pydantic import BaseModel
 
+from tracardi.domain import ExtraInfo
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.elastic_client import ElasticClient
@@ -33,6 +34,8 @@ async def check_installation() -> dict:
     ds = DatabaseService()
 
     if not await ds.exists(mysql.mysql_database):
+        logger.warning("No MySQL database",
+                       exc_info=ExtraInfo.exact(origin="installation", package=__name__))
         return {
             "schema_ok": False,
             "admin_ok": False,
@@ -43,6 +46,8 @@ async def check_installation() -> dict:
     is_schema_ok, indices = await system_db.is_schema_ok()
 
     if is_schema_ok is False:
+        logger.warning("Incorrect Elastic Schema",
+                       exc_info=ExtraInfo.exact(origin="installation", package=__name__))
         return {
             "schema_ok": False,
             "admin_ok": None,
@@ -73,7 +78,8 @@ async def check_installation() -> dict:
             except asyncio.exceptions.TimeoutError:
                 message = (f"Authorizing failed for tenant `{context.tenant}`. "
                            f"Could not reach Tenant Management Service.")
-                logger.warning(message)
+                logger.warning(message,
+                               exc_info=ExtraInfo.exact(origin="installation", package=__name__))
                 return {
                     "schema_ok": False,
                     "admin_ok": False,
@@ -83,7 +89,8 @@ async def check_installation() -> dict:
 
             tenant = await mtm.is_tenant_allowed(context.tenant)
             if not tenant:
-                logger.warning(f"Authorizing failed for tenant `{context.tenant}`.")
+                logger.warning(f"Authorizing failed for tenant `{context.tenant}`.",
+                               exc_info=ExtraInfo.exact(origin="installation", package=__name__))
                 return {
                     "schema_ok": False,
                     "admin_ok": False,

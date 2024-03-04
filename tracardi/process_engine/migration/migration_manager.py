@@ -131,7 +131,18 @@ class MigrationManager:
                     schema.copy_index.to_index,
                     production=context.production)
 
-                set_of_schemas_to_migrate.append(schema)
+                es = ElasticClient.instance()
+                if await es.exists_index(schema.copy_index.from_index):
+                    set_of_schemas_to_migrate.append(schema)
+                else:
+                    logger.warning(
+                        f"Can't find the index {schema.copy_index.from_index}. Migration for this index will be stopped.",
+                        extra=ExtraInfo.build(
+                            object=self,
+                            origin="migration",
+                            error_number="M0001"
+                        )
+                    )
 
             elif schema.copy_index.multi is True:
 

@@ -91,14 +91,14 @@ class Index:
     def _get_prefixed_index(self) -> str:
         """
         Gets real prefixed - index
-        E.g. fa73a.tracardi-event or tenant.tracardi-event
+        E.g. 09x.fa73a.tracardi-event or tenant.tracardi-event
         or tracardi-event if single index
         """
 
         if self.single is True:
             return self.index
 
-        return f"{get_context().tenant}.{self.index}"
+        return f"{self._version_prefix}.{get_context().tenant}.{self.index}"
 
     def prepare_mappings(self, mapping, index) -> dict:
 
@@ -140,9 +140,7 @@ class Index:
             # Eg. tracardi-license
             return prefixed_index
 
-        version_prefix_index = f"{self._version_prefix}.{prefixed_index}"
-
-        return self._prod_or_static(version_prefix_index)
+        return self._prod_or_static(prefixed_index)
 
     def get_templated_index_pattern(self):
 
@@ -163,10 +161,8 @@ class Index:
             # Eg. tracardi-license-*-*
             return multi_index_pattern
 
-        # (prod|static) 070 . fa73a.tracardi-event - * - *
-        index = f"{self._version_prefix}.{multi_index_pattern}"
-
-        return self._prod_or_static(index)
+        # (prod|static) 070.fa73a.tracardi-event - * - *
+        return self._prod_or_static(multi_index_pattern)
 
     def get_prefixed_template_name(self):
         if self.multi_index is False:
@@ -180,7 +176,7 @@ class Index:
             # Eg. template.tracardi-license
             return f"template.{prefixed_index}"
 
-        prefixed_template = f"template.{self._version_prefix}.{prefixed_index}"
+        prefixed_template = f"template.{prefixed_index}"
         # (prods | static) template . 070 . fa73a . tracardi-event
         return self._prod_or_static(prefixed_template)
 
