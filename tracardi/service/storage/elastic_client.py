@@ -158,7 +158,8 @@ class ElasticClient:
                 return BulkInsertResult(
                     saved=success,
                     errors=errors,
-                    ids=ids
+                    ids=ids,
+                    index=index
                 )
             except Exception as e:
                 last_exception = e
