@@ -170,7 +170,8 @@ class ElasticClient:
         return BulkInsertResult(
             saved=0,
             errors=[str(last_exception) if last_exception is not None else "Could not save data."],
-            ids=ids
+            ids=ids,
+            index=index
         )
 
     async def update(self, index, id, record, retry_on_conflict=3):

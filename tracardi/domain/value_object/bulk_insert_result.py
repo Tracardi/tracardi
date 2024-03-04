@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -5,6 +7,7 @@ class BulkInsertResult(BaseModel):
     saved: int = 0
     errors: list = []
     ids: list = []
+    index: Optional[str] = None
 
     def __add__(self, other):
         if not isinstance(other, BulkInsertResult):
