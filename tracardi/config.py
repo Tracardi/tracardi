@@ -40,17 +40,23 @@ class MysqlConfig:
         self.mysql_username = env.get('MYSQL_USERNAME', "root")
         self.mysql_password = env.get('MYSQL_PASSWORD', "root")
         self.mysql_schema = env.get('MYSQL_SCHEMA', "mysql+aiomysql://")
+        self.mysql_schema_sync = env.get('MYSQL_SCHEMA', "mysql+pymysql://")
         self.mysql_port = env.get('MYSQL_PORT', 3306)
         self.mysql_database = env.get('MYSQL_DATABASE', "tracardi")
         self.mysql_echo = env.get('MYSQL_ECHO', "no") == "yes"
 
         self.mysql_database = self.mysql_database.strip(" /")
 
-        self.mysql_database_uri = self._uri()
-        self.mysql_database_uri = self.mysql_database_uri.strip(" /")
+        self.mysql_database_uri = self.uri(async_driver=True)
+        self.mysql_database_uri_with_db = f"{self.mysql_database_uri}/{self.mysql_database}"
 
 
-    def _uri(self):
+    def _get_schema(self, async_driver:bool=True):
+        if async_driver:
+            return self.mysql_schema
+        return self.mysql_schema_sync
+
+    def uri(self, async_driver:bool=True) -> str:
         if self.mysql_username and self.mysql_password:
             _creds = f"{self.mysql_username}:{self.mysql_password}"
         elif self.mysql_username:
@@ -59,9 +65,11 @@ class MysqlConfig:
             _creds = ""
 
         if _creds:
-            return f"{self.mysql_schema}{_creds}@{self.mysql_host}:{self.mysql_port}"
+            uri = f"{self._get_schema(async_driver)}{_creds}@{self.mysql_host}:{self.mysql_port}"
         else:
-            return f"{self.mysql_schema}{self.mysql_host}:{self.mysql_port}"
+            uri = f"{self._get_schema(async_driver)}{self.mysql_host}:{self.mysql_port}"
+
+        return uri.strip(" /")
 
 class ElasticConfig:
 

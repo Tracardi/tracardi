@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class UserPayload(BaseModel):
-    password: str
+    password: Optional[str] = None
     name: str
     email: str
     roles: List[str]
