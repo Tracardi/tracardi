@@ -32,7 +32,7 @@ async def _get_destination_dispatchers(destinations: List[Destination], dot, tem
         if not destination.enabled:
             continue
 
-        # Load resource
+        # Load resource from cache
         resource = await load_resource(destination.resource.id)
 
         if resource.enabled is False:
