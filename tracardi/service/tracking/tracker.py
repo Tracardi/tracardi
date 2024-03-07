@@ -28,7 +28,7 @@ async def os_tracker(source: EventSource,
             return None
 
         # Lock profile and session for changes and compute data
-
+        # TODO ERROR - saves session and profile
         profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
             tracker_payload,
             tracker_config,
@@ -66,6 +66,7 @@ async def os_tracker(source: EventSource,
             # TODO this should be in mutex as is mutates profile
 
             profile, session, events, ux, response = await (
+                # TODO ERROR - saves session and profile
                 dispatch_sync_workflow_and_destinations_and_save_data(
                     profile,
                     session,
