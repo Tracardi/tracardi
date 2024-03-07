@@ -1,7 +1,7 @@
 from typing import List
 
 from tracardi.config import memory_cache
-from tracardi.decorator.function_memory_cache import async_cache_for
+from tracardi.decorators.function_memory_cache import async_cache_for
 from tracardi.domain.destination import Destination
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.service.destination_service import DestinationService

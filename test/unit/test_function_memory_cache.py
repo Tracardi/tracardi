@@ -1,6 +1,6 @@
 import asyncio
 
-from tracardi.decorator.function_memory_cache import cache_for, cache, async_cache_for
+from tracardi.decorators.function_memory_cache import cache_for, cache, async_cache_for
 import time
 
 
