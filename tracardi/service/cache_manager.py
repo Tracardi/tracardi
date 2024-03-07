@@ -62,59 +62,59 @@ class CacheManager(metaclass=Singleton):
     def event_to_profile_coping_cache(self) -> MemoryCache:
         return self._cache['EVENT_TO_PROFILE_COPING']
 
-    def profile_destination_cache(self) -> MemoryCache:
-        return self._cache['PROFILE_DESTINATIONS']
+    # def profile_destination_cache(self) -> MemoryCache:
+    #     return self._cache['PROFILE_DESTINATIONS']
 
-    def event_destination_cache(self) -> MemoryCache:
-        return self._cache['EVENT_DESTINATION']
+    # def event_destination_cache(self) -> MemoryCache:
+    #     return self._cache['EVENT_DESTINATION']
 
     def event_consent_compliance_cache(self) -> MemoryCache:
         return self._cache['EVENT_CONSENT_COMPLIANCE']
 
     # Caches
 
-    async def event_destination(self, event_type, source_id, ttl) -> List[Destination]:
-        """
-        Session cache
-        """
+    # async def event_destination(self, event_type, source_id, ttl) -> List[Destination]:
+    #     """
+    #     Session cache
+    #     """
+    #
+    #     async def _load_event_destinations(event_type, source_id) -> List[Destination]:
+    #         ds = DestinationService()
+    #         return (await ds.load_event_destinations(event_type, source_id)).map_to_objects(map_to_destination)
+    #
+    #
+    #     if ttl > 0:
+    #         return await MemoryCache.cache(
+    #             self.event_destination_cache(),
+    #             f"{event_type}-{source_id}",
+    #             ttl,
+    #             _load_event_destinations,
+    #             True,
+    #             event_type,
+    #             source_id
+    #         )
+    #
+    #     return await _load_event_destinations(event_type, source_id)
 
-        async def _load_event_destinations(event_type, source_id) -> List[Destination]:
-            ds = DestinationService()
-            return (await ds.load_event_destinations(event_type, source_id)).map_to_objects(map_to_destination)
-
-
-        if ttl > 0:
-            return await MemoryCache.cache(
-                self.event_destination_cache(),
-                f"{event_type}-{source_id}",
-                ttl,
-                _load_event_destinations,
-                True,
-                event_type,
-                source_id
-            )
-
-        return await _load_event_destinations(event_type, source_id)
-
-    async def profile_destinations(self, ttl) -> List[Destination]:
-        """
-        Session cache
-        """
-
-        async def _load_profile_destinations() -> List[Destination]:
-            ds = DestinationService()
-            return (await ds.load_profile_destinations()).map_to_objects(map_to_destination)
-
-        if ttl > 0:
-            return await MemoryCache.cache(
-                self.profile_destination_cache(),
-                "profile-destination-key",
-                ttl,
-                _load_profile_destinations,
-                True
-            )
-
-        return await _load_profile_destinations()
+    # async def profile_destinations(self, ttl) -> List[Destination]:
+    #     """
+    #     Session cache
+    #     """
+    #
+    #     async def _load_profile_destinations() -> List[Destination]:
+    #         ds = DestinationService()
+    #         return (await ds.load_profile_destinations()).map_to_objects(map_to_destination)
+    #
+    #     if ttl > 0:
+    #         return await MemoryCache.cache(
+    #             self.profile_destination_cache(),
+    #             "profile-destination-key",
+    #             ttl,
+    #             _load_profile_destinations,
+    #             True
+    #         )
+    #
+    #     return await _load_profile_destinations()
 
     async def session(self, session_id, ttl) -> Optional[Session]:
         """

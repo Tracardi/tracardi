@@ -1,11 +1,12 @@
 from typing import List, Tuple, Optional
 
 from tracardi.domain.segment import Segment
+# from tracardi.service.cache.destinations import load_event_destinations
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segment
 from tracardi.service.storage.mysql.service.segment_service import SegmentService
-from tracardi.service.tracking.destination.dispatcher import sync_destination
+from tracardi.service.tracking.destination.dispatcher import sync_profile_destination, sync_event_destination
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
@@ -17,7 +18,7 @@ from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsyn
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
-from tracardi.service.destinations.dispatchers import event_destination_dispatch
+# from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -163,21 +164,27 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
     # We save manually only when async processing is disabled.
     # Otherwise, flusher worker saves in-memory profile and session automatically
 
-    if tracardi.enable_event_destinations:
-        load_destination_task = cache.event_destination
-        await event_destination_dispatch(
-            load_destination_task,
-            profile,
-            session,
-            events,
-            tracker_payload.debug
-        )
+    await sync_event_destination(
+        profile,
+        session,
+        events,
+        tracker_payload.debug)
+
+    # if tracardi.enable_event_destinations:
+    #     await event_destination_dispatch(
+    #         load_event_destinations,
+    #         profile,
+    #         session,
+    #         events,
+    #         tracker_payload.debug
+    #     )
 
     # Storage must be here as destination may need to load profile
 
-    _profile_not_ephemeral, _session_not_ephemeral, _events_not_ephemeral = remove_ephemeral_data(tracker_payload,
-                                                                                                  profile, session,
-                                                                                                  events)
+    _profile_not_ephemeral, _session_not_ephemeral, _events_not_ephemeral = remove_ephemeral_data(
+        tracker_payload,
+        profile, session,
+        events)
 
     if store_in_db:
         await storage.save_profile_and_session(
@@ -187,8 +194,6 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
 
     # Dispatch outbound profile
 
-    must_dispatch = profile and tracardi.enable_profile_destinations and profile.has_not_saved_changes()
-    if must_dispatch:
-        await sync_destination(profile, session)
+    await sync_profile_destination(profile, session)
 
     return profile, session, events, ux, response

@@ -117,7 +117,7 @@ class HttpConnector(DestinationInterface):
                         "cookies": response.cookies
                     }
 
-                    logger.debug(f"Profile destination response from {url}, response: {result}")
+                    logger.debug(f"Destination response from {url}, response: {result}")
 
                     # todo log
 
@@ -129,8 +129,8 @@ class HttpConnector(DestinationInterface):
             logger.error(str(e), e, exc_info=True)
             raise e
 
-    async def dispatch_profile(self, data, profile: Profile, session: Session):
+    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session]):
         await self._dispatch(data)
 
-    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
+    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event):
         await self._dispatch(data)
