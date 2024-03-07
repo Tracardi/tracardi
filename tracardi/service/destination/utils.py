@@ -1,17 +1,13 @@
-from typing import List, Any, Optional
+from typing import List, Any
 
 from tracardi.domain.destination import Destination
-from tracardi.domain.entity import Entity
 from tracardi.domain.resource import Resource
 from tracardi.process_engine.destination.destination_interface import DestinationInterface
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.cache.resource import load_resource
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.module_loader import load_callable, import_package
-from tracardi.service.domain import resource as resource_db
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.domain.event import Event
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 logger = get_logger(__name__)
@@ -37,8 +33,7 @@ async def _get_destination_dispatchers(destinations: List[Destination], dot, tem
             continue
 
         # Load resource
-        # todo cache
-        resource = await resource_db.load(destination.resource.id)
+        resource = await load_resource(destination.resource.id)
 
         if resource.enabled is False:
             raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
