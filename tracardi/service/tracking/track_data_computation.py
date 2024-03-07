@@ -161,6 +161,8 @@ Optional[FieldTimestampMonitor]]:
 
         # MUST BE INSIDE MUTEX
         # Update only when needed
+        # TODO remove_ephemeral_data
+        # session_storage_worker(session)
 
         await _save_profile_and_session(profile, session)
 
