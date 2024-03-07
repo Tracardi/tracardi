@@ -4,7 +4,7 @@ from tracardi.config import memory_cache
 from tracardi.domain.destination import Destination
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
-from tracardi.decorators.function_memory_cache import async_cache_for
+from tracardi.service.decorators.function_memory_cache import async_cache_for
 
 @async_cache_for(memory_cache.event_destination_cache_ttl)
 async def load_event_destinations(event_type, source_id) -> List[Destination]:

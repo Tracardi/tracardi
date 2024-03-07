@@ -1,4 +1,4 @@
-from tracardi.decorators.function_memory_cache import async_cache_for
+from tracardi.service.decorators.function_memory_cache import async_cache_for
 from tracardi.domain.resource import Resource
 from tracardi.service.domain import resource as resource_db
 
