@@ -1,7 +1,6 @@
 from typing import List, Tuple, Optional
 
 from tracardi.domain.segment import Segment
-# from tracardi.service.cache.destinations import load_event_destinations
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
 from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segment
@@ -18,7 +17,6 @@ from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsyn
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
-# from tracardi.service.destinations.dispatchers import event_destination_dispatch
 from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
