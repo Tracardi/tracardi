@@ -117,7 +117,6 @@ async def event_to_profile_mapping(flat_event: Dotty,
             source)
 
         # Add fields timestamps
-
         if not isinstance(flat_profile['metadata.fields'], dict):
             flat_profile['metadata.fields'] = {}
 
@@ -185,7 +184,7 @@ async def compute_events(events: List[EventPayload],
                          tracker_payload: TrackerPayload
                          ) -> Tuple[List[Event], Session, Optional[Profile], Optional[FieldTimestampMonitor]]:
 
-    field_timestamp_monitor = None
+
     event_objects = []
 
     if profile:
@@ -197,6 +196,7 @@ async def compute_events(events: List[EventPayload],
 
     auto_merge_ids = set()
 
+    field_changes_monitors = []
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
@@ -218,6 +218,8 @@ async def compute_events(events: List[EventPayload],
                 flat_profile,
                 session,
                 source)
+
+            field_changes_monitors.append(field_timestamp_monitor)
 
             # Combine all auto merge ids
 
@@ -258,6 +260,16 @@ async def compute_events(events: List[EventPayload],
         # Collect event objects
 
         event_objects.append(event)
+
+    print('Adding')
+    # Add monitors
+    if field_changes_monitors:
+        field_timestamp_monitor = field_changes_monitors[0]
+        for x in field_changes_monitors[1:]:
+            field_timestamp_monitor += x
+    else:
+        field_timestamp_monitor = None
+
 
     # Recreate Profile from flat_profile, that was changed
 
