@@ -133,7 +133,7 @@ class Tracker:
 
     async def track_event(self, tracker_payload: TrackerPayload, tracking_start: float):
 
-        if tracker_payload.is_bot() and not tracardi.allow_bot_traffic:
+        if tracker_payload.is_bot() and tracardi.disallow_bot_traffic:
             raise PermissionError(f"Traffic from bot is not allowed.")
 
             # Trim ids - spaces are frequent issues

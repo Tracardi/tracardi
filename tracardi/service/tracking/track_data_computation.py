@@ -150,7 +150,7 @@ Optional[FieldTimestampMonitor]]:
             session = update_session_utm_with_client_data(tracker_payload, session)
 
             # If agent is a bot stop
-            if session.app.bot and not tracardi.allow_bot_traffic:
+            if session.app.bot and tracardi.disallow_bot_traffic:
                 raise PermissionError(f"Traffic from bot is not allowed.")
 
         profile, session, events, tracker_payload, field_timestamp_monitor = await _compute(
