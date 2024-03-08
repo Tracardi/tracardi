@@ -24,7 +24,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
 if License.has_service(LICENSE) :
-    from com_tracardi.service.tracking.field_change_dispatcher import field_update_log_dispatch
+    from com_tracardi.workers.profile_change_log import profile_change_log_worker
 
 logger = get_logger(__name__)
 cache = CacheManager()
@@ -154,10 +154,10 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
                                                          context=get_context(),
                                                          lock_name="post-workflow-session-save")
 
-    # Queue storage of fields update history log (changes made by workflow)
+    # Queue storage of fields update history log (changes made by workflow). The previous changes are already saved.
 
     if tracardi.enable_field_update_log and License.has_service(LICENSE) and field_update_log_manager.has_changes():
-        field_update_log_dispatch(get_context(), field_update_log_manager.get_history_log())
+        profile_change_log_worker(field_update_log_manager)
 
     # We save manually only when async processing is disabled.
     # Otherwise, flusher worker saves in-memory profile and session automatically
