@@ -119,7 +119,7 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
 
     # Dispatch workflow and post eve segmentation
 
-    profile, session, events, ux, response, field_update_log_manager, is_wf_triggered = await (
+    profile, session, events, ux, response, field_changes, is_wf_triggered = await (
         trigger_workflows(
             profile,
             session,
@@ -156,8 +156,8 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
 
     # Queue storage of fields update history log (changes made by workflow). The previous changes are already saved.
 
-    if tracardi.enable_field_update_log and License.has_service(LICENSE) and field_update_log_manager.has_changes():
-        profile_change_log_worker(field_update_log_manager)
+    if tracardi.enable_field_update_log and License.has_service(LICENSE) and field_changes.has_changes():
+        profile_change_log_worker(field_changes)
 
     # We save manually only when async processing is disabled.
     # Otherwise, flusher worker saves in-memory profile and session automatically
