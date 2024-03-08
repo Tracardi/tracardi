@@ -261,7 +261,7 @@ async def compute_events(events: List[EventPayload],
 
         event_objects.append(event)
 
-    print('Adding')
+    print('Merging changes of profile fields')
     # Add monitors
     if field_changes_monitors:
         field_timestamp_monitor = field_changes_monitors[0]
