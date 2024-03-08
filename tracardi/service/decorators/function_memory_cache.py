@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, Tuple, Any
+from typing import Dict, Tuple, Any, Callable
 
 import functools
 
@@ -7,16 +7,19 @@ from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 
 cache: Dict[str, MemoryCache] = {}
 
-def _run_function(func, args, kwargs, max_size, allow_null_values) -> Tuple[Any, str, str]:
+def _run_function(func, args, kwargs, max_size, allow_null_values, key_func:Callable=None) -> Tuple[Any, str, str]:
     # Construct a unique cache key from the function's module name,
     # function name, args, and kwargs to avoid collisions.
 
     key_parts = [func.__module__, func.__qualname__, ]
     func_key = ':'.join(map(str, key_parts))
 
-    key_parts = [args]
-    key_parts.extend(f'{k}={v}' for k, v in kwargs.items())
-    args_key = ':'.join(map(str, key_parts))
+    if key_func is not None:
+        args_key = key_func(*args, **kwargs)
+    else:
+        key_parts = [args]
+        key_parts.extend(f'{k}={v}' for k, v in kwargs.items())
+        args_key = ':'.join(map(str, key_parts))
 
     # Create cache
     if func_key not in cache:
@@ -30,12 +33,12 @@ def _run_function(func, args, kwargs, max_size, allow_null_values) -> Tuple[Any,
 
     return result, func_key, args_key
 
-def async_cache_for(ttl, max_size=1000, allow_null_values=False):
+def async_cache_for(ttl, max_size=1000, allow_null_values=False, key_func:Callable=None):
     def decorator(func):
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
 
-            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values)
+            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func)
             if asyncio.iscoroutine(result):
                 result = await result
 
@@ -48,12 +51,11 @@ def async_cache_for(ttl, max_size=1000, allow_null_values=False):
     return decorator
 
 
-def cache_for(ttl, max_size=1000, allow_null_values=False):
+def cache_for(ttl, max_size=1000, allow_null_values=False, key_func:Callable=None):
     def decorator(func):
-
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
-            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values)
+            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func)
 
             # Update cache
             cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
