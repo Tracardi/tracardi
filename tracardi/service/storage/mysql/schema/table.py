@@ -272,8 +272,8 @@ class UserTable(Base):
     tenant = Column(String(40))
 
     __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant'),
-        UniqueConstraint('email', 'password', name='uiq_email_password')
+        PrimaryKeyConstraint('id', 'tenant', 'email'),
+        UniqueConstraint('tenant', 'email', 'password', name='uiq_email_password')
     )
 
 
