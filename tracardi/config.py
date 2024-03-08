@@ -171,7 +171,7 @@ class TracardiConfig(metaclass=Singleton):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = env.get('TRACK_DEBUG', 'no').lower() == 'yes'
-        self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
+        self.save_logs = get_env_as_bool('SAVE_LOGS', 'yes')
         self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'no')
         self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'no')
         self.enable_segmentation_wf_triggers = get_env_as_bool('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no')
