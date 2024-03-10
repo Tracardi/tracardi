@@ -189,8 +189,8 @@ class RulesEngine:
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
                     else:
-                        logger.warning(f"Workflow {rule.flow.id} skipped. Event source id is not equal "
-                                       f"to trigger rule source id.")
+                        logger.warning(f"Workflow {rule.flow.id} skipped. Event source id (event.source.id) is not equal "
+                                       f"to trigger rule source id (rule.source.id).")
                 else:
                     # todo FlowHistory is empty
                     workflow = WorkFlow(

@@ -79,7 +79,8 @@ class AddEmptyProfileAction(ActionRunner):
 
         self.execution_graph.set_sessions(session)
 
-        self.tracker_payload.session.id = session.id
+        if self.tracker_payload.session:
+            self.tracker_payload.session.id = session.id
 
         self.tracker_payload.options.update({"saveSession": True})
 

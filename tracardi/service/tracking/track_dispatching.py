@@ -9,10 +9,9 @@ from tracardi.service.tracking.destination.dispatcher import sync_profile_destin
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
-from tracardi.context import get_context
 from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.tracking.cache.merge_profile_cache import lock_merge_with_cache_and_save_profile
-from tracardi.service.tracking.cache.merge_session_cache import lock_merge_with_cache_and_save_session
+from tracardi.service.tracking.cache.merge_session_cache import merge_with_cache_and_save_session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import get_logger
@@ -118,7 +117,7 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
     Profile, Session, List[Event], Optional[list], Optional[dict]]:
 
     # Dispatch workflow and post eve segmentation
-
+    # TODO use formklow form service.wf. moze service.wf.exec_workflow
     profile, session, events, ux, response, field_changes, is_wf_triggered = await (
         trigger_workflows(
             profile,
@@ -150,9 +149,7 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
 
             logger.info(f"Session needs update after workflow.")
 
-            await lock_merge_with_cache_and_save_session(session,
-                                                         context=get_context(),
-                                                         lock_name="post-workflow-session-save")
+            await merge_with_cache_and_save_session(session)
 
     # Queue storage of fields update history log (changes made by workflow). The previous changes are already saved.
 
@@ -167,15 +164,6 @@ async def dispatch_sync_workflow_and_destinations_and_save_data(profile: Profile
         session,
         events,
         tracker_payload.debug)
-
-    # if tracardi.enable_event_destinations:
-    #     await event_destination_dispatch(
-    #         load_event_destinations,
-    #         profile,
-    #         session,
-    #         events,
-    #         tracker_payload.debug
-    #     )
 
     # Storage must be here as destination may need to load profile
 
