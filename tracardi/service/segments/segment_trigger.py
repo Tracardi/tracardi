@@ -1,4 +1,3 @@
-from typing import List, Union
 from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.profile import Profile
@@ -20,15 +19,15 @@ def trigger_segment_workflow(profile: Profile, session: Session, segment: str):
         print("Trigger by segmentation")
 
 
-def trigger_segment_add(profile: Profile, session: Session, segments: Union[List[str], str]) -> Profile:
-    if isinstance(segments, list):
-        for segment in segments:
-            profile.segments.append(segment)
-            # trigger_segment_workflow(profile, session, segment)
-
-    elif isinstance(segments, str):
-        profile.segments.append(segments)
-        # trigger_segment_workflow(profile, session, segments)
-
-    return profile
+# def trigger_segment_add(profile: Profile, session: Session, segments: Union[List[str], str]) -> Profile:
+#     if isinstance(segments, list):
+#         for segment in segments:
+#             profile.segments.append(segment)
+#             # trigger_segment_workflow(profile, session, segment)
+#
+#     elif isinstance(segments, str):
+#         profile.segments.append(segments)
+#         # trigger_segment_workflow(profile, session, segments)
+#
+#     return profile
 

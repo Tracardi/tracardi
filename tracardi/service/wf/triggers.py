@@ -1,18 +1,15 @@
 from typing import List, Optional, Tuple
 
 from tracardi.config import tracardi
-from tracardi.context import get_context
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.segment import Segment
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.field_mappings_cache import add_new_field_mappings
-from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segment
 from tracardi.service.storage.mysql.service.segment_service import SegmentService
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
-from tracardi.service.tracking.cache.merge_session_cache import merge_with_cache_and_save_session
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.storage.profile_storage import load_profile
@@ -82,18 +79,6 @@ async def trigger_workflows(profile: Profile,
             _auto_merge_ids = profile.set_metadata_fields_timestamps(tracker_result.changed_field_timestamps)
             if _auto_merge_ids:
                 auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
-
-        # Dispatch changed profile to destination
-
-    # Post Event Segmentation
-
-    if tracardi.enable_post_event_segmentation and isinstance(profile, Profile):
-        # MUTATES Profile
-
-        await post_ev_segment(profile,
-                              session,
-                              [event.type for event in events],
-                              _load_segments)
 
     is_wf_triggered = isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered
 

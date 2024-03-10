@@ -84,7 +84,7 @@ async def trigger_workflows(profile: Profile,
         # Dispatch changed profile to destination
 
     # Post Event Segmentation
-
+    # TODO remove
     if tracardi.enable_post_event_segmentation and isinstance(profile, Profile):
         # MUTATES Profile
 

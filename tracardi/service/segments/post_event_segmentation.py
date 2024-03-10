@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, List
 
 from tracardi.domain.profile import Profile
 from tracardi.domain.segment import Segment
