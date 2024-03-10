@@ -77,9 +77,12 @@ def _save_single_profile(profile: Profile, context: Context):
         )
 
 
-def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]], context: Context):
+def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]], context: Optional[Context] = None):
 
     if profile:
+
+        if context is None:
+            context = get_context()
 
         if isinstance(profile, Profile):
             _save_single_profile(profile, context)

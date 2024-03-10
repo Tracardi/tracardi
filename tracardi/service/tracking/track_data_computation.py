@@ -1,4 +1,6 @@
 from typing import Tuple, List, Optional
+
+
 from tracardi.config import tracardi
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -28,13 +30,15 @@ from tracardi.service.utils.getters import get_entity_id
 if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
+    from com_tracardi.workers.session import session_storage_worker
+
 
 async def _compute(source,
                    profile: Optional[Profile],
                    session: Optional[Session],
                    tracker_payload: TrackerPayload
-                   ) -> Tuple[Optional[Profile], Optional[Session],List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
-
+                   ) -> Tuple[
+    Optional[Profile], Optional[Session], List[Event], TrackerPayload, Optional[FieldTimestampMonitor]]:
     if profile is not None:
 
         if License.has_license():
@@ -94,7 +98,7 @@ async def _compute(source,
         tracker_payload.metadata,
         source,
         session,
-        profile, # Profile gets converted to FlatProfile
+        profile,  # Profile gets converted to FlatProfile
         tracker_payload.profile_less,
         tracker_payload
     )
@@ -103,9 +107,10 @@ async def _compute(source,
 
     return profile, session, events, tracker_payload, field_timestamp_monitor
 
+
 async def lock_and_compute_data(tracker_payload: TrackerPayload,
-                       tracker_config: TrackerConfig,
-                       source: EventSource) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
+                                tracker_config: TrackerConfig,
+                                source: EventSource) -> Tuple[Profile, Optional[Session], List[Event], TrackerPayload,
 Optional[FieldTimestampMonitor]]:
     # We need profile and session before async
 
@@ -114,7 +119,7 @@ Optional[FieldTimestampMonitor]]:
     # -----------------------------------
     # Profile Loading
 
-    #TODO It can deduplicate profile so it should be in mutex
+    # TODO It can deduplicate profile so it should be in mutex
 
     profile, session = await load_profile_and_session(
         session,
@@ -159,22 +164,20 @@ Optional[FieldTimestampMonitor]]:
             session,
             tracker_payload)
 
-        # MUST BE INSIDE MUTEX
+        # MUST BE INSIDE MUTEX until it stores data to cache
         # Update only when needed
         # TODO remove_ephemeral_data
-        # session_storage_worker(session)
 
-        await _save_profile_and_session(profile, session)
+        # MUST BE INSIDE MUTEX until it stores data to cache
+        if License.has_license():
+            session_storage_worker(session)
+            if profile and profile.has_not_saved_changes():
+                await save_profile(profile)
+        else:
+            # MUST BE INSIDE MUTEX until it stores data to cache
+            if profile and profile.has_not_saved_changes():
+                await save_profile(profile)
+            if session and session.has_not_saved_changes():
+                await save_session(session)
 
         return profile, session, events, tracker_payload, field_timestamp_monitor
-
-
-async def _save_profile_and_session(profile: Profile, session: Session):
-
-    # Update only when needed
-
-    if profile and profile.has_not_saved_changes():
-        await save_profile(profile)
-
-    if session and session.has_not_saved_changes():
-        await save_session(session)

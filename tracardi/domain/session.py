@@ -99,6 +99,9 @@ class Session(Entity):
         self.operation.update = flag
 
 
+    def is_updated(self) -> bool:
+        return self.operation.update
+
     def set_updated_in_workflow(self, state=True):
         self._updated_in_workflow = state
 
@@ -130,6 +133,9 @@ class Session(Entity):
 
     def has_not_saved_changes(self) -> bool:
         return self.operation.new or self.operation.needs_update()
+
+    def has_data_to_geo_locate(self) -> bool:
+        return self.device.ip and self.device.ip != '0.0.0.0' and self.device.geo.is_empty()
 
     @staticmethod
     def storage_info() -> StorageInfo:

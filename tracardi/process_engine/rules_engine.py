@@ -57,10 +57,6 @@ class RulesEngine:
             if not event.metadata.valid:
                 continue
 
-            if len(rules) == 0:
-                logger.debug(
-                    f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")
-
             for rule in rules:
 
                 if rule is None:

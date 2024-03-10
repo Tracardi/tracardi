@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple
 
 from tracardi.config import tracardi
+from tracardi.context import get_context
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.segment import Segment
 from tracardi.exceptions.log_handler import get_logger
@@ -11,17 +12,20 @@ from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segmen
 from tracardi.service.storage.mysql.service.segment_service import SegmentService
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
-from tracardi.service.tracking.cache.merge_profile_cache import merge_with_cache_and_save_profile
 from tracardi.service.tracking.cache.merge_session_cache import merge_with_cache_and_save_session
+from tracardi.service.tracking.cache.profile_cache import save_profile_cache
 from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
+from tracardi.service.storage.driver.elastic import profile as profile_db
 
 logger = get_logger(__name__)
 _redis = RedisClient()
+
 
 async def _load_segments(event_type, limit=500) -> List[Segment]:
     ss = SegmentService()
@@ -32,13 +36,19 @@ async def _load_segments(event_type, limit=500) -> List[Segment]:
 
     return records.map_to_objects(map_to_segment)
 
+
+async def _save_profile(profile: Profile):
+    # Save to database - do not defer
+    await profile_db.save(profile, refresh_after_save=True)
+    save_profile_cache(profile)
+
+
 async def trigger_workflows(profile: Profile,
                             session: Session,
                             events: List[Event],
                             tracker_payload: TrackerPayload,
                             debug: bool) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeTimestampManager, bool]:
-
     # Checks rules and trigger workflows for given events and saves profile and session
 
     ux = []
@@ -73,7 +83,6 @@ async def trigger_workflows(profile: Profile,
             if _auto_merge_ids:
                 auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
 
-
         # Dispatch changed profile to destination
 
     # Post Event Segmentation
@@ -89,17 +98,16 @@ async def trigger_workflows(profile: Profile,
     is_wf_triggered = isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered
 
     if is_wf_triggered:
-
         # Add new fields to field mapping. New fields can be created in workflow.
         add_new_field_mappings(profile, session)
-
 
     if auto_merge_ids:
         profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
 
     return profile, session, events, ux, response, field_manager, is_wf_triggered
 
-async def exec_workflow(profile_id:str, session: Session, events: List[Event], tracker_payload: TrackerPayload):
+
+async def exec_workflow(profile_id: str, session: Session, events: List[Event], tracker_payload: TrackerPayload):
     if tracardi.enable_workflow:
 
         profile_key = Lock.get_key(Collection.lock_tracker, "profile", profile_id)
@@ -131,20 +139,20 @@ async def exec_workflow(profile_id:str, session: Session, events: List[Event], t
                 # The state should always be in cache.
 
                 if profile and profile.is_updated_in_workflow():
-                    # Locks profile, loads profile from cache merges it with current profile and saves it in cache
+                    logger.debug(f"Profile {profile.id} needs update after workflow.")
 
-                    logger.info(f"Profile needs update after workflow.")
+                    # Profile is in mutex, no profile loading from cache necessary; Save it in db and cache
 
-                    await merge_with_cache_and_save_profile(profile)
+                    await _save_profile(profile)
 
                 if session and session.is_updated_in_workflow():
-                    # Locks session, loads session from cache merges it with current session and saves it in cache
+                    logger.debug(f"Session {session.id} needs update after workflow.")
 
-                    logger.info(f"Session needs update after workflow.")
+                    # Profile is in mutex, that means no session for the profile should be modified.
+                    # No session loading from cache necessary; Save it in db and cache
+                    await save_session(session, cache=True, refresh=True)
 
-                    await merge_with_cache_and_save_session(session)
-
-        logger.info(f"Output profile {profile.traits}")
+        # logger.info(f"Output profile {profile.traits}")
         # logger.info(f"Output session {session}")
         # logger.info(f"Output events {events}")
         # logger.info(f"Output ux {ux}")
