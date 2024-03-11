@@ -3,14 +3,14 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.profile_data import ProfileData, PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     ProfileContact, ProfileEmail, ProfilePhone, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MAIN, PREFIX_PHONE_MOBILE, \
     PREFIX_PHONE_WHATSUP
-from tracardi.service.utils.hasher import hash_pk
+from tracardi.service.utils.hasher import timestamped_hash_id
 
 tracardi.auto_profile_merging = "abc"
 
 def test_returns_string_with_length_40():
     value = "test"
     prefix = "emb"
-    result = hash_pk(value, prefix)
+    result = timestamped_hash_id(value, prefix)
     assert isinstance(result, str)
     assert len(result) <= 40
     assert result.startswith("emb-9bc648bc-afbc-f965-564f")
@@ -139,7 +139,7 @@ def test_should_return_string():
     prefix = "prefix"
 
     # Act
-    result = hash_pk(value, prefix)
+    result = timestamped_hash_id(value, prefix)
 
     # Assert
     assert isinstance(result, str)

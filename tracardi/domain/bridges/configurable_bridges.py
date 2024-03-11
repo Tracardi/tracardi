@@ -13,7 +13,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.utils.hasher import uuid4_from_md5, hash_pk
+from tracardi.service.utils.hasher import uuid4_from_md5, hash_id
 
 logger = get_logger(__name__)
 
@@ -42,7 +42,7 @@ class ConfigurableBridge(NamedEntity):
                     if source in flat_properties:
                         _merge_id = flat_properties[source]
                         _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
-                        profile_id = hash_pk(_merge_id, _prefix)
+                        profile_id = hash_id(_merge_id, _prefix)
                         return profile_id
 
             # Check if in default event to profile mapping for current event type, there is a mapping for merging keys
@@ -53,14 +53,12 @@ class ConfigurableBridge(NamedEntity):
                     if destination in FLAT_PROFILE_FIELD_MAPPING and source in flat_properties:
                         _merge_id = flat_properties[source]
                         _prefix = FLAT_PROFILE_FIELD_MAPPING[destination]
-                        profile_id = hash_pk(_merge_id, _prefix)
+                        profile_id = hash_id(_merge_id, _prefix)
                         return profile_id
 
         return None
 
 class WebHookBridge(ConfigurableBridge):
-
-
 
     async def configure(self, tracker_payload: TrackerPayload, tracker_config: TrackerConfig) -> Tuple[
         TrackerPayload, TrackerConfig]:

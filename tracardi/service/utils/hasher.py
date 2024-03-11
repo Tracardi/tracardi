@@ -33,12 +33,24 @@ def get_pk_timestamp() -> str:
     return days_str + seconds_str
 
 
-def hash_pk(value: str, prefix: str, pk_guid:str=None) -> str:
+def timestamped_hash_id(value: str, prefix: str, pk_guid:str=None) -> str:
     if pk_guid is None:
         pk_guid = hash_pk_guid(value, prefix)
     pk_timestamp = get_pk_timestamp()
 
     return pk_guid + pk_timestamp
+
+def has_hash_id(hash_id: str, ids) -> bool:
+    return hash_id in ids
+
+def hash_id(value: str, prefix: str):
+    if not tracardi.is_apm_on():
+        raise ValueError("Env AUTO_PROFILE_MERGING is not set.")
+
+    hash = md5(f"{tracardi.auto_profile_merging}-{value}".encode()).hexdigest()
+    pk_guid = uuid4_from_md5(hash)
+
+    return f"{prefix[0:3]}-{pk_guid}"
 
 def has_pk_guid(pk_guid, ids):
     for string in ids:
