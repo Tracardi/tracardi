@@ -4,18 +4,15 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.rule import Rule
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.cache.trigger import load_trigger_rule
 from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_to_workflow_trigger_table, \
     map_to_workflow_trigger_rule
 from tracardi.service.storage.mysql.schema.table import WorkflowTriggerTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.service.storage.mysql.service.table_filtering import where_tenant_and_mode_context
-from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
-from tracardi.config import memory_cache as memory_cache_config
 
 logger = get_logger(__name__)
-
-memory_cache = MemoryCache("rules")
 
 class WorkflowTriggerService(TableService):
 
@@ -57,7 +54,7 @@ class WorkflowTriggerService(TableService):
                                                      limit=limit,
                                                      offset=offset)
 
-    async def _load_rule(self, event_type_id, source_id):
+    async def load_rule(self, event_type_id, source_id):
         where = where_tenant_and_mode_context(
             WorkflowTriggerTable,
             WorkflowTriggerTable.event_type_id == event_type_id,
@@ -87,16 +84,18 @@ class WorkflowTriggerService(TableService):
         has_routes = False
         for event_type in event_types:
 
-            cache_key = self._get_cache_key(source.id, event_type)
-            if cache_key not in memory_cache:
-                logger.debug("Loading routing rules for cache key {}".format(cache_key))
-                records = await self._load_rule(event_type, source.id)
-                rules: List[Rule] = list(records.map_to_objects(map_to_workflow_trigger_rule))
+            routes: List[Rule] = await load_trigger_rule(self, event_type, source.id)
 
-                memory_cache[cache_key] = CacheItem(data=rules,
-                                                    ttl=memory_cache_config.trigger_rule_cache_ttl)
+            # cache_key = self._get_cache_key(source.id, event_type)
+            # if cache_key not in memory_cache:
+            #     logger.debug("Loading routing rules for cache key {}".format(cache_key))
+            #     rules: List[Rule] = await load_trigger_rule(event_type, source.id)
+            #
+            #     memory_cache[cache_key] = CacheItem(data=rules,
+            #                                         ttl=memory_cache_config.trigger_rule_cache_ttl)
+            #
+            # routes = list(memory_cache[cache_key].data)
 
-            routes = list(memory_cache[cache_key].data)
             if not has_routes and routes:
                 has_routes = True
 

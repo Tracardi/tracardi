@@ -8,7 +8,6 @@ from tracardi.domain.rule import Rule
 
 from tracardi.config import tracardi
 from tracardi.process_engine.debugger import Debugger
-from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.exceptions.exception_service import get_traceback
@@ -23,7 +22,6 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1

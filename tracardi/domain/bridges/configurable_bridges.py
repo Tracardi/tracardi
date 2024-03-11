@@ -1,5 +1,5 @@
 from hashlib import md5
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from uuid import uuid4
 
 from dotty_dict import Dotty
@@ -7,16 +7,15 @@ from dotty_dict import Dotty
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.config import memory_cache, tracardi
+from tracardi.config import tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache_manager import CacheManager
+from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.hasher import uuid4_from_md5, hash_pk
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 class ConfigurableBridge(NamedEntity):
     config: Optional[dict] = {}
@@ -35,9 +34,7 @@ class ConfigurableBridge(NamedEntity):
 
             # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys
 
-            custom_event_to_profile_mapping = await cache.event_to_profile_coping(
-                event_type_id=event_type,
-                ttl=memory_cache.event_to_profile_coping_ttl)
+            custom_event_to_profile_mapping:List[EventToProfile] = await load_event_to_profile(event_type_id=event_type)
 
             for item in custom_event_to_profile_mapping:
                 custom_mapping_schema = item.to_entity(EventToProfile)

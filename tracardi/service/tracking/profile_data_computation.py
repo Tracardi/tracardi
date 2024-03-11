@@ -12,7 +12,6 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
@@ -21,8 +20,6 @@ from tracardi.service.tracking.utils.languages import get_continent
 from tracardi.service.utils.domains import free_email_domains
 from tracardi.service.events import copy_default_event_to_profile
 from tracardi.service.utils.languages import language_countries_dict
-
-cache = CacheManager()
 
 EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1

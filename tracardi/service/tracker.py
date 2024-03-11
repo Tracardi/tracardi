@@ -2,6 +2,7 @@ import time
 from typing import Optional
 
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
+from tracardi.service.cache.event_source import load_event_source
 from tracardi.service.license import License
 from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.service.utils.date import now_in_utc
@@ -13,10 +14,9 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.storage.mysql.bootstrap.bridge import open_rest_source_bridge
 from tracardi.service.tracking.source_validation import validate_source
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.config import memory_cache, tracardi
+from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache_manager import CacheManager
 from typing import List
 if License.has_license():
     from com_tracardi.service.tracking.tracker import com_tracker
@@ -24,7 +24,6 @@ else:
     from tracardi.service.tracking.tracker import os_tracker
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 
 async def track_event(tracker_payload: TrackerPayload,
@@ -93,9 +92,6 @@ class Tracker:
                     else:
                         # Replace the profile in tracker payload with ref __tr_pid
                         tracker_payload.profile = Entity(id=referred_profile_id)
-
-                    # Invalidate session. It may have wrong profile id
-                    cache.session_cache().delete(tracker_payload.session.id)
 
                     # If no session create one
                     if tracker_payload.session is None:
@@ -207,7 +203,7 @@ class Tracker:
                 timestamp=now_in_utc()
             )
 
-        source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
+        source: Optional[EventSource] = await load_event_source(event_source_id=source_id)
 
         if source is not None:
 

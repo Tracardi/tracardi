@@ -1,12 +1,10 @@
 from typing import List, Tuple
-from tracardi.service.cache_manager import CacheManager
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 
 def remove_ephemeral_data(tracker_payload, profile: Profile, session: Session, events: List[Event]) -> Tuple[Profile, Session, List[Event]]:

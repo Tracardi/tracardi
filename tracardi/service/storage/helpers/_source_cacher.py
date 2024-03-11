@@ -1,14 +1,14 @@
-from tracardi.config import memory_cache
+from typing import Optional
+
 from tracardi.domain.event_source import EventSource
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache_manager import CacheManager
+from tracardi.service.cache.event_source import load_event_source
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 
 async def validate_source(source_id: str, allowed_bridges: list) -> EventSource:
-    source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
+    source:Optional[EventSource] = await load_event_source(event_source_id=source_id,)
 
     if source is None:
         raise ValueError(f"Invalid event source `{source_id}`")

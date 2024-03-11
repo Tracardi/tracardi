@@ -18,7 +18,6 @@ from tracardi.config import tracardi
 from .. import ExtraInfo
 from ...exceptions.log_handler import get_logger
 
-from ...service.cache_manager import CacheManager
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..event_metadata import EventPayloadMetadata
@@ -38,7 +37,6 @@ if License.has_service(LICENSE):
     from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 
 class ScheduledEventConfig:

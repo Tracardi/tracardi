@@ -1,6 +1,6 @@
 import asyncio
 
-from tracardi.service.decorators.function_memory_cache import cache_for, cache, async_cache_for
+from tracardi.service.decorators.function_memory_cache import cache_for, cache, async_cache_for, delete_cache
 import time
 
 
@@ -53,3 +53,14 @@ def test_async_positive_path():
         assert len(cache['unit.test_function_memory_cache:y'].memory_buffer) == 1
 
     asyncio.run(main())
+
+
+
+def test_delete():
+    assert x(1) == 1
+    assert 'unit.test_function_memory_cache:x' in cache
+    assert len(cache['unit.test_function_memory_cache:x'].memory_buffer) == 1
+
+    delete_cache(x, 1)
+
+    assert len(cache['unit.test_function_memory_cache:x'].memory_buffer) == 0

@@ -82,7 +82,8 @@ class MemoryCache:
             del self.memory_buffer[key]
 
     def delete(self, key):
-        del self[key]
+        if key in self:
+            del self[key]
 
     def delete_all(self, keys: List[str]):
         for key in keys:
