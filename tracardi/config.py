@@ -90,8 +90,6 @@ class ElasticConfig:
         self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
         self.verify_certs = get_env_as_bool('ELASTIC_VERIFY_CERTS', 'off')
 
-        self.refresh_profiles_after_save = get_env_as_bool('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'off')
-
         self.host = self.get_host()
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', 'elastic')
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
@@ -174,7 +172,6 @@ class TracardiConfig(metaclass=Singleton):
         self.save_logs = get_env_as_bool('SAVE_LOGS', 'yes')
         self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'no')
         self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'no')
-        self.enable_segmentation_wf_triggers = get_env_as_bool('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no')
         self.enable_workflow = get_env_as_bool('ENABLE_WORKFLOW', 'yes')
         self.enable_event_validation = get_env_as_bool('ENABLE_EVENT_VALIDATION', 'yes')
         self.enable_event_reshaping = get_env_as_bool('ENABLE_EVENT_RESHAPING', 'yes')

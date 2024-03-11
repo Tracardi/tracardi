@@ -200,7 +200,7 @@ async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_aft
         profile.before_profile_storage()
         profile.mark_for_update()
     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
-    if refresh_after_save or elastic.refresh_profiles_after_save:
+    if refresh_after_save:
         await storage_manager('profile').flush()
     return result
 
