@@ -2,12 +2,9 @@ from typing import List, Optional, Tuple
 
 from tracardi.config import tracardi
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.segment import Segment
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.field_mappings_cache import add_new_field_mappings
-from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segment
-from tracardi.service.storage.mysql.service.segment_service import SegmentService
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
@@ -22,16 +19,6 @@ from tracardi.service.storage.driver.elastic import profile as profile_db
 
 logger = get_logger(__name__)
 _redis = RedisClient()
-
-
-async def _load_segments(event_type, limit=500) -> List[Segment]:
-    ss = SegmentService()
-    records = await ss.load_by_event_type(event_type, limit)
-
-    if not records.exists():
-        return []
-
-    return records.map_to_objects(map_to_segment)
 
 
 async def _save_profile(profile: Profile):

@@ -544,25 +544,25 @@ class ActivationTable(Base):
     running: bool = False
 
 
-class SegmentTable(Base):
-    __tablename__ = 'segment'
-
-    id = Column(String(40))
-    name = Column(Text)
-    description = Column(Text)
-    event_type = Column(String(64), default=None)
-    condition = Column(Text)
-    enabled = Column(Boolean, default=False)
-    machine_name = Column(String(128))
-
-    tenant = Column(String(40))
-    production = Column(Boolean)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
-    )
-
-    running: bool = False
+# class SegmentTable(Base):
+#     __tablename__ = 'segment'
+#
+#     id = Column(String(40))
+#     name = Column(Text)
+#     description = Column(Text)
+#     event_type = Column(String(64), default=None)
+#     condition = Column(Text)
+#     enabled = Column(Boolean, default=False)
+#     machine_name = Column(String(128))
+#
+#     tenant = Column(String(40))
+#     production = Column(Boolean)
+#
+#     __table_args__ = (
+#         PrimaryKeyConstraint('id', 'tenant', 'production'),
+#     )
+#
+#     running: bool = False
 
 
 class ReportTable(Base):
@@ -635,30 +635,30 @@ class ImportTable(Base):
     running: bool = False
 
 
-class WorkflowSegmentationTriggerTable(Base):
-    __tablename__ = 'workflow_segmentation_trigger'
-
-    id = Column(String(40))
-    timestamp = Column(DateTime)
-    name = Column(String(128))
-    description = Column(Text)
-    enabled = Column(Boolean, default=False)
-    type = Column(String(32))
-    condition = Column(String(255))
-    operation = Column(String(32))
-    segment = Column(String(128))
-    code = Column(Text)
-    workflow_id = Column(String(40))
-    workflow_name = Column(String(128))
-
-    tenant = Column(String(40))
-    production = Column(Boolean)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
-    )
-
-    running: bool = False
+# class WorkflowSegmentationTriggerTable(Base):
+#     __tablename__ = 'workflow_segmentation_trigger'
+#
+#     id = Column(String(40))
+#     timestamp = Column(DateTime)
+#     name = Column(String(128))
+#     description = Column(Text)
+#     enabled = Column(Boolean, default=False)
+#     type = Column(String(32))
+#     condition = Column(String(255))
+#     operation = Column(String(32))
+#     segment = Column(String(128))
+#     code = Column(Text)
+#     workflow_id = Column(String(40))
+#     workflow_name = Column(String(128))
+#
+#     tenant = Column(String(40))
+#     production = Column(Boolean)
+#
+#     __table_args__ = (
+#         PrimaryKeyConstraint('id', 'tenant', 'production'),
+#     )
+#
+#     running: bool = False
 
 
 class TaskTable(Base):

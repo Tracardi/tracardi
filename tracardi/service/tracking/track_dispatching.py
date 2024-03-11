@@ -1,10 +1,7 @@
 from typing import List, Tuple, Optional
 
-from tracardi.domain.segment import Segment
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.license import License, LICENSE
-from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segment
-from tracardi.service.storage.mysql.service.segment_service import SegmentService
 from tracardi.service.tracking.destination.dispatcher import sync_profile_destination, sync_event_destination
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
@@ -15,8 +12,6 @@ from tracardi.service.tracking.cache.merge_session_cache import merge_with_cache
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.config import tracardi
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache_manager import CacheManager
-from tracardi.service.segments.post_event_segmentation import post_ev_segment
 from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
@@ -26,17 +21,7 @@ if License.has_service(LICENSE) :
     from com_tracardi.workers.profile_change_log import profile_change_log_worker
 
 logger = get_logger(__name__)
-cache = CacheManager()
 _redis = RedisClient()
-
-async def _load_segments(event_type, limit=500) -> List[Segment]:
-    ss = SegmentService()
-    records = await ss.load_by_event_type(event_type, limit)
-
-    if not records.exists():
-        return []
-
-    return records.map_to_objects(map_to_segment)
 
 
 async def trigger_workflows(profile: Profile,
@@ -80,18 +65,6 @@ async def trigger_workflows(profile: Profile,
             if _auto_merge_ids:
                 auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
 
-
-        # Dispatch changed profile to destination
-
-    # Post Event Segmentation
-    # TODO remove
-    if tracardi.enable_post_event_segmentation and isinstance(profile, Profile):
-        # MUTATES Profile
-
-        await post_ev_segment(profile,
-                              session,
-                              [event.type for event in events],
-                              _load_segments)
 
     is_wf_triggered = isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered
 

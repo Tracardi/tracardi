@@ -39,16 +39,14 @@ from tracardi.service.storage.mysql.mapping.identification_point_mapping import 
 from tracardi.service.storage.mysql.mapping.import_mapping import map_to_import_config_table
 from tracardi.service.storage.mysql.mapping.report_mapping import map_to_report_table
 from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource_table
-from tracardi.service.storage.mysql.mapping.segment_mapping import map_to_segment_table
-from tracardi.service.storage.mysql.mapping.segment_trigger_mapping import map_to_workflow_segmentation_trigger_table
 from tracardi.service.storage.mysql.mapping.setting_mapping import map_to_settings_table
 from tracardi.service.storage.mysql.mapping.task_mapping import map_to_task_table
 from tracardi.service.storage.mysql.mapping.user_mapping import map_to_user_table
 from tracardi.service.storage.mysql.mapping.workflow_mapping import map_to_workflow_table
 from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_to_workflow_trigger_table
-from tracardi.service.storage.mysql.schema.table import BridgeTable, ConsentTypeTable, SegmentTable, \
+from tracardi.service.storage.mysql.schema.table import BridgeTable, ConsentTypeTable, \
     IdentificationPointTable, EventMappingTable, EventSourceTable, EventDataComplianceTable, EventReshapingTable, \
-    TaskTable, WorkflowSegmentationTriggerTable, UserTable, DestinationTable, EventRedirectTable, ReportTable, \
+    TaskTable, UserTable, DestinationTable, EventRedirectTable, ReportTable, \
     EventToProfileMappingTable, WorkflowTriggerTable, ResourceTable, WorkflowTable, ImportTable, EventValidationTable, \
     SettingTable
 from tracardi.service.storage.mysql.service.table_service import TableService
@@ -91,7 +89,6 @@ def user_record_converter(record: StorageRecord, schema: MigrationSchema) -> Sto
 class_mapping = {
     "bridge": (Bridge, BridgeTable, map_to_bridge_table, None, None),
     "consent-type": (ConsentType, ConsentTypeTable, map_to_consent_type_table, None, None),
-    "segment": (Segment, SegmentTable, map_to_segment_table, None, None),
     "identification-point": (IdentificationPoint, IdentificationPointTable, map_to_identification_point, None, None),
     # "events-tags": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None, None),  # todo check
     "event-source": (EventSource, EventSourceTable, map_to_event_source_table, None, None),
@@ -100,9 +97,9 @@ class_mapping = {
     "event-reshaping": (EventReshapingSchema, EventReshapingTable, map_to_event_reshaping_table, None, None),
     # "tracardi-pro": (None, TracardiProTable, None, None, None), # todo check
     "task": (Task, TaskTable, map_to_task_table, None, None),
-    "live-segment": (
-        WorkflowSegmentationTrigger, WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table, None,
-        None),
+    # "live-segment": (
+    #     WorkflowSegmentationTrigger, WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table, None,
+    #     None),
     "event-management": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None, None),
     "user": (User, UserTable, map_to_user_table, user_record_converter, None),
     "destination": (Destination, DestinationTable, map_to_destination_table, destination_record_converter, None),
