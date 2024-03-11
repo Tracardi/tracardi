@@ -13,8 +13,6 @@ from tracardi.service.tracking.profile_data_computation import update_profile_la
     update_profile_visits, update_profile_time, compute_profile_aux_geo_markets
 from tracardi.service.tracking.session_data_computation import compute_session, update_device_geo, \
     update_session_utm_with_client_data
-from tracardi.service.tracking.storage.profile_storage import save_profile
-from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.system_events import add_system_events
 
 from tracardi.domain.event_source import EventSource
@@ -25,8 +23,6 @@ from tracardi.service.tracker_config import TrackerConfig
 if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
-    from com_tracardi.workers.session import session_storage_worker
-    from com_tracardi.workers.event import event_storage_worker
 
 async def _compute(source,
                    profile: Optional[Profile],

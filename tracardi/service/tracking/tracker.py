@@ -60,14 +60,17 @@ async def os_tracker(source: EventSource,
 
             # Save profile
             if profile and profile.has_not_saved_changes():
+                # Sync save
                 await save_profile(profile)
 
             # Save session
             if session and session.has_not_saved_changes():
+                # Sync save
                 await save_session(session)
 
             # Save events
             if events:
+                # Sync save
                 await save_events(events)
 
         # Save field change log

@@ -1,13 +1,9 @@
 from typing import Optional, Union, List, Set
 
-from tracardi.service.license import License
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache, save_profile_cache, delete_profile_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.profile import Profile
 from tracardi.service.storage.driver.elastic import profile as profile_db
-
-if License.has_license():
-    from com_tracardi.dispatchers.pulsar.profile_dispatcher import profile_dispatch
 
 async def delete_profile(id: str,
                          index: str,
@@ -33,10 +29,7 @@ async def save_profile(profiles: Union[Profile, List[Profile], Set[Profile]],
     if context is None:
         context = get_context()
 
-    if License.has_license():
-        profile_dispatch(profiles, context)
-    else:
-        await profile_db.save(profiles, refresh_after_save=refresh)
+    await profile_db.save(profiles, refresh_after_save=refresh)
 
     if cache:
         save_profile_cache(profiles, context)
