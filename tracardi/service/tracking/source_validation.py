@@ -25,7 +25,7 @@ async def _check_source_id(allowed_bridges, source_id) -> Optional[EventSource]:
             transitional=False  # ephemeral
         )
 
-    source = await load_event_source(event_source_id=source_id)
+    source = await load_event_source(source_id=source_id)
 
     if source is not None:
 

@@ -86,6 +86,7 @@ class WorkflowTriggerService(TableService):
 
             routes: List[Rule] = await load_trigger_rule(self, event_type, source.id)
 
+            # TODO remove 01-04-2024
             # cache_key = self._get_cache_key(source.id, event_type)
             # if cache_key not in memory_cache:
             #     logger.debug("Loading routing rules for cache key {}".format(cache_key))
