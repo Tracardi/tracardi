@@ -49,7 +49,8 @@ async def os_tracker(source: EventSource,
                 del tracker_payload.context['utm']
 
             # ----------------------------------------------
-            # FROM THIS POINT EVENTS AND SESSION SHOULD NOT BE MUTATED
+            # FROM THIS POINT EVENTS AND SESSION SHOULD NOT
+            # BE MUTATED, ALREADY SAVED
             # ----------------------------------------------
 
             # MUTEX: Session and profile are saved if workflow triggered
