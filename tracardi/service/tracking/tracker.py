@@ -1,7 +1,12 @@
 import time
 
+from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
-from tracardi.service.tracking.track_data_computation import lock_and_compute_data
+from tracardi.service.tracking.process.loading import tracker_loading
+from tracardi.service.tracking.storage.event_storage import save_events
+from tracardi.service.tracking.storage.profile_storage import save_profile
+from tracardi.service.tracking.storage.session_storage import save_session
+from tracardi.service.tracking.track_data_computation import compute_data
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
@@ -10,9 +15,13 @@ from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
 from tracardi.service.storage.driver.elastic import field_update_log as field_update_log_db
+from tracardi.service.storage.redis.collections import Collection
+from tracardi.service.tracking.locking import Lock, async_mutex
+
 
 logger = get_logger(__name__)
 cache = CacheManager()
+_redis = RedisClient()
 
 
 async def os_tracker(source: EventSource,
@@ -26,22 +35,49 @@ async def os_tracker(source: EventSource,
             logger.debug(f"No events have been sent in tracker payload.")
             return None
 
-        # Lock profile and session for changes and compute data
-        # Saves session, profile, events
-        profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
-            tracker_payload,
-            tracker_config,
-            source
-        )
+        # Load profile and session
+        profile, session = await tracker_loading(tracker_payload, tracker_config)
 
-        # TODO maybe should be moved to lock_and_compute_data
+        # We need profile ID to lock.
+
+        profile_key = Lock.get_key(Collection.lock_tracker, "profile", get_entity_id(profile))
+        profile_lock = Lock(_redis, profile_key, default_lock_ttl=3)
+
+        # If not profile ID then no locking
+
+        async with async_mutex(profile_lock, name='lock_and_compute_data_profile'):
+
+            # Lock profile and session for changes and compute data
+            profile, session, events, tracker_payload, field_timestamp_monitor = await compute_data(
+                profile,
+                session,
+                tracker_payload,
+                tracker_config,
+                source
+            )
+
+            # MUST BE INSIDE MUTEX until it stores data to cache
+
+            # Save profile
+            if profile and profile.has_not_saved_changes():
+                await save_profile(profile)
+
+            # Save session
+            if session and session.has_not_saved_changes():
+                await save_session(session)
+
+            # Save events
+            if events:
+                await save_events(events)
+
+        # Save field change log
         if field_timestamp_monitor:
             timestamp_log = field_timestamp_monitor.get_timestamps_log()
             await field_update_log_db.upsert(timestamp_log.get_history_log())
 
         try:
-            # TODO why is this here
-            # Clean up
+
+            # Clean up so can not be used. It is already in session
             if 'location' in tracker_payload.context:
                 del tracker_payload.context['location']
 
@@ -67,7 +103,9 @@ async def os_tracker(source: EventSource,
                 tracker_payload.debug)
 
             # Dispatch outbound profile SYNCHRONOUSLY
-            await sync_profile_destination(profile, session)
+            await sync_profile_destination(
+                profile,
+                session)
 
             return {
                 "task": tracker_payload.get_id(),

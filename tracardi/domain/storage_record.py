@@ -1,4 +1,4 @@
-from typing import Callable, Iterator, List, Union, Tuple, Optional, TypeVar, Type, Dict
+from typing import Iterator, List, Union, Tuple, Optional, TypeVar, Type, Dict
 from pydantic import BaseModel
 
 
