@@ -1,5 +1,6 @@
 from typing import List, Optional, Tuple
 
+from com_tracardi.workers.profile_change_log import profile_change_log_worker
 from tracardi.config import tracardi
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
@@ -16,15 +17,16 @@ from tracardi.domain.session import Session
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.storage.driver.elastic import field_update_log as field_update_log_db
 
 logger = get_logger(__name__)
 _redis = RedisClient()
 
 
 async def _save_profile(profile: Profile):
+    save_profile_cache(profile)
     # Save to database - do not defer
     await profile_db.save(profile, refresh_after_save=True)
-    save_profile_cache(profile)
 
 
 async def trigger_workflows(profile: Profile,
@@ -79,7 +81,8 @@ async def trigger_workflows(profile: Profile,
     return profile, session, events, ux, response, field_manager, is_wf_triggered
 
 
-async def exec_workflow(profile_id: str, session: Session, events: List[Event], tracker_payload: TrackerPayload):
+async def exec_workflow(profile_id: str, session: Session, events: List[Event], tracker_payload: TrackerPayload) -> Tuple[
+    Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeTimestampManager, bool]:
     if tracardi.enable_workflow:
 
         profile_key = Lock.get_key(Collection.lock_tracker, "profile", profile_id)
@@ -124,8 +127,15 @@ async def exec_workflow(profile_id: str, session: Session, events: List[Event], 
                     # No session loading from cache necessary; Save it in db and cache
                     await save_session(session, cache=True, refresh=True)
 
+                # Save changes to field log
+                if tracardi.enable_field_update_log and field_change_manager.has_changes():
+                    log = field_change_manager.get_history_log()
+                    await field_update_log_db.upsert(log)
+
         # logger.info(f"Output profile {profile.traits}")
         # logger.info(f"Output session {session}")
         # logger.info(f"Output events {events}")
         # logger.info(f"Output ux {ux}")
         # logger.info(f"Output response {response}")
+
+        return profile, session, events, ux, response, field_change_manager, is_wf_triggered

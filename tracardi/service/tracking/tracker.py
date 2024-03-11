@@ -1,16 +1,15 @@
 import time
 
-from tracardi.service.tracking.ephemerals import remove_ephemeral_data
+from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.track_data_computation import lock_and_compute_data
-from tracardi.service.tracking.track_dispatching import dispatch_sync_workflow_and_destinations_and_save_data
-from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
-from tracardi.context import get_context
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache_manager import CacheManager
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
+from tracardi.service.wf.triggers import exec_workflow
+from tracardi.service.storage.driver.elastic import field_update_log as field_update_log_db
 
 logger = get_logger(__name__)
 cache = CacheManager()
@@ -28,17 +27,20 @@ async def os_tracker(source: EventSource,
             return None
 
         # Lock profile and session for changes and compute data
-        # TODO ERROR - saves session and profile
+        # Saves session, profile, events
         profile, session, events, tracker_payload, field_timestamp_monitor = await lock_and_compute_data(
             tracker_payload,
             tracker_config,
             source
         )
 
-        try:
-            if profile:
-                logger.debug(f"Profile {get_entity_id(profile)} cached in context {get_context()}")
+        # TODO maybe should be moved to lock_and_compute_data
+        if field_timestamp_monitor:
+            timestamp_log = field_timestamp_monitor.get_timestamps_log()
+            await field_update_log_db.upsert(timestamp_log.get_history_log())
 
+        try:
+            # TODO why is this here
             # Clean up
             if 'location' in tracker_payload.context:
                 del tracker_payload.context['location']
@@ -50,33 +52,21 @@ async def os_tracker(source: EventSource,
             # FROM THIS POINT EVENTS AND SESSION SHOULD NOT BE MUTATED
             # ----------------------------------------------
 
-            # Compute process time
+            # MUTEX: Session and profile are saved if workflow triggered
+            profile, session, events, ux, response, field_changes, is_wf_triggered = await exec_workflow(profile.id,
+                                                                                                         session,
+                                                                                                         events,
+                                                                                                         tracker_payload)
 
-            for event in events:
-                event.metadata.time.total_time = time.time() - tracking_start
+            # Dispatch events SYNCHRONOUSLY
+            await sync_event_destination(
+                profile,
+                session,
+                events,
+                tracker_payload.debug)
 
-            # Save events
-
-            _, _, _events_not_ephemeral = remove_ephemeral_data(
-                tracker_payload, profile, session, events)
-
-            storage = TrackingPersisterAsync()
-            await storage.save_events(events)
-
-            # TODO this should be in mutex as is mutates profile
-
-            profile, session, events, ux, response = await (
-                # TODO ERROR - saves session and profile
-                dispatch_sync_workflow_and_destinations_and_save_data(
-                    profile,
-                    session,
-                    events,
-                    tracker_payload,
-                    # Save. We need to manually save the session and profile in Open-source as there is no
-                    # flusher worker and in-memory profile and session is not saved
-                    store_in_db=True,  # No cache worker for OS. must store manually
-                    storage=storage
-                ))
+            # Dispatch outbound profile SYNCHRONOUSLY
+            await sync_profile_destination(profile, session)
 
             return {
                 "task": tracker_payload.get_id(),

@@ -1,7 +1,7 @@
-from typing import Tuple, List, Optional
-
+from typing import Tuple, List, Optional, Union, Set
 
 from tracardi.config import tracardi
+from tracardi.context import get_context
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -9,6 +9,7 @@ from tracardi.service.change_monitoring.field_change_monitor import FieldTimesta
 from tracardi.service.license import License
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.event_data_computation import compute_events
 from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
@@ -25,13 +26,22 @@ from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 
 from tracardi.service.tracker_config import TrackerConfig
+from tracardi.service.tracking.tracker_persister_async import TrackingPersisterAsync
 from tracardi.service.utils.getters import get_entity_id
 
 if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
     from com_tracardi.workers.session import session_storage_worker
+    from com_tracardi.dispatchers.pulsar.event_dispatcher import event_dispatch
 
+async def _save_event_conditional(events: Union[List[Event], Set[Event]]):
+    if License.has_license():
+        context = get_context().get_user_less_context_copy()
+        event_dispatch(events, context)
+    else:
+        storage = TrackingPersisterAsync()
+        await storage.save_events(events)
 
 async def _compute(source,
                    profile: Optional[Profile],
@@ -164,9 +174,8 @@ Optional[FieldTimestampMonitor]]:
             session,
             tracker_payload)
 
-        # MUST BE INSIDE MUTEX until it stores data to cache
-        # Update only when needed
-        # TODO remove_ephemeral_data
+        # Removes data that should not be saved
+        profile, session, events = remove_ephemeral_data(tracker_payload, profile, session, events)
 
         # MUST BE INSIDE MUTEX until it stores data to cache
         if License.has_license():
@@ -179,5 +188,11 @@ Optional[FieldTimestampMonitor]]:
                 await save_profile(profile)
             if session and session.has_not_saved_changes():
                 await save_session(session)
+
+        # MUST BE INSIDE MUTEX until it stores data to cache
+        if events:
+            # Send events
+            await _save_event_conditional(events)
+
 
         return profile, session, events, tracker_payload, field_timestamp_monitor
