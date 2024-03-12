@@ -10,25 +10,36 @@
         "private": "string",
         "business": "string"
       },
-      "login": "string",
-      "firstname": "string",
-      "lastname": "string"
+      "phone": {
+        "main": "string",
+        "mobile": "string",
+        "whatsapp": "string",
+        "business": "string"
+      },
+      "pk": "string",
+      "login": "string"
     },
     "copy": {
+      "data.identifier.pk":          "properties.pk",
+      "data.identifier.token":       "properties.login",
       "data.contact.email.main":     "properties.email.main",
       "data.contact.email.private":  "properties.email.private",
       "data.contact.email.business": "properties.email.business",
-      "data.identifier.token":   "properties.login",
-      "data.pii.firstname":      "properties.firstname",
-      "data.pii.lastname":       "properties.lastname"
+      "data.contact.phone.main":     "properties.phone.main",
+      "data.contact.phone.mobile":   "properties.phone.mobile",
+      "data.contact.phone.business": "properties.phone.business",
+      "data.contact.phone.whatsapp": "properties.phone.whatsapp"
     },
     "profile": {
+      "data.identifier.pk":          ["data.identifier.pk", "equal"],
+      "data.identifier.token":       ["data.identifier.token", "equal"],
       "data.contact.email.main":     ["data.contact.email.main", "equal"],
       "data.contact.email.private":  ["data.contact.email.private", "equal"],
       "data.contact.email.business": ["data.contact.email.business", "equal"],
-      "data.identifier.token":  ["data.identifier.token", "equal"],
-      "data.pii.firstname":     ["data.pii.firstname", "equal"],
-      "data.pii.lastname":      ["data.pii.lastname", "equal"]
+      "data.contact.phone.main":      ["data.contact.phone.main", "equal"],
+      "data.contact.phone.business":  ["data.contact.phone.business", "equal"],
+      "data.contact.phone.mobile":    ["data.contact.phone.mobile", "equal"],
+      "data.contact.phone.whatsapp":  ["data.contact.phone.whatsapp", "equal"]
     },
     "tags": ["event:behavioral"],
     "state": "consideration"
@@ -81,17 +92,19 @@
   },
   {
     "name": "Identification",
-    "description": "User sends PII data.",
+    "description": "User sends PII data that can be used for identification.",
     "explain": "The \"Identification\" event should be employed when a customer provides personally identifiable information (PII). For instance, this event is relevant when a user subscribes to a newsletter or a service, or leaves a comment with their email address, or signs-in.",
     "id": "identification",
     "properties": {
-      "firstname": "string",
-      "lastname": "string",
-
       "phone": {
         "main": "string",
         "mobile": "string",
         "whatsapp": "string",
+        "business": "string"
+      },
+      "email": {
+        "main": "string",
+        "private": "string",
         "business": "string"
       },
       "id": "string",
@@ -102,11 +115,7 @@
       "credit_card": "string",
       "coupon": "string",
       "badge": "string",
-      "email": {
-        "main": "string",
-        "private": "string",
-        "business": "string"
-      },
+
       "twitter": "string",
       "whatsapp": "string",
       "discord": "string",
@@ -124,8 +133,6 @@
       "data.contact.phone.mobile":   "properties.phone.mobile",
       "data.contact.phone.business": "properties.phone.business",
       "data.contact.phone.whatsapp": "properties.phone.whatsapp",
-      "data.pii.firstname":          "properties.firstname",
-      "data.pii.lastname":           "properties.lastname",
       "data.identifier.pk":          "properties.pk",
       "data.identifier.id":          "properties.id",
       "data.identifier.token":       "properties.login",
