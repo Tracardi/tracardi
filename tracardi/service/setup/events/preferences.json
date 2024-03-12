@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Add Color Preference",
+    "description": "Add color preference to current profile.",
+    "id": "add-color-preference",
+    "properties": {
+      "color": "white"
+    },
+    "copy": {
+      "traits.color": "properties.color"
+    },
+    "profile": {
+      "data.preferences.colors": [
+        "traits.color",
+        "append"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ]
+  },
+  {
+    "name": "Add Size Preference",
+    "description": "Add size preference to current profile.",
+    "id": "add-size-preference",
+    "properties": {
+      "size": "M"
+    },
+    "copy": {
+      "traits.size": "properties.size"
+    },
+    "profile": {
+      "data.preferences.sizes": [
+        "traits.size",
+        "append"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ]
+  },
+   {
+    "name": "Add Brand Preference",
+    "description": "Add brand preference to current profile.",
+    "id": "add-brand-preference",
+    "properties": {
+      "brand": "apple"
+    },
+     "copy": {
+      "traits.brand": "properties.brand"
+    },
+    "profile": {
+      "data.preferences.brands": [
+        "traits.brand",
+        "append"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ]
+  },
+     {
+    "name": "Add Channel Preference",
+    "description": "Add channel preference to current profile.",
+    "id": "add-channel-preference",
+    "properties": {
+      "channel": "mobile"
+    },
+     "copy": {
+      "traits.channels": "properties.channel"
+    },
+    "profile": {
+      "data.preferences.channels": [
+        "traits.channel",
+        "append"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ]
+  },
+       {
+    "name": "Add Payment Preference",
+    "description": "Add payment preference to current profile.",
+    "id": "add-payment-preference",
+    "properties": {
+      "payment": "card"
+    },
+     "copy": {
+      "traits.payments": "properties.payment"
+    },
+    "profile": {
+      "data.preferences.payments": [
+        "traits.payment",
+        "append"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ]
+  }
+]
