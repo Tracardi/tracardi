@@ -220,8 +220,11 @@ async def create_index(index: str, mapping: dict) -> bool:
 
 async def remove_index(index: str) -> bool:
     es = ElasticClient.instance()
-    result = await es.remove_index(index)
-    return _acknowledged(result)
+    if await es.exists_index(index):
+        result = await es.remove_index(index)
+        if _acknowledged(result):
+            return True
+    return False
 
 
 async def get_unique_field_values(index, field, limit=100):
