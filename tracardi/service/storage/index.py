@@ -242,6 +242,12 @@ class Resource(metaclass=Singleton):
     def list_aliases(self) -> set:
         return {index.get_index_alias() for name, index in self.resources.items()}
 
+    def list_indices(self) -> set:
+        return {index.get_write_index() for name, index in self.resources.items()}
+
+    def list_templates(self) -> set:
+        return {index.get_prefixed_template_name() for name, index in self.resources.items() if index.multi_index}
+
     def get_index_constant(self, name) -> Index:
         if name in self.resources:
             return self.resources[name]
