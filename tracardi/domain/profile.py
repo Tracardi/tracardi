@@ -20,14 +20,11 @@ from ..config import tracardi
 from ..service.change_monitoring.field_change_monitor import FieldChangeTimestampManager, FieldTimestampMonitor
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
-from ..service.license import License
 from ..service.utils.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
 from ..service.utils.hasher import hash_id, has_hash_id
 
-if License.has_license():
-    from com_tracardi.service.profile.primary_key import set_primary_key
 
 class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
@@ -108,11 +105,6 @@ class Profile(PrimaryEntity):
             if id.startswith(PREFIX_IDENTIFIER_ID):
                 return True
         return False
-
-    def before_profile_storage(self):
-        # Mutates state
-        if License.has_license():
-            set_primary_key(self)
 
     def create_auto_merge_hashed_ids(self):
         ids_len = len(self.ids)

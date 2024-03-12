@@ -167,20 +167,13 @@ class ProfileMerger:
 
         return traits, data, conflicts_aux
 
-    def _get_primary_id(self, all_profiles) ->Optional[str]:
-        primary_id = None
-        for profile in all_profiles:
+    @staticmethod
+    def _get_primary_id(all_profiles) ->Optional[str]:
+        primary_ids = {profile.primary_id for profile in all_profiles}
+        if len(primary_ids)>1:
+            logger.warning(f"Primary ID conflict while merging. Expected Single primary id got {primary_ids}.")
 
-            if profile.primary_id is None:
-                # No primary id skip
-                continue
-
-            if primary_id is None:
-                primary_id = profile.primary_id
-            elif primary_id != profile.primary_id:
-                logger.warning(f"Primary ID conflict while merging {primary_id}, {profile.primary_id}.")
-
-        return primary_id
+        return list(primary_ids)[0]
 
     def _get_merged_profile(self,
                             similar_profiles: List[Profile],
