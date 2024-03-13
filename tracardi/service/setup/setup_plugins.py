@@ -734,8 +734,16 @@ installed_plugins: Dict[str, PluginMetadata] = {
             init={'index': 'index', 'query': '{"query":{"match_all":{}}}'},
             resource=None)
     ),
+
+    "tracardi.process_engine.action.v1.connectors.ghost.plugin": PluginMetadata(
+        test=PluginTest(init={'uuid': ''},
+                        resource={
+                            "api_url": "<api-url>",
+                            "api_key": "<api-key>"
+                        })
+    ),
     
-"tracardi.process_engine.action.v1.group_and_rank_interests_action": PluginMetadata(
+    "tracardi.process_engine.action.v1.group_and_rank_interests_action": PluginMetadata(
         test=PluginTest(init={'interests': 'profile@interests', 'segment_mapping': '{}','segments_to_apply':''},
         resource=None)
     ),
