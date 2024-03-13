@@ -8,10 +8,10 @@ from dotty_dict import Dotty
 from pydantic import BaseModel, ValidationError, PrivateAttr
 from dateutil import parser
 
-from .entity import Entity
+from .entity import PrimaryEntity
 from .metadata import ProfileMetadata
 from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
-    FLAT_PROFILE_MAPPING
+    FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
@@ -23,7 +23,7 @@ from .profile_stats import ProfileStats
 from ..service.utils.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
-from ..service.utils.hasher import hash_id
+from ..service.utils.hasher import hash_id, has_hash_id
 
 
 class ConsentRevoke(BaseModel):
@@ -42,7 +42,7 @@ class CustomMetric(BaseModel):
         return value != self.value
 
 
-class Profile(Entity):
+class Profile(PrimaryEntity):
     ids: Optional[List[str]] = []
     metadata: Optional[ProfileMetadata] = ProfileMetadata(
         time=ProfileTime()
@@ -94,9 +94,28 @@ class Profile(Entity):
                 return True
         return False
 
+    def has_hashed_id(self) -> bool:
+        for id in self.ids:
+            if id.startswith(PREFIX_IDENTIFIER_ID):
+                return True
+        return False
+
+    def has_hashed_pk(self) -> bool:
+        for id in self.ids:
+            if id.startswith(PREFIX_IDENTIFIER_ID):
+                return True
+        return False
+
     def create_auto_merge_hashed_ids(self):
         ids_len = len(self.ids)
         if tracardi.is_apm_on():
+
+            if self.data.identifier.pk and not self.has_hashed_pk():
+                self.ids.append(hash_id(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
+
+            if self.data.identifier.id and not self.has_hashed_id():
+                self.ids.append(hash_id(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
+
             if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
                 self.ids.append(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
             if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
@@ -130,16 +149,14 @@ class Profile(Entity):
             # Add new hashed Id
 
             if value:
-                hashed_value = hash_id(value, prefix)
+                _hash_id = hash_id(value, prefix)
 
                 # Do not add value if exists
-                if hashed_value in self.ids:
+                if has_hash_id(_hash_id, self.ids):
                     return None
 
-                # Remove old hashed id by prefix
-                self.ids = [hid for hid in self.ids if not hid.startswith(prefix)]
-
-                self.ids.append(hashed_value)
+                self.ids.append(_hash_id)
+                
                 return flat_field
 
         return None
@@ -245,6 +262,7 @@ class Profile(Entity):
             profile.segments = list(set(profile.segments))
 
             self.id = profile.id
+            self.primary_id = profile.primary_id
             self.ids = profile.ids
             self.metadata = profile.metadata
             self.operation = profile.operation
@@ -353,15 +371,14 @@ class FlatProfile(Dotty):
             if value:
                 # Add new
                 # Can not simply append. Must reassign
-                new_hash_id = hash_id(value, prefix)
+                _hash_id = hash_id(value, prefix)
 
                 # Do not add value if exists
-                if new_hash_id in self['ids']:
+                if has_hash_id(_hash_id, self['ids']):
                     return None
 
-                # Remove old
-                ids = [hid for hid in self['ids'] if not hid.startswith(prefix)]
-                ids.append(new_hash_id)
+                ids = self['ids']
+                ids.append(_hash_id)
                 # Assign to replace value
                 self['ids'] = list(set(ids))
 

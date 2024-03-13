@@ -7,7 +7,6 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.tracking.storage.profile_storage import save_profile
 
 
 class DeleteTraitConfiguration(PluginConfig):
@@ -53,7 +52,6 @@ class DeleteTraitAction(ActionRunner):
             self.session.replace(session)
 
         self.update_profile()
-        await save_profile(self.profile)
 
         return Result(port="payload", value=payload)
 

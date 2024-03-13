@@ -7,7 +7,7 @@ with open("README.md", "r",encoding="utf-8") as fh:
 
 setup(
     name='tracardi',
-    version='0.8.2',
+    version='0.9.0-dev',
     description='Tracardi Customer Data Platform backend',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -70,16 +70,18 @@ setup(
         'user-agents==2.2.0',
         'faker==18.4.0',
         'faker-commerce==1.0.3',
+        'SQLAlchemy==2.0.23',
         'speedict==0.3.12',
+        'alembic==1.13.1',
         # Worker requirements
-        'requests',
         'mysql-connector-python==8.0.29',
+        'requests',
         # Com requirements
         'weaviate-client==3.23.2',
         'twilio==8.2.1',
         'huey',
-        'pulsar-client==3.3.0'
-
+        'pulsar-client==3.3.0',
+        'aiokafka==0.8.1'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

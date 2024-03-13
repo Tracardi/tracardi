@@ -16,10 +16,11 @@ class Task(NamedEntity):
     progress: float = 0
     type: str
     params: dict = {}
+    message: Optional[str] = None
 
     @field_validator("status")
     @classmethod
     def validate_status(cls, value):
-        if value not in ("pending", "running", "error", "done", "cancelled"):
-            raise ValueError(f"Status must be one of: pending, running, error, done, cancelled. {value} given.")
+        if value not in ("none", "pending", "running", "error", "finished", "cancelled"):
+            raise ValueError(f"Status must be one of: none, pending, running, error, finished, cancelled. {value} given.")
         return value

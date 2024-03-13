@@ -2,8 +2,7 @@ import uuid
 from datetime import datetime
 
 from tracardi.service.wf.domain.flow_graph import FlowGraph
-from .named_entity import NamedEntity
-from .value_object.storage_info import StorageInfo
+from .named_entity import NamedEntityInContext
 from typing import Optional, List, Any
 from pydantic import BaseModel
 from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, EdgeBundle
@@ -29,11 +28,12 @@ class FlowSchema(BaseModel):
 
 
 class Flow(FlowGraph):
-    projects: Optional[List[str]] = ["General"]
+    tags: Optional[List[str]] = ["General"]
     lock: bool = False
     type: str
     timestamp: Optional[datetime] = None
     deploy_timestamp: Optional[datetime] = None
+    file_name: Optional[str] = None
     wf_schema: FlowSchema = FlowSchema()
 
     def arrange_nodes(self):
@@ -64,23 +64,6 @@ class Flow(FlowGraph):
 
                 start_at[0] += len(max(distance_to_nodes_map.values(), key=len)) * 200
 
-    def get_production_workflow_record(self) -> 'FlowRecord':
-
-        production = encrypt(self.model_dump())
-
-        return FlowRecord(
-            id=self.id,
-            timestamp=self.timestamp,
-            deploy_timestamp=self.deploy_timestamp,
-            description=self.description,
-            name=self.name,
-            projects=self.projects,
-            draft=production,
-            production=production,
-            lock=self.lock,
-            type=self.type
-        )
-
     def get_empty_workflow_record(self, type: str) -> 'FlowRecord':
 
         return FlowRecord(
@@ -88,25 +71,22 @@ class Flow(FlowGraph):
             timestamp=now_in_utc(),
             description=self.description,
             name=self.name,
-            projects=self.projects,
+            tags=self.tags,
             lock=self.lock,
             type=type
         )
 
     @staticmethod
-    def from_workflow_record(record: 'FlowRecord', output) -> 'Flow':
+    def from_workflow_record(record: 'FlowRecord') -> Optional['Flow']:
 
-        if output == 'draft':
-            decrypted = decrypt(record.draft)
-        else:
-            decrypted = decrypt(record.production)
+        if 'type' not in record.draft:
+            record.draft['type'] = record.type
 
-        if 'type' not in decrypted:
-            decrypted['type'] = record.type
-
-        flow = Flow(**decrypted)
+        flow = Flow(**record.draft)
         flow.deploy_timestamp = record.deploy_timestamp
         flow.timestamp = record.timestamp
+        flow.file_name = record.file_name
+        flow.id = record.id
 
         if not flow.timestamp:
             flow.timestamp = now_in_utc()
@@ -125,9 +105,9 @@ class Flow(FlowGraph):
         )
 
     @staticmethod
-    def build(name: str, description: str = None, id=None, lock=False, projects=None, type='collection') -> 'Flow':
-        if projects is None:
-            projects = ["General"]
+    def build(name: str, description: str = None, id=None, lock=False, tags=None, type='collection') -> 'Flow':
+        if tags is None:
+            tags = ["General"]
 
         return Flow(
             id=str(uuid.uuid4()) if id is None else id,
@@ -135,7 +115,7 @@ class Flow(FlowGraph):
             name=name,
             wf_schema=FlowSchema(version=str(tracardi.version)),
             description=description,
-            projects=projects,
+            tags=tags,
             lock=lock,
             flowGraph=FlowGraphData(
                 nodes=[],
@@ -171,7 +151,7 @@ class SpecRecord(BaseModel):
     manual: Optional[str] = None
     author: Optional[str] = None
     license: Optional[str] = "MIT"
-    version: Optional[str] = '0.8.2'
+    version: Optional[str] = '0.9.0-rc3'
 
     @staticmethod
     def encode(spec: Spec) -> 'SpecRecord':
@@ -297,52 +277,19 @@ class PluginRecord(BaseModel):
         return Plugin.model_construct(_fields_set=self.model_fields_set, **data)
 
 
-class FlowRecord(NamedEntity):
+class FlowRecord(NamedEntityInContext):
     timestamp: Optional[datetime] = None
     deploy_timestamp: Optional[datetime] = None
     description: Optional[str] = None
-    projects: Optional[List[str]] = ["General"]
-    draft: Optional[str] = ''
-    production: Optional[str] = ''
-    backup: Optional[str] = ''
+    tags: Optional[List[str]] = ["General"]
+    file_name: Optional[str] = None
+    draft: Optional[dict] = {}
     lock: bool = False
-    deployed: Optional[bool] = False
     type: str
 
-    # Persistence
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'flow',
-            FlowRecord
-        )
-
-    def get_production_workflow(self) -> 'Flow':
-        return Flow.from_workflow_record(self, output='production')
-
-    def get_draft_workflow(self) -> 'Flow':
-        return Flow.from_workflow_record(self, output='draft')
-
     def get_empty_workflow(self, id) -> 'Flow':
-        return Flow.build(id=id, name=self.name, description=self.description,
-                          projects=self.projects, lock=self.lock)
-
-    def restore_production_from_backup(self):
-        if not self.backup:
-            raise ValueError("Back up is empty.")
-        self.production = self.backup
-
-    def restore_draft_from_production(self):
-        if not self.production:
-            raise ValueError("Production up is empty.")
-        self.draft = self.production
-
-    def set_lock(self, lock: bool = True) -> None:
-        self.lock = lock
-        production_flow = self.get_production_workflow()
-        production_flow.lock = lock
-        self.production = encrypt(production_flow.model_dump())
-        draft_flow = self.get_draft_workflow()
-        draft_flow.lock = lock
-        self.draft = encrypt(draft_flow.model_dump())
+        return Flow.build(id=id,
+                          name=self.name,
+                          description=self.description,
+                          tags=self.tags,
+                          lock=self.lock)

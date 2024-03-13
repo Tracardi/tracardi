@@ -9,7 +9,7 @@ import tracardi.config
 from pydantic import BaseModel, field_validator, PrivateAttr
 
 from ..api_instance import ApiInstance
-from ..entity import Entity
+from ..entity import Entity, PrimaryEntity
 from ..enum.event_status import COLLECTED
 from ..event import Event, EventSession, Tags
 from ..event_metadata import EventMetadata
@@ -19,7 +19,7 @@ from ..session import Session, SessionContext
 from ..time import Time
 from ..value_object.operation import RecordFlag
 from ...service.string_manager import capitalize_event_type_id
-from ...service.utils.getters import get_entity, get_entity_id
+from ...service.utils.getters import get_entity, get_entity_id, get_primary_entity
 
 
 class ProcessStatus(BaseModel):
@@ -146,7 +146,7 @@ class EventPayload(BaseModel):
                  metadata: EventPayloadMetadata,
                  source: Entity,
                  session: Union[Optional[Entity], Optional[Session]],
-                 profile: Optional[Entity],
+                 profile: Optional[PrimaryEntity],
                  profile_less: bool) -> Event:
 
         meta = EventMetadata(**metadata.model_dump())
@@ -185,7 +185,7 @@ class EventPayload(BaseModel):
                 name=capitalize_event_type_id(event_type),
                 metadata=meta,
                 session=self._get_event_session(session),
-                profile=get_entity(profile),  # profile can be None when profile_less event.
+                profile=get_primary_entity(profile),  # profile can be None when profile_less event.
                 type=event_type,
 
                 os=session.os.model_dump(exclude_unset=True),
@@ -209,7 +209,7 @@ class EventPayload(BaseModel):
                           name=capitalize_event_type_id(event_type),
                           metadata=meta,
                           session=self._get_event_session(session),
-                          profile=get_entity(profile),  # profile can be None when profile_less event.
+                          profile=get_primary_entity(profile),  # profile can be None when profile_less event.
                           type=event_type,
                           properties=self.properties,
                           source=source if not self._source_id else Entity(id=self._source_id),  # Entity

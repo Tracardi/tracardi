@@ -1,16 +1,15 @@
 from uuid import uuid4
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
+
+from tracardi.domain import ExtraInfo
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 
 from tracardi.config import tracardi
 from tracardi.process_engine.debugger import Debugger
-from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
-from tracardi.service.console_log import ConsoleLog
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.domain.console import Console
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -18,14 +17,11 @@ from tracardi.domain.session import Session
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.profile_merger import ProfileMerger
-from tracardi.service.storage.driver.elastic import debug_info as debug_info_db
-from tracardi.service.storage.driver.elastic import rule as rule_db
-from tracardi.service.storage.driver.elastic import flow as flow_db
+from tracardi.service.storage.mysql.service.workflow_trigger_service import WorkflowTriggerService
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1
@@ -40,7 +36,6 @@ class TrackerResult:
     changed_field_timestamps: FieldChangeTimestampManager
     session: Optional[Session] = None
     profile: Optional[Profile] = None
-    console_log: Optional[ConsoleLog] = None
     response: Optional[dict] = None
     debugger: Optional[Debugger] = None
     ux: Optional[list] = None
@@ -63,7 +58,6 @@ class TrackerResult:
 class WorkflowManagerAsync:
 
     def __init__(self,
-                 console_log: ConsoleLog,
                  tracker_payload: TrackerPayload,
                  field_timestamps: FieldChangeTimestampManager,
                  profile: Optional[Profile] = None,
@@ -74,7 +68,6 @@ class WorkflowManagerAsync:
         self.tracker_payload = tracker_payload
         self.profile = profile
         self.session = session
-        self.console_log = console_log
         self.profile_copy = None
         self.has_profile = not tracker_payload.profile_less and isinstance(profile, Profile)
 
@@ -95,7 +88,7 @@ class WorkflowManagerAsync:
 
         return profile
 
-    async def get_routing_rules(self, events: List[Event]):
+    async def get_routing_rules(self, events: List[Event]) -> Optional[List[Tuple[List[Rule], Event]]]:
 
         # If one event is scheduled every event is treated as scheduled. This is TEMPORARY
 
@@ -118,7 +111,7 @@ class WorkflowManagerAsync:
                         source=NamedEntity(id=event.source.id, name="Scheduled"),
                         properties={},
                         enabled=True,
-                    ).model_dump()
+                    )
                 ],
                 event
             ) for event in events if event.metadata.valid]
@@ -127,32 +120,10 @@ class WorkflowManagerAsync:
                 f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
         else:
             # Routing rules are subject to caching
-            event_rules = await rule_db.load_rules(self.tracker_payload.source, events)
+            wts = WorkflowTriggerService()
+            event_rules = await wts.load_by_source_and_events(self.tracker_payload.source, events)
 
         return event_rules
-
-    async def _save_debug_data(self, debugger, profile_id):
-        try:
-            if isinstance(debugger, Debugger) and debugger.has_call_debug_trace():
-                # Save debug info in background
-                await debug_info_db.save_debug_info(debugger)
-        except Exception as e:
-            message = "Error during saving debug info: `{}`".format(str(e))
-            logger.error(message)
-            self.console_log.append(
-                Console(
-                    flow_id=None,
-                    node_id=None,
-                    event_id=None,
-                    profile_id=profile_id,
-                    origin='profile',
-                    class_name='invoke_track_process_step_2',
-                    module=__name__,
-                    type='error',
-                    message=message,
-                    traceback=get_traceback(e)
-                )
-            )
 
     async def trigger_workflows_for_events(self, events: List[Event], debug: bool = False) -> TrackerResult:
 
@@ -178,14 +149,12 @@ class WorkflowManagerAsync:
                 rules_engine = RulesEngine(
                     self.session,
                     self.profile,
-                    events_rules=event_trigger_rules,
-                    console_log=self.console_log
+                    events_rules=event_trigger_rules
                 )
 
                 # Invoke rules engine
                 try:
                     rule_invoke_result = await rules_engine.invoke(
-                        flow_db.load_production_flow,
                         ux,
                         self.tracker_payload,
                         debug
@@ -217,21 +186,18 @@ class WorkflowManagerAsync:
 
                 except Exception as e:
                     message = 'Rules engine or segmentation returned an error `{}`'.format(str(e))
-                    self.console_log.append(
-                        Console(
+                    logger.error(
+                        message,
+                        extra=ExtraInfo.build(
                             flow_id=None,
                             node_id=None,
                             event_id=None,
                             profile_id=get_entity_id(self.profile),
                             origin='profile',
-                            class_name='invoke_track_process_step_2',
-                            module=__name__,
-                            type='error',
-                            message=message,
+                            object=self,
                             traceback=get_traceback(e)
                         )
                     )
-                    logger.error(message)
 
                 # TODO Does profile need rules to merge?
                 # Profile merge
@@ -242,21 +208,19 @@ class WorkflowManagerAsync:
 
                 except Exception as e:
                     message = 'Profile merging returned an error `{}`'.format(str(e))
-                    logger.error(message)
-                    self.console_log.append(
-                        Console(
+                    logger.error(
+                        message,
+                        extra=ExtraInfo.build(
                             flow_id=None,
                             node_id=None,
                             event_id=None,
                             profile_id=get_entity_id(self.profile),
                             origin='profile',
-                            class_name='invoke_track_process_step_2',
-                            module=__name__,
-                            type='error',
-                            message=message,
+                            object=self,
                             traceback=get_traceback(e)
                         )
                     )
+
             else:
                 logger.debug(f"No routing rules found for workflow.")
 
@@ -278,17 +242,12 @@ class WorkflowManagerAsync:
 
                 events = synced_events
 
-            # Debug data
-            if tracardi.track_debug or debug:
-                await self._save_debug_data(debugger, get_entity_id(self.profile))
-
             return TrackerResult(
                 wf_triggered=wf_triggered,
                 session=self.session,
                 profile=self.profile,
                 events=events,
                 tracker_payload=self.tracker_payload,
-                console_log=self.console_log,
                 response=flow_responses.merge(),
                 debugger=debugger,
                 ux=ux,

@@ -1,5 +1,5 @@
 from uuid import uuid4
-from tracardi.domain.entity import Entity
+from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event import EventSession
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.value_object.operation import Operation
@@ -15,7 +15,7 @@ class AddEmptySessionAction(ActionRunner):
 
         session = Session(
                 id=str(uuid4()),
-                profile=Entity(id=self.profile.id) if self.profile is not None else None,
+                profile=PrimaryEntity(id=self.profile.id) if self.profile is not None else None,
                 metadata=SessionMetadata(),
                 operation=Operation(update=True)
             )

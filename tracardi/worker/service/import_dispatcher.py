@@ -14,6 +14,5 @@ class ImportDispatcher:
         for data, progress, batch in self.importer.data(self.credentials):
             url = f"{tracardi_api_url}{self.webhook_url}"
             response = requests.post(url, json=data, verify=False)
-            print(url, response.json())
             yield progress, batch
 

@@ -15,10 +15,9 @@ from pydantic import PrivateAttr, BaseModel
 from user_agents import parse
 
 from tracardi.config import tracardi
+from .. import ExtraInfo
 from ...exceptions.log_handler import get_logger
 
-from ...service.cache_manager import CacheManager
-from ...service.console_log import ConsoleLog
 from ...service.license import License, LICENSE
 from ...service.profile_merger import ProfileMerger
 from ..event_metadata import EventPayloadMetadata
@@ -27,17 +26,17 @@ from ..identification_point import IdentificationPoint
 from ..payload.event_payload import EventPayload
 from ..session import Session
 from ..time import Time
-from ..entity import Entity
+from ..entity import Entity, PrimaryEntity
 from ..profile import Profile
 
-from tracardi.service.storage.driver.elastic import identification as identification_db
+from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
+from ...service.storage.mysql.service.idetification_point_service import IdentificationPointService
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
     from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 
 class ScheduledEventConfig:
@@ -66,7 +65,7 @@ class TrackerPayload(BaseModel):
     session: Optional[Entity] = None
 
     metadata: Optional[EventPayloadMetadata] = None
-    profile: Optional[Entity] = None
+    profile: Optional[PrimaryEntity] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
     request: Optional[dict] = {}
@@ -266,9 +265,8 @@ class TrackerPayload(BaseModel):
     async def get_static_profile_and_session(
             self,
             session: Session,
-            profile_loader: Callable[['TrackerPayload', bool, Optional[ConsoleLog]], Awaitable],
-            profile_less: bool,
-            console_log: Optional[ConsoleLog] = None
+            profile_loader: Callable[['TrackerPayload', bool], Awaitable],
+            profile_less: bool
     ) -> Tuple[Optional[Profile], Session]:
 
         if profile_less:
@@ -277,9 +275,10 @@ class TrackerPayload(BaseModel):
             if not self.profile or not self.profile.id:
                 raise ValueError("Can not use static profile id without profile.id.")
 
-            profile = await profile_loader(self,
-                                           True,  # is_static is set to true
-                                           console_log)
+            profile = await profile_loader(
+                self,
+                True  # is_static is set to true
+            )
 
             # Create empty profile if the profile id does nto point to any profile in database.
             if not profile:
@@ -355,7 +354,10 @@ class TrackerPayload(BaseModel):
                 return find_profile_by_fields
             return None
         except AssertionError as e:
-            logger.error(f"Can not find property to load profile by identification data: {str(e)}", e, exc_info=True)
+            logger.error(f"Can not find property to load profile by identification data: {str(e)}", e,
+                         exc_info=True,
+                         extra=ExtraInfo.build(origin="collector", object=self, error_number="T0001")
+                         )
             return None
 
     def finger_printing_enabled(self):
@@ -367,9 +369,8 @@ class TrackerPayload(BaseModel):
     async def get_profile_and_session(
             self,
             session: Optional[Session],
-            profile_loader: Callable[['TrackerPayload', bool, Optional[ConsoleLog]], Awaitable],
-            profile_less,
-            console_log: Optional[ConsoleLog] = None
+            profile_loader: Callable[['TrackerPayload', bool], Awaitable],
+            profile_less
     ) -> Tuple[Optional[Profile], Session]:
 
         """
@@ -447,8 +448,8 @@ class TrackerPayload(BaseModel):
                     # ID exists, load profile from storage
                     profile: Optional[Profile] = await profile_loader(
                         self,
-                        False,  # Not static profile ID
-                        console_log)
+                        False  # Not static profile ID
+                        )
 
                     if profile is None:
                         # Profile id delivered but profile does not exist in storage.
@@ -459,7 +460,7 @@ class TrackerPayload(BaseModel):
                         # Create new profile
                         is_new_profile = True
 
-                        logger.info(
+                        logger.debug(
                             "No merged profile. New profile created at UTC {} with id {}".format(
                                 profile.metadata.time.insert,
                                 profile.id))
@@ -492,8 +493,8 @@ class TrackerPayload(BaseModel):
 
                     profile: Optional[Profile] = await profile_loader(
                         copy_of_tracker_payload,  # Not static profile ID
-                        False,
-                        console_log)
+                        False
+                    )
 
                     # Reassign events that can be mutated
                     self.events = copy_of_tracker_payload.events
@@ -556,8 +557,7 @@ class TrackerPayload(BaseModel):
 
                         fp_profile: Optional[Profile] = await profile_loader(
                             copy_of_tracker_payload,
-                            False,  # Not static profile ID
-                            console_log
+                            False  # Not static profile ID
                         )
 
                         # Reassign events that can be mutated
@@ -581,8 +581,9 @@ class TrackerPayload(BaseModel):
 
     @staticmethod
     async def _load_identification_points():
-        identification_points = await identification_db.load_enabled(limit=200)
-        return identification_points.to_domain_objects(IdentificationPoint)
+        ips = IdentificationPointService()
+        records = await ips.load_enabled(limit=200)
+        return records.map_to_objects(map_to_identification_point)
 
     def _get_valid_identification_points(self,
                                          identification_points: List[IdentificationPoint]):

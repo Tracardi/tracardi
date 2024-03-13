@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.service.tracardi_http_client import HttpClient
 from .models.configuration import Configuration
 from tracardi.domain.resources.google_analytics_v4 import GoogleAnalyticsV4Credentials

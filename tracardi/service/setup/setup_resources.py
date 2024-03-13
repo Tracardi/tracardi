@@ -494,11 +494,11 @@ def get_resource_types() -> List[ResourceSettings]:
     return os_resource_types
 
 
-def get_destinations():
-    resource_types = get_resource_types()
-    for resource_type in resource_types:
-        if resource_type.destination is not None:
-            yield resource_type.destination.package, resource_type.dict()
+# def get_destinations():
+#     resource_types = get_resource_types()
+#     for resource_type in resource_types:
+#         if resource_type.destination is not None:
+#             yield resource_type.destination.package, resource_type.dict()
 
 
 def get_type_of_resources():

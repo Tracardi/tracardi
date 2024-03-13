@@ -20,7 +20,7 @@
         },
         "timestamp": {
           "type": "date",
-          "format": "yyyy-MM-dd HH:mm:ss.SSSSSS || yyyy-MM-dd HH:mm:ss || strict_date_optional_time || epoch_millis"
+          "format": "yyyy-MM-dd HH:mm:ss.SSSSSS+00:00 || yyyy-MM-dd HH:mm:ss.SSSSSS || yyyy-MM-dd HH:mm:ss || strict_date_optional_time || epoch_millis"
         },
         "type": {
           "type": "keyword",

@@ -1,6 +1,6 @@
 from tracardi.service.utils.date import now_in_utc
 from uuid import uuid4
-from tracardi.domain.entity import Entity
+from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event import EventSession
 from tracardi.domain.metadata import ProfileMetadata
 from tracardi.domain.profile import Profile
@@ -36,7 +36,7 @@ class AddEmptyProfileAction(ActionRunner):
                     )
                 )
             ),
-            operation=Operation(update=True)
+            operation=Operation(new=True, update=True)
         )
 
         self.event.profile = profile
@@ -57,16 +57,17 @@ class AddEmptyProfileAction(ActionRunner):
 
         session = Session(
             id=str(uuid4()),
-            profile=Entity(id=profile.id),
+            profile=PrimaryEntity(id=profile.id),
             metadata=SessionMetadata(time=SessionTime()),
-            operation=Operation(update=True)
+            operation=Operation(new=True, update=True)
         )
 
         # todo set session in tracker payload
 
         if self.session is not None:
-            self.console.warning(f"Old session {self.session.id} was replaced by new session {session.id}. "
-                                 f"Replacing session is not a good practice if you already have a session.")
+            self.console.warning(
+                f"Old session {self.session.id} was replaced by new session {session.id}. "
+                f"Replacing session is not a good practice if you already have a session.")
 
         self.session = session
 
@@ -78,7 +79,8 @@ class AddEmptyProfileAction(ActionRunner):
 
         self.execution_graph.set_sessions(session)
 
-        self.tracker_payload.session.id = session.id
+        if self.tracker_payload.session:
+            self.tracker_payload.session.id = session.id
 
         self.tracker_payload.options.update({"saveSession": True})
 

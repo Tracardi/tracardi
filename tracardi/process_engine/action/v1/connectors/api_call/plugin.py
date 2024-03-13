@@ -10,7 +10,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.service.wf.domain.node import Node
 from .model.configuration import RemoteCallConfiguration
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.service.url_constructor import ApiCredentials
 
 

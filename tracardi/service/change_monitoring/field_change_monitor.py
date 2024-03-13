@@ -126,6 +126,15 @@ class FieldTimestampMonitor:
             value=value
         )
 
+    def __add__(self, other):
+        if self.profile_id != other.profile_id or self.session_id != other.session_id or self.source_id != other.source_id:
+            raise ValueError("Can not add different monitors")
+
+        self._timestamps_log.merge(other.get_timestamps_log().get_list())
+
+        return self
+
+
     def get_timestamps_log(self) -> FieldChangeTimestampManager:
         return self._timestamps_log
 

@@ -1,21 +1,18 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from dotty_dict import Dotty
 
-from tracardi.domain.console import Console
+from tracardi.domain import ExtraInfo
 from tracardi.domain.event import Event
 from tracardi.domain.event_compute import EventCompute
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
-from tracardi.domain.storage_record import StorageRecords
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.cache_manager import CacheManager
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.tracking.utils.function_call import default_event_call_function
@@ -23,8 +20,6 @@ from tracardi.service.tracking.utils.languages import get_continent
 from tracardi.service.utils.domains import free_email_domains
 from tracardi.service.events import copy_default_event_to_profile
 from tracardi.service.utils.languages import language_countries_dict
-
-cache = CacheManager()
 
 EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1
@@ -83,12 +78,11 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 
 
 async def map_event_to_profile(
-        custom_mapping_schemas: StorageRecords,
+        custom_mapping_schemas: List[EventToProfile],
         flat_event: Dotty,
         flat_profile: FlatProfile,
         session: Session,
-        source: EventSource,
-        console_log: ConsoleLog) -> Tuple[FlatProfile, FieldTimestampMonitor]:
+        source: EventSource) -> Tuple[FlatProfile, FieldTimestampMonitor]:
 
     # Default event types mappings
 
@@ -112,10 +106,9 @@ async def map_event_to_profile(
 
     # Custom event types mappings, filtered by event type
 
-    if custom_mapping_schemas.total > 0:
+    if len(custom_mapping_schemas) > 0:
 
         for custom_mapping_schema in custom_mapping_schemas:
-            custom_mapping_schema = custom_mapping_schema.to_entity(EventToProfile)
 
             # Check condition
             if 'condition' in custom_mapping_schema.config:
@@ -127,23 +120,23 @@ async def map_event_to_profile(
                     if result is False:
                         continue
                 except Exception as e:
-                    console_log.append(Console(
-                        flow_id=None,
-                        node_id=None,
-                        event_id=flat_event.get('id', None),
-                        profile_id=flat_profile.get('id', None),
-                        origin='event',
-                        class_name='map_event_to_profile',
-                        module=__name__,
-                        type='error',
-                        message=f"Routing error. "
-                                f"An error occurred when coping data from event to profile. "
-                                f"There is error in the conditional trigger settings for event "
-                                f"`{flat_event['type']}`."
-                                f"Could not parse or access data for if statement: `{if_statement}`. "
-                                f"Data was not copied but the event was routed to the next step. ",
-                        traceback=get_traceback(e)
-                    ))
+                    logger.error(
+                        f"Routing error. "
+                        f"An error occurred when coping data from event to profile. "
+                        f"There is error in the conditional trigger settings for event "
+                        f"`{flat_event['type']}`."
+                        f"Could not parse or access data for if statement: `{if_statement}`. "
+                        f"Data was not copied but the event was routed to the next step. ",
+                        extra=ExtraInfo.exact(
+                            flow_id=None,
+                            node_id=None,
+                            event_id=flat_event.get('id', None),
+                            profile_id=flat_profile.get('id', None),
+                            origin='profile-computation',
+                            package=__name__,
+                            traceback=get_traceback(e)
+                        )
+                    )
                     continue
 
             # Custom Copy
@@ -167,41 +160,35 @@ async def map_event_to_profile(
                                   f"fields that are {allowed_profile_fields}. Please check if there isn't " \
                                   f"an error in your copy schema. Data will not be copied if it does not " \
                                   f"match Profile schema."
-                        console_log.append(
-                            Console(
+
+                        logger.warning(
+                            message,
+                            extra=ExtraInfo.exact(
+                                origin='profile-computation',
                                 flow_id=None,
                                 node_id=None,
                                 event_id=flat_event.get('id', None),
                                 profile_id=flat_profile.get('id', None),
-                                origin='event',
-                                class_name='map_event_to_profile',
-                                module=__name__,
-                                type='warning',
-                                message=message,
-                                traceback=[]
+                                package=__name__
                             )
                         )
-                        logger.warning(message)
                         continue
 
                     try:
                         if not flat_event[event_ref]:
                             message = f"Value of event@{event_ref} is None or empty. " \
                                       f"No data has been assigned to profile@{profile_ref}"
-                            console_log.append(
-                                Console(
+                            logger.warning(
+                                message,
+                                extra=ExtraInfo.exact(
                                     flow_id=None,
                                     node_id=None,
                                     event_id=flat_event.get('id', None),
                                     profile_id=flat_profile.get('id', None),
-                                    origin='event',
-                                    class_name='map_event_to_profile',
-                                    module=__name__,
-                                    type='warning',
-                                    message=message
+                                    origin='profile-computation',
+                                    package=__name__,
                                 )
                             )
-                            logger.warning(message)
                             continue
 
                         if operation == APPEND:
@@ -240,21 +227,20 @@ async def map_event_to_profile(
                             message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
                                       f"Maybe `properties.{event_ref}` or `traits.{event_ref}` could work. " \
                                       f"Data was not copied. Error message: {repr(e)} key."
-                        console_log.append(
-                            Console(
+
+                        logger.warning(
+                            message,
+                            extra=ExtraInfo.exact(
                                 flow_id=None,
                                 node_id=None,
                                 event_id=flat_event.get('id', None),
                                 profile_id=flat_profile.get('id', None),
                                 origin='event',
                                 class_name='map_event_to_profile',
-                                module=__name__,
-                                type='warning',
-                                message=message,
+                                package=__name__,
                                 traceback=get_traceback(e)
                             )
                         )
-                        logger.error(message)
 
     compute_schema = get_default_mappings_for(flat_event['type'], "compute")
     if compute_schema:

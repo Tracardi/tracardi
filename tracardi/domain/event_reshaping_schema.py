@@ -1,8 +1,7 @@
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from typing import Optional, List
-from pydantic import field_validator, BaseModel
+from pydantic import BaseModel
 
-from tracardi.process_engine.tql.condition import Condition
 
 
 class EventReshapeDefinition(BaseModel):
@@ -21,7 +20,7 @@ class ReshapeSchema(BaseModel):
     reshape_schema: EventReshapeDefinition
 
 
-class EventReshapingSchema(NamedEntity):
+class EventReshapingSchema(NamedEntityInContext):
     event_type: str
     event_source: NamedEntity
     description: Optional[str] = "No description provided"

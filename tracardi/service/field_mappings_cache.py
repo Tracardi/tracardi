@@ -30,7 +30,7 @@ class FieldMapper(metaclass=Singleton):
         self.batch = 5
         self.redis = RedisClient()
 
-    def get_field_mapping(self, type) -> Set[str]:
+    def get_field_mapping(self, type: str) -> Set[str]:
         if type in redis_collections:
             return {item.decode() for item in self.redis.smembers(redis_collections[type])}
         return set()

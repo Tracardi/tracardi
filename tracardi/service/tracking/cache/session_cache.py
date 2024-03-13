@@ -2,6 +2,7 @@ from typing import Optional, List, Union
 
 from tracardi.config import tracardi
 from tracardi.context import Context
+from tracardi.domain import ExtraInfo
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.exceptions.log_handler import get_logger
@@ -39,21 +40,23 @@ def _save_single_session(session, context):
     index = session.get_meta_data()
 
     if index is None:
-        logger.error("Empty session index.")
-
-    redis_cache.set(
-        session.id,
-        (
-            {
-                "production": context.production,
-                "tenant": context.tenant
-            },
-            session.model_dump(mode="json", exclude_defaults=True, exclude={"operation": ...}),
-            None,
-            index.model_dump(mode="json")
-        ),
-        get_session_key_namespace(session.id, context)
-    )
+        logger.warning("Empty session metadata. Index is not set. Cached session removed.",
+                       extra=ExtraInfo.exact(origin="cache", package=__name__))
+        redis_cache.delete(session.id, get_session_key_namespace(session.id, context))
+    else:
+        redis_cache.set(
+            session.id,
+            (
+                {
+                    "production": context.production,
+                    "tenant": context.tenant
+                },
+                session.model_dump(mode="json", exclude_defaults=True, exclude={"operation": ...}),
+                None,
+                index.model_dump(mode="json")
+            ),
+            get_session_key_namespace(session.id, context)
+        )
 
 def save_session_cache(session: Union[Optional[Session], List[Session]], context: Context):
     if session:

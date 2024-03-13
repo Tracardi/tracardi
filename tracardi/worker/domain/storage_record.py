@@ -34,8 +34,10 @@ class StorageRecord(dict):
     def has_meta_data(self) -> bool:
         return self._meta is not None
 
-    def to_entity(self, model):
+    def to_entity(self, model, set_metadata: bool = True):
         _object = model(**self)
+        if not set_metadata:
+            return _object
         return _object.set_meta_data(self.get_meta_data())
 
 

@@ -1,4 +1,4 @@
-from typing import Callable, Iterator, List, Union, Tuple, Optional, TypeVar, Type, Dict
+from typing import Iterator, List, Union, Tuple, Optional, TypeVar, Type, Dict
 from pydantic import BaseModel
 
 
@@ -140,7 +140,7 @@ class StorageRecords(dict):
         if key is None:
             return StorageAggregates(self._aggregations) if self._aggregations is not None else None
         if self._aggregations is None or key not in self._aggregations:
-            raise ValueError(f"Aggregation {key} not available.")
+            raise ValueError(f"Aggregation `{key}` not available. No aggregation set for this query")
         return StorageAggregate(**self._aggregations[key])
 
     @staticmethod
@@ -192,8 +192,8 @@ class StorageRecords(dict):
             "result": hits
         }
 
-    def transform_hits(self, func: Callable) -> None:
-        self._hits = [{**hit, "_source": func(hit["_source"])} for hit in self._hits]
+    # def transform_hits(self, func: Callable) -> None:
+    #     self._hits = [{**hit, "_source": func(hit["_source"])} for hit in self._hits]
 
     @staticmethod
     def _make_domain_object(domain_object: Type[T], record: StorageRecord) -> T:

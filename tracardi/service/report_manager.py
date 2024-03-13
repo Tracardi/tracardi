@@ -1,6 +1,7 @@
 from tracardi.domain.report import Report
 from tracardi.service.storage.driver.elastic import raw as raw_db
-from tracardi.service.storage.driver.elastic import report as report_db
+from tracardi.service.storage.mysql.mapping.report_mapping import map_to_report
+from tracardi.service.storage.mysql.service.report_service import ReportService
 
 
 class ReportManagerException(Exception):
@@ -11,9 +12,14 @@ class ReportManager:
 
     @staticmethod
     async def build(report_id: str) -> 'ReportManager':
-        report = await report_db.load(report_id)
-        if report is None:
+        rs = ReportService()
+        record = await rs.load_by_id(report_id)
+
+        if not record.exists():
             raise ReportManagerException(f"Report with ID `{report_id}` does not exist.")
+
+        report = record.map_to_object(map_to_report)
+        # report = await report_db.load(report_id)
 
         return ReportManager(report)
 

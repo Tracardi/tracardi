@@ -2,6 +2,7 @@ import time
 from typing import Optional
 
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
+from tracardi.service.cache.event_source import load_event_source
 from tracardi.service.license import License
 from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.service.utils.date import now_in_utc
@@ -10,23 +11,19 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.service.setup.data.defaults import open_rest_source_bridge
+from tracardi.service.storage.mysql.bootstrap.bridge import open_rest_source_bridge
 from tracardi.service.tracking.source_validation import validate_source
-from tracardi.service.storage.driver.elastic.operations import console_log as console_log_db
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.config import memory_cache, tracardi
+from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache_manager import CacheManager
 from typing import List
-from tracardi.service.console_log import ConsoleLog
 if License.has_license():
     from com_tracardi.service.tracking.tracker import com_tracker
 else:
     from tracardi.service.tracking.tracker import os_tracker
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 
 async def track_event(tracker_payload: TrackerPayload,
@@ -36,44 +33,23 @@ async def track_event(tracker_payload: TrackerPayload,
                       run_async: bool = False,
                       static_profile_id: bool = False
                       ):
-    console_log = ConsoleLog()
-
-    try:
-        tracking_start = time.time()
-        tr = Tracker(
-            console_log,
-            TrackerConfig(
-                ip=ip,
-                allowed_bridges=allowed_bridges,
-                internal_source=internal_source,
-                run_async=run_async,
-                static_profile_id=static_profile_id
-            )
+    tracking_start = time.time()
+    tr = Tracker(
+        TrackerConfig(
+            ip=ip,
+            allowed_bridges=allowed_bridges,
+            internal_source=internal_source,
+            run_async=run_async,
+            static_profile_id=static_profile_id
         )
+    )
 
-        result = await tr.track_event(tracker_payload, tracking_start)
-        return result
-
-    except Exception as e:
-        logger.error(str(e))
-        raise e
-
-    finally:
-        try:
-            # Save console log
-            await console_log_db.save_console_log(console_log)
-
-        except Exception as e:
-            logger.warning(f"Could not save logs. Error: {str(e)} ")
+    return await tr.track_event(tracker_payload, tracking_start)
 
 
 class Tracker:
 
-    def __init__(self,
-                 console_log: ConsoleLog,
-                 tracker_config: TrackerConfig
-                 ):
-        self.console_log = console_log
+    def __init__(self, tracker_config: TrackerConfig):
         self.tracker_config = tracker_config
 
     async def _attach_referenced_profile(self, tracker_payload: TrackerPayload) -> TrackerPayload:
@@ -117,9 +93,6 @@ class Tracker:
                         # Replace the profile in tracker payload with ref __tr_pid
                         tracker_payload.profile = Entity(id=referred_profile_id)
 
-                    # Invalidate session. It may have wrong profile id
-                    cache.session_cache().delete(tracker_payload.session.id)
-
                     # If no session create one
                     if tracker_payload.session is None:
                         tracker_payload.session = Session.new()
@@ -156,7 +129,7 @@ class Tracker:
 
     async def track_event(self, tracker_payload: TrackerPayload, tracking_start: float):
 
-        if tracker_payload.is_bot() and not tracardi.allow_bot_traffic:
+        if tracker_payload.is_bot() and tracardi.disallow_bot_traffic:
             raise PermissionError(f"Traffic from bot is not allowed.")
 
             # Trim ids - spaces are frequent issues
@@ -190,10 +163,10 @@ class Tracker:
 
         configurable_bridge = self.get_bridge(tracker_payload)
         if configurable_bridge:
-            tracker_payload, self.tracker_config, self.console_log = await configurable_bridge.configure(
+            tracker_payload, self.tracker_config = await configurable_bridge.configure(
                 tracker_payload,
-                self.tracker_config,
-                self.console_log)
+                self.tracker_config
+            )
 
         # Is source ephemeral
         if tracker_payload.source.transitional is True:
@@ -202,15 +175,17 @@ class Tracker:
         if License.has_license():
             result = await com_tracker(
                 source, tracker_payload,
-                self.tracker_config, tracking_start, self.console_log)
+                self.tracker_config, tracking_start
+            )
         else:
             result = await os_tracker(
                 source, tracker_payload,
-                self.tracker_config, tracking_start, self.console_log)
+                self.tracker_config, tracking_start
+            )
 
-        if result and tracardi.enable_errors_on_response:
-            result['errors'] += self.console_log.get_errors()
-            result['warnings'] += self.console_log.get_warnings()
+        # if result and tracardi.enable_errors_on_response:
+        #     result['errors'] += self.console_log.get_errors()
+        #     result['warnings'] += self.console_log.get_warnings()
 
         return result
 
@@ -228,7 +203,7 @@ class Tracker:
                 timestamp=now_in_utc()
             )
 
-        source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
+        source: Optional[EventSource] = await load_event_source(event_source_id=source_id)
 
         if source is not None:
 

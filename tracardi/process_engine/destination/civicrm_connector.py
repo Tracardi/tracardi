@@ -1,3 +1,5 @@
+from typing import Optional
+
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
 from ...domain.event import Event
@@ -17,8 +19,8 @@ class CiviCRMConnector(DestinationInterface):
 
         await client.add_contact(data)
 
-    async def dispatch_profile(self, data, profile: Profile, session: Session):
+    async def dispatch_profile(self, data, profile: Optional[Profile], session: Optional[Session]):
         await self._dispatch(data)
 
-    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
+    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event):
         await self._dispatch(data)

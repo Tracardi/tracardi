@@ -20,6 +20,11 @@
           "type": "keyword",
           "ignore_above": 64
         },
+        "primary_id": {
+          "type": "keyword",
+          "ignore_above": 64,
+          "null_value": "NULL"
+        },
         "ids": {
           "type": "keyword"
         },
@@ -183,6 +188,10 @@
             "identifier": {
               "properties": {
                 "id": {
+                  "type": "keyword",
+                  "ignore_above": 64
+                },
+                "pk": {
                   "type": "keyword",
                   "ignore_above": 64
                 },

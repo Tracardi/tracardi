@@ -2,7 +2,7 @@ import asyncio
 from asyncio import Task
 from collections import defaultdict
 from time import time
-from typing import Dict, List, Tuple, Optional
+from typing import List, Tuple, Optional
 from tracardi.service.license import License
 
 from tracardi.domain.event import Event
@@ -13,7 +13,7 @@ from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
 from .debugger import Debugger
-from ..domain.console import Console
+from ..domain import ExtraInfo
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow
 from ..domain.flow_invoke_result import FlowInvokeResult
@@ -24,7 +24,9 @@ from ..domain.session import Session
 from ..domain.rule import Rule
 from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import get_logger
-from ..service.console_log import ConsoleLog
+from ..service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
+from ..service.storage.mysql.service.workflow_service import WorkflowService
+from ..service.utils.getters import get_entity_id
 
 logger = get_logger(__name__)
 
@@ -34,16 +36,14 @@ class RulesEngine:
     def __init__(self,
                  session: Session,
                  profile: Optional[Profile],
-                 events_rules: List[Tuple[List[Dict], Event]],
-                 console_log: ConsoleLog
+                 events_rules: List[Tuple[List[Rule], Event]]
                  ):
 
-        self.console_log = console_log
         self.session = session
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, load_flow_callable, ux: list, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
+    async def invoke(self, ux: list, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
 
         source_id = tracker_payload.source.id
         flow_task_store = defaultdict(list)
@@ -57,40 +57,34 @@ class RulesEngine:
             if not event.metadata.valid:
                 continue
 
-            if len(rules) == 0:
-                logger.debug(
-                    f"Could not find rules for event \"{event.type}\". Check if the rule exists and is enabled.")
-
             for rule in rules:
 
                 if rule is None:
-                    console = Console(
-                        origin="rule",
-                        event_id=event.id,
-                        flow_id=None,
-                        node_id=None,
-                        profile_id=self.profile.id,
-                        module=__name__,
-                        class_name=RulesEngine.__name__,
-                        type="error",
-                        message="Rule to workflow does not exist. This may happen when you debug a workflow that "
-                                "has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
-                                "that gets rescheduled and it could not find the routing to the workflow. "
-                                "Set a routing rule and this error will be solved automatically."
+                    logger.error(
+                        "Rule to workflow does not exist. This may happen when you debug a workflow that "
+                        "has no routing rules set but you use `Background task` or `Pause and Resume` plugin "
+                        "that gets rescheduled and it could not find the routing to the workflow. "
+                        "Set a routing rule and this error will be solved automatically.",
+                        extra=ExtraInfo.build(
+                            origin="rule",
+                            event_id=event.id,
+                            flow_id=None,
+                            node_id=None,
+                            profile_id=get_entity_id(self.profile),
+                            object=self,
+                            error_number="R0001"
+                        )
                     )
-                    self.console_log.append(console)
                     continue
 
                 # this is main roles loop
-                if 'name' in rule:
-                    invoked_rules[event.id].append(rule['name'])
-                    rule_name = rule['name']
+                if rule.name:
+                    invoked_rules[event.id].append(rule.name)
+                    rule_name = rule.name
                 else:
                     rule_name = 'Unknown'
 
                 try:
-                    rule = Rule(**rule)
-
                     # Can check consents only if there is profile
                     if License.has_license() and self.profile is not None:
                         # Check consents
@@ -99,19 +93,19 @@ class RulesEngine:
                             continue
                     invoked_flows.append(rule.flow.id)
                 except Exception as e:
-                    console = Console(
-                        origin="rule",
-                        event_id=event.id,
-                        flow_id=None,
-                        node_id=None,
-                        profile_id=None,
-                        module=__name__,
-                        class_name='RulesEngine',
-                        type="error",
-                        message=f"Rule '{rule_name}:{rule.id}' validation error: {str(e)}",
-                        traceback=get_traceback(e)
+                    logger.error(
+                        f"Rule '{rule_name}:{rule.id}' validation error: {str(e)}",
+                        extra=ExtraInfo.build(
+                            origin="rule",
+                            event_id=event.id,
+                            flow_id=rule.flow.id,
+                            node_id=None,
+                            profile_id=get_entity_id(self.profile),
+                            object=self,
+                            traceback=get_traceback(e),
+                            error_number="R0002"
+                        )
                     )
-                    self.console_log.append(console)
                     continue
 
                 if not rule.enabled:
@@ -124,10 +118,27 @@ class RulesEngine:
 
                     # Loads flow for given rule
 
-                    flow: Flow = await load_flow_callable(rule.flow.id)
+                    ws = WorkflowService()
+                    flow_record = (await ws.load_by_id(rule.flow.id)).map_to_object(map_to_workflow_record)
+
+                    if not flow_record:
+                        raise ValueError("Could not find flow `{}`".format(rule.flow.id))
+
+                    flow: Flow = Flow.from_workflow_record(flow_record)
 
                 except Exception as e:
-                    logger.error(str(e), e, exc_info=True)
+                    logger.error(str(e), e,
+                                 extra=ExtraInfo.build(
+                                     origin="rule",
+                                     event_id=event.id,
+                                     flow_id=rule.flow.id,
+                                     node_id=None,
+                                     profile_id=get_entity_id(self.profile),
+                                     object=self,
+                                     traceback=get_traceback(e),
+                                     error_number="R0003"
+                                 ),
+                                 exc_info=True)
                     # This is empty DebugInfo without nodes
                     debug_info = DebugInfo(
                         timestamp=time(),
@@ -174,8 +185,8 @@ class RulesEngine:
                         flow_task_store[event.type].append((rule.flow.id, event.id, rule.name, flow_task))
 
                     else:
-                        logger.warning(f"Workflow {rule.flow.id} skipped. Event source id is not equal "
-                                       f"to trigger rule source id.")
+                        logger.warning(f"Workflow {rule.flow.id} skipped. Event source id (event.source.id) is not equal "
+                                       f"to trigger rule source id (rule.source.id).")
                 else:
                     # todo FlowHistory is empty
                     workflow = WorkFlow(
@@ -214,23 +225,23 @@ class RulesEngine:
                     flow_responses.append(flow_invoke_result.flow.response)
                     post_invoke_events[post_invoke_event.id] = post_invoke_event
 
-                    # Store logs in one console log
-                    self.console_log.append_event_log_list(event_id, flow_id, log_list)
+                    # Store logs in central log
+                    flow_invoke_result.register_logs_in_logger()
 
                 except Exception as e:
-                    # todo log error
-                    console = Console(
-                        origin="workflow",
-                        event_id=event_id,
-                        node_id=None,  # We do not know node id here as WF did not start
-                        flow_id=flow_id,
-                        module='tracardi.process_engine.rules_engine',
-                        class_name="RulesEngine",
-                        type="error",
-                        message=repr(e),
-                        traceback=get_traceback(e)
+                    logger.error(
+                        repr(e),
+                        extra=ExtraInfo.build(
+                            origin="workflow",
+                            event_id=event_id,
+                            node_id=None,  # We do not know node id here as WF did not start
+                            flow_id=flow_id,
+                            profile_id=get_entity_id(self.profile),
+                            object=self,
+                            traceback=get_traceback(e),
+                            error_number="R0003"
+                        )
                     )
-                    self.console_log.append(console)
 
                     debug_info = DebugInfo(
                         timestamp=time(),

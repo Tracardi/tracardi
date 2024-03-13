@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 from .destination import DestinationConfig
 from .entity import Entity
+from .named_entity import NamedEntityInContext
 from .pro_service_form_data import ProService
-from .value_object.storage_info import StorageInfo
 from ..context import get_context
 from ..service.secrets import encrypt, decrypt
 from ..service.utils.date import now_in_utc
@@ -26,13 +26,14 @@ class ResourceCredentials(BaseModel):
 
         if plugin.debug is True or not get_context().production:
             return output(**self.test) if output is not None else self.test
+        return self.get_production_credentials(output)
+
+    def get_production_credentials(self, output: Type[T] = None) -> Union[T, dict]:
         return output(**self.production) if output is not None else self.production
 
-
-class Resource(Entity):
+class Resource(NamedEntityInContext):
     type: str
     timestamp: Optional[datetime] = None
-    name: Optional[str] = "No name provided"
     description: Optional[str] = "No description provided"
     credentials: ResourceCredentials = ResourceCredentials()
     tags: Union[List[str], str] = ["general"]
@@ -45,15 +46,6 @@ class Resource(Entity):
         data['timestamp'] = now_in_utc()
         super().__init__(**data)
 
-    # Persistence
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'resource',
-            Resource
-        )
-
     def is_destination(self):
         return self.destination is not None
 
@@ -64,6 +56,7 @@ class Resource(Entity):
     def from_pro_service(pro: ProService) -> 'Resource':
         return Resource(
             id=str(uuid4()),
+            timestamp=datetime.utcnow(),
             type=pro.service.metadata.type,
             name=pro.service.form.metadata.name or "No name provided",
             description=pro.service.form.metadata.description or "No description provided",
@@ -125,15 +118,6 @@ class ResourceRecord(Entity):
             icon=self.icon,
             enabled=self.enabled,
             credentials=ResourceCredentials(**decrypted)
-        )
-
-    # Persistence
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'resource',
-            ResourceRecord
         )
 
     def is_destination(self):

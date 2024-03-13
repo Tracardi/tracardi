@@ -33,10 +33,3 @@ class SchedulerJob(Entity):
             request=self.event.request,
             events=[EventPayload(type=self.event.type, properties=self.event.properties, options=options)]
         )
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'task',
-            SchedulerJob
-        )

@@ -20,4 +20,4 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["celery", "-A","tracardi.worker.celery_worker","worker", "-l", "info", "--uid=nobody", "--gid=nogroup"]
+ENTRYPOINT ["huey_consumer.py", "tracardi.worker.worker.queue"]

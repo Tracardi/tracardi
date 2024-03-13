@@ -1,4 +1,4 @@
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntityInContext
 from typing import Optional, List
 from pydantic import field_validator, BaseModel
 import jsonschema
@@ -35,7 +35,7 @@ class ValidationSchema(BaseModel):
             return None
 
 
-class EventValidator(NamedEntity):
+class EventValidator(NamedEntityInContext):
     event_type: str
     description: Optional[str] = "No description provided"
     tags: List[str] = []

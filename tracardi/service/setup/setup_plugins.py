@@ -445,6 +445,14 @@ installed_plugins: Dict[str, PluginMetadata] = {
                   'uix_source': 'http://localhost:8686'},
             resource=None)
     ),
+    "tracardi.process_engine.action.v1.ux.custom_js.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "attributes": "{}",
+                "content": ""
+            },
+            resource=None)
+    ),
 
     "tracardi.process_engine.action.v1.connectors.html.fetch.plugin": PluginMetadata(
         test=PluginTest(
@@ -1719,77 +1727,4 @@ test_plugins: Dict[str, PluginMetadata] = {
                         })
     ),
 
-    # Moved to microservice
-    # "tracardi.process_engine.action.v1.connectors.trello.add_card_action.plugin": PluginTestTemplate(
-    #     init={
-    #         "source": {
-    #             "name": "test",
-    #             "id": "1"
-    #         },
-    #         "board_url": "http://localhost",
-    #         "list_name": "test",
-    #         "card": {
-    #             "name": "name",
-    #             "desc": None,
-    #             "urlSource": None,
-    #             "coordinates": None,
-    #             "due": None
-    #         }
-    #
-    #     },
-    #     resource={
-    #         "api_key": "api_key",
-    #         "token": "token"
-    #     }
-    # ),
-    #
-    # "tracardi.process_engine.action.v1.connectors.trello.delete_card_action.plugin": PluginTestTemplate(
-    #     init={
-    #         "source": {
-    #             "name": "test",
-    #             "id": "1"
-    #         },
-    #         "board_url": "http://localhost",
-    #         "list_name": "list",
-    #         "card_name": "card"
-    #     },
-    #     resource={
-    #         "api_key": "api_key",
-    #         "token": "token"
-    #     }
-    # ),
-    #
-    # "tracardi.process_engine.action.v1.connectors.trello.move_card_action.plugin": PluginTestTemplate(
-    #     init={
-    #         "source": {
-    #             "name": "test",
-    #             "id": "1"
-    #         },
-    #         "board_url": "http://localhost",
-    #         "list_name1": "list1",
-    #         "list_name2": "list2",
-    #         "card_name": "card"
-    #     },
-    #     resource={
-    #         "api_key": "api_key",
-    #         "token": "token"
-    #     }
-    # ),
-    #
-    # "tracardi.process_engine.action.v1.connectors.trello.add_member_action.plugin": PluginTestTemplate(
-    #     init={
-    #         "source": {
-    #             "name": "test",
-    #             "id": "1"
-    #         },
-    #         "board_url": "http://locahost",
-    #         "card_name": "card",
-    #         "list_name": "list_name",
-    #         "member_id": "1"
-    #     },
-    #     resource={
-    #         "api_key": "api_key",
-    #         "token": "token"
-    #     }
-    # ),
 }

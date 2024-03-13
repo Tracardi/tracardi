@@ -1,7 +1,7 @@
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from pydantic import field_validator
-from typing import List
-from tracardi.service.secrets import encrypt, decrypt
+from typing import List, Optional
+# from tracardi.service.secrets import encrypt, decrypt
 import json
 import re
 
@@ -10,19 +10,13 @@ class QueryBuildingError(Exception):
     pass
 
 
-class ReportRecord(NamedEntity):
-    description: str
-    index: str
-    query: str
-    tags: List[str]
-
-
-class Report(NamedEntity):
+class Report(NamedEntityInContext):
     _regex = re.compile(r"\"\{{2}\s*([0-9a-zA-Z_]+)\s*\}{2}\"")
     description: str
     index: str
     query: dict
     tags: List[str]
+    enabled: Optional[bool] = False
 
     @field_validator("index")
     @classmethod
@@ -30,27 +24,6 @@ class Report(NamedEntity):
         if value not in ("profile", "session", "event", "entity"):
             raise ValueError(f"Entity has to be one of: profile, session, event, entity. `{value}` given.")
         return value
-
-    def encode(self) -> ReportRecord:
-        return ReportRecord(
-            id=self.id,
-            name=self.name,
-            description=self.description,
-            tags=self.tags,
-            index=self.index,
-            query=encrypt(self.query)
-        )
-
-    @staticmethod
-    def decode(record: ReportRecord) -> 'Report':
-        return Report(
-            id=record.id,
-            name=record.name,
-            description=record.description,
-            index=record.index,
-            tags=record.tags,
-            query=decrypt(record.query)
-        )
 
     @staticmethod
     def _format_value(value) -> str:

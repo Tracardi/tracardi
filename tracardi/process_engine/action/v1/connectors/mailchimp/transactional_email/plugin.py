@@ -5,7 +5,7 @@ from tracardi.service.plugin.domain.result import Result
 from tracardi.service.mailchimp_sender import MailChimpTransactionalSender
 from tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.model.config import Config, Token
 from tracardi.service.notation.dot_template import DotTemplate
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from email_validator import validate_email, EmailNotValidError
 
 

@@ -1,17 +1,16 @@
 from typing import Optional
 
-from tracardi.config import tracardi, memory_cache
+from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache_manager import CacheManager
+from tracardi.service.cache.event_source import load_event_source
+from tracardi.service.storage.mysql.bootstrap.bridge import open_rest_source_bridge
 from tracardi.service.tracker_config import TrackerConfig
-from tracardi.service.setup.data.defaults import open_rest_source_bridge
 from tracardi.service.utils.date import now_in_utc
 
 logger = get_logger(__name__)
-cache = CacheManager()
 
 
 async def _check_source_id(allowed_bridges, source_id) -> Optional[EventSource]:
@@ -26,7 +25,7 @@ async def _check_source_id(allowed_bridges, source_id) -> Optional[EventSource]:
             transitional=False  # ephemeral
         )
 
-    source = await cache.event_source(event_source_id=source_id, ttl=memory_cache.source_ttl)
+    source = await load_event_source(source_id=source_id)
 
     if source is not None:
 

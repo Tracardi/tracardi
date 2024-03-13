@@ -9,7 +9,8 @@ class Version(BaseModel):
     upgrades: List[str] = []
     production: bool = False
     config: Optional[dict] = {}
-    db_version: str = '0820'
+    db_version: str = '09x'
+    mysql_version: int = 1
 
     def __init__(self, **data):
         super().__init__(**data)

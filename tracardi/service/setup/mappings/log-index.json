@@ -16,7 +16,8 @@
       "dynamic": "strict",
       "properties": {
         "date": {
-          "type": "date"
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||strict_date_optional_time ||epoch_millis"
         },
         "message": {
           "type": "keyword"
@@ -37,6 +38,33 @@
           "type": "keyword"
         },
         "stack_info": {
+          "type": "keyword"
+        },
+        "user_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "event_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "profile_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "flow_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "node_id": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "origin": {
+          "type": "keyword", "ignore_above": 40
+        },
+        "class_name": {
+          "type": "keyword"
+        },
+        "module": {
+          "type": "text"
+        },
+        "error_number": {
           "type": "keyword"
         }
       }

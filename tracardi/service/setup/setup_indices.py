@@ -5,22 +5,12 @@ from typing import List, Tuple, Generator, Any
 from elasticsearch.exceptions import TransportError, NotFoundError
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.license import LICENSE, License
-from tracardi.service.setup.data.defaults import default_db_data
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
 
-if License.has_service(LICENSE):
-    from com_tracardi.bridge.bridges import bridges_db
-
 __local_dir = os.path.dirname(__file__)
 
-index_mapping = {
-    # Update on actions is done when installing
-    # 'action': {
-    #     "on-start": install_default_plugins  # Callable to fill the index
-    # }
-}
+index_mapping = {}
 
 logger = get_logger(__name__)
 
@@ -33,17 +23,6 @@ def add_ids(data):
     for record in data:
         record['_id'] = record['id']
         yield record
-
-
-async def install_default_data():
-    for index_name, data in default_db_data.items():
-        index = Resource().get_index_constant(index_name)
-        await raw_db.bulk_upsert(index.get_write_index(), list(add_ids(data)))
-
-    if License.has_service(LICENSE):
-        for index_name, data in bridges_db.items():
-            index = Resource().get_index_constant(index_name)
-            await raw_db.bulk_upsert(index.get_write_index(), list(add_ids(data)))
 
 
 # todo add to install
@@ -148,11 +127,12 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
             else:
                 logger.error(message)
 
+    # TODO Many force index creations
+
     # Check if alias exists
-    if not await raw_db.exists_alias(alias_index, index=None):
+    if not await raw_db.exists_alias(alias_index, index=target_index):
         # Check if it points to target index
 
-        print(alias_index)
         try:
             existing_aliases_setup = await raw_db.get_alias(alias_index)
         except NotFoundError:
@@ -169,6 +149,8 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
                 raise ConnectionError(f"Could not create alias {alias_index} to target index {target_index}.")
 
             aliases_created.append(alias_index)
+    else:
+        logger.debug(f"Alias {alias_index} exists.")
 
     return indices_created, templates_created, aliases_created
 
@@ -204,48 +186,3 @@ async def create_schema(index_mappings: Generator[Tuple[Index, dict], Any, None]
             logger.error(str(e))
 
     return output
-
-# def get_index(index, mapping_file, version):
-#     if 'name' in index:
-#         del index['name']
-#     index['mapping'] = mapping_file
-#     index = Index(**index)
-#     index.set_version(version)
-#
-#     return index
-#
-# async def remote_system_upgrade(version):
-#     def get_index_mappings(version) -> Generator[Tuple[Index, dict], Any, None]:
-#         for mapping_file, index in data['indices'].items():
-#
-#             index = get_index(index, mapping_file, version)
-#
-#             if mapping_file not in data['mappings']:
-#                 raise ValueError(f"No mapping for {index.index} in release settings for version {version}.")
-#             mapping = index.prepare_mappings(data['mappings'][mapping_file], index)
-#
-#             yield index, mapping
-#
-#     async with HttpClient(3, 200) as client:
-#         async with client.get(f"http://localhost:11111/{version}", json={}) as response:
-#             data = await response.json()
-#             if 'mappings' not in data:
-#                 raise ValueError(f"No mappings in release settings for version {version}.")
-#
-#             if 'indices' not in data:
-#                 raise ValueError(f"No indices in release settings for version {version}.")
-#
-#             # Install
-#             with ServerContext(get_context().switch_context(production=True)):
-#                 await create_schema(get_index_mappings(version), update_mapping=False)
-#                 await install_default_data(version)
-#
-#             with ServerContext(get_context().switch_context(production=False)):
-#                 await create_schema(get_index_mappings(version), update_mapping=False)
-#                 await install_default_data(version)
-#
-#
-# if __name__ == "__main__":
-#     import asyncio
-#
-#     asyncio.run(remote_system_upgrade('1.0.0'))

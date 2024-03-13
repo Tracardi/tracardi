@@ -33,9 +33,10 @@ payload = {
 
 profile = Profile(id="1")
 session = EventSession(id="2")
-resource = Resource(id="3", type="event")
+resource = Resource(id="3", type="event", name="type")
 event = Event(id="event-id",
               type="type",
+              name="type",
               metadata=EventMetadata(time=EventTime()),
               source=resource,
               context={},
