@@ -1,5 +1,5 @@
+from tracardi.service.domain import resource as resource_db
 from tracardi.domain.geo import Geo
-from tracardi.service.storage.driver.elastic import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, FormGroup, FormField, FormComponent, Form, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner

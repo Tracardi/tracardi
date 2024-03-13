@@ -12,7 +12,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
     from tracardi.domain.user import User
     from tracardi.service.storage.index import Index
 
-    admin = User(id="1", password="pass", full_name="test", email="none", roles=['admin'])
+    admin = User(id="1", password="pass", name="test", email="none", roles=['admin'])
     tenant = get_context().tenant
 
     mapping_mock = {
@@ -259,6 +259,28 @@ with ServerContext(Context(production=False, tenant=namespace)):
                 assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
     def test_templated_index_partitioning():
+
+        def _get_quarter(month):
+            """
+            Get the quarter of the year based on the month.
+
+            Args:
+            month (int): The month number (1-12).
+
+            Returns:
+            int: The quarter of the year (1-4).
+            """
+            if 1 <= month <= 3:
+                return 1
+            elif 4 <= month <= 6:
+                return 2
+            elif 7 <= month <= 9:
+                return 3
+            elif 10 <= month <= 12:
+                return 4
+            else:
+                raise ValueError("Invalid month. Month should be between 1 and 12.")
+
         date = datetime.now()
         with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=True,
@@ -267,7 +289,8 @@ with ServerContext(Context(production=False, tenant=namespace)):
                           index="index-name",
                           mapping=mapping_mock)
             write_index = index.get_write_index()
-            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-q{(date.month%4) + 1}"
+
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-q{(_get_quarter(date.month))}"
 
             index = Index(multi_index=True,
                           partitioning='month',

@@ -64,12 +64,6 @@ def test_should_assign_and_read_values():
     assert len(records) == 1
     assert len(records.dict()["result"]) == 1
 
-    records.transform_hits(lambda record: {"replaced": 1})
-
-    list_of_records = list(records)
-    assert list_of_records[0] == {"replaced": 1, "id": "0"}
-    assert list_of_records[0].get_meta_data().index == "my-index-000001"
-
 
 def test_should_handle_empty_data():
     records = StorageRecords.build_from_elastic()

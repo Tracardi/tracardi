@@ -1,6 +1,6 @@
 import pytest
 
-from tracardi.domain.entity import Entity
+from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -12,7 +12,7 @@ def test_should_be_scheduled():
         source=Entity(id="@1"),
         session=None,
         metadata=EventPayloadMetadata(time=Time()),
-        profile=Entity(id="2"),
+        profile=PrimaryEntity(id="2"),
         context={},
         request={},
         properties={},
@@ -27,7 +27,7 @@ def test_should_be_scheduled():
         source=Entity(id="@1"),
         session=None,
         metadata=EventPayloadMetadata(time=Time()),
-        profile=Entity(id="2"),
+        profile=PrimaryEntity(id="2"),
         context={},
         request={},
         properties={},
@@ -44,7 +44,7 @@ def test_should_be_scheduled():
             source=Entity(id="1"),
             session=None,
             metadata=EventPayloadMetadata(time=Time()),
-            profile=Entity(id="2"),
+            profile=PrimaryEntity(id="2"),
             context={},
             request={},
             properties={},
@@ -57,7 +57,7 @@ def test_should_be_scheduled():
             source=Entity(id="@1"),
             session=None,
             metadata=EventPayloadMetadata(time=Time()),
-            profile=Entity(id="2"),
+            profile=PrimaryEntity(id="2"),
             context={},
             request={},
             properties={},
@@ -69,7 +69,7 @@ def test_should_be_scheduled():
         source=Entity(id="@1"),
         session=None,
         metadata=EventPayloadMetadata(time=Time()),
-        profile=Entity(id="2"),
+        profile=PrimaryEntity(id="2"),
         context={},
         request={},
         properties={},

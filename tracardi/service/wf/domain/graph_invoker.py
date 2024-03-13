@@ -7,6 +7,7 @@ from time import time
 from typing import List, Union, Tuple, Optional, Dict, AsyncIterable
 from pydantic import BaseModel, ValidationError
 
+from tracardi.domain import ExtraInfo
 from tracardi.domain.enum.event_status import PROCESSED
 from tracardi.exceptions.log_handler import get_logger
 
@@ -276,7 +277,14 @@ class GraphInvoker(BaseModel):
                             # Run spec with every downstream message (param)
                             # Runs as many times as downstream edges
 
-                            logger.debug(f"Runs node \"{node.name}\". ")
+                            logger.debug(
+                                f"Runs node \"{node.name}\". ",
+                                extra=ExtraInfo.build(
+                                    origin="workflow",
+                                    object=self,
+                                    node_id=node.id
+                                )
+                            )
 
                             tasks = await self._run_in_event_loop(
                                 tasks,
@@ -658,10 +666,10 @@ class GraphInvoker(BaseModel):
                         for input_edge_id, _ in input_edges.edges.items():  # type: str, InputEdge
                             log_list.append(
                                 Log(
-                                    node_id=None,
+                                    node_id=node_debug_info.id,
                                     module=node.object.console.module,
                                     class_name=node.object.console.class_name,
-                                    type='info',
+                                    type='debug',
                                     message=f"Node `{node_debug_info.name}` edge {input_edge_id} executed without errors."
                                 )
                             )

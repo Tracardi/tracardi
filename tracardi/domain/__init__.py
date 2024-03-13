@@ -6,6 +6,5 @@ __all__ = [
     'resource',
     'rule',
     'entity',
-    'value_object',
-    'console'
+    'value_object'
 ]

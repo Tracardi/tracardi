@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntityInContext
 
 
-class FlowMetaData(NamedEntity):
+class FlowMetaData(NamedEntityInContext):
     description: str
-    projects: Optional[List[str]] = ["General"]
+    tags: Optional[List[str]] = ["General"]
     type: str = 'collection'

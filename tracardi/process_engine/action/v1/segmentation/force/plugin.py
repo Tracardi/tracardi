@@ -32,7 +32,7 @@ def register() -> Plugin:
             outputs=["payload"],
             version="0.6.0.1",
             init=None,
-            manual="segment_profiles_action"
+            manual="segmentation/force_segment_action"
         ),
         metadata=MetaData(
             name='Force segmentation',

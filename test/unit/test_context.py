@@ -83,7 +83,7 @@ def test_server_context_async():
 
 
 def test_server_switch_context():
-    fake_user = User(id="1", password="pass", full_name="name", roles=['market'], email="a")
+    fake_user = User(id="1", password="pass", name="name", roles=['market'], email="a")
     with ServerContext(Context(production=False, user=fake_user, tenant=tracardi.version.name)) as cm:
         assert cm.context.user == fake_user
         new_ctx = get_context()
@@ -93,9 +93,9 @@ def test_server_switch_context():
 
 
 def test_server_switch_context_async():
-    fake_user1 = User(id="2", password="pass", full_name="name", roles=['market'], email="some")
+    fake_user1 = User(id="2", password="pass", name="name", roles=['market'], email="some")
     with ServerContext(Context(production=True, user=fake_user1, tenant=tracardi.version.name)) as ctx:
-        fake_user2 = User(id="1", password="pass", full_name="name", roles=['market'], email="a")
+        fake_user2 = User(id="1", password="pass", name="name", roles=['market'], email="a")
 
         async def main():
             async def context1():

@@ -1,3 +1,4 @@
+import asyncio
 from time import time
 from typing import Any, Dict, List
 
@@ -21,6 +22,26 @@ class CacheItem(BaseModel):
 
 
 class MemoryCache:
+    """
+    The MemoryCache class implements an in-memory caching system with expiration capabilities for stored items.
+    It operates by maintaining a dictionary as an internal memory buffer, where each key-value pair corresponds
+    to a cache key and its associated CacheItem. Each CacheItem contains the actual data to be cached and a
+    time-to-live (TTL) value indicating how long the data should remain valid.
+
+    Here's a more streamlined explanation of how MemoryCache functions:
+    Caching and Expiration Logic
+
+    When an item is added to the cache, its TTL is converted into an absolute expiration timestamp. This
+    timestamp is then used to determine if the item is still valid whenever it is accessed.
+    The cache employs a lazy expiration mechanism. This means that items are only checked for expiration at the
+    moment they are accessed. If an item's expiration timestamp is past the current time, it is considered expired
+    and is automatically removed from the cache.
+
+    To prevent the cache from indefinitely growing, a max_pool limit is set, indicating the maximum number of items
+    the cache should ideally hold. When adding an item causes the cache to exceed this limit, the cache is purged
+    of expired items. However, this mechanism does not guarantee that the cache size will be immediately reduced to
+    below max_pool if all items within are still valid; it only removes those that have expired.
+    """
 
     def __init__(self, name: str, max_pool=1000, allow_null_values=False):
         self.memory_buffer: Dict[str, CacheItem] = {}
@@ -61,7 +82,8 @@ class MemoryCache:
             del self.memory_buffer[key]
 
     def delete(self, key):
-        del self[key]
+        if key in self:
+            del self[key]
 
     def delete_all(self, keys: List[str]):
         for key in keys:
@@ -74,8 +96,11 @@ class MemoryCache:
 
     @staticmethod
     async def save(cache: 'MemoryCache', key, data, ttl):
+        if asyncio.iscoroutine(data):
+            data = await data  # Await the coroutine and store its result
         cache[key] = CacheItem(data=data, ttl=ttl)
 
+    # TODO used in MemoryCache only
     @staticmethod
     async def cache(cache: 'MemoryCache', key, ttl, load_callable, awaitable, *args):
         if key not in cache:

@@ -2,8 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from tracardi.domain.entity import Entity
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from tracardi.domain.ref_value import RefValue
 
 
@@ -20,8 +19,7 @@ class ConsentFieldComplianceSetting(BaseModel):
         return required_consents.intersection(profile_consents) == required_consents
 
 
-class ConsentFieldCompliance(Entity):
-    name: str
+class EventDataCompliance(NamedEntityInContext):
     description: Optional[str] = ""
     event_type: NamedEntity
     settings: List[ConsentFieldComplianceSetting]  # Flattened ES field

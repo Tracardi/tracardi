@@ -1,10 +1,11 @@
-from typing import Optional, Any
+from datetime import datetime
+from typing import Optional, Any, Callable
 from tracardi.service.plugin.domain.register import Plugin
 from .entity import Entity
 from .metadata import Metadata
 from .settings import Settings
 from .time import Time
-from .value_object.storage_info import StorageInfo
+from tracardi.service.module_loader import import_package, load_callable
 from ..service.utils.date import now_in_utc
 
 
@@ -28,13 +29,7 @@ class FlowActionPlugin(Entity):
 
     # Persistence
 
-    """
-    Do not use load method. This object must be decoded from FlowActionPluginRecord
-    """
 
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'action',
-            FlowActionPlugin
-        )
+    def get_validator(self) -> Callable:
+        module = import_package(self.plugin.spec.module)
+        return load_callable(module, 'validate')

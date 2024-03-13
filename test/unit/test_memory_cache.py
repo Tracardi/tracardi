@@ -7,28 +7,28 @@ from tracardi.exceptions.exception import ExpiredException
 
 
 def test_should_delete_memory_cache():
-    cache = MemoryCache("test")
+    cache = MemoryCache("name")
 
-    cache['test'] = CacheItem(data='xxx', ttl=0.5)
+    cache['key'] = CacheItem(data='value', ttl=0.5)
 
-    del cache['test']
+    del cache['key']
 
-    assert 'test' not in cache
+    assert 'key' not in cache
 
 
 def test_should_not_allow_plain_values():
-    cache = MemoryCache("test")
+    cache = MemoryCache("name")
     with pytest.raises(ValueError):
-        cache['test'] = 'xxx'
+        cache['key'] = 'value'
 
 
 def test_should_expire_on_data_fetch():
-    cache = MemoryCache("test")
-    cache['test'] = CacheItem(data='xxx', ttl=0.5)
-    assert cache['test'].data == 'xxx'
+    cache = MemoryCache("name")
+    cache['key'] = CacheItem(data='value', ttl=0.5)
+    assert cache['key'].data == 'value'
     sleep(1)
     with pytest.raises(ExpiredException):
-        assert cache['test'].data
+        assert cache['key'].data
 
 
 def test_should_expire_on_data_check():

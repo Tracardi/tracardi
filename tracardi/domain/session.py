@@ -5,7 +5,7 @@ from typing import Optional, Any
 
 from pydantic import ConfigDict, BaseModel, PrivateAttr
 
-from .entity import Entity
+from .entity import Entity, PrimaryEntity
 from .marketing import UTM
 from .metadata import OS, Device, Application
 from .time import Time
@@ -22,15 +22,15 @@ class SessionTime(Time):
 
     def __init__(self, **data: Any):
 
-        if 'timestamp' not in data:
-            data['timestamp'] = datetime.timestamp(now_in_utc())
-
         if 'duration' not in data:
             data['duration'] = 0
 
         super().__init__(**data)
 
         self.weekday = self.insert.weekday()
+
+        if self.timestamp == 0:
+            self.timestamp = datetime.timestamp(now_in_utc())
 
 
 class SessionMetadata(BaseModel):
@@ -64,7 +64,7 @@ class SessionContext(dict):
 class Session(Entity):
     metadata: SessionMetadata
     operation: Operation = Operation()
-    profile: Optional[Entity] = None
+    profile: Optional[PrimaryEntity] = None
 
     device: Optional[Device] = Device()
     os: Optional[OS] = OS()
@@ -99,6 +99,9 @@ class Session(Entity):
         self.operation.update = flag
 
 
+    def is_updated(self) -> bool:
+        return self.operation.update
+
     def set_updated_in_workflow(self, state=True):
         self._updated_in_workflow = state
 
@@ -131,6 +134,9 @@ class Session(Entity):
     def has_not_saved_changes(self) -> bool:
         return self.operation.new or self.operation.needs_update()
 
+    def has_data_to_geo_locate(self) -> bool:
+        return self.device.ip and self.device.ip != '0.0.0.0' and self.device.geo.is_empty()
+
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
@@ -149,7 +155,7 @@ class Session(Entity):
         session.fill_meta_data()
         session.set_new()
         if profile_id is not None:
-            session.profile = Entity(id=profile_id)
+            session.profile = PrimaryEntity(id=profile_id)
 
         return session
 

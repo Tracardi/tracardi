@@ -4,18 +4,20 @@ from hashlib import md5
 
 import yaml
 
+from tracardi.domain import ExtraInfo
 from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.singleton import Singleton
-from tracardi.service.utils.environment import get_env_as_int
+from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
 from tracardi.service.utils.validators import is_valid_url
 
-VERSION = os.environ.get('_DEBUG_VERSION', '0.8.2')
+VERSION = os.environ.get('_DEBUG_VERSION', '0.9.0-rc3')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
 logger = get_logger(__name__)
+
 
 class MemoryCacheConfig:
     def __init__(self, env):
@@ -30,11 +32,50 @@ class MemoryCacheConfig:
         self.trigger_rule_cache_ttl = get_env_as_int('TRIGGER_RULE_CACHE_TTL', 5)
 
 
+class MysqlConfig:
+
+    def __init__(self, env):
+        self.env = env
+        self.mysql_host = env.get('MYSQL_HOST', "localhost")
+        self.mysql_username = env.get('MYSQL_USERNAME', "root")
+        self.mysql_password = env.get('MYSQL_PASSWORD', "root")
+        self.mysql_schema = env.get('MYSQL_SCHEMA', "mysql+aiomysql://")
+        self.mysql_schema_sync = env.get('MYSQL_SCHEMA', "mysql+pymysql://")
+        self.mysql_port = env.get('MYSQL_PORT', 3306)
+        self.mysql_database = env.get('MYSQL_DATABASE', "tracardi")
+        self.mysql_echo = env.get('MYSQL_ECHO', "no") == "yes"
+
+        self.mysql_database = self.mysql_database.strip(" /")
+
+        self.mysql_database_uri = self.uri(async_driver=True)
+        self.mysql_database_uri_with_db = f"{self.mysql_database_uri}/{self.mysql_database}"
+
+
+    def _get_schema(self, async_driver:bool=True):
+        if async_driver:
+            return self.mysql_schema
+        return self.mysql_schema_sync
+
+    def uri(self, async_driver:bool=True) -> str:
+        if self.mysql_username and self.mysql_password:
+            _creds = f"{self.mysql_username}:{self.mysql_password}"
+        elif self.mysql_username:
+            _creds = f"{self.mysql_username}:"
+        else:
+            _creds = ""
+
+        if _creds:
+            uri = f"{self._get_schema(async_driver)}{_creds}@{self.mysql_host}:{self.mysql_port}"
+        else:
+            uri = f"{self._get_schema(async_driver)}{self.mysql_host}:{self.mysql_port}"
+
+        return uri.strip(" /")
+
 class ElasticConfig:
 
     def __init__(self, env):
         self.env = env
-        self.unset_credentials = env.get('UNSET_CREDENTIALS', "no") == 'yes'
+        self.unset_credentials = get_env_as_bool('UNSET_CREDENTIALS', "off")
         self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
         self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
         self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
@@ -47,9 +88,7 @@ class ElasticConfig:
         self.cloud_id = env['ELASTIC_CLOUD_ID'] if 'ELASTIC_CLOUD_ID' in env else None
         self.maxsize = get_env_as_int('ELASTIC_MAX_CONN', 25)
         self.http_compress = env.get('ELASTIC_HTTP_COMPRESS', None)
-        self.verify_certs = (env['ELASTIC_VERIFY_CERTS'].lower() == 'yes') if 'ELASTIC_VERIFY_CERTS' in env else None
-
-        self.refresh_profiles_after_save = env.get('ELASTIC_REFRESH_PROFILES_AFTER_SAVE', 'no').lower() == 'yes'
+        self.verify_certs = get_env_as_bool('ELASTIC_VERIFY_CERTS', 'off')
 
         self.host = self.get_host()
         self.http_auth_username = self.env.get('ELASTIC_HTTP_AUTH_USERNAME', 'elastic')
@@ -130,28 +169,27 @@ class TracardiConfig(metaclass=Singleton):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
         self.track_debug = env.get('TRACK_DEBUG', 'no').lower() == 'yes'
-        self.save_logs = env.get('SAVE_LOGS', 'yes').lower() == 'yes'
-        self.enable_event_destinations = env.get('ENABLE_EVENT_DESTINATIONS', 'no').lower() == 'yes'
-        self.enable_profile_destinations = env.get('ENABLE_PROFILE_DESTINATIONS', 'no').lower() == 'yes'
-        self.enable_segmentation_wf_triggers = env.get('ENABLE_SEGMENTATION_WF_TRIGGERS', 'no').lower() == 'yes'
-        self.enable_workflow = env.get('ENABLE_WORKFLOW', 'yes').lower() == 'yes'
-        self.enable_event_validation = env.get('ENABLE_EVENT_VALIDATION', 'yes').lower() == 'yes'
-        self.enable_event_reshaping = env.get('ENABLE_EVENT_RESHAPING', 'yes').lower() == 'yes'
-        self.enable_event_source_check = env.get('ENABLE_EVENT_SOURCE_CHECK', 'yes').lower() == 'yes'
-        self.enable_profile_immediate_flush = env.get('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes').lower() == 'yes'
-        self.enable_identification_point = env.get('ENABLE_IDENTIFICATION_POINT', 'yes').lower() == 'yes'
-        self.enable_post_event_segmentation = env.get('ENABLE_POST_EVENT_SEGMENTATION', 'yes').lower() == 'yes'
-        self.system_events = env.get('SYSTEM_EVENTS', 'yes').lower() == 'yes'
-        self.enable_errors_on_response = env.get('ENABLE_ERRORS_ON_RESPONSE', 'yes').lower() == 'yes'
-        self.enable_field_update_log = env.get('ENABLE_FIELD_UPDATE_LOG', 'yes').lower() == 'yes'
-        self.allow_bot_traffic = env.get('ALLOW_BOT_TRAFFIC', 'no').lower() == 'yes'
+        self.save_logs = get_env_as_bool('SAVE_LOGS', 'yes')
+        self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'no')
+        self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'no')
+        self.enable_workflow = get_env_as_bool('ENABLE_WORKFLOW', 'yes')
+        self.enable_event_validation = get_env_as_bool('ENABLE_EVENT_VALIDATION', 'yes')
+        self.enable_event_reshaping = get_env_as_bool('ENABLE_EVENT_RESHAPING', 'yes')
+        self.enable_event_source_check = get_env_as_bool('ENABLE_EVENT_SOURCE_CHECK', 'yes')
+        self.enable_profile_immediate_flush = get_env_as_bool('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes')
+        self.enable_identification_point = get_env_as_bool('ENABLE_IDENTIFICATION_POINT', 'yes')
+        self.enable_post_event_segmentation = get_env_as_bool('ENABLE_POST_EVENT_SEGMENTATION', 'yes')
+        self.system_events = get_env_as_bool('SYSTEM_EVENTS', 'yes')
+        self.enable_errors_on_response = get_env_as_bool('ENABLE_ERRORS_ON_RESPONSE', 'yes')
+        self.enable_field_update_log = get_env_as_bool('ENABLE_FIELD_UPDATE_LOG', 'no')
+        self.disallow_bot_traffic = get_env_as_bool('DISALLOW_BOT_TRAFFIC', 'yes')
         self.keep_profile_in_cache_for = get_env_as_int('KEEP_PROFILE_IN_CACHE_FOR', 60*60)
         self.keep_session_in_cache_for = get_env_as_int('KEEP_SESSION_IN_CACHE_FOR', 30 * 60)
 
-        self.skip_errors_on_profile_mapping = env.get('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no').lower() == 'yes'
+        self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
         # Temporary flag
-        self.new_collector = env.get('NEW_COLLECTOR', 'yes').lower() == 'yes'
+        self.new_collector = get_env_as_bool('NEW_COLLECTOR', 'yes')
 
         self.profile_cache_ttl = get_env_as_int('PROFILE_CACHE_TTL', 60)
         self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 60)
@@ -166,10 +204,10 @@ class TracardiConfig(metaclass=Singleton):
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
-        self.multi_tenant = env.get('MULTI_TENANT', "no") == 'yes'
+        self.multi_tenant = get_env_as_bool('MULTI_TENANT', "no")
         self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
-        self.expose_gui_api = env.get('EXPOSE_GUI_API', 'yes').lower() == "yes"
+        self.expose_gui_api = get_env_as_bool('EXPOSE_GUI_API', 'yes')
         self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()
@@ -177,7 +215,7 @@ class TracardiConfig(metaclass=Singleton):
         self.segmentation_source = f"@segmentation-{random_hash[:20]}"
         self.demo_source = f"@demo-{random_hash[:20]}"
 
-        self.event_partitioning = env.get('EVENT_PARTITIONING', 'month')
+        self.event_partitioning = env.get('EVENT_PARTITIONING', 'quarter')
         self.profile_partitioning = env.get('PROFILE_PARTITIONING', 'quarter')
         self.session_partitioning = env.get('SESSION_PARTITIONING', 'quarter')
         self.entity_partitioning = env.get('ITEM_PARTITIONING', 'quarter')
@@ -188,7 +226,7 @@ class TracardiConfig(metaclass=Singleton):
         self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
         self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
         self.auto_profile_merging = env.get('AUTO_PROFILE_MERGING', 's>a.d-kljsa87^5adh')
-        self.apm_on = env.get('APM', 'yes') == 'yes'
+        self.apm_on = get_env_as_bool('APM', 'yes')
 
         self._config = None
         self._unset_secrets()
@@ -196,17 +234,26 @@ class TracardiConfig(metaclass=Singleton):
         if self.multi_tenant and (self.multi_tenant_manager_url is None or self.multi_tenant_manager_api_key is None):
             if self.multi_tenant_manager_url is None:
                 logger.warning('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
-                               'the MULTI_TENANT_MANAGER_URL or set MULTI_TENANT to "no"')
+                               'the MULTI_TENANT_MANAGER_URL or set MULTI_TENANT to "no"',
+                               extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0001")
+                               )
 
             if self.multi_tenant_manager_api_key is None:
                 logger.warning('No MULTI_TENANT_MANAGER_API_KEY set for MULTI_TENANT mode. Either set '
-                               'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"')
+                               'the MULTI_TENANT_MANAGER_API_KEY or set MULTI_TENANT to "no"',
+                               extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0002")
+                               )
 
         if self.multi_tenant and not is_valid_url(self.multi_tenant_manager_url):
-            logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.')
+            logger.warning('Env MULTI_TENANT_MANAGER_URL is not valid URL.',
+                           extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0003")
+                           )
 
         if self.apm_on and self.auto_profile_merging and len(self.auto_profile_merging) < 20:
-            logger.warning('Security risk. Env AUTO_PROFILE_MERGING is too short. It must be at least 20 chars long.')
+            logger.warning(
+                'Security risk. Env AUTO_PROFILE_MERGING is too short. It must be at least 20 chars long.',
+                extra=ExtraInfo.build(object=self, origin="configuration", error_number="C0004")
+            )
 
     def is_apm_on(self) -> bool:
         return self.apm_on
@@ -226,3 +273,4 @@ class TracardiConfig(metaclass=Singleton):
 
 
 tracardi = TracardiConfig(os.environ)
+mysql = MysqlConfig(os.environ)

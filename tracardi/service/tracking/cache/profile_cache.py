@@ -2,6 +2,7 @@ from typing import Optional, List, Union, Set
 
 from tracardi.config import tracardi
 from tracardi.context import get_context, Context
+from tracardi.domain import ExtraInfo
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.redis.cache import RedisCache
@@ -51,14 +52,14 @@ def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
 
 
 def _save_single_profile(profile: Profile, context: Context):
-    try:
+    key = get_profile_key_namespace(profile.id, context)
+    index = profile.get_meta_data()
 
-        key = get_profile_key_namespace(profile.id, context)
-        index = profile.get_meta_data()
-
-        if index is None:
-            raise ValueError("Empty profile index.")
-
+    if index is None:
+        logger.warning("Empty profile metadata. Index is not set. Profile removed from cache.",
+                       extra=ExtraInfo.exact(origin="cache", package=__name__))
+        redis_cache.delete(profile.id, key)
+    else:
         value = (
             {
                 "production": context.production,
@@ -75,13 +76,13 @@ def _save_single_profile(profile: Profile, context: Context):
             key
         )
 
-    except ValueError as e:
-        logger.error(f"Saving to cache failed: Detail: {str(e)}")
 
-
-def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]], context: Context):
+def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]], context: Optional[Context] = None):
 
     if profile:
+
+        if context is None:
+            context = get_context()
 
         if isinstance(profile, Profile):
             _save_single_profile(profile, context)

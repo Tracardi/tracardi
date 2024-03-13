@@ -6,7 +6,7 @@ from tracardi.service.tracardi_http_client import HttpClient
 from aiohttp import ClientConnectorError
 from tracardi.config import tracardi
 from tracardi.domain.resources.token import Token
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner

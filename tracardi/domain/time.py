@@ -20,6 +20,7 @@ class Time(BaseModel):
         self.update = add_utc_time_zone_if_none(self.update)
 
 
+
 class ProfileVisit(BaseModel):
     last: Optional[datetime] = None
     current: Optional[datetime] = None

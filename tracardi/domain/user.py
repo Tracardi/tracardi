@@ -8,15 +8,16 @@ from datetime import datetime
 class User(BaseModel):
     id: str
     password: str
-    full_name: str
+    name: str
     email: str
     roles: List[str]
-    disabled: bool = False
+    enabled: bool = False
     preference: Optional[dict] = {}
     expiration_timestamp: Optional[int] = None
 
-    def encode_password(self):
-        self.password = SHA1Encoder.encode(self.password)
+    @staticmethod
+    def encode_password(password):
+        return SHA1Encoder.encode(password)
 
     def has_roles(self, roles) -> bool:
         return len(set(self.roles).intersection(set(roles))) > 0
@@ -38,7 +39,7 @@ class User(BaseModel):
             del self.preference[key]
 
     def __str__(self):
-        return f"User: {self.full_name}"
+        return f"User: {self.name}"
 
     def __repr__(self):
-        return f"User: {self.full_name}"
+        return f"User: {self.name}"

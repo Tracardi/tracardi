@@ -5,7 +5,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.resources.clicksend_resource import ClicksendResourceCredentials
 from tracardi.service.notation.dot_template import DotTemplate
 from tracardi.service.tracardi_http_client import HttpClient
-from tracardi.service.storage.driver.elastic import resource as resource_db
+from tracardi.service.domain import resource as resource_db
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner

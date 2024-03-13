@@ -1,70 +1,87 @@
+from tracardi.config import tracardi
+from tracardi.context import Context, ServerContext
+from tracardi.exceptions.log_handler import log_handler
 from tracardi.worker.domain.migration_schema import MigrationSchema
-from tracardi.worker.misc.update_progress import update_progress
-from tracardi.worker.misc.add_task import add_task
+from tracardi.worker.misc.task_progress import task_create, task_status, task_finish, task_progress
 from time import sleep
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
 import logging
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
+logger = logging.getLogger(__name__)
+logger.setLevel(tracardi.logging_level)
+logger.addHandler(log_handler)
 
-def reindex(celery_job, schema: MigrationSchema, url: str, task_index: str):
-    add_task(
-        url,
-        task_index,
-        f"Migration of \"{schema.copy_index.from_index}\"",
-        celery_job,
-        schema.model_dump()
-    )
 
-    body = {
-        "source": {
-            "index": schema.copy_index.from_index
-        },
-        "dest": {
-            "index": schema.copy_index.to_index
+async def reindex(schema: MigrationSchema, url: str, context: Context):
+    with ServerContext(context):
+        task_id = await task_create(
+            "upgrade",
+            f"Migration of \"{schema.copy_index.from_index}\"",
+            schema.model_dump()
+        )
+
+        body = {
+            "source": {
+                "index": schema.copy_index.from_index
+            },
+            "dest": {
+                "index": schema.copy_index.to_index
+            }
         }
-    }
 
-    if schema.copy_index.script is not None:
-        body["script"] = {"lang": "painless", "source": schema.copy_index.script}
+        if schema.copy_index.script is not None:
+            body["script"] = {"lang": "painless", "source": schema.copy_index.script}
 
-    with ElasticClient(hosts=[url]) as client:
-        print(f"Reindexing with\n{body}")
-        response = client.reindex(body=body, wait_for_completion=schema.wait_for_completion)
-        print(f"Response:\n{response}")
+        with ElasticClient(hosts=[url]) as client:
 
-        if not isinstance(response, dict):
-            raise MigrationError(str(response))
+            response = client.reindex(body=body, wait_for_completion=schema.wait_for_completion)
 
-        if schema.wait_for_completion is True:
+            if not isinstance(response, dict):
+                raise MigrationError(str(response))
 
-            if 'failures' in response and len(response['failures']) > 0:
-                raise MigrationError(f"Import encountered failures: {response['failures']}")
+            if schema.wait_for_completion is True:
 
-        if schema.wait_for_completion is False:
-            # Async processing
-            if "task" not in response:
-                raise MigrationError("No task in reindex response.")
+                if 'failures' in response and len(response['failures']) > 0:
+                    error_message = f"Import encountered failures: {response['failures']}"
+                    await task_status(task_id, "error", error_message)
+                    raise MigrationError(error_message)
 
-            task_id = response["task"]
+            if schema.wait_for_completion is False:
+                # Async processing
+                if "task" not in response:
+                    error_message = "No task in reindex response."
+                    await task_status(task_id, "error", error_message)
+                    raise MigrationError(error_message)
 
-            while True:
-                task_response = client.get_task(task_id)
-                if task_response is None:
-                    break
+                es_task_id = response["task"]
 
-                if task_response["completed"] is True:
-                    if 'error' in task_response:
-                        error = f"Migration task {task_response['task']['node']}:{task_response['task']['id']} " \
-                                f"from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` " \
-                                f"FAILED due to {task_response}. "
-                        raise MigrationError(error)
-                    break
+                while True:
+                    task_response = client.get_task(es_task_id)
+                    if task_response is None:
+                        break
 
-                status = task_response["task"]["status"]
-                update_progress(celery_job, status["updated"] + status["created"], status["total"])
-                sleep(3)
+                    if task_response["completed"] is True:
+                        if 'error' in task_response:
+                            error = f"Migration task {task_response['task']['node']}:{task_response['task']['id']} " \
+                                    f"from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` " \
+                                    f"FAILED due to {task_response}. "
 
-            logging.info(f"Migration from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` COMPLETED.")
+                            await task_status(task_id, 'error', error)
+                            logger.error(error)
+                            raise MigrationError(error)
+                        break
 
-            update_progress(celery_job, 100)
+                    status = task_response["task"]["status"]
+
+                    if status["total"] == 0:
+                        progress = 0
+                    else:
+                        progress = int(((status["updated"] + status["created"]) / status["total"]) * 100)
+
+                    await task_progress(task_id, progress)
+                    sleep(3)
+
+                logger.info(f"Migration from `{schema.copy_index.from_index}` to `{schema.copy_index.to_index}` COMPLETED.")
+
+                await task_finish(task_id)

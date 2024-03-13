@@ -40,7 +40,7 @@ class WorkFlow:
             logger.error(message)
             raise DagGraphError(message)
 
-    async def _run(self, exec_dag: GraphInvoker, flow: Flow, event: Event, profile, session, ux: list):
+    async def _run(self, exec_dag: GraphInvoker, flow: Flow, event: Event, profile, session, ux: list) -> FlowInvokeResult:
         flow_start_time = time()
         debug_info = DebugInfo(
             timestamp=flow_start_time,

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
 
-from .entity import Entity
+from .entity import Entity, PrimaryEntity
 from .event_metadata import EventMetadata
 from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
@@ -77,7 +77,7 @@ class EventProduct(BaseModel):
     sku: Optional[str] = None
     category: Optional[str] = None
     brand: Optional[str] = None
-    variant: Optional[str] = None
+    variant: Optional[EventProductVariant] = None
     price: Optional[float] = 0
     quantity: Optional[int] = 0
     position: Optional[int] = 0
@@ -126,6 +126,7 @@ class EventPromotion(BaseModel):
 
 class EventMarketing(BaseModel):
     coupon: Optional[str] = None
+    channel: Optional[str] = None
     promotion: Optional[EventPromotion] = EventPromotion()
 
 
@@ -155,7 +156,7 @@ class Event(NamedEntity):
 
     source: Entity
     session: Optional[EventSession] = None
-    profile: Optional[Entity] = None
+    profile: Optional[PrimaryEntity] = None
     context: Optional[dict] = {}
     request: Optional[dict] = {}
     config: Optional[dict] = {}
@@ -163,17 +164,21 @@ class Event(NamedEntity):
     aux: dict = {}
 
     device: Optional[dict] = {}
-    os: Optional[dict] = {}
-    app: Optional[dict] = {}
-    hit: Optional[dict] = {}
-    # journey: Optional[dict] = {}
-    data: Optional[dict] = {}
-
     # device: Optional[Device] = Device.construct()
+
+    os: Optional[dict] = {}
     # os: Optional[OS] = OS.construct()
+
+    app: Optional[dict] = {}
     # app: Optional[Application] = Application.construct()
+
+    hit: Optional[dict] = {}
     # hit: Optional[Hit] = Hit.construct()
+
     journey: EventJourney = EventJourney.model_construct()
+    # journey: Optional[dict] = {}
+
+    data: Optional[dict] = {}
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):

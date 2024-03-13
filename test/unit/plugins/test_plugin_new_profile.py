@@ -1,3 +1,4 @@
+from tracardi.context import ServerContext, Context
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.event_metadata import EventMetadata
@@ -25,18 +26,19 @@ def test_plugin_new_profile_true():
 
 
 def test_plugin_new_profile_false():
-    init = {}
-    payload = {}
-    profile = Profile(id="1")
-    profile.new(False)
-    event = Event(
-        id='1',
-        type='text',
-        metadata=EventMetadata(time=EventTime()),
-        session=EventSession(id='1'),
-        source=Entity(id='1')
-    )
+    with ServerContext(Context(production=False)):
+        init = {}
+        payload = {}
+        profile = Profile(id="1")
+        profile.new(False)
+        event = Event(
+            id='1',
+            type='text',
+            metadata=EventMetadata(time=EventTime()),
+            session=EventSession(id='1'),
+            source=Entity(id='1')
+        )
 
-    result = run_plugin(NewProfileAction, init, payload, profile=profile, event=event)
-    assert result.output.value == payload
-    assert result.output.port == 'false'
+        result = run_plugin(NewProfileAction, init, payload, profile=profile, event=event)
+        assert result.output.value == payload
+        assert result.output.port == 'false'

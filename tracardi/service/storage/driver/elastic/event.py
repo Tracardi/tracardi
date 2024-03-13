@@ -12,6 +12,8 @@ from tracardi.service.storage.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple, Union, Set
 from .raw import load_by_key_value_pairs
 
+from ...mysql.service.event_source_service import EventSourceService
+
 logger = get_logger(__name__)
 
 
@@ -142,55 +144,6 @@ async def aggregate_event_by_field_within_time(profile_id,
         "result": output,
         "total": result.total
     }
-
-
-# async def heatmap_by_event_type(event_type=None):
-#     query = {
-#         "size": 0,
-#         "aggs": {
-#             "items_over_time": {
-#                 "date_histogram": {
-#                     "min_doc_count": 1,
-#                     "field": "metadata.time.insert",
-#                     "fixed_interval": "1d",
-#                     "extended_bounds": {
-#                         "min": datetime.utcnow() - timedelta(days=1 * 365),
-#                         "max": datetime.utcnow()
-#                     }
-#                 }
-#             }
-#         }
-#     }
-#
-#     if event_type is not None:
-#         query["query"] = {"term": {"type": event_type}}
-#
-#     result = await storage_manager(index="event").query(query)
-#     return result['aggregations']["items_over_time"]['buckets']
-
-
-# async def heatmap_by_profile(profile_id=None, bucket_name="items_over_time") -> StorageAggregateResult:
-#     query = {
-#         "size": 0,
-#         "aggs": {
-#             bucket_name: {
-#                 "date_histogram": {
-#                     "min_doc_count": 1,
-#                     "field": "metadata.time.insert",
-#                     "fixed_interval": "1d",
-#                     "extended_bounds": {
-#                         "min": datetime.utcnow() - timedelta(days=1 * 365),
-#                         "max": datetime.utcnow()
-#                     }
-#                 }
-#             }
-#         }
-#     }
-#
-#     if profile_id is not None:
-#         query["query"] = {"term": {"profile.id": profile_id}}
-#
-#     return await storage_manager(index="event").aggregate(query, aggregate_key='key_as_string')
 
 
 async def load_event_by_type(event_type, limit=1) -> StorageRecords:
@@ -453,8 +406,11 @@ async def aggregate_events_by_source(buckets_size):
 
     query_string = [f"id:{id}" for id in result.aggregations['by_source'][0]]
     query_string = " OR ".join(query_string)
-    sources = await storage_manager('event-source').load_by_query_string(query_string)
-    source_names_idx = {source['id']: source['name'] for source in sources}
+
+    ess =  EventSourceService()
+    event_source_as_named_entities = (await ess.load_all_in_deployment_mode()).as_named_entities()
+
+    source_names_idx = {source.id: source.name for source in event_source_as_named_entities}
     return [{"name": _get_name(source_names_idx, id), "value": count} for id, count in
             result.aggregations['by_source'][0].items()]
 
@@ -530,30 +486,6 @@ async def load_events_heatmap(profile_id: str = None):
                         yield record
 
     return list(convert_data(raw_result))
-
-
-async def update_tags(event_type: str, tags: List[str]):
-    tags = [tag.lower() for tag in tags]
-    query = {
-        "script": {
-            "source": f"ctx._source.tags.values = {tags}; ctx._source.tags.count = {len(tags)}",
-            "lang": "painless"
-        },
-        "query": {
-            "bool": {
-                "must": {"match": {"type": event_type}},
-                "must_not": {
-                    "bool": {
-                        "must": [
-                            *[{"term": {"tags.values": tag}} for tag in tags],
-                            {"term": {"tags.count": len(tags)}}
-                        ]
-                    }
-                }
-            }
-        }
-    }
-    return await storage_manager(index="event").update_by_query(query=query)
 
 
 async def aggregate_timespan_events(time_from: datetime, time_to: datetime,

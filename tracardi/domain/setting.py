@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import Optional, Any
 
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntityInContext
 from tracardi.service.utils.date import now_in_utc
 
 
-class Setting(NamedEntity):
+class Setting(NamedEntityInContext):
     timestamp: Optional[datetime] = None
     description: Optional[str] = ""
     enabled: Optional[bool] = False

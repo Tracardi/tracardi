@@ -4,7 +4,6 @@ from tracardi.domain.profile import *
 from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.console_log import ConsoleLog
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.factory import storage_manager
@@ -21,6 +20,52 @@ def load_profiles_for_auto_merge():
         }
     }
     return storage_manager('profile').scan(query, batch=1000)
+
+async def load_profile_duplicates(profile_ids: List[str]):
+    return await storage_manager('profile').query({
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "terms": {
+                            "ids": profile_ids
+                        }
+                    },
+                    {
+                        "terms": {
+                            "id": profile_ids
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        },
+        "sort": [
+            {"metadata.time.insert": "asc"}  # todo maybe should be based on updates (but update should always exist)
+        ]
+    })
+
+
+async def count_profile_duplicates(profile_ids: List[str]):
+    return await storage_manager('profile').count({
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "terms": {
+                            "ids": profile_ids
+                        }
+                    },
+                    {
+                        "terms": {
+                            "id": profile_ids
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        }
+    })
 
 
 async def load_profiles_with_duplicated_ids():
@@ -119,36 +164,20 @@ def load_by_ids(profile_ids: List[str], batch):
     return storage_manager('profile').scan(query, batch)
 
 
+async def load_by_primary_ids(profile_ids: List[str], size):
+    query = {
+        "size": size,
+        "query": {
+            "terms": {
+                "id": profile_ids
+            }
+        }
+    }
+    return await storage_manager('profile').query(query)
+
+
 async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
     return await storage_manager('profile').load_all(start, limit, sort)
-
-
-async def load_profile_without_identification(tracker_payload,
-                                              is_static=False,
-                                              console_log: Optional[ConsoleLog] = None) -> Optional[Profile]:
-    """
-    Loads current profile. If profile was merged then it loads merged profile.
-    """
-    if tracker_payload.profile is None:
-        return None
-
-    profile_id = tracker_payload.profile.id
-
-    profile_record = await load_by_id(profile_id)
-
-    if profile_record is None:
-
-        # Static profiles can be None as they need to be created if does not exist.
-        # Static means the profile id was given in the track payload
-
-        if is_static:
-            return Profile(id=tracker_payload.profile.id)
-
-        return None
-
-    profile = Profile.create(profile_record)
-
-    return profile
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple],
@@ -169,7 +198,7 @@ async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_aft
     elif isinstance(profile, Profile):
         profile.mark_for_update()
     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
-    if refresh_after_save or elastic.refresh_profiles_after_save:
+    if refresh_after_save:
         await storage_manager('profile').flush()
     return result
 

@@ -3,11 +3,11 @@ from uuid import uuid4
 
 from pydantic import field_validator
 
-from tracardi.domain.named_entity import NamedEntity
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from tracardi.domain.value_object.storage_info import StorageInfo
 
 
-class EventRedirect(NamedEntity):
+class EventRedirect(NamedEntityInContext):
     source: NamedEntity
     description: Optional[str] = ""
     url: str  # AnyHttpUrl
@@ -18,6 +18,7 @@ class EventRedirect(NamedEntity):
     def __init__(self, **data: Any):
         if 'id' not in data:
             data['id'] = str(uuid4())
+
         super().__init__(**data)
 
     @field_validator("source")
@@ -42,10 +43,3 @@ class EventRedirect(NamedEntity):
         if not value:
             raise ValueError("Event type cannot be empty")
         return value
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'event-redirect',
-            EventRedirect
-        )

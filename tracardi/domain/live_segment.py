@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from tracardi.domain.named_entity import NamedEntity
-from tracardi.domain.value_object.storage_info import StorageInfo
+from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 
 
-class LiveSegment(NamedEntity):
+class WorkflowSegmentationTrigger(NamedEntityInContext):
     timestamp: Optional[datetime] = None
     description: Optional[str] = ""
     enabled: bool = True
@@ -15,10 +14,3 @@ class LiveSegment(NamedEntity):
     condition: Optional[str] = None
     segment: Optional[str] = None
     code: Optional[str] = None
-
-    @staticmethod
-    def storage_info() -> StorageInfo:
-        return StorageInfo(
-            'live-segment',
-            LiveSegment
-        )
