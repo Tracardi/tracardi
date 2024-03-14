@@ -1,9 +1,15 @@
 Version: 0.9.0
 ----------------------------------------------------------
-* MySQL as a metadata store. Migration from ElasticSearch to MySQL as metastore for app configuration. Now only big data is stored in elastic search.
+* GUI Dark theme.
+* MySQL as a metadata store. Now only big data is stored in elastic search.
 * New deployment process
-* Workers
-  * Entity expiration worker (pro)
+* All workers have been replaced by one worker - simplifies the commercial installation
+* Huge cost savings for multi tenant installations
+* Audiences and Activations replaced the Workflow Segmentation
+* Post Event Segmentation was removed.
+* GitHub Workflow Push
+* Auto events - not documented
+* New build-in event types
 
 Version: 0.8.2
 ----------------------------------------------------------
