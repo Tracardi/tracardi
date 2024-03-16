@@ -22,7 +22,7 @@ async def store_bulk_session(sessions: List[Session], context: Context):
         # Group sessions by index and iterate
         for index, sessions in _split_by_index(sessions).items():
             # Save sessions in Elastic
-            print(index, await session_db.save(sessions))
+            await session_db.save(sessions)
 
 
 async def save_sessions_in_db(sessions: List[Session]):
