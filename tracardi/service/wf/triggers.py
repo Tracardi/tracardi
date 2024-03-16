@@ -6,6 +6,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldChangeTimestampManager
 from tracardi.service.field_mappings_cache import add_new_field_mappings
+from tracardi.service.storage.elastic.interface.session import save_session_to_db
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache
@@ -17,7 +18,6 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 from tracardi.service.storage.driver.elastic import profile as profile_db
-from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.driver.elastic import field_update_log as field_update_log_db
 
 logger = get_logger(__name__)
@@ -34,7 +34,7 @@ async def _save_session(sessions: Union[Session, List[Session], Set[Session]]):
     context = get_context()
     save_session_cache(sessions, context)
     # Save to database - do not defer
-    await session_db.save(sessions)
+    await save_session_to_db(sessions)
 
 
 async def trigger_workflows(profile: Profile,

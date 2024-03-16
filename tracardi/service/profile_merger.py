@@ -4,12 +4,12 @@ from dotty_dict import Dotty
 from tracardi.service.tracking.storage.profile_storage import save_profile, delete_profile
 
 from tracardi.domain.profile_data import ProfileData
+from .storage.elastic.interface.event import refresh_event_db
+from .storage.elastic.interface.session import refresh_session_db
 
 from ..context import get_context
 from ..domain import ExtraInfo
 from ..domain.storage_record import RecordMetadata
-from tracardi.service.storage.driver.elastic import event as event_db
-from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from datetime import datetime
@@ -45,9 +45,9 @@ async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], m
     for old_profile in duplicate_profiles:
         if old_profile.id != merged_profile.id:
             await raw_db.update_profile_ids('event', old_profile.id, merged_profile.id)
-            await event_db.refresh()
+            await refresh_event_db()
             await raw_db.update_profile_ids('session', old_profile.id, merged_profile.id)
-            await session_db.refresh()
+            await refresh_session_db()
 
 
 async def _delete_profiles(profile_ids: List[Tuple[str, RecordMetadata]]):

@@ -1,9 +1,9 @@
 import time
 
+from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
-from tracardi.service.tracking.storage.event_storage import save_events
 from tracardi.service.tracking.storage.profile_storage import save_profile
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.track_data_computation import compute_data
@@ -69,7 +69,7 @@ async def os_tracker(source: EventSource,
             # Save events
             if events:
                 # Sync save
-                await save_events(events)
+                await save_events_in_db(events)
 
         # Save field change log
         if field_timestamp_monitor:
