@@ -33,7 +33,7 @@
 
 # API-First Composable Open-source Customer Data Platform
 
-[TRACARDI](http://www.tracardi.com) is an API-first, composable CDP solution, tah is tailored for any company willing to integrate CDP into their Platform. Tracardi comes with a low-code or no-code editor aimed at any business that wants to start using user data for automated customer engagement. It is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery.
+[TRACARDI](http://www.tracardi.com) is an API-first, composable CDP solution, that is tailored for any company willing to integrate CDP into their Platform. Tracardi comes with a low-code or no-code editor aimed at any business that wants to start using user data for automated customer engagement. It is intended for anyone who carries out any type of customer interaction, be it through sales or service delivery.
 
 Tracardi __collects data from customer journeys__ and assigns it to a profile, automates __data enhancement__, and facilitates 🚀 __Machine Learning APIs__ usage.
 
