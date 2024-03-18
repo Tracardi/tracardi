@@ -168,7 +168,10 @@ class StorageRecords(dict):
         """
         Return row data the same way as elastic does.
         """
-        return self._hits[n]
+        try:
+            return self._hits[n]
+        except Exception:
+            return None
 
     def first(self) -> Optional[StorageRecord]:
         if len(self._hits) > 0:
