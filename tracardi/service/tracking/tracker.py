@@ -91,7 +91,7 @@ async def os_tracker(source: EventSource,
             # ----------------------------------------------
 
             # MUTEX: Session and profile are saved if workflow triggered
-            profile, session, events, ux, response, field_changes, is_wf_triggered = await exec_workflow(profile.id,
+            profile, session, events, ux, response, field_changes, is_wf_triggered = await exec_workflow(get_entity_id(profile),
                                                                                                          session,
                                                                                                          events,
                                                                                                          tracker_payload)

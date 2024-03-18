@@ -57,6 +57,19 @@ open_webhook_source_bridge = Bridge(
                 )
             ]),
         FormGroup(
+            name="API Webhook Profile ID Mapping",
+            description="If you would like the profile ID to be replaced by the profile ID from payload fill this section.",
+            fields=[
+                FormField(
+                    id="replace_profile_id",
+                    name="Please type the location of the profile ID in payload.",
+                    description="By default, webhook events do not include session or profile IDs. "
+                                "However, if you would like to add profile ID from payload type the location of it.",
+
+                    component=FormComponent(type="text", props={"label": "Profile ID location"})
+                )
+            ]),
+        FormGroup(
             name="Webhook event session management",
             fields=[
                 FormField(
