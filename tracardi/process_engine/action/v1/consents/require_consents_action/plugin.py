@@ -1,10 +1,10 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.mysql.mapping.consent_type_mapping import map_to_consent_type
 from tracardi.service.storage.mysql.service.consent_type_service import ConsentTypeService
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
-from tracardi.domain.consent_type import ConsentType
 
 
 def validate(config: dict) -> Config:
@@ -37,7 +37,7 @@ class RequireConsentsAction(ActionRunner):
 
             if not consent_type_record.exists():
                 raise ValueError(f"There is no consent type with ID {consent_id}")
-            consent_type = consent_type_record.map_to_object(ConsentType)
+            consent_type = consent_type_record.map_to_object(map_to_consent_type)
 
             if self.config.require_all is True:
                 if consent_id not in self.profile.consents:
