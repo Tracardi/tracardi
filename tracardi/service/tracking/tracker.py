@@ -91,10 +91,16 @@ async def os_tracker(source: EventSource,
             # ----------------------------------------------
 
             # MUTEX: Session and profile are saved if workflow triggered
-            profile, session, events, ux, response, field_changes, is_wf_triggered = await exec_workflow(get_entity_id(profile),
-                                                                                                         session,
-                                                                                                         events,
-                                                                                                         tracker_payload)
+            profile, session, events, ux, response, wf_field_changes, is_wf_triggered = await exec_workflow(
+                get_entity_id(profile),
+                session,
+                events,
+                tracker_payload)
+
+            changed_fields_monitor = field_timestamp_monitor.get_timestamps_log()
+            if wf_field_changes.has_changes():
+                field_timestamp_monitor.get_timestamps_log().merge(wf_field_changes.get_history_log())
+
 
             # Dispatch events SYNCHRONOUSLY
             await sync_event_destination(
@@ -104,9 +110,12 @@ async def os_tracker(source: EventSource,
                 tracker_payload.debug)
 
             # Dispatch outbound profile SYNCHRONOUSLY
+
             await sync_profile_destination(
                 profile,
-                session)
+                session,
+                changed_fields_monitor.get_history_log()
+            )
 
             return {
                 "task": tracker_payload.get_id(),

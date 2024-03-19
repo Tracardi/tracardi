@@ -118,7 +118,6 @@ def _append_value(values, value):
 
 def copy_default_event_to_profile(copy_schema: dict, profile_changes: FieldTimestampMonitor, flat_event: dotty) -> Tuple[FieldTimestampMonitor, bool]:
     profile_updated_flag = False
-    _flat_profile = profile_changes.flat_profile
 
     if copy_schema is not None:
 

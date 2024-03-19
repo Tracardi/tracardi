@@ -47,16 +47,18 @@ class CopyTraitAction(ActionRunner):
                 continue
 
             # Value is automatically converted to value if in dot format
+            old_value = dot[destination] if destination in dot else None
             dot[destination] = value
-            if self.profile and destination.startswith('profile'):
+            if self.profile and destination.startswith('profile@'):
                 flow.set_change(
                     'profile',
                     self.profile.id,
                     self.event.id,
                     get_entity_id(self.session),
                     get_entity_id(self.tracker_payload.source),
-                    destination,
-                    dot[destination]  # Use dot destination as it has computed values for `1`, `true`
+                    destination[8:],  # remove profile@
+                    dot[destination],  # Use dot destination as it has computed values for `1`, `true`
+                    old_value
                 )
 
         self.flow = flow

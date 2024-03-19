@@ -3,7 +3,7 @@ import json
 from json import JSONDecodeError
 
 import aiohttp
-from typing import Optional
+from typing import Optional, List
 
 from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
@@ -73,7 +73,7 @@ class HttpConnector(DestinationInterface):
                     "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
                                                                                name))
 
-    async def _dispatch(self, data):
+    async def _dispatch(self, data, changed_fields):
         try:
             credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
             credentials = HttpCredentials(**credentials)
@@ -89,7 +89,10 @@ class HttpConnector(DestinationInterface):
             url = str(credentials.url)
 
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                params = config.get_params(data)
+                params = config.get_params({
+                    "data": data,
+                    "changes": changed_fields
+                })
 
                 async with session.request(
                         method=config.method,
@@ -129,8 +132,8 @@ class HttpConnector(DestinationInterface):
             logger.error(str(e), e, exc_info=True)
             raise e
 
-    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session]):
-        await self._dispatch(data)
+    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session], changed_fields: List[dict]=None):
+        await self._dispatch(data, changed_fields)
 
     async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event):
-        await self._dispatch(data)
+        await self._dispatch(data, [])
