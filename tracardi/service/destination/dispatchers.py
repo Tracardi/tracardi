@@ -73,6 +73,7 @@ async def profile_destination_dispatch(profile: Optional[Profile],
 
     destination_instance, reshaped_data = result
     try:
+        logger.info(f"Dispatching {result}. Profile id: {get_entity_id(profile)}.")
         await destination_instance.dispatch_profile(reshaped_data, profile=profile, session=session, changed_fields=changed_fields)
     except Exception as e:
         logger.error(

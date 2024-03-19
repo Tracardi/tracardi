@@ -55,11 +55,12 @@ class FieldChangeTimestampManager:
                 result.append(log_entry)
         return result
 
-    def get_history_log(self) -> List[Dict]:
+    def get_history_log(self, add_id:bool = True) -> List[Dict]:
         result = []
         for field_dicts in self._log.values():
             for log_entry in field_dicts.values():
-                log_entry['id'] = str(uuid4())
+                if add_id:
+                    log_entry['id'] = str(uuid4())
                 result.append(log_entry)
         return result
 

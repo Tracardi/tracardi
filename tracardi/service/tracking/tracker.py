@@ -85,6 +85,21 @@ async def os_tracker(source: EventSource,
             if 'utm' in tracker_payload.context:
                 del tracker_payload.context['utm']
 
+            # Dispatch events SYNCHRONOUSLY
+            await sync_event_destination(
+                profile,
+                session,
+                events,
+                tracker_payload.debug)
+
+            # Dispatch outbound profile SYNCHRONOUSLY
+            changed_fields_monitor = field_timestamp_monitor.get_timestamps_log()
+            await sync_profile_destination(
+                profile,
+                session,
+                changed_fields_monitor.get_history_log(add_id=False)
+            )
+
             # ----------------------------------------------
             # FROM THIS POINT EVENTS AND SESSION SHOULD NOT
             # BE MUTATED, ALREADY SAVED
@@ -97,25 +112,13 @@ async def os_tracker(source: EventSource,
                 events,
                 tracker_payload)
 
-            changed_fields_monitor = field_timestamp_monitor.get_timestamps_log()
             if wf_field_changes.has_changes():
-                field_timestamp_monitor.get_timestamps_log().merge(wf_field_changes.get_history_log())
-
-
-            # Dispatch events SYNCHRONOUSLY
-            await sync_event_destination(
-                profile,
-                session,
-                events,
-                tracker_payload.debug)
-
-            # Dispatch outbound profile SYNCHRONOUSLY
-
-            await sync_profile_destination(
-                profile,
-                session,
-                changed_fields_monitor.get_history_log()
-            )
+                # Dispatch outbound profile SYNCHRONOUSLY again because the profile changed
+                await sync_profile_destination(
+                    profile,
+                    session,
+                    wf_field_changes.get_history_log(add_id=False)
+                )
 
             return {
                 "task": tracker_payload.get_id(),
