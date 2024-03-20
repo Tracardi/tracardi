@@ -5,8 +5,13 @@ class ElasticFieldCondition:
     def __init__(self, field):
         self.field = field
 
+    @staticmethod
+    def _get_field(field):
+        return field.field if isinstance(field, ElasticFieldCondition) else field
+
     def __eq__(self, other):
         if isinstance(other, ElasticFieldCondition):
+            # This is when two fields are compared (field1=field2)
             return {
                 "bool": {
                     "filter": {
@@ -84,6 +89,7 @@ class ElasticFieldCondition:
 
     def __ne__(self, other):
         if isinstance(other, ElasticFieldCondition):
+            # This is when two fields are compared (field1=field2)
             return {
                 "bool": {
                     "filter": {
@@ -93,6 +99,7 @@ class ElasticFieldCondition:
                     }
                 }
             }
+
         else:
 
             if isinstance(other, NoneType):
@@ -111,7 +118,7 @@ class ElasticFieldCondition:
                     "must_not": {
                         query_type: {
                             self.field: {
-                                "value": other
+                                "value": other.field
                             }
                         }
                     }
@@ -119,37 +126,44 @@ class ElasticFieldCondition:
             }
 
     def __gt__(self, other):
+        #TODO This is when field and value are compared (field1=1). Add field to field comparator
         return {
             "range": {
                 self.field: {
-                    "gt": other
+                    "gt": self._get_field(other)
                 }
             }
         }
 
     def __ge__(self, other):
+        # TODO This is when field and value are compared (field1=1). Add field to field comparator
         return {
             "range": {
                 self.field: {
-                    "gte": other
+                    "gte": self._get_field(other)
                 }
             }
         }
 
     def __lt__(self, other):
+        # TODO This is when field and value are compared (field1=1). Add field to field comparator
         return {
             "range": {
                 self.field: {
-                    "lt": other
+                    "lt": self._get_field(other)
                 }
             }
         }
 
     def __le__(self, other):
+        # TODO This is when field and value are compared (field1=1). Add field to field comparator
         return {
             "range": {
                 self.field: {
-                    "lte": other
+                    "lte": self._get_field(other)
                 }
             }
         }
+
+    def __str__(self):
+        return self.field
