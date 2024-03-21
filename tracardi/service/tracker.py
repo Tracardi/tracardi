@@ -1,4 +1,3 @@
-import time
 from typing import Optional
 
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
@@ -17,34 +16,12 @@ from tracardi.service.tracker_config import TrackerConfig
 from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.exceptions.log_handler import get_logger
-from typing import List
 if License.has_license():
     from com_tracardi.service.tracking.tracker import com_tracker
 else:
     from tracardi.service.tracking.tracker import os_tracker
 
 logger = get_logger(__name__)
-
-
-async def track_event(tracker_payload: TrackerPayload,
-                      ip: str,
-                      allowed_bridges: List[str],
-                      internal_source=None,
-                      run_async: bool = False,
-                      static_profile_id: bool = False
-                      ):
-    tracking_start = time.time()
-    tr = Tracker(
-        TrackerConfig(
-            ip=ip,
-            allowed_bridges=allowed_bridges,
-            internal_source=internal_source,
-            run_async=run_async,
-            static_profile_id=static_profile_id
-        )
-    )
-
-    return await tr.track_event(tracker_payload, tracking_start)
 
 
 class Tracker:

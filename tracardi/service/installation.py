@@ -8,7 +8,6 @@ from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
 from tracardi.service.storage.mysql.service.user_service import UserService
 from tracardi.service.storage.mysql.service.version_service import VersionService
-from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
@@ -19,6 +18,7 @@ from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource
+from tracardi.service.track_event import track_event
 
 if License.has_license():
     from com_tracardi.db.bootstrap.default_bridges import commercial_default_bridges
