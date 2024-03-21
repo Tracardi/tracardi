@@ -39,7 +39,7 @@ async def save_session_to_db(session: Session):
 async def load_nth_last_session_for_profile(profile_id: str, offset):
     return await session_db.get_nth_last_session(
                 profile_id=profile_id,
-                n=(-1) * offset
+                n=offset
             )
 
 async def refresh_session_db():

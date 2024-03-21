@@ -19,9 +19,15 @@ class PreviousSessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is False:
+
+            if self.config.offset < 0:
+                offset = (-1 * self.config.offset)
+            else:
+                offset = self.config.offset
+
             result = await load_nth_last_session_for_profile(
                 profile_id=self.profile.id,
-                offset=(-1) * self.config.offset
+                offset= offset - 1
             )
             if result is not None:
                 return Result(port="found", value=result)
