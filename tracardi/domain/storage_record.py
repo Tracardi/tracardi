@@ -20,6 +20,8 @@ class StorageRecord(dict):
 
     @staticmethod
     def build_from_elastic(elastic_record: dict) -> 'StorageRecord':
+        if '_source' not in elastic_record:
+            raise ValueError("No data in StorageRecord. Source does not exist.")
         record = StorageRecord(**elastic_record['_source'])
         record.set_meta_data(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
         if 'inner_hits' in elastic_record:
