@@ -18,7 +18,7 @@ from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource
-from tracardi.service.track_event import track_event
+from tracardi.service.track_event import *
 
 if License.has_license():
     from com_tracardi.db.bootstrap.default_bridges import commercial_default_bridges
