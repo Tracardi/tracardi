@@ -230,6 +230,9 @@ class TracardiConfig(metaclass=Singleton):
         self._config = None
         self._unset_secrets()
 
+        if self.multi_tenant_manager_url:
+            self.multi_tenant_manager_url = self.multi_tenant_manager_url.strip("/")
+
         if self.multi_tenant and (self.multi_tenant_manager_url is None or self.multi_tenant_manager_api_key is None):
             if self.multi_tenant_manager_url is None:
                 logger.warning('No MULTI_TENANT_MANAGER_URL set for MULTI_TENANT mode. Either set '
