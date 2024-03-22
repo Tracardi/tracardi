@@ -5,8 +5,10 @@ def get_env_as_int(env_key, default_value):
     value = os.environ.get(env_key, default_value)
     if not value:
         return default_value
-    return int(value)
-
+    try:
+        return int(value)
+    except Exception:
+        return default_value
 
 def _str_to_bool(value):
     true_values = ['yes', 'on', 'true']
