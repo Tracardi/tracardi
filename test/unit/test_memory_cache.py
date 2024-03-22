@@ -2,6 +2,7 @@ from time import sleep
 
 import pytest
 
+from tracardi.context import ServerContext, Context
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from tracardi.exceptions.exception import ExpiredException
 
@@ -75,3 +76,19 @@ def test_should_be_purged():
     assert not cache.memory_buffer
 
     print(cache.memory_buffer)
+
+def test_is_expired_check():
+    cache = MemoryCache("test")
+    cache['test'] = CacheItem(data='xxx', ttl=0.5)
+    assert not cache.is_expired('test')
+    sleep(1)
+    assert cache.is_expired('test')
+
+
+def test_must_work_per_context():
+    cache = MemoryCache("test")
+    with ServerContext(Context(production=True)):
+        cache['test'] = CacheItem(data='xxx', ttl=5)
+        assert 'test' in cache
+    with ServerContext(Context(production=False)):
+        assert 'test' not in cache
