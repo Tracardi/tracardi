@@ -466,6 +466,25 @@ def get_resource_types() -> List[ResourceSettings]:
                 },
                 pro=True
             )
+        ),
+        ResourceSettings(
+            id='ghost',
+            config={
+                "api_url": "<api-url>",
+                "api_key": "<api-key>"
+            },
+            icon='ghost',
+            tags=['ghost'],
+            name='Ghost',
+            manual='ghost_resource',
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.ghost_connector.GhostConnector",
+                init={
+                    "uuid": "<uuid>",
+                    "label_add": "<label-to-add>",
+                    "label_remove": "<label-to-remove>"
+                }
+            )
         )
     ]
 
