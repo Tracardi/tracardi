@@ -127,7 +127,7 @@ class RedisConfig:
     def __init__(self, env):
         self.env = env
         self.host = env.get('REDIS_HOST', 'localhost')
-        self.port = get_env_as_int('REDIS_PORT', '6379')
+        self.port = get_env_as_int('REDIS_PORT', 6379)
         self.redis_host = env.get('REDIS_HOST', 'redis://localhost:6379')
         self.redis_password = env.get('REDIS_PASSWORD', None)
 
