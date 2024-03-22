@@ -91,7 +91,7 @@ class TableService(metaclass=Singleton):
                 return deleted, record.map_to_object(mapper)
 
     async def _load_all_in_deployment_mode(self, table,
-                                           search: str,
+                                           search: Optional[str] = None,
                                            limit: int = None,
                                            offset: int = None,
                                            columns=None

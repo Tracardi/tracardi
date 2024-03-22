@@ -60,6 +60,9 @@ class MemoryCache:
 
         return key in self.memory_buffer
 
+    def is_expired(self, key: str) -> bool:
+        return (key in self.memory_buffer and self.memory_buffer[key].expired()) or key not in self.memory_buffer
+
     def __getitem__(self, item: str) -> [CacheItem, None]:
         if item in self.memory_buffer:
             cache_item = self.memory_buffer[item]  # type: CacheItem

@@ -17,7 +17,7 @@ logger.addHandler(log_handler)
 
 class ConsentTypeService(TableService):
 
-    async def load_all(self, search:str, limit: int = None, offset: int = None) -> SelectResult:
+    async def load_all(self, search: Optional[str]=None, limit: int = None, offset: int = None) -> SelectResult:
         return await self._load_all_in_deployment_mode(ConsentTypeTable, search, limit, offset)
 
     async def load_by_id(self, consent_type_id: str) -> SelectResult:

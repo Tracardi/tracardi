@@ -13,7 +13,7 @@ from tracardi.service.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
 from tracardi.service.utils.validators import is_valid_url
 
-VERSION = os.environ.get('_DEBUG_VERSION', '0.9.0-rc3')
+VERSION = os.environ.get('_DEBUG_VERSION', '0.9.0-rc4')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
 logger = get_logger(__name__)
@@ -127,7 +127,7 @@ class RedisConfig:
     def __init__(self, env):
         self.env = env
         self.host = env.get('REDIS_HOST', 'localhost')
-        self.port = get_env_as_int('REDIS_PORT', '6379')
+        self.port = get_env_as_int('REDIS_PORT', 6379)
         self.redis_host = env.get('REDIS_HOST', 'redis://localhost:6379')
         self.redis_password = env.get('REDIS_PASSWORD', None)
 
