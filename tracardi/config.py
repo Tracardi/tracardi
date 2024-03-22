@@ -13,7 +13,7 @@ from tracardi.service.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
 from tracardi.service.utils.validators import is_valid_url
 
-VERSION = os.environ.get('_DEBUG_VERSION', '0.9.0-rc3')
+VERSION = os.environ.get('_DEBUG_VERSION', '0.9.0-rc4')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
 logger = get_logger(__name__)
