@@ -6,6 +6,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.domain.profile import Profile
+from tracardi.service.segmentation.profile_segmentation_services import add_segment_to_profile
 
 
 class Configuration(PluginConfig):
@@ -15,23 +16,23 @@ class Configuration(PluginConfig):
 
     @field_validator('interests')
     @classmethod
-    def must_not_be_empty(cls, value):
+    def interests_must_not_be_empty(cls, value):
         if value.strip() == "":
-            raise ValueError("interests must not be empty.")
+            raise ValueError("Interests must not be empty.")
         return value
     
     @field_validator('segment_mapping')
     @classmethod
-    def must_not_be_empty(cls, value):
+    def mapping_must_not_be_empty(cls, value):
         if value.strip() == "":
-            raise ValueError("segment_mapping must not be empty.")
+            raise ValueError("Segment Mapping must not be empty.")
         return value
     
     @field_validator('segments_to_apply')
     @classmethod
-    def must_not_be_empty(cls, value):
+    def segments_to_apply_must_not_be_empty(cls, value):
         if value.strip() == "" or value.isnumeric() != True:
-            raise ValueError("segments_to_apply must not be empty and must be a number.")
+            raise ValueError("Segments to Apply must not be empty and must be a number.")
         return value
     
 def validate(config: dict):
@@ -48,7 +49,6 @@ class GroupAndRankInterestsAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         profile = Profile(**dot.profile)
 
-        
         try:
             segment_mapping = json.loads(dot[self.config.segment_mapping])
             interests = dot[self.config.interests]
@@ -57,21 +57,29 @@ class GroupAndRankInterestsAction(ActionRunner):
 
             for interest, count in interests.items():
                 for segment, keywords in segment_mapping.items():
-                    if interest.lower() in keywords:
+                    if isinstance(keywords, list) and interest.lower() in keywords:
                         segment_count[segment] += count
 
             ranked_segments = sorted(segment_count.keys(), key=lambda x: segment_count[x], reverse=True)
-            
-            # segments_to_apply=int(dot[self.config.segments_to_apply])
-            # if segments_to_apply > len(ranked_segments):
-            #     segments_to_apply=len(ranked_segments)
-            #
-            # for index in range(0, segments_to_apply):
-            #     profile = trigger_segment_add(profile, self.session, ranked_segments[index])
+
+            try:
+                segments_to_apply=int(dot[self.config.segments_to_apply])
+            except Exception:
+                # If segments to apply not a number
+                message = "Segments To Apply must be a number"
+                self.console.error(message)
+                return Result(value={"message": message}, port="error")
+
+            if segments_to_apply > len(ranked_segments):
+                segments_to_apply=len(ranked_segments)
+
+            # Apply segments to profile
+            for index in range(0, segments_to_apply):
+                profile = add_segment_to_profile(profile, ranked_segments[index])
                 
             self.profile.replace(profile)
 
-            return Result(port='result', value={'ranked_segments':ranked_segments})
+            return Result(port='result', value={'applied_segments':ranked_segments})
         except Exception as e:
             return Result(value={"message": str(e)}, port="error")            
 
@@ -85,8 +93,8 @@ def register() -> Plugin:
             outputs=["result", "error"],
             version='0.9.0',
             init={
-                "interests": "",
-                "segment_mapping": "",
+                "interests": "profile@interests",  # Interests is a path the where the interests are stored.
+                "segment_mapping": "",  # See the "Example of segment_mapping" above
                 "segments_to_apply": ""
             },
             form=Form(groups=[
@@ -96,7 +104,7 @@ def register() -> Plugin:
                         FormField(
                             id="interests",
                             name="Interests",
-                            description="Interests, usually profile@interests",
+                            description="Location of profile interests, usually profile@interests",
                             component=FormComponent(type="dotPath", props={
                                 "label": "Interests",
                                 "defaultSourceValue": "profile"
@@ -105,7 +113,7 @@ def register() -> Plugin:
                         FormField(
                             id="segment_mapping",
                             name="Segment Mapping",
-                            description="Used to pass the object containing segment to interest mapping.",
+                            description="Defines how the segment rank is computed based on profile's interests. It maps key which is a segment name to a list of interests that build this segment.",
                             component=FormComponent(type="json", props={
                                 "label": "segment_mapping"
                             })
@@ -113,7 +121,7 @@ def register() -> Plugin:
                         FormField(
                             id="segments_to_apply",
                             name="Segments To Apply",
-                            description="Used to set the number of segments from segment_mapping that will be applied to the profile.",
+                            description="This setting decides which computed segments get added to a profile. For instance, if the limit is set to 5, the sum of the interests must be more than 5",
                             component=FormComponent(type="dotPath", props={
                                 "label": "segments_to_apply"
                             })

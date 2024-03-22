@@ -1,3 +1,4 @@
+from tracardi.service.segmentation.profile_segmentation_services import add_segment_to_profile
 from tracardi.service.utils.date import now_in_utc
 
 from typing import List, Union
@@ -47,6 +48,7 @@ class AddSegmentAction(ActionRunner):
                     if isinstance(self.config.segment, list):
                         converter = DictTraverser(dot, include_none=False)
                         segments = converter.reshape(self.config.segment)
+                        add_segment_to_profile(profile, segments)
                     else:
                         return Result(value={
                             "message": "Not acceptable segmentation type. "
