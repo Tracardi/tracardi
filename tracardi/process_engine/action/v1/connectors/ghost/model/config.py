@@ -5,7 +5,7 @@ from tracardi.service.plugin.domain.config import PluginConfig
 
 
 class Configuration(PluginConfig):
-    source: NamedEntity
+    resource: NamedEntity
     uuid: str
 
     @field_validator('uuid')
