@@ -1,8 +1,8 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.elastic.interface.session import load_nth_last_session_for_profile
 from .model.config import Config
-from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.plugin.domain.result import Result
 
 
@@ -19,9 +19,15 @@ class PreviousSessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         if self.event.metadata.profile_less is False:
-            result = await session_db.get_nth_last_session(
+
+            if self.config.offset < 0:
+                offset = (-1 * self.config.offset)
+            else:
+                offset = self.config.offset
+
+            result = await load_nth_last_session_for_profile(
                 profile_id=self.profile.id,
-                n=(-1) * self.config.offset
+                offset= offset - 1
             )
             if result is not None:
                 return Result(port="found", value=result)

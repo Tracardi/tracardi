@@ -12,21 +12,21 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
-async def sync_profile_destination(profile: Optional[Profile], session: Session):
+
+async def sync_profile_destination(profile: Optional[Profile], session: Session, changed_fields: List[dict]):
     has_profile = isinstance(profile, Profile)
     if has_profile and tracardi.enable_profile_destinations and profile.has_not_saved_changes():
-
         await profile_destination_dispatch(profile=profile,
-                                               session=session,
-                                               debug=False)
-
+                                           session=session,
+                                           changed_fields=changed_fields,
+                                           debug=False)
 
 
 async def sync_event_destination(profile: Optional[Profile], session: Session, events: List[Event], debug):
     if tracardi.enable_event_destinations and len(events) > 0:
-            await event_destination_dispatch(
-                profile,
-                session,
-                events,
-                debug
-            )
+        await event_destination_dispatch(
+            profile,
+            session,
+            events,
+            debug
+        )

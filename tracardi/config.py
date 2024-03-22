@@ -176,7 +176,6 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_event_validation = get_env_as_bool('ENABLE_EVENT_VALIDATION', 'yes')
         self.enable_event_reshaping = get_env_as_bool('ENABLE_EVENT_RESHAPING', 'yes')
         self.enable_event_source_check = get_env_as_bool('ENABLE_EVENT_SOURCE_CHECK', 'yes')
-        self.enable_profile_immediate_flush = get_env_as_bool('ENABLE_PROFILE_IMMEDIATE_FLUSH', 'yes')
         self.enable_identification_point = get_env_as_bool('ENABLE_IDENTIFICATION_POINT', 'yes')
         self.enable_post_event_segmentation = get_env_as_bool('ENABLE_POST_EVENT_SEGMENTATION', 'yes')
         self.system_events = get_env_as_bool('SYSTEM_EVENTS', 'yes')
@@ -230,6 +229,9 @@ class TracardiConfig(metaclass=Singleton):
 
         self._config = None
         self._unset_secrets()
+
+        if self.multi_tenant_manager_url:
+            self.multi_tenant_manager_url = self.multi_tenant_manager_url.strip("/")
 
         if self.multi_tenant and (self.multi_tenant_manager_url is None or self.multi_tenant_manager_api_key is None):
             if self.multi_tenant_manager_url is None:

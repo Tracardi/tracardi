@@ -57,6 +57,7 @@ async def event_destination_dispatch(profile: Optional[Profile],
 
 async def profile_destination_dispatch(profile: Optional[Profile],
                                        session: Optional[Session],
+                                       changed_fields: List[dict],
                                        debug: bool):  # debug is used to find out which resource to use.
 
     dot = DotAccessor(profile, session)
@@ -72,7 +73,8 @@ async def profile_destination_dispatch(profile: Optional[Profile],
 
     destination_instance, reshaped_data = result
     try:
-        await destination_instance.dispatch_profile(reshaped_data, profile=profile, session=session)
+        logger.info(f"Dispatching {result}. Profile id: {get_entity_id(profile)}.")
+        await destination_instance.dispatch_profile(reshaped_data, profile=profile, session=session, changed_fields=changed_fields)
     except Exception as e:
         logger.error(
             str(e),

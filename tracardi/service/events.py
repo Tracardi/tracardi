@@ -8,7 +8,7 @@ from dotty_dict import dotty
 from tracardi.context import ServerContext, get_context
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_monitor import FieldTimestampMonitor
-from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.elastic.interface.event import load_unique_field_value
 from tracardi.service.string_manager import capitalize_event_type_id
 
 _local_dir = os.path.dirname(__file__)
@@ -61,7 +61,7 @@ async def get_event_types(query: str = None, limit: int = 1000):
     context = get_context()
 
     with ServerContext(context.switch_context(production=True)):
-        production_event_types = await event_db.unique_field_value(query, limit)
+        production_event_types = await load_unique_field_value(query, limit)
 
         for item in production_event_types:
             if item not in pre_defined_ids:
@@ -69,7 +69,7 @@ async def get_event_types(query: str = None, limit: int = 1000):
                 pre_defined_ids.append(item)
 
     with ServerContext(context.switch_context(production=False)):
-        test_event_types = await event_db.unique_field_value(query, limit)
+        test_event_types = await load_unique_field_value(query, limit)
 
         for item in test_event_types:
             if item not in pre_defined_ids:
@@ -118,7 +118,6 @@ def _append_value(values, value):
 
 def copy_default_event_to_profile(copy_schema: dict, profile_changes: FieldTimestampMonitor, flat_event: dotty) -> Tuple[FieldTimestampMonitor, bool]:
     profile_updated_flag = False
-    _flat_profile = profile_changes.flat_profile
 
     if copy_schema is not None:
 
@@ -203,55 +202,3 @@ def copy_default_event_to_profile(copy_schema: dict, profile_changes: FieldTimes
                                 f"to {profile_changes[profile_path]} at profile@{profile_path}")
 
     return profile_changes, profile_updated_flag
-
-
-# def remove_empty_dicts(dictionary):
-#     keys_to_remove = []
-#     for key, value in dictionary.items():
-#         if isinstance(value, dict):
-#             remove_empty_dicts(value)  # Recursively check nested dictionaries
-#             if not value:  # Empty dictionary after recursive check
-#                 keys_to_remove.append(key)
-#     for key in keys_to_remove:
-#         del dictionary[key]
-
-
-# def auto_index_default_event_type(event: Event, profile: Profile) -> Event:
-#     index_schema = get_default_mappings_for(event.type, 'copy')
-#
-#     if index_schema is not None:
-#
-#         flat_event = dotty(event.model_dump())
-#
-#         for destination, source in index_schema.items():  # type: str, str
-#             try:
-#
-#                 # if destination not in flat_event:
-#                 #     logger.warning(f"While indexing type {event.type}. "
-#                 #                    f"Property destination {destination} could not be found in event schema.")
-#
-#                 # Skip none existing event properties.
-#                 if source in flat_event:
-#                     flat_event[destination] = flat_event[source]
-#                     del flat_event[source]
-#             except KeyError:
-#                 pass
-#
-#         event_dict = flat_event.to_dict()
-#         remove_empty_dicts(event_dict)
-#         event = Event(**event_dict)
-#
-#         state = get_default_mappings_for(event.type, 'state')
-#
-#         if state:
-#             if isinstance(state, str):
-#                 if state.startswith("call:"):
-#                     event.journey.state = call_function(call_string=state, event=flat_event, profile=profile)
-#                 else:
-#                     event.journey.state = state
-#
-#         tags = get_default_mappings_for(event.type, 'tags')
-#         if tags:
-#             event.tags = Tags(values=tuple(tags), count=len(tags))
-#
-#     return event

@@ -49,6 +49,10 @@
         "value": {
           "type": "object",
           "enabled": false
+        },
+        "old_value": {
+          "type": "object",
+          "enabled": false
         }
       }
     },

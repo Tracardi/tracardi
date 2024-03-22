@@ -1,8 +1,8 @@
-from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
+from tracardi.service.storage.elastic.interface.event import load_event_from_db
 
 from .model.configuration import Configuration
 
@@ -19,7 +19,7 @@ class InjectEvent(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        event = await event_db.load(self.config.event_id)
+        event = await load_event_from_db(self.config.event_id)
         if event is None:
             self.console.warning("Event id `{}` does not exist.".format(self.config.event_id))
         return Result(port="payload", value=event)

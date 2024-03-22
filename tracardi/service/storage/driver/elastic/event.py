@@ -517,7 +517,7 @@ async def flush():
     return await storage_manager('event').flush()
 
 
-async def get_nth_last_event(event_type: str, n: int, profile_id: str = None):
+async def get_nth_last_event(event_type: str, n: int, profile_id: Optional[str] = None):
     profile_term = {"profile.id": profile_id} if profile_id is not None else {"metadata.profile_less": True}
 
     result = (await storage_manager("event").query({

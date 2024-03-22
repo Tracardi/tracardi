@@ -8,7 +8,6 @@ from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
 from tracardi.service.storage.mysql.service.user_service import UserService
 from tracardi.service.storage.mysql.service.version_service import VersionService
-from tracardi.service.tracker import track_event
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
@@ -19,6 +18,7 @@ from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
 from tracardi.service.storage.driver.elastic import raw as raw_db
 from tracardi.service.storage.index import Resource
+from tracardi.service.track_event import track_event
 
 if License.has_license():
     from com_tracardi.db.bootstrap.default_bridges import commercial_default_bridges
@@ -41,8 +41,19 @@ async def install_system(credentials: Credentials):
         mtm = MultiTenantManager()
         logger.info(f"Authorizing `{context.tenant}` for installation at {mtm.auth_endpoint}.")
 
-        await mtm.authorize(tracardi.multi_tenant_manager_api_key)
-        tenant = await mtm.is_tenant_allowed(context.tenant)
+        if not tracardi.multi_tenant_manager_api_key:
+            raise PermissionError(f"Installation stopped not Tenant Management API key set.")
+
+        if not tracardi.multi_tenant_manager_url:
+            raise PermissionError(f"Installation stopped not Tenant Management API URL set.")
+
+        try:
+            await mtm.authorize(tracardi.multi_tenant_manager_api_key)
+            tenant = await mtm.is_tenant_allowed(context.tenant)
+        except Exception as e:
+            raise PermissionError(f"Installation stopped Tenant Management System returned na error when authorizing "
+                                  f"tenant {context.tenant}: Details {str(e)}.")
+
         if not tenant:
             raise PermissionError(f"Installation forbidden. Tenant [{context.tenant}] not allowed.")
 

@@ -123,40 +123,37 @@ class Bridge(NamedEntity):
 Based on the sqlalchemy table:
 
 ```python
-class ActivationTable(Base):
-    __tablename__ = 'activation'
+class CustomerTable(Base):
+    __tablename__ = 'customer'
+    # __table_args__ = {'schema': 'tms'}
 
-    id = Column(String(40))
+    id = Column(String(40), primary_key=True)
     name = Column(String(128))
-    description = Column(Text)
-    activation_class = Column(String(128))
-    audience_query = Column(Text)
-    mapping = Column(JSON)
-    enabled = Column(Boolean, default=False)
-
-    tenant = Column(String(40))
-    production = Column(Boolean)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('id', 'tenant', 'production'),
-    )
-
-    running: bool = False
+    description = Text()
+    created = Column(DateTime)
+    install_token = Column(String(128))
+    domain = Column(String(128))
+    tracardi_host = Column(String(128))
+    email = Column(String(128))
+    license = Text()
+    license_expire = Column(DateTime)
 ```
 
-and it to the corresponding object `Activation` that has the following schema:
+and it to the corresponding object `Customer` that has the following schema:
 
 ```python
-from typing import Optional
-from tracardi.domain.named_entity import NamedEntityInContext
-
-
-class Activation(NamedEntityInContext):
+class Customer(BaseModel):
+    id: str
+    name: str
     description: Optional[str] = ""
-    activation_class: str
-    audience_query: str
-    mapping: Optional[dict] = {}
-    enabled: bool = False
+    created = datetime
+    install_token = str
+    domain = str
+    tracardi_host = str
+    email = str
+    license = str
+    license_expire = datetime
+
 
 ```
 

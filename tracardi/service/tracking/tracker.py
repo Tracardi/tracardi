@@ -1,9 +1,9 @@
 import time
 
+from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.storage.redis_client import RedisClient
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
-from tracardi.service.tracking.storage.event_storage import save_events
 from tracardi.service.tracking.storage.profile_storage import save_profile
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.track_data_computation import compute_data
@@ -69,7 +69,7 @@ async def os_tracker(source: EventSource,
             # Save events
             if events:
                 # Sync save
-                await save_events(events)
+                await save_events_in_db(events)
 
         # Save field change log
         if field_timestamp_monitor:
@@ -85,17 +85,6 @@ async def os_tracker(source: EventSource,
             if 'utm' in tracker_payload.context:
                 del tracker_payload.context['utm']
 
-            # ----------------------------------------------
-            # FROM THIS POINT EVENTS AND SESSION SHOULD NOT
-            # BE MUTATED, ALREADY SAVED
-            # ----------------------------------------------
-
-            # MUTEX: Session and profile are saved if workflow triggered
-            profile, session, events, ux, response, field_changes, is_wf_triggered = await exec_workflow(profile.id,
-                                                                                                         session,
-                                                                                                         events,
-                                                                                                         tracker_payload)
-
             # Dispatch events SYNCHRONOUSLY
             await sync_event_destination(
                 profile,
@@ -104,9 +93,32 @@ async def os_tracker(source: EventSource,
                 tracker_payload.debug)
 
             # Dispatch outbound profile SYNCHRONOUSLY
+            changed_fields_monitor = field_timestamp_monitor.get_timestamps_log()
             await sync_profile_destination(
                 profile,
-                session)
+                session,
+                changed_fields_monitor.get_history_log(add_id=False)
+            )
+
+            # ----------------------------------------------
+            # FROM THIS POINT EVENTS AND SESSION SHOULD NOT
+            # BE MUTATED, ALREADY SAVED
+            # ----------------------------------------------
+
+            # MUTEX: Session and profile are saved if workflow triggered
+            profile, session, events, ux, response, wf_field_changes, is_wf_triggered = await exec_workflow(
+                get_entity_id(profile),
+                session,
+                events,
+                tracker_payload)
+
+            if wf_field_changes.has_changes():
+                # Dispatch outbound profile SYNCHRONOUSLY again because the profile changed
+                await sync_profile_destination(
+                    profile,
+                    session,
+                    wf_field_changes.get_history_log(add_id=False)
+                )
 
             return {
                 "task": tracker_payload.get_id(),

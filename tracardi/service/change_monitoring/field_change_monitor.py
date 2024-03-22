@@ -15,7 +15,7 @@ class FieldChangeTimestampManager:
     def __init__(self):
         self._log: Dict[str, Dict[str, dict]] = defaultdict(dict)
 
-    def append(self, type: str, profile_id:str, event_id:str, session_id:str, source_id:str, field: str, value: Any):
+    def append(self, type: str, profile_id:str, event_id:str, session_id:str, source_id:str, field: str, value: Any, old_value: Any):
         self._log[type][field]= dict(
                 id=f"{field}:{profile_id}",
                 type=type,
@@ -25,7 +25,8 @@ class FieldChangeTimestampManager:
                 source_id=source_id,
                 session_id=session_id,
                 field=field,
-                value=value
+                value=value,
+                old_value=old_value
             )
 
     def merge(self, timestamps: List[Dict]):
@@ -37,7 +38,8 @@ class FieldChangeTimestampManager:
                 session_id=timestamp['session_id'],
                 source_id=timestamp['source_id'],
                 field=timestamp['field'],
-                value=timestamp['value']
+                value=timestamp['value'],
+                old_value=timestamp.get('old_value', None)
             )
 
     def has_changes(self):
@@ -53,11 +55,12 @@ class FieldChangeTimestampManager:
                 result.append(log_entry)
         return result
 
-    def get_history_log(self) -> List[Dict]:
+    def get_history_log(self, add_id:bool = True) -> List[Dict]:
         result = []
         for field_dicts in self._log.values():
             for log_entry in field_dicts.values():
-                log_entry['id'] = str(uuid4())
+                if add_id:
+                    log_entry['id'] = str(uuid4())
                 result.append(log_entry)
         return result
 
@@ -72,7 +75,7 @@ class FieldChangeLogManager:
     def __init__(self):
         self._log: List[dict] = []
 
-    def append(self, type: str, profile_id:str, event_id: str, session_id:str, source_id:str, field: str, value: Any):
+    def append(self, type: str, profile_id:str, event_id: str, session_id:str, source_id:str, field: str, value: Any, old_value:Any):
         self._log.append(
             dict(
                 id=str(uuid4()),
@@ -83,7 +86,8 @@ class FieldChangeLogManager:
                 source_id=source_id,
                 session_id=session_id,
                 field=field,
-                value=value
+                value=value,
+                old_value=old_value
             )
         )
 
@@ -115,6 +119,7 @@ class FieldTimestampMonitor:
         return self.flat_profile[item]
 
     def __setitem__(self, field: str, value: Any):
+        old_value = self.flat_profile.get(field, None)
         self.flat_profile[field] = value
         self._timestamps_log.append(
             type=self.type,
@@ -123,7 +128,8 @@ class FieldTimestampMonitor:
             session_id=self.session_id,
             source_id=self.source_id,
             field=field,
-            value=value
+            value=value,
+            old_value=old_value
         )
 
     def __add__(self, other):
