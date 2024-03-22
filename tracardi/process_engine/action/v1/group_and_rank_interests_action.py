@@ -1,12 +1,11 @@
+import json
 from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-import json
 from tracardi.domain.profile import Profile
-from tracardi.service.segments.segment_trigger import trigger_segment_add
 
 
 class Configuration(PluginConfig):
@@ -16,21 +15,21 @@ class Configuration(PluginConfig):
 
     @field_validator('interests')
     @classmethod
-    def must_not_be_emty(cls, value):
+    def must_not_be_empty(cls, value):
         if value.strip() == "":
             raise ValueError("interests must not be empty.")
         return value
     
     @field_validator('segment_mapping')
     @classmethod
-    def must_not_be_emty(cls, value):
+    def must_not_be_empty(cls, value):
         if value.strip() == "":
             raise ValueError("segment_mapping must not be empty.")
         return value
     
     @field_validator('segments_to_apply')
     @classmethod
-    def must_not_be_emty(cls, value):
+    def must_not_be_empty(cls, value):
         if value.strip() == "" or value.isnumeric() != True:
             raise ValueError("segments_to_apply must not be empty and must be a number.")
         return value
@@ -63,12 +62,12 @@ class GroupAndRankInterestsAction(ActionRunner):
 
             ranked_segments = sorted(segment_count.keys(), key=lambda x: segment_count[x], reverse=True)
             
-            segments_to_apply=int(dot[self.config.segments_to_apply])
-            if segments_to_apply > len(ranked_segments):
-                segments_to_apply=len(ranked_segments)
-                
-            for index in range(0, segments_to_apply):
-                profile = trigger_segment_add(profile, self.session, ranked_segments[index])
+            # segments_to_apply=int(dot[self.config.segments_to_apply])
+            # if segments_to_apply > len(ranked_segments):
+            #     segments_to_apply=len(ranked_segments)
+            #
+            # for index in range(0, segments_to_apply):
+            #     profile = trigger_segment_add(profile, self.session, ranked_segments[index])
                 
             self.profile.replace(profile)
 
@@ -84,7 +83,7 @@ def register() -> Plugin:
             className=GroupAndRankInterestsAction.__name__,
             inputs=["payload"],
             outputs=["result", "error"],
-            version='0.8.2',
+            version='0.9.0',
             init={
                 "interests": "",
                 "segment_mapping": "",
@@ -122,9 +121,9 @@ def register() -> Plugin:
                         
                     ])
             ]),
-            license="MIT + CC",
+            license="MIT",
             author="Matt Cameron",
-            manual="GroupAndRankInterestsAction"
+            manual="group_and_rank_interests"
         ),
         metadata=MetaData(
             name='Group and Rank Interests',
