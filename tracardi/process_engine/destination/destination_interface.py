@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from tracardi.domain.destination import Destination
 from tracardi.domain.event import Event
@@ -14,7 +14,7 @@ class DestinationInterface:
         self.debug = debug
         self.resource = resource
 
-    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session]):
+    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session], changed_fields: List[dict] = None):
         pass
 
     async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event):

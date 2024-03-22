@@ -1,9 +1,10 @@
 from typing import Optional, Union, List, Set
 
+from tracardi.service.storage.elastic.interface.session import load_session_from_db, save_session_to_db, \
+    refresh_session_db
 from tracardi.service.tracking.cache.session_cache import load_session_cache, save_session_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.session import Session
-from tracardi.service.storage.driver.elastic import session as session_db
 
 
 async def load_session(session_id: str,
@@ -16,7 +17,7 @@ async def load_session(session_id: str,
     if cached_session is not None:
         return cached_session
 
-    session = await session_db.load_by_id(session_id)
+    session = await load_session_from_db(session_id)
     if session:
         save_session_cache(session, context)
 
@@ -31,9 +32,9 @@ async def save_session(sessions: Union[Session, List[Session], Set[Session]],
     if context is None:
         context = get_context()
 
-    await session_db.save(sessions)
+    await save_session_to_db(sessions)
     if refresh:
-        await session_db.refresh()
+        await refresh_session_db()
 
     if cache:
         save_session_cache(sessions, context)
@@ -51,9 +52,9 @@ async def store_session(sessions: Union[Session, List[Session], Set[Session]],
     if context is None:
         context = get_context()
 
-    await session_db.save(sessions)
+    await save_session_to_db(sessions)
     if refresh:
-        await session_db.refresh()
+        await refresh_session_db()
 
     if cache:
         save_session_cache(sessions, context)

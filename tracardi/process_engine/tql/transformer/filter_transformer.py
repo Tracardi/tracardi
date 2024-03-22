@@ -72,6 +72,9 @@ class FilterTransformer(TransformerNamespace):
     def OP_INTEGER(self, args):
         return int(args.value)
 
+    def OP_TIME(self, args):
+        return args.value
+
     def OP_STRING(self, args):
         return args.value.strip('"')
 

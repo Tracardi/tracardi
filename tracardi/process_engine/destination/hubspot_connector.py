@@ -1,3 +1,5 @@
+from typing import List
+
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
 from ...domain.destination import Destination
@@ -118,7 +120,7 @@ class HubSpotConnector(DestinationInterface):
             # Try to update
             await self._update_contact(payload, profile.id, hubspot_id)
 
-    async def dispatch_profile(self, data: dict, profile: Profile, session: Session):
+    async def dispatch_profile(self, data: dict, profile: Profile, session: Session, changed_fields: List[dict]=None):
         await self._dispatch(data, profile)
 
     async def dispatch_event(self, data: dict, profile: Profile, session: Session, event: Event):

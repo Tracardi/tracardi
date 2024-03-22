@@ -125,14 +125,16 @@ class TrackerPayload(BaseModel):
         return False
 
     def replace_profile(self, profile_id):
-        self.profile = Entity(id=profile_id)
-        self.profile_less = False
-        self.options.update({"saveProfile": True})
+        if profile_id:
+            self.profile = PrimaryEntity(id=profile_id)
+            self.profile_less = False
+            self.options.update({"saveProfile": True})
 
     def replace_session(self, session_id):
-        self.session = Entity(id=session_id)
-        self.profile_less = False
-        self.options.update({"saveSession": True})
+        if session_id:
+            self.session = Entity(id=session_id)
+            self.profile_less = False
+            self.options.update({"saveSession": True})
 
     def get_timestamp(self) -> float:
         return self._timestamp

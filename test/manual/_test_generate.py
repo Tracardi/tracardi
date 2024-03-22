@@ -2,7 +2,7 @@ import asyncio
 from faker import Faker
 
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.service.tracker import track_event
+from tracardi.service.track_event import track_event
 
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 

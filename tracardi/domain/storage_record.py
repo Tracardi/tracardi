@@ -20,6 +20,8 @@ class StorageRecord(dict):
 
     @staticmethod
     def build_from_elastic(elastic_record: dict) -> 'StorageRecord':
+        if '_source' not in elastic_record:
+            raise ValueError("No data in StorageRecord. Source does not exist.")
         record = StorageRecord(**elastic_record['_source'])
         record.set_meta_data(RecordMetadata(id=elastic_record['_id'], index=elastic_record['_index']))
         if 'inner_hits' in elastic_record:
@@ -168,7 +170,10 @@ class StorageRecords(dict):
         """
         Return row data the same way as elastic does.
         """
-        return self._hits[n]
+        try:
+            return self._hits[n]
+        except Exception:
+            return None
 
     def first(self) -> Optional[StorageRecord]:
         if len(self._hits) > 0:

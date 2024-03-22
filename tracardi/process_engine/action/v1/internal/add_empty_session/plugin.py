@@ -1,12 +1,12 @@
 from uuid import uuid4
-from tracardi.domain.entity import Entity, PrimaryEntity
+from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event import EventSession
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.driver.elastic import session as session_db
+from tracardi.service.storage.elastic.interface.session import save_session_to_db
 
 
 class AddEmptySessionAction(ActionRunner):
@@ -27,7 +27,7 @@ class AddEmptySessionAction(ActionRunner):
             )
 
         self.execution_graph.set_sessions(session)
-        await session_db.save(session)
+        await save_session_to_db(session)
 
         self.set_tracker_option("saveSession", True)
 

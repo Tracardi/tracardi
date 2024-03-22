@@ -10,6 +10,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.config import tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracker_config import TrackerConfig
@@ -88,7 +89,20 @@ class WebHookBridge(ConfigurableBridge):
                     if not tracker_payload.profile:
                         tracker_payload.replace_profile(str(uuid4()))
 
+            elif 'replace_profile_id' in self.config:
 
+                replace_profile_id = self.config.get('replace_profile_id', None)
+
+                if replace_profile_id:
+                    # There is always o event in webhook
+                    flat_properties = flatten(tracker_payload.events[0].properties)
+                    if replace_profile_id in flat_properties:
+                        profile_id = str(flat_properties.get(replace_profile_id, None))
+                        tracker_payload.replace_profile(profile_id)
+                        if not tracker_payload.session:
+                            # Replace session id with profile ID
+                            tracker_payload.replace_session(profile_id)
+                        tracker_config.static_profile_id = True
 
         return tracker_payload, tracker_config
 

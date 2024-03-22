@@ -16,11 +16,9 @@ from tracardi.domain.event_validator import EventValidator
 from tracardi.domain.flow import FlowRecord
 from tracardi.domain.identification_point import IdentificationPoint
 from tracardi.domain.import_config import ImportConfig
-from tracardi.domain.live_segment import WorkflowSegmentationTrigger
 from tracardi.domain.report import Report
 from tracardi.domain.resource import Resource, ResourceRecord
 from tracardi.domain.rule import Rule
-from tracardi.domain.segment import Segment
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.task import Task
 from tracardi.domain.user import User
@@ -97,9 +95,6 @@ class_mapping = {
     "event-reshaping": (EventReshapingSchema, EventReshapingTable, map_to_event_reshaping_table, None, None),
     # "tracardi-pro": (None, TracardiProTable, None, None, None), # todo check
     "task": (Task, TaskTable, map_to_task_table, None, None),
-    # "live-segment": (
-    #     WorkflowSegmentationTrigger, WorkflowSegmentationTriggerTable, map_to_workflow_segmentation_trigger_table, None,
-    #     None),
     "event-management": (EventTypeMetadata, EventMappingTable, map_to_event_mapping_table, None, None),
     "user": (User, UserTable, map_to_user_table, user_record_converter, None),
     "destination": (Destination, DestinationTable, map_to_destination_table, destination_record_converter, None),
