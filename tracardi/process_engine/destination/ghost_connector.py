@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -28,11 +28,13 @@ class GhostConnector(DestinationInterface):
 
             init = self.destination.destination.init
 
+            #TODO Finish.
+
         except Exception as e:
             logger.error(str(e))
             raise e
 
-    async def dispatch_profile(self, mapped_data, profile: Profile, session: Session):
+    async def dispatch_profile(self, mapped_data, profile: Profile, session: Session, changed_fields: List[dict]=None):
         self._dispatch(payload=mapped_data)
 
     async def dispatch_event(self, mapped_data, profile: Profile, session: Session, event: Event):

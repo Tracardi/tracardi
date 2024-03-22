@@ -477,14 +477,14 @@ def get_resource_types() -> List[ResourceSettings]:
             tags=['ghost'],
             name='Ghost',
             manual='ghost_resource',
-            destination=DestinationData(
-                package="tracardi.process_engine.destination.ghost_connector.GhostConnector",
-                init={
-                    "uuid": "<uuid>",
-                    "label_add": "<label-to-add>",
-                    "label_remove": "<label-to-remove>"
-                }
-            )
+            # destination=DestinationData(
+            #     package="tracardi.process_engine.destination.ghost_connector.GhostConnector",
+            #     init={
+            #         "uuid": "<uuid>",
+            #         "label_add": "<label-to-add>",
+            #         "label_remove": "<label-to-remove>"
+            #     }
+            # )
         )
     ]
 
