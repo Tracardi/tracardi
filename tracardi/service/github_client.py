@@ -1,3 +1,5 @@
+import json
+
 from typing import Optional
 
 from tracardi.exceptions.log_handler import get_logger
@@ -89,6 +91,6 @@ class GitHubClient:
                     content = await response.json()
                     # The content is base64 encoded, so decode it
                     file_content = base64.b64decode(content['content']).decode('utf-8')
-                    return file_content
+                    return json.loads(file_content)
                 else:
                     raise ConnectionError(f"Failed to retrieve file. Status code: {response.status}, Response: {await response.text()}")
