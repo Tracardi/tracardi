@@ -4,6 +4,16 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
 
+    "tracardi.process_engine.action.v1.connectors.aws.s3.upload_segments.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "aws_access_key_id": "",
+                "aws_secret_access_key": "",
+                "s3_bucket": ""
+            },
+            resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.get_integration_id_action": PluginMetadata(
         test=PluginTest(
             init={
