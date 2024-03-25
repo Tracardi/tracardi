@@ -28,6 +28,18 @@ def get_resource_types() -> List[ResourceSettings]:
             }
         ),
         ResourceSettings(
+            id="aws-s3",
+            name="AWS S3",
+            icon="aws",
+            tags=["aws", "s3"],
+            config={
+                "access_key": "<api-key>",
+                "secret": "<secret>",
+                "bucket": "<bucket>"
+            },
+            manual='s3_aws'
+        ),
+        ResourceSettings(
             id="api",
             name="API endpoint",
             icon="cloud",
