@@ -68,7 +68,7 @@ async def count_profile_duplicates(profile_ids: List[str]):
     })
 
 
-async def load_profiles_with_duplicated_ids():
+async def load_profiles_with_duplicated_ids(log_error=True):
     query = {
         "size": 0,
         "aggs": {
@@ -92,7 +92,7 @@ async def load_profiles_with_duplicated_ids():
         }
     }
 
-    records = await storage_manager('profile').query(query)
+    records = await storage_manager('profile').query(query, log_error)
     for data in records.aggregations("duplicate_ids").buckets():
         profile_ids = StorageRecords.build_from_elastic(data['duplicate_documents'])
         for profile_id in profile_ids:

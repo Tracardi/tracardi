@@ -551,11 +551,12 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def query(self, query) -> StorageRecords:
+    async def query(self, query, logg_error=True) -> StorageRecords:
         try:
             return await self.storage.search(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
-            _logger.error(str(e))
+            if logg_error:
+                _logger.error(str(e))
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
