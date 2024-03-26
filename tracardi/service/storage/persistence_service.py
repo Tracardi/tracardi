@@ -25,6 +25,44 @@ from tracardi.service.storage.elastic_storage import ElasticStorage
 _logger = get_logger(__name__)
 
 
+from datetime import datetime, timedelta
+
+
+def _timedelta_to_largest_unit(delta: timedelta):
+
+    # Constants
+    SECONDS_PER_MINUTE = 60
+    SECONDS_PER_HOUR = 3600
+    SECONDS_PER_DAY = 86400
+
+    total_seconds = delta.total_seconds()
+
+    # Calculate for each unit
+    if total_seconds >= SECONDS_PER_DAY:
+        days = total_seconds / SECONDS_PER_DAY
+        return int(days), 'd', "%y-%m-%d"
+    elif total_seconds >= SECONDS_PER_HOUR:
+        hours = total_seconds / SECONDS_PER_HOUR
+        return int(hours), 'h', "%d/%m %H:%M"
+    elif total_seconds >= SECONDS_PER_MINUTE:
+        minutes = total_seconds / SECONDS_PER_MINUTE
+        return int(minutes), 'm', "%H:%M"
+    else:
+        return int(total_seconds), 's', "%M"
+
+def _interval(start_date: datetime, end_date: datetime):
+
+    INTERVALS = 30
+
+    # Calculate the total difference in minutes to ensure we cover all cases accurately
+    total_seconds = (end_date - start_date).total_seconds()
+
+    interval = timedelta(seconds=int(total_seconds/INTERVALS))
+
+    return _timedelta_to_largest_unit(interval)
+
+
+
 class SqlSearchQueryParser(metaclass=Singleton):
     def __init__(self):
         self.parser = Parser(Parser.read('grammar/filter_condition.lark'), start='expr')
@@ -167,31 +205,6 @@ class SqlSearchQueryEngine:
 
     async def histogram(self, query: DatetimeRangePayload, group_by: str = None) -> QueryResult:
 
-        def __interval(min: datetime, max: datetime):
-
-            max_interval = 50
-            min_interval = 20
-
-            span = max - min
-
-            if span.days > max_interval:
-                # up
-                return int(span.days / max_interval), 'd', "%y-%m-%d"
-            elif min_interval > span.days:
-                # down
-                interval = int((span.days * 24) / max_interval)
-                if interval > 0:
-                    return interval, 'h', "%d/%m %H:%M"
-
-                # minutes
-                interval = int((span.days * 24 * 60) / max_interval)
-                if interval > 0:
-                    return interval, 'm', "%H:%M"
-
-                return 1, 'm', "%H:%M"
-
-            return 1, 'd', "%y-%m-%d"
-
         def __format_count(data, unit, interval, format):
             for row in data:
                 # todo timestamp no timezone
@@ -231,7 +244,7 @@ class SqlSearchQueryEngine:
         # sql = query.where
         time_field = self.time_fields_map[self.index]
 
-        interval, unit, format = __interval(min_date_time, max_date_time)
+        interval, unit, format = _interval(min_date_time, max_date_time)
         try:
             es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
         except LarkError:
