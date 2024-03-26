@@ -232,7 +232,7 @@ async def aggregate_event_type() -> List[Dict[str, str]]:
         }
     }
 
-    result = await _aggregate_event(bucket_name, "type", query, buckets_size=15)
+    result = await _aggregate_event(bucket_name, "type", query, buckets_size=12)
 
     if bucket_name not in result.aggregations:
         return []

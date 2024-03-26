@@ -160,7 +160,7 @@ class DatetimeRangePayload(BaseModel):
     where: Optional[str] = ""
     timeZone: Optional[str] = None
     start: Optional[int] = 0
-    limit: Optional[int] = 20
+    limit: Optional[int] = 25
     rand: Optional[float] = 0
 
     def get_dates(self) -> (datetime, datetime):

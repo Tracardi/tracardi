@@ -151,12 +151,8 @@ async def count_online_by_location():
         "aggs": {
             "tz": {
                 "terms": {
+                    "size": 3,
                     "field": "session.tz"
-                }
-            },
-            "country": {
-                "terms": {
-                    "field": "device.name"
                 }
             }
         }

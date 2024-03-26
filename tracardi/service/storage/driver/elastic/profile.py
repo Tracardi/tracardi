@@ -164,6 +164,19 @@ def load_by_ids(profile_ids: List[str], batch):
     return storage_manager('profile').scan(query, batch)
 
 
+async def load_modified_top_profiles(size):
+    query = {
+        "size": size,
+        "sort": [
+            {
+                "metadata.time.update": {
+                    "order": "desc"
+                }
+            }
+        ]
+    }
+    return await storage_manager('profile').query(query)
+
 async def load_by_primary_ids(profile_ids: List[str], size):
     query = {
         "size": size,
