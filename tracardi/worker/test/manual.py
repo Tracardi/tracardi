@@ -31,7 +31,7 @@ async def main():
         },
         "params": {
             "mysql": "user",
-            "version": "0.9.0-rc4"
+            "version": "0.9.0-rc5"
         },
         "worker": "copy_to_mysql",
         "asynchronous": True
