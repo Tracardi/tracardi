@@ -30,17 +30,9 @@ async def event_destination_dispatch(profile: Optional[Profile],
 
             dot.set_storage("event", event)
 
-            result = await get_dispatch_destination_and_data(
-                dot, destinations, debug
-            )
-
-            if result is None:
-                # No destination found
-                return
-
-            destination_instance, reshaped_data = result
-
-            await destination_instance.dispatch_event(reshaped_data, profile=profile, session=session, event=event)
+            async for destination_instance, reshaped_data in get_dispatch_destination_and_data(dot, destinations,
+                                                                                               debug):
+              await destination_instance.dispatch_event(reshaped_data, profile=profile, session=session, event=event)
         except Exception as e:
             logger.error(
                 str(e),
@@ -63,29 +55,21 @@ async def profile_destination_dispatch(profile: Optional[Profile],
     dot = DotAccessor(profile, session)
     destinations: List[Destination] = await load_profile_destinations()
 
-    result = await get_dispatch_destination_and_data(
-        dot, destinations, debug
-    )
-
-    if result is None:
-        # No destination found
-        return
-
-    destination_instance, reshaped_data = result
-    try:
-        logger.info(f"Dispatching {result}. Profile id: {get_entity_id(profile)}.")
-        await destination_instance.dispatch_profile(reshaped_data, profile=profile, session=session, changed_fields=changed_fields)
-    except Exception as e:
-        logger.error(
-            str(e),
-            extra=ExtraInfo.exact(
-                flow_id=None,
-                node_id=None,
-                event_id=None,
-                profile_id=get_entity_id(profile),
-                origin='profile-destination',
-                package=__name__,
-                traceback=get_traceback(e)
+    async for destination_instance, reshaped_data in get_dispatch_destination_and_data(dot, destinations, debug):
+        try:
+            logger.info(f"Dispatching {destination_instance}. Profile id: {get_entity_id(profile)}.")
+            await destination_instance.dispatch_profile(reshaped_data, profile=profile, session=session, changed_fields=changed_fields)
+        except Exception as e:
+            logger.error(
+                str(e),
+                extra=ExtraInfo.exact(
+                    flow_id=None,
+                    node_id=None,
+                    event_id=None,
+                    profile_id=get_entity_id(profile),
+                    origin='profile-destination',
+                    package=__name__,
+                    traceback=get_traceback(e)
+                )
             )
-        )
 

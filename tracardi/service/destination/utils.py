@@ -59,11 +59,8 @@ async def get_dispatch_destination_and_data(
     async for destination, resource, data in _get_destination_dispatchers(destinations,
                                                                           dot,
                                                                           template):  # type: Destination, Resource, Any
-
         destination_class = _get_destination_class(destination)
         destination_instance = destination_class(debug, resource, destination)  # type: DestinationInterface
         reshaped_data = template.reshape(reshape_template=destination.mapping)
 
-        return destination_instance, reshaped_data
-
-    return None
+        yield destination_instance, reshaped_data
