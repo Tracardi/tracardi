@@ -170,6 +170,10 @@ class ProfileMerger:
     @staticmethod
     def _get_primary_id(all_profiles) ->Optional[str]:
         primary_ids = {profile.primary_id for profile in all_profiles if profile.primary_id is not None}
+
+        if len(primary_ids) == 0:
+            return None
+
         if len(primary_ids)>1:
             logger.warning(f"Primary ID conflict while merging. Expected Single primary id got {primary_ids}.")
 
