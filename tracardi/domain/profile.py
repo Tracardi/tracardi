@@ -1,11 +1,9 @@
-from zoneinfo import ZoneInfo
-
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set, Tuple
 
 from dotty_dict import Dotty
-from pydantic import BaseModel, ValidationError, PrivateAttr
+from pydantic import BaseModel, PrivateAttr
 from dateutil import parser
 
 from .entity import PrimaryEntity
@@ -80,18 +78,6 @@ class ConsentRevoke(BaseModel):
     revoke: Optional[datetime] = None
 
 
-class CustomMetric(BaseModel):
-    next: datetime
-    timestamp: datetime
-    value: Any = None
-
-    def expired(self) -> bool:
-        return now_in_utc() > self.next.replace(tzinfo=ZoneInfo('UTC'))
-
-    def changed(self, value) -> bool:
-        return value != self.value
-
-
 class Profile(PrimaryEntity):
     ids: Optional[List[str]] = []
     metadata: Optional[ProfileMetadata] = ProfileMetadata(
@@ -158,35 +144,55 @@ class Profile(PrimaryEntity):
                 return True
         return False
 
-    def create_auto_merge_hashed_ids(self):
-        ids_len = len(self.ids)
+    def create_auto_merge_hashed_ids(self) -> Optional[set]:
+
         if tracardi.is_apm_on():
 
+            new_ids = set()
+            update_fields = set()
+
             if self.data.identifier.pk and not self.has_hashed_pk():
-                self.ids.append(hash_id(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
+                new_ids.add(hash_id(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
+                update_fields.add('data.identifier.pk')
 
             if self.data.identifier.id and not self.has_hashed_id():
-                self.ids.append(hash_id(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
+                new_ids.add(hash_id(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
+                update_fields.add('data.identifier.id')
 
             if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
-                self.ids.append(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
+                new_ids.add(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
+                update_fields.add('data.contact.email.business')
+
             if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
-                self.ids.append(hash_id(self.data.contact.email.main, PREFIX_EMAIL_MAIN))
+                new_ids.add(hash_id(self.data.contact.email.main, PREFIX_EMAIL_MAIN))
+                update_fields.add('data.contact.email.main')
+
             if self.data.contact.email.has_private() and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
-                self.ids.append(hash_id(self.data.contact.email.private, PREFIX_EMAIL_PRIVATE))
+                new_ids.add(hash_id(self.data.contact.email.private, PREFIX_EMAIL_PRIVATE))
+                update_fields.add('data.contact.email.private')
 
             if self.data.contact.phone.has_business() and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
-                self.ids.append(hash_id(self.data.contact.phone.business, PREFIX_PHONE_BUSINESS))
+                new_ids.add(hash_id(self.data.contact.phone.business, PREFIX_PHONE_BUSINESS))
+                update_fields.add('data.contact.phone.business')
+
             if self.data.contact.phone.has_main() and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
-                self.ids.append(hash_id(self.data.contact.phone.main, PREFIX_PHONE_MAIN))
+                new_ids.add(hash_id(self.data.contact.phone.main, PREFIX_PHONE_MAIN))
+                update_fields.add('data.contact.phone.main')
+
             if self.data.contact.phone.has_mobile() and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
-                self.ids.append(hash_id(self.data.contact.phone.mobile, PREFIX_PHONE_MOBILE))
+                new_ids.add(hash_id(self.data.contact.phone.mobile, PREFIX_PHONE_MOBILE))
+                update_fields.add('data.contact.phone.mobile')
+
             if self.data.contact.phone.has_whatsapp() and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
-                self.ids.append(hash_id(self.data.contact.phone.whatsapp, PREFIX_PHONE_WHATSUP))
+                new_ids.add(hash_id(self.data.contact.phone.whatsapp, PREFIX_PHONE_WHATSUP))
+                update_fields.add('data.contact.phone.whatsapp')
 
             # Update if new data
-            if len(self.ids) > ids_len:
-                self.mark_for_update()
+            if new_ids:
+                self.ids = list(set(self.ids) | new_ids)
+                return update_fields
+
+        return None
 
     def add_auto_merge_hashed_id(self, flat_field) -> Optional[str]:
         field_closure = FIELD_TO_PROPERTY_MAPPING.get(flat_field, None)
@@ -253,51 +259,14 @@ class Profile(PrimaryEntity):
             "storage": self.get_meta_data().model_dump()
         }
 
-    def has_metric(self, metric_name) -> bool:
-        return metric_name in self.data.metrics.custom
-
-    def need_metric_computation(self, metric_name) -> bool:
-        if not self.has_metric(metric_name):
-            return False
-
-        if 'next' not in self.data.metrics.custom[metric_name]:
-            return True
-
-        if not isinstance(self.data.metrics.custom[metric_name], dict):
-            print(f"ERROR: Metric {metric_name} is not dict.")
-            return False
-
-        try:
-            metric = CustomMetric(**self.data.metrics.custom[metric_name])
-        except ValidationError as e:
-            print(str(e))
-            return False
-
-        return metric.expired()
-
     def mark_for_update(self):
         self.operation.update = True
         self.metadata.time.update = now_in_utc()
         self.data.compute_anonymous_field()
         self.set_updated_in_workflow()
-
-    def get_next_metric_computation_date(self) -> Optional[datetime]:
-
-        if not self.data.metrics.custom:
-            return None
-
-        all_next_dates = []
-        for _, _metric_data in self.data.metrics.custom.items():
-            if 'next' in _metric_data:
-                _next = _metric_data['next']
-                if isinstance(_next, str):
-                    _next = parser.parse(_next)
-
-                if not isinstance(_next, datetime):
-                    print("err")
-
-                all_next_dates.append(_next)
-        return min(all_next_dates)
+        changed_fields = self.create_auto_merge_hashed_ids()
+        if changed_fields:
+            self.metadata.system.set_auto_merge_fields(changed_fields)
 
     def is_merged(self, profile_id) -> bool:
         return profile_id != self.id and profile_id in self.ids

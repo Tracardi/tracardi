@@ -24,6 +24,7 @@ from tracardi.service.utils.getters import get_entity_id
 
 if License.has_license():
     from com_tracardi.service.event_mapper import map_event_props_to_traits, map_events_tags_and_journey
+    from com_tracardi.service.tracking.consistency_check import check_profile_consistency
 
 logger = get_logger(__name__)
 
@@ -73,7 +74,6 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
 async def event_to_profile_mapping(flat_event: Dotty,
                                    flat_profile: Optional[FlatProfile],
                                    session: Session,
-                                   source: EventSource,
                                    field_change_logger: FieldChangeLogger
                                    ) -> Tuple[
     Dotty, Optional[FlatProfile], Set[str], FieldChangeLogger]:
@@ -218,7 +218,6 @@ async def compute_events(events: List[EventPayload],
                 flat_event,
                 flat_profile,
                 session,
-                source,
                 field_change_logger
             )
 
@@ -262,11 +261,14 @@ async def compute_events(events: List[EventPayload],
 
         event_objects.append(event)
 
-
     # Recreate Profile from flat_profile, that was changed
 
     if profile:
         try:
+
+            if License.has_license():
+                flat_profile = check_profile_consistency(flat_profile)
+
             profile = Profile(**flat_profile.to_dict())
             profile.set_meta_data(profile_metadata)
             if auto_merge_ids:

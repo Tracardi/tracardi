@@ -22,7 +22,7 @@ class ProfileSystemMetadata(BaseModel):
         if 'auto_merge' in  self.aux:
             del (self.aux['auto_merge'])
 
-    def set_auto_merge_fields(self, auto_merge_ids):
+    def set_auto_merge_fields(self, auto_merge_ids: set):
         if 'auto_merge' not in self.aux or not isinstance(self.aux['auto_merge'], list):
             self.aux['auto_merge'] = list(auto_merge_ids)
         else:

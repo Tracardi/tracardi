@@ -31,7 +31,6 @@
       "data.contact.phone.whatsapp": "properties.phone.whatsapp"
     },
     "profile": {
-      "primary_id":                  ["data.identifier.pk", "equal"],
       "data.identifier.pk":          ["data.identifier.pk", "equal"],
       "data.identifier.token":       ["data.identifier.token", "equal"],
       "data.contact.email.main":     ["data.contact.email.main", "equal"],
@@ -154,7 +153,6 @@
       "data.contact.app.signal":     "properties.signal"
     },
     "profile": {
-      "primary_id":                   ["data.identifier.pk", "equal"],
       "data.pii.firstname":           ["data.pii.firstname", "equal"],
       "data.pii.lastname":            ["data.pii.lastname", "equal"],
       "data.contact.phone.main":      ["data.contact.phone.main", "equal"],

@@ -8,6 +8,7 @@ from tracardi.config import tracardi
 def uuid4_from_md5(hash: str):
     return f"{hash[0:8]}-{hash[8:12]}-{hash[12:16]}-{hash[16:20]}-{hash[20:32]}"
 
+
 def hash_pk_guid(value: str, prefix: str):
     if not tracardi.is_apm_on():
         raise ValueError("Env AUTO_PROFILE_MERGING is not set.")
@@ -16,6 +17,7 @@ def hash_pk_guid(value: str, prefix: str):
     pk_guid = uuid4_from_md5(hash)[:24]
 
     return f"{prefix[0:3]}-{pk_guid}"
+
 
 def get_pk_timestamp() -> str:
     # Calculate the days and seconds since 2014-01-01
@@ -33,15 +35,17 @@ def get_pk_timestamp() -> str:
     return days_str + seconds_str
 
 
-def timestamped_hash_id(value: str, prefix: str, pk_guid:str=None) -> str:
+def timestamped_hash_id(value: str, prefix: str, pk_guid: str = None) -> str:
     if pk_guid is None:
         pk_guid = hash_pk_guid(value, prefix)
     pk_timestamp = get_pk_timestamp()
 
     return pk_guid + pk_timestamp
 
+
 def has_hash_id(hash_id: str, ids) -> bool:
     return hash_id in ids
+
 
 def hash_id(value: str, prefix: str):
     if not tracardi.is_apm_on():
@@ -52,11 +56,13 @@ def hash_id(value: str, prefix: str):
 
     return f"{prefix[0:3]}-{pk_guid}"
 
+
 def has_pk_guid(pk_guid, ids):
     for string in ids:
         if string.startswith(pk_guid):
             return True
     return False
+
 
 def deep_sort(obj):
     """

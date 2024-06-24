@@ -1,79 +1,11 @@
 import datetime
 
-from tracardi.domain.profile import Profile, CustomMetric
+from tracardi.domain.profile import Profile
 
 
 def test_profile_must_have_id_in_ids():
     profile = Profile(id="1")
     assert profile.id in profile.ids
-
-
-def test_next_metric_computation_date():
-    p = Profile(id="1")
-    assert p.get_next_metric_computation_date() is None
-    next1 = datetime.datetime.utcnow() + datetime.timedelta(seconds=10)
-    p.data.metrics.custom['metric1'] = dict(
-        timestamp=datetime.datetime.utcnow(),
-        next=next1,
-        value=10
-    )
-    assert p.get_next_metric_computation_date() == next1
-
-    next2 = datetime.datetime.utcnow() + datetime.timedelta(seconds=5)
-    p.data.metrics.custom['metric2'] = dict(
-        timestamp=datetime.datetime.utcnow(),
-        next=next2,
-        value=11
-    )
-    assert p.get_next_metric_computation_date() == next2
-
-    next3 = datetime.datetime.utcnow() + datetime.timedelta(seconds=15)
-    p.data.metrics.custom['metric3'] = dict(
-        timestamp=datetime.datetime.utcnow(),
-        next=next3,
-        value=12
-    )
-    assert p.get_next_metric_computation_date() == next2
-
-
-def test_has_metric():
-    p = Profile(id="1")
-    assert p.has_metric('metric1') is False
-    next1 = datetime.datetime.utcnow() + datetime.timedelta(seconds=10)
-    p.data.metrics.custom['metric1'] = dict(
-        timestamp=datetime.datetime.utcnow(),
-        next=next1,
-        value=10
-    )
-    assert p.has_metric('metric1')
-
-
-def test_needs_metric_computation():
-    p = Profile(id="1")
-
-    assert p.need_metric_computation('metric1') is False
-
-    # After
-
-    next1 = datetime.datetime.utcnow() + datetime.timedelta(seconds=10)
-    p.data.metrics.custom['metric1'] = dict(
-        timestamp=datetime.datetime.utcnow(),
-        next=next1,
-        value=10
-    )
-
-    assert p.need_metric_computation('metric1') is False
-
-    # Before
-
-    next1 = datetime.datetime.utcnow() + datetime.timedelta(seconds=-10)
-    p.data.metrics.custom['metric1'] = dict(
-        timestamp=datetime.datetime.utcnow(),
-        next=next1,
-        value=10
-    )
-
-    assert p.need_metric_computation('metric1') is True
 
 
 def test_data_fill():
