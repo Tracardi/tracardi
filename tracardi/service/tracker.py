@@ -5,9 +5,9 @@ from tracardi.exceptions.exception import BlockedException
 from tracardi.service.cache.event_source import load_event_source
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.license import License
+from tracardi.service.merging.facade_old import merge_profile_by_merging_keys
 from tracardi.service.tracking.storage.profile_storage import load_profile
 from tracardi.service.utils.date import now_in_utc
-from tracardi.service.profile_merger import ProfileMerger
 from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -60,12 +60,11 @@ class Tracker:
 
                     if tracker_payload.profile is not None:
                         # Merge profiles
-                        merged_profile = await ProfileMerger.invoke_merge_profile(
+                        merged_profile = await merge_profile_by_merging_keys(
                             referred_profile,
                             # Merge when id = tracker_payload.profile.id
                             # This basically loads the current profile.
-                            merge_by=[('id', tracker_payload.profile.id)],
-                            limit=2000)
+                            merge_by=[('id', tracker_payload.profile.id)])
                         tracker_payload.profile = Entity(id=merged_profile.id)
 
                     else:

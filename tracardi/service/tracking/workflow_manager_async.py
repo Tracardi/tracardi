@@ -15,7 +15,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.service.profile_merger import ProfileMerger
+from tracardi.service.merging.facade_old import merge_profile_by_merging_keys, get_merging_keys_and_values
 from tracardi.service.storage.mysql.service.workflow_trigger_service import WorkflowTriggerService
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
@@ -74,11 +74,10 @@ class WorkflowManagerAsync:
 
     @staticmethod
     async def merge_profile(profile: Profile) -> Profile:
-        merge_key_values = ProfileMerger.get_merging_keys_and_values(profile)
-        merged_profile = await ProfileMerger.invoke_merge_profile(
+        merge_key_values = get_merging_keys_and_values(profile)
+        merged_profile = await merge_profile_by_merging_keys(
             profile,
-            merge_by=merge_key_values,
-            limit=1000)
+            merge_by=merge_key_values)
 
         if merged_profile is not None:
             # Replace profile with merged_profile

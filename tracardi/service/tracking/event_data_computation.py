@@ -71,12 +71,14 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
     return flat_event
 
 
-async def event_to_profile_mapping(flat_event: Dotty,
-                                   flat_profile: Optional[FlatProfile],
-                                   session: Session,
-                                   field_change_logger: FieldChangeLogger
-                                   ) -> Tuple[
+async def event_to_traits_and_profile_mapping(flat_event: Dotty,
+                                              flat_profile: Optional[FlatProfile],
+                                              session: Session,
+                                              field_change_logger: FieldChangeLogger
+                                              ) -> Tuple[
     Dotty, Optional[FlatProfile], Set[str], FieldChangeLogger]:
+
+    # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     auto_merge_ids = set()
 
@@ -214,7 +216,7 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, flat_profile, _auto_merge_ids, field_change_logger = await event_to_profile_mapping(
+            flat_event, flat_profile, _auto_merge_ids, field_change_logger = await event_to_traits_and_profile_mapping(
                 flat_event,
                 flat_profile,
                 session,

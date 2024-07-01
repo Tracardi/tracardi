@@ -7,4 +7,4 @@ elasticsearch==7.10.1
 pulsar-client==3.3.0
 huey==2.4.5
 
-git+https://github.com/Tracardi/tracardi.git@0.9.1-dev
+git+https://github.com/Tracardi/tracardi.git@1.0.x

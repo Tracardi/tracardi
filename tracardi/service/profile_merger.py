@@ -1,10 +1,11 @@
 import asyncio
 from dotty_dict import Dotty
 
-from tracardi.service.tracking.storage.profile_storage import save_profile, delete_profile
+from tracardi.service.tracking.storage.profile_storage import save_profile
 
 from tracardi.domain.profile_data import ProfileData
 from .storage.elastic.interface.event import refresh_event_db
+from .storage.elastic.interface.merging import delete_multiple_profiles
 from .storage.elastic.interface.session import refresh_session_db
 
 from ..context import get_context
@@ -26,8 +27,8 @@ from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
-
 logger = get_logger(__name__)
+
 
 async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
                                                               duplicate_profiles: List[Profile]) -> Profile:
@@ -50,12 +51,6 @@ async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], m
             await refresh_session_db()
 
 
-async def _delete_profiles(profile_ids: List[Tuple[str, RecordMetadata]]):
-    tasks = [asyncio.create_task(delete_profile(profile_id, metadata.index))
-             for profile_id, metadata in profile_ids]
-    return await asyncio.gather(*tasks)
-
-
 class ProfileMerger:
 
     def __init__(self, profile: Profile):
@@ -73,7 +68,7 @@ class ProfileMerger:
     @staticmethod
     async def invoke_merge_profile(profile: Optional[Profile],
                                    merge_by: List[Tuple[str, str]],  # Field: value
-                                   condition:str ='must',
+                                   condition: str = 'must',
                                    limit: int = 2000) -> Optional[Profile]:
 
         if profile is None:
@@ -157,9 +152,10 @@ class ProfileMerger:
         # This is the fix for merging error on location
         flat_new_values = Dotty(new_value)
         if 'data.devices.last.geo.location' in flat_new_values:
-            del(flat_new_values['data.devices.last.geo.location'])
+            del (flat_new_values['data.devices.last.geo.location'])
             if 'data.devices.last.geo.latitude' in flat_new_values and 'data.devices.last.geo.longitude' in flat_new_values:
-                flat_new_values['data.devices.last.geo.location'] = [flat_new_values['data.devices.last.geo.latitude'], flat_new_values['data.devices.last.geo.longitude']]
+                flat_new_values['data.devices.last.geo.location'] = [flat_new_values['data.devices.last.geo.latitude'],
+                                                                     flat_new_values['data.devices.last.geo.longitude']]
             new_value = flat_new_values.to_dict()
 
         traits = new_value['traits']
@@ -168,13 +164,13 @@ class ProfileMerger:
         return traits, data, conflicts_aux
 
     @staticmethod
-    def _get_primary_id(all_profiles) ->Optional[str]:
+    def _get_primary_id(all_profiles) -> Optional[str]:
         primary_ids = {profile.primary_id for profile in all_profiles if profile.primary_id is not None}
 
         if len(primary_ids) == 0:
             return None
 
-        if len(primary_ids)>1:
+        if len(primary_ids) > 1:
             logger.warning(f"Primary ID conflict while merging. Expected Single primary id got {primary_ids}.")
 
         return list(primary_ids)[0]
@@ -355,7 +351,7 @@ class ProfileMerger:
             logger.debug(f"Profiles to delete {records_to_delete}.",
                          extra=ExtraInfo.build(origin="merging", object=self))
 
-            await _delete_profiles(records_to_delete)
+            await delete_multiple_profiles(records_to_delete)
 
             # Replace current profile with merged profile
             return merged_profile

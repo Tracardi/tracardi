@@ -1,8 +1,10 @@
 import asyncio
+from deepdiff import DeepDiff
 from dotty_dict import dotty
 
 from tracardi.context import Context, ServerContext
-from tracardi.service.merging.merger import get_modifications
+from tracardi.service.merging.merger import universal_merger, get_changed_values, get_modifications
+from tracardi.service.merging._merging_rules import rules
 from tracardi.service.tracking.storage.profile_storage import load_profile
 
 

@@ -1,7 +1,7 @@
+import asyncio
 from typing import Union, Tuple
 
 from tracardi.domain.profile import *
-from tracardi.config import elastic
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.driver.elastic import raw as raw_db
@@ -34,7 +34,7 @@ async def get_duplicated_profiles_by_field(field):
         yield bucket['key'], bucket['doc_count']
 
 
-def get_profiles_by_field_and_value(field:str, email: str):
+def get_profiles_by_field_and_value(field: str, email: str):
     query = {
         "query": {
             "term": {
@@ -43,6 +43,7 @@ def get_profiles_by_field_and_value(field:str, email: str):
         }
     }
     return storage_manager('profile').scan(query, batch=1000)
+
 
 def load_profiles_for_auto_merge():
     query = {
@@ -54,8 +55,10 @@ def load_profiles_for_auto_merge():
     }
     return storage_manager('profile').scan(query, batch=1000)
 
+
 async def load_profile_duplicates(profile_ids: List[str]):
     return await storage_manager('profile').query({
+        "size": 10000,
         "query": {
             "bool": {
                 "should": [
@@ -101,6 +104,39 @@ async def count_profile_duplicates(profile_ids: List[str]):
     })
 
 
+# async def load_profiles_with_duplicated_ids(log_error=True):
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             "duplicate_ids": {
+#                 "terms": {
+#                     "field": "ids",
+#                     "min_doc_count": 2,
+#                     "size": 1000
+#                 },
+#                 "aggs": {
+#                     "duplicate_documents": {
+#                         "top_hits": {
+#                             "size": 100,
+#                             "_source": {
+#                                 "includes": ["id"]
+#                             }
+#                         }
+#                     }
+#                 }
+#             }
+#         }
+#     }
+#
+#     records = await storage_manager('profile').query(query, log_error)
+#
+#     for data in records.aggregations("duplicate_ids").buckets():
+#         logger.info(f"Found {data['doc_count']} profiles with the same ID='{data['key']}'")
+#         profile_ids = StorageRecords.build_from_elastic(data['duplicate_documents'])
+#         for profile_id in profile_ids:
+#             yield profile_id['id']
+
+
 async def load_profiles_with_duplicated_ids(log_error=True):
     query = {
         "size": 0,
@@ -110,26 +146,21 @@ async def load_profiles_with_duplicated_ids(log_error=True):
                     "field": "ids",
                     "min_doc_count": 2,
                     "size": 1000
-                },
-                "aggs": {
-                    "duplicate_documents": {
-                        "top_hits": {
-                            "_source": {
-                                "includes": ["id"]
-                            }
-                        }
-                    }
                 }
-            },
-
+            }
         }
     }
 
     records = await storage_manager('profile').query(query, log_error)
+
+    duplicated_ids = set()
     for data in records.aggregations("duplicate_ids").buckets():
-        profile_ids = StorageRecords.build_from_elastic(data['duplicate_documents'])
-        for profile_id in profile_ids:
-            yield profile_id['id']
+        logger.info(f"Found {data['doc_count']} profiles with the same ID='{data['key']}'")
+        duplicated_ids.add(data['key'])
+
+    if duplicated_ids:
+        async for row in load_by_ids(list(duplicated_ids), batch=1000):
+            yield row
 
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
@@ -209,6 +240,7 @@ async def load_modified_top_profiles(size):
         ]
     }
     return await storage_manager('profile').query(query)
+
 
 async def load_by_primary_ids(profile_ids: List[str], size):
     query = {
@@ -354,3 +386,13 @@ async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket
         _query['query'] = query
 
     return await storage_manager('profile').query(_query)
+
+
+async def load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:
+    if isinstance(profile.ids, list):
+        set(profile.ids).add(profile.id)
+        profile_ids = list(profile.ids)
+    else:
+        profile_ids = [profile.id]
+
+    return await load_profile_duplicates(profile_ids)

@@ -1,3 +1,11 @@
+Version: 1.0.0
+----------------------------------------------------------
+* Versio 1.0.0 doe not require migration from version 0.9.0.x
+* Refactored merging mechanism for commercial version
+* New APM 
+* News feed
+* Bug fixes
+
 Version: 0.9.0
 ----------------------------------------------------------
 * GUI Dark theme.

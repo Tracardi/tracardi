@@ -35,7 +35,7 @@ async def save_profile(profiles: Union[Profile, List[Profile], Set[Profile]],
         save_profile_cache(profiles, context)
 
 
-async def load_profile(profile_id: str, context: Optional[Context] = None, fallback_to_db: bool =True) -> Optional[Profile]:
+async def load_profile(profile_id: str, context: Optional[Context] = None, fallback_to_db: bool = True) -> Optional[Profile]:
 
     if context is None:
         context = get_context()

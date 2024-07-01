@@ -4,6 +4,7 @@ from tracardi.service.tracker import Tracker
 from tracardi.service.tracker_config import TrackerConfig
 from typing import List
 
+
 async def track_event(tracker_payload: TrackerPayload,
                       ip: str,
                       allowed_bridges: List[str],

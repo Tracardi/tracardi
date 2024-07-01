@@ -88,7 +88,6 @@ async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id)
             }
         }
     }
-
     return await storage_manager(index=index).update_by_query(query=query)
 
 

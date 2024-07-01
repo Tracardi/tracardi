@@ -83,7 +83,7 @@ def test_to_plugin_mapping():
         plugin_spec_manual="This is the manual",
         plugin_spec_author="John Doe",
         plugin_spec_license="MIT",
-        plugin_spec_version="1.0.0",
+        plugin_spec_version="x.0.0",
         plugin_spec_run_once_value="my_value",
         plugin_spec_run_once_ttl=3600,
         plugin_spec_run_once_type="time",
@@ -134,7 +134,7 @@ def test_to_plugin_mapping():
     assert flow_action_plugin.plugin.spec.manual == "This is the manual"
     assert flow_action_plugin.plugin.spec.author == "John Doe"
     assert flow_action_plugin.plugin.spec.license == "MIT"
-    assert flow_action_plugin.plugin.spec.version == "1.0.0"
+    assert flow_action_plugin.plugin.spec.version == "x.0.0"
     assert flow_action_plugin.plugin.start is True
     assert flow_action_plugin.plugin.spec.run_once.value == "my_value"
     assert flow_action_plugin.plugin.spec.run_once.ttl == 3600

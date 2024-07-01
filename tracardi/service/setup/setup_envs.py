@@ -439,6 +439,22 @@ system_settings = [
     ),
     SystemSettings(
         **{
+            "label": "ENABLE_EVENT_RESHAPING",
+            "value": tracardi.enable_event_reshaping,
+            "desc": "Default: yes. Enables event reshaping.",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "ENABLE_EVENT_VALIDATION",
+            "value": tracardi.enable_event_validation,
+            "desc": "Default: yes. Enables event validation.",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
             "label": "ENABLE_FIELD_UPDATE_LOG",
             "value": tracardi.enable_field_update_log,
             "desc": "Default: Yes. Save timestamps of updated fields."

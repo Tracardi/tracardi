@@ -140,7 +140,7 @@ class Profile(PrimaryEntity):
 
     def has_hashed_pk(self) -> bool:
         for id in self.ids:
-            if id.startswith(PREFIX_IDENTIFIER_ID):
+            if id.startswith(PREFIX_IDENTIFIER_PK):
                 return True
         return False
 
@@ -214,7 +214,7 @@ class Profile(PrimaryEntity):
                     return None
 
                 self.ids.append(_hash_id)
-                
+
                 return flat_field
 
         return None
@@ -411,7 +411,6 @@ class FlatProfile(Dotty):
         if not key.startswith(ignore):
             self.log.log(key, old_value)
 
-
     def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
         field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
         if field_closure:
@@ -510,16 +509,19 @@ class FlatProfile(Dotty):
         interest_key = f'interests.{interest}'
         self[interest_key] = value
 
-
     def mark_for_update(self):
         self['operation.update'] = True
         self['metadata.time.update'] = now_in_utc()
 
-
     def has_changed(self) -> bool:
         return self.get('operation.update',False)
 
-
-
     def is_new(self) -> bool:
         return self['operation.new']
+
+    def mark_as_merged(self):
+        self['metadata.system.aux.auto_merge'] = []
+        self['metadata.aux.merge_time'] = now_in_utc()
+
+    def update_changed_fields(self, changed_fields):
+        self['metadata.fields'] = changed_fields

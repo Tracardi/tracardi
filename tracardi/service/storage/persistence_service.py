@@ -79,12 +79,19 @@ class SqlSearchQueryEngine:
     def __init__(self, persister):
         self.persister = persister  # type: PersistenceService
         self.index = persister.storage.index_key
-        self.time_fields_map = {
+        self.sorting_map = {
+            'event': [{'metadata.time.insert': 'desc'}],
+            'session': [{'metadata.time.insert': 'desc'}],
+            'profile': [{'metadata.time.update': 'desc'}, {'metadata.time.insert': 'desc'}, {'metadata.time.create': 'desc'}],
+            'log': [{'date': 'desc'}],
+            'entity': [{'metadata.time.insert': 'desc'}],
+        }
+        self.time_field_map = {
             'event': 'metadata.time.insert',
             'session': 'metadata.time.insert',
-            'profile': 'metadata.time.insert',
+            'profile': 'metadata.time.update',
             'log': 'date',
-            'entity': 'metadata.time.insert'
+            'entity': 'metadata.time.insert',
         }
         self.parser = SqlSearchQueryParser()
 
@@ -119,15 +126,15 @@ class SqlSearchQueryEngine:
         return StorageRecords.build_from_elastic(result)
 
     @staticmethod
-    def _string_query(query: DatetimeRangePayload, min_date_time, max_date_time, time_field: str,
+    def _string_query(query: DatetimeRangePayload, min_date_time, max_date_time, time_range_field: str, sorting: list,
                       time_zone: str) -> dict:
 
         es_query = {
             "from": query.start,
             "size": query.limit,
-            'sort': [{time_field: 'desc'}],
+            'sort': sorting,
             "query": {"bool": {"filter": {"range": {
-                time_field: {
+                time_range_field: {
                     'from': min_date_time,
                     'to': max_date_time,
                     'include_lower': True,
@@ -142,11 +149,11 @@ class SqlSearchQueryEngine:
 
         return es_query
 
-    def _query(self, query: DatetimeRangePayload, min_date_time, max_date_time, time_field: str,
+    def _query(self, query: DatetimeRangePayload, min_date_time, max_date_time, time_range_field: str, sorting: list,
                time_zone: str) -> dict:
         query_range = {
             'range': {
-                time_field: {
+                time_range_field: {
                     'from': min_date_time,
                     'to': max_date_time,
                     'include_lower': True,
@@ -160,7 +167,7 @@ class SqlSearchQueryEngine:
         es_query = {
             "from": query.start,
             "size": query.limit,
-            'sort': [{time_field: 'desc'}],
+            'sort': sorting,
         }
 
         query_where = self.parser.parse(query.where)
@@ -181,17 +188,19 @@ class SqlSearchQueryEngine:
 
     async def time_range(self, query: DatetimeRangePayload) -> QueryResult:
 
-        if self.index not in self.time_fields_map:
+        if self.index not in self.sorting_map:
             raise ValueError("No time_field available on `{}`".format(self.index))
 
         min_date_time, max_date_time = query.get_dates()  # type: datetime, datetime
         min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
 
-        time_field = self.time_fields_map[self.index]
+        sorting = self.sorting_map[self.index]
+        time_field = self.time_field_map[self.index]
+
         try:
-            es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
+            es_query = self._query(query, min_date_time, max_date_time, time_field, sorting, time_zone)
         except LarkError:
-            es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
+            es_query = self._string_query(query, min_date_time, max_date_time, time_field, sorting, time_zone)
 
         try:
             result = await self.persister.filter(es_query)
@@ -240,13 +249,14 @@ class SqlSearchQueryEngine:
         min_date_time, max_date_time, time_zone = self._convert_time_zone(query, min_date_time, max_date_time)
 
         # sql = query.where
-        time_field = self.time_fields_map[self.index]
+        sorting = self.sorting_map[self.index]
+        time_field = self.time_field_map[self.index]
 
         interval, unit, format = _interval(min_date_time, max_date_time)
         try:
-            es_query = self._query(query, min_date_time, max_date_time, time_field, time_zone)
+            es_query = self._query(query, min_date_time, max_date_time, time_field, sorting, time_zone)
         except LarkError:
-            es_query = self._string_query(query, min_date_time, max_date_time, time_field, time_zone)
+            es_query = self._string_query(query, min_date_time, max_date_time, time_field, sorting, time_zone)
 
         if group_by is None:
             es_query = {

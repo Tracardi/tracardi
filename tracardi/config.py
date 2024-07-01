@@ -13,7 +13,7 @@ from tracardi.service.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
 from tracardi.service.utils.validators import is_valid_url
 
-VERSION = os.environ.get('_DEBUG_VERSION', '0.9.1-dev')
+VERSION = os.environ.get('_DEBUG_VERSION', '2.0.0-alfa1')
 TENANT_NAME = os.environ.get('TENANT_NAME', None)
 
 logger = get_logger(__name__)
@@ -215,7 +215,6 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_event_reshaping = get_env_as_bool('ENABLE_EVENT_RESHAPING', 'yes')
         self.enable_event_source_check = get_env_as_bool('ENABLE_EVENT_SOURCE_CHECK', 'yes')
         self.enable_identification_point = get_env_as_bool('ENABLE_IDENTIFICATION_POINT', 'yes')
-        self.enable_post_event_segmentation = get_env_as_bool('ENABLE_POST_EVENT_SEGMENTATION', 'yes')
         self.system_events = get_env_as_bool('SYSTEM_EVENTS', 'no')
         self.enable_errors_on_response = get_env_as_bool('ENABLE_ERRORS_ON_RESPONSE', 'yes')
         self.enable_field_update_log = get_env_as_bool('ENABLE_FIELD_UPDATE_LOG', 'no')

@@ -22,7 +22,7 @@ from ..request import Request
 from ...exceptions.log_handler import get_logger
 from ...service.decorators.function_memory_cache import async_cache_for
 from ...service.license import License, LICENSE
-from ...service.profile_merger import ProfileMerger
+from ...service.merging.facade_old import merge_profile_by_merging_keys
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..identification_point import IdentificationPoint
@@ -493,10 +493,9 @@ class TrackerPayload(BaseModel):
                         # We have fields that identify profile according to identification point
 
                         if profile_fields:
-                            profile = await ProfileMerger.invoke_merge_profile(
+                            profile = await merge_profile_by_merging_keys(
                                 self.create_default_profile(),
-                                merge_by=profile_fields,
-                                limit=1000)
+                                merge_by=profile_fields)
 
                     # If there is still no profile that means that it could not be loaded. It can happen if
                     # event properties did not have all necessary data or the is no profile with defined

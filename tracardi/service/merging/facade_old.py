@@ -1,12 +1,27 @@
-from typing import List
+from typing import List, Optional
+
 from tracardi.domain.profile import Profile
-from tracardi.domain.storage_record import StorageRecord, RecordMetadata
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.tracking.storage.profile_storage import save_profile
+
 from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.domain.storage_record import StorageRecord, RecordMetadata
 
-async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
 
+async def merge_profile_by_merging_keys(profile: Optional[Profile], merge_by) -> Optional[Profile]:
+    return await ProfileMerger.invoke_merge_profile(
+        profile,
+        # Merge when id = tracker_payload.profile.id
+        # This basically loads the current profile.
+        merge_by=merge_by,
+        limit=2000)
+
+
+def get_merging_keys_and_values(profile: Profile):
+    return ProfileMerger.get_merging_keys_and_values(profile)
+
+
+async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) -> Optional[Profile]:
     if isinstance(profile_ids, list):
         set(profile_ids).add(profile_id)
         profile_ids = list(profile_ids)
@@ -37,5 +52,4 @@ async def deduplicate_profile(profile_id: str, profile_ids:List[str] = None):
         similar_profiles.append(_profile_record.to_entity(Profile))
 
     # Merged profiles refresh index
-    merger = ProfileMerger(profile)
-    return await merger.compute_one_profile(similar_profiles)
+    return await ProfileMerger(profile).compute_one_profile(similar_profiles)

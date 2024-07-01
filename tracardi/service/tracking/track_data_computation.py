@@ -4,6 +4,7 @@ from tracardi.config import tracardi
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.exceptions.exception import BlockedException
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.license import License
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
@@ -22,6 +23,7 @@ from tracardi.service.tracker_config import TrackerConfig
 if License.has_license():
     from com_tracardi.service.data_compliance import event_data_compliance
     from com_tracardi.service.identification_point_service import identify_and_merge_profile
+
 
 async def _compute(source,
                    profile: Optional[Profile],
@@ -56,7 +58,8 @@ async def _compute(source,
         # Profile computation
 
         # Compute Profile GEO Markets and continent
-        profile, field_change_logger = compute_profile_aux_geo_markets(profile, session, tracker_payload, field_change_logger)
+        profile, field_change_logger = compute_profile_aux_geo_markets(profile, session, tracker_payload,
+                                                                       field_change_logger)
 
         # Update profile last geo with session device geo
         profile, field_change_logger = update_profile_last_geo(session, profile, field_change_logger)
@@ -100,6 +103,12 @@ async def _compute(source,
     return profile, session, events, tracker_payload
 
 
+def _has_google_bot_header(request: dict) -> bool:
+    try:
+        return request['headers']['from'] == 'googlebot(at)googlebot.com'
+    except KeyError:
+        return False
+
 async def compute_data(
         profile: Profile,
         session: Optional[Session],
@@ -108,7 +117,6 @@ async def compute_data(
         source: EventSource,
         field_change_logger: FieldChangeLogger) -> Tuple[
     Profile, Optional[Session], List[Event], TrackerPayload]:
-
     # We need profile and session before async
 
     # ------------------------------------
@@ -130,8 +138,8 @@ async def compute_data(
         session = update_session_utm_with_client_data(tracker_payload, session)
 
         # If agent is a bot stop
-        if session.app.bot and tracardi.disallow_bot_traffic:
-            raise PermissionError(f"Traffic from bot is not allowed.")
+        if (session.app.bot or _has_google_bot_header(tracker_payload.request)) and tracardi.disallow_bot_traffic:
+            raise BlockedException(f"Traffic from bot is not allowed.")
 
     profile, session, events, tracker_payload = await _compute(
         source,

@@ -2,5 +2,5 @@ from tracardi.domain.version import Version
 
 
 def test_version_name():
-    version = Version(version="0.9.1-dev", db_version="091x")
-    assert version.name == Version._generate_name("091x")
+    version = Version(version="x.0.0", db_version="090x")
+    assert version.name == Version._generate_name("090x")
