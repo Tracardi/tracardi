@@ -8,7 +8,7 @@ docker run \
 -e PULSAR_HOST=pulsar://192.168.0.116:6650 \
 -e PULSAR_API=http://192.168.0.116:8080 \
 -e LOGGING_LEVEL=info \
-tracardi/init:1.0.0
+tracardi/init:2.0.0
 
 
 docker run \
@@ -19,5 +19,5 @@ docker run \
 -e PULSAR_HOST=pulsar://192.168.0.116:6650 \
 -e PULSAR_API=http://192.168.0.116:8080 \
 -e LOGGING_LEVEL=info \
-tracardi/background-worker:1.0.0
+tracardi/background-worker:2.0.0
 ```
