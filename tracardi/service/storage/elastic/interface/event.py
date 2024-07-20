@@ -71,7 +71,8 @@ async def load_events_by_session_and_profile(profile_id: str, session_id: str, l
         "metadata": doc["metadata"],
         "type": doc["type"],
         "name": doc.get('name', None),
-        "source": doc.get('source')
+        "source": doc.get('source'),
+        "context": doc.get('context', None)
     } for doc in result]
 
     return {"result": result, "more_to_load": more_to_load}

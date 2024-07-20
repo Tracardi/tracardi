@@ -51,7 +51,7 @@ class HttpConfiguration(BaseModel):
 
             if self.method.lower() == 'get':
                 params = flatten(body)
-                params = {key: self._convert_params(value) for key,value in params.items() if value is not None}
+                params = {key: self._convert_params(value) for key, value in params.items() if value is not None}
                 return {
                     "params": params
                 }
@@ -132,8 +132,10 @@ class HttpConnector(DestinationInterface):
             logger.error(str(e), e, exc_info=True)
             raise e
 
-    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session], changed_fields: List[dict]=None):
+    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session],
+                               changed_fields: List[dict] = None, metadata=None):
         await self._dispatch(data, changed_fields)
 
-    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event):
+    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event,
+                             metadata=None):
         await self._dispatch(data, [])

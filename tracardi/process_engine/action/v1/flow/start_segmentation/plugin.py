@@ -1,4 +1,4 @@
-from tracardi.service.tracking.storage.profile_storage import load_profile
+from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from uuid import uuid4
 
 from tracardi.domain.event_metadata import EventMetadata

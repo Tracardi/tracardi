@@ -1,4 +1,5 @@
 import logging
+from sqlalchemy import or_
 from typing import Tuple, Optional
 
 from tracardi.config import tracardi
@@ -40,7 +41,7 @@ class DestinationService(TableService):
             DestinationTable.enabled == True,
             DestinationTable.on_profile_change_only == False,
             DestinationTable.source_id == source_id,
-            DestinationTable.event_type_id == event_type,
+            or_(DestinationTable.event_type_id == event_type, DestinationTable.event_type_id == None),
         )
         return await self._select_in_deployment_mode(DestinationTable, where=where)
 

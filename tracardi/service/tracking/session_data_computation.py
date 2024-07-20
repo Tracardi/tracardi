@@ -26,6 +26,7 @@ def _get_user_agent_string(session: Session, tracker_payload: TrackerPayload) ->
         except Exception:
             return None
 
+
 def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[UserAgent]:
     _user_agent = tracker_payload.get_user_agent()
 
@@ -38,39 +39,84 @@ def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Option
 
     return None
 
+
 def _compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
     user_agent = _get_user_agent(session, tracker_payload)
     if user_agent:
         try:
-
-            session.os.version = user_agent.os.version_string
             session.os.name = user_agent.os.family
+        except Exception:
+            if 'os' in session.context:
+                session.os.name = session.context['os'].get('name', None)
 
+        try:
+            session.os.version = user_agent.os.version_string
+        except Exception:
+            if 'os' in session.context:
+                session.os.version = session.context['os'].get('version', None)
+
+        try:
             device_type = 'mobile' if user_agent.is_mobile else \
                 'pc' if user_agent.is_pc else \
                     'tablet' if user_agent.is_tablet else \
                         'email' if user_agent.is_email_client else None
+            session.device.type = device_type
 
+        except Exception:
             if 'device' in session.context:
-                session.device.name = session.context['device'].get('name', user_agent.device.family)
-                session.device.brand = session.context['device'].get('brand', user_agent.device.brand)
-                session.device.model = session.context['device'].get('model', user_agent.device.model)
-                session.device.touch = session.context['device'].get('model', user_agent.device.is_touch_capable)
-                session.device.type = session.context['device'].get('type', device_type)
-            else:
-                session.device.name = user_agent.device.family
-                session.device.brand = user_agent.device.brand
-                session.device.model = user_agent.device.model
-                session.device.touch = user_agent.is_touch_capable
-                session.device.type = device_type
+                session.device.type = session.context['device'].get('type', None)
 
-            session.app.bot = user_agent.is_bot
+        try:
+            session.device.name = user_agent.device.family
+        except Exception:
+            if 'device' in session.context:
+                session.device.name = session.context['device'].get('name', None)
+
+        try:
+            session.device.brand = user_agent.device.brand
+        except Exception:
+            if 'device' in session.context:
+                session.device.brand = session.context['device'].get('brand', None)
+
+        try:
+            session.device.model = user_agent.device.model
+        except Exception:
+            if 'device' in session.context:
+                session.device.model = session.context['device'].get('model', None)
+
+        try:
+            session.device.touch = user_agent.is_touch_capable
+        except Exception:
+            pass
+
+        try:
             session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
             session.app.version = user_agent.browser.version_string
             session.app.type = "browser"
 
+            session.app.bot = user_agent.is_bot
         except Exception:
-            pass
+            if 'app' in session.context:
+                session.app.name = session.context['app'].get('name', None)
+                session.app.version = session.context['app'].get('version', None)
+                session.app.type = session.context['app'].get('type', "unknown")
+
+    else:
+
+        if 'os' in session.context:
+            session.os.name = session.context['os'].get('name', None)
+
+        if 'device' in session.context:
+            session.device.name = session.context['device'].get('name', None)
+            session.device.brand = session.context['device'].get('brand', None)
+            session.device.model = session.context['device'].get('model', None)
+            session.device.touch = session.context['device'].get('model', None)
+            session.device.type = session.context['device'].get('type', None)
+
+        if 'app' in session.context:
+            session.app.name = session.context['app'].get('name', None)
+            session.app.version = session.context['app'].get('version', None)
+            session.app.type = session.context['app'].get('type', "unknown")
 
     return session
 
@@ -156,7 +202,6 @@ def compute_session(session: Session,
                     tracker_payload: TrackerPayload,
                     tracker_config: TrackerConfig
                     ) -> Session:
-
     # Compute the User Agent data
     session = _compute_data_from_user_agent(session, tracker_payload)
 
@@ -183,8 +228,8 @@ def compute_session(session: Session,
         pass
 
     try:
-         header_from = tracker_payload.request['headers']['from']
-         if header_from == "googlebot(at)googlebot.com":
+        header_from = tracker_payload.request['headers']['from']
+        if header_from == "googlebot(at)googlebot.com":
             session.app.bot = True
     except Exception:
         pass

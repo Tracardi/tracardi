@@ -7,7 +7,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
-from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.elastic.interface import raw as raw_db
 
 
 def validate(config: dict):

@@ -2,8 +2,8 @@ import json
 from json import JSONDecodeError
 
 from tracardi.service.storage.elastic.interface.event import load_event_from_db
-from tracardi.service.storage.elastic.interface.session import load_session_from_db
-from tracardi.service.tracking.storage.profile_storage import load_profile
+from tracardi.service.storage.elastic.interface.collector.load.session import load_session_from_db
+from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result

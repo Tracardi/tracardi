@@ -12,4 +12,4 @@ def test_encrypt_base_model_object():
     # Verify
     assert isinstance(result, str)
 
-    assert decrypt(result) == {'package': '1', 'init': {}, 'form': {}}
+    assert decrypt(result) == {'form': {}, 'init': {}, 'package': '1', 'pro': False}

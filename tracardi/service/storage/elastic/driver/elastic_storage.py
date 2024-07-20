@@ -8,7 +8,7 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception import DuplicatedRecordException
-from tracardi.service.storage.elastic_client import ElasticClient
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.service.storage.index import Index, Resource
 
 

@@ -1,10 +1,14 @@
+from datetime import datetime
+
 import asyncio
 from time import time
 from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
+from tracardi.context import get_context
 from tracardi.exceptions.exception import ExpiredException
+from tracardi.service.utils.date import seconds_to_minutes_seconds
 
 
 class CacheItem(BaseModel):
@@ -43,17 +47,30 @@ class MemoryCache:
     below max_pool if all items within are still valid; it only removes those that have expired.
     """
 
-    def __init__(self, name: str, max_pool=1000, allow_null_values=False):
+    def __init__(self, name: str, max_pool=1000, allow_null_values=False, use_context: bool = True):
         self.memory_buffer: Dict[str, CacheItem] = {}
         self.name = name
         self.max_pool = max_pool
         self.counter = 0
         self.allow_null_values = allow_null_values
+        self._use_context = use_context
+
+    def _get_contextualized_key(self, key):
+
+        if not self._use_context:
+            return key
+
+        try:
+            context = get_context()
+            return f"{hash(context)}-{key}"
+        except ValueError:
+            return key
 
     def __len__(self):
         return len(self.memory_buffer)
 
     def __contains__(self, key: str):
+        key = self._get_contextualized_key(key)
         if key in self.memory_buffer:
             if self.memory_buffer[key].expired():
                 del self.memory_buffer[key]
@@ -61,9 +78,11 @@ class MemoryCache:
         return key in self.memory_buffer
 
     def is_expired(self, key: str) -> bool:
+        key = self._get_contextualized_key(key)
         return (key in self.memory_buffer and self.memory_buffer[key].expired()) or key not in self.memory_buffer
 
     def __getitem__(self, item: str) -> [CacheItem, None]:
+        item = self._get_contextualized_key(item)
         if item in self.memory_buffer:
             cache_item = self.memory_buffer[item]  # type: CacheItem
             if cache_item.expired():
@@ -73,6 +92,7 @@ class MemoryCache:
         return None
 
     def __setitem__(self, key: str, value: CacheItem):
+        key = self._get_contextualized_key(key)
         if not isinstance(value, CacheItem):
             raise ValueError("MemoryCache item must be CacheItem type.")
         self.memory_buffer[key] = value
@@ -81,6 +101,7 @@ class MemoryCache:
             self.purge()
 
     def __delitem__(self, key):
+        key = self._get_contextualized_key(key)
         if key in self.memory_buffer:
             del self.memory_buffer[key]
 
@@ -96,6 +117,14 @@ class MemoryCache:
         for key, value in self.memory_buffer.copy().items():
             if value.expired():
                 del self.memory_buffer[key]
+
+    def get_cached_items(self):
+        return [{
+            "expired": item.expired(),
+            "ttl": seconds_to_minutes_seconds(item.ttl - datetime.now().timestamp()),
+            "key_length": len(key)
+        } for key, item in
+            self.memory_buffer.items()]
 
     @staticmethod
     async def save(cache: 'MemoryCache', key, data, ttl):

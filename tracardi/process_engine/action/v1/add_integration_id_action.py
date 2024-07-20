@@ -2,7 +2,7 @@ import json
 
 from pydantic import field_validator
 
-from tracardi.service.integration_id import save_integration_id
+from tracardi.service.storage.elastic.interface.integration_id import save_integration_id
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \

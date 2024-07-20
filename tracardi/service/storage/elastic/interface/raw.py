@@ -4,11 +4,11 @@ from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.cache.field_mapping import load_fields
 from tracardi.service.field_mappings_cache import FieldMapper
-from tracardi.service.storage.elastic_client import ElasticClient
-from tracardi.service.storage.elastic_storage import ElasticFiledSort
-from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
+from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
+from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.index import Resource
-from tracardi.service.storage.persistence_service import PersistenceService
+from tracardi.service.storage.elastic.driver.persistence_service import PersistenceService
 
 
 def index(idx) -> PersistenceService:

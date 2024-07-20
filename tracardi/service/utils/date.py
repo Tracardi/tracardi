@@ -25,3 +25,12 @@ def add_utc_time_zone_if_none(dt: Optional[datetime]) -> Optional[datetime]:
         return dt
 
     return dt.replace(tzinfo=ZoneInfo('UTC'))
+
+
+def seconds_to_minutes_seconds(seconds):
+    sign = "-" if seconds < 0 else ""
+    seconds = abs(seconds)
+    minutes = seconds // 60
+    remaining_seconds = int(seconds % 60)
+    milliseconds = int((seconds % 1) * 1000)
+    return f"{sign}{int(minutes)}:{remaining_seconds:02d}.{milliseconds:03d}"

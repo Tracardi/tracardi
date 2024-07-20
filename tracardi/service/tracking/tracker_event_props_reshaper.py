@@ -9,10 +9,18 @@ class EventDataReshaper:
     def __init__(self, dot: DotAccessor):
         self.dot = dot
 
-    def _reshape(self, schema: dict):
+    def _reshape(self, schema: dict) -> dict:
         return DictTraverser(dot=self.dot, include_none=True, default=None).reshape(
             schema
         )
+
+    @staticmethod
+    def _has_delete_schema(reshape_schema) -> bool:
+        return '-' in reshape_schema.properties and isinstance(reshape_schema.properties['-'], list)
+
+    @staticmethod
+    def _get_delete_schema(reshape_schema) -> List[str]:
+        return reshape_schema.properties['-']
 
     def reshape(self, schemas: List[EventReshapingSchema]) -> Optional[Tuple[dict, dict, Optional[dict]]]:
 
@@ -32,6 +40,15 @@ class EventDataReshaper:
                 reshaped = True
 
                 if schema.reshaping.reshape_schema.properties:
+
+                    # Delete event properties
+                    if 'properties' in self.dot.event and self._has_delete_schema(schema.reshaping.reshape_schema):
+                        for event_property in self._get_delete_schema(schema.reshaping.reshape_schema):
+                            # Remove that value
+                            self.dot.event['properties'].pop(event_property, None)
+                        del schema.reshaping.reshape_schema.properties['-']
+
+                    # Reshape remaining properties
                     event_properties = self._reshape(schema.reshaping.reshape_schema.properties)
 
                 if schema.reshaping.reshape_schema.context:

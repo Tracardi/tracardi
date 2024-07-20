@@ -15,6 +15,7 @@ class GhostCredentials(BaseModel):
     api_url: str
     api_key: Optional[str] = None
 
+
 class GhostConnector(DestinationInterface):
 
     def _dispatch(self, payload):
@@ -24,14 +25,15 @@ class GhostConnector(DestinationInterface):
 
             init = self.destination.destination.init
 
-            #TODO Finish.
+            # TODO Finish.
 
         except Exception as e:
             logger.error(str(e))
             raise e
 
-    async def dispatch_profile(self, mapped_data, profile: Profile, session: Session, changed_fields: List[dict]=None):
+    async def dispatch_profile(self, mapped_data, profile: Profile, session: Session, changed_fields: List[dict] = None,
+                               metadata=None):
         self._dispatch(payload=mapped_data)
 
-    async def dispatch_event(self, mapped_data, profile: Profile, session: Session, event: Event):
+    async def dispatch_event(self, mapped_data, profile: Profile, session: Session, event: Event, metadata=None):
         self._dispatch(payload=mapped_data)

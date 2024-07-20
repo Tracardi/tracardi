@@ -1,6 +1,6 @@
 from typing import Optional, Any
 
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 import msgpack
 
 

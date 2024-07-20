@@ -17,11 +17,11 @@ def test_context():
             with pytest.raises(ValueError):
                 ctx.get("b")
 
-            ctx.set("a", 1)
+            ctx.set("a", Context(version="1"))
             await asyncio.sleep(.5)
             value = ctx.get("a")
 
-            assert value == 1
+            assert value.version == "1"
 
         async def context2():
             ctx = ContextManager()
@@ -29,11 +29,11 @@ def test_context():
             with pytest.raises(ValueError):
                 ctx.get("b")
 
-            ctx.set("a", 2)
+            ctx.set("a", Context(version="2"))
             await asyncio.sleep(.5)
             value = ctx.get("a")
 
-            assert value == 2
+            assert value.version == "2"
 
         with ServerContext(Context(production=True, tenant=tracardi.version.name)):
             context_handler = ctx_id.set(str(uuid4()))
@@ -124,3 +124,8 @@ def test_server_switch_context_async():
         assert ctx.context.user.id == '2'
 
         asyncio.run(main())
+
+
+def test_context_hash():
+    context = Context(production=True)
+    assert hash(context) == hash((context.production, context.tenant))

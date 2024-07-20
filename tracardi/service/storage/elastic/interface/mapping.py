@@ -1,6 +1,6 @@
 from typing import List
 
-from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.elastic.interface import raw as raw_db
 
 
 def _find_time_fields(mapping, field_types: List[str], prefix=''):

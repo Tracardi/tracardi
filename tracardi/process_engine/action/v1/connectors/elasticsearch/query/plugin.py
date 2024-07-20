@@ -5,7 +5,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.elastic_client import ElasticClient
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from .model.config import Config
 from elasticsearch import ElasticsearchException
 from tracardi.service.domain import resource as resource_db

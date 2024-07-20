@@ -1,5 +1,5 @@
 from tracardi.domain.report import Report
-from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.elastic.interface import raw as raw_db
 from tracardi.service.storage.mysql.mapping.report_mapping import map_to_report
 from tracardi.service.storage.mysql.service.report_service import ReportService
 

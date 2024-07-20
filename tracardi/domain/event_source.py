@@ -36,6 +36,10 @@ class EventSource(NamedEntityInContext):
         return bool(set(self.type).intersection(set(allowed_types)))
 
     def has_restricted_domain(self) -> bool:
+
+        if not isinstance(self.config, dict):
+            return False
+
         if 'restrict_to' not in self.config or 'restriction' not in self.config:
             return False
 
@@ -49,6 +53,9 @@ class EventSource(NamedEntityInContext):
 
     def get_restricted_domain(self) -> Optional[ParseResult]:
         try:
+
+            if not isinstance(self.config, dict):
+                return None
 
             domain: Optional[str] = self.config.get('restriction', "")
             domain = domain.strip()
@@ -67,6 +74,10 @@ class EventSource(NamedEntityInContext):
 
     def get_restriction_type(self) -> Optional[str]:
         try:
+
+            if not isinstance(self.config, dict):
+                return None
+
             restrict_to: Optional[str] = self.config.get('restrict_to', "")
             restrict_to = restrict_to.strip()
 

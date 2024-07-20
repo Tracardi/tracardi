@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 
 
 class Limiter:

@@ -1,85 +1,58 @@
-import asyncio
 from typing import Union, Tuple
 
 from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.driver.elastic import raw as raw_db
-from tracardi.service.storage.elastic_storage import ElasticFiledSort
-from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
+from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = get_logger(__name__)
 
 
-async def get_duplicated_profiles_by_field(field):
-    query = {
-        "size": 0,
-        "query": {
-            "exists": {
-                "field": field
-            }
-        },
-        "aggs": {
-            "duplicate_emails": {
-                "terms": {
-                    "field": field,
-                    "min_doc_count": 2,
-                    "size": 1000
-                }
-            },
-        }
-    }
-    result = await storage_manager('profile').query(query)
-    for bucket in result.aggregations('duplicate_emails').buckets():
-        yield bucket['key'], bucket['doc_count']
+# async def get_duplicated_profiles_by_field(field):
+#     query = {
+#         "size": 0,
+#         "query": {
+#             "exists": {
+#                 "field": field
+#             }
+#         },
+#         "aggs": {
+#             "duplicate_emails": {
+#                 "terms": {
+#                     "field": field,
+#                     "min_doc_count": 2,
+#                     "size": 1000
+#                 }
+#             },
+#         }
+#     }
+#     result = await storage_manager('profile').query(query)
+#     for bucket in result.aggregations('duplicate_emails').buckets():
+#         yield bucket['key'], bucket['doc_count']
 
 
-def get_profiles_by_field_and_value(field: str, email: str):
-    query = {
-        "query": {
-            "term": {
-                field: email
-            }
-        }
-    }
-    return storage_manager('profile').scan(query, batch=1000)
+# def get_profiles_by_field_and_value(field: str, email: str):
+#     query = {
+#         "query": {
+#             "term": {
+#                 field: email
+#             }
+#         }
+#     }
+#     return storage_manager('profile').scan(query, batch=1000)
 
 
-def load_profiles_for_auto_merge():
-    query = {
-        "query": {
-            "exists": {
-                "field": "metadata.system.aux.auto_merge"
-            }
-        }
-    }
-    return storage_manager('profile').scan(query, batch=1000)
-
-
-async def load_profile_duplicates(profile_ids: List[str]):
-    return await storage_manager('profile').query({
-        "size": 10000,
-        "query": {
-            "bool": {
-                "should": [
-                    {
-                        "terms": {
-                            "ids": profile_ids
-                        }
-                    },
-                    {
-                        "terms": {
-                            "id": profile_ids
-                        }
-                    }
-                ],
-                "minimum_should_match": 1
-            }
-        },
-        "sort": [
-            {"metadata.time.insert": "asc"}  # todo maybe should be based on updates (but update should always exist)
-        ]
-    })
+# def load_profiles_for_auto_merge():
+#     query = {
+#         "query": {
+#             "exists": {
+#                 "field": "metadata.system.aux.auto_merge"
+#             }
+#         }
+#     }
+#     return storage_manager('profile').scan(query, batch=1000)
 
 
 async def count_profile_duplicates(profile_ids: List[str]):
@@ -258,14 +231,14 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
     return await storage_manager('profile').load_all(start, limit, sort)
 
 
-async def load_profiles_to_merge(merge_key_values: List[tuple],
-                                 condition: str = 'must',
-                                 limit=1000) -> List[Profile]:
-    profiles = await storage_manager('profile').load_by_values(
-        merge_key_values,
-        condition=condition,
-        limit=limit)
-    return [profile.to_entity(Profile) for profile in profiles]
+# async def load_profiles_to_merge(merge_key_values: List[tuple],
+#                                  condition: str = 'must',
+#                                  limit=1000) -> List[Profile]:
+#     profiles = await storage_manager('profile').load_by_values(
+#         merge_key_values,
+#         condition=condition,
+#         limit=limit)
+#     return [profile.to_entity(Profile) for profile in profiles]
 
 
 async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
@@ -323,7 +296,7 @@ async def update_by_query(query, conflicts: str = 'proceed', wait_for_completion
     )
 
 
-async def count(query: dict = None):
+async def count(query: dict = None) -> dict:
     return await storage_manager('profile').count(query)
 
 
@@ -388,11 +361,18 @@ async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket
     return await storage_manager('profile').query(_query)
 
 
-async def load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:
-    if isinstance(profile.ids, list):
-        set(profile.ids).add(profile.id)
-        profile_ids = list(profile.ids)
-    else:
-        profile_ids = [profile.id]
+# async def load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:
+#     if isinstance(profile.ids, list):
+#         set(profile.ids).add(profile.id)
+#         profile_ids = list(profile.ids)
+#     else:
+#         profile_ids = [profile.id]
+#
+#     return await load_profile_duplicates(profile_ids)
 
-    return await load_profile_duplicates(profile_ids)
+
+# async def load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str]]) -> StorageRecords:
+#     return await storage_manager('profile').load_by_values(
+#         merge_by,
+#         condition='must',
+#         limit=10000)

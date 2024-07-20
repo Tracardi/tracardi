@@ -18,7 +18,9 @@ logger = get_logger(__name__)
 async def event_destination_dispatch(profile: Optional[Profile],
                                      session: Optional[Session],
                                      events: List[Event],
-                                     debug):
+                                     debug,
+                                     metadata=None
+                                     ):
     dot = DotAccessor(profile, session)
     for event in events:
         try:
@@ -32,7 +34,11 @@ async def event_destination_dispatch(profile: Optional[Profile],
 
             async for destination_instance, reshaped_data in get_dispatch_destination_and_data(dot, destinations,
                                                                                                debug):
-              await destination_instance.dispatch_event(reshaped_data, profile=profile, session=session, event=event)
+                await destination_instance.dispatch_event(reshaped_data,
+                                                          profile=profile,
+                                                          session=session,
+                                                          event=event,
+                                                          metadata=metadata)
         except Exception as e:
             logger.error(
                 str(e),
@@ -47,10 +53,12 @@ async def event_destination_dispatch(profile: Optional[Profile],
                 )
             )
 
+
 async def profile_destination_dispatch(profile: Optional[Profile],
                                        session: Optional[Session],
                                        changed_fields: List[dict],
-                                       debug: bool):  # debug is used to find out which resource to use.
+                                       debug: bool,
+                                       metadata: dict = None):  # debug is used to find out which resource to use.
 
     dot = DotAccessor(profile, session)
     destinations: List[Destination] = await load_profile_destinations()
@@ -58,7 +66,13 @@ async def profile_destination_dispatch(profile: Optional[Profile],
     async for destination_instance, reshaped_data in get_dispatch_destination_and_data(dot, destinations, debug):
         try:
             logger.info(f"Dispatching {destination_instance}. Profile id: {get_entity_id(profile)}.")
-            await destination_instance.dispatch_profile(reshaped_data, profile=profile, session=session, changed_fields=changed_fields)
+            await destination_instance.dispatch_profile(
+                reshaped_data,
+                profile=profile,
+                session=session,
+                changed_fields=changed_fields,
+                metadata=metadata
+            )
         except Exception as e:
             logger.error(
                 str(e),
@@ -72,4 +86,3 @@ async def profile_destination_dispatch(profile: Optional[Profile],
                     traceback=get_traceback(e)
                 )
             )
-

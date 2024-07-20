@@ -8,7 +8,7 @@ from tracardi.domain.storage_record import RecordMetadata
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
 
 redis_cache = RedisCache(ttl=tracardi.keep_session_in_cache_for)

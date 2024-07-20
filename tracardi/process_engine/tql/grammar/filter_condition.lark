@@ -23,7 +23,10 @@ expr: and_expr
         | op_not_exists
         | op_exists
         | op_field_sig OP function
+        | op_exact_match
+        | op_fulltext_match
         | op_field_eq_field
+        | op_in
 
 op_field_sig: OP_FIELD
         | op_compound_field
@@ -31,13 +34,16 @@ op_field_sig: OP_FIELD
 op_value_sig: op_value
     | op_compound_value
 
+op_in: op_field_sig IN op_array
+op_fulltext_match: op_field_sig FULL_TEXT_SEARCH op_value_sig
+op_exact_match: op_field_sig EXACT_MATCH op_value_sig
 op_field_eq_field: op_field_sig OP op_field_sig
 op_between: op_field_sig BETWEEN_TERMINAL op_range
 op_is_null: op_field_sig "IS NULL"i
 op_exists: OP_FIELD EXISTS_TERMINAL
 op_not_exists: OP_FIELD "NOT"i EXISTS_TERMINAL
 
-OP: /(!=|<=|>=|=>|=<|==|=|>|<)/
+OP: /(!=|<=|>=|=>|=<|=|>|<)/
 
 // FIELDS FOR CONDITION
 
@@ -58,5 +64,8 @@ BETWEEN_TERMINAL: /(\r? \n|\s)+BETWEEN\s+/i
 AND_TERMINAL: /(\r? \n|\s)+AND(\r? \n|\s)+/i
 OR_TERMINAL: /(\r? \n|\s)+OR(\r? \n|\s)+/i
 EXISTS_TERMINAL: /EXISTS/i
+EXACT_MATCH: /(==|is)/
+FULL_TEXT_SEARCH: /~|match/
+IN: /in/i
 
 %ignore WS

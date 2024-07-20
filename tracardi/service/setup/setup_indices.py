@@ -5,7 +5,7 @@ from typing import List, Tuple, Generator, Any
 from elasticsearch.exceptions import TransportError, NotFoundError
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.elastic.interface import raw as raw_db
 from tracardi.service.storage.index import Resource, Index
 
 __local_dir = os.path.dirname(__file__)

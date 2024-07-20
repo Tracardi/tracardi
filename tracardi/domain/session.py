@@ -71,7 +71,7 @@ class SessionContext(dict):
 class Session(Entity):
     metadata: SessionMetadata
     operation: Operation = Operation()
-    profile: Optional[PrimaryEntity] = None
+    profile: Optional[Entity] = None
 
     device: Optional[Device] = Device()
     os: Optional[OS] = OS()
@@ -172,7 +172,7 @@ class Session(Entity):
         session.fill_meta_data()
         session.set_new()
         if profile_id is not None:
-            session.profile = PrimaryEntity(id=profile_id)
+            session.profile = Entity(id=profile_id)
 
         return session
 

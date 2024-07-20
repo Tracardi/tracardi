@@ -6,7 +6,7 @@ from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.elastic.interface.session import save_session_to_db
+from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db
 
 
 class AddEmptySessionAction(ActionRunner):

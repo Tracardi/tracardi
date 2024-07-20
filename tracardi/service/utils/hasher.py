@@ -19,6 +19,13 @@ def hash_pk_guid(value: str, prefix: str):
     return f"{prefix[0:3]}-{pk_guid}"
 
 
+def get_shadow_session_id(session_id) -> str:
+    hash = md5(session_id.encode()).hexdigest()
+    guid = uuid4_from_md5(hash)
+
+    return f"shd-{guid}"
+
+
 def get_pk_timestamp() -> str:
     # Calculate the days and seconds since 2014-01-01
     start_date = datetime(2024, 1, 1)

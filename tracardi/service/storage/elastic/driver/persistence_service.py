@@ -2,7 +2,7 @@ import elasticsearch
 from lark import LarkError
 from pydantic import BaseModel
 
-import tracardi.service.storage.elastic_storage as storage
+import tracardi.service.storage.elastic.driver.elastic_storage as storage
 from typing import List, Union, Dict
 
 from tracardi.domain.entity import Entity
@@ -20,14 +20,12 @@ from tracardi.domain.time_range_query import DatetimeRangePayload
 from tracardi.exceptions.exception import StorageException
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.filter_transformer import FilterTransformer
-from tracardi.service.storage.elastic_storage import ElasticStorage
+from tracardi.service.storage.elastic.driver.elastic_storage import ElasticStorage
 
 _logger = get_logger(__name__)
 
 
-
 def _timedelta_to_largest_unit(delta: timedelta):
-
     # Constants
     SECONDS_PER_MINUTE = 60
     SECONDS_PER_HOUR = 3600
@@ -48,17 +46,16 @@ def _timedelta_to_largest_unit(delta: timedelta):
     else:
         return int(total_seconds), 's', "%M"
 
-def _interval(start_date: datetime, end_date: datetime):
 
+def _interval(start_date: datetime, end_date: datetime):
     INTERVALS = 30
 
     # Calculate the total difference in minutes to ensure we cover all cases accurately
     total_seconds = (end_date - start_date).total_seconds()
 
-    interval = timedelta(seconds=int(total_seconds/INTERVALS))
+    interval = timedelta(seconds=int(total_seconds / INTERVALS))
 
     return _timedelta_to_largest_unit(interval)
-
 
 
 class SqlSearchQueryParser(metaclass=Singleton):
@@ -82,7 +79,8 @@ class SqlSearchQueryEngine:
         self.sorting_map = {
             'event': [{'metadata.time.insert': 'desc'}],
             'session': [{'metadata.time.insert': 'desc'}],
-            'profile': [{'metadata.time.update': 'desc'}, {'metadata.time.insert': 'desc'}, {'metadata.time.create': 'desc'}],
+            'profile': [{'metadata.time.update': 'desc'}, {'metadata.time.insert': 'desc'},
+                        {'metadata.time.create': 'desc'}],
             'log': [{'date': 'desc'}],
             'entity': [{'metadata.time.insert': 'desc'}],
         }
@@ -205,7 +203,9 @@ class SqlSearchQueryEngine:
         try:
             result = await self.persister.filter(es_query)
         except StorageException as e:
-            _logger.warning("Could not filter data using {}. Possible reason - wrong filter query typed by user. Details: {}".format(es_query, str(e)))
+            _logger.warning(
+                "Could not filter data using {}. Possible reason - wrong filter query typed by user. Details: {}".format(
+                    es_query, str(e)))
             return QueryResult(total=0, result=[])
 
         return QueryResult(**result.dict())
@@ -216,10 +216,12 @@ class SqlSearchQueryEngine:
             for row in data:
                 # todo timestamp no timezone
                 timestamp = datetime.fromisoformat(row["key_as_string"].replace('Z', '+00:00'))
+                speed = int(row["doc_count"]) / interval
                 yield {
                     "date": "{}".format(timestamp.strftime(format)),
                     'interval': "+{}{}".format(interval, unit),
-                    "count": row["doc_count"]
+                    "count": row["doc_count"],
+                    "speed": f"{speed:.3f}/{unit}"
                 }
 
         def __format_count_by_bucket(data, unit, interval, format):
@@ -234,10 +236,11 @@ class SqlSearchQueryEngine:
                 for number, row in enumerate(bucket['items_over_time']['buckets']):
                     # todo timestamp no timezone
                     timestamp = datetime.fromisoformat(row["key_as_string"].replace('Z', '+00:00'))
-
+                    speed = int(row["doc_count"]) / interval
                     item, result = list_value_at_index(result, number, default_value={
                         "date": "{}".format(timestamp.strftime(format)),
                         'interval': "+{}{}".format(interval, unit),
+                        "speed": f"{speed:.3f}/{unit}"
                     })
 
                     item[bucket_name] = row["doc_count"]
@@ -417,7 +420,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def count(self, query: dict):
+    async def count(self, query: dict) -> dict:
         try:
             return await self.storage.count(query)
         except elasticsearch.exceptions.ElasticsearchException as e:
@@ -613,7 +616,7 @@ class PersistenceService:
         engine = SqlSearchQueryEngine(self)
         return await engine.histogram(query, group_by)
 
-    async def update_by_query(self, query: dict, conflicts: str = 'abort', wait_for_completion:bool = None):
+    async def update_by_query(self, query: dict, conflicts: str = 'abort', wait_for_completion: bool = None):
         try:
             return await self.storage.update_by_query(
                 query=query,

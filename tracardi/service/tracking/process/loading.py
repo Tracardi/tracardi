@@ -12,6 +12,7 @@ from tracardi.service.tracker_config import TrackerConfig
 
 async def tracker_loading(tracker_payload: TrackerPayload,
                           tracker_config: TrackerConfig) -> Tuple[Profile, Optional[Session]]:
+
     # We need profile and session before async
 
     session, tracker_payload = await load_or_create_session(tracker_payload)
@@ -19,12 +20,12 @@ async def tracker_loading(tracker_payload: TrackerPayload,
     # -----------------------------------
     # Profile Loading
 
-    # TODO It can deduplicate profile so it should be in mutex or the process redone
-
     profile, session = await load_profile_and_session(
         session,
         tracker_config,
         tracker_payload
     )
+
+    # TODO update finger print profile id
 
     return profile, session

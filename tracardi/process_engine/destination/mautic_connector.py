@@ -41,8 +41,9 @@ class MauticConnector(DestinationInterface):
 
             await resource_db.save_record(self.resource)
 
-    async def dispatch_profile(self, data, profile: Profile, session: Session, changed_fields: List[dict]=None):
+    async def dispatch_profile(self, data, profile: Profile, session: Session, changed_fields: List[dict] = None,
+                               metadata=None):
         await self._dispatch(data)
 
-    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event):
+    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event, metadata=None):
         await self._dispatch(data)

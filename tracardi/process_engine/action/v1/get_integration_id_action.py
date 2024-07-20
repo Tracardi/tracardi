@@ -1,6 +1,6 @@
 from pydantic import field_validator
 
-from tracardi.service.integration_id import load_integration_id
+from tracardi.service.storage.elastic.interface.integration_id import load_integration_id
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent

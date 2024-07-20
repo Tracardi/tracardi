@@ -6,7 +6,7 @@ from typing import Optional, List, Dict
 import json
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic_client import ElasticClient
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from hashlib import sha1
 from pathlib import Path
 from tracardi.domain.version import Version

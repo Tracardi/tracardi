@@ -2,7 +2,7 @@ from tracardi.service.utils.date import now_in_utc
 from typing import Optional
 from tracardi.domain.value_threshold import ValueThreshold
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 
 redis = RedisClient()
 

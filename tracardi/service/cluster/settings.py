@@ -21,7 +21,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.mysql.mapping.configuration_mapping import map_to_configuration
 from tracardi.service.storage.mysql.service.configuration_service import ConfigurationService
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 from tracardi.service.utils.date import now_in_utc
 from threading import Thread
 

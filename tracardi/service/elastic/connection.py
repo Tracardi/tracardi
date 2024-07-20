@@ -4,8 +4,8 @@ import elasticsearch
 
 from tracardi.config import tracardi, elastic
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.driver.elastic import system as system_db
-from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service import system
 
 logger = get_logger(__name__)
 
@@ -20,7 +20,7 @@ def _is_elastic_on_localhost():
 async def is_system_installed(no_of_tries: int = 10, pause: int = 15) -> bool:
     success = False
     while True:
-        is_installed, indices = await system_db.is_schema_ok()
+        is_installed, indices = await system.is_schema_ok()
 
         if is_installed:
             success = True

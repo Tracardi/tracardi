@@ -19,8 +19,10 @@ class CiviCRMConnector(DestinationInterface):
 
         await client.add_contact(data)
 
-    async def dispatch_profile(self, data, profile: Optional[Profile], session: Optional[Session], changed_fields: List[dict]=None):
+    async def dispatch_profile(self, data, profile: Optional[Profile], session: Optional[Session],
+                               changed_fields: List[dict] = None, metadata=None):
         await self._dispatch(data)
 
-    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event):
+    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event,
+                             metadata=None):
         await self._dispatch(data)

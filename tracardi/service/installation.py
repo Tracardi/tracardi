@@ -17,7 +17,7 @@ from tracardi.exceptions.log_handler import get_installation_logger
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
-from tracardi.service.storage.driver.elastic import raw as raw_db
+from tracardi.service.storage.elastic.interface import raw as raw_db
 from tracardi.service.storage.index import Resource
 from tracardi.service.track_event import track_event
 

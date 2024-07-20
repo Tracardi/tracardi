@@ -3,14 +3,15 @@ import re
 from .dot_accessor import DotAccessor
 from ..singleton import Singleton
 
+
 class DotTemplate(metaclass=Singleton):
 
     def __init__(self):
         # Updated regex to capture optional format strings and "no data" strings
         self._regex = re.compile(r"\{{2}\s*((?:payload|profile|event|session|flow|memory)"
-                                r"@[\[\]0-9a-zA-Z_\-\.]+(?<![\.\[]))"
-                                r"(?:\s*\?\s*\"([^\"]+)\")?"
-                                r"(?:\s*!\s*\"([^\"]+)\")?\s*\}{2}")
+                                 r"@[\[\]0-9a-zA-Z_\-\.]+(?<![\.\[]))"
+                                 r"(?:\s*\?\s*\"([^\"]+)\")?"
+                                 r"(?:\s*!\s*\"([^\"]+)\")?\s*\}{2}")
 
     def render(self, template, dot: DotAccessor):
         def replacement(match):

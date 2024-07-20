@@ -31,13 +31,13 @@ def test_year_partitioning():
 def test_hour_partitioning():
     index = Index(multi_index=False, index="tracardi-event", mapping=None, staging=False, static=False, single=False,
                   partitioning="hour")
-    assert index._multi_index_suffix() == f"{datetime.now().year}-{datetime.now().month}/{datetime.now().day}/{datetime.now().hour}"
+    assert index._multi_index_suffix() == f"{datetime.now().year}-{datetime.now().month}{datetime.now().day}{datetime.now().hour}"
 
 
 def test_minute_partitioning():
     index = Index(multi_index=False, index="tracardi-event", mapping=None, staging=False, static=False, single=False,
                   partitioning="minute")
-    assert index._multi_index_suffix() == f"{datetime.now().year}-{datetime.now().month}/{datetime.now().day}/{datetime.now().hour}/{datetime.now().minute}"
+    assert index._multi_index_suffix() == f"{datetime.now().year}-{datetime.now().month}{datetime.now().day}{datetime.now().hour}{datetime.now().minute}"
 
 
 def test_invalid_partitioning():

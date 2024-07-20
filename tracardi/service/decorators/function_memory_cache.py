@@ -8,13 +8,14 @@ from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 
 cache: Dict[str, MemoryCache] = {}
 
+
 def _args_key(args, kwargs):
     key_parts = [args]
     key_parts.extend(f'{k}={v}' for k, v in kwargs.items())
     return ':'.join(map(str, key_parts))
 
 
-def _func_key(func, use_context:bool=True):
+def _func_key(func, use_context: bool = True):
     if use_context:
         context = get_context()
         key_parts = [context.__hash__(), func.__module__, func.__qualname__]
@@ -23,7 +24,9 @@ def _func_key(func, use_context:bool=True):
 
     return ':'.join(map(str, key_parts))
 
-def _run_function(func, args, kwargs, max_size, allow_null_values, key_func:Callable=None, use_context: bool=True) -> Tuple[Any, str, str]:
+
+def _run_function(func, args, kwargs, max_size, allow_null_values, key_func: Callable = None,
+                  use_context: bool = True) -> Tuple[Any, str, str]:
     # Construct a unique cache key from the function's module name,
     # function name, args, and kwargs to avoid collisions.
 
@@ -36,7 +39,12 @@ def _run_function(func, args, kwargs, max_size, allow_null_values, key_func:Call
 
     # Create cache
     if func_key not in cache:
-        cache[func_key] = MemoryCache(func_key, max_pool=max_size, allow_null_values=allow_null_values)
+        cache[func_key] = MemoryCache(
+            func_key,
+            max_pool=max_size,
+            allow_null_values=allow_null_values,
+            use_context=False  # It is already with context key
+        )
 
     # Check cache
     if args_key in cache[func_key]:
@@ -46,12 +54,13 @@ def _run_function(func, args, kwargs, max_size, allow_null_values, key_func:Call
 
     return result, func_key, args_key
 
-def async_cache_for(ttl, max_size=1000, allow_null_values=False, key_func:Callable=None, use_context:bool=True):
+
+def async_cache_for(ttl, max_size=1000, allow_null_values=False, key_func: Callable = None, use_context: bool = True):
     def decorator(func):
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
-
-            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func, use_context)
+            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func,
+                                                       use_context)
             if asyncio.iscoroutine(result):
                 result = await result
 
@@ -64,11 +73,12 @@ def async_cache_for(ttl, max_size=1000, allow_null_values=False, key_func:Callab
     return decorator
 
 
-def cache_for(ttl, max_size=1000, allow_null_values=False, key_func:Callable=None, use_context:bool=True):
+def cache_for(ttl, max_size=1000, allow_null_values=False, key_func: Callable = None, use_context: bool = True):
     def decorator(func):
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
-            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func, use_context)
+            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func,
+                                                       use_context)
 
             # Update cache
             cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
@@ -87,6 +97,7 @@ def delete_cache(func, *args, **kwargs):
         cache_item.delete(args_key)
     except KeyError:
         pass
+
 
 def has_cache(func, *args, **kwargs) -> bool:
     args_key = _args_key(args, kwargs)

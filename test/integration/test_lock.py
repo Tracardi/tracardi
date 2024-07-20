@@ -1,7 +1,7 @@
 from time import sleep
 
 from tracardi.context import ServerContext, Context
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 from tracardi.service.tracking.locking import Lock, RELEASED
 
 

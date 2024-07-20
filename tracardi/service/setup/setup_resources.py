@@ -280,7 +280,12 @@ def get_resource_types() -> List[ResourceSettings]:
                 "api_key": "<api_key>",
                 "measurement_id": "<measurement_id>"
             },
-            manual="ga4_tracker_resource"
+            icon='google',
+            manual="ga4_tracker_resource",
+            destination=DestinationData(
+                package="com_tracardi.destination.ga4_connector.Ga4Connector",
+                init={}
+            )
         ),
         ResourceSettings(
             id="google-cloud-service-account",
@@ -461,6 +466,32 @@ def get_resource_types() -> List[ResourceSettings]:
             manual='apache_pulsar_resource',
             destination=DestinationData(
                 package="com_tracardi.destination.pulsar_connector.PulsarConnector",
+                init={
+                    "topic": "<topic>",
+                    "serializer": "json"
+                },
+                pro=True
+            )
+        ),
+        ResourceSettings(
+            id="apache-kafka",
+            name="Apache Kafka",
+            icon='kafka',
+            tags=['kafka', 'pro', 'queue', 'destination'],
+            config={
+                "bootstrap_servers": 'localhost:port',
+                "security_protocol": "PLAINTEXT",
+                "sasl_mechanism": "PLAIN",
+                "sasl_plain_username": None,
+                "sasl_plain_password": None,
+                "metadata_max_age_ms": 300000,
+                "request_timeout_ms": 40000,
+                "max_batch_size": 16384,
+                "max_request_size": 1048576,
+                "ssl_context": False
+            },
+            destination=DestinationData(
+                package="com_tracardi.destination.kafka_connector.KafkaConnector",
                 init={
                     "topic": "<topic>",
                     "serializer": "json"

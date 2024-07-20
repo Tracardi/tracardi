@@ -5,12 +5,12 @@ from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.factory import storage_manager
+from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = get_logger(__name__)
 
 
-async def save_sessions(sessions: List[Session]):
+async def save_sessions(sessions: List[Session]) -> BulkInsertResult:
     return await storage_manager("session").upsert(sessions, exclude={"operation": ...})
 
 

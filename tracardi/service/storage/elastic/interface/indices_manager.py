@@ -1,12 +1,10 @@
 import json
-
-from deepdiff import DeepDiff
-from dotty_dict import dotty
 from elasticsearch import NotFoundError
 
 from tracardi.context import get_context
-from tracardi.service.storage.elastic_client import ElasticClient
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.service.storage.index import Resource, Index
+from tracardi.service.utils.diff import get_changed_values
 
 
 async def get_indices_status():
@@ -58,18 +56,6 @@ async def get_indices_status():
                 yield "missing_alias", _alias
             else:
                 yield "existing_alias", _alias
-
-
-def get_changed_values(old_dict: dict, new_dict: dict) -> dict:
-    diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree", exclude_paths=["root['aliases']"])
-    changed_values = dotty()
-    for _, diff in diff_result.items():
-        for change in diff:
-            key = ".".join(change.path(output_format='list'))
-            value = change.t2
-            changed_values[key] = value
-
-    return changed_values.to_dict()
 
 
 async def check_indices_mappings_consistency():

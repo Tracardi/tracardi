@@ -126,7 +126,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
         with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=False, index="index-name", mapping=mapping_mock)
             alias = index.get_index_alias()
-            assert alias == f"{tenant}.{index.index}"
+            assert alias == f"{tracardi.version.db_version}.{tenant}.{index.index}"
 
 
     def test_write_index():
@@ -137,13 +137,13 @@ with ServerContext(Context(production=False, tenant=namespace)):
 
             date = datetime.now()
             assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
-            assert alias == f"{tenant}.index-name"
+            assert alias == f"{tracardi.version.db_version}.{tenant}.index-name"
             with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_write_index()
                 alias = index.get_index_alias()
 
                 assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
-                assert alias == f"prod-{tenant}.index-name"
+                assert alias == f"prod-{tracardi.version.db_version}.{tenant}.index-name"
 
 
     def test_static_index():
@@ -153,7 +153,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
             alias = index.get_index_alias()
 
             assert write_index == f"static-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
-            assert alias == f"static-{tenant}.index-name"
+            assert alias == f"static-{tracardi.version.db_version}.{tenant}.index-name"
 
 
     def test_regular_index():
@@ -163,14 +163,14 @@ with ServerContext(Context(production=False, tenant=namespace)):
             alias = index.get_index_alias()
 
             assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name"
-            assert alias == f"{tenant}.index-name"
+            assert alias == f"{tracardi.version.db_version}.{tenant}.index-name"
 
             with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_write_index()
                 alias = index.get_index_alias()
 
                 assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
-                assert alias == f"prod-{tenant}.index-name"
+                assert alias == f"prod-{tracardi.version.db_version}.{tenant}.index-name"
 
 
     def test_single_storage_index():
@@ -198,11 +198,11 @@ with ServerContext(Context(production=False, tenant=namespace)):
         with ServerContext(Context(production=False, tenant=namespace)):
             index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
             write_index = index.get_multi_storage_alias()
-            assert write_index == f"{tenant}.index-name"
+            assert write_index == f"{tracardi.version.db_version}.{tenant}.index-name"
 
             with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_multi_storage_alias()
-                assert write_index == f"prod-{tenant}.index-name"
+                assert write_index == f"prod-{tracardi.version.db_version}.{tenant}.index-name"
 
 
     def test_template():
@@ -300,14 +300,13 @@ with ServerContext(Context(production=False, tenant=namespace)):
             write_index = index.get_write_index()
             assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
 
-
             index = Index(multi_index=True,
                           partitioning='day',
                           static=False,
                           index="index-name",
                           mapping=mapping_mock)
             write_index = index.get_write_index()
-            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}/{date.day}"
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}{date.day}"
 
             index = Index(multi_index=True,
                           partitioning='year',
@@ -323,6 +322,6 @@ with ServerContext(Context(production=False, tenant=namespace)):
                           index="index-name",
                           mapping=mapping_mock)
             write_index = index.get_write_index()
-            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}/{date.day}/{date.hour}/{date.minute}"
+            assert write_index == f"{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}{date.day}{date.hour}{date.minute}"
 
 

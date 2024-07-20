@@ -8,8 +8,7 @@ import time
 
 import json
 from hashlib import sha1
-from datetime import datetime, timedelta
-from typing import Union, Callable, Awaitable, Optional, List, Any, Tuple, Generator
+from typing import Union, Optional, List, Any, Tuple, Generator
 from uuid import uuid4
 
 from dotty_dict import dotty
@@ -22,7 +21,6 @@ from ..request import Request
 from ...exceptions.log_handler import get_logger
 from ...service.decorators.function_memory_cache import async_cache_for
 from ...service.license import License, LICENSE
-from ...service.merging.facade_old import merge_profile_by_merging_keys
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..identification_point import IdentificationPoint
@@ -34,10 +32,12 @@ from ..profile import Profile
 
 from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
 from ...service.storage.mysql.service.idetification_point_service import IdentificationPointService
+from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
+from ...service.utils.getters import get_entity_id
+from ...service.utils.hasher import get_shadow_session_id
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
-    from com_tracardi.service.browser_fingerprinting import BrowserFingerPrint
 
 logger = get_logger(__name__)
 
@@ -190,29 +190,6 @@ class TrackerPayload(BaseModel):
     def has_static_profile_id(self) -> bool:
         return self._make_static_profile_id
 
-    # def get_events_dict(self) -> List[dict]:
-    #     if self._cached_events_as_dicts is None:
-    #         self._cached_events_as_dicts = []
-    #         for event_payload in self.events:
-    #             self._cached_events_as_dicts.append(
-    #                 event_payload.to_event_dict(
-    #                     self.source,
-    #                     self.session,
-    #                     self.profile,
-    #                     self.profile_less)
-    #             )
-    #     return self._cached_events_as_dicts
-    #     # yield event_payload.to_event(self.metadata,
-    #     #                              self.source,
-    #     #                              self.session,
-    #     #                              self.profile,
-    #     #                              self.profile_less)
-    #     # yield event_payload.to_event_data_class(self.metadata,
-    #     #                                         self.source,
-    #     #                                         self.session,
-    #     #                                         self.profile,
-    #     #                                         self.profile_less)
-
     def set_headers(self, headers: dict):
         if 'authorization' in headers:
             del headers['authorization']
@@ -243,17 +220,28 @@ class TrackerPayload(BaseModel):
             "saveEvents": not flag
         })
 
+    def get_browser_agent_from_header(self) -> Optional[str]:
+        try:
+            return self.request['headers']['user-agent']
+        except KeyError:
+            return None
+
     def get_browser_agent(self) -> Optional[str]:
         try:
             return self.context['browser']['local']['browser']['userAgent']
         except KeyError:
-            return None
+            return self.get_browser_agent_from_header()
 
     def get_browser_language(self) -> Optional[str]:
         try:
             return self.context['browser']['local']['browser']['language']
         except KeyError:
             return None
+
+    def add_context_to_events(self, context: dict):
+        if isinstance(context, dict) and context:
+            for event in self.events:
+                event.context.update(context)
 
     def get_ip(self) -> Optional[str]:
         return Request(self.request).get_ip()
@@ -277,9 +265,7 @@ class TrackerPayload(BaseModel):
             return None
 
     def force_session(self, session):
-        # Get session
         if self.session is None or self.session.id is None:
-            # Generate random
             self.session = session
 
     def is_on(self, key, default):
@@ -292,6 +278,16 @@ class TrackerPayload(BaseModel):
     def is_debugging_on(self) -> bool:
         return tracardi.track_debug and self.is_on('debugger', default=False)
 
+    def _fill_session_metadata(self, session: Session) -> Session:
+        if self.session and isinstance(self.session, DefaultEntity) and self.session.metadata:
+            if self.session.metadata.insert:
+                session.metadata.time.insert = self.session.metadata.insert
+            if self.session.metadata.update:
+                session.metadata.time.update = self.session.metadata.update
+            if self.session.metadata.create:
+                session.metadata.time.create = self.session.metadata.create
+        return session
+
     def create_default_session(self) -> Session:
 
         if not self.session:
@@ -302,27 +298,12 @@ class TrackerPayload(BaseModel):
 
         session = Session.new(id=self.session.id)
 
-        if self.session and isinstance(self.session, DefaultEntity) and self.session.metadata:
-            if self.session.metadata.insert:
-                session.metadata.time.insert = self.session.metadata.insert
-            if self.session.metadata.update:
-                session.metadata.time.update = self.session.metadata.update
-            if self.session.metadata.create:
-                session.metadata.time.create = self.session.metadata.create
+        self._fill_session_metadata(session)
 
         return session
 
-    def create_default_profile(self, id: Optional[str] = None) -> Profile:
-
-        if id:
-            profile_id = id
-        elif self.profile and self.profile.id:
-            profile_id = self.profile.id
-        else:
-            profile_id = str(uuid4())
-
-        profile = Profile.new(id=profile_id)
-
+    def _fill_profile_metadata(self, profile):
+        # Copy metadata to new profile
         if self.profile and self.profile.metadata:
             if self.profile.metadata.insert:
                 profile.metadata.time.insert = self.profile.metadata.insert
@@ -331,53 +312,27 @@ class TrackerPayload(BaseModel):
             if self.profile.metadata.create:
                 profile.metadata.time.create = self.profile.metadata.create
 
-        return profile
+    def create_default_profile(self, static: bool) -> Profile:
 
-    async def get_static_profile_and_session(
-            self,
-            session: Session,
-            profile_loader: Callable[['TrackerPayload', bool], Awaitable],
-            profile_less: bool
-    ) -> Tuple[Optional[Profile], Session]:
-
-        if profile_less:
-            profile = None
+        if static:
+            profile_id = self.profile.id
         else:
-            if not self.profile or not self.profile.id:
-                raise ValueError("Can not use static profile id without profile.id.")
+            profile_id = str(uuid4())
 
-            profile = await profile_loader(
-                self,
-                True  # is_static is set to true
-            )
+        profile = Profile.new(id=profile_id)
 
-            # Create empty profile if the profile id does nto point to any profile in database.
-            if not profile:
-                profile = self.create_default_profile()
+        # Copy metadata to new profile
+        self._fill_profile_metadata(profile)
 
-            # Create empty session if the session id does nto point to any session in database.
-            if session is None:
-                session = self.create_default_session()
-
-                if isinstance(session.context, dict):
-                    session.context.update(self.context)
-                else:
-                    session.context = self.context
-
-                if isinstance(session.properties, dict):
-                    session.properties.update(self.properties)
-                else:
-                    session.properties = self.properties
-
-            # Assign profile to session
-
-            session.profile = Entity(id=profile.id)
-
-        return profile, session
+        return profile
 
     def get_tracardi_data_referer(self) -> dict:
 
         try:
+            # Referred ids are passed in context.tracardi.pass = {
+            #    profile: profile,
+            #    source: source
+            # }
             return self.context['tracardi']['pass']
         except (KeyError, TypeError):
             return {}
@@ -395,6 +350,9 @@ class TrackerPayload(BaseModel):
         if self.profile is None:
             return True
         return self.profile.id != refer_profile_id.strip()
+
+    def is_cde(self) -> bool:
+        return self.get_referer_data('source') is not None and self.has_referred_profile()
 
     @async_cache_for(30, use_context=True)
     async def list_identification_points(self):
@@ -438,10 +396,194 @@ class TrackerPayload(BaseModel):
             return ttl > 0
         return False
 
+    def create_session(self) -> Session:
+        # Artificial session (Mutates tracker Payload)
+
+        # If no session in tracker payload this means that we do not need session.
+        # But we may need an artificial session for workflow handling. We create
+        # one but will not save it.
+
+        session = self.create_default_session()
+
+        assert (session.operation.new is True)
+
+        # Set profile from tracker payload to session
+        if isinstance(self.profile, Entity) and self.profile.id:
+            session.profile = Entity(id=self.profile.id)
+
+        return session
+
+    def has_tracker_payload_profile_id(self) -> bool:
+        return self.profile is not None and isinstance(self.profile.id, str) and self.profile.id.strip() != ""
+
+    @staticmethod
+    def _has_profile_id_in_session(session) -> bool:
+        return session and session.profile and isinstance(session.profile.id, str) and session.profile.id.strip() != ""
+
+    @staticmethod
+    def _profile_consistency_check(requested_profile_id, profile):
+        if profile.id != requested_profile_id and requested_profile_id not in profile.ids:
+            raise ValueError(f"Loading of profile failed. Some inconsistent profile loaded. "
+                             f"Requested profile (ID: {requested_profile_id}), loaded profile (ID: {profile.id} "
+                             f"with profile.ids={profile.ids}). "
+                             f"Requested id could not be found in any ID collection.")
+
+    def _resolve_conflicts(self, requested_profile_id, loaded_session_profile_id, profile, session):
+        no_profiles_conflict = loaded_session_profile_id in profile.ids or loaded_session_profile_id == profile.id
+
+        if not no_profiles_conflict:
+            # The first attempt to resolve this issue was on the session loading level.
+            # But we did not have profile loaded, so we are resolving it again.
+
+            # Force new session ID. Create shadow session
+            shadow_session_id = get_shadow_session_id(session.id)
+
+            self.context.update({
+                "session_conflict": {
+                    "session_id": session.id,
+                    "shadow_session_id": shadow_session_id,
+                    "profile_in_payload": requested_profile_id,
+                    "profile_id_in_loaded_session": loaded_session_profile_id
+                }
+            })
+
+            # Create new session, to protect old session
+            session = Session.new(id=shadow_session_id, profile_id=profile.id)
+            self._fill_session_metadata(session)
+
+            # Update tracker payload
+            self.session.id = session.id
+
+            logger.warning(f"Conflicting data in tracker payload. Session exists but belongs to profile "
+                           f"profile (ID: {session.profile.id}) that has not the same ID as requested in payload profile "
+                           f"(ID: {loaded_session_profile_id}). "
+                           f"New session ID ({session.id}) created with attached existing in DB profile "
+                           f"(ID {session.profile.id}).",
+                           extra=ExtraInfo.build(origin='profile-loading', profile_id=profile.id)
+                           )
+        return session
+
+    def _load_default_profile(self, session, static: bool) -> Tuple[Profile, Session]:
+
+        # Create new profile
+        profile = self.create_default_profile(static)
+
+        assert profile.operation.new is True
+        assert profile.operation.update is True
+
+        if profile:
+            if not isinstance(self.profile, PrimaryEntity):
+                self.profile = PrimaryEntity(id=profile.id)
+            else:
+                self.profile.id = profile.id
+
+        if not session.profile:
+            session.profile = Entity(id=profile.id)
+        else:
+            session.profile.id = profile.id
+
+        return profile, session
+
+    async def _load_profile_by_session_profile_id(self, session: Session, static: bool) -> Tuple[Profile, Session]:
+
+        # Check if the profile.id from session is not empty
+
+        if not session.profile or not session.profile.id:
+            return self._load_default_profile(session, static)
+
+        requested_profile_id = session.profile.id
+
+        # ID exists in session, load profile with session.profile.id
+        profile: Optional[Profile] = await load_profile(requested_profile_id)
+
+        if profile is not None:
+
+            self._profile_consistency_check(requested_profile_id, profile)
+
+            # Update client profile ids
+            if self.profile:
+                self.profile.id = profile.id
+            else:
+                self.profile = PrimaryEntity(id=profile.id)
+
+            session.profile.id = profile.id  # Assign profile id it could be different then requested_profile_id (it could load form profile.ids)
+
+            return profile, session
+
+        # Profile id delivered but profile does not exist in storage.
+        # ID was forged. Create new.
+
+        return self._load_default_profile(session, static)
+
+    async def _load_profile_by_payload_profile_id(self, session: Session, static: bool) -> Tuple[Profile, Session]:
+
+        # We have valid profile definition
+        requested_profile_id = get_entity_id(self.profile)
+        loaded_session_profile_id = session.profile.id  # Session id delivered in payload
+
+        # ID exists, load profile from storage
+        profile: Optional[Profile] = await load_profile(requested_profile_id)
+
+        if profile is not None:
+
+            self._profile_consistency_check(requested_profile_id, profile)
+
+            # Check if the loaded profile has not different ID.
+            # It may happen if profile is loaded by IDS and the Profile ID is different
+
+            # Update Tracker Profile ID
+            self.profile.id = profile.id
+
+            # Update Tracker Session Profile ID
+            session.profile.id = profile.id
+
+            # Check if there is a conflict in IDS.
+            # Session ID exists but do not point to profile ID from tracker payload
+
+            session = self._resolve_conflicts(requested_profile_id, loaded_session_profile_id, profile, session)
+
+            return profile, session
+
+        # Profile missing in db
+        conflicting_profiles = session.profile.id != get_entity_id(self.profile)
+        if conflicting_profiles:  # if there is different profile in session lets try to load this profile
+            return await self._load_profile_by_session_profile_id(session, static)
+        else:
+            return self._load_default_profile(session, static)
+
+    async def _get_profile(self, session, static: bool) -> Tuple[Profile, Session]:
+
+        # Check consistency
+
+        if static and not get_entity_id(self.profile):
+            raise ValueError("Can not use static profile id without profile.id.")
+
+        # Let's check what was sent
+
+        if self.has_tracker_payload_profile_id():
+
+            # Tracked Profile ID exists, start loading profile with tracker_payload.profile.id
+            # And do the regular fallback
+
+            profile, session = await self._load_profile_by_payload_profile_id(session, static)
+
+        elif self._has_profile_id_in_session(session):
+
+            # Fallback to loading from session with regular fallback
+
+            profile, session = await self._load_profile_by_session_profile_id(session, static)
+
+        else:
+
+            profile, session = self._load_default_profile(session, static)
+
+        return profile, session
+
+
     async def get_profile_and_session(
             self,
-            session: Optional[Session],
-            profile_loader: Callable[['TrackerPayload', bool], Awaitable],
+            session: Session,
+            static: bool,
             profile_less
     ) -> Tuple[Optional[Profile], Session]:
 
@@ -449,157 +591,10 @@ class TrackerPayload(BaseModel):
         Returns session. Creates profile if it does not exist.If it exists connects session with profile.
         """
 
-        # Fingerprinting.
-
-        fp_profile_id = None
-        if self.finger_printing_enabled():
-            ttl = 15 * 60
-            device_finger_print = BrowserFingerPrint.get_browser_fingerprint(self)
-            if self.source.config:
-                ttl = int(self.source.config.get('device_fingerprint_ttl', 15 * 60))
-            fp = BrowserFingerPrint(device_finger_print, timedelta(seconds=ttl))
-            fp_profile_id = fp.get_profile_id_by_device_finger_print()
-
-        is_new_profile = False
-        profile = None
-
         if session is None:  # loaded session is empty
+            raise ValueError("Session must exist at this point")
 
-            is_new_session = True
-
-            session = self.create_default_session()
-
-            logger.debug("New session is to be created with id {}".format(session.id))
-
-            if profile_less is False:
-
-                # No profile in tracker payload
-                if self.profile is None:
-
-                    # First, check if the tracker_payload does not have events that need merging because
-                    # the identification point is defined. In such case we need to try to load profile with
-                    # data defined in identification point.
-
-                    # Rafael Bug fixed
-
-                    valid_identification_points = await self.list_identification_points()
-
-                    # Has identification points?
-                    if valid_identification_points:
-                        # We have new profile and identification point.
-                        profile_fields = self.get_profile_attributes_via_identification_data(
-                            valid_identification_points)
-
-                        # We have fields that identify profile according to identification point
-
-                        if profile_fields:
-                            profile = await merge_profile_by_merging_keys(
-                                self.create_default_profile(),
-                                merge_by=profile_fields)
-
-                    # If there is still no profile that means that it could not be loaded. It can happen if
-                    # event properties did not have all necessary data or the is no profile with defined
-                    # attributes.
-
-                    # Then create new profile.
-
-                    if profile is None:
-                        # Create empty default profile generate profile_id
-                        profile = self.create_default_profile()
-
-                        # Create new profile
-                        is_new_profile = True
-
-                        logger.info(
-                            "New profile created at UTC {} with id {}".format(profile.metadata.time.insert, profile.id))
-
-                else:
-
-                    # ID exists, load profile from storage
-                    profile: Optional[Profile] = await profile_loader(
-                        self,
-                        False  # Not static profile ID
-                    )
-
-                    if profile is None:
-                        # Profile id delivered but profile does not exist in storage.
-                        # ID was forged
-
-                        profile = self.create_default_profile()
-
-                        # Create new profile
-                        is_new_profile = True
-
-                        logger.debug(
-                            "No merged profile. New profile created at UTC {} with id {}".format(
-                                profile.metadata.time.insert,
-                                profile.id))
-
-                    else:
-                        logger.info(
-                            "Merged profile loaded with date {} UTC and id {}".format(profile.metadata.time.insert,
-                                                                                      profile.id))
-
-                # Now we have profile and we should assign it to session
-
-                session.profile = Entity(id=profile.id)
-
-        else:
-
-            # Get flag from existing session
-            is_new_session = session.operation.new if session.operation else True
-
-            logger.debug("Session exists with id {}".format(session.id))
-
-            if profile_less is False:
-
-                # There is session. Copy profile id form session to profile
-
-                if session.profile is not None:
-                    # Loaded session has profile
-
-                    # Load profile on profile id saved in session
-                    copy_of_tracker_payload = TrackerPayload(**self.model_dump())
-                    copy_of_tracker_payload.profile = Entity(id=session.profile.id)
-
-                    # Loader can mutate the copy_of_tracker_payload and add merging status
-
-                    profile: Optional[Profile] = await profile_loader(
-                        copy_of_tracker_payload,  # Not static profile ID
-                        False
-                    )
-
-                    # Reassign events that can be mutated
-                    self.events = copy_of_tracker_payload.events
-
-                    if isinstance(profile, Profile) and session.profile.id != profile.id:
-                        # Profile in session id has been merged. Change profile in session.
-
-                        session.profile.id = profile.id
-                        session.metadata.time.timestamp = datetime.timestamp(
-                            now_in_utc()
-                        )
-
-                        is_new_session = True
-
-                else:
-                    # Corrupted session, or profile less session
-
-                    profile = None
-
-                # Although we tried to load profile it still does not exist.
-                if profile is None:
-                    # ID exists but profile not exist in storage.
-
-                    profile = self.create_default_profile()
-
-                    # Create new profile
-                    is_new_profile = True
-
-                    # Update session as there is new profile. Previous session had no profile.id.
-                    session.profile = Entity(id=profile.id)
-                    is_new_session = True
-
+        # Update session
         if isinstance(session.context, dict):
             session.context.update(self.context)
         else:
@@ -610,45 +605,30 @@ class TrackerPayload(BaseModel):
         else:
             session.properties = self.properties
 
-        session.set_new(is_new_session)
+        if profile_less is True:
+            return None, session
 
-        if profile_less is False and profile is not None:
-            profile.set_new(is_new_profile)
+        # There is profile
 
-        if profile:
-            # If there is fingerprinted profile and we just created new profile then load fingerprinted profile.
-            if fp_profile_id:
-                # If new profile then check if there is fingerprinted profile
-                if is_new_profile:
-                    if profile.id != fp_profile_id:
+        # Calling self._get_profile(session) revolves inconsistencies such as - missing ids.
+        profile, session = await self._get_profile(session, static=static)
 
-                        # Load profile with finger printed profile id
-                        copy_of_tracker_payload = TrackerPayload(**self.model_dump())
-                        copy_of_tracker_payload.profile = Entity(id=fp_profile_id)
+        # Check consistency
 
-                        # Loader can mutate the copy_of_tracker_payload and add merging status
-
-                        fp_profile: Optional[Profile] = await profile_loader(
-                            copy_of_tracker_payload,
-                            False  # Not static profile ID
-                        )
-
-                        # Reassign events that can be mutated
-                        self.events = copy_of_tracker_payload.events
-
-                        if fp_profile:
-                            profile = fp_profile
-                        elif self.finger_printing_enabled():
-                            fp.save_browser_finger_print(profile.id)
-
-                        print("Loading profile by FP")
-                else:
-                    pass
-                    # Todo merge with fingerprint as merge key. Do not know if I want to do this.
-
-            elif self.finger_printing_enabled():
-                # Does not have fingerprinted profile
-                fp.save_browser_finger_print(profile.id)
+        if session and self.session:
+            # Correct session ID are when they are the same or a shadowed session was created when there was a conflict.
+            correct_session = self.session.id == session.id or session.id == get_shadow_session_id(session.id)
+            if not correct_session:
+                logger.warning(
+                    f"Session ID ({self.session.id}) in Tracker Payload does not equal to "
+                    f"loaded session ({session.id}) ")
+        if profile and self.profile:
+            if self.profile.id != profile.id:
+                raise AssertionError(f"Profile ID ({self.profile.id}) in Tracker Payload does not equal "
+                                     f"to loaded profile ({profile.id}) ")
+            if session.profile.id != profile.id:
+                raise AssertionError(
+                    f"Profile ID in session ({session.profile.id}) does not equal to loaded profile ({profile.id}) ")
 
         return profile, session
 

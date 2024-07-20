@@ -1,3 +1,5 @@
+from typing import List
+
 from tracardi.service.storage.driver.elastic import event as event_db
 
 
@@ -17,15 +19,15 @@ class EventContextFetcher:
             return f"{kql} AND ({query})"
         return kql
 
-    def get_query(self,
-                  query: str = None,
-                  start:int = 0,
-                  limit:int = 50,
-                  time_field: str = "metadata.time.insert",
-                  time_zone: str = "UTC",
-                  min_date_time='now-7d/d',
-                  max_date_time='now'
-                  ) -> dict:
+    def _query(self,
+               query: str = None,
+               start: int = 0,
+               limit: int = 50,
+               time_field: str = "metadata.time.insert",
+               time_zone: str = "UTC",
+               min_date_time='now-7d/d',
+               max_date_time='now'
+               ) -> dict:
         es_query = {
             "from": start,
             "size": limit,
@@ -51,6 +53,24 @@ class EventContextFetcher:
 
         return es_query
 
-    @staticmethod
-    async def fetch(query: dict):
-        return await event_db.query(query)
+    async def fetch_event_types(
+            self,
+            query: str = None,
+            start: int = 0,
+            limit: int = 50,
+            time_field: str = "metadata.time.insert",
+            time_zone: str = "UTC",
+            min_date_time='now-7d/d',
+            max_date_time='now'
+    ) -> List[str]:
+        query = self._query(
+            query,
+            start,
+            limit,
+            time_field,
+            time_zone,
+            min_date_time,
+            max_date_time
+        )
+        events = await event_db.query(query)
+        return [event['type'] for event in events]

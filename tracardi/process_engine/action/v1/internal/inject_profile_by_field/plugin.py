@@ -1,4 +1,4 @@
-from tracardi.service.tracking.storage.profile_storage import load_profile
+from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.domain.profile import Profile
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.plugin.runner import ActionRunner

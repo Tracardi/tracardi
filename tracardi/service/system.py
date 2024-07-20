@@ -2,7 +2,7 @@ from typing import Tuple
 
 from tracardi.context import ServerContext, get_context
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.indices_manager import get_indices_status
+from tracardi.service.storage.elastic.interface.indices_manager import get_indices_status
 
 logger = get_logger(__name__)
 

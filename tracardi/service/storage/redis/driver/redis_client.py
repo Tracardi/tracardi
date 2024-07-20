@@ -8,7 +8,7 @@ from tracardi.context import get_context
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.singleton import Singleton
 from tracardi.config import redis_config
-from tracardi.service.storage.redis_connection_pool import get_redis_connection_pool
+from tracardi.service.storage.redis.driver.redis_connection_pool import get_redis_connection_pool
 
 logger = get_logger(__name__)
 

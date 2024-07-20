@@ -7,11 +7,11 @@ from pydantic import BaseModel
 from tracardi.domain import ExtraInfo
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.service.singleton import Singleton
-from tracardi.service.storage.elastic_client import ElasticClient
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.config import tracardi, mysql
 from tracardi.context import ServerContext, get_context, Context
 from tracardi.exceptions.log_handler import get_installation_logger
-from tracardi.service.storage.driver.elastic import system as system_db
+from tracardi.service import system
 from tracardi.service.storage.index import Resource
 
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
@@ -44,7 +44,7 @@ async def check_installation() -> dict:
             "warning": None
         }
 
-    is_schema_ok, indices = await system_db.is_schema_ok()
+    is_schema_ok, indices = await system.is_schema_ok()
 
     if is_schema_ok is False:
         logger.warning("Incorrect Elastic Schema",

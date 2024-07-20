@@ -25,11 +25,11 @@ class EventReshapingService(TableService):
         return await self._load_by_id_in_deployment_mode(EventReshapingTable, primary_id=event_reshaping_id)
 
     async def delete_by_id(self, event_reshaping_id: str) -> Tuple[bool, Optional[EventReshapingSchema]]:
-        return await self._delete_by_id_in_deployment_mode(EventReshapingTable, map_to_event_reshaping, primary_id=event_reshaping_id)
+        return await self._delete_by_id_in_deployment_mode(EventReshapingTable, map_to_event_reshaping,
+                                                           primary_id=event_reshaping_id)
 
     async def insert(self, event_reshaping: EventReshapingSchema):
         return await self._replace(EventReshapingTable, map_to_event_reshaping_table(event_reshaping))
-
 
     async def load_by_event_type(self, event_type: str, only_enabled: bool = True):
         if only_enabled:

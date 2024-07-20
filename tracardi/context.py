@@ -129,6 +129,9 @@ class ContextManager(metaclass=Singleton):
         return context
 
     def set(self, local: str, context: Context):
+        if not isinstance(context, Context):
+            raise ValueError(f"Expected Context object got {type(context)}")
+
         _request_id = ctx_id.get()
 
         if self._empty():

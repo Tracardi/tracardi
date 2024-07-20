@@ -1,7 +1,7 @@
 from typing import Optional
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 
 logger = get_logger(__name__)
 

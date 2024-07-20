@@ -66,7 +66,7 @@ def map_to_plugin_table(plugin: FlowActionPlugin) -> PluginTable:
         plugin_spec_manual=plugin.plugin.spec.manual,
         plugin_spec_author=plugin.plugin.spec.author,
         plugin_spec_license=plugin.plugin.spec.license or 'MIT',
-        plugin_spec_version=plugin.plugin.spec.version or '1.0.0',
+        plugin_spec_version=plugin.plugin.spec.version or '1.0.x',
         plugin_spec_run_once_value=plugin.plugin.spec.run_once.value or "",
         plugin_spec_run_once_ttl=plugin.plugin.spec.run_once.ttl or 0,
         plugin_spec_run_once_type=plugin.plugin.spec.run_once.type or "value",

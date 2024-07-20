@@ -6,10 +6,10 @@ from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.storage.elastic.interface.event import save_events_in_db
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
-from tracardi.service.tracking.storage.profile_storage import save_profile
+from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.track_data_computation import compute_data
 from tracardi.domain.event_source import EventSource
@@ -66,7 +66,7 @@ async def os_tracker(
             # Save profile
             if profile and profile.has_not_saved_changes():
                 # Sync save
-                await save_profile(profile)
+                await mutation_profile_db.save_profile(profile)
 
             # Save session
             if session and session.has_not_saved_changes():

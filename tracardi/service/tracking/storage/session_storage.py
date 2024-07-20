@@ -1,7 +1,7 @@
 from typing import Optional, Union, List, Set
 
-from tracardi.service.storage.elastic.interface.session import load_session_from_db, save_session_to_db, \
-    refresh_session_db
+from tracardi.service.storage.elastic.interface.collector.load.session import load_session_from_db, refresh_session_db
+from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db
 from tracardi.service.tracking.cache.session_cache import load_session_cache, save_session_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.session import Session

@@ -7,7 +7,7 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis_client import RedisClient
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 
 batch = 3
 i = 0

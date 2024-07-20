@@ -156,3 +156,12 @@ def test_should_cast_values():
     assert array_value == [1, 2, 3]
     assert object_value == {"key": "1.02"}
     assert memory_casted
+
+
+def test_ampersand():
+    dot = DotAccessor(
+        profile={"@a": "1", "b": {"@a": 1}}
+    )
+
+    assert dot['profile@@a'] == '1'
+    assert dot['profile@b.@a'] == 1

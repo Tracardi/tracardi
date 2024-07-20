@@ -37,6 +37,7 @@ class NullableEntity(Creatable):
 class NullablePrimaryEntity(NullableEntity):
     primary_id: Optional[str] = None
 
+
 class Entity(Creatable):
     id: str
     _metadata: Optional[RecordMetadata] = PrivateAttr(None)
@@ -108,8 +109,10 @@ class Entity(Creatable):
     def __eq__(self, other):
         return self.id == other.id if isinstance(other, Entity) else False
 
+
 class DefaultEntity(Entity):
     metadata: Optional[Time] = None
+
 
 class PrimaryEntity(Entity):
     primary_id: Optional[str] = None

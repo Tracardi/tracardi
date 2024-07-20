@@ -1,39 +1,23 @@
-from typing import List, Optional, Tuple, Union, Set, Dict
+from typing import List, Optional, Tuple, Dict
 
 from tracardi.config import tracardi
-from tracardi.context import get_context
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.field_mappings_cache import add_new_field_mappings
-from tracardi.service.storage.elastic.interface.session import save_session_to_db
+from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
+from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis_client import RedisClient
-from tracardi.service.tracking.cache.profile_cache import save_profile_cache
-from tracardi.service.tracking.cache.session_cache import save_session_cache
+from tracardi.service.storage.redis.driver.redis_client import RedisClient
 from tracardi.service.tracking.locking import Lock, async_mutex
-from tracardi.service.tracking.storage.profile_storage import load_profile
+from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
-from tracardi.service.storage.driver.elastic import profile as profile_db
 
 logger = get_logger(__name__)
 _redis = RedisClient()
-
-
-async def _save_profile(profile: Profile):
-    save_profile_cache(profile)
-    # Save to database - do not defer
-    await profile_db.save(profile, refresh_after_save=True)
-
-
-async def _save_session(sessions: Union[Session, List[Session], Set[Session]]):
-    context = get_context()
-    save_session_cache(sessions, context)
-    # Save to database - do not defer
-    await save_session_to_db(sessions)
 
 
 async def trigger_workflows(profile: Profile,
@@ -116,7 +100,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
 
             # Profile is in mutex, no profile loading from cache necessary; Save it in db and cache
             # Synchronous save
-            await _save_profile(profile)
+            await save_profile_in_db_and_cache(profile)
 
         if session and session.is_updated_in_workflow():
             logger.debug(f"Session {session.id} needs update after workflow.")
@@ -124,7 +108,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
             # Profile is in mutex, that means no session for the profile should be modified.
             # No session loading from cache necessary; Save it in db and cache
             # Synchronous save
-            await _save_session(session)
+            await save_session_to_db_and_cache(session)
 
         changed_fields = FieldChangeLogger(changed_fields)
 

@@ -14,12 +14,13 @@ class DestinationInterface:
         self.debug = debug
         self.resource = resource
 
-    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session], changed_fields: List[dict] = None):
+    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session],
+                               changed_fields: List[dict] = None, metadata=None):
         pass
 
-    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event):
+    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event,
+                             metadata=None):
         pass
-
 
     def _get_credentials(self):
         return self.resource.credentials.test if self.debug else self.resource.credentials.production
