@@ -18,3 +18,4 @@ class SystemSettings(BaseModel):
     value: Any = None
     desc: str
     expose: Optional[bool] = False
+    cluster_wide: Optional[bool] = False

@@ -11,8 +11,7 @@ from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiled
 from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple, Union, Set
 from tracardi.service.storage.elastic.interface import raw as raw_db
-
-from ...mysql.service.event_source_service import EventSourceService
+from tracardi.service.storage.mysql.interface import event_source_dao
 
 logger = get_logger(__name__)
 
@@ -407,8 +406,7 @@ async def aggregate_events_by_source(buckets_size):
     query_string = [f"id:{id}" for id in result.aggregations['by_source'][0]]
     query_string = " OR ".join(query_string)
 
-    ess =  EventSourceService()
-    event_source_as_named_entities = (await ess.load_all_in_deployment_mode()).as_named_entities()
+    event_source_as_named_entities, _ = await event_source_dao.load_event_source_entities()
 
     source_names_idx = {source.id: source.name for source in event_source_as_named_entities}
     return [{"name": _get_name(source_names_idx, id), "value": count} for id, count in

@@ -38,4 +38,5 @@ with (ServerContext(Context(production=False))):
             await exec_workflow(profile_id, session, events, tp)
         finally:
             await save_logs()
+
     asyncio.run(main())

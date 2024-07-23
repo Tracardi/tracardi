@@ -107,7 +107,7 @@ class EventSourceService(TableService):
         return standard_inbound_sources
 
     async def save(self, event_source: EventSource):
-        types = EventSourceService.event_source_types()
+        types = self.event_source_types()
         if event_source.is_allowed(types):
             return await self._replace(EventSourceTable, map_to_event_source_table(event_source))
         else:

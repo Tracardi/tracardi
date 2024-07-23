@@ -2,6 +2,7 @@ import pytest
 from uuid import uuid4
 from tracardi.context import ServerContext, Context
 from tracardi.domain.destination import Destination, DestinationConfig, NamedEntity
+from tracardi.service.destination.utils import get_destination_types
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
 
 @pytest.mark.asyncio
@@ -46,7 +47,7 @@ async def test_destination_service():
             assert not profile_destinations.rows
 
             # Get Destination Types (custom method, might require mocking or additional setup)
-            destination_types = list(DestinationService.get_destination_types())
+            destination_types = list(get_destination_types())
             assert destination_types
 
             # Filter Destinations

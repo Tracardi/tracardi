@@ -1,9 +1,10 @@
 from tracardi.config import elastic, tracardi, mysql, memory_cache, redis_config, server
 from tracardi.domain.settings import SystemSettings
+from tracardi.service.cluster.config import is_save_logs_on
 from tracardi.service.license import License
 
 if License.has_license():
-    from com_tracardi.service.settings import com_system_settings
+    from com_tracardi.service.settings import com_system_settings, com_cluster_settings
 
 system_settings = [
     SystemSettings(
@@ -408,13 +409,6 @@ system_settings = [
     ),
     SystemSettings(
         **{
-            "label": "SAVE_LOGS",
-            "value": tracardi.save_logs,
-            "desc": "Default: yes. When set to yes all logs will be saved in tracardi log."
-        }
-    ),
-    SystemSettings(
-        **{
             "label": "ENABLE_WORKFLOW",
             "value": tracardi.enable_workflow,
             "desc": "Default: yes. Enables processing events by workflows.",
@@ -498,8 +492,16 @@ system_settings = [
     ),
 ]
 
-def get_system_envs():
+cluster_system_settings = [
+    {
+        "label": "SAVE_LOGS",
+        "value": is_save_logs_on,
+        "desc": "Default: yes. When set to yes all logs will be saved in tracardi log."
+    }
+]
 
+
+def get_system_envs():
     _system_settings = system_settings
     if License.has_license():
         _system_settings += com_system_settings
@@ -507,9 +509,24 @@ def get_system_envs():
     return {item.label: item.value for item in _system_settings if item.expose}
 
 
-def list_system_envs():
+async def list_system_envs():
+    _cluster_settings = []
+    for item in cluster_system_settings:
+        _cluster_settings.append(SystemSettings(
+            label=item["label"],
+            value=await item['value'](),
+            desc=item['desc'],
+            cluster_wide=True
+        ))
 
+    for item in com_cluster_settings:
+        _cluster_settings.append(SystemSettings(
+            label=item["label"],
+            value=await item['value'](),
+            desc=item['desc'],
+            cluster_wide=True
+        ))
     if License.has_license():
-        return system_settings + com_system_settings
+        return system_settings + com_system_settings + _cluster_settings
 
-    return system_settings
+    return system_settings + _cluster_settings

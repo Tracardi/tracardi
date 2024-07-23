@@ -31,6 +31,7 @@ class ResourceCredentials(BaseModel):
     def get_production_credentials(self, output: Type[T] = None) -> Union[T, dict]:
         return output(**self.production) if output is not None else self.production
 
+
 class Resource(NamedEntityInContext):
     type: str
     timestamp: Optional[datetime] = None
@@ -41,6 +42,7 @@ class Resource(NamedEntityInContext):
     icon: Optional[str] = None
     destination: Optional[DestinationConfig] = None
     enabled: Optional[bool] = True
+    locked: Optional[bool] = False
 
     def __init__(self, **data: Any):
         data['timestamp'] = now_in_utc()

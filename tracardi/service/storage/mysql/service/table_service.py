@@ -24,6 +24,7 @@ logger = get_logger(__name__)
 client = AsyncMySqlEngine()
 engine = client.get_engine_for_database()
 
+
 class TableService(metaclass=Singleton):
 
     def __init__(self):

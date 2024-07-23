@@ -40,6 +40,7 @@ class Destination(NamedEntityInContext):
     resource: Entity
     event_type: Optional[NamedEntity] = None
     source: NamedEntity
+    locked: Optional[bool] = False
 
     @field_validator("name")
     @classmethod

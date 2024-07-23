@@ -32,8 +32,10 @@ async def event_destination_dispatch(profile: Optional[Profile],
 
             dot.set_storage("event", event)
 
-            async for destination_instance, reshaped_data in get_dispatch_destination_and_data(dot, destinations,
-                                                                                               debug):
+            async for destination_instance, reshaped_data in get_dispatch_destination_and_data(
+                    dot,
+                    destinations,
+                    debug):
                 await destination_instance.dispatch_event(reshaped_data,
                                                           profile=profile,
                                                           session=session,

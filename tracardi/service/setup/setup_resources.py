@@ -3,7 +3,7 @@ from tracardi.domain.resource_settings import ResourceSettings, DestinationData
 from typing import List
 
 if License.has_license():
-    from com_tracardi.resource.resource_types import commercial_resource_types
+    from com_tracardi.service.setup.setup_resources import commercial_resource_types
 
 
 def get_resource_types() -> List[ResourceSettings]:
@@ -466,32 +466,6 @@ def get_resource_types() -> List[ResourceSettings]:
             manual='apache_pulsar_resource',
             destination=DestinationData(
                 package="com_tracardi.destination.pulsar_connector.PulsarConnector",
-                init={
-                    "topic": "<topic>",
-                    "serializer": "json"
-                },
-                pro=True
-            )
-        ),
-        ResourceSettings(
-            id="apache-kafka",
-            name="Apache Kafka",
-            icon='kafka',
-            tags=['kafka', 'pro', 'queue', 'destination'],
-            config={
-                "bootstrap_servers": 'localhost:port',
-                "security_protocol": "PLAINTEXT",
-                "sasl_mechanism": "PLAIN",
-                "sasl_plain_username": None,
-                "sasl_plain_password": None,
-                "metadata_max_age_ms": 300000,
-                "request_timeout_ms": 40000,
-                "max_batch_size": 16384,
-                "max_request_size": 1048576,
-                "ssl_context": False
-            },
-            destination=DestinationData(
-                package="com_tracardi.destination.kafka_connector.KafkaConnector",
                 init={
                     "topic": "<topic>",
                     "serializer": "json"
