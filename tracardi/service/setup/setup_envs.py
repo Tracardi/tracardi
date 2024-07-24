@@ -1,6 +1,6 @@
 from tracardi.config import elastic, tracardi, mysql, memory_cache, redis_config, server
 from tracardi.domain.settings import SystemSettings
-from tracardi.service.cluster.config import is_save_logs_on
+from tracardi.cluster_config import is_save_logs_on
 from tracardi.service.license import License
 
 if License.has_license():
