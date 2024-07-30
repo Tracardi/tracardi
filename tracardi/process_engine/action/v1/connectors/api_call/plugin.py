@@ -32,11 +32,12 @@ class RemoteCallAction(ActionRunner):
 
     @staticmethod
     def _validate_key_value(values, label):
-        for name, value in values.items():
-            if not isinstance(value, str):
-                raise ValueError(
-                    "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
-                                                                               name))
+        if values:
+            for name, value in values.items():
+                if not isinstance(value, str):
+                    raise ValueError(
+                        "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
+                                                                                   name))
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
@@ -54,6 +55,12 @@ class RemoteCallAction(ActionRunner):
 
             cookies = traverser.reshape(reshape_template=self.config.cookies)
             headers = traverser.reshape(reshape_template=headers)
+
+            if cookies is None:
+                cookies = {}
+
+            if headers is None:
+                headers = {}
 
             self._validate_key_value(headers, "Header")
             self._validate_key_value(cookies, "Cookie")

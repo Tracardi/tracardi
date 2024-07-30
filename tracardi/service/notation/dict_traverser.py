@@ -50,7 +50,7 @@ class DictTraverser:
 
     def reshape(self, reshape_template: Union[Dict, List, str]):
 
-        if not reshape_template:
+        if reshape_template is None:
             return None
 
         if isinstance(reshape_template, str):

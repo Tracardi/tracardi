@@ -10,6 +10,7 @@ from tracardi.service.wf.domain.flow_graph import FlowGraph
 
 logger = get_logger(__name__)
 
+
 class FlowInvokeResult:
 
     def __init__(self, debug_info: DebugInfo, log_list: List[Log], flow: FlowGraph, event: Event,
@@ -24,7 +25,6 @@ class FlowInvokeResult:
 
     def __repr__(self):
         return f"FlowInvokeResult(\n\tprofile=({self.profile})\n\tsession=({self.session})\n\tevent=({self.event}))"
-
 
     def register_logs_in_logger(self):
         for log in self.log_list:

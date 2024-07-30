@@ -3,7 +3,6 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 
-
 class EventReshapeDefinition(BaseModel):
     properties: Optional[dict] = None
     context: Optional[dict] = None

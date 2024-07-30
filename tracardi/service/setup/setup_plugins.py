@@ -813,6 +813,13 @@ if License.has_service(SCHEDULER):
 
 if License.has_license():
 
+    installed_plugins["com_tracardi.action.v1.internal.save_state.plugin"] = PluginMetadata(
+        test=PluginTest(
+            init={
+                "result": ""
+            })
+    )
+
     installed_plugins["com_tracardi.action.v1.ux.chats.chatwoot.plugin"] = PluginMetadata(
         test=PluginTest(
             init={

@@ -28,6 +28,7 @@ class FlowSchema(BaseModel):
 
 
 class Flow(FlowGraph):
+    # Graph inherited
     tags: Optional[List[str]] = ["General"]
     lock: bool = False
     type: str

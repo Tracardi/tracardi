@@ -11,6 +11,9 @@ class FlowGraph(NamedEntity):
     description: Optional[str] = None
     flowGraph: Optional[FlowGraphData] = None
     response: Optional[Dict[str, dict]] = {}
+    # Exit result
+    state: Optional[dict] = None
+    defer: Optional[List] = []
 
     _updated_in_workflow: dict = PrivateAttr({})
 

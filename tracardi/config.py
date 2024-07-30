@@ -236,7 +236,6 @@ class TracardiConfig(metaclass=Singleton):
         self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
         self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
         self.tracardi_pro_port = get_env_as_int('TRACARDI_PRO_PORT', 40000)
-        self.tracardi_scheduler_host = env.get('TRACARDI_SCHEDULER_HOST', 'scheduler.tracardi.com')
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING

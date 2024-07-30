@@ -25,11 +25,11 @@ class EventDataReshaper:
     def reshape(self, schemas: List[EventReshapingSchema]) -> Optional[Tuple[dict, dict, Optional[dict]]]:
 
         """
-        Returns event and session context
+        Returns event and session context.
         """
 
-        event_properties: dict = {}
-        event_context: dict = {}
+        event_properties = None
+        event_context = None
         session_context = None
         for schema in schemas:
 
@@ -42,14 +42,25 @@ class EventDataReshaper:
                 if schema.reshaping.reshape_schema.properties:
 
                     # Delete event properties
+                    delete_schema = None
                     if 'properties' in self.dot.event and self._has_delete_schema(schema.reshaping.reshape_schema):
-                        for event_property in self._get_delete_schema(schema.reshaping.reshape_schema):
-                            # Remove that value
-                            self.dot.event['properties'].pop(event_property, None)
+                        delete_schema = schema.reshaping.reshape_schema.properties['-']
                         del schema.reshaping.reshape_schema.properties['-']
 
-                    # Reshape remaining properties
-                    event_properties = self._reshape(schema.reshaping.reshape_schema.properties)
+                    # If after removing the '-' there is no reshapes. Do not change the properties
+                    # (reassign original properties)
+                    if not schema.reshaping.reshape_schema.properties and 'properties' in self.dot.event:
+                        # If not reshape define for event return default properties
+                        event_properties = dict(self.dot.event['properties'])
+                    else:
+                        # Reshape properties
+                        event_properties = self._reshape(schema.reshaping.reshape_schema.properties)
+
+                    # Remove properties
+                    if delete_schema and event_properties:
+                        for event_property in delete_schema:
+                            # Remove that value
+                            event_properties.pop(event_property, None)
 
                 if schema.reshaping.reshape_schema.context:
                     event_context = self._reshape(schema.reshaping.reshape_schema.context)
