@@ -334,9 +334,3 @@ def async_mutex(lock: Lock,
             f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
     return AsyncGlobalMutexLock(lock, name, break_after_time)
 
-
-def profile_mutex(profile_id: str,
-                  name: str,
-                  break_after_time: Union[int, float] = None,
-                  raise_error_when_locked: bool = False):
-    return AsyncProfileMutex(profile_id, name, break_after_time, raise_error_when_locked)

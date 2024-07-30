@@ -6,7 +6,6 @@ from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.storage.elastic.interface.event import save_events_in_db
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
@@ -18,12 +17,8 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
-from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.tracking.locking import Lock, async_mutex
-
 
 logger = get_logger(__name__)
-_redis = RedisClient()
 
 
 async def os_tracker(
@@ -42,41 +37,30 @@ async def os_tracker(
         # Load profile and session
         profile, session = await tracker_loading(tracker_payload, tracker_config)
 
-        # We need profile ID to lock.
+        # Lock profile and session for changes and compute data
+        profile, session, events, tracker_payload = await compute_data(
+            profile,
+            session,
+            tracker_payload,
+            tracker_config,
+            source,
+            field_change_logger
+        )
 
-        profile_key = Lock.get_key(Collection.lock_tracker, "profile", get_entity_id(profile))
-        profile_lock = Lock(_redis, profile_key, default_lock_ttl=3)
+        # Save profile
+        if profile and profile.has_not_saved_changes():
+            # Sync save
+            await mutation_profile_db.save_profile(profile)
 
-        # If not profile ID then no locking
+        # Save session
+        if session and session.has_not_saved_changes():
+            # Sync save
+            await save_session(session)
 
-        async with async_mutex(profile_lock, name='lock_and_compute_data_profile'):
-
-            # Lock profile and session for changes and compute data
-            profile, session, events, tracker_payload = await compute_data(
-                profile,
-                session,
-                tracker_payload,
-                tracker_config,
-                source,
-                field_change_logger
-            )
-
-            # MUST BE INSIDE MUTEX until it stores data to cache
-
-            # Save profile
-            if profile and profile.has_not_saved_changes():
-                # Sync save
-                await mutation_profile_db.save_profile(profile)
-
-            # Save session
-            if session and session.has_not_saved_changes():
-                # Sync save
-                await save_session(session)
-
-            # Save events
-            if events:
-                # Sync save
-                await save_events_in_db(events)
+        # Save events
+        if events:
+            # Sync save
+            await save_events_in_db(events)
 
         try:
 

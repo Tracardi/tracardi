@@ -68,13 +68,6 @@ system_settings = [
     ),
     SystemSettings(
         **{
-            "label": "TRACARDI_SCHEDULER_HOST",
-            "value": tracardi.tracardi_scheduler_host,
-            "desc": "Defines the Tracardi Pro Scheduler Host."
-        }
-    ),
-    SystemSettings(
-        **{
             "label": "EVENT_TO_PROFILE_COPY_CACHE_TTL",
             "value": memory_cache.event_to_profile_coping_ttl,
             "desc": "Default: 2. Set caching time for the event to profile schema. Set 0 for no caching."

@@ -7,9 +7,6 @@ from tracardi.service.change_monitoring.field_change_logger import FieldChangeLo
 from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
-from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
-from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -17,7 +14,6 @@ from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 
 logger = get_logger(__name__)
-_redis = RedisClient()
 
 
 async def trigger_workflows(profile: Profile,
@@ -69,9 +65,9 @@ async def trigger_workflows(profile: Profile,
     return profile, session, events, ux, response, tracker_result.changed_field_timestamps, is_wf_triggered
 
 
-async def _exec_workflow(profile_id: Optional[str], session: Session, events: List[Event], tracker_payload: TrackerPayload) -> Tuple[
+async def _exec_workflow(profile_id: Optional[str], session: Session, events: List[Event],
+                         tracker_payload: TrackerPayload) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeLogger, bool]:
-
     # Loads profile form cache
     # Profile needs to be loaded from cache. It may have changed during it was dispatched by event trigger
 
@@ -115,9 +111,9 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
     return profile, session, events, ux, response, changed_fields, is_wf_triggered
 
 
-async def exec_workflow(profile_id: Optional[str], session: Session, events: List[Event], tracker_payload: TrackerPayload) -> Optional[Tuple[
+async def exec_workflow(profile_id: Optional[str], session: Session, events: List[Event],
+                        tracker_payload: TrackerPayload) -> Optional[Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeLogger, bool]]:
-
     if not tracardi.enable_workflow:
         return None
 
@@ -127,19 +123,8 @@ async def exec_workflow(profile_id: Optional[str], session: Session, events: Lis
             profile_id, session, events, tracker_payload
         )
 
-    profile_key = Lock.get_key(Collection.lock_tracker, "profile", profile_id)
-    profile_lock = Lock(_redis, profile_key, default_lock_ttl=5)
-
-    async with async_mutex(profile_lock, name='workflow-worker'):
-        profile, session, events, ux, response, workflow_field_timestamp_log, is_wf_triggered = await _exec_workflow(
-            profile_id, session, events, tracker_payload
-        )
-
-    # logger.info(f"Output profile {profile.traits}")
-    # logger.info(f"Output session {session}")
-    # logger.info(f"Output events {events}")
-    # logger.info(f"Output ux {ux}")
-    # logger.info(f"Output response {response}")
-    # print(workflow_field_timestamp_log.get_log())
+    profile, session, events, ux, response, workflow_field_timestamp_log, is_wf_triggered = await _exec_workflow(
+        profile_id, session, events, tracker_payload
+    )
 
     return profile, session, events, ux, response, workflow_field_timestamp_log, is_wf_triggered
