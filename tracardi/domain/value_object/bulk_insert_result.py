@@ -24,3 +24,6 @@ class BulkInsertResult(BaseModel):
 
     def has_errors(self) -> bool:
         return len(self.errors) > 0
+
+    def number_of_errors(self) -> int:
+        return len(self.errors)
