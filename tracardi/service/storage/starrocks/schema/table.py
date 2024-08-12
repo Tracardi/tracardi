@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import DOUBLE
 
 Base = declarative_base()
 
+
 class EventTable(Base):
     __tablename__ = 'event'
 
@@ -87,7 +88,6 @@ class EventTable(Base):
     entity_id = Column(String(64))
 
     aux = Column(JSON)
-    trash = Column(JSON)
     config = Column(JSON)
     context = Column(JSON)
     properties = Column(JSON)
@@ -245,6 +245,7 @@ class EventTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'production'),
     )
+
 
 class ProfileTable(Base):
     __tablename__ = 'profile'

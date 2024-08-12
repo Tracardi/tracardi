@@ -1,4 +1,4 @@
-from typing import Optional, Type, Callable, Tuple, TypeVar, Any
+from typing import Optional, Type, Callable, Tuple, TypeVar, Any, List
 
 from sqlalchemy.dialects.mysql import insert
 
@@ -284,6 +284,13 @@ class TableService(metaclass=Singleton):
 
                 # Assuming the primary key field is named 'id'
                 return getattr(instance, 'id', None)
+
+    async def _insert_many(self, tables: List[Type[Base]]):
+        local_session = self.client.get_session(self.engine)
+        async with local_session() as session:
+            async with session.begin():
+                session.add_all(tables)
+                await session.commit()
 
     async def _insert_if_none(self, table: Type[Base], data, server_context: bool = True) -> Optional[str]:
 

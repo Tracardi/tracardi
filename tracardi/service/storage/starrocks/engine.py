@@ -10,7 +10,7 @@ class AsyncStarRocksEngine(metaclass=Singleton):
     def __init__(self, echo: bool = None):
         self.default = None
         self.engines = {}
-        self.echo = starrocks.starrocks_echo if echo is None else echo
+        self.echo = True  # starrocks.starrocks_echo if echo is None else echo
 
     @staticmethod
     def get_session(async_engine):

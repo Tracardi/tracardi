@@ -1,8 +1,12 @@
+import os
 from sqlalchemy import text
 
 from tracardi.config import starrocks
-from tracardi.service.storage.starrocks.schema.table import Base
+# from tracardi.service.storage.starrocks.schema.table import Base
 from tracardi.service.storage.starrocks.engine import AsyncStarRocksEngine
+from tracardi.service.utils.file import read_file
+
+_local_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 class DatabaseService:
@@ -10,10 +14,18 @@ class DatabaseService:
     def __init__(self):
         self.client = AsyncStarRocksEngine()
 
+    # async def _create_tables(self):
+    #     engine = self.client.get_engine_for_database()
+    #     async with engine.begin() as conn:
+    #         await conn.run_sync(Base.metadata.create_all, checkfirst=False)
+    #         await conn.commit()
+    #     await engine.dispose()
+
     async def _create_tables(self):
+        sql = read_file(os.path.join(_local_dir, "../schema/table.sql"))
         engine = self.client.get_engine_for_database()
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        async with engine.connect() as conn:
+            await conn.execute(text(sql))
             await conn.commit()
         await engine.dispose()
 
@@ -39,7 +51,6 @@ class DatabaseService:
             return result.fetchone() is not None
 
     async def bootstrap(self):
-
         # Connect to the database
         await self._create_database()
 
