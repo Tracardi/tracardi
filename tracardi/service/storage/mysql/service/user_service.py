@@ -1,10 +1,12 @@
 from typing import Optional, List, Tuple
 
 import logging
+from uuid import uuid4
 
 from tracardi.domain.user_payload import UserPayload
 from tracardi.config import tracardi
 from tracardi.domain.user import User
+from tracardi.domain.credentials import Credentials
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.user_mapping import map_to_user_table, map_to_user
 from tracardi.service.storage.mysql.schema.table import UserTable
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(tracardi.logging_level)
 logger.addHandler(log_handler)
 
+
 # --------------------------------------------------------
 # This Service Runs in Production and None-Production Mode
 # It is PRODUCTION CONTEXT-LESS
@@ -28,6 +31,7 @@ def _where_with_context(*clause):
         False,
         *clause
     )
+
 
 class UserService(TableService):
 
@@ -45,7 +49,6 @@ class UserService(TableService):
                                         limit=limit,
                                         offset=offset)
 
-
     async def load_by_id(self, user_id: str) -> SelectResult:
         return await self._load_by_id(UserTable, primary_id=user_id, server_context=False)
 
@@ -57,11 +60,10 @@ class UserService(TableService):
     async def upsert(self, user: User):
         return await self._replace(UserTable, map_to_user_table(user))
 
-
     # Custom
 
     async def load_by_credentials(self, email: str, password: str) -> Optional[User]:
-        where = _where_with_context( # tenant only mode
+        where = _where_with_context(  # tenant only mode
             UserTable.email == email,
             UserTable.password == User.encode_password(password),
             UserTable.enabled == True
@@ -74,9 +76,8 @@ class UserService(TableService):
 
         return records.map_first_to_object(map_to_user)
 
-
     async def load_by_role(self, role: str) -> List[User]:
-        where = _where_with_context( # tenant only mode
+        where = _where_with_context(  # tenant only mode
             sql_functions().find_in_set(role, UserTable.roles) > 0
         )
 
@@ -87,8 +88,8 @@ class UserService(TableService):
 
         return list(records.map_to_objects(map_to_user))
 
-    async def load_by_name(self, name: str, start:int, limit: int) -> List[User]:
-        where = _where_with_context( # tenant only mode
+    async def load_by_name(self, name: str, start: int, limit: int) -> List[User]:
+        where = _where_with_context(  # tenant only mode
             UserTable.name.like(name)
         )
 
@@ -99,7 +100,7 @@ class UserService(TableService):
         return users
 
     async def check_if_exists(self, email: str) -> bool:
-        where = _where_with_context( # tenant only mode
+        where = _where_with_context(  # tenant only mode
             UserTable.email == email
         )
 
@@ -116,7 +117,7 @@ class UserService(TableService):
             )
         return None
 
-    async def update_if_exist(self, user_id:str, user_payload: UserPayload) -> Tuple[bool, User]:
+    async def update_if_exist(self, user_id: str, user_payload: UserPayload) -> Tuple[bool, User]:
 
         user_record = await self.load_by_id(user_id)
 
@@ -127,7 +128,8 @@ class UserService(TableService):
 
         user = User(
             id=user_id,
-            password=User.encode_password(user_payload.password) if user_payload.password is not None else existing_user.password,
+            password=User.encode_password(
+                user_payload.password) if user_payload.password is not None else existing_user.password,
             name=user_payload.name if user_payload.name is not None else existing_user.name,
             email=user_payload.email if user_payload.email is not None else existing_user.email,
             roles=user_payload.roles if user_payload.roles is not None else existing_user.roles,
@@ -139,3 +141,24 @@ class UserService(TableService):
         result = await self._replace(UserTable, map_to_user_table(user))
 
         return result is not None, user
+
+    async def bootstrap(self, credentials: Credentials) -> bool:
+        admins = await self.load_by_role('admin')
+
+        if credentials.needs_admin and len(admins) > 0:
+            logger.warning("There is at least one admin account. New admin account not created.")
+            return True
+
+        user = User(
+            id=str(uuid4()),
+            password=User.encode_password(credentials.password),
+            roles=['admin', 'maintainer'],
+            email=credentials.username,
+            name="Default Admin",
+            enabled=True
+        )
+
+        # Add admin
+        await self.insert_if_none(user)
+
+        return True

@@ -10,7 +10,7 @@ class SystemEntityProperty(Entity):
     default: Optional[str] = None
     optional: bool = False
     converter: Optional[str] = None
-    merge_strategies: Optional[List[str]]
+    merge_strategies: Optional[List[str]] = []
     nested: Optional[bool] = False
     undefined: Optional[bool] = False
 
