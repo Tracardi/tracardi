@@ -8,7 +8,6 @@ from tracardi.service.change_monitoring.field_change_logger import FieldChangeLo
 from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
-from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.track_data_computation import compute_data
 from tracardi.domain.event_source import EventSource
@@ -17,6 +16,8 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
+
+from tracardi.service.storage.interface import profile_mutation_dao
 
 logger = get_logger(__name__)
 
@@ -50,7 +51,7 @@ async def os_tracker(
         # Save profile
         if profile and profile.has_not_saved_changes():
             # Sync save
-            await mutation_profile_db.save_profile(profile)
+            await profile_mutation_dao.save_profile(profile)
 
         # Save session
         if session and session.has_not_saved_changes():

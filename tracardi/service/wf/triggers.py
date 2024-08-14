@@ -5,13 +5,14 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.field_mappings_cache import add_new_field_mappings
-from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
+
+from tracardi.service.storage.interface import profile_mutation_dao
 
 logger = get_logger(__name__)
 
@@ -96,7 +97,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
 
             # Profile is in mutex, no profile loading from cache necessary; Save it in db and cache
             # Synchronous save
-            await save_profile_in_db_and_cache(profile)
+            await profile_mutation_dao.save_profile_in_db_and_cache(profile)
 
         if session and session.is_updated_in_workflow():
             logger.debug(f"Session {session.id} needs update after workflow.")

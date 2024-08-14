@@ -1,7 +1,5 @@
 from dotty_dict import Dotty
 
-from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
-
 from tracardi.domain.profile_data import ProfileData
 from .storage.elastic.interface.event import refresh_event_db
 from .storage.elastic.interface.merging import delete_multiple_profiles
@@ -25,6 +23,8 @@ from ..exceptions.log_handler import get_logger
 from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
+
+from tracardi.service.storage.interface import profile_mutation_dao
 
 logger = get_logger(__name__)
 
@@ -338,7 +338,7 @@ class ProfileMerger:
             merged_profile.metadata.system.remove_merging_data()
 
             # Auto refresh db
-            await mutation_profile_db.save_profile(merged_profile, refresh=True)
+            await profile_mutation_dao.save_profile(merged_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
             await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)

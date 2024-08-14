@@ -9,6 +9,8 @@ from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 
+from tracardi.service.storage.interface import profile_mutation_dao
+
 
 async def _load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
     return await storage_manager('profile').query({
@@ -106,6 +108,6 @@ async def save_merged_profile(flat_profile: FlatProfile, metadata: RecordMetadat
     profile.set_meta_data(metadata)
 
     # Auto refresh db
-    await mutation_profile_db.save_profile(profile, refresh=True)
+    await profile_mutation_dao.save_profile(profile, refresh=True)
 
     return profile
