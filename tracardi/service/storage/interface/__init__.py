@@ -1,7 +1,7 @@
 import os
 
 package_name = os.getenv('STORAGE_DRIVER', 'starrocks')
-print(package_name)
+
 if package_name == 'elasticsearch':
     from tracardi.service.storage.interface.elastic.collector.mutation import profile as profile_mutation_dao
 elif package_name == 'starrocks':
