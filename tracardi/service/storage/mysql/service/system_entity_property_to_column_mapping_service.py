@@ -6,6 +6,7 @@ from com_tracardi.domain.object_mapping import ObjectMapping
 from tracardi.context import get_context
 from tracardi.domain.system_entity_mapping import SystemEntityPropertyToColumn
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.decorators.function_memory_cache import cache_for, async_cache_for
 from tracardi.service.storage.mysql.mapping.system_entity_property_to_column_mapping import \
     map_to_system_entity_property_to_column_table
 from tracardi.service.storage.mysql.schema.table import SystemEntityPropertyToColumnMappingTable, \
@@ -63,22 +64,6 @@ class SystemEntityPropertyToColumnMapping(TableService):
                         value_type=object.type,
                     )
 
+    @async_cache_for(60*15)
     async def load_by_type(self, entity_type: str, only_enabled: bool = True) -> List[ObjectMapping]:
         return [item async for item in self._load_by_type(entity_type, only_enabled)]
-
-        # if only_enabled:
-        #     where = where_tenant_and_mode_context(
-        #         SystemEntityPropertyToColumnMappingTable,
-        #         SystemEntityPropertyToColumnMappingTable.event_type == entity_type,
-        #         EventMappingTable.enabled == only_enabled
-        #     )
-        # else:
-        #     where = where_tenant_and_mode_context(
-        #         EventMappingTable,
-        #         EventMappingTable.event_type == entity_type
-        #     )
-        #
-        # return await self._select_in_deployment_mode(EventMappingTable,
-        #                                              where=where,
-        #                                              order_by=EventMappingTable.name
-        #                                              )
