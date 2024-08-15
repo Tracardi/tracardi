@@ -1,12 +1,10 @@
-import os
+from tracardi.config import tracardi
 
-package_name = os.getenv('STORAGE_DRIVER', 'starrocks')
-
-if package_name == 'elasticsearch':
+if tracardi.storage_driver == 'elasticsearch':
     from tracardi.service.storage.interface.elastic.collector.mutation import profile as profile_mutation_dao
-elif package_name == 'starrocks':
+elif tracardi.storage_driver == 'starrocks':
     from tracardi.service.storage.interface.starrocks.collector.mutation import profile as profile_mutation_dao
 else:
-    raise ValueError(f"Unknown storage driver: {package_name}")
+    raise ValueError(f"Unknown storage driver: {tracardi.storage_driver}")
 
 __all__ = ['profile_mutation_dao']
