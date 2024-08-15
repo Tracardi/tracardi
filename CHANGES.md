@@ -1,11 +1,15 @@
+Version 2.0.1
+----------------------------------------------------------
+* New SQL compliant storage
+
 Version: 1.0.1
 ----------------------------------------------------------
 * Refactored Data Access Layer
-
+* Preconfigured events sources, resources and destinations.
 
 Version: 1.0.0
 ----------------------------------------------------------
-* Versio 1.0.0 doe not require migration from version 0.9.0.x
+* Versio 1.0.0 does not require migration from version 0.9.0.x
 * Refactored merging mechanism for commercial version
 * New APM 
 * News feed
