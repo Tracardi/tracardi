@@ -15,11 +15,14 @@ redis_cache = RedisCache(ttl=tracardi.keep_session_in_cache_for)
 _redis = RedisClient()
 logger = get_logger(__name__)
 
+
 def get_session_key_namespace(session_id: str, context: Context) -> str:
     return f"{Collection.session}{context.context_abrv()}:{get_cache_prefix(session_id[0:2])}:"
 
 
 def load_session_cache(session_id: str, context: Context):
+    if tracardi.keep_session_in_cache_for == 0:
+        return None
 
     key_namespace = get_session_key_namespace(session_id, context)
 
@@ -35,6 +38,7 @@ def load_session_cache(session_id: str, context: Context):
         session.set_meta_data(RecordMetadata(**session_metadata))
 
     return session
+
 
 def _save_single_session(session, context):
     index = session.get_meta_data()
@@ -58,6 +62,7 @@ def _save_single_session(session, context):
             get_session_key_namespace(session.id, context)
         )
 
+
 def save_session_cache(session: Union[Optional[Session], List[Session]], context: Context):
     if session:
 
@@ -68,5 +73,3 @@ def save_session_cache(session: Union[Optional[Session], List[Session]], context
                 _save_single_session(_session, context)
         else:
             raise ValueError(f"Incorrect session value. Expected Session or list of Sessions. Got {type(session)}")
-
-
