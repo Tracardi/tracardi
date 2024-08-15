@@ -6,7 +6,7 @@ from com_tracardi.domain.object_mapping import ObjectMapping
 from tracardi.context import get_context
 from tracardi.domain.system_entity_mapping import SystemEntityPropertyToColumn
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.decorators.function_memory_cache import cache_for, async_cache_for
+from tracardi.service.decorators.function_memory_cache import async_cache_for
 from tracardi.service.storage.mysql.mapping.system_entity_property_to_column_mapping import \
     map_to_system_entity_property_to_column_table
 from tracardi.service.storage.mysql.schema.table import SystemEntityPropertyToColumnMappingTable, \

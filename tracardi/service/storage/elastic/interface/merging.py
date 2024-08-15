@@ -7,7 +7,6 @@ from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.interface import raw as raw_db
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
-from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 
 from tracardi.service.storage.interface import profile_mutation_dao
 
@@ -71,7 +70,7 @@ async def load_duplicated_profiles(profile: Profile, merge_by: Optional[List[Tup
 
 
 async def delete_multiple_profiles(profile_tuples: List[Tuple[str, RecordMetadata]]):
-    tasks = [asyncio.create_task(mutation_profile_db.delete_profile(profile_id, metadata.index))
+    tasks = [asyncio.create_task(profile_mutation_dao.delete_profile(profile_id, metadata.index))
              for profile_id, metadata in profile_tuples]
     return await asyncio.gather(*tasks)
 

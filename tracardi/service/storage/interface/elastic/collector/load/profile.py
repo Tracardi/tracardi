@@ -3,6 +3,7 @@ from typing import Optional
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache, save_profile_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.profile import Profile
+from tracardi.service.storage.elastic.interface import profile as profile_db
 
 
 async def load_profile(profile_id: str, context: Optional[Context] = None, fallback_to_db: bool = True) -> Optional[
@@ -19,7 +20,7 @@ async def load_profile(profile_id: str, context: Optional[Context] = None, fallb
         return None
 
     # This load is acceptable
-    # profile = await profile_db.load_by_id(profile_id)
+    profile = await profile_db.load_by_id(profile_id)
     save_profile_cache(profile, context)
 
     return profile

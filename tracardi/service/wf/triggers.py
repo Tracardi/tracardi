@@ -6,13 +6,13 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
-from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 
 from tracardi.service.storage.interface import profile_mutation_dao
+from tracardi.service.storage.interface import profile_load_dao
 
 logger = get_logger(__name__)
 
@@ -72,7 +72,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
     # Loads profile form cache
     # Profile needs to be loaded from cache. It may have changed during it was dispatched by event trigger
 
-    profile: Profile = await load_profile(profile_id) if profile_id is not None else None
+    profile: Profile = await profile_load_dao.load_profile(profile_id) if profile_id is not None else None
 
     # Triggers workflow
 

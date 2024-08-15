@@ -32,9 +32,10 @@ from ..profile import Profile
 
 from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
 from ...service.storage.mysql.service.idetification_point_service import IdentificationPointService
-from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from ...service.utils.getters import get_entity_id
 from ...service.utils.hasher import get_shadow_session_id
+
+from tracardi.service.storage.interface import profile_load_dao
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
@@ -494,7 +495,7 @@ class TrackerPayload(BaseModel):
         requested_profile_id = session.profile.id
 
         # ID exists in session, load profile with session.profile.id
-        profile: Optional[Profile] = await load_profile(requested_profile_id)
+        profile: Optional[Profile] = await profile_load_dao.load_profile(requested_profile_id)
 
         if profile is not None:
 
@@ -522,7 +523,7 @@ class TrackerPayload(BaseModel):
         loaded_session_profile_id = session.profile.id  # Session id delivered in payload
 
         # ID exists, load profile from storage
-        profile: Optional[Profile] = await load_profile(requested_profile_id)
+        profile: Optional[Profile] = await profile_load_dao.load_profile(requested_profile_id)
 
         if profile is not None:
 

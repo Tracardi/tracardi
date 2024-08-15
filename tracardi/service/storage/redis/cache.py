@@ -11,11 +11,12 @@ class RedisCache:
         self.ttl = ttl
 
     def set(self, key: str, value: Any, collection: str):
-        self._redis.set(
-            f"{collection}{key}",
-            msgpack.packb(value),
-            ex=self.ttl
-        )
+        if self.ttl > 0:
+            self._redis.set(
+                f"{collection}{key}",
+                msgpack.packb(value),
+                ex=self.ttl
+            )
 
     def mset(self, mapping):
         return self._redis.mset(mapping)

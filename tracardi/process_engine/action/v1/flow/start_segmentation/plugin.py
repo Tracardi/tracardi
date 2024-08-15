@@ -1,4 +1,3 @@
-from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from uuid import uuid4
 
 from tracardi.domain.event_metadata import EventMetadata
@@ -12,6 +11,8 @@ from typing import Optional
 from tracardi.domain.event import Event
 from tracardi.domain.session import Session, SessionMetadata, SessionTime
 from tracardi.domain.entity import Entity
+
+from tracardi.service.storage.interface import profile_load_dao
 
 
 def validate(config: dict):
@@ -48,7 +49,7 @@ class StartSegmentationAction(ActionRunner):
                 self.console.error(msg)
                 return None
 
-            profile = await load_profile(self.config.profile_id)
+            profile = await profile_load_dao.load_profile(self.config.profile_id)
 
             if profile is None:
                 msg = "Loaded profile is empty. Can not run segmentation without profile. "

@@ -3,7 +3,6 @@ from json import JSONDecodeError
 
 from tracardi.service.storage.elastic.interface.event import load_event_from_db
 from tracardi.service.storage.elastic.interface.collector.load.session import load_session_from_db
-from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -13,6 +12,8 @@ from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from typing import Optional
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity
+
+from tracardi.service.storage.interface import profile_load_dao
 
 
 
@@ -66,7 +67,7 @@ class StartAction(ActionRunner):
         # Replace profile
 
         if self.config.profile_id:
-            _profile = await load_profile(self.config.profile_id)
+            _profile = await profile_load_dao.load_profile(self.config.profile_id)
             if not _profile:
                 msg = f"Can not load session with id {self.config.profile_id}"
                 raise ValueError(msg)
