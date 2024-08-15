@@ -6,6 +6,10 @@ from tracardi.domain.profile import Profile
 from tracardi.service.storage.elastic.interface import profile as profile_db
 
 
+async def load_profile_by_id(profile_id: str):
+    return await profile_db.load_by_id(profile_id)
+
+
 async def load_profile(profile_id: str, context: Optional[Context] = None, fallback_to_db: bool = True) -> Optional[
     Profile]:
     if context is None:
