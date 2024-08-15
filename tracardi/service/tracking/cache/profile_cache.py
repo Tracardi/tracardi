@@ -29,6 +29,9 @@ def delete_profile_cache(profile_id: str, context: Context):
 
 
 def load_profile_cache(profile_id: str, context: Context) -> Optional[Profile]:
+    if tracardi.keep_profile_in_cache_for == 0:
+        return None
+
     key_namespace = get_profile_key_namespace(profile_id, context)
 
     if not redis_cache.has(profile_id, key_namespace):
@@ -77,8 +80,8 @@ def _save_single_profile(profile: Profile, context: Context):
         )
 
 
-def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]], context: Optional[Context] = None):
-
+def save_profile_cache(profile: Union[Optional[Profile], List[Profile], Set[Profile]],
+                       context: Optional[Context] = None):
     if profile:
 
         if context is None:

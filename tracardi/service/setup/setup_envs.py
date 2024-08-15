@@ -83,13 +83,6 @@ system_settings = [
     ),
     SystemSettings(
         **{
-            "label": "SESSION_CACHE_TTL",
-            "value": memory_cache.session_cache_ttl,
-            "desc": "Default: 2. Set session caching time. Set 0 for no caching."
-        }
-    ),
-    SystemSettings(
-        **{
             "label": "EVENT_VALIDATION_CACHE_TTL",
             "value": memory_cache.event_validation_cache_ttl,
             "desc": "Default: 2. Set event validation schema caching time. Set 0 for no caching."
