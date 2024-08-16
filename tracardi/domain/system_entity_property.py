@@ -13,6 +13,8 @@ class SystemEntityProperty(Entity):
     merge_strategies: Optional[List[str]] = []
     nested: Optional[bool] = False
     undefined: Optional[bool] = False
+    masked: Optional[bool] = False  # Used to mast displayed value
+    group: Optional[str] = None  # Defines a group of properties
 
 
 class SystemEntityPropertySet(Set[SystemEntityProperty]):

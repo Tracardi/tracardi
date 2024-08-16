@@ -709,7 +709,9 @@ class SystemEntityPropertyTable(Base):
     type = Column(String(40))   # string
     default = Column(String(40), nullable=True)  # string | Null
     optional = Column(Boolean, default=False)
-    converter  = Column(String(40))   # lower
+    converter = Column(String(40))   # lower
+    masked = Column(Boolean, default=False)  # Used to mask displayed value
+    group = Column(String(64))  # Defines a group of properties
 
     # Additional fields for multi-tenancy
     tenant = Column(String(40))
@@ -748,8 +750,6 @@ class SystemEntityPropertyToColumnMappingTable(Base):
     id = Column(String(40), index=True)
     property_id = Column(String(40), ForeignKey('system_entity_property.id', ondelete="CASCADE"))
     column_id = Column(String(40), ForeignKey('system_entity_table_column.id', ondelete="CASCADE"))
-    # property_id = Column(String(40))
-    # column_id = Column(String(40))
     mode = Column(String(5))
 
     # Additional fields for multi-tenancy
