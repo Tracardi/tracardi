@@ -5,7 +5,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 
-from tracardi.service.storage.interface import profile_load_dao
+from tracardi.service.storage.interface import profile_load_collector_dao
 
 from .model.configuration import Configuration
 
@@ -27,7 +27,7 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
-            profile = await profile_load_dao.load_profile(profile_id=value)
+            profile = await profile_load_collector_dao.load_profile(profile_id=value)
 
             if not profile:
                 return Result(port="error", value={"message": "Could not find profile."})

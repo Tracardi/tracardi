@@ -9,7 +9,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis.driver.redis_client import RedisClient
 
-from tracardi.service.storage.interface import profile_load_dao
+from tracardi.service.storage.interface import profile_load_collector_dao
 
 logger = get_logger(__name__)
 _redis = RedisClient()
@@ -311,9 +311,9 @@ class AsyncProfileMutex(_GlobalMutexLock):
 
     async def __aenter__(self) -> Optional[Profile]:
         if self._lock.key is None:
-            return await profile_load_dao.load_profile(self.profile_id)
+            return await profile_load_collector_dao.load_profile(self.profile_id)
         await self._keep_locked_for()
-        return await profile_load_dao.load_profile(self.profile_id)
+        return await profile_load_collector_dao.load_profile(self.profile_id)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self._exit(exc_type)

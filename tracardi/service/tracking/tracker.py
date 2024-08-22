@@ -17,7 +17,7 @@ from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
 
-from tracardi.service.storage.interface import profile_mutation_dao
+from tracardi.service.storage.interface import profile_mutation_collector_dao
 
 logger = get_logger(__name__)
 
@@ -51,7 +51,7 @@ async def os_tracker(
         # Save profile
         if profile and profile.has_not_saved_changes():
             # Sync save
-            await profile_mutation_dao.save_profile(profile)
+            await profile_mutation_collector_dao.save_profile(profile)
 
         # Save session
         if session and session.has_not_saved_changes():

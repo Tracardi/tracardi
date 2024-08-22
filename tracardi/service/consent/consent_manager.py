@@ -12,15 +12,15 @@ from tracardi.domain.profile import ConsentRevoke
 from tracardi.service.storage.mysql.service.consent_type_service import ConsentTypeService
 
 from tracardi.service.storage.mysql.interface import event_source_dao
-from tracardi.service.storage.interface import profile_mutation_dao
-from tracardi.service.storage.interface import profile_load_dao
+from tracardi.service.storage.interface import profile_mutation_collector_dao
+from tracardi.service.storage.interface import profile_load_collector_dao
 
 
 async def add_consent(data: CustomerConsent, all: Optional[bool] = False):
     source = await event_source_dao.load_event_source_by_id(data.source.id)
     session = await load_session(data.session.id)
 
-    profile = await profile_load_dao.load_profile(data.profile.id)
+    profile = await profile_load_collector_dao.load_profile(data.profile.id)
 
     if not source or not profile or not session:
         raise HTTPException(status_code=403, detail="Access denied")
@@ -52,4 +52,4 @@ async def add_consent(data: CustomerConsent, all: Optional[bool] = False):
                     del profile.consents[consent]
 
     profile.aux['consents'] = {"granted": True}
-    return await profile_mutation_dao.save_profile(profile, refresh=True)
+    return await profile_mutation_collector_dao.save_profile(profile, refresh=True)

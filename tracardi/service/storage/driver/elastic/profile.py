@@ -55,26 +55,26 @@ logger = get_logger(__name__)
 #     return storage_manager('profile').scan(query, batch=1000)
 
 
-async def count_profile_duplicates(profile_ids: List[str]):
-    return await storage_manager('profile').count({
-        "query": {
-            "bool": {
-                "should": [
-                    {
-                        "terms": {
-                            "ids": profile_ids
-                        }
-                    },
-                    {
-                        "terms": {
-                            "id": profile_ids
-                        }
-                    }
-                ],
-                "minimum_should_match": 1
-            }
-        }
-    })
+# async def count_profile_duplicates(profile_ids: List[str]):
+#     return await storage_manager('profile').count({
+#         "query": {
+#             "bool": {
+#                 "should": [
+#                     {
+#                         "terms": {
+#                             "ids": profile_ids
+#                         }
+#                     },
+#                     {
+#                         "terms": {
+#                             "id": profile_ids
+#                         }
+#                     }
+#                 ],
+#                 "minimum_should_match": 1
+#             }
+#         }
+#     })
 
 
 # async def load_profiles_with_duplicated_ids(log_error=True):

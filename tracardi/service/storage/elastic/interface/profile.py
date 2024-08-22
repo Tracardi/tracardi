@@ -155,3 +155,29 @@ async def load_by_id(profile_id: str) -> Optional[Profile]:
         profile = Profile.create(profile_record)
 
     return profile
+
+
+async def count(query: dict = None) -> dict:
+    return await storage_manager('profile').count(query)
+
+
+async def count_profile_duplicates(profile_ids: List[str]):
+    return await storage_manager('profile').count({
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "terms": {
+                            "ids": profile_ids
+                        }
+                    },
+                    {
+                        "terms": {
+                            "id": profile_ids
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        }
+    })

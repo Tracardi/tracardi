@@ -24,7 +24,7 @@ from ..service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
-from tracardi.service.storage.interface import profile_mutation_dao
+from tracardi.service.storage.interface import profile_mutation_collector_dao
 
 logger = get_logger(__name__)
 
@@ -338,7 +338,7 @@ class ProfileMerger:
             merged_profile.metadata.system.remove_merging_data()
 
             # Auto refresh db
-            await profile_mutation_dao.save_profile(merged_profile, refresh=True)
+            await profile_mutation_collector_dao.save_profile(merged_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
             await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)

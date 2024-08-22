@@ -420,7 +420,7 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def count(self, query: dict) -> dict:
+    async def count(self, query: Optional[dict] = None) -> dict:
         try:
             return await self.storage.count(query)
         except elasticsearch.exceptions.ElasticsearchException as e:

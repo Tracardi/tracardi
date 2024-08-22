@@ -11,8 +11,8 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 
-from tracardi.service.storage.interface import profile_mutation_dao
-from tracardi.service.storage.interface import profile_load_dao
+from tracardi.service.storage.interface import profile_mutation_collector_dao
+from tracardi.service.storage.interface import profile_load_collector_dao
 
 logger = get_logger(__name__)
 
@@ -72,7 +72,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
     # Loads profile form cache
     # Profile needs to be loaded from cache. It may have changed during it was dispatched by event trigger
 
-    profile: Profile = await profile_load_dao.load_profile(profile_id) if profile_id is not None else None
+    profile: Profile = await profile_load_collector_dao.load_profile(profile_id) if profile_id is not None else None
 
     # Triggers workflow
 
@@ -97,7 +97,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
 
             # Profile is in mutex, no profile loading from cache necessary; Save it in db and cache
             # Synchronous save
-            await profile_mutation_dao.save_profile_in_db_and_cache(profile)
+            await profile_mutation_collector_dao.save_profile_in_db_and_cache(profile)
 
         if session and session.is_updated_in_workflow():
             logger.debug(f"Session {session.id} needs update after workflow.")

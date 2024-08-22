@@ -13,7 +13,7 @@ from typing import Optional
 from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity
 
-from tracardi.service.storage.interface import profile_load_dao
+from tracardi.service.storage.interface import profile_load_collector_dao
 
 
 
@@ -67,7 +67,7 @@ class StartAction(ActionRunner):
         # Replace profile
 
         if self.config.profile_id:
-            _profile = await profile_load_dao.load_profile(self.config.profile_id)
+            _profile = await profile_load_collector_dao.load_profile(self.config.profile_id)
             if not _profile:
                 msg = f"Can not load session with id {self.config.profile_id}"
                 raise ValueError(msg)

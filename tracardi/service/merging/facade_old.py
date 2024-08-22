@@ -6,7 +6,7 @@ from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.storage.elastic.interface import profile as profile_db
 from tracardi.domain.storage_record import RecordMetadata
 
-from tracardi.service.storage.interface import profile_mutation_dao
+from tracardi.service.storage.interface import profile_mutation_collector_dao
 
 async def merge_profile_by_merging_keys(profile: Optional[Profile], merge_by) -> Optional[Profile]:
     return await ProfileMerger.invoke_merge_profile(
@@ -43,7 +43,7 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
         if first_profile.metadata.system.has_merging_data():
             first_profile.metadata.system.remove_merging_data()
             first_profile.mark_for_update()
-            await profile_mutation_dao.save_profile(first_profile, refresh=True)
+            await profile_mutation_collector_dao.save_profile(first_profile, refresh=True)
 
         # If 1 then there is no duplication
         return first_profile
