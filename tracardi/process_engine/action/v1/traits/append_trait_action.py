@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Any, Union
 
-from pydantic import validator, ValidationError
+from pydantic import validator, ValidationError, field_validator
+from pydantic_core.core_schema import ValidationInfo
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -15,10 +16,9 @@ class Configuration(PluginConfig):
     append: Optional[Dict[str, Any]] = {}
     remove: Optional[Dict[str, Union[Any, List[Any]]]] = {}
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("remove")
-    def validate_remove(cls, value, values):
+    @field_validator("remove")
+    def validate_remove(cls, value, info: ValidationInfo):
+        values = info.data
         if 'append' not in values and 'remove' not in values:
             raise ValueError("Please define `append` or `remove` in config section.")
 
@@ -42,6 +42,7 @@ class AppendTraitAction(ActionRunner):
 
         for destination, value in self.config.append.items():
             value = dot[value]
+            print(destination, value, destination in dot)
             if destination in dot:
                 if not isinstance(dot[destination], list):
                     # Make it a list with original value

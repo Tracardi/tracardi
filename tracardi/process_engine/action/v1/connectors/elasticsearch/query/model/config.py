@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import field_validator
 import json
 from tracardi.domain.named_entity import NamedEntity
@@ -8,6 +10,7 @@ class Config(PluginConfig):
     source: NamedEntity
     index: NamedEntity
     query: str
+    log: Optional[bool] = False
 
     @field_validator("index")
     @classmethod

@@ -36,7 +36,7 @@ asyncpg
 aiobotocore~=2.12.1
 google-api-python-client == 2.33.0
 google_auth_oauthlib == 0.4.6
-python_weather==0.4.1
+python_weather==0.4.2
 influxdb-client
 grpcio==1.48.2
 grpcio-tools==1.48.2
@@ -63,11 +63,7 @@ mysql-connector-python==8.0.29
 requests
 
 # Com requirements
-weaviate-client==3.23.2
-twilio==8.2.1
 huey
-pulsar-client==3.3.0
-aiokafka==0.8.1
 
 # Telemetry
 opentelemetry-distro==0.45b0
