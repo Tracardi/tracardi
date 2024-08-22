@@ -1,23 +1,118 @@
 from typing import List, AsyncGenerator, Any, Optional
 
 from tracardi.domain.profile import Profile
+from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = get_logger(__name__)
 
 
+async def _count(query: dict = None) -> dict:
+    return await storage_manager('profile').count(query)
+
+
+async def _load_by_id(profile_id: str) -> Optional[StorageRecord]:
+    query = {
+        "size": 2,
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            "ids": profile_id
+                        }
+                    },
+                    {
+                        "term": {
+                            "id": profile_id
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        },
+        "sort": [
+            {
+                "metadata.time.update": {
+                    "order": "desc"
+                }
+            }
+        ]
+    }
+
+    profile_records = await storage_manager('profile').query(query)
+
+    if profile_records.total <= 0:
+        return None
+
+    if profile_records.total > 1:
+        logger.warning(
+            "Profile {} id duplicated in the database. It will be merged with APM worker.".format(profile_id))
+
+    return profile_records.first()
+
+
+async def _load_modified_top_profiles(size):
+    query = {
+        "size": size,
+        "sort": [
+            {
+                "metadata.time.update": {
+                    "order": "desc"
+                }
+            }
+        ]
+    }
+    return await storage_manager('profile').query(query)
+
+
+async def _load_by_primary_ids(profile_ids: List[str], size):
+    query = {
+        "size": size,
+        "query": {
+            "terms": {
+                "id": profile_ids
+            }
+        }
+    }
+    return await storage_manager('profile').query(query)
+
+
+async def load_active_profile_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
+    query = {
+        "from": start,
+        "size": limit,
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            field: value
+                        }
+                    },
+                    {
+                        "term": {
+                            "active": True
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    return await storage_manager('profile').query(query)
+
+
 async def profile_count_in_db(query: dict = None) -> dict:
-    return await profile_db.count(query)
+    return await _count(query)
 
 
 async def load_profile_by_primary_ids(profile_id_batch, batch):
-    return await profile_db.load_by_primary_ids(profile_id_batch, size=batch)
+    return await _load_by_primary_ids(profile_id_batch, size=batch)
 
 
 async def load_modified_top_profiles(size):
-    result = await profile_db.load_modified_top_profiles(size)
+    result = await _load_modified_top_profiles(size)
     return result.dict()
 
 
@@ -94,7 +189,7 @@ async def load_profiles_with_duplicated_ids(log_error=True) -> AsyncGenerator[Pr
 
     if duplicated_ids:
         for duplicated_profile_id in duplicated_ids:
-            profile_record = await profile_db.load_by_id(duplicated_profile_id)
+            profile_record = await _load_by_id(duplicated_profile_id)
             yield profile_record.to_entity(Profile)
 
 
@@ -147,8 +242,12 @@ async def refresh():
     return await storage_manager('profile').refresh()
 
 
+async def flush():
+    return await storage_manager('profile').flush()
+
+
 async def load_by_id(profile_id: str) -> Optional[Profile]:
-    profile_record = await profile_db.load_by_id(profile_id)
+    profile_record = await _load_by_id(profile_id)
 
     profile = None
     if profile_record is not None:

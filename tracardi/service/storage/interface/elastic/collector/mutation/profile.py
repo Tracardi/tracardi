@@ -2,13 +2,14 @@ from typing import Union, List, Set, Optional
 
 from tracardi.context import Context, get_context
 from tracardi.domain.profile import Profile
-from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.storage.elastic.dal.profile import refresh
+from tracardi.service.storage.elastic.dal.collector.mutation.profile import save
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache, delete_profile_cache
 
 
 async def save_profiles_in_db(profiles: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
-    return await profile_db.save(profiles, refresh_after_save)
+    return await save(profiles, refresh_after_save)
 
 
 async def save_profile_in_db_and_cache(profile: Profile):
@@ -43,7 +44,7 @@ async def delete_profile(id: str,
         context = get_context()
 
     result = await delete_by_id(id, index)
-    await profile_db.refresh()
+    await refresh()
     if cache:
         delete_profile_cache(profile_id=id, context=context)
 

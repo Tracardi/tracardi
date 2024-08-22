@@ -8,6 +8,7 @@ from tracardi.domain.storage_record import RecordMetadata
 
 from tracardi.service.storage.interface import profile_mutation_collector_dao
 
+
 async def merge_profile_by_merging_keys(profile: Optional[Profile], merge_by) -> Optional[Profile]:
     return await ProfileMerger.invoke_merge_profile(
         profile,
