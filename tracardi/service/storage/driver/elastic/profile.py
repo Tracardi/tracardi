@@ -3,7 +3,7 @@ from typing import Union, Tuple
 from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service.storage.elastic.dal import raw as raw_db
 from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 

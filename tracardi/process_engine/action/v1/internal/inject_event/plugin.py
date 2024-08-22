@@ -2,7 +2,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.elastic.interface.event import load_event_from_db
+from tracardi.service.storage.elastic.dal.event import load_event_from_db
 
 from .model.configuration import Configuration
 

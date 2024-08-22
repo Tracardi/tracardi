@@ -4,7 +4,7 @@ import elasticsearch
 
 from tracardi.config import tracardi, elastic
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service.storage.elastic.dal import raw as raw_db
 from tracardi.service import system
 
 logger = get_logger(__name__)

@@ -1,6 +1,6 @@
 from typing import List
 
-from tracardi.service.storage.elastic.interface import profile as profile_db
+from tracardi.service.storage.elastic.dal import profile as profile_db
 
 
 async def profile_count():

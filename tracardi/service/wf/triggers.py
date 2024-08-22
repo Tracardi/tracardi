@@ -5,7 +5,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.field_mappings_cache import add_new_field_mappings
-from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
+from tracardi.service.storage.elastic.dal.collector.mutation.session import save_session_to_db_and_cache
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session

@@ -3,7 +3,7 @@ from typing import Optional
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache, save_profile_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.profile import Profile
-from tracardi.service.storage.elastic.interface import profile as profile_db
+from tracardi.service.storage.elastic.dal import profile as profile_db
 
 
 async def load_profile_by_id(profile_id: str):

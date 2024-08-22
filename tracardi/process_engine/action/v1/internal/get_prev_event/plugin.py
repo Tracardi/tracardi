@@ -1,7 +1,7 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.elastic.interface.event import load_nth_last_event
+from tracardi.service.storage.elastic.dal.event import load_nth_last_event
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 

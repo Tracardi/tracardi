@@ -8,7 +8,7 @@ from ...domain.profile import Profile
 from ...domain.resource import Resource
 from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.interface.integration_id import load_integration_id, save_integration_id
+from tracardi.service.storage.elastic.dal.integration_id import load_integration_id, save_integration_id
 
 logger = get_logger(__name__)
 

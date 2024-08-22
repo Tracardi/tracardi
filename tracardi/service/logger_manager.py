@@ -3,7 +3,7 @@ from tracardi.exceptions.log_handler import log_handler, get_installation_logger
 from tracardi.cluster_config import is_save_logs_on
 from tracardi.service.license import License
 from tracardi.domain.installation_status import installation_status
-from tracardi.service.storage.elastic.interface import log as log_db
+from tracardi.service.storage.elastic.dal import log as log_db
 
 logger = get_installation_logger(__name__)
 

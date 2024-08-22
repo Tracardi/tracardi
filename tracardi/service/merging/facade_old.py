@@ -3,7 +3,7 @@ from typing import List, Optional
 from tracardi.domain.profile import Profile
 from tracardi.service.profile_merger import ProfileMerger
 
-from tracardi.service.storage.elastic.interface import profile as profile_db
+from tracardi.service.storage.elastic.dal import profile as profile_db
 from tracardi.domain.storage_record import RecordMetadata
 
 from tracardi.service.storage.interface import profile_mutation_collector_dao

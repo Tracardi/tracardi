@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional, Set
 from tracardi.domain.profile import FlatProfile, Profile
 from tracardi.domain.storage_record import RecordMetadata, StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
-from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service.storage.elastic.dal import raw as raw_db
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
 

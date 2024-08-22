@@ -8,7 +8,7 @@ from dotty_dict import dotty
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.profile import FlatProfile
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.interface.event import load_unique_field_value
+from tracardi.service.storage.elastic.dal.event import load_unique_field_value
 from tracardi.service.string_manager import capitalize_event_type_id
 
 _local_dir = os.path.dirname(__file__)

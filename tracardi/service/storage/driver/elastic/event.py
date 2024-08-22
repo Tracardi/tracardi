@@ -10,7 +10,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple, Union, Set
-from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service.storage.elastic.dal import raw as raw_db
 from tracardi.service.storage.mysql.interface import event_source_dao
 
 logger = get_logger(__name__)

@@ -1,15 +1,15 @@
 from dotty_dict import Dotty
 
 from tracardi.domain.profile_data import ProfileData
-from .storage.elastic.interface.event import refresh_event_db
-from .storage.elastic.interface.merging import delete_multiple_profiles
-from tracardi.service.storage.elastic.interface.collector.load.session import refresh_session_db
+from tracardi.service.storage.elastic.dal.event import refresh_event_db
+from tracardi.service.storage.elastic.dal.merging import delete_multiple_profiles
+from tracardi.service.storage.elastic.dal.collector.load.session import refresh_session_db
 
 from ..context import get_context
 from ..domain import ExtraInfo
 from ..domain.storage_record import RecordMetadata
-from tracardi.service.storage.elastic.interface import profile as profile_db
-from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service.storage.elastic.dal import profile as profile_db
+from tracardi.service.storage.elastic.dal import raw as raw_db
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update

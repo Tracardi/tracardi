@@ -4,7 +4,7 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.entity_record import EntityRecord, EntityRecordMetadata, EntityRecordTime
 from tracardi.domain.remote_system_integration_id import RemoteSystemIntegrationId
 from tracardi.domain.storage_record import StorageRecords
-from tracardi.service.storage.elastic.interface import entity as entity_db
+from tracardi.service.storage.elastic.dal import entity as entity_db
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.utils.date import now_in_utc
 
