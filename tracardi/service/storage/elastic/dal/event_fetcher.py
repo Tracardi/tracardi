@@ -1,6 +1,6 @@
 from typing import List
 
-from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 
 class EventContextFetcher:
@@ -72,5 +72,5 @@ class EventContextFetcher:
             min_date_time,
             max_date_time
         )
-        events = await event_db.query(query)
+        events = await storage_manager("event").query(query)
         return [event['type'] for event in events]

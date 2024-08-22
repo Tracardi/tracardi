@@ -5,7 +5,7 @@ from tracardi.domain.profile import FlatProfile, Profile
 from tracardi.domain.storage_record import RecordMetadata, StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.dal import raw as raw_db
-from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.elastic.dal.event import refresh_event_db
 
 from tracardi.service.storage.interface import profile_mutation_collector_dao
 from tracardi.service.storage.elastic.dal.session import refresh as refresh_session
@@ -80,7 +80,7 @@ async def move_profile_events_and_sessions(duplicate_profile_ids: Set[str], merg
     for old_id in duplicate_profile_ids:
         if old_id != merged_profile_id:
             await raw_db.update_profile_ids('event', old_id, merged_profile_id)
-            await event_db.refresh()
+            await refresh_event_db()
             await raw_db.update_profile_ids('session', old_id, merged_profile_id)
             await refresh_session()
 
