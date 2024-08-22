@@ -4,10 +4,19 @@ from typing import List, Dict, TypeVar, Union, Set
 from tracardi.context import Context, ServerContext, get_context
 from tracardi.domain.session import Session
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.storage.driver.elastic import session as session_db
+from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.tracking.cache.session_cache import save_session_cache
 
 T = TypeVar("T")
+
+
+async def _delete_session_by_id(id: str, index: str):
+    sm = storage_manager('session')
+    return await sm.delete(id, index)
+
+
+async def _save_sessions(sessions: List[Session]) -> BulkInsertResult:
+    return await storage_manager("session").upsert(sessions, exclude={"operation": ...})
 
 
 def _split_by_index(entities: List[T]) -> Dict[str, List[T]]:
@@ -22,7 +31,7 @@ def _split_by_index(entities: List[T]) -> Dict[str, List[T]]:
 
 
 async def save_session_to_db(session: Union[Session, List[Session], Set[Session]]):
-    await session_db.save(session)
+    await _save_sessions(session)
 
 
 async def save_session_to_db_and_cache(session: Union[Session, List[Session], Set[Session]]):
@@ -32,7 +41,7 @@ async def save_session_to_db_and_cache(session: Union[Session, List[Session], Se
 
 
 async def save_sessions_in_db(sessions: List[Session]) -> BulkInsertResult:
-    return await session_db.save_sessions(sessions)
+    return await _save_sessions(sessions)
 
 
 async def store_bulk_session(sessions: List[Session], context: Context):
@@ -40,8 +49,8 @@ async def store_bulk_session(sessions: List[Session], context: Context):
         # Group sessions by index and iterate
         for index, sessions in _split_by_index(sessions).items():
             # Save sessions in Elastic
-            await session_db.save(sessions)
+            await _save_sessions(sessions)
 
 
 async def delete_session_from_db(session_id: str, index):
-    return await session_db.delete_by_id(session_id, index=index)
+    return await _delete_session_by_id(session_id, index=index)

@@ -6,9 +6,9 @@ from tracardi.domain.storage_record import RecordMetadata, StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.dal import raw as raw_db
 from tracardi.service.storage.driver.elastic import event as event_db
-from tracardi.service.storage.driver.elastic import session as session_db
 
 from tracardi.service.storage.interface import profile_mutation_collector_dao
+from tracardi.service.storage.elastic.dal.session import refresh as refresh_session
 
 
 async def _load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
@@ -82,7 +82,7 @@ async def move_profile_events_and_sessions(duplicate_profile_ids: Set[str], merg
             await raw_db.update_profile_ids('event', old_id, merged_profile_id)
             await event_db.refresh()
             await raw_db.update_profile_ids('session', old_id, merged_profile_id)
-            await session_db.refresh()
+            await refresh_session()
 
 
 async def delete_duplicated_profiles(
