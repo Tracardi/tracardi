@@ -1,12 +1,12 @@
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.elastic.dal import raw as raw_db
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 from elasticsearch import ElasticsearchException
 from tracardi.service.notation.dot_template import DotTemplate
 from pytimeparse import parse as parse_time
+from tracardi.service.storage.elastic.interface.gui import storage as storage_dao
 
 
 def validate(config: dict) -> Config:
@@ -27,7 +27,7 @@ class CountRecordsAction(ActionRunner):
 
         try:
 
-            result = await raw_db.count_by_query(
+            result = await storage_dao.count_by_query(
                 index=self.config.index,
                 query=query,
                 time_span=parse_time(self.config.time_range)

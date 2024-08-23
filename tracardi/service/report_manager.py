@@ -1,8 +1,7 @@
 from tracardi.domain.report import Report
-from tracardi.service.storage.elastic.dal import raw as raw_db
 from tracardi.service.storage.mysql.mapping.report_mapping import map_to_report
 from tracardi.service.storage.mysql.service.report_service import ReportService
-
+from tracardi.service.storage.elastic.interface.gui import storage as storage_dao
 
 class ReportManagerException(Exception):
     pass
@@ -31,7 +30,7 @@ class ReportManager:
 
     async def get_report(self, params: dict) -> dict:
         built_query = self.report.get_built_query(**params)
-        result = await raw_db.query_by_index(self.report.index, built_query)
+        result = await storage_dao.query_by_index(self.report.index, built_query)
         aggregations = result.aggregations()
         result = result.dict()
         if aggregations is not None:

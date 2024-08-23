@@ -7,7 +7,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
-from tracardi.service.storage.elastic.dal import raw as raw_db
+from tracardi.service.storage.elastic.interface.gui import storage as storage_dao
 
 
 def validate(config: dict):
@@ -23,7 +23,6 @@ def validate(config: dict):
 
 
 class QueryLocalDatabase(ActionRunner):
-
     config: Config
 
     async def set_up(self, init):
@@ -46,7 +45,7 @@ class QueryLocalDatabase(ActionRunner):
             if self.config.log:
                 self.console.log(f"Executed query {query}")
 
-            result = await raw_db.query_by_index(
+            result = await storage_dao.query_by_index(
                 index=self.config.index,
                 query=query
             )

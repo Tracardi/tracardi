@@ -9,7 +9,6 @@ from ..context import get_context
 from ..domain import ExtraInfo
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.elastic.dal import profile as profile_db
-from tracardi.service.storage.elastic.dal import raw as raw_db
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update
@@ -25,6 +24,7 @@ from ..service.dot_notation_converter import DotNotationConverter
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
 from tracardi.service.storage.interface import profile_mutation_collector_dao
+from tracardi.service.storage.elastic.interface.gui import storage as storage_dao
 
 logger = get_logger(__name__)
 
@@ -44,9 +44,9 @@ async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Pr
 async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
     for old_profile in duplicate_profiles:
         if old_profile.id != merged_profile.id:
-            await raw_db.update_profile_ids('event', old_profile.id, merged_profile.id)
+            await storage_dao.update_profile_ids('event', old_profile.id, merged_profile.id)
             await refresh_event_db()
-            await raw_db.update_profile_ids('session', old_profile.id, merged_profile.id)
+            await storage_dao.update_profile_ids('session', old_profile.id, merged_profile.id)
             await refresh_session_db()
 
 

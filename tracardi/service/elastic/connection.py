@@ -4,8 +4,8 @@ import elasticsearch
 
 from tracardi.config import tracardi, elastic
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.dal import raw as raw_db
 from tracardi.service import system
+from tracardi.service.storage.elastic.interface.gui import storage as storage_dao
 
 logger = get_logger(__name__)
 
@@ -47,7 +47,7 @@ async def wait_for_connection(no_of_tries=10):
             if no_of_tries < 0:
                 break
 
-            _health = await raw_db.health()
+            _health = await storage_dao.health()
             for key, value in _health.items():
                 key = key.replace("_", " ")
                 logger.info(f"Elasticsearch {key}: {value}")

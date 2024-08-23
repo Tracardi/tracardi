@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple
 from elasticsearch import NotFoundError
 from tracardi.domain.storage_record import StorageRecords
+from tracardi.domain.time_range_query import DatetimeRangePayload
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.cache.field_mapping import load_fields
 from tracardi.service.field_mappings_cache import FieldMapper
@@ -9,6 +10,7 @@ from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiled
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.index import Resource
 from tracardi.service.storage.elastic.driver.persistence_service import PersistenceService
+from tracardi.domain.query_result import QueryResult
 
 
 def index(idx) -> PersistenceService:
@@ -22,6 +24,21 @@ async def query(index: str, query: dict):
 
 async def query_by_index(index: str, query: dict) -> StorageRecords:
     return await storage_manager(index).query(query)
+
+
+async def query_by_sql(index: str, query: str, start: int = 0, limit: int = 0) -> StorageRecords:
+    sm = storage_manager(index)
+    return await sm.query_by_sql(query, start, limit)
+
+
+async def query_by_sql_in_time_range(index: str, query: DatetimeRangePayload) -> QueryResult:
+    sm = storage_manager(index)
+    return await sm.query_by_sql_in_time_range(query)
+
+
+async def histogram_by_sql_in_time_range(index, query: DatetimeRangePayload, group_by: str = None) -> QueryResult:
+    sm = storage_manager(index)
+    return await sm.histogram_by_sql_in_time_range(query, group_by)
 
 
 async def load_by_id(index: str, id: str) -> StorageRecords:
