@@ -1,3 +1,6 @@
+from typing import List
+
+
 class IndexMapping:
 
     def __init__(self, mapping):
@@ -12,7 +15,7 @@ class IndexMapping:
         else:
             yield keystring, data
 
-    def get_field_names(self):
+    def get_field_names(self) -> List[str]:
         for index, mapping in self.mapping.items():
             self._get_field_names(mapping['mappings'], self.field_collection)
         return [k for k, v in self._flatten_dict(self.field_collection) if k != ""]

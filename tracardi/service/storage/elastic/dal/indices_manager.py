@@ -7,6 +7,11 @@ from tracardi.service.storage.index import Resource, Index
 from tracardi.service.utils.diff import get_changed_values
 
 
+async def remove_index(index_name: str):
+    es = ElasticClient.instance()
+    return await es.remove_index(index_name)
+
+
 async def get_indices_status():
     es = ElasticClient.instance()
     for key, index in Resource().resources.items():  # type: str, Index
@@ -58,7 +63,7 @@ async def get_indices_status():
                 yield "existing_alias", _alias
 
 
-async def check_indices_mappings_consistency():
+async def check_indices_mappings_consistency() -> dict:
     """
 
     This code is checking the mapping of an Elasticsearch

@@ -19,7 +19,7 @@ async def _flush():
 
 
 async def _save_events(events: Union[List[Event], Set[Event]], exclude=None):
-    return await storage_manager("event").upsert(events, exclude=exclude)
+    return await storage_manager('event').upsert(events, exclude=exclude)
 
 
 async def _count(query: dict = None):
@@ -27,7 +27,7 @@ async def _count(query: dict = None):
 
 
 async def _delete_by_id(id: str) -> dict:
-    sm = storage_manager("event")
+    sm = storage_manager('event')
     # Delete in all indices
     return await sm.delete(id, index=sm.get_multi_storage_alias())
 
