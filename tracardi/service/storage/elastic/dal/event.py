@@ -8,6 +8,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.elastic.driver.agg_result import AggResult
 from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
 from tracardi.service.storage.mysql.interface import event_source_dao
+from tracardi.service.storage.elastic.dal import raw as raw_db
 
 
 async def _refresh():
@@ -30,14 +31,6 @@ async def _delete_by_id(id: str) -> dict:
     sm = storage_manager('event')
     # Delete in all indices
     return await sm.delete(id, index=sm.get_multi_storage_alias())
-
-
-async def refresh_event_db():
-    return await _refresh()
-
-
-async def flush_event_db():
-    await _flush()
 
 
 async def _load(id: str) -> Optional[StorageRecord]:
@@ -205,7 +198,7 @@ async def _aggregate_event_type() -> List[Dict[str, str]]:
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
-async def _aggregate_source_by_type(source_id: str, time_span: str):
+async def _aggregate_source_by_type(source_id: str, time_span: str) -> List[dict]:
     result = await storage_manager("event").query({
         "query": {
             "bool": {
@@ -232,7 +225,7 @@ async def _aggregate_source_by_type(source_id: str, time_span: str):
         return []
 
 
-async def _aggregate_source_by_tags(source_id: str, time_span: str):
+async def _aggregate_source_by_tags(source_id: str, time_span: str) -> List[dict]:
     result = await storage_manager("event").query({
         "query": {
             "bool": {
@@ -283,7 +276,7 @@ async def _aggregate_event_tag() -> List[Dict[str, str]]:
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
-async def _get_avg_process_time():
+async def _get_avg_process_time() -> dict:
     result = await storage_manager("event").query({
         "size": 0,
         "aggs": {
@@ -427,7 +420,7 @@ def _get_name(source_names_idx, id):
     return source_names_idx[id] if id in source_names_idx else id
 
 
-async def _aggregate_events_by_source(buckets_size):
+async def _aggregate_events_by_source(buckets_size) -> List[dict]:
     query = {
         "bool": {
             "must": {
@@ -590,20 +583,8 @@ async def _count_events_by_type(profile_id: str, event_type: str, time_span: int
     return result.total
 
 
-async def load_event_from_db(event_id: str) -> Optional[Event]:
-    event_record = await _load(event_id)
-
-    if event_record is None:
-        return None
-    return event_record.to_entity(Event)
-
-
-async def delete_event_from_db(event_id):
-    return await _delete_by_id(event_id)
-
-
-async def count_events_in_db(query: dict = None):
-    return await _count(query)
+async def _count_events_in_db(query: dict = None):
+    return await raw_db.count('event', query)
 
 
 async def load_nth_last_event(event_type: str, offset: int, profile_id: Optional[str] = None):
@@ -618,41 +599,8 @@ async def load_unique_field_value(search_query, limit):
     return await _unique_field_value(search_query, limit)
 
 
-async def load_events_avg_requests():
-    result = await count_events_in_db(query={
-        "query": {
-            "range": {
-                "metadata.time.insert": {
-                    "gte": "now-5m",
-                    "lte": "now"
-                }
-            }
-        }
-    })
-    return result['count'] / (5 * 60) if 'count' in result else 0
-
-
 async def save_events_in_db(events) -> BulkInsertResult:
     return await _save_events(events, exclude={"operation": ...})
-
-
-async def load_events_by_session_and_profile(profile_id: str, session_id: str, limit: int):
-    result = await _get_events_by_session_and_profile(
-        profile_id,
-        session_id,
-        limit)
-
-    more_to_load = result.total > len(result)
-    result = [{
-        "id": doc["id"],
-        "metadata": doc["metadata"],
-        "type": doc["type"],
-        "name": doc.get('name', None),
-        "source": doc.get('source'),
-        "context": doc.get('context', None)
-    } for doc in result]
-
-    return {"result": result, "more_to_load": more_to_load}
 
 
 async def load_events_by_profile_id(profile_id: str, limit: int) -> dict:
@@ -693,65 +641,6 @@ async def load_events_by_profile_and_field(profile_id: str, field: str, table: b
     if table:
         return {id: count for id, count in result.aggregations[bucket_name][0].items()}
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
-
-
-async def aggregate_event_types_from_db() -> List[Dict[str, str]]:
-    return await _aggregate_event_type()
-
-
-async def aggregate_events_by_source_and_type(source_id, time_span):
-    return await _aggregate_source_by_type(source_id, time_span)
-
-
-async def aggregate_events_by_source_and_tags(source_id, time_span):
-    return await _aggregate_source_by_tags(source_id, time_span)
-
-
-async def aggregate_event_tags_from_db() -> List[Dict[str, str]]:
-    return await _aggregate_event_tag()
-
-
-async def load_event_avg_process_time():
-    return await _get_avg_process_time()
-
-
-async def aggregate_event_statuses_from_db():
-    return await _aggregate_event_status()
-
-
-async def aggregate_event_devices_geo_from_db():
-    return await _aggregate_event_device_geo()
-
-
-async def aggregate_event_os_names_from_db():
-    return await _aggregate_event_os_name()
-
-
-async def aggregate_event_channels_from_db():
-    return await _aggregate_event_channels()
-
-
-async def aggregate_event_resolutions_from_db():
-    return await _aggregate_event_resolution()
-
-
-async def aggregate_events_by_source_from_db(buckets_size: int):
-    return await _aggregate_events_by_source(buckets_size=buckets_size)
-
-
-async def aggregate_events_by_type_and_source():
-    def _get_data(result):
-        for by_type in result.aggregations('by_type').buckets():
-            row = {'type': by_type['key'], 'source': []}
-            for bucket in by_type['by_source']['buckets']:
-                row['source'].append({
-                    "id": bucket['key'],
-                    "count": bucket['doc_count']
-                })
-            yield row
-
-    result = await _aggregate_events_by_type_and_source()
-    return list(_get_data(result))
 
 
 async def aggregate_event_by_field_within_time(profile_id: str, field_id: str, span_in_sec: int, metric, event_type):

@@ -1,13 +1,13 @@
-from typing import Union
+# from typing import Union
+#
+# from tracardi.domain.profile import *
+# from tracardi.domain.storage_record import StorageRecords
+# from tracardi.exceptions.log_handler import get_logger
+# from tracardi.service.storage.elastic.dal import raw as raw_db
+# from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
 
-from tracardi.domain.profile import *
-from tracardi.domain.storage_record import StorageRecords
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.dal import raw as raw_db
-from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
-from tracardi.service.storage.elastic.driver.factory import storage_manager
-
-logger = get_logger(__name__)
+# logger = get_logger(__name__)
 
 
 # async def get_duplicated_profiles_by_field(field):
@@ -276,24 +276,24 @@ logger = get_logger(__name__)
 #     return await sm.bulk_delete(ids)
 
 
-def scan(query: dict = None, batch: int = 1000):
-    return storage_manager('profile').scan(query, batch)
-
-
-def query(query: dict = None):
-    return storage_manager('profile').query(query)
-
-
-# async def load_by_query_string(query: str):
-#     return await storage_manager('profile').load_by_query_string(query)
-
-
-async def update_by_query(query, conflicts: str = 'proceed', wait_for_completion: bool = False):
-    return await storage_manager('profile').update_by_query(
-        query=query,
-        conflicts=conflicts,
-        wait_for_completion=wait_for_completion
-    )
+# def scan(query: dict = None, batch: int = 1000):
+#     return storage_manager('profile').scan(query, batch)
+#
+#
+# def query(query: dict = None):
+#     return storage_manager('profile').query(query)
+#
+#
+# # async def load_by_query_string(query: str):
+# #     return await storage_manager('profile').load_by_query_string(query)
+#
+#
+# async def update_by_query(query, conflicts: str = 'proceed', wait_for_completion: bool = False):
+#     return await storage_manager('profile').update_by_query(
+#         query=query,
+#         conflicts=conflicts,
+#         wait_for_completion=wait_for_completion
+#     )
 
 
 # async def count(query: dict = None) -> dict:

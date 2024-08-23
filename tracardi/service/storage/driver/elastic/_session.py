@@ -1,7 +1,7 @@
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.driver.factory import storage_manager
-
-logger = get_logger(__name__)
+# from tracardi.exceptions.log_handler import get_logger
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
+#
+# logger = get_logger(__name__)
 
 
 # async def save_sessions(sessions: Union[Session, List[Session], Set[Session]]) -> BulkInsertResult:
@@ -12,8 +12,8 @@ logger = get_logger(__name__)
 #     return await storage_manager('session').upsert(session, exclude={"operation": ...})
 
 
-async def exist(id: str) -> bool:
-    return await storage_manager("session").exists(id)
+# async def exist(id: str) -> bool:
+#     return await storage_manager("session").exists(id)
 
 
 # async def load_by_id(id: str) -> Optional[Session]:
@@ -72,8 +72,8 @@ async def exist(id: str) -> bool:
 #     return StorageRecord.build_from_elastic(record)
 
 
-async def count(query: dict = None):
-    return await storage_manager('session').count(query)
+# async def count(query: dict = None):
+#     return await storage_manager('session').count(query)
 
 
 # async def _aggregate_session(bucket_name, by, filter_query=None, buckets_size=100) -> StorageAggregateResult:

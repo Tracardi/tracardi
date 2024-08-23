@@ -5,7 +5,7 @@ from tracardi.domain.profile import FlatProfile, Profile
 from tracardi.domain.storage_record import RecordMetadata, StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.dal import raw as raw_db
-from tracardi.service.storage.elastic.dal.event import refresh_event_db
+from tracardi.service.storage.elastic.interface.gui.event import refresh_event_db
 
 from tracardi.service.storage.interface import profile_mutation_collector_dao
 from tracardi.service.storage.elastic.dal.session import refresh as refresh_session
