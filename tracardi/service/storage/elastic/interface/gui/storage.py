@@ -35,8 +35,33 @@ async def health():
 
 
 async def list_indices():
+    """
+    This one returns raw data as it is elastic specific.
+    """
     return await raw_db.indices()
 
 
 async def remove_template(template_name):
     return raw_db.remove_template(template_name)
+
+
+async def create_index(index: str, mapping: dict):
+    return await raw_db.create_index(index, mapping)
+
+
+async def load_task_status(task_id: str):
+    """
+    This one returns raw data as it is elastic specific.
+    """
+    return await raw_db.task_status(task_id)
+
+
+async def load_mapping(index: str):
+    """
+    This one returns raw data as it is elastic specific.
+    """
+    return await raw_db.get_mapping(index)
+
+
+async def count(index: str, query: dict = None):
+    return await raw_db.count(index, query)

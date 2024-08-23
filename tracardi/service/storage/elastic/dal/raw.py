@@ -247,3 +247,7 @@ async def get_mapping_fields(index: str) -> list:
     set_of_db_mappings = set(db_mappings)
     set_of_db_mappings.update(FieldMapper().get_field_mapping(index))
     return sorted(list(set_of_db_mappings))
+
+
+async def count(index: str, query: dict = None):
+    return await storage_manager(index).count(query)

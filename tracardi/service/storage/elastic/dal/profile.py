@@ -4,12 +4,13 @@ from tracardi.domain.profile import Profile
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.driver.factory import storage_manager
+from tracardi.service.storage.elastic.dal import raw as raw_db
 
 logger = get_logger(__name__)
 
 
 async def _count(query: dict = None) -> dict:
-    return await storage_manager('profile').count(query)
+    return await raw_db.count('profile', query)
 
 
 async def _load_by_id(profile_id: str) -> Optional[StorageRecord]:
@@ -257,7 +258,7 @@ async def load_by_id(profile_id: str) -> Optional[Profile]:
 
 
 async def count(query: dict = None) -> dict:
-    return await storage_manager('profile').count(query)
+    return await raw_db.count('profile', query)
 
 
 async def count_profile_duplicates(profile_ids: List[str]):
