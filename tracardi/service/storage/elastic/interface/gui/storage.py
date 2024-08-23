@@ -22,8 +22,26 @@ async def remove_index(index_name: str):
     return await raw_db.remove_index(index_name)
 
 
+async def exists_index(index_name: str):
+    return await raw_db.exists_index(index_name)
+
+
+async def load_alias(alias_index: str):
+    return await raw_db.get_alias(alias_index)
+
+
 async def remove_alias(alias_index):
     return await raw_db.remove_alias(alias_index)
+
+
+async def update_aliases(target_index: str, alias_index: str):
+    return await raw_db.update_aliases({
+        "actions": [{"add": {"index": target_index, "alias": alias_index}}]
+    })
+
+
+async def exists_alias(alias_index: str, target_index: str):
+    return await raw_db.exists_alias(alias_index, index=target_index)
 
 
 async def reindex(source, destination, wait_for_completion):
@@ -34,15 +52,23 @@ async def health():
     return await raw_db.health()
 
 
-async def list_indices():
+async def list_indices(index_pattern="*"):
     """
     This one returns raw data as it is elastic specific.
     """
-    return await raw_db.indices()
+    return await raw_db.indices(index_pattern)
 
 
 async def remove_template(template_name):
     return raw_db.remove_template(template_name)
+
+
+async def exists_template(template_name: str):
+    return await raw_db.exists_template(template_name)
+
+
+async def save_template(template_name, index_map):
+    return await raw_db.add_template(template_name, index_map)
 
 
 async def create_index(index: str, mapping: dict):
@@ -61,6 +87,10 @@ async def load_mapping(index: str):
     This one returns raw data as it is elastic specific.
     """
     return await raw_db.get_mapping(index)
+
+
+async def save_mapping(idx, update_mappings):
+    return await raw_db.set_mapping(idx, update_mappings)
 
 
 async def count(index: str, query: dict = None):

@@ -156,9 +156,9 @@ async def exists_template(template_name) -> bool:
     return await es.exists_index_template(template_name)
 
 
-async def indices(index="*"):
+async def indices(index_pattern="*"):
     es = ElasticClient.instance()
-    return await es.list_indices(index)
+    return await es.list_indices(index_pattern)
 
 
 async def health():

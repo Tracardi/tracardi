@@ -5,7 +5,8 @@ from typing import List, Tuple, Generator, Any
 from elasticsearch.exceptions import TransportError, NotFoundError
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.dal import raw as raw_db
+from tracardi.service.storage.elastic.interface.gui.storage import list_indices, load_mapping, save_mapping, \
+    exists_template, save_template, exists_index, create_index, exists_alias, load_alias, update_aliases
 from tracardi.service.storage.index import Resource, Index
 
 __local_dir = os.path.dirname(__file__)
@@ -33,11 +34,11 @@ async def update_mappings():
             with open(path) as f:
                 update_mappings = json.load(f)
                 if index.multi_index:
-                    current_indices = await raw_db.indices(index.get_templated_index_pattern())
+                    current_indices = await list_indices(index.get_templated_index_pattern())
                     for idx, idx_data in current_indices.items():
                         from pprint import pprint
-                        pprint(await raw_db.set_mapping(idx, update_mappings))
-                        pprint(await raw_db.get_mapping(idx))
+                        pprint(await save_mapping(idx, update_mappings))
+                        pprint(await load_mapping(idx))
 
 
 async def create_index_and_template(index: Index, index_map, update_mapping) -> Tuple[List[str], List[str], List[str]]:
@@ -54,9 +55,9 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
 
         template_name = index.get_prefixed_template_name()
 
-        if not await raw_db.exists_template(template_name):
+        if not await exists_template(template_name):
             # Multi indices need templates. Index will be created automatically on first insert
-            ack, result = await raw_db.add_template(template_name, index_map)
+            ack, result = await save_template(template_name, index_map)
 
             if not ack:
                 raise ConnectionError(
@@ -74,10 +75,10 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
 
     # -------- INDEX --------
 
-    if not await raw_db.exists_index(target_index):
+    if not await exists_index(target_index):
 
         # There is no index but the alias may exist
-        exists_index_with_alias_name = await raw_db.exists_index(alias_index)
+        exists_index_with_alias_name = await exists_index(alias_index)
 
         # Skip this error if the index is static. With static indexes there must be one alias to two indices.
         if not index.static:
@@ -94,7 +95,7 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
         result = None
         for attempt in range(0, 3):
             try:
-                result = await raw_db.create_index(target_index, mapping)
+                result = await create_index(target_index, mapping)
                 break
             except Exception as e:
                 raise ConnectionError(
@@ -118,7 +119,7 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
         try:
             logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
             mapping = index_map['template'] if index.multi_index else index_map
-            update_result = await raw_db.set_mapping(target_index, mapping['mappings'])
+            update_result = await save_mapping(target_index, mapping['mappings'])
             logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
         except TransportError as e:
             message = f"Update of index {target_index} mapping failed with error {repr(e)}"
@@ -130,17 +131,17 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
     # TODO Many force index creations
 
     # Check if alias exists
-    if not await raw_db.exists_alias(alias_index, index=target_index):
+    if not await exists_alias(alias_index, target_index):
         # Check if it points to target index
 
         try:
-            existing_aliases_setup = await raw_db.get_alias(alias_index)
+            existing_aliases_setup = await load_alias(alias_index)
         except NotFoundError:
             existing_aliases_setup = []
 
         if target_index not in existing_aliases_setup:
 
-            result = await raw_db.update_aliases({
+            result = await update_aliases({
                 "actions": [{"add": {"index": target_index, "alias": alias_index}}]
             })
             if acknowledged(result):
