@@ -35,7 +35,7 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
     else:
         profile_ids = [profile_id]
 
-    _duplicated_profiles = await profile_dao.load_profile_duplicates(profile_ids)  # 1st records is the newest
+    _duplicated_profiles = await profile_dao.load_profile_duplicates_by_ids(profile_ids)  # 1st records is the newest
     first_profile = first(_duplicated_profiles)  # type: Profile
     if first_profile is None:
         raise ValueError("Could not fetch first profile. Probably already merged.")

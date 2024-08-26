@@ -1,7 +1,7 @@
-from typing import List, AsyncGenerator, Any, Optional
+from typing import List, AsyncGenerator, Any, Optional, Tuple
 
-from tracardi.domain.profile import Profile
-from tracardi.domain.storage_record import StorageRecord, StorageRecords
+from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.storage_record import StorageRecord, StorageRecords, RecordMetadata
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.dal import raw as raw_db
@@ -226,7 +226,7 @@ async def load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
             {"metadata.time.insert": "asc"}  # todo maybe should be based on updates (but update should always exist)
         ]
     }
-    return  await storage_manager('profile').query(query)
+    return await storage_manager('profile').query(query)
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple],
@@ -236,6 +236,35 @@ async def load_profiles_to_merge(merge_key_values: List[tuple],
         merge_key_values,
         condition=condition,
         limit=limit)
+
+
+async def _load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str]]) -> StorageRecords:
+    return await storage_manager('profile').load_by_values(
+        merge_by,
+        condition='must',
+        limit=10000)
+
+
+async def _load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:
+    if isinstance(profile.ids, list):
+        set(profile.ids).add(profile.id)
+        profile_ids = list(profile.ids)
+    else:
+        profile_ids = [profile.id]
+
+    return await load_profile_duplicates(profile_ids)
+
+
+async def load_duplicated_profiles(profile: Profile,
+                                                 merge_by: Optional[List[Tuple[str, str]]] = None) -> StorageRecords:
+    if merge_by is None:
+        # merge by ids
+        duplicated_profiles = await _load_duplicated_profiles_for_profile(profile)
+    else:
+        # merge by merge keys
+        duplicated_profiles = await _load_duplicated_profiles_with_merge_key(merge_by)
+
+    return duplicated_profiles
 
 
 async def delete_by_id(id: str, index: str):

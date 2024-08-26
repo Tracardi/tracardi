@@ -1,9 +1,9 @@
-import asyncio
-from typing import List, Tuple, Optional, Set
-
-from tracardi.domain.profile import FlatProfile, Profile
-from tracardi.domain.storage_record import RecordMetadata, StorageRecords
-from tracardi.service.storage.elastic.driver.factory import storage_manager
+# import asyncio
+# from typing import List, Tuple, Optional, Set
+#
+# from tracardi.domain.profile import FlatProfile, Profile
+# from tracardi.domain.storage_record import RecordMetadata, StorageRecords
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
 # from tracardi.service.storage.elastic.dal import raw as raw_db
 # from tracardi.service.storage.elastic.interface.gui.event import refresh_event_db
 #
@@ -11,62 +11,62 @@ from tracardi.service.storage.elastic.driver.factory import storage_manager
 # from tracardi.service.storage.elastic.dal.session import refresh as refresh_session
 
 
-async def _load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
-    return await storage_manager('profile').query({
-        "size": 10000,
-        "query": {
-            "bool": {
-                "should": [
-                    {
-                        "terms": {
-                            "ids": profile_ids
-                        }
-                    },
-                    {
-                        "terms": {
-                            "id": profile_ids
-                        }
-                    }
-                ],
-                "minimum_should_match": 1
-            }
-        },
-        "sort": [
-            {"metadata.time.insert": "asc"}  # todo maybe should be based on updates (but update should always exist)
-        ]
-    })
+# async def _load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
+#     return await storage_manager('profile').query({
+#         "size": 10000,
+#         "query": {
+#             "bool": {
+#                 "should": [
+#                     {
+#                         "terms": {
+#                             "ids": profile_ids
+#                         }
+#                     },
+#                     {
+#                         "terms": {
+#                             "id": profile_ids
+#                         }
+#                     }
+#                 ],
+#                 "minimum_should_match": 1
+#             }
+#         },
+#         "sort": [
+#             {"metadata.time.insert": "asc"}  # todo maybe should be based on updates (but update should always exist)
+#         ]
+#     })
 
 
-async def _load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:
-    if isinstance(profile.ids, list):
-        set(profile.ids).add(profile.id)
-        profile_ids = list(profile.ids)
-    else:
-        profile_ids = [profile.id]
-
-    return await _load_profile_duplicates(profile_ids)
-
-
-async def _load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str]]) -> StorageRecords:
-    return await storage_manager('profile').load_by_values(
-        merge_by,
-        condition='must',
-        limit=10000)
-
-
-async def load_duplicated_profiles(profile: Profile, merge_by: Optional[List[Tuple[str, str]]] = None) -> List[
-    Tuple[FlatProfile, Optional[RecordMetadata]]]:
-    if merge_by is None:
-        # merge by ids
-        duplicated_profiles = await _load_duplicated_profiles_for_profile(profile)
-    else:
-        # merge by merge keys
-        duplicated_profiles = await _load_duplicated_profiles_with_merge_key(merge_by)
-
-    return [
-        (FlatProfile(profile_record), profile_record.get_meta_data())
-        for profile_record in duplicated_profiles
-    ]
+# async def _load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:
+#     if isinstance(profile.ids, list):
+#         set(profile.ids).add(profile.id)
+#         profile_ids = list(profile.ids)
+#     else:
+#         profile_ids = [profile.id]
+#
+#     return await _load_profile_duplicates(profile_ids)
+#
+#
+# async def _load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str]]) -> StorageRecords:
+#     return await storage_manager('profile').load_by_values(
+#         merge_by,
+#         condition='must',
+#         limit=10000)
+#
+#
+# async def load_duplicated_profiles(profile: Profile, merge_by: Optional[List[Tuple[str, str]]] = None) -> List[
+#     Tuple[FlatProfile, Optional[RecordMetadata]]]:
+#     if merge_by is None:
+#         # merge by ids
+#         duplicated_profiles = await _load_duplicated_profiles_for_profile(profile)
+#     else:
+#         # merge by merge keys
+#         duplicated_profiles = await load_duplicated_profiles_with_merge_key(merge_by)
+#
+#     return [
+#         (FlatProfile(profile_record), profile_record.get_meta_data())
+#         for profile_record in duplicated_profiles
+#     ]
 
 
 # async def delete_multiple_profiles(profile_tuples: List[Tuple[str, RecordMetadata]]):

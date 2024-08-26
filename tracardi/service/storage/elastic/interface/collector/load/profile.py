@@ -1,8 +1,9 @@
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
+from tracardi.domain.storage_record import RecordMetadata
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache, save_profile_cache
 from tracardi.context import Context, get_context
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.service.storage.elastic.dal import profile as profile_db
 
 
@@ -39,9 +40,19 @@ async def load_profiles_to_merge(merge_key_values: List[tuple],
     return [profile.to_entity(Profile) for profile in profiles]
 
 
-async def load_profile_duplicates(profile_ids: List[str]):
+async def load_profile_duplicates_by_ids(profile_ids: List[str]):
     result = await profile_db.load_profile_duplicates(profile_ids)
     profiles = []
     for row in result:
         profiles.append(row.to_entity(Profile))
     return profiles
+
+
+async def load_duplicated_profiles_with_metadata(profile: Profile, merge_by: Optional[List[Tuple[str, str]]] = None) -> \
+        List[Tuple[FlatProfile, Optional[RecordMetadata]]]:
+    duplicated_profiles = await profile_db.load_duplicated_profiles(profile, merge_by)
+
+    return [
+        (FlatProfile(profile_record), profile_record.get_meta_data())
+        for profile_record in duplicated_profiles
+    ]
