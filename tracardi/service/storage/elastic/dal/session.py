@@ -4,14 +4,19 @@ from tracardi.domain.session import Session
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.service.storage.elastic.driver.factory import storage_manager
+from tracardi.service.storage.elastic.dal import raw as raw_db
 
 
 async def refresh():
-    return await storage_manager('session').refresh()
+    return await raw_db.refresh('session')
 
 
 async def flush():
-    return await storage_manager('session').flush()
+    return await raw_db.flush('session')
+
+
+async def count(query: dict = None):
+    return await raw_db.count('session', query)
 
 
 async def get_nth_last_session(profile_id: str, n: int) -> Optional[StorageRecord]:
@@ -42,10 +47,6 @@ async def load_by_id(id: str) -> Optional[Session]:
     session = session_record.to_entity(Session)  # 10rq/s
 
     return session
-
-
-async def count(query: dict = None):
-    return await storage_manager('session').count(query)
 
 
 async def count_online():

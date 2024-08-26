@@ -11,20 +11,20 @@ from tracardi.service.storage.mysql.interface import event_source_dao
 from tracardi.service.storage.elastic.dal import raw as raw_db
 
 
-async def _refresh():
-    return await storage_manager('event').refresh()
+async def refresh():
+    return await raw_db.refresh('event')
 
 
-async def _flush():
-    return await storage_manager('event').flush()
+async def flush():
+    return await raw_db.flush('event')
+
+
+async def count(query: dict = None):
+    return await raw_db.count('event', query)
 
 
 async def _save_events(events: Union[List[Event], Set[Event]], exclude=None):
     return await storage_manager('event').upsert(events, exclude=exclude)
-
-
-async def _count(query: dict = None):
-    return await storage_manager('event').count(query)
 
 
 async def _delete_by_id(id: str) -> dict:
@@ -630,17 +630,6 @@ async def aggregate_events_by_profile_and_field(profile_id: str, field: str, buc
     return await _aggregate_profile_events_by_field(profile_id,
                                                     field=field,
                                                     bucket_name=bucket_name)
-
-
-async def load_events_by_profile_and_field(profile_id: str, field: str, table: bool = False):
-    bucket_name = f"by_{field}"
-    result = await aggregate_events_by_profile_and_field(profile_id,
-                                                         field=field,
-                                                         bucket_name=bucket_name)
-
-    if table:
-        return {id: count for id, count in result.aggregations[bucket_name][0].items()}
-    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
 async def aggregate_event_by_field_within_time(profile_id: str, field_id: str, span_in_sec: int, metric, event_type):

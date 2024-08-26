@@ -13,6 +13,18 @@ from tracardi.service.storage.elastic.driver.persistence_service import Persiste
 from tracardi.domain.query_result import QueryResult
 
 
+async def count(index: str, query: dict = None):
+    return await storage_manager(index).count(query)
+
+
+async def refresh(index: str):
+    return await storage_manager(index).refresh()
+
+
+async def flush(index: str):
+    return await storage_manager(index).flush()
+
+
 def index(idx) -> PersistenceService:
     return storage_manager(idx)
 
@@ -213,11 +225,6 @@ async def task_status(task_id):
     return await es._client.tasks.get(task_id)
 
 
-async def refresh(index):
-    es = ElasticClient.instance()
-    return await es.refresh(index)
-
-
 async def get_mapping(index):
     es = ElasticClient.instance()
     result = await es.get_mapping(index)
@@ -264,7 +271,3 @@ async def get_mapping_fields(index: str) -> list:
     set_of_db_mappings = set(db_mappings)
     set_of_db_mappings.update(FieldMapper().get_field_mapping(index))
     return sorted(list(set_of_db_mappings))
-
-
-async def count(index: str, query: dict = None):
-    return await storage_manager(index).count(query)

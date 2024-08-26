@@ -1,13 +1,24 @@
 from typing import List, Dict, Optional
 
 from tracardi.domain.event import Event
-from tracardi.service.storage.elastic.dal.event import _aggregate_events_by_type_and_source, _refresh, _flush, \
+from tracardi.service.storage.elastic.dal.event import _aggregate_events_by_type_and_source, refresh, flush, \
     _get_avg_process_time, _aggregate_event_type, _aggregate_event_tag, _aggregate_event_status, \
     _aggregate_event_device_geo, _aggregate_event_os_name, _aggregate_event_channels, _aggregate_event_resolution, \
     _aggregate_events_by_source, _aggregate_source_by_type, _aggregate_source_by_tags, \
     _get_events_by_session_and_profile, _get_events_by_profile, _load, _delete_by_id
 from tracardi.service.storage.elastic.dal import raw as raw_db
 
+
+async def refresh_event_db():
+    return await refresh()
+
+
+async def flush_event_db():
+    return await flush()
+
+
+async def count_events_in_db(query: dict = None):
+    return await raw_db.count('event', query)
 
 def _get_data(result):
     for by_type in result.aggregations('by_type').buckets():
@@ -23,18 +34,6 @@ def _get_data(result):
 async def aggregate_events_by_type_and_source() -> List[dict]:
     result = await _aggregate_events_by_type_and_source()
     return list(_get_data(result))
-
-
-async def refresh_event_db():
-    return await _refresh()
-
-
-async def flush_event_db():
-    await _flush()
-
-
-async def count_events_in_db(query: dict = None):
-    return await raw_db.count('event', query)
 
 
 async def load_events_avg_requests() -> float:

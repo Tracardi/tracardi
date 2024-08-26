@@ -3,7 +3,7 @@ from dotty_dict import Dotty
 from tracardi.domain.profile_data import ProfileData
 from tracardi.service.storage.elastic.interface.gui.event import refresh_event_db
 from tracardi.service.storage.elastic.dal.merging import delete_multiple_profiles
-from tracardi.service.storage.elastic.dal.collector.load.session import refresh_session_db
+from tracardi.service.storage.elastic.interface.collector.load.session import refresh_session_db
 
 from ..context import get_context
 from ..domain import ExtraInfo

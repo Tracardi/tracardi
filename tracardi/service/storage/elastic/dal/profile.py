@@ -9,7 +9,15 @@ from tracardi.service.storage.elastic.dal import raw as raw_db
 logger = get_logger(__name__)
 
 
-async def _count(query: dict = None) -> dict:
+async def refresh():
+    return await raw_db.refresh('profile')
+
+
+async def flush():
+    return await raw_db.flush('profile')
+
+
+async def count(query: dict = None) -> dict:
     return await raw_db.count('profile', query)
 
 
@@ -54,7 +62,7 @@ async def _load_by_id(profile_id: str) -> Optional[StorageRecord]:
     return profile_records.first()
 
 
-async def _load_modified_top_profiles(size):
+async def _load_modified_top_profiles(size: int) -> StorageRecords:
     query = {
         "size": size,
         "sort": [
@@ -105,7 +113,7 @@ async def load_active_profile_by_field(field: str, value: str, start: int = 0, l
 
 
 async def profile_count_in_db(query: dict = None) -> dict:
-    return await _count(query)
+    return await count(query)
 
 
 async def load_profile_by_primary_ids(profile_id_batch, batch):
@@ -239,14 +247,6 @@ async def delete_by_id(id: str, index: str):
     return await sm.delete(id, index)
 
 
-async def refresh():
-    return await storage_manager('profile').refresh()
-
-
-async def flush():
-    return await storage_manager('profile').flush()
-
-
 async def load_by_id(profile_id: str) -> Optional[Profile]:
     profile_record = await _load_by_id(profile_id)
 
@@ -255,10 +255,6 @@ async def load_by_id(profile_id: str) -> Optional[Profile]:
         profile = Profile.create(profile_record)
 
     return profile
-
-
-async def count(query: dict = None) -> dict:
-    return await raw_db.count('profile', query)
 
 
 async def count_profile_duplicates(profile_ids: List[str]):

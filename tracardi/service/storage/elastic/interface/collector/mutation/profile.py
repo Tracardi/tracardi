@@ -3,13 +3,25 @@ from typing import Union, List, Set, Optional
 from tracardi.context import Context, get_context
 from tracardi.domain.profile import Profile
 from tracardi.service.storage.elastic.dal.profile import refresh
-from tracardi.service.storage.elastic.dal.collector.mutation.profile import save
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache, delete_profile_cache
 
 
+async def _save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
+    if isinstance(profile, (list, set)):
+        for _profile in profile:
+            if isinstance(_profile, Profile):
+                _profile.mark_for_update()
+    elif isinstance(profile, Profile):
+        profile.mark_for_update()
+    result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
+    if refresh_after_save:
+        await storage_manager('profile').flush()
+    return result
+
+
 async def save_profiles_in_db(profiles: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
-    return await save(profiles, refresh_after_save)
+    return await _save(profiles, refresh_after_save)
 
 
 async def save_profile_in_db_and_cache(profile: Profile):

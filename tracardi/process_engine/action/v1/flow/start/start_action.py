@@ -1,8 +1,8 @@
 import json
 from json import JSONDecodeError
 
-from tracardi.service.storage.elastic.dal.event import load_event_from_db
-from tracardi.service.storage.elastic.dal.collector.load.session import load_session_from_db
+from tracardi.service.storage.elastic.interface.gui.event import load_event_from_db
+from tracardi.service.storage.elastic.interface.collector.load.session import load_session_from_db
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -14,7 +14,6 @@ from tracardi.domain.event import Event, EventSession
 from tracardi.domain.entity import Entity
 
 from tracardi.service.storage.interface import profile_load_collector_dao
-
 
 
 def validate(config: dict):
@@ -82,7 +81,6 @@ class StartAction(ActionRunner):
             event = _event
 
         event.profile = profile
-
 
         try:
             if properties:

@@ -102,6 +102,14 @@ async def count(index: str, query: dict = None):
     return await raw_db.count(index, query)
 
 
+async def refresh(index:str):
+    return await raw_db.refresh(index)
+
+
+async def flush(index: str):
+    return await raw_db.flush(index)
+
+
 async def query_by_index(index, query):
     return await raw_db.query_by_index(
         index=index,
