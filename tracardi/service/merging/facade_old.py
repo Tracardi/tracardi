@@ -3,7 +3,7 @@ from typing import List, Optional
 from tracardi.domain.profile import Profile
 from tracardi.service.profile_merger import ProfileMerger
 
-from tracardi.service.storage.elastic.dal import profile as profile_db
+from tracardi.service.storage.elastic.interface.collector.load import profile as profile_dao
 from tracardi.domain.storage_record import RecordMetadata
 
 from tracardi.service.storage.interface import profile_mutation_collector_dao
@@ -35,7 +35,7 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
     else:
         profile_ids = [profile_id]
 
-    _duplicated_profiles = await profile_db.load_profile_duplicates(profile_ids)  # 1st records is the newest
+    _duplicated_profiles = await profile_dao.load_profile_duplicates(profile_ids)  # 1st records is the newest
     first_profile = first(_duplicated_profiles)  # type: Profile
     if first_profile is None:
         raise ValueError("Could not fetch first profile. Probably already merged.")

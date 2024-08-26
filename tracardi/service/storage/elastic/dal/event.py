@@ -595,14 +595,6 @@ async def load_nth_last_event(event_type: str, offset: int, profile_id: Optional
     )
 
 
-async def load_unique_field_value(search_query, limit):
-    return await _unique_field_value(search_query, limit)
-
-
-async def save_events_in_db(events) -> BulkInsertResult:
-    return await _save_events(events, exclude={"operation": ...})
-
-
 async def load_events_by_profile_id(profile_id: str, limit: int) -> dict:
     result = await _get_events_by_profile(
         profile_id,
@@ -652,3 +644,7 @@ async def count_events_by_type(profile_id: str, event_type_id: str, span_in_sec:
 
 def scan(query: dict = None, batch: int = 1000):
     return storage_manager('event').scan(query, batch)
+
+
+async def update_profile_event(old_id: str, merged_profile_id):
+    await raw_db.update_profile_ids('event', old_id, merged_profile_id)

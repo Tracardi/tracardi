@@ -5,7 +5,7 @@ import time
 from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
-from tracardi.service.storage.elastic.dal.event import save_events_in_db
+from tracardi.service.storage.elastic.interface.collector.mutation.event import save_events_in_db
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
 from tracardi.service.tracking.storage.session_storage import save_session

@@ -125,3 +125,7 @@ async def aggregate_session(bucket_name, by, filter_query=None, buckets_size=100
     }
 
     return await storage_manager(index="session").aggregate(query)
+
+
+async def update_session_profile_ids(old_id: str, merged_profile_id):
+    await raw_db.update_profile_ids('session', old_id, merged_profile_id)

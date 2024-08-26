@@ -2,13 +2,13 @@ from dotty_dict import Dotty
 
 from tracardi.domain.profile_data import ProfileData
 from tracardi.service.storage.elastic.interface.gui.event import refresh_event_db
-from tracardi.service.storage.elastic.dal.merging import delete_multiple_profiles
+from tracardi.service.storage.elastic.interface.collector.mutation import profile as profile_dao
 from tracardi.service.storage.elastic.interface.collector.load.session import refresh_session_db
 
 from ..context import get_context
 from ..domain import ExtraInfo
 from ..domain.storage_record import RecordMetadata
-from tracardi.service.storage.elastic.dal import profile as profile_db
+from tracardi.service.storage.elastic.interface.collector.load import profile as profile_dao
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update
@@ -84,7 +84,7 @@ class ProfileMerger:
 
             merge_by = ProfileMerger.add_keywords(merge_by)
 
-            similar_profiles = await profile_db.load_profiles_to_merge(
+            similar_profiles = await profile_dao.load_profiles_to_merge(
                 merge_by,
                 condition=condition,
                 limit=limit
@@ -350,7 +350,7 @@ class ProfileMerger:
             logger.debug(f"Profiles to delete {records_to_delete}.",
                          extra=ExtraInfo.build(origin="merging", object=self))
 
-            await delete_multiple_profiles(records_to_delete)
+            await profile_dao.delete_many_profiles(records_to_delete)
 
             # Replace current profile with merged profile
             return merged_profile

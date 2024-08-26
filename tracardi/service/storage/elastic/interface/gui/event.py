@@ -5,7 +5,7 @@ from tracardi.service.storage.elastic.dal.event import _aggregate_events_by_type
     _get_avg_process_time, _aggregate_event_type, _aggregate_event_tag, _aggregate_event_status, \
     _aggregate_event_device_geo, _aggregate_event_os_name, _aggregate_event_channels, _aggregate_event_resolution, \
     _aggregate_events_by_source, _aggregate_source_by_type, _aggregate_source_by_tags, \
-    _get_events_by_session_and_profile, _get_events_by_profile, _load, _delete_by_id
+    _get_events_by_session_and_profile, _get_events_by_profile, _load, _delete_by_id, _unique_field_value
 from tracardi.service.storage.elastic.dal import raw as raw_db
 
 
@@ -19,6 +19,7 @@ async def flush_event_db():
 
 async def count_events_in_db(query: dict = None):
     return await raw_db.count('event', query)
+
 
 def _get_data(result):
     for by_type in result.aggregations('by_type').buckets():
@@ -128,5 +129,11 @@ async def aggregate_events_by_source_and_tags(source_id, time_span) -> List[dict
     return await _aggregate_source_by_tags(source_id, time_span)
 
 
-async def delete_event_from_db(event_id:str):
+async def delete_event_from_db(event_id: str):
+    # TODO returns raw data
     return await _delete_by_id(event_id)
+
+
+async def load_unique_field_value(search_query, limit):
+    # TODO returns raw data
+    return await _unique_field_value(search_query, limit)

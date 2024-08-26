@@ -2,7 +2,7 @@ from typing import Tuple
 
 from tracardi.context import ServerContext, get_context
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.dal.indices_manager import get_indices_status
+from tracardi.service.storage.elastic.interface.gui.storage import load_indices_status
 
 logger = get_logger(__name__)
 
@@ -14,11 +14,11 @@ async def is_schema_ok() -> Tuple[bool, list]:
 
     # Missing indices in staging
     with ServerContext(get_context().switch_context(production=False)):
-        _indices_staging = [item async for item in get_indices_status()]
+        _indices_staging = [item async for item in load_indices_status()]
 
     # Missing indices in production
     with ServerContext(get_context().switch_context(production=True)):
-        _indices_production = [item async for item in get_indices_status()]
+        _indices_production = [item async for item in load_indices_status()]
 
     _indices = _indices_staging + _indices_production
 

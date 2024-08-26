@@ -1,13 +1,13 @@
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 
-async def load_by_type(type: str) -> dict:
+async def load_by_type(type: str) -> StorageRecords:
     field_value_pairs = [
         ('type', type)
     ]
-    result = await storage_manager("field-update-log").load_by_values(field_value_pairs)
-    return result.dict()
+    return await storage_manager("field-update-log").load_by_values(field_value_pairs)
 
 
 async def upsert(data: list) -> BulkInsertResult:

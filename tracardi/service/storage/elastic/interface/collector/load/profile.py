@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache, save_profile_cache
 from tracardi.context import Context, get_context
@@ -29,3 +29,19 @@ async def load_profile(profile_id: str, context: Optional[Context] = None, fallb
 
     return profile
 
+
+async def load_profiles_to_merge(merge_key_values: List[tuple],
+                                 condition: str = 'must',
+                                 limit=1000) -> List[Profile]:
+    profiles = await profile_db.load_profiles_to_merge(merge_key_values,
+                                                       condition,
+                                                       limit)
+    return [profile.to_entity(Profile) for profile in profiles]
+
+
+async def load_profile_duplicates(profile_ids: List[str]):
+    result = await profile_db.load_profile_duplicates(profile_ids)
+    profiles = []
+    for row in result:
+        profiles.append(row.to_entity(Profile))
+    return profiles

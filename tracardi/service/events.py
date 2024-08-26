@@ -8,7 +8,7 @@ from dotty_dict import dotty
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.profile import FlatProfile
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.dal.event import load_unique_field_value
+from tracardi.service.storage.elastic.interface.gui import event as event_gui_dao
 from tracardi.service.string_manager import capitalize_event_type_id
 
 _local_dir = os.path.dirname(__file__)
@@ -61,7 +61,7 @@ async def get_event_types(query: str = None, limit: int = 1000):
     context = get_context()
 
     with ServerContext(context.switch_context(production=True)):
-        production_event_types = await load_unique_field_value(query, limit)
+        production_event_types = await event_gui_dao.load_unique_field_value(query, limit)
 
         for item in production_event_types:
             if item not in pre_defined_ids:
@@ -69,7 +69,7 @@ async def get_event_types(query: str = None, limit: int = 1000):
                 pre_defined_ids.append(item)
 
     with ServerContext(context.switch_context(production=False)):
-        test_event_types = await load_unique_field_value(query, limit)
+        test_event_types = await event_gui_dao.load_unique_field_value(query, limit)
 
         for item in test_event_types:
             if item not in pre_defined_ids:

@@ -202,7 +202,7 @@ async def load_profiles_with_duplicated_ids(log_error=True) -> AsyncGenerator[Pr
             yield profile_record.to_entity(Profile)
 
 
-async def load_profile_duplicates(profile_ids: List[str]) -> List[Profile]:
+async def load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
     query = {
         "size": 10000,
         "query": {
@@ -226,20 +226,16 @@ async def load_profile_duplicates(profile_ids: List[str]) -> List[Profile]:
             {"metadata.time.insert": "asc"}  # todo maybe should be based on updates (but update should always exist)
         ]
     }
-    profiles = []
-    for row in await storage_manager('profile').query(query):
-        profiles.append(row.to_entity(Profile))
-    return profiles
+    return  await storage_manager('profile').query(query)
 
 
 async def load_profiles_to_merge(merge_key_values: List[tuple],
                                  condition: str = 'must',
-                                 limit=1000) -> List[Profile]:
-    profiles = await storage_manager('profile').load_by_values(
+                                 limit=1000) -> StorageRecords:
+    return await storage_manager('profile').load_by_values(
         merge_key_values,
         condition=condition,
         limit=limit)
-    return [profile.to_entity(Profile) for profile in profiles]
 
 
 async def delete_by_id(id: str, index: str):

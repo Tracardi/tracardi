@@ -1,6 +1,7 @@
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
-from tracardi.service.storage.elastic.dal.indices_manager import check_indices_mappings_consistency
+from tracardi.service.storage.elastic.dal.client import elastic_close
+from tracardi.service.storage.elastic.dal.indices_manager import check_indices_mappings_consistency, get_indices_status
 from tracardi.service.storage.elastic.dal import raw as raw_db
 
 
@@ -102,7 +103,7 @@ async def count(index: str, query: dict = None):
     return await raw_db.count(index, query)
 
 
-async def refresh(index:str):
+async def refresh(index: str):
     return await raw_db.refresh(index)
 
 
@@ -145,5 +146,12 @@ def count_all_indices_by_alias():
     return raw_db.count_all_indices_by_alias()
 
 
+def load_indices_status():
+    return get_indices_status()
+
 async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id):
     return await raw_db.update_profile_ids(index, old_profile_id, merged_profile_id)
+
+
+async def close_storage():
+    await elastic_close()
