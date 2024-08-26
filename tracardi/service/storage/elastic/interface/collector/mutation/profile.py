@@ -8,9 +8,9 @@ from tracardi.domain.storage_record import RecordMetadata
 from tracardi.service.storage.elastic.dal.event import update_profile_event
 from tracardi.service.storage.elastic.dal.profile import refresh
 from tracardi.service.storage.elastic.dal.session import update_session_profile_ids, refresh as refresh_session
-from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.interface.gui.event import refresh_event_db
 from tracardi.service.tracking.cache.profile_cache import save_profile_cache, delete_profile_cache
+from tracardi.service.storage.elastic.dal import raw as raw_db
 
 
 async def _delete_multiple_profiles(profile_tuples: List[Tuple[str, RecordMetadata]]):
@@ -53,9 +53,9 @@ async def _save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_af
                 _profile.mark_for_update()
     elif isinstance(profile, Profile):
         profile.mark_for_update()
-    result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
+    result = await raw_db.upsert_document('profile', profile, exclude={"operation": ...})
     if refresh_after_save:
-        await storage_manager('profile').flush()
+        await raw_db.flush('profile')
     return result
 
 
@@ -83,8 +83,7 @@ async def save_profile(profiles: Union[Profile, List[Profile], Set[Profile]],
 
 
 async def delete_by_id(id: str, index: str):
-    sm = storage_manager('profile')
-    return await sm.delete(id, index)
+    return await raw_db.delete_document_by_id('profile', index, id)
 
 
 async def delete_profile(id: str,

@@ -4,19 +4,18 @@ from typing import List, Dict, TypeVar, Union, Set
 from tracardi.context import Context, ServerContext, get_context
 from tracardi.domain.session import Session
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.tracking.cache.session_cache import save_session_cache
+from tracardi.service.storage.elastic.dal import raw as raw_db
 
 T = TypeVar("T")
 
 
 async def _delete_session_by_id(id: str, index: str):
-    sm = storage_manager('session')
-    return await sm.delete(id, index)
+    return await raw_db.delete_document_by_id('session', index, id)
 
 
 async def _save_sessions(sessions: List[Session]) -> BulkInsertResult:
-    return await storage_manager("session").upsert(sessions, exclude={"operation": ...})
+    return await raw_db.upsert_document('session', sessions,  exclude={"operation": ...})
 
 
 def _split_by_index(entities: List[T]) -> Dict[str, List[T]]:

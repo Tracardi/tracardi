@@ -82,6 +82,11 @@ async def delete_by_id(index: str, id: str) -> dict:
     return await es.delete(index, id)
 
 
+async def delete_document_by_id(type: str, index: str, id: str) -> dict:
+    sm = storage_manager(type)
+    return await sm.delete(id, index)
+
+
 async def delete_by_query(index: str, query: str) -> dict:
     es = ElasticClient.instance()
     return await es.delete_by_query(index, query)
@@ -90,6 +95,10 @@ async def delete_by_query(index: str, query: str) -> dict:
 async def upsert(index: str, data: dict) -> BulkInsertResult:
     es = ElasticClient.instance()
     return await es.insert(index, [data])
+
+
+async def upsert_document(index: str, data, exclude):
+    return await storage_manager(index).upsert(data, exclude=exclude)
 
 
 async def bulk_upsert(index: str, data: list) -> BulkInsertResult:
