@@ -5,8 +5,10 @@ from tracardi.service.storage.elastic.dal.event import _aggregate_events_by_type
     _get_avg_process_time, _aggregate_event_type, _aggregate_event_tag, _aggregate_event_status, \
     _aggregate_event_device_geo, _aggregate_event_os_name, _aggregate_event_channels, _aggregate_event_resolution, \
     _aggregate_events_by_source, _aggregate_source_by_type, _aggregate_source_by_tags, \
-    _get_events_by_session_and_profile, _get_events_by_profile, _load, _delete_by_id, _unique_field_value
+    _get_events_by_session_and_profile, _get_events_by_profile, _load, _delete_by_id, _unique_field_value, \
+    load_raw_events_by_session, events_scan
 from tracardi.service.storage.elastic.dal import raw as raw_db
+
 
 
 async def refresh_event_db():
@@ -137,3 +139,17 @@ async def delete_event_from_db(event_id: str):
 async def load_unique_field_value(search_query, limit):
     # TODO returns raw data
     return await _unique_field_value(search_query, limit)
+
+
+async def load_events_by_session(session_id: str, limit: int) -> Optional[List[Event]]:
+    result = await load_raw_events_by_session(session_id, limit)
+
+    if not result:
+        return None
+
+    return result.to_domain_objects(Event)
+
+
+def events_generator(query: dict = None, batch: int = 1000):
+    # TODO returns raw data
+    return events_scan(query, batch)

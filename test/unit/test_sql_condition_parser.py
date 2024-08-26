@@ -1,4 +1,4 @@
-from tracardi.service.storage.elastic.driver.persistence_service import SqlSearchQueryParser
+from tracardi.process_engine.tql.sql_parser import SqlSearchQueryParser
 
 
 def test_parser_between():

@@ -602,13 +602,13 @@ async def load_events_by_profile_id(profile_id: str, limit: int) -> dict:
     return result.dict()
 
 
-async def load_events_by_session(session_id: str, limit: int) -> Optional[List[Event]]:
+async def load_raw_events_by_session(session_id: str, limit: int) -> Optional[StorageRecords]:
     result = await _get_events_by_session(session_id, limit)
 
     if result.total == 0:
         return None
 
-    return result.to_domain_objects(Event)
+    return result
 
 
 async def aggregate_profile_events_from_db(profile_id, aggregate_query):
@@ -642,8 +642,8 @@ async def count_events_by_type(profile_id: str, event_type_id: str, span_in_sec:
     )
 
 
-def scan(query: dict = None, batch: int = 1000):
-    return storage_manager('event').scan(query, batch)
+def events_scan(query: dict = None, batch: int = 1000):
+    return raw_db.scan('event', query, batch)
 
 
 async def update_profile_event(old_id: str, merged_profile_id):

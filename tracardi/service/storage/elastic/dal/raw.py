@@ -200,6 +200,10 @@ async def aliases():
     return await es.list_aliases()
 
 
+def scan(index: str, query: dict = None, batch: int = 1000):
+    return storage_manager(index).scan(query, batch)
+
+
 async def clone(source_index, destination_index):
     es = ElasticClient.instance()
     return await es.clone(source_index, destination_index)

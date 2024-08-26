@@ -1,6 +1,7 @@
 from typing import Optional, List, Tuple
 
 from tracardi.domain.storage_record import RecordMetadata
+from tracardi.service.storage.elastic.dal.profile import load_by_primary_ids
 from tracardi.service.tracking.cache.profile_cache import load_profile_cache, save_profile_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.profile import Profile, FlatProfile
@@ -9,6 +10,11 @@ from tracardi.service.storage.elastic.dal import profile as profile_db
 
 async def load_profile_by_id(profile_id: str):
     return await profile_db.load_by_id(profile_id)
+
+
+async def load_profile_by_primary_ids(profile_id_batch, batch):
+    # TODO returns raw data
+    return await load_by_primary_ids(profile_id_batch, size=batch)
 
 
 async def load_profile(profile_id: str, context: Optional[Context] = None, fallback_to_db: bool = True) -> Optional[
@@ -56,3 +62,5 @@ async def load_duplicated_profiles_with_metadata(profile: Profile, merge_by: Opt
         (FlatProfile(profile_record), profile_record.get_meta_data())
         for profile_record in duplicated_profiles
     ]
+
+

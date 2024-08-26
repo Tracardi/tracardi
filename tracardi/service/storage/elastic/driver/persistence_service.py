@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from typing import Tuple, Optional
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.process_engine.tql.sql_parser import SqlSearchQueryParser
 from tracardi.service.list_default_value import list_value_at_index
 from tracardi.service.singleton import Singleton
 from tracardi.domain.query_result import QueryResult
@@ -56,19 +57,6 @@ def _interval(start_date: datetime, end_date: datetime):
     interval = timedelta(seconds=int(total_seconds / INTERVALS))
 
     return _timedelta_to_largest_unit(interval)
-
-
-class SqlSearchQueryParser(metaclass=Singleton):
-    def __init__(self):
-        self.parser = Parser(Parser.read('grammar/filter_condition.lark'), start='expr')
-
-    def parse(self, query) -> Optional[dict]:
-        if not query:
-            return None
-
-        tree = self.parser.parse(query)
-        result = FilterTransformer().transform(tree)
-        return result
 
 
 class SqlSearchQueryEngine:

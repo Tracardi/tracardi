@@ -1,7 +1,7 @@
 from typing import List, AsyncGenerator, Any, Optional, Tuple
 
-from tracardi.domain.profile import Profile, FlatProfile
-from tracardi.domain.storage_record import StorageRecord, StorageRecords, RecordMetadata
+from tracardi.domain.profile import Profile
+from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.dal import raw as raw_db
@@ -76,7 +76,7 @@ async def _load_modified_top_profiles(size: int) -> StorageRecords:
     return await storage_manager('profile').query(query)
 
 
-async def _load_by_primary_ids(profile_ids: List[str], size):
+async def load_by_primary_ids(profile_ids: List[str], size) -> StorageRecords:
     query = {
         "size": size,
         "query": {
@@ -116,16 +116,12 @@ async def profile_count_in_db(query: dict = None) -> dict:
     return await count(query)
 
 
-async def load_profile_by_primary_ids(profile_id_batch, batch):
-    return await _load_by_primary_ids(profile_id_batch, size=batch)
-
-
 async def load_modified_top_profiles(size):
     result = await _load_modified_top_profiles(size)
     return result.dict()
 
 
-async def load_profiles_for_auto_merge() -> AsyncGenerator[Profile, Any]:
+def _load_profiles_for_auto_merge() -> AsyncGenerator[StorageRecord, Any]:
     query = {
         "query": {
             "exists": {
@@ -133,11 +129,10 @@ async def load_profiles_for_auto_merge() -> AsyncGenerator[Profile, Any]:
             }
         }
     }
-    async for profile_record in storage_manager('profile').scan(query, batch=1000):
-        yield profile_record.to_entity(Profile)
+    return storage_manager('profile').scan(query, batch=1000)
 
 
-async def get_profiles_by_field_and_value(field: str, email: str) -> AsyncGenerator[Profile, Any]:
+def _get_profiles_by_field_and_value(field: str, email: str) -> AsyncGenerator[StorageRecord, Any]:
     query = {
         "query": {
             "term": {
@@ -145,11 +140,10 @@ async def get_profiles_by_field_and_value(field: str, email: str) -> AsyncGenera
             }
         }
     }
-    async for profile_record in storage_manager('profile').scan(query, batch=1000):
-        yield profile_record.to_entity(Profile)
+    return storage_manager('profile').scan(query, batch=1000)
 
 
-async def get_duplicated_profiles_by_field(field):
+async def _get_duplicated_profiles_by_field(field) -> StorageRecords:
     query = {
         "size": 0,
         "query": {
@@ -167,12 +161,10 @@ async def get_duplicated_profiles_by_field(field):
             },
         }
     }
-    result = await storage_manager('profile').query(query)
-    for bucket in result.aggregations('duplicate_emails').buckets():
-        yield bucket['key'], bucket['doc_count']
+    return await storage_manager('profile').query(query)
 
 
-async def load_profiles_with_duplicated_ids(log_error=True) -> AsyncGenerator[Profile, Any]:
+async def _aggr_profiles_with_duplicated_ids(log_error=True) -> StorageRecords:
     query = {
         "size": 0,
         "aggs": {
@@ -186,20 +178,37 @@ async def load_profiles_with_duplicated_ids(log_error=True) -> AsyncGenerator[Pr
         }
     }
 
-    records = await storage_manager('profile').query(query, log_error)
+    return await storage_manager('profile').query(query, log_error)
 
-    duplicated_ids = set()
-    for data in records.aggregations("duplicate_ids").buckets():
-        logger.info(f"Found {data['doc_count']} profiles with the same ID='{data['key']}'")
-        duplicated_ids.add(data['key'])
 
-    # Now return only one example of duplicated profile, for further merging.
-    # All duplicates will be loaded later.
-
-    if duplicated_ids:
-        for duplicated_profile_id in duplicated_ids:
-            profile_record = await _load_by_id(duplicated_profile_id)
-            yield profile_record.to_entity(Profile)
+# async def _load_profiles_with_duplicated_ids(log_error=True) -> AsyncGenerator[Profile, Any]:
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             "duplicate_ids": {
+#                 "terms": {
+#                     "field": "ids",
+#                     "min_doc_count": 2,
+#                     "size": 1000
+#                 }
+#             }
+#         }
+#     }
+#
+#     records = await storage_manager('profile').query(query, log_error)
+#
+#     duplicated_ids = set()
+#     for data in records.aggregations("duplicate_ids").buckets():
+#         logger.info(f"Found {data['doc_count']} profiles with the same ID='{data['key']}'")
+#         duplicated_ids.add(data['key'])
+#
+#     # Now return only one example of duplicated profile, for further merging.
+#     # All duplicates will be loaded later.
+#
+#     if duplicated_ids:
+#         for duplicated_profile_id in duplicated_ids:
+#             profile_record = await _load_by_id(duplicated_profile_id)
+#             yield profile_record.to_entity(Profile)
 
 
 async def load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
@@ -256,7 +265,7 @@ async def _load_duplicated_profiles_for_profile(profile: Profile) -> StorageReco
 
 
 async def load_duplicated_profiles(profile: Profile,
-                                                 merge_by: Optional[List[Tuple[str, str]]] = None) -> StorageRecords:
+                                   merge_by: Optional[List[Tuple[str, str]]] = None) -> StorageRecords:
     if merge_by is None:
         # merge by ids
         duplicated_profiles = await _load_duplicated_profiles_for_profile(profile)
