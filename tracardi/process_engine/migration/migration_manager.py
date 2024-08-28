@@ -6,22 +6,23 @@ from typing import Optional, List, Dict
 import json
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from hashlib import sha1
 from pathlib import Path
 from tracardi.domain.version import Version
 import re
+
+from tracardi.service.storage.elastic.interface.gui.storage import exists_index, list_indices
 from tracardi.worker.worker import run_migration_job
 from typing import Union
 
 logger = get_logger(__name__)
+
 
 class MigrationNotFoundException(Exception):
     pass
 
 
 class MigrationManager:
-
     """
     This code defines a class which is used to handle the migration of data between
     different versions of the software. The class has two attributes, "from_version" and "to_version",
@@ -77,7 +78,6 @@ class MigrationManager:
         ) as f:
             return [MigrationSchema(**schema) for schema in json.load(f) if isinstance(schema, dict)]  # avoid comments
 
-
     @staticmethod
     def _get_static_indices(version: str, tenant: str, index: str, production: bool) -> str:
         index = f"static-{version}.{tenant}.{index}"
@@ -96,8 +96,7 @@ class MigrationManager:
         if production:
             template = f"prod-{template}"
 
-        es = ElasticClient.instance()
-        return [index for index in await es.list_indices() if re.fullmatch(template, index)]
+        return [index for index in await list_indices() if re.fullmatch(template, index)]
 
     async def get_available_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
 
@@ -131,8 +130,7 @@ class MigrationManager:
                     schema.copy_index.to_index,
                     production=context.production)
 
-                es = ElasticClient.instance()
-                if await es.exists_index(schema.copy_index.from_index):
+                if await exists_index(schema.copy_index.from_index):
                     set_of_schemas_to_migrate.append(schema)
                 else:
                     logger.warning(
@@ -206,8 +204,7 @@ class MigrationManager:
                     schema.copy_index.to_index,
                     production=context.production)
 
-                es = ElasticClient.instance()
-                if await es.exists_index(schema.copy_index.from_index):
+                if await exists_index(schema.copy_index.from_index):
                     set_of_schemas_to_migrate.append(schema)
                 else:
                     logger.warning(
@@ -233,7 +230,8 @@ class MigrationManager:
     async def start_migration(self, ids: List[str], elastic_host: str, context: Context) -> None:
 
         customized_schemas = await self.get_available_schemas()
-        selected_schemas_for_migration = [schema.model_dump() for schema in customized_schemas["schemas"] if schema.id in ids]
+        selected_schemas_for_migration = [schema.model_dump() for schema in customized_schemas["schemas"] if
+                                          schema.id in ids]
 
         if not selected_schemas_for_migration:
             return
@@ -241,7 +239,6 @@ class MigrationManager:
         run_migration_job(selected_schemas_for_migration, elastic_host, context.dict())
 
         await self.save_version_update()
-
 
     @classmethod
     def get_available_migrations_for_version(cls, version: Version) -> List[str]:
@@ -251,5 +248,3 @@ class MigrationManager:
     async def save_version_update(self):
         # TODO Warning disabled - save installation info in redis. Now it is saved only in 1 instance memory
         tracardi.version.add_upgrade(self.from_version)
-
-

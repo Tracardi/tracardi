@@ -151,6 +151,7 @@ def count_all_indices_by_alias():
 def load_indices_status():
     return get_indices_status()
 
+
 async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id):
     return await raw_db.update_profile_ids(index, old_profile_id, merged_profile_id)
 

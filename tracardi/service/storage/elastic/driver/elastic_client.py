@@ -25,7 +25,6 @@ class ElasticClient:
         self._cache = {}
         self._client = AsyncElasticsearch(**kwargs)
 
-
     async def close(self):
         await self._client.close()
 
@@ -269,7 +268,6 @@ class ElasticClient:
 
     async def get_snapshot_status(self, repo, snapshot, params=None):
         return await self._client.snapshot.status(repository=repo, snapshot=snapshot, params=params)
-
 
     async def auto_create_index(self, flag):
         settings = {

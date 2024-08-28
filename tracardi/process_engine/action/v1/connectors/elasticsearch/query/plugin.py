@@ -36,7 +36,6 @@ class Endpoint(PluginEndpoint):
 
 
 class ElasticSearchFetcher(ActionRunner):
-
     _client: ElasticClient
     config: Config
 
@@ -70,13 +69,14 @@ class ElasticSearchFetcher(ActionRunner):
                 query=query
             )
 
-            await self._client.close()
-
         except ElasticsearchException as e:
             self.console.error(str(e))
             return Result(port="error", value={
                 "message": str(e)
             })
+
+        finally:
+            await self._client.close()
 
         return Result(port="result", value=result)
 
