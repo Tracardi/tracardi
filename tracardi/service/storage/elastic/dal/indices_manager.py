@@ -2,7 +2,8 @@ import json
 from elasticsearch import NotFoundError
 
 from tracardi.context import get_context
-from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
+from tracardi.domain.resources.elastic_resource_config import ElasticCredentials
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient, get_client
 from tracardi.service.storage.index import Resource, Index
 from tracardi.service.utils.diff import get_changed_values
 
@@ -103,3 +104,24 @@ async def check_indices_mappings_consistency() -> dict:
             result[index.get_write_index()] = {"Message": str(e)}
 
     return result
+
+
+async def get_indices_list_by_credentials(credentials: ElasticCredentials) -> dict:
+    client = get_client(credentials)
+
+    indices = await client.list_indices()
+    aliases = await client.list_aliases()
+    indices = [("I", item) for item in indices.keys()]
+
+    list_of_aliases = []
+    for alias in aliases.values():
+        if 'aliases' in alias:
+            for _alias in alias['aliases']:
+                list_of_aliases.append(("A", _alias))
+
+    aliases_and_indices = list_of_aliases + indices
+
+    return {
+        "total": len(aliases_and_indices),
+        "result": [{"name": f"({record[0]}) {record[1]}", "id": record[1]} for record in aliases_and_indices]
+    }

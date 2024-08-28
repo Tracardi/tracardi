@@ -8,6 +8,7 @@ from ssl import create_default_context
 from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain import ExtraInfo
+from tracardi.domain.resources.elastic_resource_config import ElasticCredentials
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.log_handler import get_logger
 
@@ -336,3 +337,12 @@ class ElasticClient:
             _singleton = get_elastic_client()
 
         return _singleton
+
+
+def get_client(creds: ElasticCredentials) -> ElasticClient:
+    return ElasticClient(**ElasticClient.get_elastic_config(ElasticConfig(env={
+        "ELASTIC_HOST": creds.url,
+        "ELASTIC_HTTP_AUTH_USERNAME": creds.username,
+        "ELASTIC_HTTP_AUTH_PASSWORD": creds.password,
+        "ELASTIC_SCHEME": creds.scheme
+    })))

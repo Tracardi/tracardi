@@ -1,7 +1,9 @@
 from tracardi.domain.query_result import QueryResult
+from tracardi.domain.resources.elastic_resource_config import ElasticCredentials
 from tracardi.domain.time_range_query import DatetimeRangePayload
 from tracardi.service.storage.elastic.dal.client import elastic_close
-from tracardi.service.storage.elastic.dal.indices_manager import check_indices_mappings_consistency, get_indices_status
+from tracardi.service.storage.elastic.dal.indices_manager import check_indices_mappings_consistency, get_indices_status, \
+    get_indices_list_by_credentials
 from tracardi.service.storage.elastic.dal import raw as raw_db
 
 
@@ -155,3 +157,15 @@ async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id)
 
 async def close_storage():
     await elastic_close()
+
+
+async def _load_indices_by_credentials(credentials: ElasticCredentials) -> dict:
+    return await get_indices_list_by_credentials(credentials)
+
+
+async def load_indices_by_credentials(resource):
+    """
+    It gets indices from production credentials
+    """
+    credentials = ElasticCredentials(**resource.credentials.production)
+    return await _load_indices_by_credentials(credentials)

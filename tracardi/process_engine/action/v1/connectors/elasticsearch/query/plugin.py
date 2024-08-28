@@ -6,7 +6,8 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
+from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient, get_client
+from tracardi.service.storage.elastic.interface.gui.storage import load_indices_by_credentials
 from .model.config import Config
 from elasticsearch import ElasticsearchException
 from tracardi.service.domain import resource as resource_db
@@ -30,7 +31,8 @@ class Endpoint(PluginEndpoint):
     @staticmethod
     async def fetch_indices(config: dict):
         config = ElasticResourceConfig(**config)
-        return await config.get_indices()
+        resource = await resource_db.load(config.source.id)
+        return await load_indices_by_credentials(resource)
 
 
 class ElasticSearchFetcher(ActionRunner):
@@ -44,7 +46,7 @@ class ElasticSearchFetcher(ActionRunner):
 
         self.config = config
         credentials = resource.credentials.get_credentials(self, ElasticCredentials)
-        self._client = credentials.get_client()
+        self._client = get_client(credentials)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 

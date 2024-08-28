@@ -1,7 +1,5 @@
-from typing import Tuple
 from tracardi.domain.import_config import ImportConfig
 from tracardi.domain.resources.elastic_resource_config import ElasticResourceConfig
-from tracardi.worker.misc.task_progress import task_create
 from .importer import Importer
 from pydantic import field_validator, BaseModel
 from tracardi.service.plugin.domain.register import Form, FormGroup, FormField, FormComponent
@@ -10,6 +8,7 @@ from tracardi.service.domain import resource as resource_db
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.worker.worker import run_elastic_import_job
 from ...context import get_context
+from ...service.storage.elastic.interface.gui.storage import load_indices_by_credentials
 
 
 class ElasticIndexImportConfig(BaseModel):
@@ -30,7 +29,8 @@ class Endpoint(PluginEndpoint):
     @staticmethod
     async def fetch_indices(config: dict):
         config = ElasticResourceConfig(**config)
-        return await config.get_indices()
+        resource = await resource_db.load(config.source.id)
+        return await load_indices_by_credentials(resource)
 
 
 class ElasticIndexImporter(Importer):
@@ -72,7 +72,6 @@ class ElasticIndexImporter(Importer):
         ])])
 
     async def run(self, task_name, import_config: ImportConfig):
-
         config = ElasticIndexImportConfig(**import_config.config)
         resource = await resource_db.load(config.source.id)
         credentials = resource.credentials.test if self.debug is True else resource.credentials.production
