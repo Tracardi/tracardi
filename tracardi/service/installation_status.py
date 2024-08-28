@@ -1,23 +1,22 @@
 import asyncio
 import elasticsearch
 
-from typing import List, Optional, Dict
-from pydantic import BaseModel
+from typing import Dict
 
 from tracardi.domain import ExtraInfo
+from tracardi.domain.system_installation_status import SystemInstallationStatus
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.service.singleton import Singleton
-from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.config import tracardi, mysql
 from tracardi.context import ServerContext, get_context, Context
 from tracardi.exceptions.log_handler import get_installation_logger
 from tracardi.service import system
+from tracardi.service.storage.elastic.interface.gui.storage import exists_template
 from tracardi.service.storage.index import Resource
 
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.service.storage.mysql.service.user_service import UserService
-
 
 if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
@@ -25,7 +24,7 @@ if License.has_license() and License.has_service(MULTI_TENANT):
 logger = get_installation_logger(__name__)
 
 
-async def check_installation() -> dict:
+async def _check_installation() -> dict:
     """
     Returns list of missing and updated indices
     """
@@ -107,28 +106,16 @@ async def check_installation() -> dict:
     }
 
 
-class SystemInstallationStatus(BaseModel):
-    schema_ok: bool = False
-    admin_ok: Optional[bool] = None
-    form_ok: Optional[bool] = None
-    warning: Optional[List[str]] = None
-    config: Optional[dict] = {}
-
-    @staticmethod
-    async def check() -> 'SystemInstallationStatus':
-        status = await check_installation()
-        return SystemInstallationStatus(**status)
-
-
 class InstallationStatus(metaclass=Singleton):
     _installed_tenants: Dict[str, bool] = {}
 
-    def __init__(self):
-        self.es = ElasticClient.instance()
-
     @staticmethod
-    async def get_status():
-        status = await SystemInstallationStatus.check()
+    async def check() -> 'SystemInstallationStatus':
+        status = await _check_installation()
+        return SystemInstallationStatus(**status)
+
+    async def get_status(self):
+        status = await self.check()
         return {
             "schema": status.schema_ok,
             "users": status.admin_ok,
@@ -142,7 +129,7 @@ class InstallationStatus(metaclass=Singleton):
         tenant = context.tenant
         if tenant not in self._installed_tenants or self._installed_tenants[tenant] is False:
             try:
-                self._installed_tenants[tenant] = await self.es.exists_index_template(template)
+                self._installed_tenants[tenant] = await exists_template(template)
             except elasticsearch.exceptions.ConnectionError:
                 return False
         return self._installed_tenants[tenant]
