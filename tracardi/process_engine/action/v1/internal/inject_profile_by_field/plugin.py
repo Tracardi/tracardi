@@ -15,7 +15,6 @@ def validate(config: dict):
 
 
 class InjectProfileByField(ActionRunner):
-
     config: Configuration
 
     async def set_up(self, init):
