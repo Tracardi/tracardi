@@ -1,10 +1,10 @@
 from tracardi.domain.profile import Profile
-from tracardi.service.storage.elastic.dal.profile import load_active_profile_by_field
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 
+from tracardi.service.storage.elastic.interface.plugin.profile import load_active_profile_by_field
 from tracardi.service.storage.interface import profile_load_collector_dao
 
 from .model.configuration import Configuration

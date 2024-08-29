@@ -1,9 +1,9 @@
-from tracardi.service.storage.elastic.dal.integration_id import save_integration_id
 from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.elastic.interface.plugin.entity import save_integration_id_in_entity
 from .model.config import Config
 from tracardi.service.domain import resource as resource_db
 from tracardi.domain.resource import Resource
@@ -58,7 +58,7 @@ class HubSpotContactAdder(ActionRunner):
 
             if 'id' in result:
                 contact_id = result['id']
-                await save_integration_id(self.profile.id, 'hubspot', contact_id)
+                await save_integration_id_in_entity(self.profile.id, 'hubspot', contact_id)
 
             return Result(port="response", value=result)
 

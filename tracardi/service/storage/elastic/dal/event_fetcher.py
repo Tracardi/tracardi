@@ -1,5 +1,6 @@
 from typing import List
 
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 
@@ -19,15 +20,15 @@ class EventContextFetcher:
             return f"{kql} AND ({query})"
         return kql
 
-    def _query(self,
-               query: str = None,
-               start: int = 0,
-               limit: int = 50,
-               time_field: str = "metadata.time.insert",
-               time_zone: str = "UTC",
-               min_date_time='now-7d/d',
-               max_date_time='now'
-               ) -> dict:
+    async def fetch_event_types(self,
+                                query: str = None,
+                                start: int = 0,
+                                limit: int = 50,
+                                time_field: str = "metadata.time.insert",
+                                time_zone: str = "UTC",
+                                min_date_time='now-7d/d',
+                                max_date_time='now'
+                                ) -> StorageRecords:
         es_query = {
             "from": start,
             "size": limit,
@@ -50,27 +51,4 @@ class EventContextFetcher:
             }
         }
         es_query['query']["bool"]["must"] = {'query_string': {"query": self._get_query(query)}}
-
-        return es_query
-
-    async def fetch_event_types(
-            self,
-            query: str = None,
-            start: int = 0,
-            limit: int = 50,
-            time_field: str = "metadata.time.insert",
-            time_zone: str = "UTC",
-            min_date_time='now-7d/d',
-            max_date_time='now'
-    ) -> List[str]:
-        query = self._query(
-            query,
-            start,
-            limit,
-            time_field,
-            time_zone,
-            min_date_time,
-            max_date_time
-        )
-        events = await storage_manager("event").query(query)
-        return [event['type'] for event in events]
+        return await storage_manager("event").query(es_query)

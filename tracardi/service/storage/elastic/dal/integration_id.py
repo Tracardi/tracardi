@@ -17,10 +17,9 @@ async def commit_integration_ids():
     await entity_db.refresh()
 
 
-async def load_integration_id(profile_id, system_name) -> List[RemoteSystemIntegrationId]:
+async def load_integration_id(profile_id, system_name) -> StorageRecords:
     field_value_pairs = [('type', system_name), ('profile.id', profile_id)]
-    result = await _load_by_values(field_value_pairs)
-    return result.to_domain_objects(RemoteSystemIntegrationId)
+    return await _load_by_values(field_value_pairs)
 
 
 async def save_integration_id(profile_id, system_name, remote_id, data: Optional[dict] = None):

@@ -8,7 +8,8 @@ from ...domain.profile import Profile
 from ...domain.resource import Resource
 from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.dal.integration_id import load_integration_id, save_integration_id
+from ...service.storage.elastic.interface.plugin.entity import save_integration_id_in_entity, \
+    load_integration_id_from_entity
 
 logger = get_logger(__name__)
 
@@ -26,7 +27,7 @@ class HubSpotConnector(DestinationInterface):
             logger.info(f"Updating in hubspot with data {payload} for remote ID {hubspot_id}")
             response = await self.client.update_contact(hubspot_id, payload)
             logger.info(f"Updated data {payload} in hubspot; response {response}")
-            print(await save_integration_id(profile_id, self.name, hubspot_id, {}))
+            await save_integration_id_in_entity(profile_id, self.name, hubspot_id, {})
 
         except HubSpotClientException as e:
             # Record deleted
@@ -54,7 +55,7 @@ class HubSpotConnector(DestinationInterface):
         finally:
             if hubspot_id:
                 logger.info(f"Updating hubspot integration with {hubspot_id}")
-                print(await save_integration_id(profile_id, self.name, hubspot_id, {}))
+                await save_integration_id_in_entity(profile_id, self.name, hubspot_id, {})
 
     @staticmethod
     def _prepare_payload(profile, config_data):
@@ -100,7 +101,7 @@ class HubSpotConnector(DestinationInterface):
             logger.info(f"No update in hubspot data is empty for profile {profile.id}.")
             return
 
-        integration_ids = await load_integration_id(profile.id, self.name)
+        integration_ids = await load_integration_id_from_entity(profile.id, self.name)
 
         if not integration_ids:
             return await self._add_contact(payload, profile.id)

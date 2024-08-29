@@ -587,14 +587,6 @@ async def _count_events_in_db(query: dict = None):
     return await raw_db.count('event', query)
 
 
-async def load_nth_last_event(event_type: str, offset: int, profile_id: Optional[str] = None):
-    return await _get_nth_last_event(
-        profile_id=profile_id,
-        event_type=event_type,
-        n=(-1) * offset
-    )
-
-
 async def load_events_by_profile_id(profile_id: str, limit: int) -> dict:
     result = await _get_events_by_profile(
         profile_id,
@@ -622,24 +614,6 @@ async def aggregate_events_by_profile_and_field(profile_id: str, field: str, buc
     return await _aggregate_profile_events_by_field(profile_id,
                                                     field=field,
                                                     bucket_name=bucket_name)
-
-
-async def aggregate_event_by_field_within_time(profile_id: str, field_id: str, span_in_sec: int, metric, event_type):
-    return await _aggregate_event_by_field_within_time(
-        profile_id,
-        field_id,
-        span_in_sec,
-        metric,
-        event_type
-    )
-
-
-async def count_events_by_type(profile_id: str, event_type_id: str, span_in_sec: int):
-    return await _count_events_by_type(
-        profile_id,
-        event_type_id,
-        span_in_sec
-    )
 
 
 def events_scan(query: dict = None, batch: int = 1000):

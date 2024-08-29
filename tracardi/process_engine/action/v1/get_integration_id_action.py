@@ -1,11 +1,11 @@
 from pydantic import field_validator
 
-from tracardi.service.storage.elastic.dal.integration_id import load_integration_id
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+from tracardi.service.storage.elastic.interface.plugin.entity import load_integration_id_from_entity
 
 
 class Config(PluginConfig):
@@ -39,7 +39,7 @@ class GetIntegrationIdAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
         try:
             system_name = self.config.name.lower().replace(" ", "-")
-            result = await load_integration_id(self.profile.id, system_name)
+            result = await load_integration_id_from_entity(self.profile.id, system_name)
 
             if result is not None:
                 if self.config.get_ids_only:

@@ -88,7 +88,7 @@ async def load_by_primary_ids(profile_ids: List[str], size) -> StorageRecords:
     return await storage_manager('profile').query(query)
 
 
-async def load_active_profile_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
+async def _load_active_profile_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
     query = {
         "from": start,
         "size": limit,
