@@ -11,14 +11,14 @@ Base = declarative_base()
 class BridgeTable(Base):
     __tablename__ = 'bridge'
 
-    id = Column(String(40))
+    id = Column(String(40), unique=True)
     tenant = Column(String(40))
     name = Column(String(64), index=True)
     description = Column(Text)
     type = Column(String(48))
     config = Column(JSON)
     form = Column(JSON)
-    manual = Column(Text, nullable=True)
+    manual = Column('manual', Text, nullable=True, quote=True)
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant'),
@@ -28,7 +28,7 @@ class BridgeTable(Base):
 class EventSourceTable(Base):
     __tablename__ = 'event_source'
 
-    id = Column(String(40))
+    id = Column(String(40), unique=True)
     tenant = Column(String(40))
     production = Column(Boolean)
     timestamp = Column(DateTime)
@@ -53,7 +53,7 @@ class EventSourceTable(Base):
     permanent_profile_id = Column(Boolean, default=False)
     requires_consent = Column(Boolean, default=False)
     synchronize_profiles = Column(Boolean)
-    manual = Column(Text)
+    manual = Column('manual', Text, quote=True)
     endpoints_get_url = Column(String(255))
     endpoints_get_method = Column(String(255))
     endpoints_post_url = Column(String(255))
@@ -242,7 +242,6 @@ class DestinationTable(Base):
     running: bool = False
 
 
-
 class VersionTable(Base):
     __tablename__ = 'version'
 
@@ -304,7 +303,6 @@ class IdentificationPointTable(Base):
     running: bool = False
 
 
-
 class TracardiProTable(Base):
     __tablename__ = 'tracardi_pro'
 
@@ -317,6 +315,7 @@ class TracardiProTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
     )
+
 
 class EventRedirectTable(Base):
     __tablename__ = 'event_redirect'
@@ -411,10 +410,10 @@ class EventReshapingTable(Base):
 class EventMappingTable(Base):
     __tablename__ = 'event_mapping'
 
-    id = Column(String(40))
+    id = Column(String(40), index=True)
     name = Column(String(128))
     description = Column(Text)
-    event_type = Column(String(64))
+    event_type = Column(String(64), index=True, unique=True)
     tags = Column(String(128))
     journey = Column(String(64))
     enabled = Column(Boolean, default=False)
@@ -431,12 +430,13 @@ class EventMappingTable(Base):
 
     running: bool = False
 
+
 class EventPropertiesTable(Base):
     __tablename__ = 'event_properties'
 
-    id = Column(String(40))
-    event_type = Column(String(40), ForeignKey('event_mapping.event_type')) # sign-in
-    field_path = Column(String(255), index=True) # properties.email
+    id = Column(String(40), index=True, unique=True)
+    event_type = Column(String(40), ForeignKey('event_mapping.event_type'), unique=True)  # sign-in
+    field_path = Column(String(255), index=True, unique=True)  # properties.email
     field_type = Column(String(40))  # string
     traits_field = Column(String(255), nullable=True)  # event_to_traits
 
@@ -461,8 +461,8 @@ class EventPropertiesToEntityMappingTable(Base):
     property_field_path = Column(String(255), ForeignKey('event_properties.field_path'))  # properties.email
     entity_name = Column(String(64))  # e.g. profile
     field_path = Column(String(255))  # data.pii.email.main
-    field_type = Column(String(40))   # string
-    converter  = Column(String(40))   # lower
+    field_type = Column(String(40))  # string
+    converter = Column(String(40))  # lower
 
     # Additional fields for multi-tenancy
     tenant = Column(String(40))
@@ -479,7 +479,7 @@ class EventPropertiesToEntityMappingTable(Base):
 class EventToProfileMappingTable(Base):
     __tablename__ = 'event_to_profile_mapping'
 
-    id = Column(String(40))
+    id = Column(String(40), index=True)
     name = Column(String(128))
     description = Column(Text)
     event_type_id = Column(String(40))
@@ -683,6 +683,7 @@ class TaskTable(Base):
 
     running: bool = False
 
+
 class SettingTable(Base):
     __tablename__ = 'setting'
 
@@ -727,7 +728,6 @@ class SubscriptionTable(Base):
     running: bool = False
 
 
-
 class TestTable(Base):
     __tablename__ = 'test'
 
@@ -749,6 +749,7 @@ class TestTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant'),
     )
+
 
 class ConfigurationTable(Base):
     __tablename__ = 'configuration'
