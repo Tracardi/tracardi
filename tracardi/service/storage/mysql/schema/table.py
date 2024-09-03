@@ -431,6 +431,7 @@ class EventMappingTable(Base):
     running: bool = False
 
 
+# TODO check if not used
 class EventPropertiesTable(Base):
     __tablename__ = 'event_properties'
 
@@ -453,6 +454,7 @@ class EventPropertiesTable(Base):
     running: bool = False
 
 
+# TODO check if not used
 class EventPropertiesToEntityMappingTable(Base):
     __tablename__ = 'event_properties_to_entity_mapping'
 
@@ -748,13 +750,13 @@ class AudienceTable(Base):
 class SystemEntityPropertyTable(Base):
     __tablename__ = 'system_entity_property'
 
-    id = Column(String(40), index=True)  # properties.email
+    id = Column(String(40), index=True, unique=True)  # properties.email
     entity = Column(String(64), index=True)  # e.g. profile
     property = Column(String(255), index=True)  # properties.email
-    type = Column(String(40))   # string
+    type = Column(String(40))  # string
     default = Column(String(40), nullable=True)  # string | Null
     optional = Column(Boolean, default=False)
-    converter = Column(String(40))   # lower
+    converter = Column(String(40))  # lower
     masked = Column(Boolean, default=False)  # Used to mask displayed value
     group = Column(String(64))  # Defines a group of properties
 
@@ -771,7 +773,7 @@ class SystemEntityPropertyTable(Base):
 class SystemEntityTableColumnTable(Base):
     __tablename__ = 'system_entity_table_column'
 
-    id = Column(String(40), index=True)  # data_contact_email_main
+    id = Column(String(40), index=True, unique=True)  # data_contact_email_main
     database = Column(String(128), index=True)  # e.g. tracardi_profiles
     table = Column(String(128), index=True)  # e.g. profile
     column = Column(String(128), index=True)  # data_contact_email_main
@@ -804,7 +806,7 @@ class SystemEntityPropertyToColumnMappingTable(Base):
         PrimaryKeyConstraint('id', 'tenant', 'mode'),
         Index('ix_table_column_id', 'property_id'),
         Index('ix_entity_property_id', 'column_id'),
-        Index('ix_context',  'tenant', 'mode'),
+        Index('ix_context', 'tenant', 'mode'),
     )
 
 
