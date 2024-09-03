@@ -431,6 +431,7 @@ class EventMappingTable(Base):
     running: bool = False
 
 
+# TODO check if not used
 class EventPropertiesTable(Base):
     __tablename__ = 'event_properties'
 
@@ -453,6 +454,7 @@ class EventPropertiesTable(Base):
     running: bool = False
 
 
+# TODO check if not used
 class EventPropertiesToEntityMappingTable(Base):
     __tablename__ = 'event_properties_to_entity_mapping'
 
