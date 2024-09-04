@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 
 from dotty_dict import dotty
 
+from com_tracardi.service.traits_update import update_dict_with_conflicts
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.profile import FlatProfile
 from tracardi.exceptions.log_handler import get_logger
@@ -118,7 +119,6 @@ def _append_value(values, value):
 
 def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, flat_event: dotty) -> Tuple[
     FlatProfile, bool]:
-
     profile_updated_flag = False
 
     if copy_schema is not None:
@@ -181,8 +181,44 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
                                 raise AssertionError(
                                     f"Can not add subtract {flat_event[event_path]} to {flat_profile[profile_path]} "
                                     f"at profile@{profile_path}")
+                    elif operation == 'update':
+                        # Updates checking if there are ot conflicts
 
+                        profile_data_as_dict = dict(flat_profile[profile_path]) if flat_profile[
+                                                                                       profile_path] is not None else {}
+                        event_data_as_dict = dict(flat_event[event_path]) if flat_event[event_path] is not None else {}
+
+                        updated_dict, conflicts = update_dict_with_conflicts(profile_data_as_dict, event_data_as_dict,
+                                                                             append_lists=False)
+                        flat_profile[profile_path] = updated_dict
+                        if conflicts:
+                            conflicts = {
+                                path: {
+                                    "new": {
+                                        "value": conflict.new_value,
+                                        "type": str(conflict.new_type),
+                                    },
+                                    "old": {
+                                        "value": conflict.original_value,
+                                        "type": str(conflict.original_type),
+                                    }
+                                }
+                                for path, conflict in conflicts.items()
+                            }
+
+                            # Update conflicts
+
+                            try:
+                                trash_conflicts = flat_profile['trash']['conflicts']
+                            except KeyError:
+                                trash_conflicts = {}
+
+                            trash_conflicts.update(conflicts)
+                            flat_profile['trash'] = {
+                                "conflicts": trash_conflicts
+                            }
                     else:
+                        # Equal
                         flat_profile[profile_path] = flat_event[event_path]
             elif isinstance(event_path, int) or isinstance(event_path, float):
                 if profile_path in flat_profile:

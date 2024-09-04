@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from tracardi.domain.operations import APPEND, EQUALS, EQUALS_IF_NOT_EXISTS
+from tracardi.domain.operations import APPEND, EQUALS, EQUALS_IF_NOT_EXISTS, UPDATE
 from tracardi.domain.ref_value import RefValue
 
 from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
@@ -22,6 +22,8 @@ class EventToProfileMap(BaseModel):
                 data['op'] = APPEND
             elif data['op'] == 'equals_if_not_exists':
                 data['op'] = EQUALS_IF_NOT_EXISTS
+            elif data['op'] in ['update']:
+                data['op'] = UPDATE
             else:
                 raise ValueError(f"Unknown operation in event to profile mapping. Expected: equals, append, or equals_if_not_exists, got: {data['op']}")
 

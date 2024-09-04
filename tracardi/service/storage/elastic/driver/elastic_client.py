@@ -5,6 +5,9 @@ from uuid import uuid4
 from elasticsearch import helpers, AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from ssl import create_default_context
+
+from elasticsearch.helpers.errors import BulkIndexError
+
 from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain import ExtraInfo
@@ -152,6 +155,7 @@ class ElasticClient:
 
             bulk.append(record)
 
+        errors = set()
         last_exception = None
         while repeats > 0:
             try:
@@ -164,18 +168,26 @@ class ElasticClient:
                 )
             except Exception as e:
                 last_exception = e
-                logger.error(
-                    f"Bulk insert error: {str(e)}",
-                    extra=ExtraInfo.build("storage", object=self, error_number="S0001")
-                )
-                await asyncio.sleep(1)
+                if isinstance(e, BulkIndexError) and isinstance(e.errors, list):
+                    for error in e.errors:
+                        try:
+                            errors.add(error['index']['_id'])
+                        except KeyError:
+                            pass
+                await asyncio.sleep(.3)
 
             repeats -= 1
+
+        logger.error(
+            f"Bulk insert error: {str(last_exception)}",
+            extra=ExtraInfo.build("storage", object=self, error_number="S0001")
+        )
 
         return BulkInsertResult(
             saved=0,
             errors=[str(last_exception) if last_exception is not None else "Could not save data."],
             ids=ids,
+            error_ids=list(errors),
             index=index
         )
 

@@ -494,7 +494,7 @@
     "profile": {
       "traits": [
         "traits",
-        "equal"
+        "update"
       ]
     },
     "tags": ["event:operational"],

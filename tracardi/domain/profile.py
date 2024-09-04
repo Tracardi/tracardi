@@ -42,6 +42,7 @@ class Profile(PrimaryEntity):
     active: bool = True
     aux: Optional[dict] = {}
     data: Optional[ProfileData] = ProfileData()
+    trash: Optional[dict] = None
 
     _updated_in_workflow: bool = PrivateAttr(False)
 
