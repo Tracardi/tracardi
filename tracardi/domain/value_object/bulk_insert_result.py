@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class BulkInsertResult(BaseModel):
     saved: int = 0
     errors: list = []
+    error_ids: Optional[list] = []
     ids: list = []
     index: Optional[str] = None
 
