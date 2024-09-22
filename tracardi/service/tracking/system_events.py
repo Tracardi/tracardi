@@ -10,6 +10,7 @@ from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.utils.date import now_in_utc
 
+
 def add_system_events(profile: Profile, session: Session, tracker_payload: TrackerPayload) -> Tuple[TrackerPayload, Session]:
 
     # Visit ended never creates system events.

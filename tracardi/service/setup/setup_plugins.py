@@ -13,6 +13,26 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
+    "tracardi.process_engine.action.v1.ux.cta.plugin": PluginMetadata(
+        test=PluginTest(
+            init={
+                "title": "",
+                "message": "",
+                "uix_source": "http://localhost:8686",
+                "cta_button": "",
+                "cta_link": "",
+                "cancel_button": "",
+                "border_radius": 2,
+                "border_shadow": 1,
+                "min_width": 300,
+                "max_width": 500,
+                "hide_after": 6000,
+                "position_x": "right",
+                "position_y": "bottom",
+            },
+            resource=None)
+    ),
+
     "tracardi.process_engine.action.v1.connectors.aws.s3.upload_segments.plugin": PluginMetadata(
         test=PluginTest(
             init={

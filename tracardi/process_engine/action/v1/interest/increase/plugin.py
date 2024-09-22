@@ -32,13 +32,30 @@ class IncreaseInterestAction(ActionRunner):
         dot = self._get_dot_accessor(payload)
         interest_key = dot[self.config.interest]
 
-        if not is_valid_string(interest_key):
-            message = (f"Invalid interest name. Expected alpha-numeric string without spaces, got `{interest_key}`. "
-                       f"Interest name must be an alpha-numeric string without spaces. Hyphen and dashes are allowed.")
-            self.console.error(message)
-            return Result(value={"message": message}, port="error")
+        if isinstance(interest_key, list):
+            interests_keys = interest_key
+        else:
+            if not is_valid_string(interest_key):
+                message = (
+                    f"Invalid interest name. Expected alpha-numeric string without spaces, got `{interest_key}`. "
+                    f"Interest name must be an alpha-numeric string without spaces. Hyphen and dashes are allowed.")
 
-        self.profile.increase_interest(interest_key, float(self.config.value))
+                self.console.error(message)
+
+                return Result(port="error", value={"message": message})
+
+            interests_keys = interest_key.split(',')
+
+        for interest_key in interests_keys:
+
+            if not is_valid_string(interest_key):
+                message = (
+                    f"Invalid interest name. Expected alpha-numeric string without spaces, got `{interest_key}`. "
+                    f"Interest name must be an alpha-numeric string without spaces. Hyphen and dashes are allowed.")
+                self.console.error(message)
+                continue
+
+            self.profile.increase_interest(interest_key, float(self.config.value))
         self.profile.set_updated()
 
         return Result(port="payload", value=payload)
@@ -75,7 +92,7 @@ def register() -> Plugin:
                     ]
                 )]
             ),
-            version='0.8.2',
+            version='1.0.2',
             license="MIT + CC",
             author="Risto Kowaczewski",
             manual="increase_interest"

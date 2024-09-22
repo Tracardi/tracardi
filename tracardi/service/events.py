@@ -5,12 +5,16 @@ from typing import Optional, Tuple
 
 from dotty_dict import dotty
 
-from com_tracardi.service.traits_update import update_dict_with_conflicts
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.profile import FlatProfile
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.interface.gui import event as event_gui_dao
+from tracardi.service.license import License
+from tracardi.service.storage.elastic.interface.event import load_unique_field_value
 from tracardi.service.string_manager import capitalize_event_type_id
+
+if License.has_license():
+    from com_tracardi.service.traits_update import update_dict_with_conflicts
 
 _local_dir = os.path.dirname(__file__)
 _predefined_event_types = {}
@@ -210,7 +214,7 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
 
                             try:
                                 trash_conflicts = flat_profile['trash']['conflicts']
-                            except KeyError:
+                            except (KeyError, TypeError):
                                 trash_conflicts = {}
 
                             trash_conflicts.update(conflicts)
