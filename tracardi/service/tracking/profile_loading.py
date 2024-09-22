@@ -31,10 +31,13 @@ async def load_profile_and_session(
     # Check if necessary hashed ID are present and add missing
     if profile is not None:
 
-        changed_fields = profile.create_auto_merge_hashed_ids()
-        if changed_fields:
-            profile.mark_for_update()
-            profile.metadata.system.set_auto_merge_fields(changed_fields)
+        # Removed not needed to always hash IDS. Hash only on update.
+        # Mark profile if the hashed IDs can be computed on its PII.
+        # event_types = tracker_payload.get_event_types()
+        # if can_profile_pii_be_hashed_in_ids(event_types):
+        #     has_changes = profile.hash_all_allowed_pii_as_ids()
+        #     if has_changes:
+        #         profile.mark_for_update()
 
         # Add Ids from payload
         if isinstance(tracker_payload.profile, PrimaryEntity) and tracker_payload.profile.ids:

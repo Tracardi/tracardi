@@ -66,6 +66,9 @@ class ActionRunner:
     def update_profile(self):
         if isinstance(self.profile, Profile):
             self.profile.mark_for_update()
+            self.profile.data.compute_anonymous_field()
+            # Removed not needed to always hash IDS. Hash only on update.
+            # self.profile.hash_all_allowed_pii_as_ids()
         else:
             if self.event.metadata.profile_less is True:
                 self.console.warning("Can not update profile when processing profile less events.")

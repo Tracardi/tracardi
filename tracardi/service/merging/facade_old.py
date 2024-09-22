@@ -43,6 +43,8 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
         if first_profile.metadata.system.has_merging_data():
             first_profile.metadata.system.remove_merging_data()
             first_profile.mark_for_update()
+            # Removed not needed to always hash IDS. Hash only on update.
+            # first_profile.hash_all_allowed_pii_as_ids()
             await mutation_profile_db.save_profile(first_profile, refresh=True)
 
         # If 1 then there is no duplication

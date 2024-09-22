@@ -77,7 +77,6 @@ async def event_to_traits_and_profile_mapping(flat_event: Dotty,
                                               field_change_logger: FieldChangeLogger
                                               ) -> Tuple[
     Dotty, Optional[FlatProfile], Set[str], FieldChangeLogger]:
-
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     auto_merge_ids = set()
@@ -97,7 +96,6 @@ async def event_to_traits_and_profile_mapping(flat_event: Dotty,
 
     # Custom event mapping
     if License.has_license():
-
         # Map event properties to traits (Event Mapping)
         flat_event = map_event_props_to_traits(flat_event,
                                                custom_event_mapping)
@@ -116,14 +114,14 @@ async def event_to_traits_and_profile_mapping(flat_event: Dotty,
             field_change_logger
         )
 
-        # Add fields timestamps
-        if not isinstance(flat_profile['metadata.fields'], dict):
-            flat_profile['metadata.fields'] = {}
-
+        # Add fields timestamps to logger
         field_change_logger = field_change_logger.merge(flat_profile.log)
 
         # Append field changes fo metadata.fields
-        auto_merge_ids = flat_profile.set_metadata_fields_timestamps(field_change_logger)
+        flat_profile.set_metadata_fields_timestamps(field_change_logger)
+
+        # Add AUTO_PROFILE_MERGING hashed IDS. This is the same as hash_all_allowed_pii_as_ids in Profile
+        auto_merge_ids = flat_profile.get_profile_pii_as_hashed_ids(field_change_logger)
 
     return flat_event, flat_profile, auto_merge_ids, field_change_logger
 
@@ -134,7 +132,6 @@ async def make_event_from_event_payload(event_payload,
                                         source,
                                         metadata,
                                         profile_less) -> Event:
-
     # Get event
     event = event_payload.to_event(
         metadata,
@@ -187,8 +184,6 @@ async def compute_events(events: List[EventPayload],
                          tracker_payload: TrackerPayload,
                          field_change_logger: FieldChangeLogger
                          ) -> Tuple[List[Event], Session, Optional[Profile], FieldChangeLogger]:
-
-
     event_objects = []
 
     if profile:

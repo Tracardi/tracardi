@@ -610,6 +610,7 @@ class TrackerPayload(BaseModel):
 
         # There is profile
 
+        # Load profile
         # Calling self._get_profile(session) revolves inconsistencies such as - missing ids.
         profile, session = await self._get_profile(session, static=static)
 

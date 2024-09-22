@@ -268,6 +268,8 @@ class ProfileMerger:
 
         profile.set_meta_data(self.current_profile.get_meta_data())
         profile.mark_for_update()
+        # Removed not needed to always hash IDS. Hash only on update.
+        # profile.hash_all_allowed_pii_as_ids()
 
         return profile
 
