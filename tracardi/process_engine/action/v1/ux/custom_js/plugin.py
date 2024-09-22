@@ -1,5 +1,6 @@
 import json
 
+from tracardi.service.notation.dict_traverser import DictTraverser
 from .configuration import Config
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, \
     FormField, FormComponent
@@ -18,11 +19,21 @@ class GenericJsScriptPlugin(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
+        attributes = json.loads(self.config.attributes)
+
+        if not isinstance(attributes, dict):
+            raise ValueError(f"Script attributes must be a dictionary, {type(attributes)} given.")
+
+        dot = self._get_dot_accessor(payload)
+        traverser = DictTraverser(dot)
+        attributes = traverser.reshape(attributes)
+
         self.ux.append({
             "tag": "script",
-            "props": json.loads(self.config.attributes),
+            "props": attributes,
             "content": self.config.content
         })
+
         return Result(port="response", value=payload)
 
 
