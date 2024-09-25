@@ -75,6 +75,23 @@ def get_resource_types() -> List[ResourceSettings]:
             )
         ),
         ResourceSettings(
+            id="tracardi",
+            name="Tracardi API",
+            icon="cloud",
+            config={
+                "url": "<url>",
+                "source_id": "<source-id>",
+                "username": "<username>",
+                "password": "<password>",
+                "timeout": 30
+            },
+            tags=['tracardi', "destination"],
+            destination=DestinationData(
+                package="tracardi.process_engine.destination.tracardi_connector.TracardiConnector",
+                init={}
+            )
+        ),
+        ResourceSettings(
             id="smtp-server",
             name="SMTP",
             tags=["mail", "smtp"],

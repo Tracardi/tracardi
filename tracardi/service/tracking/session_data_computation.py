@@ -40,6 +40,13 @@ def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Option
     return None
 
 
+def _compute_session_referer(session: Session, tracker_payload: TrackerPayload) -> Session:
+    referer = tracker_payload.context.get('referer', None)
+    if referer:
+        session.context['referer'] = referer
+    return session
+
+
 def _compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
     user_agent = _get_user_agent(session, tracker_payload)
     if user_agent:
@@ -210,6 +217,9 @@ def compute_session(session: Session,
 
     # Compute Screen size
     session = _compute_screen_size(session, tracker_payload)
+
+    # Compute session referer
+    session = _compute_session_referer(session, tracker_payload)
 
     # Compute channel
     if isinstance(tracker_payload.source, EventSource):
