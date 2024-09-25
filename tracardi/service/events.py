@@ -10,7 +10,6 @@ from tracardi.domain.profile import FlatProfile
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.interface.gui import event as event_gui_dao
 from tracardi.service.license import License
-from tracardi.service.storage.elastic.interface.event import load_unique_field_value
 from tracardi.service.string_manager import capitalize_event_type_id
 
 if License.has_license():
