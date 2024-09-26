@@ -1,6 +1,7 @@
 from typing import Optional
 
 from tracardi.config import tracardi
+from tracardi.context import get_context
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -63,7 +64,10 @@ async def _validate_source(tracker_payload: TrackerPayload, allowed_bridges) -> 
     source = await _check_source_id(allowed_bridges, source_id)
 
     if source is None:
-        raise BlockedException(f"Invalid event source `{source_id}`. Request came from IP: `{ip}` "
+        context = get_context()
+        raise BlockedException(f"Invalid event source `{source_id}` for tenant `{context.tenant}`. "
+                               f"Tenant or event source may not exit. "
+                               f"Request came from IP: `{ip}` "
                                f"width payload: {tracker_payload}")
 
     if source.has_restricted_domain():
