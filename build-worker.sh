@@ -1,1 +1,1 @@
-docker build . --rm --no-cache -f docker.worker.Dockerfile -t tracardi/worker:1.0.x-dev
+docker build . --rm --no-cache -f docker.worker.Dockerfile -t tracardi/worker:1.1.x
