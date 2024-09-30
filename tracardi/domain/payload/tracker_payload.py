@@ -112,6 +112,9 @@ class TrackerPayload(BaseModel):
     def scheduled_event_config(self) -> ScheduledEventConfig:
         return ScheduledEventConfig(flow_id=self._scheduled_flow_id, node_id=self._scheduled_node_id)
 
+    def queue_required(self) -> bool:
+        return self.options.get('queue', False)
+
     def _set_user_agent(self):
         if self._user_agent is None:
             try:

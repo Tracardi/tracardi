@@ -1,6 +1,16 @@
 Version 2.0.1
 ----------------------------------------------------------
-* New SQL compliant storage
+[ ] New SQL compliant storage
+
+Version: 1.1.0
+----------------------------------------------------------
+[ ] - Queueing of the tracker payloads
+[ ] - Bulk event payloads.
+
+Version: 1.0.2
+----------------------------------------------------------
+* Mysql Installation Bug fix.
+
 
 Version: 1.0.1
 ----------------------------------------------------------

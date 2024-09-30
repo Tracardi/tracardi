@@ -23,13 +23,14 @@ logger = get_logger(__name__)
 
 
 async def os_tracker(
-        field_change_logger: FieldChangeLogger,
         source: EventSource,
         tracker_payload: TrackerPayload,
         tracker_config: TrackerConfig,
         tracking_start: float
 ):
     try:
+
+        field_change_logger = FieldChangeLogger()
 
         if not tracker_payload.events:
             logger.warning(f"No events have been sent in tracker payload.")

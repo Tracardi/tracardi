@@ -76,7 +76,7 @@ class StarRocksConfig:
         self.env = env
         self.starrocks_host = env.get('STARROCKS_HOST', "localhost")
         self.starrocks_username = env.get('STARROCKS_USERNAME', "root")
-        self.starrocks_password = env.get('STARROCKS_PASSWORD', "")
+        self.starrocks_password = env.get('STARROCKS_PASSWORD', "root")
         self.starrocks_schema = env.get('STARROCKS_SCHEMA', "mysql+aiomysql://")
         self.starrocks_schema_sync = env.get('STARROCKS_SCHEMA', "mysql+pymysql://")
         self.starrocks_port = env.get('STARROCKS_PORT', 9030)
@@ -231,8 +231,6 @@ class TracardiConfig(metaclass=Singleton):
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
         self.sync_profile_tracks_wait = get_env_as_int('SYNC_PROFILE_TRACKS_WAIT', 1)
         self.storage_driver = env.get('STORAGE_DRIVER', 'elasticsearch')
-        self.tracardi_pro_host = env.get('TRACARDI_PRO_HOST', 'pro.tracardi.com')
-        self.tracardi_pro_port = get_env_as_int('TRACARDI_PRO_PORT', 40000)
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING

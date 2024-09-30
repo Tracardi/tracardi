@@ -94,27 +94,5 @@ async def install_plugins(plugins_list: Dict[str, PluginMetadata]):
     return result
 
 
-async def install_remote_plugin(plugin_data: Plugin):
-    if len(plugin_data.spec.inputs) > 1:
-        raise ValueError(
-            "Node can not have more then 1 input port. Found {} that is {}".format(
-                plugin_data.spec.inputs,
-                len(plugin_data.spec.inputs)
-            ))
-
-    logger.info(f"Remote MICROSERVICE module `{plugin_data.spec.module}` was REGISTERED.")
-
-    flow_plugin = FlowActionPlugin(
-        id=plugin_data.spec.get_id(),
-        metadata=Metadata(
-            time=Time()
-        ),
-        plugin=plugin_data
-    )
-
-    aps = ActionPluginService()
-    return await aps.insert(flow_plugin)
-
-
 async def install_default_plugins():
     return await install_plugins(installed_plugins)
