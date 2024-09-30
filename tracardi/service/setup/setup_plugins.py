@@ -692,11 +692,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.microservice.plugin": PluginMetadata(
-        test=PluginTest(init={},
-                        resource=None)
-    ),
-
     "tracardi.process_engine.action.v1.consents.add_consent_action.plugin": PluginMetadata(
         test=PluginTest(init={'consents': 'aa'},
                         resource=None)

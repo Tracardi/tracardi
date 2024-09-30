@@ -1,20 +1,6 @@
 from typing import List, Optional
 
 from pydantic import field_validator, BaseModel
-from tracardi.domain.named_entity import NamedEntity
-
-
-class TProMicroserviceCredentials(BaseModel):
-    url: str
-    token: str
-
-    def is_configured(self) -> bool:
-        return bool(self.url and self.token)
-
-
-class TProMicroserviceResource(BaseModel):
-    service: NamedEntity
-    credentials: Optional[dict] = {}
 
 
 class DocumentationMetadata(BaseModel):
@@ -76,7 +62,3 @@ class ProService(BaseModel):
     service: ProServicePayload
     destination: Optional[ProDestinationPackage] = None
     plugins: Optional[List[dict]] = None  # this is Plugin
-
-
-class ProMicroService(ProService):
-    microservice: Optional[TProMicroserviceResource] = None
