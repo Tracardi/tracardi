@@ -41,7 +41,7 @@ def register() -> Plugin:
                 "string": None,
                 "to_remove": None,
             },
-            manual="string_strip_action",
+            manual="string_stripper_action",
             form=Form(
                 groups=[
                     FormGroup(
