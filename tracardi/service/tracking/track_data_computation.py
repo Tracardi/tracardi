@@ -1,6 +1,7 @@
 from typing import Tuple, List, Optional
 
 from tracardi.config import tracardi
+from tracardi.context import get_context
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -32,6 +33,8 @@ async def _compute(source,
                    field_change_logger: FieldChangeLogger
                    ) -> Tuple[
     Optional[Profile], Optional[Session], List[Event], TrackerPayload]:
+
+    context = get_context()
 
     if profile is not None:
 
@@ -73,6 +76,8 @@ async def _compute(source,
 
         # Update profile time zone
         profile, field_change_logger = update_profile_time(session, profile, field_change_logger)
+
+        context.profiler.measure('after-profile-computation')
 
     # Updates/Mutations of tracker_payload and session
 
@@ -123,6 +128,7 @@ async def compute_data(
 
     # ------------------------------------
     # Session computation
+    context = get_context()
 
     if session:
 
@@ -142,6 +148,8 @@ async def compute_data(
         # If agent is a bot stop
         if (session.app.bot or _has_google_bot_header(tracker_payload.request)) and tracardi.disallow_bot_traffic:
             raise BlockedException(f"Traffic from bot is not allowed.")
+
+    context.profiler.measure('after-profile-computation')
 
     profile, session, events, tracker_payload = await _compute(
         source,
