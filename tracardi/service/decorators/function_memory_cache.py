@@ -1,12 +1,28 @@
 import asyncio
+import inspect
+from collections import defaultdict
+
+from time import time
 from typing import Dict, Tuple, Any, Callable
 
 import functools
 
 from tracardi.context import get_context
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
+from contextlib import asynccontextmanager
 
+# Cache DB
 cache: Dict[str, MemoryCache] = {}
+
+# Dictionary to store locks for each key
+locks = defaultdict(asyncio.Lock)
+
+
+@asynccontextmanager
+async def _lock_for_loading(key, params):
+    # Acquire the lock for the specific key
+    async with locks[key]:
+        yield
 
 
 def _args_key(args, kwargs):
@@ -25,19 +41,16 @@ def _func_key(func, use_context: bool = True):
     return ':'.join(map(str, key_parts))
 
 
-def _run_function(func, args, kwargs, max_size, allow_null_values, key_func: Callable = None,
-                  use_context: bool = True) -> Tuple[Any, str, str]:
-    # Construct a unique cache key from the function's module name,
-    # function name, args, and kwargs to avoid collisions.
-
-    func_key = _func_key(func, use_context)
-
+def _func_params_key(key_func, args, kwargs):
     if key_func is not None:
         args_key = key_func(*args, **kwargs)
     else:
         args_key = _args_key(args, kwargs)
 
-    # Create cache
+    return args_key
+
+
+def _init_funct_cache(func_key, max_size, allow_null_values):
     if func_key not in cache:
         cache[func_key] = MemoryCache(
             func_key,
@@ -45,27 +58,101 @@ def _run_function(func, args, kwargs, max_size, allow_null_values, key_func: Cal
             allow_null_values=allow_null_values,
             use_context=False  # It is already with context key
         )
+    return cache
+
+
+def _run_function(ttl: float, func, args, kwargs, max_size, allow_null_values, key_func: Callable = None,
+                  use_context: bool = True) -> Tuple[Any, str, str]:
+    # Construct a unique cache key from the function's module name,
+    # function name, args, and kwargs to avoid collisions.
+
+    global cache
+
+    func_key = _func_key(func, use_context)
+    args_key = _func_params_key(key_func, args, kwargs)
+
+    # Create cache
+    cache = _init_funct_cache(func_key, max_size, allow_null_values)
 
     # Check cache
     if args_key in cache[func_key]:
         return cache[func_key][args_key].data, func_key, args_key
 
+        # Check lock is it is not already loading data.
+
     result = func(*args, **kwargs)
+
+    # Update cache
+    cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
 
     return result, func_key, args_key
 
 
-def async_cache_for(ttl, max_size=1000, allow_null_values=False, key_func: Callable = None, use_context: bool = True):
+async def _async_exec(ttl, func, func_key, args_key, args, kwargs):
+    # Check cache again it may be filled already
+    if args_key in cache[func_key]:
+        # 2nd attempt to check cache.When being locked the cache could have been filled.
+        return cache[func_key][args_key].data, func_key, args_key
+
+    # Check lock is it is not already loading data.
+    t = time()
+    result = func(*args, **kwargs)
+    if asyncio.iscoroutine(result):
+        result = await result
+    print("laoding - after", func_key, time() - t, args_key)
+    # Update cache
+    cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
+
+    return result, func_key, args_key
+
+
+async def _run_async_function(
+        ttl: float, func, args, kwargs, max_size, allow_null_values,
+        locked: bool,
+        key_func: Callable = None,
+        use_context: bool = True,
+
+) -> Tuple[Any, str, str]:
+    # Construct a unique cache key from the function's module name,
+    # function name, args, and kwargs to avoid collisions.
+
+    global cache
+
+    func_key = _func_key(func, use_context)
+    args_key = _func_params_key(key_func, args, kwargs)
+
+    # Create cache
+    cache = _init_funct_cache(func_key, max_size, allow_null_values)
+    if args_key in cache[func_key]:
+        # First attempt to check cache. It may be in memory already
+        return cache[func_key][args_key].data, func_key, args_key
+
+    if locked:
+        async with _lock_for_loading(func_key, args_key):
+            return await _async_exec(ttl, func, func_key, args_key, args, kwargs)
+
+    return await _async_exec(ttl, func, func_key, args_key, args, kwargs)
+
+
+def async_cache_for(ttl: float, max_size=1000, allow_null_values=False, key_func: Callable = None,
+                    use_context: bool = True, lock: bool = True):
     def decorator(func):
+        if not inspect.iscoroutinefunction(func):
+            raise TypeError(f"Incorrect cache type for async function {func.__module__}.{func.__qualname__}. "
+                            f"Expected `cache_for`, got `async_cache_for` for not async function. "
+                            f"Use `cache_for`.")
+
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
-            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func,
-                                                       use_context)
-            if asyncio.iscoroutine(result):
-                result = await result
+            result, func_key, args_key = await _run_async_function(
+                ttl,
+                func, args, kwargs,
+                max_size, allow_null_values,
+                lock,
+                key_func,
+                use_context
+            )
 
-            # Update cache
-            cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
             return result
 
         return async_wrapper
@@ -75,13 +162,19 @@ def async_cache_for(ttl, max_size=1000, allow_null_values=False, key_func: Calla
 
 def cache_for(ttl, max_size=1000, allow_null_values=False, key_func: Callable = None, use_context: bool = True):
     def decorator(func):
+        if inspect.iscoroutinefunction(func):
+            raise TypeError(f"Incorrect cache type for function {func.__module__}.{func.__qualname__}. "
+                            f"Expected `async_cache_for`, got `cache_for` for not async function.  "
+                            f"Use `async_cache_for`.")
+
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
-            result, func_key, args_key = _run_function(func, args, kwargs, max_size, allow_null_values, key_func,
-                                                       use_context)
+            result, func_key, args_key = _run_function(
+                ttl,
+                func, args, kwargs,
+                max_size, allow_null_values, key_func,
+                use_context)
 
-            # Update cache
-            cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
             return result
 
         return sync_wrapper

@@ -156,6 +156,8 @@ class EventPayload(BaseModel):
 
         if self.time.insert:
             meta.time.insert = self.time.insert
+        else:
+            meta.time.insert = now_in_utc()
 
         if self.time.create:
             meta.time.create = self.time.create

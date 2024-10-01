@@ -15,7 +15,7 @@ from dotty_dict import dotty
 from pydantic import PrivateAttr, BaseModel
 from user_agents import parse
 
-from tracardi.config import tracardi
+from tracardi.config import tracardi, memory_cache
 from .. import ExtraInfo
 from ..request import Request
 from ...exceptions.log_handler import get_logger
@@ -41,6 +41,9 @@ if License.has_service(LICENSE):
 
 logger = get_logger(__name__)
 
+
+def _identification_list_key(tp):
+    return 1
 
 class ScheduledEventConfig:
 
@@ -357,7 +360,7 @@ class TrackerPayload(BaseModel):
     def is_cde(self) -> bool:
         return self.get_referer_data('source') is not None and self.has_referred_profile()
 
-    @async_cache_for(30, use_context=True)
+    @async_cache_for(memory_cache.identification_points_cache_ttl, use_context=True, key_func=_identification_list_key, lock=True)
     async def list_identification_points(self):
         return list(await self.get_identification_points())
 

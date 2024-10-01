@@ -77,7 +77,6 @@ async def event_to_traits_and_profile_mapping(flat_event: Dotty,
                                               field_change_logger: FieldChangeLogger
                                               ) -> Tuple[
     Dotty, Optional[FlatProfile], Set[str], FieldChangeLogger]:
-
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     auto_merge_ids = set()
@@ -97,7 +96,6 @@ async def event_to_traits_and_profile_mapping(flat_event: Dotty,
 
     # Custom event mapping
     if License.has_license():
-
         # Map event properties to traits (Event Mapping)
         flat_event = map_event_props_to_traits(flat_event,
                                                custom_event_mapping)
@@ -134,7 +132,6 @@ async def make_event_from_event_payload(event_payload,
                                         source,
                                         metadata,
                                         profile_less) -> Event:
-
     # Get event
     event = event_payload.to_event(
         metadata,
@@ -187,8 +184,6 @@ async def compute_events(events: List[EventPayload],
                          tracker_payload: TrackerPayload,
                          field_change_logger: FieldChangeLogger
                          ) -> Tuple[List[Event], Session, Optional[Profile], FieldChangeLogger]:
-
-
     event_objects = []
 
     if profile:
