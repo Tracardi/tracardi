@@ -64,6 +64,7 @@ requests
 
 # Com requirements
 huey
+tabulate
 
 # Telemetry
 opentelemetry-distro==0.45b0

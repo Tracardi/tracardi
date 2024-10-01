@@ -82,6 +82,7 @@ setup(
         'huey',
         'pulsar-client==3.3.0',
         'aiokafka==0.8.1',
+        'tabulate',
         # Telemetry
         'opentelemetry-distro==0.45b0',
         'opentelemetry-instrumentation-wsgi==0.45b0',
