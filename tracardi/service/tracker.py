@@ -115,6 +115,6 @@ class Tracker:
 
         context.profiler.measure('tracker-after-queue')
 
-        context.profiler.report()
+        # context.profiler.report()
 
         return {}
