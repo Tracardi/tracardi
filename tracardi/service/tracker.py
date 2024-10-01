@@ -1,3 +1,5 @@
+import asyncio
+
 from time import time
 from typing import Optional
 
@@ -110,7 +112,7 @@ class Tracker:
 
         if not tracker_payload.queue_required():
             # Process without queue
-            return await process_com_tracker(self.tracker_config, tracker_payload, source, tracking_start)
+            return await com_tracker(source, tracker_payload, self.tracker_config, tracking_start)
 
         # Queue
         t = time()
@@ -122,5 +124,5 @@ class Tracker:
                 tracking_start
             ).push('queue_track')
 
-        logger.info(f"Queued in {time()-t}")
+        logger.info(f"Queued in {time() - t}")
         return {}

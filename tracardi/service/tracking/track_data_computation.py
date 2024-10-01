@@ -32,6 +32,7 @@ async def _compute(source,
                    field_change_logger: FieldChangeLogger
                    ) -> Tuple[
     Optional[Profile], Optional[Session], List[Event], TrackerPayload]:
+
     if profile is not None:
 
         if License.has_license():
@@ -108,6 +109,7 @@ def _has_google_bot_header(request: dict) -> bool:
         return request['headers']['from'] == 'googlebot(at)googlebot.com'
     except KeyError:
         return False
+
 
 async def compute_data(
         profile: Profile,
