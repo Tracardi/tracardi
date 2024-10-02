@@ -14,6 +14,9 @@ class Timer:
     def get_time(self, key) -> float:
         return self.time_db.get(key, 0.0)
 
+    def get_passed_time(self, key) -> float:
+        return time() - self.get_time(key)
+
     def is_time_over(self, key, max_time) -> bool:
         key_time = self.time_db.get(key, 0)
 
