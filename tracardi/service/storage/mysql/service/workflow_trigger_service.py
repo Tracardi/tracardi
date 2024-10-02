@@ -14,6 +14,7 @@ from tracardi.service.storage.mysql.service.table_filtering import where_tenant_
 
 logger = get_logger(__name__)
 
+
 class WorkflowTriggerService(TableService):
 
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
@@ -22,11 +23,10 @@ class WorkflowTriggerService(TableService):
     async def load_by_id(self, trigger_id: str) -> SelectResult:
         return await self._load_by_id_in_deployment_mode(WorkflowTriggerTable, primary_id=trigger_id)
 
-    async def delete_by_id(self, trigger_id: str) ->  Tuple[bool, Optional[Rule]]:
+    async def delete_by_id(self, trigger_id: str) -> Tuple[bool, Optional[Rule]]:
         return await self._delete_by_id_in_deployment_mode(WorkflowTriggerTable,
                                                            map_to_workflow_trigger_rule,
                                                            primary_id=trigger_id)
-
 
     async def delete_by_workflow_id(self, workflow_id: str) -> str:
         where = where_tenant_and_mode_context(
@@ -111,7 +111,8 @@ class WorkflowTriggerService(TableService):
 
         return rules[event_type_id]
 
-    async def load_by_source_and_events(self, source: Entity, events: List[Event]) -> Optional[List[Tuple[List[Rule], Event]]]:
+    async def load_by_source_and_events(self, source: Entity, events: List[Event]) -> Optional[
+        List[Tuple[List[Rule], Event]]]:
         rules, has_routing_rules = await self._get_rules_for_source_and_event_type(source, events)
 
         if not has_routing_rules:

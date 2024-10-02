@@ -99,12 +99,9 @@ class Tracker:
             )
 
         # Only commercial
-        t = time()
         if not tracker_payload.queue_required():
             # Process without queue
-            result = await run_com_tracker(source, tracker_payload, self.tracker_config, tracking_start)
-            logger.info(f"Collected in {time() - t}")
-            return result
+            return await run_com_tracker(source, tracker_payload, self.tracker_config, tracking_start)
 
         # Queue
         await run_com_tracker_worker(
