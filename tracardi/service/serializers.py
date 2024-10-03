@@ -16,12 +16,14 @@ from tracardi.protocol.json_serializable import JsonSerializable
 def _implements_protocol(obj, protocol) -> bool:
     return all(hasattr(obj, method) for method in protocol)
 
+
 def _create_base_model_object(class_name, module_name, data):
     module = importlib.import_module(module_name)
     cls = getattr(module, class_name)
     obj = cls(**data)
 
     return obj
+
 
 def _deserialize_object(class_name, module_name, data):
     module = importlib.import_module(module_name)
@@ -30,17 +32,21 @@ def _deserialize_object(class_name, module_name, data):
 
     return obj
 
+
 class SerializationObject(str):
     pass
+
 
 def _data_encoder(obj):
     if isinstance(obj, datetime):
         return f"$$datetime$${obj.isoformat()}"
     elif isinstance(obj, BaseModel):
-        return SerializationObject(f"$$basemodel$${obj.__class__.__module__}$${obj.__class__.__name__}$${obj.model_dump_json()}")
+        return SerializationObject(
+            f"$$basemodel$${obj.__class__.__module__}$${obj.__class__.__name__}$${obj.model_dump_json()}")
     elif isinstance(obj, JsonSerializable):
         return f"$$serializable$${obj.__class__.__module__}$${obj.__class__.__name__}$${obj.serialize()}"
     raise TypeError(f"Object of type [{obj.__class__.__name__}] is not JSON serializable. Value: {obj}")
+
 
 def _deserialize_from_string(value):
     if value.startswith("$$datetime$$"):
@@ -62,6 +68,7 @@ def _deserialize_from_string(value):
 
     raise ValueError("Could not deserialize")
 
+
 def _data_decoder(dict):
     for key, value in dict.items():
         try:
@@ -75,6 +82,7 @@ def _data_decoder(dict):
 
 def json_serializer(data) -> str:
     return json.dumps(data, default=_data_encoder)
+
 
 def json_deserializer(data: str):
     try:
@@ -91,6 +99,7 @@ def pickle_serializer(obj):
     base64_bytes = base64.b64encode(message_bytes)
     txt = base64_bytes.decode('ascii')
     return txt
+
 
 def pickle_deserializer(txt):
     base64_bytes = txt.encode('ascii')
