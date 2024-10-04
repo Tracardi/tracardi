@@ -3,7 +3,10 @@ from time import time
 
 
 @contextmanager
-def profiler(name):
+def profiler():
     t1 = time()
-    yield
-    print(name, time() - t1)
+    result = {}
+    try:
+        yield result
+    finally:
+        result["duration"] = time() - t1

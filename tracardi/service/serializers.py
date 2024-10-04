@@ -1,4 +1,7 @@
 import base64
+from typing import Protocol, Any, Tuple
+
+import marshal
 
 import pickle
 
@@ -10,7 +13,23 @@ from datetime import datetime
 from dateutil import parser
 from pydantic import BaseModel
 
+from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.protocol.json_serializable import JsonSerializable
+
+preloaded_classes = {
+    ("tracardi.domain.payload.tracker_payload", "TrackerPayload"): lambda data: TrackerPayload.model_construct(**data)
+}
+
+
+class SerializerProtocol(Protocol):
+
+    @staticmethod
+    def serialize(args, kwargs, context) -> Any:
+        pass
+
+    @staticmethod
+    def deserialize(payload: Any) -> Tuple[tuple, dict, dict]:
+        pass
 
 
 def _implements_protocol(obj, protocol) -> bool:
@@ -20,7 +39,7 @@ def _implements_protocol(obj, protocol) -> bool:
 def _create_base_model_object(class_name, module_name, data):
     module = importlib.import_module(module_name)
     cls = getattr(module, class_name)
-    obj = cls(**data)
+    obj = cls.model_construct(**data)
 
     return obj
 
@@ -94,15 +113,90 @@ def json_deserializer(data: str):
         return json.loads(data, object_hook=_data_decoder)
 
 
-def pickle_serializer(obj):
-    message_bytes = pickle.dumps(obj)
-    base64_bytes = base64.b64encode(message_bytes)
-    txt = base64_bytes.decode('ascii')
-    return txt
+def _fast_pickle_data_encoder(obj):
+    if isinstance(obj, BaseModel):
+        return {
+            "__$type__": (obj.__class__.__module__, obj.__class__.__name__),
+            "__$data__": obj.model_dump(mode="json", exclude_defaults=True, exclude_unset=True)
+        }, 'marshal'  # Data as dict
+    return obj, 'pickle'
 
 
-def pickle_deserializer(txt):
-    base64_bytes = txt.encode('ascii')
-    message_bytes = base64.b64decode(base64_bytes)
-    obj = pickle.loads(message_bytes)
+def _fast_pickle_data_decoder(obj):
+    if isinstance(obj, dict) and "__$type__" in obj and '__$data__' in obj:
+        module, class_name = obj['__$type__']
+        data = obj['__$data__']
+
+        if (module, class_name) in preloaded_classes:
+            return preloaded_classes[(module, class_name)](data)
+
+        return _create_base_model_object(class_name, module, data)
     return obj
+
+
+class PickleSerializer:
+
+    @staticmethod
+    def serialize(obj):
+        message_bytes = pickle.dumps(obj)
+        base64_bytes = base64.b64encode(message_bytes)
+        txt = base64_bytes.decode('ascii')
+        return txt
+
+    @staticmethod
+    def deserialize(txt):
+        base64_bytes = txt.encode('ascii')
+        message_bytes = base64.b64decode(base64_bytes)
+        obj = pickle.loads(message_bytes)
+        return obj
+
+
+class BinaryPickleSerializer:
+
+    @staticmethod
+    def serialize(obj):
+        return pickle.dumps(obj)
+
+    @staticmethod
+    def deserialize(message_bytes):
+        return pickle.loads(message_bytes)
+
+
+class FastPickleSerializer:
+
+    @staticmethod
+    def serialize(obj):
+        obj, serializer_type = _fast_pickle_data_encoder(obj)
+
+        if serializer_type == 'marshal':
+            message_bytes = marshal.dumps(obj)
+        elif serializer_type == 'pickle':
+            message_bytes = pickle.dumps(obj)
+        else:
+            raise ValueError(f"Unknown serialisation type {serializer_type}.")
+
+        base64_bytes = base64.b64encode(message_bytes)
+        txt = base64_bytes.decode('ascii')
+        return f"{serializer_type}$${txt}"
+
+    @staticmethod
+    def deserialize(txt: str):
+
+        if txt.startswith('marshal$$'):
+            txt = txt[9:]
+            serializer_type = 'marshal'
+        elif txt.startswith('pickle$$'):
+            txt = txt[8:]
+            serializer_type = 'pickle'
+        else:
+            serializer_type = 'pickle'
+
+        base64_bytes = txt.encode('ascii')
+        message_bytes = base64.b64decode(base64_bytes)
+
+        if serializer_type == 'pickle':
+            obj = pickle.loads(message_bytes)
+        else:
+            obj = marshal.loads(message_bytes)
+
+        return _fast_pickle_data_decoder(obj)
