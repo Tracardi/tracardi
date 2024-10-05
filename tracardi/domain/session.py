@@ -4,8 +4,9 @@ from datetime import datetime
 from typing import Optional, Any
 
 from pydantic import ConfigDict, BaseModel, PrivateAttr
+from user_agents import parse
 
-from .entity import Entity, PrimaryEntity
+from .entity import Entity
 from .marketing import UTM
 from .metadata import OS, Device, Application
 from .time import Time
@@ -151,6 +152,15 @@ class Session(Entity):
 
             ips = self.device.ip.split(',')
             return ips[0]
+        except Exception:
+            return None
+
+    def get_user_agent(self) -> Optional[str]:
+        try:
+            _user_agent_string = self.context['browser']['local']['browser']['userAgent']
+            if not _user_agent_string:
+                return None
+            return parse(_user_agent_string)
         except Exception:
             return None
 

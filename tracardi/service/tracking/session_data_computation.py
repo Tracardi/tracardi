@@ -1,13 +1,11 @@
-from typing import Tuple, Optional
+from typing import Optional
 
 from pydantic import ValidationError
-from user_agents import parse
 from user_agents.parsers import UserAgent
 
 from tracardi.service.tracking.utils.languages import get_spoken_languages
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.marketing import UTM
-from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.geo import Geo
@@ -17,27 +15,14 @@ from tracardi.service.tracker_config import TrackerConfig
 logger = get_logger(__name__)
 
 
-def _get_user_agent_string(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:
-    try:
-        return session.context['browser']['local']['browser']['userAgent']
-    except Exception:
-        try:
-            return tracker_payload.request['headers']['user-agent']
-        except Exception:
-            return None
-
-
 def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[UserAgent]:
     _user_agent = tracker_payload.get_user_agent()
 
     if _user_agent is not None:
         return _user_agent
 
-    _user_agent_string = _get_user_agent_string(session, tracker_payload)
-    if _user_agent_string:
-        return parse(_user_agent_string)
-
-    return None
+    # Return user agent from session
+    return session.get_user_agent()
 
 
 def _compute_session_referer(session: Session, tracker_payload: TrackerPayload) -> Session:
