@@ -11,8 +11,8 @@ from tracardi.domain.time import Time
 from tracardi.service.utils.date import now_in_utc
 
 
-def add_system_events(profile: Profile, session: Session, tracker_payload: TrackerPayload) -> Tuple[TrackerPayload, Session]:
-
+def add_system_events(profile: Profile, session: Session, tracker_payload: TrackerPayload) -> Tuple[
+    TrackerPayload, Session]:
     # Visit ended never creates system events.
     if tracker_payload.has_event_type('visit-ended'):
         return tracker_payload, session
@@ -26,8 +26,7 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
     _now_utc = now_in_utc()
 
     if profile and profile.is_new() and not tracker_payload.has_event_type('profile-created'):
-
-        _time = _now_utc- timedelta(seconds=3)
+        _time = _now_utc - timedelta(seconds=3)
         # Add session created
         tracker_payload.events.append(
             EventPayload(
@@ -50,7 +49,6 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
         if tracker_payload.is_on('saveSession', default=True):
 
             if session.is_reopened():
-
                 # Session can not be reopened with event type visit started.
 
                 session.metadata.status = 'started'
