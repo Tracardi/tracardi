@@ -3,7 +3,7 @@ from user_agents.parsers import UserAgent
 from tracardi.domain.entity import Entity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import Session, SessionMetadata
-from tracardi.service.tracking.compute.session_computer import _get_user_agent
+from tracardi.service.tracking.user_agent import _get_user_agent
 
 
 def test_user_agent_string_from_tracker_payload():

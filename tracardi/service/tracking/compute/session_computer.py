@@ -1,11 +1,11 @@
 from typing import Optional
 
 from pydantic import ValidationError
-from user_agents.parsers import UserAgent
 
 from tracardi.config import tracardi
 from tracardi.exceptions.exception import BlockedException
 from tracardi.service.tracking.bot import _has_google_bot_header
+from tracardi.service.tracking.user_agent import _get_user_agent
 from tracardi.service.tracking.utils.languages import get_spoken_languages
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.marketing import UTM
@@ -16,16 +16,6 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
 
 logger = get_logger(__name__)
-
-
-def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[UserAgent]:
-    _user_agent = tracker_payload.get_user_agent()
-
-    if _user_agent is not None:
-        return _user_agent
-
-    # Return user agent from session
-    return session.get_user_agent()
 
 
 def _compute_session_referer(session: Session, tracker_payload: TrackerPayload) -> Session:
