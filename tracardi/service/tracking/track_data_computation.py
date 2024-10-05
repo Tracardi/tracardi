@@ -6,7 +6,6 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
-from tracardi.service.license import License
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.event_data_computation import compute_events
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
@@ -15,9 +14,6 @@ from tracardi.service.tracking.system_events import add_system_events
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-
-if License.has_license():
-    from com_tracardi.service.identification_point_service import identify_and_merge_profile
 
 
 async def _compute(source,
@@ -30,17 +26,6 @@ async def _compute(source,
     context = get_context()
 
     if profile is not None:
-
-        if License.has_license():
-
-            # Merge profile on identification points
-
-            identification_points = await tracker_payload.list_identification_points()
-
-            profile = await identify_and_merge_profile(profile,
-                                                       identification_points,
-                                                       tracker_payload.events)
-
         # Profile computation
 
         # Compute Profile GEO Markets and continent

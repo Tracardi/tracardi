@@ -5,10 +5,8 @@ from typing import List, Tuple, Optional, Set
 from tracardi.domain import ExtraInfo
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache.event_mapping import load_event_mapping
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
-from tracardi.service.license import License
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
@@ -20,10 +18,6 @@ from tracardi.domain.event import Event
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
 from tracardi.service.utils.getters import get_entity_id
-
-if License.has_license():
-    from com_tracardi.service.event_mapper import map_event_props_to_traits, map_events_tags_and_journey
-    from com_tracardi.service.tracking.consistency_check import check_profile_consistency
 
 logger = get_logger(__name__)
 
@@ -71,9 +65,9 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
 
 
 async def event_properties_to_profile(flat_event: Dotty,
-                           flat_profile: Optional[FlatProfile],
-                           session: Session,
-                           field_change_logger: FieldChangeLogger) -> Tuple[
+                                      flat_profile: Optional[FlatProfile],
+                                      session: Session,
+                                      field_change_logger: FieldChangeLogger) -> Tuple[
     Optional[FlatProfile], Set[str], FieldChangeLogger]:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
@@ -109,20 +103,7 @@ async def event_to_traits(flat_event: Dotty,
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Default event mapping form predefined file
-    flat_event = _auto_index_default_event_type(flat_event, flat_profile)
-
-    # Custom event mapping
-    if License.has_license():
-        custom_event_mapping = await load_event_mapping(event_type_id=flat_event['type'])
-        # Map event properties to traits (Event Mapping)
-        flat_event = map_event_props_to_traits(flat_event,
-                                               custom_event_mapping)
-
-        # Add event tags and add journey tag
-        flat_event = map_events_tags_and_journey(flat_event,
-                                                 custom_event_mapping)
-
-    return flat_event
+    return _auto_index_default_event_type(flat_event, flat_profile)
 
 
 # async def event_to_traits_and_profile_mapping(flat_event: Dotty,
@@ -323,9 +304,6 @@ async def compute_events(events: List[EventPayload],
 
     if profile:
         try:
-
-            if License.has_license():
-                flat_profile = check_profile_consistency(flat_profile)
 
             profile = Profile(**flat_profile.to_dict())
             profile.set_meta_data(profile_metadata)
