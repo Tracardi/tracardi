@@ -9,6 +9,7 @@ from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
+from tracardi.service.tracking.compute.session_computer import compute_session
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.track_data_computation import compute_data
 from tracardi.domain.event_source import EventSource
@@ -38,12 +39,17 @@ async def os_tracker(
         # Load profile and session
         profile, session = await tracker_loading(tracker_payload, tracker_config)
 
+        session = await compute_session(
+            session,
+            tracker_payload,
+            tracker_config
+        )
+
         # Lock profile and session for changes and compute data
         profile, session, events, tracker_payload = await compute_data(
             profile,
             session,
             tracker_payload,
-            tracker_config,
             source,
             field_change_logger
         )

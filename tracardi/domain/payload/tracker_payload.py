@@ -45,6 +45,7 @@ logger = get_logger(__name__)
 def _identification_list_key(tp):
     return 1
 
+
 class ScheduledEventConfig:
 
     def __init__(self, flow_id: Optional[str], node_id: Optional[str]):
@@ -126,6 +127,7 @@ class TrackerPayload(BaseModel):
                 pass
 
     def get_user_agent(self) -> Optional[UserAgent]:
+        self._set_user_agent()
         return self._user_agent
 
     def is_bot(self) -> bool:
@@ -360,7 +362,8 @@ class TrackerPayload(BaseModel):
     def is_cde(self) -> bool:
         return self.get_referer_data('source') is not None and self.has_referred_profile()
 
-    @async_cache_for(memory_cache.identification_points_cache_ttl, use_context=True, key_func=_identification_list_key, lock=True)
+    @async_cache_for(memory_cache.identification_points_cache_ttl, use_context=True, key_func=_identification_list_key,
+                     lock=True)
     async def list_identification_points(self):
         return list(await self.get_identification_points())
 
@@ -584,7 +587,6 @@ class TrackerPayload(BaseModel):
             profile, session = self._load_default_profile(session, static)
 
         return profile, session
-
 
     async def get_profile_and_session(
             self,
