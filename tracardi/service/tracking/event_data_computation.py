@@ -1,4 +1,3 @@
-import asyncio
 from dotty_dict import dotty, Dotty
 
 from typing import List, Tuple, Optional, Set
@@ -71,41 +70,19 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
     return flat_event
 
 
-async def event_to_traits_and_profile_mapping(flat_event: Dotty,
-                                              flat_profile: Optional[FlatProfile],
-                                              session: Session,
-                                              field_change_logger: FieldChangeLogger
-                                              ) -> Tuple[
-    Dotty, Optional[FlatProfile], Set[str], FieldChangeLogger]:
+async def event_properties_to_profile(flat_event: Dotty,
+                           flat_profile: Optional[FlatProfile],
+                           session: Session,
+                           field_change_logger: FieldChangeLogger) -> Tuple[
+    Optional[FlatProfile], Set[str], FieldChangeLogger]:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     auto_merge_ids = set()
 
-    # Default event mapping
-    flat_event = _auto_index_default_event_type(flat_event, flat_profile)
-
-    custom_event_mapping_coroutine = load_event_mapping(event_type_id=flat_event['type'])
-
-    custom_event_to_profile_mapping_coroutine = load_event_to_profile(event_type_id=flat_event['type'])
-
-    # Run in parallel
-    custom_event_mapping, custom_event_to_profile_mapping_schemas = await asyncio.gather(
-        custom_event_mapping_coroutine,
-        custom_event_to_profile_mapping_coroutine
-    )
-
-    # Custom event mapping
-    if License.has_license():
-        # Map event properties to traits (Event Mapping)
-        flat_event = map_event_props_to_traits(flat_event,
-                                               custom_event_mapping)
-
-        # Add event tags and add journey tag
-        flat_event = map_events_tags_and_journey(flat_event,
-                                                 custom_event_mapping)
-
     # Map event data to profile
     if flat_profile:
+
+        custom_event_to_profile_mapping_schemas = await load_event_to_profile(event_type_id=flat_event['type'])
         flat_profile, field_change_logger = await map_event_to_profile(
             custom_event_to_profile_mapping_schemas,
             flat_event,
@@ -123,7 +100,84 @@ async def event_to_traits_and_profile_mapping(flat_event: Dotty,
         # Append field changes fo metadata.fields
         auto_merge_ids = flat_profile.set_metadata_fields_timestamps(field_change_logger)
 
-    return flat_event, flat_profile, auto_merge_ids, field_change_logger
+    return flat_profile, auto_merge_ids, field_change_logger
+
+
+async def event_to_traits(flat_event: Dotty,
+                          flat_profile: Optional[FlatProfile],
+                          ) -> Dotty:
+    # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
+
+    # Default event mapping form predefined file
+    flat_event = _auto_index_default_event_type(flat_event, flat_profile)
+
+    # Custom event mapping
+    if License.has_license():
+        custom_event_mapping = await load_event_mapping(event_type_id=flat_event['type'])
+        # Map event properties to traits (Event Mapping)
+        flat_event = map_event_props_to_traits(flat_event,
+                                               custom_event_mapping)
+
+        # Add event tags and add journey tag
+        flat_event = map_events_tags_and_journey(flat_event,
+                                                 custom_event_mapping)
+
+    return flat_event
+
+
+# async def event_to_traits_and_profile_mapping(flat_event: Dotty,
+#                                               flat_profile: Optional[FlatProfile],
+#                                               session: Session,
+#                                               field_change_logger: FieldChangeLogger
+#                                               ) -> Tuple[
+#     Dotty, Optional[FlatProfile], Set[str], FieldChangeLogger]:
+#     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
+#
+#     auto_merge_ids = set()
+#
+#     # Default event mapping
+#     flat_event = _auto_index_default_event_type(flat_event, flat_profile)
+#
+#     custom_event_mapping_coroutine = load_event_mapping(event_type_id=flat_event['type'])
+#
+#     custom_event_to_profile_mapping_coroutine = load_event_to_profile(event_type_id=flat_event['type'])
+#
+#     # Run in parallel
+#     custom_event_mapping, custom_event_to_profile_mapping_schemas = await asyncio.gather(
+#         custom_event_mapping_coroutine,
+#         custom_event_to_profile_mapping_coroutine
+#     )
+#
+#     # Custom event mapping
+#     if License.has_license():
+#         # Map event properties to traits (Event Mapping)
+#         flat_event = map_event_props_to_traits(flat_event,
+#                                                custom_event_mapping)
+#
+#         # Add event tags and add journey tag
+#         flat_event = map_events_tags_and_journey(flat_event,
+#                                                  custom_event_mapping)
+#
+#     # Map event data to profile
+#     if flat_profile:
+#         flat_profile, field_change_logger = await map_event_to_profile(
+#             custom_event_to_profile_mapping_schemas,
+#             flat_event,
+#             flat_profile,
+#             session,
+#             field_change_logger
+#         )
+#
+#         # Add fields timestamps
+#         if not isinstance(flat_profile['metadata.fields'], dict):
+#             flat_profile['metadata.fields'] = {}
+#
+#         field_change_logger = field_change_logger.merge(flat_profile.log)
+#
+#         # Append field changes fo metadata.fields
+#         auto_merge_ids = flat_profile.set_metadata_fields_timestamps(field_change_logger)
+#
+#     return flat_event, flat_profile, auto_merge_ids, field_change_logger
 
 
 async def make_event_from_event_payload(event_payload,
@@ -211,12 +265,19 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event, flat_profile, _auto_merge_ids, field_change_logger = await event_to_traits_and_profile_mapping(
+            flat_event = await event_to_traits(flat_event, flat_profile)
+            flat_profile, _auto_merge_ids, field_change_logger = await event_properties_to_profile(
                 flat_event,
                 flat_profile,
                 session,
                 field_change_logger
             )
+            # flat_event, flat_profile, _auto_merge_ids, field_change_logger = await event_to_traits_and_profile_mapping(
+            #     flat_event,
+            #     flat_profile,
+            #     session,
+            #     field_change_logger
+            # )
 
             # Combine all auto merge ids
 
