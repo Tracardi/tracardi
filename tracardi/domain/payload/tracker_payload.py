@@ -12,7 +12,7 @@ from typing import Union, Optional, List, Any, Tuple, Generator
 from uuid import uuid4
 
 from dotty_dict import dotty
-from pydantic import PrivateAttr, BaseModel
+from pydantic import PrivateAttr, BaseModel, ConfigDict
 from user_agents import parse
 
 from tracardi.config import tracardi, memory_cache
@@ -81,6 +81,8 @@ class TrackerPayload(BaseModel):
     profile_less: bool = False
     debug: Optional[bool] = False
 
+    model_config = ConfigDict(frozen=False)
+
     def __init__(self, **data: Any):
 
         if data.get('context', None) is None:
@@ -91,6 +93,7 @@ class TrackerPayload(BaseModel):
                 insert=now_in_utc()
             ))
         super().__init__(**data)
+        self._is_frozen = False  # Internal flag to manage mutability
         self._id = str(uuid4())
         self._tracardi_referer = self.get_tracardi_data_referer()
         self._timestamp = time.time()
@@ -106,6 +109,14 @@ class TrackerPayload(BaseModel):
 
         self._cached_events_as_dicts: Optional[List[dict]] = None
         self._set_user_agent()
+
+    def freeze(self):
+        self._is_frozen = True
+
+    def __setattr__(self, key, value):
+        if getattr(self, "_is_frozen", False):
+            raise TypeError(f"Cannot modify frozen instance: attribute '{key}' is read-only")
+        super().__setattr__(key, value)
 
     @property
     def tracardi_referer(self):
@@ -534,7 +545,6 @@ class TrackerPayload(BaseModel):
         profile: Optional[Profile] = await load_profile(requested_profile_id)
 
         if profile is not None:
-
             self._profile_consistency_check(requested_profile_id, profile)
 
             # Check if the loaded profile has not different ID.

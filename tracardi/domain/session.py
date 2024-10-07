@@ -37,6 +37,7 @@ class SessionTime(Time):
     def new() -> 'SessionTime':
         return SessionTime()
 
+
 class SessionMetadata(BaseModel):
     time: SessionTime = SessionTime()
     channel: Optional[str] = None
@@ -87,7 +88,7 @@ class Session(Entity):
 
     _updated_in_workflow: bool = PrivateAttr(False)
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=False)
 
     def __init__(self, **data: Any):
 
@@ -96,6 +97,15 @@ class Session(Entity):
 
         super().__init__(**data)
 
+        self._is_frozen = False  # Internal flag to manage mutability
+
+    def freeze(self):
+        self._is_frozen = True
+
+    def __setattr__(self, key, value):
+        if getattr(self, "_is_frozen", False):
+            raise TypeError(f"Cannot modify frozen instance: attribute '{key}' is read-only")
+        super().__setattr__(key, value)
 
     def is_new(self) -> bool:
         return self.operation.new
@@ -105,7 +115,6 @@ class Session(Entity):
 
     def set_updated(self, flag=True):
         self.operation.update = flag
-
 
     def is_updated(self) -> bool:
         return self.operation.update
@@ -174,7 +183,7 @@ class Session(Entity):
         )
 
     @staticmethod
-    def new(id: Optional[str] = None, profile_id: str=None) -> 'Session':
+    def new(id: Optional[str] = None, profile_id: str = None) -> 'Session':
         session = Session(
             id=str(uuid.uuid4()) if not id else id,
             metadata=SessionMetadata.new()

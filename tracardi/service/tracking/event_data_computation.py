@@ -3,6 +3,7 @@ from dotty_dict import dotty, Dotty
 from typing import List, Tuple, Optional, Set
 
 from tracardi.domain import ExtraInfo
+from tracardi.domain.entity import PrimaryEntity
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
@@ -18,7 +19,7 @@ from tracardi.domain.session import Session
 from tracardi.domain.event import Event
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
-from tracardi.service.utils.getters import get_entity_id
+from tracardi.service.utils.getters import get_entity_id, get_primary_entity
 
 logger = get_logger(__name__)
 
@@ -163,18 +164,19 @@ async def event_to_traits(flat_event: Dotty,
 
 
 async def make_event_from_event_payload(event_payload,
-                                        profile,
+                                        profile_entity: Optional[PrimaryEntity],
                                         session,
                                         source: EventSource,
                                         metadata,
                                         profile_less) -> Event:
+
     # Get event
     event = event_payload_to_event(
         event_payload,
         metadata,
         source,
         session,
-        profile,
+        profile_entity,
         profile_less)
 
     if not event.metadata.valid:
@@ -184,7 +186,7 @@ async def make_event_from_event_payload(event_payload,
                 flow_id=None,
                 node_id=None,
                 event_id=event.id,
-                profile_id=get_entity_id(profile),
+                profile_id=profile_entity.id if profile_entity else None,
                 origin='event-computation',
                 package=__name__,
                 traceback=event_payload.validation.trace
@@ -227,9 +229,10 @@ async def compute_events(events: List[EventPayload],
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
+        profile_entity = get_primary_entity(profile)
         event = await make_event_from_event_payload(
             event_payload,
-            profile,
+            profile_entity,
             session,
             source,
             metadata,

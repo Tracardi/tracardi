@@ -23,24 +23,17 @@ def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession
     if session is None:
         return None
 
-    if isinstance(session, Session) and isinstance(session.context, dict):
-        session.context = SessionContext(session.context)
-
-        tz = session.context.get_time_zone()
-        event_session = EventSession(
-            id=session.id,
-            tz=tz
-        )
-
-    else:
-        event_session = EventSession(
-            id=session.id
-        )
+    tz = session.context.get_time_zone()
+    event_session = EventSession(
+        id=session.id,
+        tz=tz
+    )
 
     return event_session
 
 
-def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, source: Entity, profile_less) -> EventMetadata:
+def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, source: Entity,
+                  profile_less) -> EventMetadata:
     meta = EventMetadata(**metadata.model_dump())
     meta.status = COLLECTED
     meta.profile_less = profile_less
@@ -94,12 +87,10 @@ def event_payload_to_event(event_payload: EventPayload,
                            metadata: EventPayloadMetadata,
                            source: EventSource,
                            session: Union[Optional[Entity], Optional[Session]],
-                           profile: Optional[PrimaryEntity],
+                           profile_entity: Optional[PrimaryEntity],
                            profile_less: bool) -> Event:
-
     meta = _get_metadata(event_payload, metadata, source, profile_less)
     source = source if not event_payload.has_source_id() else Entity(id=event_payload.get_source_id())
-    profile_entity = get_primary_entity(profile)
 
     if isinstance(session, Session):
 
