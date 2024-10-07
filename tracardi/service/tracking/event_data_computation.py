@@ -7,6 +7,7 @@ from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
+from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
@@ -164,26 +165,19 @@ async def event_to_traits(flat_event: Dotty,
 async def make_event_from_event_payload(event_payload,
                                         profile,
                                         session,
-                                        source,
+                                        source: EventSource,
                                         metadata,
                                         profile_less) -> Event:
     # Get event
-    event = event_payload.to_event(
+    event = event_payload_to_event(
+        event_payload,
         metadata,
         source,
         session,
         profile,
         profile_less)
 
-    event.metadata.channel = source.channel
-
-    if event_payload.merging is not None:
-        event.metadata.error = event_payload.merging.error
-        # Mark as merged if not error
-        event.metadata.merge = not event_payload.merging.error
-
-    if event_payload.validation is not None and event_payload.validation.error is True:
-        event.metadata.valid = False
+    if not event.metadata.valid:
         logger.error(
             event_payload.validation.message,
             extra=ExtraInfo.exact(

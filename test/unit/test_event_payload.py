@@ -8,6 +8,8 @@ from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.time import Time
+from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
+
 
 def test_event_payload_time_fallback():
     ep = EventPayload(type="text", tags=["tag1", "tag2", "tag3"])
@@ -18,14 +20,17 @@ def test_event_payload_time_fallback():
             create="2001-01-01 00:00:00"
         )
     )
-    event = ep.to_event(epm,
-                        source=Entity(id="1"),
-                        session=Session(id="1", metadata=SessionMetadata()),
-                        profile=PrimaryEntity(id="1"),
-                        profile_less=False
-                        )
+    event = event_payload_to_event(
+        ep,
+        epm,
+        source=Entity(id="1"),
+        session=Session(id="1", metadata=SessionMetadata()),
+        profile=PrimaryEntity(id="1"),
+        profile_less=False
+    )
 
-    assert event.metadata.time.insert != datetime.datetime(2002, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key='UTC'))  # Must be now - can not be overridden
+    assert event.metadata.time.insert != datetime.datetime(2002, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(
+        key='UTC'))  # Must be now - can not be overridden
     assert event.metadata.time.create == datetime.datetime(2001, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key='UTC'))
 
 
@@ -38,12 +43,13 @@ def test_event_payload_should_have_tags():
             create=datetime.datetime(2002, 1, 1, 0, 0)
         )
     )
-    event = ep.to_event(epm,
-                        source=Entity(id="1"),
-                        session=Session(id="1", metadata=SessionMetadata()),
-                        profile=PrimaryEntity(id="1"),
-                        profile_less=False
-                        )
+    event = event_payload_to_event(ep,
+                                   epm,
+                                   source=Entity(id="1"),
+                                   session=Session(id="1", metadata=SessionMetadata()),
+                                   profile=PrimaryEntity(id="1"),
+                                   profile_less=False
+                                   )
 
     assert event.tags.values == ('tag1', 'tag2', 'tag3')
     assert event.tags.count == 3
