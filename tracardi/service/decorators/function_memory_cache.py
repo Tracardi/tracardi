@@ -7,15 +7,19 @@ from typing import Dict, Tuple, Any, Callable
 
 import functools
 
+from com_tracardi.service.time.converters import pretty_time_format
 from tracardi.context import get_context
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from contextlib import asynccontextmanager
+
+from tracardi.exceptions.log_handler import get_logger
 
 # Cache DB
 cache: Dict[str, MemoryCache] = {}
 
 # Dictionary to store locks for each key
 locks = defaultdict(asyncio.Lock)
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
@@ -99,7 +103,7 @@ async def _async_exec(ttl, func, func_key, args_key, args, kwargs):
     result = func(*args, **kwargs)
     if asyncio.iscoroutine(result):
         result = await result
-    print("laoding - after", func_key, time() - t, args_key)
+    logger.warning(f"Filling cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [{time() - t:.3f}]")
     # Update cache
     cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
 
