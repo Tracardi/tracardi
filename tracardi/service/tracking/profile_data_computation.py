@@ -66,7 +66,7 @@ def update_profile_visits(session: Session, flat_profile: FlatProfile, field_cha
 
 
 def update_profile_time(session: Session, flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
-    Profile, FieldChangeLogger]:
+    FlatProfile, FieldChangeLogger]:
     # Set time zone form session
     if session.context:
         try:

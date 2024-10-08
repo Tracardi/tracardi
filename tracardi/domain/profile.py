@@ -6,7 +6,7 @@ from dotty_dict import Dotty
 from pydantic import BaseModel, PrivateAttr
 from dateutil import parser
 
-from .entity import PrimaryEntity
+from .entity import PrimaryEntity, Entity
 from .metadata import ProfileMetadata
 from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
     FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
@@ -266,7 +266,7 @@ class Profile(PrimaryEntity):
             self.operation.update = True
 
     def get_consent_ids(self) -> Set[str]:
-        return set([consent_id for consent_id, _ in self.consents.items()])
+        return set(self.consents.keys())
 
     def increase_visits(self, value=1):
         self.stats.visits += value
@@ -354,8 +354,16 @@ class FlatProfile(Dotty):
             self.log.log(key, old_value)
 
     @staticmethod
-    def as_primary_entity(flat_profile):
+    def as_primary_entity(flat_profile: 'FlatProfile'):
+        if not flat_profile:
+            return None
         return PrimaryEntity(id=flat_profile['id'], primary_id=flat_profile.get('primary_id', None))
+
+    @staticmethod
+    def as_entity(flat_profile: 'FlatProfile'):
+        if not flat_profile:
+            return None
+        return Entity(id=flat_profile['id'])
 
     @property
     def id(self) -> Optional[str]:
@@ -646,3 +654,8 @@ class FlatProfile(Dotty):
             field_change_logger.log('metadata.time.visit.last')
         self['metadata.time.visit.current'] = now_in_utc()
         field_change_logger.log('metadata.time.visit.current')
+
+    def get_consent_ids(self) -> Set[str]:
+        if not self.instanceof('consents', dict):
+            return set()
+        return set(self['consents'].keys())

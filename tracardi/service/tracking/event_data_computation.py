@@ -4,22 +4,19 @@ from typing import List, Tuple, Optional, Set
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.entity import PrimaryEntity
-from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
-from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.event import Event
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
-from tracardi.service.utils.getters import get_entity_id, get_primary_entity, get_primary_entity_from_flat_profile
 
 logger = get_logger(__name__)
 
@@ -216,7 +213,7 @@ async def compute_events(events: List[EventPayload],
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
-        profile_entity = get_primary_entity_from_flat_profile(flat_profile)
+        profile_entity = FlatProfile.as_primary_entity(flat_profile)
         event = await make_event_from_event_payload(
             event_payload,
             profile_entity,

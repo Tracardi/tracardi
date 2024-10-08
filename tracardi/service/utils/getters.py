@@ -15,8 +15,3 @@ def get_entity(entity: Optional[Entity]) -> Optional[Entity]:
 def get_primary_entity(entity: Optional[PrimaryEntity]) -> Optional[PrimaryEntity]:
     return PrimaryEntity(id=entity.id, primary_id=entity.primary_id) if isinstance(entity, PrimaryEntity) else None
 
-
-def get_primary_entity_from_flat_profile(flat_profile: Optional[FlatProfile]) -> Optional[PrimaryEntity]:
-    if flat_profile and flat_profile.has_not_empty('id'):
-        return FlatProfile.as_primary_entity(flat_profile)
-    return None
