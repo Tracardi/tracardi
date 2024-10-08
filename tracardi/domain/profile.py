@@ -421,8 +421,8 @@ class FlatProfile(FlatEntity):
         flat_profile = FlatProfile(
             {
                 "id": str(uuid.uuid4()) if not id else id,
-                "metadata.time.create": _now,
-                "metadata.time.insert": _now
+                "metadata": {"time": {"create": _now,
+                                      "insert": _now}}
             }
         )
         flat_profile.fill_meta_data()
@@ -458,14 +458,16 @@ class FlatProfile(FlatEntity):
     def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
         field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
         if field_closure:
+
             value, prefix = field_closure(self)
 
-            value = value.strip().lower()
-
-            if 'ids' not in self or self['ids'] is None:
-                self['ids'] = []
-
             if value:
+
+                value = value.strip().lower()
+
+                if 'ids' not in self or self['ids'] is None:
+                    self['ids'] = []
+
                 # Add new
                 # Can not simply append. Must reassign
                 _hash_id = hash_id(value, prefix)
@@ -485,7 +487,7 @@ class FlatProfile(FlatEntity):
 
     def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeLogger):
 
-        if not isinstance(self['metadata.fields'], dict):
+        if not self.instanceof('metadata.fields', dict):
             self['metadata.fields'] = {}
 
         # Iterate and set new values. Leave old intact.

@@ -73,6 +73,9 @@ class EventPayload(BaseModel):
     def from_event(event: Event) -> 'EventPayload':
         return EventPayload(type=event.type, properties=event.properties, context=event.context)
 
+    def is_valid(self) -> bool:
+        return self.validation and self.validation.error is False
+
     def get_source_id(self) -> str:
         return self._source_id
 

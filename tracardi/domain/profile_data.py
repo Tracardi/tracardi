@@ -47,17 +47,17 @@ FLAT_PROFILE_FIELD_MAPPING = {
 }
 
 FLAT_PROFILE_MAPPING = {
-    'data.identifier.pk': lambda flat_profile: (flat_profile['data.identifier.pk'], PREFIX_IDENTIFIER_PK),
-    'data.identifier.id': lambda flat_profile: (flat_profile['data.identifier.id'], PREFIX_IDENTIFIER_ID),
+    'data.identifier.pk': lambda flat_profile: (flat_profile.get('data.identifier.pk', None), PREFIX_IDENTIFIER_PK),
+    'data.identifier.id': lambda flat_profile: (flat_profile.get('data.identifier.id', None), PREFIX_IDENTIFIER_ID),
 
-    'data.contact.phone.main': lambda flat_profile: (flat_profile['data.contact.phone.main'], PREFIX_PHONE_MAIN),
-    'data.contact.phone.business': lambda flat_profile: (flat_profile['data.contact.phone.business'], PREFIX_PHONE_BUSINESS),
-    'data.contact.phone.whatsapp': lambda flat_profile: (flat_profile['data.contact.phone.whatsapp'], PREFIX_PHONE_WHATSUP),
-    'data.contact.phone.mobile': lambda flat_profile: (flat_profile['data.contact.phone.mobile'], PREFIX_PHONE_MOBILE),
+    'data.contact.phone.main': lambda flat_profile: (flat_profile.get('data.contact.phone.main', None), PREFIX_PHONE_MAIN),
+    'data.contact.phone.business': lambda flat_profile: (flat_profile.get('data.contact.phone.business', None), PREFIX_PHONE_BUSINESS),
+    'data.contact.phone.whatsapp': lambda flat_profile: (flat_profile.get('data.contact.phone.whatsapp', None), PREFIX_PHONE_WHATSUP),
+    'data.contact.phone.mobile': lambda flat_profile: (flat_profile.get('data.contact.phone.mobile', None), PREFIX_PHONE_MOBILE),
 
-    'data.contact.email.main': lambda flat_profile: (flat_profile['data.contact.email.main'], PREFIX_EMAIL_MAIN),
-    'data.contact.email.private': lambda flat_profile: (flat_profile['data.contact.email.private'], PREFIX_EMAIL_PRIVATE),
-    'data.contact.email.business': lambda flat_profile: (flat_profile['data.contact.email.business'], PREFIX_EMAIL_BUSINESS),
+    'data.contact.email.main': lambda flat_profile: (flat_profile.get('data.contact.email.main', None), PREFIX_EMAIL_MAIN),
+    'data.contact.email.private': lambda flat_profile: (flat_profile.get('data.contact.email.private', None), PREFIX_EMAIL_PRIVATE),
+    'data.contact.email.business': lambda flat_profile: (flat_profile.get('data.contact.email.business', None), PREFIX_EMAIL_BUSINESS),
 }
 
 def force_lists(props: List[str], data):
