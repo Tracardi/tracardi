@@ -14,7 +14,7 @@ from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import FlatProfile
 from tracardi.domain.session import Session
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, EventDict, FlatEvent
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
 
@@ -160,9 +160,9 @@ async def make_event_from_event_payload(event_payload,
                                         session,
                                         source: EventSource,
                                         metadata,
-                                        profile_less) -> Event:
+                                        profile_less) -> EventDict:
     # Get event
-    event = event_payload_to_event(
+    event, even_valid = event_payload_to_event(
         event_payload,
         metadata,
         source,
@@ -170,7 +170,7 @@ async def make_event_from_event_payload(event_payload,
         profile_entity,
         profile_less)
 
-    if not event.metadata.valid:
+    if not even_valid:
         logger.error(
             event_payload.validation.message,
             extra=ExtraInfo.exact(
@@ -214,7 +214,7 @@ async def compute_events(events: List[EventPayload],
 
         # For performance reasons we return flat_event and after mappings convert to event.
         profile_entity = FlatProfile.as_primary_entity(flat_profile)
-        event = await make_event_from_event_payload(
+        event_dict = await make_event_from_event_payload(
             event_payload,
             profile_entity,
             session,
@@ -223,7 +223,7 @@ async def compute_events(events: List[EventPayload],
             profile_less
         )
 
-        flat_event = dotty(event.model_dump(exclude_unset=True))
+        flat_event = FlatEvent(event_dict)
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits

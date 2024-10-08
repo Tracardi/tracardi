@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
 
+from dotty_dict import Dotty
+
 from .entity import Entity, PrimaryEntity
 from .event_metadata import EventMetadata
 from pydantic import model_validator, ConfigDict, BaseModel
@@ -180,6 +182,7 @@ class Event(NamedEntity):
     # journey: Optional[dict] = {}
 
     data: Optional[dict] = {}
+
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
@@ -380,3 +383,34 @@ class Event(NamedEntity):
                 "state": None
             }
         }
+
+
+class FlatEvent(Dotty):
+    @staticmethod
+    def as_entity(flat_event: 'FlatEvent'):
+        if not flat_event:
+            return None
+        return Entity(id=flat_event['id'])
+
+    @property
+    def id(self) -> Optional[str]:
+        return self.get('id', None)
+
+    @id.setter
+    def id(self, value: str):
+        """Setter method"""
+        if not isinstance(value, str):
+            raise ValueError("ID value must be a string.")
+
+        self['id'] = value
+
+
+class EventDict(dict):
+    pass
+
+    @property
+    def id(self) -> Optional[str]:
+        return self.get('id', None)
+
+    def is_valid(self) -> bool:
+        return True

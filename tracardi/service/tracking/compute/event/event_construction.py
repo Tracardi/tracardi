@@ -3,13 +3,13 @@ from tracardi.domain.payload.event_payload import EventPayload
 
 from tracardi.service.utils.date import now_in_utc
 
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 from uuid import uuid4
 
 from tracardi.domain.api_instance import ApiInstance
 from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.enum.event_status import COLLECTED
-from tracardi.domain.event import Event, Tags, EventSession
+from tracardi.domain.event import Event, Tags, EventSession, FlatEvent, EventDict
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.metadata import Hit
@@ -32,7 +32,7 @@ def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession
     return event_session
 
 
-def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, source: Entity,
+def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, source: EventSource,
                   profile_less) -> EventMetadata:
     meta = EventMetadata(**metadata.model_dump())
     meta.status = COLLECTED
@@ -54,8 +54,7 @@ def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, s
         # Mark as merged if not error
         metadata.merge = not event_payload.merging.error
 
-    if event_payload.validation is not None and event_payload.validation.error is True:
-        metadata.valid = False
+    meta.valid = event_payload.validation is not None and event_payload.validation.error is True
 
     return meta
 
@@ -88,51 +87,54 @@ def event_payload_to_event(event_payload: EventPayload,
                            source: EventSource,
                            session: Union[Optional[Entity], Optional[Session]],
                            profile_entity: Optional[PrimaryEntity],
-                           profile_less: bool) -> Event:
+                           profile_less: bool) -> Tuple[EventDict, bool]:
     meta = _get_metadata(event_payload, metadata, source, profile_less)
     source = source if not event_payload.has_source_id() else Entity(id=event_payload.get_source_id())
+    profile_entity_dict = profile_entity.model_dump() if profile_entity else None
 
     if isinstance(session, Session):
 
         hit = _get_hit(event_payload)
 
         event_type = event_payload.type.strip()
-        event = Event(id=str(uuid4()) if not event_payload.id else event_payload.id,
-                      name=capitalize_event_type_id(event_type),
-                      metadata=meta,
-                      session=_get_event_session(session),
-                      profile=profile_entity,  # profile can be None when profile_less event.
-                      type=event_type,
+        event_dict = EventDict(
+            id=str(uuid4()) if not event_payload.id else event_payload.id,
+            name=capitalize_event_type_id(event_type),
+            metadata=meta.model_dump(mode="json"),
+            session=_get_event_session(session).model_dump(mode="json"),
+            profile=profile_entity_dict,  # profile can be None when profile_less event.
+            type=event_type,
 
-                      os=session.os.model_dump(exclude_unset=True),
-                      app=session.app.model_dump(exclude_unset=True),
-                      device=session.device.model_dump(exclude_unset=True),
-                      hit=hit.model_dump(exclude_unset=True),
+            os=session.os.model_dump(exclude_unset=True),
+            app=session.app.model_dump(exclude_unset=True),
+            device=session.device.model_dump(exclude_unset=True),
+            hit=hit.model_dump(exclude_unset=True),
 
-                      utm=session.utm,
+            utm=session.utm.model_dump(mode="json"),
 
-                      properties=event_payload.properties,
-                      source=source,  # Entity
-                      config=event_payload.options,
-                      context=event_payload.context,
-                      operation=RecordFlag(new=True),
-                      tags=Tags(values=tuple(event_payload.tags), count=len(event_payload.tags))
-                      )
+            properties=event_payload.properties,
+            source=dict(id=source.id),  # Entity
+            config=event_payload.options,
+            context=event_payload.context,
+            operation=dict(new=True, update=False),
+            tags=dict(values=tuple(event_payload.tags), count=len(event_payload.tags))
+        )
 
     else:
         event_type = event_payload.type.strip()
-        event = Event(id=str(uuid4()) if not event_payload.id else event_payload.id,
-                      name=capitalize_event_type_id(event_type),
-                      metadata=meta,
-                      session=None,
-                      profile=profile_entity,  # profile can be None when profile_less event.
-                      type=event_type,
-                      properties=event_payload.properties,
-                      source=source,  # Entity
-                      config=event_payload.options,
-                      context=event_payload.context,
-                      operation=RecordFlag(new=True),
-                      tags=Tags(values=tuple(event_payload.tags), count=len(event_payload.tags))
-                      )
+        event_dict = EventDict(
+            id=str(uuid4()) if not event_payload.id else event_payload.id,
+            name=capitalize_event_type_id(event_type),
+            metadata=meta.model_dump(mode="json"),
+            session=None,
+            profile=profile_entity_dict,  # profile can be None when profile_less event.
+            type=event_type,
+            properties=event_payload.properties,
+            source=dict(id=source.id),  # Entity
+            config=event_payload.options,
+            context=event_payload.context,
+            operation=dict(new=True, update=False),
+            tags=dict(values=tuple(event_payload.tags), count=len(event_payload.tags))
+        )
 
-    return event
+    return event_dict, meta.valid
