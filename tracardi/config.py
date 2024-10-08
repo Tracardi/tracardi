@@ -208,7 +208,7 @@ class TracardiConfig(metaclass=Singleton):
     def __init__(self, env):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
-        self.track_debug = env.get('TRACK_DEBUG', 'no').lower() == 'yes'
+        self.track_debug = get_env_as_bool('TRACK_DEBUG', 'no')
         self.save_logs = get_env_as_bool('SAVE_LOGS', 'yes')
         self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'no')
         self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'no')
@@ -226,8 +226,9 @@ class TracardiConfig(metaclass=Singleton):
 
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
-        # Temporary flag
-        self.new_collector = get_env_as_bool('NEW_COLLECTOR', 'yes')
+        # Only this event can set hashed ID fo email, phone, etc.
+        self.identification_event_type = env.get('IDENTIFICATION_EVENT_TYPE', None)
+        self.identification_event_property = env.get('IDENTIFICATION_EVENT_PROPERTY', 'data.identifier.pk,data.identifier.id,data.contact.email.business,data.contact.email.main,data.contact.email.private,data.contact.phone.business,data.contact.phone.main,data.contact.phone.mobile,data.contact.phone.whatsapp')
 
         # Not used now
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
@@ -293,6 +294,9 @@ class TracardiConfig(metaclass=Singleton):
 
     def is_apm_on(self) -> bool:
         return self.apm_on
+
+    def has_defined_identification_event_type(self) -> bool:
+        return bool(self.identification_event_type)
 
     @property
     def config(self) -> YamlConfig:

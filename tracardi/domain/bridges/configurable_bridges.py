@@ -18,13 +18,13 @@ from tracardi.service.utils.hasher import uuid4_from_md5, hash_id
 
 logger = get_logger(__name__)
 
+
 class ConfigurableBridge(NamedEntity):
     config: Optional[dict] = {}
 
     async def configure(self, tracker_payload: TrackerPayload, tracker_config: TrackerConfig) -> Tuple[
         TrackerPayload, TrackerConfig]:
         pass
-
 
     @staticmethod
     async def _get_hashed_id(tracker_payload: TrackerPayload) -> Optional[str]:
@@ -35,7 +35,8 @@ class ConfigurableBridge(NamedEntity):
 
             # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys
 
-            custom_event_to_profile_mappings:List[EventToProfile] = await load_event_to_profile(event_type_id=event_type)
+            custom_event_to_profile_mappings: List[EventToProfile] = await load_event_to_profile(
+                event_type_id=event_type)
 
             for custom_mapping_schema in custom_event_to_profile_mappings:
                 for event_to_profile_mapping in custom_mapping_schema.event_to_profile:
@@ -58,6 +59,7 @@ class ConfigurableBridge(NamedEntity):
 
         return None
 
+
 class WebHookBridge(ConfigurableBridge):
 
     async def configure(self, tracker_payload: TrackerPayload, tracker_config: TrackerConfig) -> Tuple[
@@ -77,7 +79,8 @@ class WebHookBridge(ConfigurableBridge):
                             sticky_session = self.config.get('sticky_session', True)
 
                             if sticky_session:
-                                session_id = uuid4_from_md5(md5(f"{tracardi.auto_profile_merging}:{profile_id}".encode()).hexdigest())
+                                session_id = uuid4_from_md5(
+                                    md5(f"{tracardi.auto_profile_merging}:{profile_id}".encode()).hexdigest())
                                 tracker_payload.replace_session(session_id)
 
                     # Create random if does not exist
@@ -110,7 +113,6 @@ class RestApiBridge(ConfigurableBridge):
 
     async def configure(self, tracker_payload: TrackerPayload, tracker_config: TrackerConfig) -> Tuple[
         TrackerPayload, TrackerConfig]:
-
         # If REST API is configured to have static Profile ID, set it in tracker config
 
         if tracker_payload.source.config is not None and tracker_payload.source.config.get('static_profile_id', False):

@@ -443,6 +443,20 @@ system_settings = [
     ),
     SystemSettings(
         **{
+            "label": "IDENTIFICATION_EVENT_TYPE",
+            "value": tracardi.identification_event_type,
+            "desc": "Default: None. Generate identification ids from hashed E-mail or phone only for defined event types. None means always treat e-mail or phone as identifier.",
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "IDENTIFICATION_EVENT_PROPERTY",
+            "value": tracardi.identification_event_property,
+            "desc": "Default: 'data.identifier.pk, data.identifier.id, data.contact.email.business, data.contact.email.main, data.contact.email.private, data.contact.phone.business, data.contact.phone.main, data.contact.phone.mobile, data.contact.phone.whatsapp'. Set PII data that needs to be hashed to profile.IDs if IDENTIFICATION_EVENT_TYPE is received. System will make a Hashed ID from profile properties if the IDENTIFICATION_EVENT_PROPERTY in profile is changed by event set in IDENTIFICATION_EVENT_TYPE.",
+        }
+    ),
+    SystemSettings(
+        **{
             "label": "DISALLOW_BOT_TRAFFIC",
             "value": tracardi.disallow_bot_traffic,
             "desc": "Default: Yes. If set to Yes then block bot traffic."

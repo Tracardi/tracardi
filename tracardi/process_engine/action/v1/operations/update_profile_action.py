@@ -8,8 +8,7 @@ class UpdateProfileAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
         if self.profile:
-            self.profile.mark_for_update()
-            self.profile.data.compute_anonymous_field()
+            self.update_profile()
         else:
             self.console.error(f"Could not update profile within profile-less event.")
 
