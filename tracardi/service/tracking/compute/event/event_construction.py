@@ -59,23 +59,23 @@ def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, s
     return meta
 
 
-def _get_hit(event_payload: EventPayload) -> Hit:
-    hit = Hit()
+def _get_hit(event_payload: EventPayload) -> dict:
+    hit = dict()
 
     if isinstance(event_payload.context, dict) and 'page' in event_payload.context:
 
         try:
-            hit.name = event_payload.context['page']['title']
+            hit['name'] = event_payload.context['page']['title']
         except (KeyError, TypeError):
             pass
 
         try:
-            hit.url = event_payload.context['page']['url']
+            hit['url'] = event_payload.context['page']['url']
         except (KeyError, TypeError):
             pass
 
         try:
-            hit.referer = event_payload.context['page']['referer']['host']
+            hit['referer'] = event_payload.context['page']['referer']['host']
         except (KeyError, TypeError):
             pass
 
@@ -88,20 +88,23 @@ def event_payload_to_event(event_payload: EventPayload,
                            session: Union[Optional[Entity], Optional[Session]],
                            profile_entity: Optional[PrimaryEntity],
                            profile_less: bool) -> Tuple[EventDict, bool]:
+    id = str(uuid4()) if not event_payload.id else event_payload.id
+    event_type = event_payload.type.strip()
+    event_name = capitalize_event_type_id(event_type)
     # TODO Create Dict not Object
     meta = _get_metadata(event_payload, metadata, source, profile_less)
+    meta_dict = meta.model_dump(mode="json")
     source_dict = {"id": source.id} if not event_payload.has_source_id() else dict(id=event_payload.get_source_id())
     profile_entity_dict = {"id": profile_entity.id} if profile_entity else None
 
     if isinstance(session, Session):
 
-        hit = _get_hit(event_payload)
+        hit_dict = _get_hit(event_payload)
 
-        event_type = event_payload.type.strip()
         event_dict = EventDict(
-            id=str(uuid4()) if not event_payload.id else event_payload.id,
-            name=capitalize_event_type_id(event_type),
-            metadata=meta.model_dump(mode="json"),
+            id=id,
+            name=event_name,
+            metadata=meta_dict,
             session=_get_event_session(session).model_dump(mode="json"),
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
@@ -109,7 +112,7 @@ def event_payload_to_event(event_payload: EventPayload,
             os=session.os.model_dump(mode="json", exclude_unset=True),
             app=session.app.model_dump(mode="json", exclude_unset=True),
             device=session.device.model_dump(mode="json", exclude_unset=True),
-            hit=hit.model_dump(mode="json", exclude_unset=True),
+            hit=hit_dict,
 
             utm=session.utm.model_dump(mode="json"),
 
@@ -122,11 +125,11 @@ def event_payload_to_event(event_payload: EventPayload,
         )
 
     else:
-        event_type = event_payload.type.strip()
+
         event_dict = EventDict(
-            id=str(uuid4()) if not event_payload.id else event_payload.id,
-            name=capitalize_event_type_id(event_type),
-            metadata=meta.model_dump(mode="json"),
+            id=id,
+            name=event_name,
+            metadata=meta_dict,
             session=None,
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
