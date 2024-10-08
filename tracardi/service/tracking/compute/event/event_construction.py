@@ -54,7 +54,7 @@ def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, s
         # Mark as merged if not error
         metadata.merge = not event_payload.merging.error
 
-    meta.valid = event_payload.validation is not None and event_payload.validation.error is True
+    meta.valid = not (event_payload.validation is not None and event_payload.validation.error is True)
 
     return meta
 
