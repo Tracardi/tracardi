@@ -155,14 +155,17 @@ async def event_to_traits(flat_event: Dotty,
 #     return flat_event, flat_profile, auto_merge_ids, field_change_logger
 
 
-async def make_event_from_event_payload(event_payload,
-                                        profile_entity: Optional[PrimaryEntity],
-                                        session,
-                                        source: EventSource,
-                                        metadata,
-                                        profile_less) -> EventDict:
+async def make_event_from_event_payload(
+        request,
+        event_payload,
+        profile_entity: Optional[PrimaryEntity],
+        session,
+        source: EventSource,
+        metadata,
+        profile_less) -> EventDict:
     # Get event
-    event, even_valid = event_payload_to_event(
+    event_dict, even_valid = event_payload_to_event(
+        request,
         event_payload,
         metadata,
         source,
@@ -176,7 +179,7 @@ async def make_event_from_event_payload(event_payload,
             extra=ExtraInfo.exact(
                 flow_id=None,
                 node_id=None,
-                event_id=event.id,
+                event_id=event_dict.id,
                 profile_id=profile_entity.id if profile_entity else None,
                 origin='event-computation',
                 package=__name__,
@@ -184,15 +187,15 @@ async def make_event_from_event_payload(event_payload,
             )
         )
 
-    return event
+    return event_dict
 
 
-def update_event_from_request(tracker_payload: TrackerPayload, event: Event):
-    if tracker_payload.request:
-        if isinstance(event.request, dict):
-            event.request.update(tracker_payload.request)
-        else:
-            event.request = tracker_payload.request
+def update_event_from_request(request: dict, event: EventDict):
+    if request:
+        if 'request' not in event or not isinstance(event['request'], dict):
+            event['request'] = {}
+
+        event['request'].update(request)
 
     return event
 
@@ -209,12 +212,13 @@ async def compute_events(events: List[EventPayload],
     event_objects = []
 
     auto_merge_ids = set()
-
+    # Data that is not needed for any mapping or compliance
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
         profile_entity = FlatProfile.as_primary_entity(flat_profile)
         event_dict = await make_event_from_event_payload(
+            tracker_payload.request,
             event_payload,
             profile_entity,
             session,
@@ -254,10 +258,6 @@ async def compute_events(events: List[EventPayload],
         event_dict = flat_event.to_dict()
         _remove_empty_dicts(event_dict)
         event = Event(**event_dict)
-
-        # Data that is not needed for any mapping or compliance
-
-        event = update_event_from_request(tracker_payload, event)
 
         debugging = tracker_payload.is_debugging_on()
         event.metadata.debug = debugging

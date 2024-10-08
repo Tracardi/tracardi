@@ -1,5 +1,6 @@
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
+from tracardi.service.tracking.event_data_computation import update_event_from_request
 
 from tracardi.service.utils.date import now_in_utc
 
@@ -60,7 +61,7 @@ def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, s
 
 
 def _get_hit(event_payload: EventPayload) -> dict:
-    hit = dict()
+    hit = {}
 
     if isinstance(event_payload.context, dict) and 'page' in event_payload.context:
 
@@ -82,12 +83,15 @@ def _get_hit(event_payload: EventPayload) -> dict:
     return hit
 
 
-def event_payload_to_event(event_payload: EventPayload,
-                           metadata: EventPayloadMetadata,
-                           source: EventSource,
-                           session: Union[Optional[Entity], Optional[Session]],
-                           profile_entity: Optional[PrimaryEntity],
-                           profile_less: bool) -> Tuple[EventDict, bool]:
+def event_payload_to_event(
+        request: dict,
+        event_payload: EventPayload,
+        metadata: EventPayloadMetadata,
+        source: EventSource,
+        session: Union[Optional[Entity], Optional[Session]],
+        profile_entity: Optional[PrimaryEntity],
+        profile_less: bool) -> Tuple[EventDict, bool]:
+
     id = str(uuid4()) if not event_payload.id else event_payload.id
     event_type = event_payload.type.strip()
     event_name = capitalize_event_type_id(event_type)
@@ -140,5 +144,7 @@ def event_payload_to_event(event_payload: EventPayload,
             operation=dict(new=True, update=False),
             tags=dict(values=tuple(event_payload.tags), count=len(event_payload.tags))
         )
+
+    event_dict = update_event_from_request(request, event_dict)
 
     return event_dict, meta.valid
