@@ -22,6 +22,7 @@ from ..service.utils.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
 from ..service.utils.hasher import hash_id, has_hash_id
+from tracardi.service.storage.index import Resource
 
 
 class ConsentRevoke(BaseModel):
@@ -333,14 +334,99 @@ class FlatProfile(Dotty):
     def __init__(self, dictionary, *args, **kwargs):
         super().__init__(dictionary)
         self.log = FieldChangeLogger()
+        self._metadata = None
+
+        # Set default values and basic validation
+
+        ids = self.get('ids', None)
+        if ids is None:
+            self['ids'] = []
+        elif not isinstance(ids, list):
+            raise ValueError("IDS value must be a list.")
 
     def __setitem__(self, key, value):
         old_value = self.get(key, None)
         super().__setitem__(key, value)
+
         # Ignore
         ignore = ('metadata.fields', 'operation')
         if not key.startswith(ignore):
             self.log.log(key, old_value)
+
+    @property
+    def id(self) -> Optional[str]:
+        return self.get('id', None)
+
+    @id.setter
+    def id(self, value: str):
+        """Setter method"""
+        if not isinstance(value, str):
+            raise ValueError("ID value must be a string.")
+
+        self['id'] = value
+
+    @property
+    def ids(self) -> List[str]:
+        ids = self.get('ids', None)
+        if ids is None:
+            self['ids'] = []
+
+        return self['ids']
+
+    @ids.setter
+    def ids(self, value: List[str]):
+        """Setter method"""
+        if not isinstance(value, list):
+            raise ValueError("IDS value must be a list.")
+
+        self['ids'] = value
+
+    @staticmethod
+    def new(id: Optional[str] = None) -> 'FlatProfile':
+        _now = now_in_utc()
+
+        flat_profile = FlatProfile(
+            {
+                "id": str(uuid.uuid4()) if not id else id,
+                "metadata.time.create": _now,
+                "metadata.time.insert": _now
+            }
+        )
+        flat_profile.fill_meta_data()
+        flat_profile.set_new()
+        return flat_profile
+
+    def set_meta_data(self, metadata: RecordMetadata = None) -> 'FlatProfile':
+        self._metadata = metadata
+        return self
+
+    def get_meta_data(self) -> Optional[RecordMetadata]:
+        return self._metadata if isinstance(self._metadata, RecordMetadata) else None
+
+    def fill_meta_data(self):
+        """
+        Used to fill metadata with default current index and id.
+        """
+        self._fill_meta_data('profile')
+
+    def has_meta_data(self) -> bool:
+        return self._metadata is not None
+
+    def dump(self) -> dict:
+        dump = self.to_dict()
+        try:
+            del dump['operation']
+        except KeyError:
+            pass
+        return dump
+
+    def _fill_meta_data(self, index_type: str):
+        """
+        Used to fill metadata with default current index and id.
+        """
+        if not self.has_meta_data():
+            resource = Resource()
+            self.set_meta_data(RecordMetadata(id=self.id, index=resource[index_type].get_write_index()))
 
     def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
         field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
@@ -425,6 +511,9 @@ class FlatProfile(Dotty):
 
     def is_new(self) -> bool:
         return self['operation.new']
+
+    def set_new(self, flag=True):
+        self['operation.new'] = flag
 
     def mark_as_merged(self):
         self['metadata.system.aux.auto_merge'] = []
