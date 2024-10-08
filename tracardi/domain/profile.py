@@ -6,7 +6,7 @@ from dotty_dict import Dotty
 from pydantic import BaseModel, PrivateAttr
 from dateutil import parser
 
-from .entity import PrimaryEntity, Entity
+from .entity import PrimaryEntity, Entity, FlatEntity
 from .metadata import ProfileMetadata
 from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
     FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
@@ -329,12 +329,11 @@ class Profile(PrimaryEntity):
         return profile
 
 
-class FlatProfile(Dotty):
+class FlatProfile(FlatEntity):
 
-    def __init__(self, dictionary, *args, **kwargs):
+    def __init__(self, dictionary):
         super().__init__(dictionary)
         self.log = FieldChangeLogger()
-        self._metadata = None
 
         # Set default values and basic validation
 
@@ -364,18 +363,6 @@ class FlatProfile(Dotty):
         if not flat_profile:
             return None
         return Entity(id=flat_profile['id'])
-
-    @property
-    def id(self) -> Optional[str]:
-        return self.get('id', None)
-
-    @id.setter
-    def id(self, value: str):
-        """Setter method"""
-        if not isinstance(value, str):
-            raise ValueError("ID value must be a string.")
-
-        self['id'] = value
 
     @property
     def ids(self) -> List[str]:
@@ -409,21 +396,11 @@ class FlatProfile(Dotty):
         flat_profile.set_updated()
         return flat_profile
 
-    def set_meta_data(self, metadata: RecordMetadata = None) -> 'FlatProfile':
-        self._metadata = metadata
-        return self
-
-    def get_meta_data(self) -> Optional[RecordMetadata]:
-        return self._metadata if isinstance(self._metadata, RecordMetadata) else None
-
     def fill_meta_data(self):
         """
         Used to fill metadata with default current index and id.
         """
         self._fill_meta_data('profile')
-
-    def has_meta_data(self) -> bool:
-        return self._metadata is not None
 
     def dump(self) -> dict:
         dump = self.to_dict()

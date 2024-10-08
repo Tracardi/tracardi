@@ -1,4 +1,3 @@
-from time import time
 from typing import Optional
 
 from tracardi.context import get_context
@@ -111,7 +110,5 @@ class Tracker:
             tracking_start)
 
         context.profiler.measure('tracker-after-queue')
-
-        # context.profiler.report()
 
         return {}

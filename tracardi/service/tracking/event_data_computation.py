@@ -1,4 +1,4 @@
-from dotty_dict import dotty, Dotty
+from dotty_dict import Dotty
 
 from typing import List, Tuple, Optional, Set
 
@@ -32,7 +32,7 @@ def _remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[FlatProfile]) -> Dotty:
+def _auto_index_default_event_type(flat_event: FlatEvent, flat_profile: Optional[FlatProfile]) -> FlatEvent:
     event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
     if event_mapping_schema is not None:
@@ -63,7 +63,7 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
     return flat_event
 
 
-async def event_properties_to_profile(flat_event: Dotty,
+async def event_properties_to_profile(flat_event: FlatEvent,
                                       flat_profile: FlatProfile,
                                       session: Session,
                                       field_change_logger: FieldChangeLogger) -> Tuple[
@@ -91,9 +91,9 @@ async def event_properties_to_profile(flat_event: Dotty,
     return flat_profile, auto_merge_ids, field_change_logger
 
 
-async def event_to_traits(flat_event: Dotty,
+async def event_to_traits(flat_event: FlatEvent,
                           flat_profile: Optional[FlatProfile],
-                          ) -> Dotty:
+                          ) -> FlatEvent:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Default event mapping form predefined file
@@ -190,16 +190,6 @@ async def make_event_from_event_payload(
     return event_dict
 
 
-def update_event_from_request(request: dict, event: EventDict):
-    if request:
-        if 'request' not in event or not isinstance(event['request'], dict):
-            event['request'] = {}
-
-        event['request'].update(request)
-
-    return event
-
-
 async def compute_events(events: List[EventPayload],
                          metadata,
                          source: EventSource,
@@ -208,7 +198,7 @@ async def compute_events(events: List[EventPayload],
                          profile_less: bool,
                          tracker_payload: TrackerPayload,
                          field_change_logger: FieldChangeLogger
-                         ) -> Tuple[List[Event], Session, Optional[FlatProfile], FieldChangeLogger]:
+                         ) -> Tuple[List[FlatEvent], Session, Optional[FlatProfile], FieldChangeLogger]:
     event_objects = []
 
     auto_merge_ids = set()
@@ -226,6 +216,8 @@ async def compute_events(events: List[EventPayload],
             metadata,
             profile_less
         )
+
+        _remove_empty_dicts(event_dict)
 
         flat_event = FlatEvent(event_dict)
 
@@ -255,12 +247,9 @@ async def compute_events(events: List[EventPayload],
                     auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
 
         # Convert to event
-        event_dict = flat_event.to_dict()
-        _remove_empty_dicts(event_dict)
-        event = Event(**event_dict)
 
         debugging = tracker_payload.is_debugging_on()
-        event.metadata.debug = debugging
+        flat_event['metadata.debug'] = debugging
 
         # todo Maybe check not needed
         if isinstance(session, Session):
@@ -270,20 +259,20 @@ async def compute_events(events: List[EventPayload],
                 session.set_updated()
 
             # Add session status
-            if event.type == 'visit-started':
+            if flat_event.type == 'visit-started':
                 session.metadata.status = 'started'
                 session.set_updated()
 
-            if event.type == 'visit-ended':
+            if flat_event.type == 'visit-ended':
                 session.metadata.status = 'ended'
                 session.set_updated()
 
-            event.session.start = session.metadata.time.insert
-            event.session.duration = session.metadata.time.duration
+            flat_event['session.start'] = session.metadata.time.insert
+            flat_event['session.duration'] = session.metadata.time.duration
 
         # Collect event objects
 
-        event_objects.append(event)
+        event_objects.append(flat_event)
 
     flat_profile.set_auto_merge_fields(auto_merge_ids)
 

@@ -2,7 +2,7 @@ import logging
 from typing import Optional, List
 
 from tracardi.config import tracardi
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, FlatEvent
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
@@ -28,12 +28,12 @@ async def sync_profile_destination(profile: Optional[Profile], session: Session,
         )
 
 
-async def sync_event_destination(profile: Optional[Profile], session: Session, events: List[Event], debug):
-    if tracardi.enable_event_destinations and len(events) > 0:
+async def sync_event_destination(profile: Optional[Profile], session: Session, flat_events: List[FlatEvent], debug):
+    if tracardi.enable_event_destinations and len(flat_events) > 0:
         await event_destination_dispatch(
             profile,
             session,
-            events,
+            flat_events,
             debug,
             metadata={
                 "source": "collector",

@@ -49,7 +49,7 @@ async def os_tracker(
         )
 
         # Lock profile and session for changes and compute data
-        flat_profile, session, events, tracker_payload = await compute_data(
+        flat_profile, session, flat_events, tracker_payload = await compute_data(
             flat_profile,
             session,
             tracker_payload,
@@ -104,9 +104,9 @@ async def os_tracker(
             await save_session(session)
 
         # Save events
-        if events:
+        if flat_events:
             # Sync save
-            await save_events_in_db(events)
+            await save_events_in_db(flat_events)
 
         try:
 
@@ -121,7 +121,7 @@ async def os_tracker(
             await sync_event_destination(
                 profile,
                 session,
-                events,
+                flat_events,
                 tracker_payload.debug)
 
             # Dispatch outbound profile SYNCHRONOUSLY
@@ -153,7 +153,7 @@ async def os_tracker(
             workflow_result = await exec_workflow(
                 get_entity_id(profile),
                 session,
-                events,
+                flat_events,
                 tracker_payload)
 
             if workflow_result is not None:  # Workflow feature enabled
@@ -187,7 +187,7 @@ async def os_tracker(
                 "task": tracker_payload.get_id(),
                 "ux": ux,
                 "response": response,
-                "events": [event.id for event in events] if tracker_payload.is_debugging_on() else [],
+                "events": [event.id for event in flat_events] if tracker_payload.is_debugging_on() else [],
                 "profile": {
                     "id": get_entity_id(profile)
                 },
@@ -203,3 +203,5 @@ async def os_tracker(
                 pass
     finally:
         logger.debug(f"Process time {time.time() - tracking_start}")
+        get_context().profiler.measure("end")
+        get_context().profiler.report()

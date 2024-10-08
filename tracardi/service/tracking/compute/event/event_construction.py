@@ -1,6 +1,5 @@
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
-from tracardi.service.tracking.event_data_computation import update_event_from_request
 
 from tracardi.service.utils.date import now_in_utc
 
@@ -10,14 +9,11 @@ from uuid import uuid4
 from tracardi.domain.api_instance import ApiInstance
 from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.enum.event_status import COLLECTED
-from tracardi.domain.event import Event, Tags, EventSession, FlatEvent, EventDict
+from tracardi.domain.event import EventSession, EventDict
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.event_metadata import EventPayloadMetadata
-from tracardi.domain.metadata import Hit
-from tracardi.domain.session import Session, SessionContext
-from tracardi.domain.value_object.operation import RecordFlag
+from tracardi.domain.session import Session
 from tracardi.service.string_manager import capitalize_event_type_id
-from tracardi.service.utils.getters import get_primary_entity
 
 
 def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession]:
@@ -82,6 +78,15 @@ def _get_hit(event_payload: EventPayload) -> dict:
 
     return hit
 
+def _update_event_from_request(request: dict, event: EventDict):
+    if request:
+        if 'request' not in event or not isinstance(event['request'], dict):
+            event['request'] = {}
+
+        event['request'].update(request)
+
+    return event
+
 
 def event_payload_to_event(
         request: dict,
@@ -145,6 +150,6 @@ def event_payload_to_event(
             tags=dict(values=tuple(event_payload.tags), count=len(event_payload.tags))
         )
 
-    event_dict = update_event_from_request(request, event_dict)
+    event_dict = _update_event_from_request(request, event_dict)
 
     return event_dict, meta.valid
