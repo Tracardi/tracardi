@@ -1,25 +1,22 @@
-from dotty_dict import dotty, Dotty
+from dotty_dict import Dotty
 
 from typing import List, Tuple, Optional, Set
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.entity import PrimaryEntity
-from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
-from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.profile import FlatProfile
 from tracardi.domain.session import Session
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, EventDict, FlatEvent
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
-from tracardi.service.utils.getters import get_entity_id, get_primary_entity
 
 logger = get_logger(__name__)
 
@@ -35,7 +32,7 @@ def _remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[FlatProfile]) -> Dotty:
+def _auto_index_default_event_type(flat_event: FlatEvent, flat_profile: Optional[FlatProfile]) -> FlatEvent:
     event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
     if event_mapping_schema is not None:
@@ -66,42 +63,37 @@ def _auto_index_default_event_type(flat_event: Dotty, flat_profile: Optional[Fla
     return flat_event
 
 
-async def event_properties_to_profile(flat_event: Dotty,
-                                      flat_profile: Optional[FlatProfile],
+async def event_properties_to_profile(flat_event: FlatEvent,
+                                      flat_profile: FlatProfile,
                                       session: Session,
                                       field_change_logger: FieldChangeLogger) -> Tuple[
-    Optional[FlatProfile], Set[str], FieldChangeLogger]:
+    FlatProfile, Set[str], FieldChangeLogger]:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
-    auto_merge_ids = set()
-
     # Map event data to profile
-    if flat_profile:
+    custom_event_to_profile_mapping_schemas = await load_event_to_profile(event_type_id=flat_event['type'])
+    flat_profile, field_change_logger = await map_event_to_profile(
+        custom_event_to_profile_mapping_schemas,
+        flat_event,
+        flat_profile,
+        session,
+        field_change_logger
+    )
 
-        custom_event_to_profile_mapping_schemas = await load_event_to_profile(event_type_id=flat_event['type'])
-        flat_profile, field_change_logger = await map_event_to_profile(
-            custom_event_to_profile_mapping_schemas,
-            flat_event,
-            flat_profile,
-            session,
-            field_change_logger
-        )
+    # Add fields timestamps
+    flat_profile.set_if_not_instance('metadata.fields', {}, instance=dict)
 
-        # Add fields timestamps
-        if not isinstance(flat_profile['metadata.fields'], dict):
-            flat_profile['metadata.fields'] = {}
+    field_change_logger = field_change_logger.merge(flat_profile.log)
 
-        field_change_logger = field_change_logger.merge(flat_profile.log)
-
-        # Append field changes fo metadata.fields
-        auto_merge_ids = flat_profile.set_metadata_fields_timestamps(field_change_logger)
+    # Append field changes fo metadata.fields
+    auto_merge_ids = flat_profile.set_metadata_fields_timestamps(field_change_logger)
 
     return flat_profile, auto_merge_ids, field_change_logger
 
 
-async def event_to_traits(flat_event: Dotty,
+async def event_to_traits(flat_event: FlatEvent,
                           flat_profile: Optional[FlatProfile],
-                          ) -> Dotty:
+                          ) -> FlatEvent:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Default event mapping form predefined file
@@ -163,15 +155,17 @@ async def event_to_traits(flat_event: Dotty,
 #     return flat_event, flat_profile, auto_merge_ids, field_change_logger
 
 
-async def make_event_from_event_payload(event_payload,
-                                        profile_entity: Optional[PrimaryEntity],
-                                        session,
-                                        source: EventSource,
-                                        metadata,
-                                        profile_less) -> Event:
-
+async def make_event_from_event_payload(
+        request,
+        event_payload,
+        profile_entity: Optional[PrimaryEntity],
+        session,
+        source: EventSource,
+        metadata,
+        profile_less) -> EventDict:
     # Get event
-    event = event_payload_to_event(
+    event_dict, even_valid = event_payload_to_event(
+        request,
         event_payload,
         metadata,
         source,
@@ -179,13 +173,13 @@ async def make_event_from_event_payload(event_payload,
         profile_entity,
         profile_less)
 
-    if not event.metadata.valid:
+    if not even_valid:
         logger.error(
             event_payload.validation.message,
             extra=ExtraInfo.exact(
                 flow_id=None,
                 node_id=None,
-                event_id=event.id,
+                event_id=event_dict.id,
                 profile_id=profile_entity.id if profile_entity else None,
                 origin='event-computation',
                 package=__name__,
@@ -193,44 +187,28 @@ async def make_event_from_event_payload(event_payload,
             )
         )
 
-    return event
-
-
-def update_event_from_request(tracker_payload: TrackerPayload, event: Event):
-    if tracker_payload.request:
-        if isinstance(event.request, dict):
-            event.request.update(tracker_payload.request)
-        else:
-            event.request = tracker_payload.request
-
-    return event
+    return event_dict
 
 
 async def compute_events(events: List[EventPayload],
                          metadata,
                          source: EventSource,
                          session: Session,
-                         profile: Optional[Profile],
+                         flat_profile: Optional[FlatProfile],
                          profile_less: bool,
                          tracker_payload: TrackerPayload,
                          field_change_logger: FieldChangeLogger
-                         ) -> Tuple[List[Event], Session, Optional[Profile], FieldChangeLogger]:
+                         ) -> Tuple[List[FlatEvent], Session, Optional[FlatProfile], FieldChangeLogger]:
     event_objects = []
 
-    if profile:
-        flat_profile: Optional[FlatProfile] = FlatProfile(profile.model_dump())
-        profile_metadata = profile.get_meta_data()
-    else:
-        flat_profile = None
-        profile_metadata = None
-
     auto_merge_ids = set()
-
+    # Data that is not needed for any mapping or compliance
     for event_payload in events:
 
         # For performance reasons we return flat_event and after mappings convert to event.
-        profile_entity = get_primary_entity(profile)
-        event = await make_event_from_event_payload(
+        profile_entity = FlatProfile.as_primary_entity(flat_profile)
+        event_dict = await make_event_from_event_payload(
+            tracker_payload.request,
             event_payload,
             profile_entity,
             session,
@@ -239,40 +217,39 @@ async def compute_events(events: List[EventPayload],
             profile_less
         )
 
-        flat_event = dotty(event.model_dump(exclude_unset=True))
+        _remove_empty_dicts(event_dict)
+
+        flat_event = FlatEvent(event_dict)
 
         if flat_event.get('metadata.valid', True) is True:
             # Run mappings for valid event. Maps properties to traits, and adds traits
             flat_event = await event_to_traits(flat_event, flat_profile)
-            flat_profile, _auto_merge_ids, field_change_logger = await event_properties_to_profile(
-                flat_event,
-                flat_profile,
-                session,
-                field_change_logger
-            )
-            # flat_event, flat_profile, _auto_merge_ids, field_change_logger = await event_to_traits_and_profile_mapping(
-            #     flat_event,
-            #     flat_profile,
-            #     session,
-            #     field_change_logger
-            # )
 
-            # Combine all auto merge ids
+            # Skip mapping to profile if none
+            if flat_profile:
 
-            if _auto_merge_ids:
-                auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
+                flat_profile, _auto_merge_ids, field_change_logger = await event_properties_to_profile(
+                    flat_event,
+                    flat_profile,
+                    session,
+                    field_change_logger
+                )
+                # flat_event, flat_profile, _auto_merge_ids, field_change_logger = await event_to_traits_and_profile_mapping(
+                #     flat_event,
+                #     flat_profile,
+                #     session,
+                #     field_change_logger
+                # )
+
+                # Combine all auto merge ids
+
+                if _auto_merge_ids:
+                    auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
 
         # Convert to event
-        event_dict = flat_event.to_dict()
-        _remove_empty_dicts(event_dict)
-        event = Event(**event_dict)
-
-        # Data that is not needed for any mapping or compliance
-
-        event = update_event_from_request(tracker_payload, event)
 
         debugging = tracker_payload.is_debugging_on()
-        event.metadata.debug = debugging
+        flat_event['metadata.debug'] = debugging
 
         # todo Maybe check not needed
         if isinstance(session, Session):
@@ -282,52 +259,54 @@ async def compute_events(events: List[EventPayload],
                 session.set_updated()
 
             # Add session status
-            if event.type == 'visit-started':
+            if flat_event.type == 'visit-started':
                 session.metadata.status = 'started'
                 session.set_updated()
 
-            if event.type == 'visit-ended':
+            if flat_event.type == 'visit-ended':
                 session.metadata.status = 'ended'
                 session.set_updated()
 
-            event.session.start = session.metadata.time.insert
-            event.session.duration = session.metadata.time.duration
+            flat_event['session.start'] = session.metadata.time.insert
+            flat_event['session.duration'] = session.metadata.time.duration
 
         # Collect event objects
 
-        event_objects.append(event)
+        event_objects.append(flat_event)
+
+    flat_profile.set_auto_merge_fields(auto_merge_ids)
 
     # Recreate Profile from flat_profile, that was changed
 
-    if profile:
-        try:
+    # if flat_profile:
+    #     try:
+    #
+    #         profile = Profile(**flat_profile.to_dict())
+    #         profile.set_meta_data(profile_metadata)
+    #         if auto_merge_ids:
+    #             profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
+    #     except Exception as e:
+    #         message = f"It seems that there was an error when trying to add or update some information to " \
+    #                   f"your profile. The error occurred because you tried to add a value that is not " \
+    #                   f"allowed by the type of data that the profile can accept.  For instance, you may " \
+    #                   f"have tried to add a name to a field in your profile that only accepts a single string, " \
+    #                   f"but you provided a list of strings instead. No changes were made to your profile, and " \
+    #                   f"the original data you sent was not copied because it did not meet the " \
+    #                   f"requirements of the profile. " \
+    #                   f"Details: {repr(e)}."
+    #         logger.error(
+    #             message,
+    #             extra=ExtraInfo.exact(
+    #                 flow_id=None,
+    #                 node_id=None,
+    #                 event_id=None,
+    #                 profile_id=flat_profile.get('id', None),
+    #                 origin='event-computation',
+    #                 traceback=get_traceback(e)
+    #             )
+    #         )
+    #
+    #         if not tracardi.skip_errors_on_profile_mapping:
+    #             raise e
 
-            profile = Profile(**flat_profile.to_dict())
-            profile.set_meta_data(profile_metadata)
-            if auto_merge_ids:
-                profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
-        except Exception as e:
-            message = f"It seems that there was an error when trying to add or update some information to " \
-                      f"your profile. The error occurred because you tried to add a value that is not " \
-                      f"allowed by the type of data that the profile can accept.  For instance, you may " \
-                      f"have tried to add a name to a field in your profile that only accepts a single string, " \
-                      f"but you provided a list of strings instead. No changes were made to your profile, and " \
-                      f"the original data you sent was not copied because it did not meet the " \
-                      f"requirements of the profile. " \
-                      f"Details: {repr(e)}."
-            logger.error(
-                message,
-                extra=ExtraInfo.exact(
-                    flow_id=None,
-                    node_id=None,
-                    event_id=None,
-                    profile_id=flat_profile.get('id', None),
-                    origin='event-computation',
-                    traceback=get_traceback(e)
-                )
-            )
-
-            if not tracardi.skip_errors_on_profile_mapping:
-                raise e
-
-    return event_objects, session, profile, field_change_logger
+    return event_objects, session, flat_profile, field_change_logger

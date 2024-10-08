@@ -1,4 +1,4 @@
-def get_traceback(ex):
+def get_traceback(ex: object) -> object:
     trace = []
     tb = ex.__traceback__
     while tb is not None:

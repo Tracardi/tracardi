@@ -5,7 +5,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.profile import FlatProfile
 
 logger = get_logger(__name__)
 
@@ -34,14 +34,7 @@ async def load_profile_and_session(
         changed_fields = flat_profile.create_auto_merge_hashed_ids()
         if changed_fields:
             flat_profile.mark_for_update()
-            flat_profile.metadata.system.set_auto_merge_fields(changed_fields)
-        # Removed not needed to always hash IDS. Hash only on update.
-        # Mark profile if the hashed IDs can be computed on its PII.
-        # event_types = tracker_payload.get_event_types()
-        # if can_profile_pii_be_hashed_in_ids(event_types):
-        #     has_changes = flat_profile.hash_all_allowed_pii_as_ids()
-        #     if has_changes:
-        #         flat_profile.mark_for_update()
+            flat_profile.set_auto_merge_fields(changed_fields)
 
         # Add Ids from payload
         if isinstance(tracker_payload.profile, PrimaryEntity) and tracker_payload.profile.ids:

@@ -5,13 +5,12 @@ from datetime import timedelta
 from tracardi.config import tracardi
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.utils.date import now_in_utc
 
 
-def add_system_events(profile: Profile, session: Session, tracker_payload: TrackerPayload) -> Tuple[
+def add_system_events(is_profile_new: bool, session: Session, tracker_payload: TrackerPayload) -> Tuple[
     TrackerPayload, Session]:
     # Visit ended never creates system events.
     if tracker_payload.has_event_type('visit-ended'):
@@ -25,7 +24,7 @@ def add_system_events(profile: Profile, session: Session, tracker_payload: Track
 
     _now_utc = now_in_utc()
 
-    if profile and profile.is_new() and not tracker_payload.has_event_type('profile-created'):
+    if is_profile_new and not tracker_payload.has_event_type('profile-created'):
         _time = _now_utc - timedelta(seconds=3)
         # Add session created
         tracker_payload.events.append(

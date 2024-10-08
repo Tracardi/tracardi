@@ -2,8 +2,8 @@ from typing import Tuple, List, Optional
 
 from tracardi.config import tracardi
 from tracardi.context import get_context
-from tracardi.domain.event import Event
-from tracardi.domain.profile import Profile
+from tracardi.domain.event import Event, FlatEvent
+from tracardi.domain.profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
@@ -17,40 +17,40 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 
 
 async def _compute(source,
-                   profile: Optional[Profile],
+                   flat_profile: Optional[FlatProfile],
                    session: Optional[Session],
                    tracker_payload: TrackerPayload,
                    field_change_logger: FieldChangeLogger
                    ) -> Tuple[
-    Optional[Profile], Optional[Session], List[Event], TrackerPayload]:
+    Optional[FlatProfile], Optional[Session], List[FlatEvent], TrackerPayload]:
     context = get_context()
 
-    if profile is not None:
+    if flat_profile is not None:
         # Profile computation
 
         # Compute Profile GEO Markets and continent
-        profile, field_change_logger = compute_profile_aux_geo_markets(profile, session, tracker_payload,
-                                                                       field_change_logger)
+        flat_profile, field_change_logger = compute_profile_aux_geo_markets(
+            flat_profile, session, tracker_payload,field_change_logger)
 
         # Update profile last geo with session device geo
-        profile, field_change_logger = update_profile_last_geo(session, profile, field_change_logger)
+        flat_profile, field_change_logger = update_profile_last_geo(session, flat_profile, field_change_logger)
 
         # Update email type
-        profile, field_change_logger = update_profile_email_type(profile, field_change_logger)
+        flat_profile, field_change_logger = update_profile_email_type(flat_profile, field_change_logger)
 
         # Update visits
-        profile, field_change_logger = update_profile_visits(session, profile, field_change_logger)
+        flat_profile, field_change_logger = update_profile_visits(session, flat_profile, field_change_logger)
 
         # Update profile time zone
-        profile, field_change_logger = update_profile_time(session, profile, field_change_logger)
+        flat_profile, field_change_logger = update_profile_time(session, flat_profile, field_change_logger)
 
         context.profiler.measure('after-profile-computation')
 
-    # Updates/Mutations of tracker_payload and session
+        # Updates/Mutations of tracker_payload and session
 
-    # Add system events
-    if tracardi.system_events:
-        tracker_payload, session = add_system_events(profile, session, tracker_payload)
+        # Add system events
+        if tracardi.system_events:
+            tracker_payload, session = add_system_events(flat_profile.is_new(), session, tracker_payload)
 
     # ---------------------------------------------------------------------------
     # Compute events. Session can be changed if there is event e.g. visit-open
@@ -60,12 +60,12 @@ async def _compute(source,
 
     # Function compute_events also maps events to profile
 
-    events, session, profile, field_change_logger = await compute_events(
+    flat_events, session, flat_profile, field_change_logger = await compute_events(
         tracker_payload.events,  # All events with system events, and validation information
         tracker_payload.metadata,
         source,
         session,
-        profile,  # Profile gets converted to FlatProfile
+        flat_profile,  # Profile gets converted to FlatProfile
         tracker_payload.profile_less,
         tracker_payload,
         field_change_logger
@@ -73,29 +73,29 @@ async def _compute(source,
 
     # Caution: After clear session can become None if set sessionSave = False
 
-    return profile, session, events, tracker_payload
+    return flat_profile, session, flat_events, tracker_payload
 
 
 async def compute_data(
-        profile: Profile,
+        flat_profile: Optional[FlatProfile],
         session: Optional[Session],
         tracker_payload: TrackerPayload,
         source: EventSource,
         field_change_logger: FieldChangeLogger) -> Tuple[
-    Profile, Optional[Session], List[Event], TrackerPayload]:
+    Optional[FlatProfile], Optional[Session], List[FlatEvent], TrackerPayload]:
     # We need profile and session before async
 
     context = get_context()
     context.profiler.measure('after-profile-computation')
 
-    profile, session, events, tracker_payload = await _compute(
+    flat_profile, session, flat_events, tracker_payload = await _compute(
         source,
-        profile,
+        flat_profile,
         session,
         tracker_payload,
         field_change_logger)
 
     # Removes data that should not be saved
-    profile, session, events = remove_ephemeral_data(tracker_payload, profile, session, events)
+    flat_profile, session, flat_events = remove_ephemeral_data(tracker_payload, flat_profile, session, flat_events)
 
-    return profile, session, events, tracker_payload
+    return flat_profile, session, flat_events, tracker_payload

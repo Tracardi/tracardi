@@ -8,7 +8,7 @@ from tracardi.domain.entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import Profile, FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.tracker_config import TrackerConfig
@@ -17,7 +17,7 @@ from tracardi.service.tracking.profile_loading import load_profile_and_session
 
 async def _check_loading(loaded_session, profile_from_db, tracker_payload, expected_loads_no):
     # Use `patch` to mock the `load_session` function
-    with patch("tracardi.domain.payload.tracker_payload.load_profile",
+    with patch("tracardi.domain.payload.tracker_payload.load_flat_profile",
                new_callable=AsyncMock,
                return_value=profile_from_db) as mock_load_session:
 
@@ -44,7 +44,7 @@ async def test_profile_loading_test_1():
         # Loaded profile ID equal to requested profile in payload
         # Both session and profile are correct
 
-        profile = Profile.new(id='p123')
+        profile = FlatProfile.new(id='p123')
         existing_session = Session.new(id='s123', profile_id='p123')
 
         tracker_payload = TrackerPayload(
@@ -85,7 +85,7 @@ async def test_profile_loading_test_2():
         # Indicating that the correct profile was loaded.
 
         # Returned profile
-        returned_profile = Profile.new(id='x123')
+        returned_profile = FlatProfile.new(id='x123')
         returned_profile.ids = ['p123']
         existing_session = Session.new(id='s123', profile_id='p123')
 
@@ -145,7 +145,7 @@ async def test_profile_loading_test_3():
         )
 
         # Returned profile
-        profile_from_db = Profile.new(id='x123')
+        profile_from_db = FlatProfile.new(id='x123')
         profile_from_db.ids = ['p123']
         profile_from_db.set_new(False)
 
@@ -189,7 +189,7 @@ async def test_profile_loading_test_4():
         )
 
         # Returned profile
-        profile_from_db = Profile.new(id='x123')
+        profile_from_db = FlatProfile.new(id='x123')
         profile_from_db.ids = ['NONE']
 
         with pytest.raises(ValueError):
@@ -273,7 +273,7 @@ async def test_profile_loading_test_6():
             if profile_id == "this-profile-does-not-exist":
                 return None
             elif profile_id == 'x123':
-                profile = Profile.new(id='x123')
+                profile = FlatProfile.new(id='x123')
                 profile.set_new(False)
                 return profile
 
@@ -471,7 +471,7 @@ async def test_profile_loading_test_10():
         )
 
         # Returned profile
-        loaded_profile_from_db = Profile.new(id="D")
+        loaded_profile_from_db = FlatProfile.new(id="D")
         loaded_profile_from_db.ids = ['B']
         loaded_profile_from_db.set_new(False)
 

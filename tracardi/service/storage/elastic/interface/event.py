@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict
 
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, FlatEvent, flat_events_to_event
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.driver.elastic import event as event_db
 
@@ -55,8 +55,8 @@ async def load_events_avg_requests():
     return result['count'] / (5 * 60) if 'count' in result else 0
 
 
-async def save_events_in_db(events) -> BulkInsertResult:
-    return await event_db.save(events, exclude={"operation": ...})
+async def save_events_in_db(flat_events: List[FlatEvent]) -> BulkInsertResult:
+    return await event_db.save(flat_events, exclude={"operation": ...})
 
 
 async def load_events_by_session_and_profile(profile_id: str, session_id: str, limit: int):

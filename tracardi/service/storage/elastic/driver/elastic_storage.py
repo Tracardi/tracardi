@@ -1,10 +1,11 @@
 from collections import defaultdict
+
 from typing import List, Optional, Union, AsyncGenerator, Any, Dict
 
 import elasticsearch
 from pydantic import BaseModel
 
-from tracardi.domain.entity import Entity
+from tracardi.domain.entity import Entity, FlatEntity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.exceptions.exception import DuplicatedRecordException
@@ -99,6 +100,9 @@ class ElasticStorage:
         elif isinstance(record, Entity):
             record = record.to_storage_record(exclude=exclude)
 
+        elif isinstance(record, FlatEntity):
+            record = record.to_storage_record()
+
         elif isinstance(record, BaseModel):
             record = StorageRecord.build_from_base_model(record, exclude=exclude)
 
@@ -136,6 +140,7 @@ class ElasticStorage:
             for row in data:
                 index = self.get_storage_index(row)
                 record = self._get_storage_record(row, exclude=exclude, replace_id=replace_id)
+
                 records_by_index[index].append(record)
 
             if len(records_by_index) > 1:

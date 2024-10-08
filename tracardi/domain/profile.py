@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Any, Set
 from dotty_dict import Dotty
 from pydantic import BaseModel, PrivateAttr
 
-from .entity import PrimaryEntity
+from .entity import PrimaryEntity, Entity, FlatEntity
 from .metadata import ProfileMetadata
 from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
     FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
@@ -222,7 +222,7 @@ class Profile(PrimaryEntity):
             self.operation.update = True
 
     def get_consent_ids(self) -> Set[str]:
-        return set([consent_id for consent_id, _ in self.consents.items()])
+        return set(self.consents.keys())
 
     def increase_visits(self, value=1):
         self.stats.visits += value
@@ -363,12 +363,11 @@ class Profile(PrimaryEntity):
         return None
 
 
-class FlatProfile(Dotty):
+class FlatProfile(FlatEntity):
 
-    def __init__(self, dictionary, *args, **kwargs):
+    def __init__(self, dictionary):
         super().__init__(dictionary)
         self.log = FieldChangeLogger()
-        self._metadata = None
 
         # Set default values and basic validation
 
@@ -387,17 +386,17 @@ class FlatProfile(Dotty):
         if not key.startswith(ignore):
             self.log.log(key, old_value)
 
-    @property
-    def id(self) -> Optional[str]:
-        return self.get('id', None)
+    @staticmethod
+    def as_primary_entity(flat_profile: 'FlatProfile'):
+        if not flat_profile:
+            return None
+        return PrimaryEntity(id=flat_profile['id'], primary_id=flat_profile.get('primary_id', None))
 
-    @id.setter
-    def id(self, value: str):
-        """Setter method"""
-        if not isinstance(value, str):
-            raise ValueError("ID value must be a string.")
-
-        self['id'] = value
+    @staticmethod
+    def as_entity(flat_profile: 'FlatProfile'):
+        if not flat_profile:
+            return None
+        return Entity(id=flat_profile['id'])
 
     @property
     def ids(self) -> List[str]:
@@ -428,23 +427,14 @@ class FlatProfile(Dotty):
         )
         flat_profile.fill_meta_data()
         flat_profile.set_new()
+        flat_profile.set_updated()
         return flat_profile
-
-    def set_meta_data(self, metadata: RecordMetadata = None) -> 'FlatProfile':
-        self._metadata = metadata
-        return self
-
-    def get_meta_data(self) -> Optional[RecordMetadata]:
-        return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
     def fill_meta_data(self):
         """
         Used to fill metadata with default current index and id.
         """
         self._fill_meta_data('profile')
-
-    def has_meta_data(self) -> bool:
-        return self._metadata is not None
 
     def dump(self) -> dict:
         dump = self.to_dict()
@@ -453,6 +443,9 @@ class FlatProfile(Dotty):
         except KeyError:
             pass
         return dump
+
+    def instanceof(self, field: str, instance: type) -> bool:
+        return field in self and isinstance(field, instance)
 
     def _fill_meta_data(self, index_type: str):
         """
@@ -562,9 +555,131 @@ class FlatProfile(Dotty):
     def set_new(self, flag=True):
         self['operation.new'] = flag
 
+    def set_updated(self, flag=True):
+        self['operation.update'] = flag
+
     def mark_as_merged(self):
         self['metadata.system.aux.auto_merge'] = []
         self['metadata.aux.merge_time'] = now_in_utc()
 
     def update_changed_fields(self, changed_fields):
         self['metadata.fields'] = changed_fields
+
+    def set_auto_merge_fields(self, auto_merge_ids: set):
+        if 'metadata.system.aux.auto_merge' not in self or not isinstance(self['metadata.system.aux.auto_merge'], list):
+            self['metadata.system.aux.auto_merge'] = list(auto_merge_ids)
+        else:
+            self['metadata.system.aux.auto_merge'] = list(
+                set(self['metadata.system.aux.auto_merge']).union(auto_merge_ids))
+
+    def has(self, value, equal=None) -> bool:
+        if equal is None:
+            return value in self
+        return value in self and self[value] == equal
+
+    def has_not_empty(self, value) -> bool:
+        return value in self and self[value] is not None
+
+    def set_if_none(self, field, value):
+        if field not in self:
+            self[field] = value
+
+    def set_if_not_instance(self, field: str, value, instance: type):
+        if field not in self or not isinstance(self[field], instance):
+            self[field] = value
+
+    def has_hashed_phone_id(self, type: str = None) -> bool:
+
+        if type is None:
+            type = PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
+
+        for id in self.ids:
+            if id.startswith(type):
+                return True
+        return False
+
+    def has_hashed_email_id(self, type: str = None) -> bool:
+        """
+        This only checks if there are prefixed ids. It does not check if they are correct. APM does it.
+        """
+        if type is None:
+            type = PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, PREFIX_EMAIL_BUSINESS
+
+        for id in self.ids:
+            if id.startswith(type):
+                return True
+        return False
+
+    def has_hashed_id(self) -> bool:
+        for id in self.ids:
+            if id.startswith(PREFIX_IDENTIFIER_ID):
+                return True
+        return False
+
+    def has_hashed_pk(self) -> bool:
+        for id in self.ids:
+            if id.startswith(PREFIX_IDENTIFIER_PK):
+                return True
+        return False
+
+    def create_auto_merge_hashed_ids(self) -> Optional[set]:
+
+        if tracardi.is_apm_on():
+
+            new_ids = set()
+            update_fields = set()
+
+            if self.has('data.identifier.pk') and not self.has_hashed_pk():
+                new_ids.add(hash_id(self['data.identifier.pk'], PREFIX_IDENTIFIER_PK))
+                update_fields.add('data.identifier.pk')
+
+            if self.has('data.identifier.id') and not self.has_hashed_id():
+                new_ids.add(hash_id(self['data.identifier.id'], PREFIX_IDENTIFIER_ID))
+                update_fields.add('data.identifier.id')
+
+            if self.has('data.contact.email.business') and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
+                new_ids.add(hash_id(self['data.contact.email.business'], PREFIX_EMAIL_BUSINESS))
+                update_fields.add('data.contact.email.business')
+
+            if self.has('data.contact.email.main') and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
+                new_ids.add(hash_id(self['data.contact.email.main'], PREFIX_EMAIL_MAIN))
+                update_fields.add('data.contact.email.main')
+
+            if self.has('data.contact.email.private') and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
+                new_ids.add(hash_id(self['data.contact.email.private'], PREFIX_EMAIL_PRIVATE))
+                update_fields.add('data.contact.email.private')
+
+            if self.has('data.contact.phone.business') and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
+                new_ids.add(hash_id(self['data.contact.phone.business'], PREFIX_PHONE_BUSINESS))
+                update_fields.add('data.contact.phone.business')
+
+            if self.has('data.contact.phone.main') and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
+                new_ids.add(hash_id(self['data.contact.phone.main'], PREFIX_PHONE_MAIN))
+                update_fields.add('data.contact.phone.main')
+
+            if self.has('data.contact.phone.mobile') and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
+                new_ids.add(hash_id(self['data.contact.phone.mobile'], PREFIX_PHONE_MOBILE))
+                update_fields.add('data.contact.phone.mobile')
+
+            if self.has('data.contact.phone.whatsapp') and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
+                new_ids.add(hash_id(self['data.contact.phone.whatsapp'], PREFIX_PHONE_WHATSUP))
+                update_fields.add('data.contact.phone.whatsapp')
+
+            # Update if new data
+            if new_ids:
+                self.ids = list(set(self.ids) | new_ids)
+                return update_fields
+
+        return None
+
+    def set_visit_time(self, field_change_logger):
+        if self.has('metadata.time.visit.current'):
+            self['metadata.time.visit.last'] = self['metadata.time.visit.current']
+            field_change_logger.log('metadata.time.visit.last')
+        self['metadata.time.visit.current'] = now_in_utc()
+        field_change_logger.log('metadata.time.visit.current')
+
+    def get_consent_ids(self) -> Set[str]:
+        if not self.instanceof('consents', dict):
+            return set()
+        return set(self['consents'].keys())

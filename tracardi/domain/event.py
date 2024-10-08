@@ -1,8 +1,12 @@
+import json
+
 from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
 
-from .entity import Entity, PrimaryEntity
+from dotty_dict import Dotty
+
+from .entity import Entity, PrimaryEntity, FlatEntity
 from .event_metadata import EventMetadata
 from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
@@ -180,6 +184,7 @@ class Event(NamedEntity):
     # journey: Optional[dict] = {}
 
     data: Optional[dict] = {}
+
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
@@ -380,3 +385,94 @@ class Event(NamedEntity):
                 "state": None
             }
         }
+
+
+class DottyEncoder(json.JSONEncoder):
+    """Helper class for encoding of nested Dotty dicts into standard dict
+    """
+
+    def default(self, obj):
+        """Return dict data of Dotty when possible or encode with standard format
+
+        :param object: Input object
+        :return: Serializable data
+        """
+        try:
+            if hasattr(obj, '_data'):
+                return obj._data
+            elif isinstance(obj, datetime):
+                # Convert datetime to an ISO formatted string
+                return obj.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            return str(obj)
+
+
+class Flat:
+
+    def __init__(self, data):
+        self._data = data
+
+    def to_dict(self):
+        """Return wrapped dictionary.
+        This method does not copy wrapped dictionary.
+        :return dict: Wrapped dictionary
+        """
+        return json.loads(self.to_json())
+
+    def to_json(self):
+        """Return wrapped dictionary as json string.
+        This method does not copy wrapped dictionary.
+        :return str: Wrapped dictionary as json string
+        """
+        return json.dumps(self._data, cls=DottyEncoder)
+
+
+class FlatEvent(FlatEntity):
+
+    @staticmethod
+    def as_entity(flat_event: 'FlatEvent'):
+        if not flat_event:
+            return None
+        return Entity(id=flat_event['id'])
+
+    @property
+    def type(self) -> Optional[str]:
+        return self.get('type', None)
+
+    def is_async(self) -> bool:
+        return 'config' in self and self['config'].get('async', True)
+
+    def is_valid(self) -> bool:
+        return self.get('metadata.valid', True)
+
+    def has(self, value, equal=None) -> bool:
+        if equal is None:
+            return value in self
+        return value in self and self[value] == equal
+
+    def has_not_empty(self, value) -> bool:
+        return value in self and self[value] is not None
+
+    def set_if_not_instance(self, field: str, value, instance: type):
+        if field not in self or not isinstance(self[field], instance):
+            self[field] = value
+
+    def to_json(self):
+        """
+        Custom data serialisation
+        """
+        return json.dumps(self._data, cls=DottyEncoder)
+
+
+class EventDict(dict):
+    pass
+
+    @property
+    def id(self) -> Optional[str]:
+        return self.get('id', None)
+
+
+def flat_events_to_event(flat_events: List[FlatEvent]) -> List[Event]:
+    return [Event(**flat_event.to_dict()) for flat_event in flat_events]

@@ -1,3 +1,4 @@
+from dotty_dict import Dotty
 from typing import Optional, TypeVar, Type, Set, List
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
@@ -118,3 +119,50 @@ class PrimaryEntity(Entity):
     primary_id: Optional[str] = None
     metadata: Optional[Time] = None
     ids: Optional[List[str]] = None
+
+
+class FlatEntity(Dotty):
+
+    def __init__(self, dictionary):
+        super().__init__(dictionary)
+        self._metadata = None
+
+    @property
+    def id(self) -> Optional[str]:
+        return self.get('id', None)
+
+    @id.setter
+    def id(self, value: str):
+        """Setter method"""
+        if not isinstance(value, str):
+            raise ValueError("ID value must be a string.")
+
+        self['id'] = value
+
+    def get_meta_data(self) -> Optional[RecordMetadata]:
+        return self._metadata if isinstance(self._metadata, RecordMetadata) else None
+
+    def has_meta_data(self) -> bool:
+        return self._metadata is not None
+
+    def set_meta_data(self, metadata: RecordMetadata = None) -> 'FlatEntity':
+        self._metadata = metadata
+        return self
+
+    def to_storage_record(self) -> StorageRecord:
+
+        as_dict = self.to_dict()
+        if 'operation' in as_dict:
+            del as_dict['operation']
+
+        record = StorageRecord(**as_dict)
+
+        # Storage records must have ES _id
+
+        if 'id' in record:
+            record['_id'] = record['id']
+
+        if self._metadata:
+            record.set_meta_data(self._metadata)
+
+        return record

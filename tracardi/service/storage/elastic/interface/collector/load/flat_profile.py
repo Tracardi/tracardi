@@ -19,7 +19,7 @@ Optional[FlatProfile]:
         return None
 
     # This load is acceptable
-    profile = await profile_db.load_flat_profile_by_id(profile_id)
-    save_flat_profile_cache(profile, context)
+    flat_profile = await profile_db.load_flat_profile_by_id(profile_id)
+    save_flat_profile_cache(flat_profile, context)
 
-    return profile
+    return flat_profile

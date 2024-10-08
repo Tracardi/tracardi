@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from tracardi.domain import ExtraInfo
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, FlatEvent
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
@@ -17,12 +17,16 @@ logger = get_logger(__name__)
 
 async def event_destination_dispatch(profile: Optional[Profile],
                                      session: Optional[Session],
-                                     events: List[Event],
+                                     flat_events: List[FlatEvent],
                                      debug,
                                      metadata=None
                                      ):
     dot = DotAccessor(profile, session)
-    for event in events:
+    for flat_event in flat_events:
+
+        # Convert to Event destination needs it
+        event = Event(**flat_event.to_dict())
+
         try:
             # Reads from cache
             destinations: List[Destination] = await load_event_destinations(

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from tracardi.service.storage.elastic.driver.agg_result import AggResult
-from tracardi.domain.event import Event
+from tracardi.domain.event import Event, FlatEvent
 from tracardi.domain.named_entity import NamedEntity
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
@@ -20,7 +20,7 @@ async def load(id: str) -> Optional[StorageRecord]:
     return await storage_manager("event").load(id)
 
 
-async def save(events: Union[List[Event], Set[Event]], exclude=None):
+async def save(events: Union[List[FlatEvent], List[Event], Set[Event]], exclude=None):
     return await storage_manager("event").upsert(events, exclude=exclude)
 
 
