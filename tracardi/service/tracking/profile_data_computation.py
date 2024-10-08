@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from dotty_dict import Dotty
 
@@ -27,52 +27,54 @@ APPEND = 2
 logger = get_logger(__name__)
 
 
-def update_profile_last_geo(session: Session, profile: Profile, field_change_logger: FieldChangeLogger) -> Tuple[Profile,FieldChangeLogger]:
+def update_profile_last_geo(session: Session, flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
+    FlatProfile, FieldChangeLogger]:
     if not session.device.geo.is_empty():
-        _geo = session.device.geo
-        if profile.data.devices.last.geo.is_empty() or _geo != profile.data.devices.last.geo:
-            profile.data.devices.last.geo = _geo
+        _geo = session.device.geo.model_dump(mode="json")
+        if not flat_profile.has('data.devices.last.geo', equal=_geo):
+            flat_profile['data.devices.last.geo'] = _geo
             field_change_logger.log('data.devices.last.geo')
-            profile.set_updated()
-    return profile, field_change_logger
+            flat_profile.set_updated()
+    return flat_profile, field_change_logger
 
 
-def update_profile_email_type(profile: Profile, field_change_logger: FieldChangeLogger) -> Tuple[Profile,FieldChangeLogger]:
-    if profile.data.contact.email.main and ('email' not in profile.aux or 'free' not in profile.aux['email']):
-        email_parts = profile.data.contact.email.main.split('@')
+def update_profile_email_type(flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
+    FlatProfile, FieldChangeLogger]:
+    if flat_profile.has_not_empty('data.contact.email.main') and not flat_profile.has('aux.email.free'):
+        email_parts = flat_profile['data.contact.email.main'].split('@')
         if len(email_parts) > 1:
             email_domain = email_parts[1]
 
-            if 'email' not in profile.aux:
-                profile.aux['email'] = {}
-
-            profile.aux['email']['free'] = email_domain in free_email_domains
+            flat_profile['aux.email.free'] = email_domain in free_email_domains
             field_change_logger.log('aux.email.free')
-            profile.set_updated()
-    return profile, field_change_logger
+            flat_profile.set_updated()
+    return flat_profile, field_change_logger
 
 
-def update_profile_visits(session: Session, profile: Profile, field_change_logger: FieldChangeLogger) -> Tuple[Profile,FieldChangeLogger]:
+def update_profile_visits(session: Session, flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
+    FlatProfile, FieldChangeLogger]:
     # Calculate only on first click in visit
 
     if session.is_new():
-        profile.metadata.time.visit.set_visits_times(field_change_logger)
-        profile.metadata.time.visit.count += 1
+        flat_profile.set_visit_time(field_change_logger)
+        flat_profile.set_if_none('metadata.time.visit.count', 0)
+        flat_profile['metadata.time.visit.count'] += 1
         field_change_logger.log('metadata.time.visit.count')
-        profile.set_updated()
+        flat_profile.set_updated()
 
-    return profile, field_change_logger
+    return flat_profile, field_change_logger
 
 
-def update_profile_time(session: Session, profile: Profile, field_change_logger: FieldChangeLogger) -> Tuple[Profile,FieldChangeLogger]:
+def update_profile_time(session: Session, flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
+    Profile, FieldChangeLogger]:
     # Set time zone form session
     if session.context:
         try:
-            profile.metadata.time.visit.tz = session.context['time']['tz']
+            flat_profile['metadata.time.visit.tz'] = session.context['time']['tz']
             field_change_logger.log('metadata.time.visit.tz')
         except KeyError:
             pass
-    return profile, field_change_logger
+    return flat_profile, field_change_logger
 
 
 async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
@@ -87,7 +89,6 @@ async def map_event_to_profile(
         session: Session,
         field_change_logger: FieldChangeLogger
 ) -> Tuple[FlatProfile, FieldChangeLogger]:
-
     # Default event types mappings
 
     default_mapping_schema = get_default_mappings_for(flat_event['type'], 'profile')
@@ -113,7 +114,8 @@ async def map_event_to_profile(
                 if_statement = custom_mapping_schema.config['condition']
                 try:
                     # Todo converting to Profile and event may be not performant, maybe extend dot accessor to take dotty
-                    dot = DotAccessor(event=Event(**flat_event.to_dict()), profile=Profile(**flat_profile.to_dict()), session=session)
+                    dot = DotAccessor(event=Event(**flat_event.to_dict()), profile=Profile(**flat_profile.to_dict()),
+                                      session=session)
                     result = await _check_mapping_condition_if_met(if_statement, dot)
                     if result is False:
                         continue
@@ -205,7 +207,7 @@ async def map_event_to_profile(
                                 flat_profile[profile_ref] = flat_event[event_ref]
                             elif flat_profile[profile_ref] is None:
                                 flat_profile[profile_ref] = flat_event[event_ref]
-                            elif isinstance(flat_profile[profile_ref], str) :
+                            elif isinstance(flat_profile[profile_ref], str):
                                 __value = flat_profile[profile_ref].strip()
                                 if not __value:
                                     flat_profile[profile_ref] = flat_event[event_ref]
@@ -270,17 +272,20 @@ async def map_event_to_profile(
     return flat_profile, field_change_logger
 
 
-def compute_profile_aux_geo_markets(profile, session, tracker_payload, field_change_logger: FieldChangeLogger):
+def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_payload,
+                                    field_change_logger: FieldChangeLogger) -> Tuple[
+    FlatProfile, FieldChangeLogger]:
     if 'language' in session.context:
-        if profile:
-            if isinstance(profile.data.pii.language.spoken, list) and isinstance(session.context['language'], list):
-                profile.data.pii.language.spoken  = list(set(profile.data.pii.language.spoken + session.context['language']))
-            else:
-                profile.data.pii.language.spoken = session.context['language']
-            field_change_logger.log('data.pii.language.spoken')
+        if flat_profile.instanceof('data.pii.language.spoken', list) and isinstance(session.context['language'],
+                                                                                    list):
+            flat_profile['data.pii.language.spoken'] = list(
+                set(flat_profile['data.pii.language.spoken'] + session.context['language']))
+        else:
+            flat_profile['data.pii.language.spoken'] = session.context['language']
+        field_change_logger.log('data.pii.language.spoken')
 
-    if profile and 'geo' not in profile.aux:
-        profile.aux['geo'] = {}
+    if not flat_profile.has('aux.geo'):
+        flat_profile['aux.geo'] = {}
 
     # Aux markets
 
@@ -292,13 +297,13 @@ def compute_profile_aux_geo_markets(profile, session, tracker_payload, field_cha
 
     if markets:
         field_change_logger.log('aux.geo.markets')
-        profile.aux['geo']['markets'] = markets
+        flat_profile['aux.geo.markets'] = markets
 
     # Continent
 
     continent = get_continent(tracker_payload)
     if continent:
         field_change_logger.log('aux.geo.continent')
-        profile.aux['geo']['continent'] = continent
+        flat_profile['aux.geo.continent'] = continent
 
-    return profile, field_change_logger
+    return flat_profile, field_change_logger

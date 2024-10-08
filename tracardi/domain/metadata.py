@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Set
+from typing import Optional, Dict, Set, List, Tuple
 
 from pydantic import BaseModel
 
@@ -36,7 +36,7 @@ class ProfileMetadata(BaseModel):
     time: ProfileTime
     aux: Optional[dict] = {}
     status: Optional[str] = None
-    fields: Optional[dict] = {}
+    fields: Optional[Dict['str', list]] = {}
     system: Optional[ProfileSystemMetadata] = ProfileSystemMetadata()
 
 

@@ -4,6 +4,9 @@ import time
 
 from tracardi.config import tracardi
 from tracardi.context import get_context
+from tracardi.domain import ExtraInfo
+from tracardi.domain.profile import Profile
+from tracardi.exceptions.exception_service import get_traceback
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
@@ -37,7 +40,7 @@ async def os_tracker(
             return None
 
         # Load profile and session
-        profile, session = await tracker_loading(tracker_payload, tracker_config)
+        flat_profile, session = await tracker_loading(tracker_payload, tracker_config)
 
         session = await compute_session(
             session,
@@ -46,13 +49,49 @@ async def os_tracker(
         )
 
         # Lock profile and session for changes and compute data
-        profile, session, events, tracker_payload = await compute_data(
-            profile,
+        flat_profile, session, events, tracker_payload = await compute_data(
+            flat_profile,
             session,
             tracker_payload,
             source,
             field_change_logger
         )
+
+        # Recreate Profile from flat_profile, that was changed
+
+        if flat_profile:
+
+            try:
+
+                profile = Profile(**flat_profile.to_dict())
+                profile.set_meta_data(flat_profile.get_meta_data())
+
+            except Exception as e:
+                message = f"It seems that there was an error when trying to add or update some information to " \
+                          f"your profile. The error occurred because you tried to add a value that is not " \
+                          f"allowed by the type of data that the profile can accept.  For instance, you may " \
+                          f"have tried to add a name to a field in your profile that only accepts a single string, " \
+                          f"but you provided a list of strings instead. No changes were made to your profile, and " \
+                          f"the original data you sent was not copied because it did not meet the " \
+                          f"requirements of the profile. " \
+                          f"Details: {repr(e)}."
+
+                logger.error(
+                    message,
+                    extra=ExtraInfo.exact(
+                        flow_id=None,
+                        node_id=None,
+                        event_id=None,
+                        profile_id=flat_profile.get('id', None),
+                        origin='event-computation',
+                        traceback=get_traceback(e)
+                    )
+                )
+
+                raise e
+
+        # Delete profile from memory
+        flat_profile = None
 
         # Save profile
         if profile and profile.has_not_saved_changes():

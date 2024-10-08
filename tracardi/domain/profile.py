@@ -353,6 +353,10 @@ class FlatProfile(Dotty):
         if not key.startswith(ignore):
             self.log.log(key, old_value)
 
+    @staticmethod
+    def as_primary_entity(flat_profile):
+        return PrimaryEntity(id=flat_profile['id'], primary_id=flat_profile.get('primary_id', None))
+
     @property
     def id(self) -> Optional[str]:
         return self.get('id', None)
@@ -420,6 +424,9 @@ class FlatProfile(Dotty):
         except KeyError:
             pass
         return dump
+
+    def instanceof(self, field: str, instance: type) -> bool:
+        return field in self and isinstance(field, instance)
 
     def _fill_meta_data(self, index_type: str):
         """
@@ -533,8 +540,31 @@ class FlatProfile(Dotty):
             self['metadata.system.aux.auto_merge'] = list(
                 set(self['metadata.system.aux.auto_merge']).union(auto_merge_ids))
 
-    def has(self, value) -> bool:
-        return value in self
+    def has(self, value, equal=None) -> bool:
+        if equal is None:
+            return value in self
+        return value in self and self[value] == equal
+
+    def has_not_empty(self, value) -> bool:
+        return value in self and self[value] is not None
+
+    def set_if_none(self, field, value):
+        if field not in self:
+            self[field] = value
+
+    def set_if_not_instance(self, field: str, value, instance: type):
+        if field not in self or not isinstance(self[field], instance):
+            self[field] = value
+
+    def has_hashed_phone_id(self, type: str = None) -> bool:
+
+        if type is None:
+            type = PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
+
+        for id in self.ids:
+            if id.startswith(type):
+                return True
+        return False
 
     def has_hashed_email_id(self, type: str = None) -> bool:
         """
@@ -609,3 +639,10 @@ class FlatProfile(Dotty):
                 return update_fields
 
         return None
+
+    def set_visit_time(self, field_change_logger):
+        if self.has('metadata.time.visit.current'):
+            self['metadata.time.visit.last'] = self['metadata.time.visit.current']
+            field_change_logger.log('metadata.time.visit.last')
+        self['metadata.time.visit.current'] = now_in_utc()
+        field_change_logger.log('metadata.time.visit.current')

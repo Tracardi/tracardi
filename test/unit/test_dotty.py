@@ -1,12 +1,27 @@
 from dotty_dict import dotty
 
 
+def test_dotty_deep_set():
+    a = dotty({})
+    a['a.b.c'] = "1"
+    assert isinstance(a['a'], dict)
+    assert isinstance(a['a.b'], dict)
+    assert a['a.b.c'] == "1"
+
+    a['a.b.d'] = 0
+    a['a.b.d'] += 1
+    assert isinstance(a['a'], dict)
+    assert isinstance(a['a.b'], dict)
+    assert a['a.b.d'] == 1
+
+
 def test_none_to_dotty():
     a = dotty(None)
     assert bool(a) is False
 
+
 def test_list_in_dotty():
-    a = dotty({"id":"a", "ids": ["a"]})
+    a = dotty({"id": "a", "ids": ["a"]})
     a['ids'].append("b")
     assert len(a['ids']) == 2
     assert a.to_dict()['ids'] == a['ids']
@@ -61,7 +76,6 @@ def test_get_data():
     assert d == 1
     n = a.get('A.B.C.N', "default")
     assert n == 'default'
-
 
 
 def test_if_dict_assigned_can_be_accessed():

@@ -5,7 +5,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.profile import FlatProfile
 
 logger = get_logger(__name__)
 
