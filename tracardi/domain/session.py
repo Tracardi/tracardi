@@ -81,7 +81,7 @@ class Session(Entity):
 
     utm: Optional[UTM] = UTM()
 
-    context: Optional[SessionContext] = {}
+    context: Optional[SessionContext] = SessionContext({})
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}

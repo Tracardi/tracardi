@@ -160,6 +160,8 @@ async def load_by_id(profile_id: str) -> Optional[Profile]:
 
 async def load_flat_profile_by_id(profile_id: str) -> Optional[FlatProfile]:
     record = await profile_db.load_by_id(profile_id)
+    if record is None:
+        return None
     flat_profile = FlatProfile(dict(record))
     flat_profile.set_meta_data(record.get_meta_data())
     return flat_profile

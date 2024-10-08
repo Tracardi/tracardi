@@ -498,8 +498,8 @@ class TrackerPayload(BaseModel):
         # Create new profile
         flat_profile = self.create_default_profile(static)
 
-        assert flat_profile.operation.new is True
-        assert flat_profile.operation.update is True
+        assert flat_profile.has('operation.new') and flat_profile['operation.new'] is True
+        assert flat_profile.has('operation.update') and flat_profile['operation.update'] is True
 
         if flat_profile:
             if not isinstance(self.profile, PrimaryEntity):

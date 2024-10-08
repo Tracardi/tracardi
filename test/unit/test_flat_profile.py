@@ -12,7 +12,7 @@ def test_logger():
     })
 
     assert fp['prop.a'] == 1
-    assert fp.log.get_log() == {}
+    assert 'prop.a' not in fp.log.get_log()
 
     fp['prop.a'] = 2
     assert 'prop.a' in fp.log.get_log().keys()
@@ -76,3 +76,13 @@ def test_ids():
                 "a": 1
             }
         })
+
+
+def test_bool():
+    fp = FlatProfile({
+        "id": "1",
+        "prop": {
+            "a": 1
+        }
+    })
+    assert fp.has('data.identifier.pk') is False
