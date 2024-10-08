@@ -88,9 +88,10 @@ def event_payload_to_event(event_payload: EventPayload,
                            session: Union[Optional[Entity], Optional[Session]],
                            profile_entity: Optional[PrimaryEntity],
                            profile_less: bool) -> Tuple[EventDict, bool]:
+    # TODO Create Dict not Object
     meta = _get_metadata(event_payload, metadata, source, profile_less)
-    source = source if not event_payload.has_source_id() else Entity(id=event_payload.get_source_id())
-    profile_entity_dict = profile_entity.model_dump() if profile_entity else None
+    source_dict = {"id": source.id} if not event_payload.has_source_id() else dict(id=event_payload.get_source_id())
+    profile_entity_dict = {"id": profile_entity.id} if profile_entity else None
 
     if isinstance(session, Session):
 
@@ -105,15 +106,15 @@ def event_payload_to_event(event_payload: EventPayload,
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
 
-            os=session.os.model_dump(exclude_unset=True),
-            app=session.app.model_dump(exclude_unset=True),
-            device=session.device.model_dump(exclude_unset=True),
-            hit=hit.model_dump(exclude_unset=True),
+            os=session.os.model_dump(mode="json", exclude_unset=True),
+            app=session.app.model_dump(mode="json", exclude_unset=True),
+            device=session.device.model_dump(mode="json", exclude_unset=True),
+            hit=hit.model_dump(mode="json", exclude_unset=True),
 
             utm=session.utm.model_dump(mode="json"),
 
             properties=event_payload.properties,
-            source=dict(id=source.id),  # Entity
+            source=source_dict,  # Entity
             config=event_payload.options,
             context=event_payload.context,
             operation=dict(new=True, update=False),
@@ -130,7 +131,7 @@ def event_payload_to_event(event_payload: EventPayload,
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
             properties=event_payload.properties,
-            source=dict(id=source.id),  # Entity
+            source=source_dict,  # Entity
             config=event_payload.options,
             context=event_payload.context,
             operation=dict(new=True, update=False),
