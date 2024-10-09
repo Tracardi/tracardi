@@ -45,12 +45,6 @@ def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, s
         meta.time.create = event_payload.time.create
 
     meta.channel = source.channel
-
-    if event_payload.merging is not None:
-        metadata.error = event_payload.merging.error
-        # Mark as merged if not error
-        metadata.merge = not event_payload.merging.error
-
     meta.valid = event_payload.is_valid()
 
     return meta

@@ -28,7 +28,7 @@ from ..payload.event_payload import EventPayload
 from ..session import Session
 from ..time import Time
 from ..entity import Entity, PrimaryEntity, DefaultEntity
-from ..profile import Profile, FlatProfile
+from ..profile import FlatProfile
 from ...service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
 
 from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
@@ -42,8 +42,8 @@ if License.has_service(LICENSE):
 logger = get_logger(__name__)
 
 
-def _identification_list_key(tp):
-    return 1
+def _identification_list_key(source_id: str, flat_events):
+    return source_id
 
 
 class ScheduledEventConfig:
@@ -383,11 +383,6 @@ class TrackerPayload(BaseModel):
     def is_cde(self) -> bool:
         return self.get_referer_data('source') is not None and self.has_referred_profile()
 
-    @async_cache_for(memory_cache.identification_points_cache_ttl, use_context=True, key_func=_identification_list_key,
-                     lock=True)
-    async def list_identification_points(self):
-        return list(await self.get_identification_points())
-
     def get_profile_attributes_via_identification_data(self, valid_identification_points) -> Optional[
         List[Tuple[str, str]]]:
         try:
@@ -650,22 +645,27 @@ class TrackerPayload(BaseModel):
 
         return flat_profile, session
 
-    @staticmethod
-    async def _load_identification_points():
-        ips = IdentificationPointService()
-        records = await ips.load_enabled(limit=200)
-        return records.map_to_objects(map_to_identification_point)
-
-    def _get_valid_identification_points(self,
-                                         identification_points: List[IdentificationPoint]):
-        for identification_point in identification_points:
-            if identification_point.source.id != "" and identification_point.source.id != self.source.id:
-                continue
-
-            if not self.has_type(identification_point.event_type.id):
-                continue
-
-            yield identification_point
-
-    async def get_identification_points(self):
-        return self._get_valid_identification_points(await self._load_identification_points())
+    # @staticmethod
+    # async def _load_identification_points():
+    #     ips = IdentificationPointService()
+    #     records = await ips.load_enabled(limit=200)
+    #     return records.map_to_objects(map_to_identification_point)
+    #
+    # def _get_valid_identification_points(self,
+    #                                      identification_points: List[IdentificationPoint]):
+    #     for identification_point in identification_points:
+    #         if identification_point.source.id != "" and identification_point.source.id != self.source.id:
+    #             continue
+    #
+    #         if not self.has_type(identification_point.event_type.id):
+    #             continue
+    #
+    #         yield identification_point
+    #
+    # async def get_identification_points(self):
+    #     return self._get_valid_identification_points(await self._load_identification_points())
+    #
+    # @async_cache_for(memory_cache.identification_points_cache_ttl, use_context=True, key_func=_identification_list_key,
+    #                  lock=True)
+    # async def list_identification_points(self):
+    #     return list(await self.get_identification_points())

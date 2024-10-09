@@ -10,7 +10,7 @@ from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 
 
-async def _load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
+async def _load_profile_duplicates(profile_ids: Set[str]) -> StorageRecords:
     return await storage_manager('profile').query({
         "size": 10000,
         "query": {
@@ -36,16 +36,6 @@ async def _load_profile_duplicates(profile_ids: List[str]) -> StorageRecords:
     })
 
 
-async def _load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:
-    if isinstance(profile.ids, list):
-        set(profile.ids).add(profile.id)
-        profile_ids = list(profile.ids)
-    else:
-        profile_ids = [profile.id]
-
-    return await _load_profile_duplicates(profile_ids)
-
-
 async def _load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str]]) -> StorageRecords:
     return await storage_manager('profile').load_by_values(
         merge_by,
@@ -53,11 +43,12 @@ async def _load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str
         limit=10000)
 
 
-async def load_duplicated_profiles(profile: Profile, merge_by: Optional[List[Tuple[str, str]]] = None) -> List[
+async def load_duplicated_profiles(profile_ids: Set[str], merge_by: Optional[List[Tuple[str, str]]] = None) -> List[
     Tuple[FlatProfile, Optional[RecordMetadata]]]:
     if merge_by is None:
         # merge by ids
-        duplicated_profiles = await _load_duplicated_profiles_for_profile(profile)
+
+        duplicated_profiles = await _load_profile_duplicates(profile_ids)
     else:
         # merge by merge keys
         duplicated_profiles = await _load_duplicated_profiles_with_merge_key(merge_by)
@@ -102,10 +93,16 @@ async def delete_duplicated_profiles(
 
 
 async def save_merged_profile(flat_profile: FlatProfile, metadata: RecordMetadata) -> Profile:
-    profile = Profile(**flat_profile)
+    profile = Profile(**flat_profile.to_dict())
     profile.set_meta_data(metadata)
 
     # Auto refresh db
     await mutation_profile_db.save_profile(profile, refresh=True)
 
     return profile
+
+
+async def save_marked_for_merge_profiles(flat_profiles: List[FlatProfile]):
+    # Convert to profiles
+    profiles= [Profile(**flat_profile.to_dict()).set_meta_data(flat_profile.get_meta_data()) for flat_profile in flat_profiles]
+    await mutation_profile_db.save_profiles_in_db(profiles)

@@ -64,6 +64,9 @@ class Profile(PrimaryEntity):
     def is_segmented(self, flag):
         self.operation.segment = flag
 
+    def mark_as_merged(self):
+        self.metadata.system.reset_auto_merge_fields()
+
     def set_merge_key(self, merge_key):
         self.operation.merge = merge_key
 
@@ -413,6 +416,14 @@ class FlatProfile(FlatEntity):
             raise ValueError("IDS value must be a list.")
 
         self['ids'] = value
+
+    def add_to_ids(self, id: str):
+        ids = self.get('ids', [])
+        ids.append(id)
+        self['ids'] = list(set(ids))
+
+    def get_all_ids(self) -> Set[str]:
+        return {self.id, *self.ids} if isinstance(self.ids, list) else {self.id}
 
     @staticmethod
     def new(id: Optional[str] = None) -> 'FlatProfile':

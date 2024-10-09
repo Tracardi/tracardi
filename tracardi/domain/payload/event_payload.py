@@ -32,7 +32,6 @@ class EventPayload(BaseModel):
     tags: Optional[list] = []
     validation: Optional[ProcessStatus] = None
     reshaping: Optional[ProcessStatus] = None
-    merging: Optional[ProcessStatus] = None
     error: Optional[ProcessStatus] = None
 
     _source_id: str = PrivateAttr(None)

@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 import json
 
 from datetime import datetime
-from typing import Optional, List, Union, Any
+from typing import Optional, List, Union, Any, Dict
 from uuid import uuid4
 
 from dotty_dict import Dotty
@@ -441,6 +443,10 @@ class FlatEvent(FlatEntity):
     def type(self) -> Optional[str]:
         return self.get('type', None)
 
+    @property
+    def properties(self) -> dict:
+        return self.get('properties', {})
+
     def is_async(self) -> bool:
         return 'config' in self and self['config'].get('async', True)
 
@@ -464,6 +470,14 @@ class FlatEvent(FlatEntity):
         Custom data serialisation
         """
         return json.dumps(self._data, cls=DottyEncoder)
+
+
+class FlatEvents(list):
+    def group_by_type(self):
+        _indexed_flat_events: Dict[str, List[FlatEvent]] = defaultdict(list)
+        for flat_event in self:
+            _indexed_flat_events[flat_event.type].append(flat_event)
+        return _indexed_flat_events
 
 
 class EventDict(dict):
