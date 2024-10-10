@@ -127,6 +127,17 @@ class FlatEntity(Dotty):
         super().__init__(dictionary)
         self._metadata = None
 
+    def __getstate__(self):
+        # Here, you should retrieve the state, not set it.
+        state = super().__getstate__()
+        state['_metadata'] = self._metadata
+        return state
+
+    def __setstate__(self, state):
+        # Here, you should call the base class' setstate, not getstate.
+        super().__setstate__(state)
+        self._metadata = state.get('_metadata', None)
+
     @property
     def id(self) -> Optional[str]:
         return self.get('id', None)

@@ -1,3 +1,5 @@
+import io
+
 import base64
 from typing import Protocol, Any, Tuple
 
@@ -13,6 +15,7 @@ from datetime import datetime
 from dateutil import parser
 from pydantic import BaseModel
 
+from com_tracardi.service.debug.unpickler import DebugUnpickler
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.protocol.json_serializable import JsonSerializable
 
@@ -148,6 +151,16 @@ class PickleSerializer:
         base64_bytes = txt.encode('ascii')
         message_bytes = base64.b64decode(base64_bytes)
         obj = pickle.loads(message_bytes)
+        return obj
+
+    @staticmethod
+    def debug_deserialize(txt):
+        # Used only when debugging deserialization
+        base64_bytes = txt.encode('ascii')
+        message_bytes = base64.b64decode(base64_bytes)
+        bytes_stream = io.BytesIO(message_bytes)
+        debug = DebugUnpickler(bytes_stream)
+        obj = debug.load()
         return obj
 
 
