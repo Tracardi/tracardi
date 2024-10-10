@@ -204,4 +204,4 @@ async def os_tracker(
     finally:
         logger.debug(f"Process time {time.time() - tracking_start}")
         get_context().profiler.measure("end")
-        get_context().profiler.report()
+        # get_context().profiler.report()
