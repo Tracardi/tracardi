@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
 from ...domain.destination import Destination
 from ...domain.event import Event
-from ...domain.profile import Profile
+from ...domain.profile import FlatProfile
 from ...domain.resource import Resource
 from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
@@ -57,16 +57,16 @@ class HubSpotConnector(DestinationInterface):
                 print(await save_integration_id(profile_id, self.name, hubspot_id, {}))
 
     @staticmethod
-    def _prepare_payload(profile, config_data):
+    def _prepare_payload(flat_profile: FlatProfile, config_data):
         payload = {}
-        if profile.data.pii.firstname:
-            payload["firstname"] = profile.data.pii.firstname
-        if profile.data.pii.firstname:
-            payload["lastname"] = profile.data.pii.lastname
-        if profile.data.contact.email.main:
-            payload["email"] = profile.data.contact.email.main
-        if profile.data.contact.phone.main:
-            payload["phone"] = profile.data.contact.phone.main
+        if flat_profile.has('data.pii.firstname'):
+            payload["firstname"] = flat_profile['data.pii.firstname']
+        if flat_profile.has('data.pii.firstname'):
+            payload["lastname"] = flat_profile['data.pii.lastname']
+        if flat_profile.has('data.contact.email.main'):
+            payload["email"] = flat_profile['data.contact.email.main']
+        if flat_profile.has('data.contact.phone.main'):
+            payload["phone"] = flat_profile['data.contact.phone.main']
         # if profile.data.job.company:
         #     payload["company"] = profile.data.job.company
         # if profile.data.contact.address.town:
@@ -89,21 +89,21 @@ class HubSpotConnector(DestinationInterface):
 
         return payload
 
-    async def _dispatch(self, data: dict, profile: Profile):  # Data comes from mapping
+    async def _dispatch(self, data: dict, flat_profile: FlatProfile):  # Data comes from mapping
 
-        payload = self._prepare_payload(profile, data)
+        payload = self._prepare_payload(flat_profile, data)
 
         # If there is any data to send
         logger.info(f"Prepared data payload {payload}")
 
         if not payload:
-            logger.info(f"No update in hubspot data is empty for profile {profile.id}.")
+            logger.info(f"No update in hubspot data is empty for profile {flat_profile.id}.")
             return
 
-        integration_ids = await load_integration_id(profile.id, self.name)
+        integration_ids = await load_integration_id(flat_profile.id, self.name)
 
         if not integration_ids:
-            return await self._add_contact(payload, profile.id)
+            return await self._add_contact(payload, flat_profile.id)
 
         logger.info(f"Found hubspot integration data {integration_ids}")
 
@@ -114,15 +114,16 @@ class HubSpotConnector(DestinationInterface):
 
         if hubspot_id is None:
             # Try to add
-            await self._add_contact(payload, profile.id)
+            await self._add_contact(payload, flat_profile.id)
 
         else:
             # Try to update
-            await self._update_contact(payload, profile.id, hubspot_id)
+            await self._update_contact(payload, flat_profile.id, hubspot_id)
 
-    async def dispatch_profile(self, data: dict, profile: Profile, session: Session, changed_fields: List[dict] = None,
+    async def dispatch_profile(self, data: dict, flat_profile: Optional[FlatProfile], session: Session, changed_fields: List[dict] = None,
                                metadata=None):
-        await self._dispatch(data, profile)
+        if flat_profile:
+            await self._dispatch(data, flat_profile)
 
-    async def dispatch_event(self, data: dict, profile: Profile, session: Session, event: Event, metadata=None):
-        await self._dispatch(data, profile)
+    async def dispatch_event(self, data: dict, flat_profile: Optional[FlatProfile], session: Session, event: Event, metadata=None):
+        await self._dispatch(data, flat_profile)

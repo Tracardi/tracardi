@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from tracardi.service.domain import resource as resource_db
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
 from ...domain.event import Event
-from ...domain.profile import Profile
+from ...domain.profile import FlatProfile
 from ...domain.session import Session
 
 
@@ -41,9 +41,11 @@ class MauticConnector(DestinationInterface):
 
             await resource_db.save_record(self.resource)
 
-    async def dispatch_profile(self, data, profile: Profile, session: Session, changed_fields: List[dict] = None,
+    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile], session: Session,
+                               changed_fields: List[dict] = None,
                                metadata=None):
         await self._dispatch(data)
 
-    async def dispatch_event(self, data, profile: Profile, session: Session, event: Event, metadata=None):
+    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Session, event: Event,
+                             metadata=None):
         await self._dispatch(data)

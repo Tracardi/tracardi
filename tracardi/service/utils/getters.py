@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Optional, Union
 
-from tracardi.domain.entity import Entity, PrimaryEntity
+from tracardi.domain.entity import Entity, PrimaryEntity, FlatEntity
 from tracardi.domain.profile import FlatProfile
 
 
-def get_entity_id(entity: Optional[Entity]) -> Optional[str]:
-    return entity.id if isinstance(entity, Entity) else None
+def get_entity_id(entity: Union[Optional[Entity],Optional[FlatEntity]]) -> Optional[str]:
+    return entity.id if isinstance(entity, (Entity, FlatEntity)) else None
 
 
 def get_entity(entity: Optional[Entity]) -> Optional[Entity]:

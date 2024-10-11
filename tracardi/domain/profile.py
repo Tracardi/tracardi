@@ -441,6 +441,12 @@ class FlatProfile(FlatEntity):
         flat_profile.set_updated()
         return flat_profile
 
+    def has_not_saved_changes(self) -> bool:
+        return self.is_new() or self.needs_update()
+
+    def needs_update(self) -> bool:
+        return bool(self['operation.update'])
+
     def fill_meta_data(self):
         """
         Used to fill metadata with default current index and id.
@@ -563,7 +569,7 @@ class FlatProfile(FlatEntity):
         self['metadata.time.update'] = now_in_utc()
 
     def is_new(self) -> bool:
-        return self['operation.new']
+        return bool(self['operation.new'])
 
     def set_new(self, flag=True):
         self['operation.new'] = flag

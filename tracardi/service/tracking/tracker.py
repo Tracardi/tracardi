@@ -90,13 +90,10 @@ async def os_tracker(
 
                 raise e
 
-        # Delete profile from memory
-        flat_profile = None
-
-        # Save profile
-        if profile and profile.has_not_saved_changes():
-            # Sync save
-            await mutation_profile_db.save_profile(profile)
+            # Save profile
+            if profile and profile.has_not_saved_changes():
+                # Sync save
+                await mutation_profile_db.save_profile(profile)
 
         # Save session
         if session and session.has_not_saved_changes():
@@ -108,99 +105,94 @@ async def os_tracker(
             # Sync save
             await save_events_in_db(flat_events)
 
-        try:
+        # Clean up so can not be used. It is already in session
+        if 'location' in tracker_payload.context:
+            del tracker_payload.context['location']
 
-            # Clean up so can not be used. It is already in session
-            if 'location' in tracker_payload.context:
-                del tracker_payload.context['location']
+        if 'utm' in tracker_payload.context:
+            del tracker_payload.context['utm']
 
-            if 'utm' in tracker_payload.context:
-                del tracker_payload.context['utm']
+        # Dispatch events SYNCHRONOUSLY
+        await sync_event_destination(
+            flat_profile,
+            session,
+            flat_events,
+            tracker_payload.debug)
 
-            # Dispatch events SYNCHRONOUSLY
-            await sync_event_destination(
-                profile,
-                session,
-                flat_events,
-                tracker_payload.debug)
+        # Dispatch outbound profile SYNCHRONOUSLY
+        timestamp_log: List[dict] = field_change_logger.convert_to_list(
+            dict(
+                profile_id=get_entity_id(flat_profile),
+                source_id=source.id,
+                session_id=get_entity_id(session),
+                request_id=get_context().id
+            )
+        )
 
-            # Dispatch outbound profile SYNCHRONOUSLY
-            timestamp_log: List[dict] = field_change_logger.convert_to_list(
-                dict(
-                    profile_id=get_entity_id(profile),
-                    source_id=source.id,
-                    session_id=get_entity_id(session),
-                    request_id=get_context().id
+        await sync_profile_destination(
+            flat_profile,
+            session,
+            timestamp_log
+        )
+
+        # ----------------------------------------------
+        # FROM THIS POINT EVENTS AND SESSION SHOULD NOT
+        # BE MUTATED, ALREADY SAVED
+        # ----------------------------------------------
+
+        # MUTEX: Session and profile are saved if workflow triggered
+        # DESTINATION: Destination will be triggered if profile changes.
+
+        ux = None
+        response = None
+        workflow_result = await exec_workflow(
+            get_entity_id(flat_profile),
+            session,
+            flat_events,
+            tracker_payload)
+
+        if workflow_result is not None:  # Workflow feature enabled
+
+            profile, session, events, ux, response, wf_changed_fields, is_wf_triggered = workflow_result
+
+            if is_wf_triggered and not wf_changed_fields.empty():
+
+                _changed_fields = wf_changed_fields.convert_to_list({
+                    "profile_id": profile.id,
+                    "session_id": session.id,
+                    "request_id": get_context().id
+                })
+
+                # Save changes to field log
+                if tracardi.enable_field_update_log:
+                    # Save to history if needed (DISABLE to REDO)
+                    # await profile_change_log_worker(_changed_fields)
+                    pass
+
+                # Dispatch profile changed outbound traffic if profile changed in workflow
+                # Send it SYNCHRONOUSLY
+
+                await sync_profile_destination(
+                    flat_profile,
+                    session,
+                    changed_fields=_changed_fields
                 )
-            )
 
-            await sync_profile_destination(
-                profile,
-                session,
-                timestamp_log
-            )
+        return {
+            "task": tracker_payload.get_id(),
+            "ux": ux,
+            "response": response,
+            "events": [event.id for event in flat_events] if tracker_payload.is_debugging_on() else [],
+            "profile": {
+                "id": get_entity_id(flat_profile)
+            },
+            "session": {
+                "id": get_entity_id(session)
+            },
+            "errors": [],
+            "warnings": []
+        }
 
-            # ----------------------------------------------
-            # FROM THIS POINT EVENTS AND SESSION SHOULD NOT
-            # BE MUTATED, ALREADY SAVED
-            # ----------------------------------------------
-
-            # MUTEX: Session and profile are saved if workflow triggered
-            # DESTINATION: Destination will be triggered if profile changes.
-
-            ux = None
-            response = None
-            workflow_result = await exec_workflow(
-                get_entity_id(profile),
-                session,
-                flat_events,
-                tracker_payload)
-
-            if workflow_result is not None:  # Workflow feature enabled
-
-                profile, session, events, ux, response, wf_changed_fields, is_wf_triggered = workflow_result
-
-                if is_wf_triggered and not wf_changed_fields.empty():
-
-                    _changed_fields = wf_changed_fields.convert_to_list({
-                        "profile_id": profile.id,
-                        "session_id": session.id,
-                        "request_id": get_context().id
-                    })
-
-                    # Save changes to field log
-                    if tracardi.enable_field_update_log:
-                        # Save to history if needed (DISABLE to REDO)
-                        # await profile_change_log_worker(_changed_fields)
-                        pass
-
-                    # Dispatch profile changed outbound traffic if profile changed in workflow
-                    # Send it SYNCHRONOUSLY
-
-                    await sync_profile_destination(
-                        profile,
-                        session,
-                        changed_fields=_changed_fields
-                    )
-
-            return {
-                "task": tracker_payload.get_id(),
-                "ux": ux,
-                "response": response,
-                "events": [event.id for event in flat_events] if tracker_payload.is_debugging_on() else [],
-                "profile": {
-                    "id": get_entity_id(profile)
-                },
-                "session": {
-                    "id": get_entity_id(session)
-                },
-                "errors": [],
-                "warnings": []
-            }
-        finally:
-            # TODO this is probably not needed
-            if profile and profile.metadata.system.has_merging_data():
-                pass
     finally:
         logger.debug(f"Process time {time.time() - tracking_start}")
         get_context().profiler.measure("end")

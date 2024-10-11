@@ -8,7 +8,7 @@ from typing import Optional, List
 from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
 
-from tracardi.domain.profile import Profile
+from tracardi.domain.profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
@@ -132,10 +132,10 @@ class HttpConnector(DestinationInterface):
             logger.error(str(e), e, exc_info=True)
             raise e
 
-    async def dispatch_profile(self, data, profile: Profile, session: Optional[Session],
+    async def dispatch_profile(self, data, flat_profile: FlatProfile, session: Optional[Session],
                                changed_fields: List[dict] = None, metadata=None):
         await self._dispatch(data, changed_fields)
 
-    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event,
+    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], event: Event,
                              metadata=None):
         await self._dispatch(data, [])
