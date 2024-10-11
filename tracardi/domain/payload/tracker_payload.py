@@ -115,7 +115,7 @@ class TrackerPayload(BaseModel):
 
     def __setattr__(self, key, value):
         if getattr(self, "_is_frozen", False):
-            raise TypeError(f"Cannot modify frozen instance: attribute '{key}' is read-only")
+            raise TypeError(f"Cannot modify frozen instance of {type(self)}: attribute '{key}' is read-only")
         super().__setattr__(key, value)
 
     @property
@@ -297,7 +297,7 @@ class TrackerPayload(BaseModel):
     def is_debugging_on(self) -> bool:
         return tracardi.track_debug and self.is_on('debugger', default=False)
 
-    def _fill_session_metadata(self, session: Session) -> Session:
+    def _copy_tracker_payload_session_metadata(self, session: Session) -> Session:
         if self.session and isinstance(self.session, DefaultEntity) and self.session.metadata:
             if self.session.metadata.insert:
                 session.metadata.time.insert = self.session.metadata.insert
@@ -307,19 +307,20 @@ class TrackerPayload(BaseModel):
                 session.metadata.time.create = self.session.metadata.create
         return session
 
-    def create_default_session(self) -> Session:
-
-        if not self.session:
-            self.session = DefaultEntity(id=str(uuid4()))
-
-        if not self.session.id:
-            self.session.id = str(uuid4())
-
-        session = Session.new(id=self.session.id)
-
-        self._fill_session_metadata(session)
-
-        return session
+    # def create_default_session(self) -> Session:
+    #
+    #     if not self.session:
+    #         self.session = DefaultEntity(id=str(uuid4()))
+    #
+    #     if not self.session.id:
+    #         self.session.id = str(uuid4())
+    #
+    #     session = Session.new(id=self.session.id)
+    #     self._copy_tracker_payload_session_metadata(session)
+    #
+    #     assert (session.operation.new is True)
+    #
+    #     return session
 
     def _fill_profile_metadata(self, profile):
         # Copy metadata to new profile
@@ -421,22 +422,22 @@ class TrackerPayload(BaseModel):
             return ttl > 0
         return False
 
-    def create_session(self) -> Session:
-        # Artificial session (Mutates tracker Payload)
-
-        # If no session in tracker payload this means that we do not need session.
-        # But we may need an artificial session for workflow handling. We create
-        # one but will not save it.
-
-        session = self.create_default_session()
-
-        assert (session.operation.new is True)
-
-        # Set profile from tracker payload to session
-        if isinstance(self.profile, Entity) and self.profile.id:
-            session.profile = Entity(id=self.profile.id)
-
-        return session
+    # def create_session(self) -> Session:
+    #     # Artificial session (Mutates tracker Payload)
+    #
+    #     # If no session in tracker payload this means that we do not need session.
+    #     # But we may need an artificial session for workflow handling. We create
+    #     # one but will not save it.
+    #
+    #     session = self.create_default_session()
+    #
+    #     # Set profile from tracker payload to session
+    #     if isinstance(self.profile, Entity) and self.profile.id:
+    #         session.profile = Entity(id=self.profile.id)
+    #
+    #     self.session = session
+    #
+    #     return session
 
     def has_tracker_payload_profile_id(self) -> bool:
         return self.profile is not None and isinstance(self.profile.id, str) and self.profile.id.strip() != ""
@@ -474,7 +475,7 @@ class TrackerPayload(BaseModel):
 
             # Create new session, to protect old session
             session = Session.new(id=shadow_session_id, profile_id=profile.id)
-            self._fill_session_metadata(session)
+            self._copy_tracker_payload_session_metadata(session)
 
             # Update tracker payload
             self.session.id = session.id

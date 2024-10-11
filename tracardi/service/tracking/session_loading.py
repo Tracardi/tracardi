@@ -1,5 +1,8 @@
+from uuid import uuid4
+
 from typing import Tuple
 
+from tracardi.domain.entity import Entity
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracking.storage.session_storage import load_session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -9,14 +12,45 @@ from tracardi.service.utils.getters import get_entity_id
 logger = get_logger(__name__)
 
 
+def _copy_tracker_payload_session_metadata(tracker_payload: TrackerPayload, session: Session) -> Session:
+    if tracker_payload.session and tracker_payload.session.metadata:
+        if tracker_payload.session.metadata.insert:
+            session.metadata.time.insert = tracker_payload.session.metadata.insert
+        if tracker_payload.session.metadata.update:
+            session.metadata.time.update = tracker_payload.session.metadata.update
+        if tracker_payload.session.metadata.create:
+            session.metadata.time.create = tracker_payload.session.metadata.create
+    return session
+
+
+
+def _create_session(tracker_payload: TrackerPayload) -> Session:
+    # Artificial session (Mutates tracker Payload)
+
+    # If no session in tracker payload this means that we do not need session.
+    # But we may need an artificial session for workflow handling. We create
+    # one but will not save it.
+
+    logger.warning(f"Tracker payload delivered with empty session ID. Session created on server side with random ID.")
+
+    session = Session.new(id=str(uuid4()))
+    assert (session.operation.new is True)
+
+    _copy_tracker_payload_session_metadata(tracker_payload, session)
+
+    # Set profile from tracker payload to session
+    if isinstance(tracker_payload.profile, Entity) and tracker_payload.profile.id:
+        session.profile = Entity(id=tracker_payload.profile.id)
+
+    return session
+
 async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Session, TrackerPayload]:
     session_id = get_entity_id(tracker_payload.session)
     # orig_tracker_payload = tracker_payload.model_dump(mode='json')
 
     if session_id is None or session_id.strip() == "":
 
-        # Set session to tracker payload. New id created as there is none in session_id
-        session = tracker_payload.create_session()
+        session = _create_session(tracker_payload)
 
     else:
 
@@ -26,13 +60,14 @@ async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Sessi
         if session is not None:
             # Only loaded session must have profile.
             if session.profile is None or not session.profile.id:  # If session profile is none then it is corrupted
-                session = tracker_payload.create_session()
+                # New session created because it is corrupted
+                session = _create_session(tracker_payload)
                 logger.warning(f"Session {session_id} has no profile and is corrupted. "
                                f"New session (ID: {session.id}) created.")
 
         else:
             # Creates session with delivered session id
-            session = tracker_payload.create_session()
+            session = _create_session(tracker_payload)
 
     # AT THIS POINT session should not be empty.
     # Profile may not be attached if new session.
