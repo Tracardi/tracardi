@@ -1,16 +1,11 @@
 Version 2.0.1
 ----------------------------------------------------------
-[ ] New SQL compliant storage
+[ ] New SQL compliant data-warehouse
 
 Version: 1.1.0
 ----------------------------------------------------------
 [ ] - Queueing of the tracker payloads
-[*] - Bulk event payloads.
-[*] - Remove Tracardi PRO as remote dependency
-
-Version: 1.0.3
-----------------------------------------------------------
-* Remove Datetime range error in GUI
+[ ] - Bulk event payloads.
 
 Version: 1.0.2
 ----------------------------------------------------------
