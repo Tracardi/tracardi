@@ -67,6 +67,7 @@ class StartAction(ActionRunner):
         # Replace profile
 
         if self.config.profile_id:
+            # TODO EOFP - End of FlatProfile
             _profile = await load_profile(self.config.profile_id)
             if not _profile:
                 msg = f"Can not load session with id {self.config.profile_id}"

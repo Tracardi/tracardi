@@ -48,6 +48,7 @@ class StartSegmentationAction(ActionRunner):
                 self.console.error(msg)
                 return None
 
+            # TODO EOFP - End of FlatProfile
             profile = await load_profile(self.config.profile_id)
 
             if profile is None:

@@ -27,6 +27,7 @@ class InjectProfileByField(ActionRunner):
         field = self.config.field
 
         if field == 'id':
+            # TODO EOFP - End of FlatProfile
             profile = await load_profile(profile_id=value)
 
             if not profile:
