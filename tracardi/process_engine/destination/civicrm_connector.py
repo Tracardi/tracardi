@@ -2,8 +2,8 @@ from typing import Optional, List
 
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
-from ...domain.event import Event
-from ...domain.profile import Profile
+from tracardi.domain.flat_profile import FlatProfile
+from ...domain.flat_event import FlatEvent
 from ...domain.session import Session
 
 
@@ -19,10 +19,10 @@ class CiviCRMConnector(DestinationInterface):
 
         await client.add_contact(data)
 
-    async def dispatch_profile(self, data, profile: Optional[Profile], session: Optional[Session],
+    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session],
                                changed_fields: List[dict] = None, metadata=None):
         await self._dispatch(data)
 
-    async def dispatch_event(self, data, profile: Optional[Profile], session: Optional[Session], event: Event,
+    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent,
                              metadata=None):
         await self._dispatch(data)

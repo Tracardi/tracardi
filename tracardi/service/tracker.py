@@ -1,6 +1,6 @@
-from time import time
 from typing import Optional
 
+from tracardi.context import get_context
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
 from tracardi.exceptions.exception import BlockedException
 from tracardi.service.license import License
@@ -12,28 +12,11 @@ from tracardi.domain.event_source import EventSource
 from tracardi.exceptions.log_handler import get_logger
 
 if License.has_license():
-    from com_tracardi.service.tracking.tracker import com_tracker
-    from com_tracardi.decorator.deffer_decorator import deferred_execution
+    from com_tracardi.workers.collector import run_com_tracker_worker, run_com_tracker
 else:
     from tracardi.service.tracking.tracker import os_tracker
 
 logger = get_logger(__name__)
-
-
-async def process_com_tracker(tracker_config, tracker_payload: TrackerPayload, source, tracking_start: float):
-
-    result = await com_tracker(
-            source,
-            tracker_payload,
-            tracker_config,
-            tracking_start
-        )
-
-    # if result and tracardi.enable_errors_on_response:
-    #     result['errors'] += self.console_log.get_errors()
-    #     result['warnings'] += self.console_log.get_warnings()
-
-    return result
 
 
 class Tracker:
@@ -64,6 +47,10 @@ class Tracker:
 
     async def track_event(self, tracker_payload: TrackerPayload, tracking_start: float):
 
+        context = get_context()
+
+        context.profiler.measure('tracker-starts')
+
         if tracardi.disallow_bot_traffic and tracker_payload.is_bot():
             raise BlockedException(f"Traffic from bot is not allowed.")
 
@@ -82,6 +69,8 @@ class Tracker:
 
         logger.debug(f"Source {source.id} validated.")
 
+        context.profiler.measure('tracker-after-validation')
+
         # Update tracker source with full event source object
         tracker_payload.source = source
 
@@ -98,6 +87,8 @@ class Tracker:
         if tracker_payload.source.transitional is True:
             tracker_payload.set_ephemeral()
 
+        context.profiler.measure('tracker-after-bridge')
+
         if not License.has_license():
             return await os_tracker(
                 source,
@@ -107,20 +98,17 @@ class Tracker:
             )
 
         # Only commercial
-
         if not tracker_payload.queue_required():
             # Process without queue
-            return await process_com_tracker(self.tracker_config, tracker_payload, source, tracking_start)
+            return await run_com_tracker(source, tracker_payload, self.tracker_config, tracking_start)
 
         # Queue
-        t = time()
-        with deferred_execution() as defer:
-            await defer(process_com_tracker)(
-                self.tracker_config,
-                tracker_payload,
-                source,
-                tracking_start
-            ).push('queue_track')
+        await run_com_tracker_worker(
+            self.tracker_config,
+            tracker_payload,
+            source,
+            tracking_start)
 
-        logger.info(f"Queued in {time()-t}")
+        context.profiler.measure('tracker-after-queue')
+
         return {}

@@ -4,8 +4,9 @@ from datetime import datetime
 from typing import Optional, Any
 
 from pydantic import ConfigDict, BaseModel, PrivateAttr
+from user_agents import parse
 
-from .entity import Entity, PrimaryEntity
+from .entity import Entity
 from .marketing import UTM
 from .metadata import OS, Device, Application
 from .time import Time
@@ -35,6 +36,7 @@ class SessionTime(Time):
     @staticmethod
     def new() -> 'SessionTime':
         return SessionTime()
+
 
 class SessionMetadata(BaseModel):
     time: SessionTime = SessionTime()
@@ -79,14 +81,14 @@ class Session(Entity):
 
     utm: Optional[UTM] = UTM()
 
-    context: Optional[SessionContext] = {}
+    context: Optional[SessionContext] = SessionContext({})
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
 
     _updated_in_workflow: bool = PrivateAttr(False)
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=False)
 
     def __init__(self, **data: Any):
 
@@ -95,6 +97,15 @@ class Session(Entity):
 
         super().__init__(**data)
 
+        self._is_frozen = False  # Internal flag to manage mutability
+
+    def freeze(self):
+        self._is_frozen = True
+
+    def __setattr__(self, key, value):
+        if getattr(self, "_is_frozen", False):
+            raise TypeError(f"Cannot modify frozen instance: attribute '{key}' is read-only")
+        super().__setattr__(key, value)
 
     def is_new(self) -> bool:
         return self.operation.new
@@ -104,7 +115,6 @@ class Session(Entity):
 
     def set_updated(self, flag=True):
         self.operation.update = flag
-
 
     def is_updated(self) -> bool:
         return self.operation.update
@@ -154,6 +164,15 @@ class Session(Entity):
         except Exception:
             return None
 
+    def get_user_agent(self) -> Optional[str]:
+        try:
+            _user_agent_string = self.context['browser']['local']['browser']['userAgent']
+            if not _user_agent_string:
+                return None
+            return parse(_user_agent_string)
+        except Exception:
+            return None
+
     @staticmethod
     def storage_info() -> StorageInfo:
         return StorageInfo(
@@ -164,7 +183,7 @@ class Session(Entity):
         )
 
     @staticmethod
-    def new(id: Optional[str] = None, profile_id: str=None) -> 'Session':
+    def new(id: Optional[str] = None, profile_id: str = None) -> 'Session':
         session = Session(
             id=str(uuid.uuid4()) if not id else id,
             metadata=SessionMetadata.new()

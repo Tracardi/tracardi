@@ -6,6 +6,7 @@ from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_
 from tracardi.service.storage.mysql.service.event_to_profile_service import EventToProfileMappingService
 from tracardi.service.decorators.function_memory_cache import async_cache_for
 
+
 @async_cache_for(memory_cache.event_to_profile_coping_ttl)
 async def load_event_to_profile(event_type_id: str) -> List[EventToProfile]:
     etpms = EventToProfileMappingService()

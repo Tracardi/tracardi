@@ -1,5 +1,6 @@
 from tracardi.domain.entity import Entity
-from tracardi.domain.event import Event, EventSession
+from tracardi.domain.event import Event
+from tracardi.domain.event_session import EventSession
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.time import EventTime
 from tracardi.process_engine.action.v1.increment_action import IncrementAction

@@ -102,6 +102,9 @@ def test_returns_entity_with_same_id():
     result = get_entity(entity)
     assert result.id == entity.id
 
+
 def test_returns_none_when_input_is_none():
     result = get_entity(None)
     assert result is None
+
+

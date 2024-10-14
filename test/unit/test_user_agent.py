@@ -3,7 +3,8 @@ from user_agents.parsers import UserAgent
 from tracardi.domain.entity import Entity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import Session, SessionMetadata
-from tracardi.service.tracking.session_data_computation import _get_user_agent
+from tracardi.service.tracking.user_agent import _get_user_agent
+
 
 def test_user_agent_string_from_tracker_payload():
     # Setup
@@ -85,6 +86,7 @@ def test_fail_user_agent_string():
     # Assert
     assert result is None
 
+
 def test_user_agent_string_bot():
     # Setup
     session = Session(
@@ -106,4 +108,3 @@ def test_user_agent_string_bot():
     # Assert
     assert isinstance(result, UserAgent)
     assert result.is_bot
-

@@ -12,6 +12,7 @@ from threading import Thread
 from tracardi.domain import ExtraInfo
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.domain.configuration import Configuration
+from tracardi.service.cache.load_settings import load_global_settings_by_key
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.mysql.mapping.configuration_mapping import map_to_configuration
 from tracardi.service.storage.mysql.service.configuration_service import ConfigurationService
@@ -144,7 +145,7 @@ class GlobalSettings(metaclass=Singleton):
             return self.db[key]
 
         logger.debug(f"Global setting data {key} loaded from database", extra=ExtraInfo.build('GlobalSettings', self))
-        record = await self.cs.load_by_id(key)
+        record = await load_global_settings_by_key(key)
         if record.exists():
             # set value and return
             configuration = record.map_to_object(map_to_configuration)

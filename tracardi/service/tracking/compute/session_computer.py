@@ -1,13 +1,14 @@
-from typing import Tuple, Optional
+from typing import Optional
 
 from pydantic import ValidationError
-from user_agents import parse
-from user_agents.parsers import UserAgent
 
+from tracardi.config import tracardi
+from tracardi.exceptions.exception import BlockedException
+from tracardi.service.tracking.bot import _has_google_bot_header
+from tracardi.service.tracking.user_agent import _get_user_agent
 from tracardi.service.tracking.utils.languages import get_spoken_languages
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.marketing import UTM
-from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.geo import Geo
@@ -17,33 +18,18 @@ from tracardi.service.tracker_config import TrackerConfig
 logger = get_logger(__name__)
 
 
-def _get_user_agent_string(session: Session, tracker_payload: TrackerPayload) -> Optional[str]:
-    try:
-        return session.context['browser']['local']['browser']['userAgent']
-    except Exception:
-        try:
-            return tracker_payload.request['headers']['user-agent']
-        except Exception:
-            return None
-
-
-def _get_user_agent(session: Session, tracker_payload: TrackerPayload) -> Optional[UserAgent]:
-    _user_agent = tracker_payload.get_user_agent()
-
-    if _user_agent is not None:
-        return _user_agent
-
-    _user_agent_string = _get_user_agent_string(session, tracker_payload)
-    if _user_agent_string:
-        return parse(_user_agent_string)
-
-    return None
-
-
 def _compute_session_referer(session: Session, tracker_payload: TrackerPayload) -> Session:
     referer = tracker_payload.context.get('referer', None)
     if referer:
         session.context['referer'] = referer
+
+    # Compute channel
+    if isinstance(tracker_payload.source, EventSource):
+        session.metadata.channel = tracker_payload.source.channel
+
+    # Compute if BOT
+    session.app.bot = _has_google_bot_header(tracker_payload.request)
+
     return session
 
 
@@ -205,38 +191,32 @@ def _compute_screen_size(session: Session, tracker_payload: TrackerPayload):
     return session
 
 
-def compute_session(session: Session,
-                    tracker_payload: TrackerPayload,
-                    tracker_config: TrackerConfig
-                    ) -> Session:
-    # Compute the User Agent data
-    session = _compute_data_from_user_agent(session, tracker_payload)
+def _compute_languages(session, tracker_payload):
+    try:
+        session.app.language = session.context['browser']['local']['browser']['language']
+    except Exception:
+        pass
 
-    # Compute UTM
-    session = _compute_utm(session, tracker_payload.context)
+    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload)
+    if spoken_languages:
+        session.context['language'] = list(set(spoken_languages))
+    if language_codes:
+        session.context['language_codes'] = list(set(language_codes))
 
-    # Compute Screen size
-    session = _compute_screen_size(session, tracker_payload)
+    return session
 
-    # Compute session referer
-    session = _compute_session_referer(session, tracker_payload)
 
-    # Compute channel
-    if isinstance(tracker_payload.source, EventSource):
-        session.metadata.channel = tracker_payload.source.channel
-
-    # Compute device ip
+def _compute_ip(session, tracker_payload, tracker_config):
     _value = tracker_payload.get_ip()
     if _value:
         session.device.ip = _value
 
     session.context['ip'] = tracker_config.ip
 
-    try:
-        session.app.language = session.context['browser']['local']['browser']['language']
-    except Exception:
-        pass
+    return session
 
+
+def _compute_bot(session, tracker_payload):
     try:
         header_from = tracker_payload.request['headers']['from']
         if header_from == "googlebot(at)googlebot.com":
@@ -244,12 +224,41 @@ def compute_session(session: Session,
     except Exception:
         pass
 
-    # Compute Languages
 
-    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload)
-    if spoken_languages:
-        session.context['language'] = list(set(spoken_languages))
-    if language_codes:
-        session.context['language_codes'] = list(set(language_codes))
+async def compute_session(session: Session,
+                          tracker_payload: TrackerPayload,
+                          tracker_config: TrackerConfig
+                          ) -> Session:
+    if session:
+
+        # Is new session
+        if session.is_new():
+            # Compute session. Session is filled only when new
+
+            # Compute the User Agent data
+            session = _compute_data_from_user_agent(session, tracker_payload)
+
+            # Compute UTM
+            session = _compute_utm(session, tracker_payload.context)
+
+            # Compute Screen size
+            session = _compute_screen_size(session, tracker_payload)
+
+            # Compute session referer, channel and bot
+            session = _compute_session_referer(session, tracker_payload)
+
+            # Compute device ip
+            session = _compute_ip(session, tracker_payload, tracker_config)
+
+            # Compute languages
+            session = _compute_languages(session, tracker_payload)
+
+        # Update missing data
+        session = await update_device_geo(tracker_payload, session)
+        session = update_session_utm_with_client_data(tracker_payload, session)
+
+        # If agent is a bot stop
+        if (session.app.bot or _has_google_bot_header(tracker_payload.request)) and tracardi.disallow_bot_traffic:
+            raise BlockedException(f"Traffic from bot is not allowed.")
 
     return session

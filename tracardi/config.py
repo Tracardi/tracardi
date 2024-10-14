@@ -1,3 +1,5 @@
+from random import uniform
+
 import logging
 import os
 from hashlib import md5
@@ -19,17 +21,32 @@ TENANT_NAME = os.environ.get('TENANT_NAME', None)
 logger = get_logger(__name__)
 
 
+def _get_random_value(value) -> float:
+    _span = 0.20
+    lower_limit = max(value - (value * _span), value) if value < 5 else value - (value * _span)
+    upper_limit = value + (value * _span)
+    return uniform(lower_limit, upper_limit)
+
+
 class MemoryCacheConfig:
-    def __init__(self, env):
-        self.event_to_profile_coping_ttl = get_env_as_int('EVENT_TO_PROFILE_COPY_CACHE_TTL', 5)
-        self.source_ttl = get_env_as_int('SOURCE_CACHE_TTL', 5)
-        self.session_cache_ttl = get_env_as_int('SESSION_CACHE_TTL', 5)
-        self.event_validation_cache_ttl = get_env_as_int('EVENT_VALIDATION_CACHE_TTL', 15)
-        self.event_metadata_cache_ttl = get_env_as_int('EVENT_METADATA_CACHE_TTL', 15)
-        self.event_destination_cache_ttl = get_env_as_int('EVENT_DESTINATION_CACHE_TTL', 5)
-        self.profile_destination_cache_ttl = get_env_as_int('PROFILE_DESTINATION_CACHE_TTL', 5)
-        self.data_compliance_cache_ttl = get_env_as_int('DATA_COMPLIANCE_CACHE_TTL', 5)
-        self.trigger_rule_cache_ttl = get_env_as_int('TRIGGER_RULE_CACHE_TTL', 15)
+    def __init__(self):
+
+        _default_ttl = 60
+
+        self.event_to_profile_coping_ttl = _get_random_value(get_env_as_int('EVENT_TO_PROFILE_COPY_CACHE_TTL', _default_ttl))
+        self.source_ttl = _get_random_value(get_env_as_int('SOURCE_CACHE_TTL', _default_ttl))
+        self.event_validation_cache_ttl = _get_random_value(get_env_as_int('EVENT_VALIDATION_CACHE_TTL', _default_ttl))
+        self.data_compliance_cache_ttl = _get_random_value(get_env_as_int('DATA_COMPLIANCE_CACHE_TTL', _default_ttl))
+        self.event_mapping_cache_ttl = _get_random_value(get_env_as_int('EVENT_METADATA_CACHE_TTL', _default_ttl))
+        self.trigger_rule_cache_ttl = _get_random_value(get_env_as_int('TRIGGER_RULE_CACHE_TTL', _default_ttl))
+        self.event_destination_cache_ttl = _get_random_value(get_env_as_int('EVENT_DESTINATION_CACHE_TTL', 180))
+        self.profile_destination_cache_ttl = _get_random_value(get_env_as_int('PROFILE_DESTINATION_CACHE_TTL', 180))
+        self.event_reshaping_cache_ttl = _get_random_value(get_env_as_int('EVENT_RESHAPING_CACHE_TTL', _default_ttl))
+        self.identification_points_cache_ttl = _get_random_value(get_env_as_int('IDENTIFICATION_POINTS_CACHE_TTL', _default_ttl))
+        self.resource_load_cache_ttl = _get_random_value(get_env_as_int('RESOURCE_LOAD_CACHE_TTL', _default_ttl))
+
+        logger.info(f"EVENT_TO_PROFILE_COPY_CACHE_TTL={self.event_to_profile_coping_ttl}")
+        logger.info(f"SOURCE_CACHE_TTL={self.source_ttl}")
 
 
 class MysqlConfig:
@@ -198,7 +215,7 @@ class RedisConfig:
 
 redis_config = RedisConfig(os.environ)
 elastic = ElasticConfig(os.environ)
-memory_cache = MemoryCacheConfig(os.environ)
+memory_cache = MemoryCacheConfig()
 
 
 class TracardiConfig(metaclass=Singleton):
@@ -206,7 +223,7 @@ class TracardiConfig(metaclass=Singleton):
     def __init__(self, env):
         self.env = env
         _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
-        self.track_debug = env.get('TRACK_DEBUG', 'no').lower() == 'yes'
+        self.track_debug = get_env_as_bool('TRACK_DEBUG', 'no')
         self.save_logs = get_env_as_bool('SAVE_LOGS', 'yes')
         self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'no')
         self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'no')
@@ -224,8 +241,10 @@ class TracardiConfig(metaclass=Singleton):
 
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
-        # Temporary flag
-        self.new_collector = get_env_as_bool('NEW_COLLECTOR', 'yes')
+        # Only this event can set hashed ID fo email, phone, etc.
+        self.identification_event_type = env.get('IDENTIFICATION_EVENT_TYPE', None)
+        self.identification_event_property = env.get('IDENTIFICATION_EVENT_PROPERTY',
+                                                     'data.identifier.pk,data.identifier.id,data.contact.email.business,data.contact.email.main,data.contact.email.private,data.contact.phone.business,data.contact.phone.main,data.contact.phone.mobile,data.contact.phone.whatsapp')
 
         # Not used now
         self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
@@ -291,6 +310,9 @@ class TracardiConfig(metaclass=Singleton):
 
     def is_apm_on(self) -> bool:
         return self.apm_on
+
+    def has_defined_identification_event_type(self) -> bool:
+        return bool(self.identification_event_type)
 
     @property
     def config(self) -> YamlConfig:

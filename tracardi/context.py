@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from uuid import uuid4
 
+from com_tracardi.service.tracking.tracker_profiler import TrackerProfiler
 from tracardi.config import tracardi
 from tracardi.domain.user import User
 from tracardi.service.singleton import Singleton
@@ -43,6 +44,11 @@ class Context:
         self.host = host
         self.errors = 0
         self.warnings = 0
+        self._profiler = TrackerProfiler()
+
+    @property
+    def profiler(self) -> TrackerProfiler:
+        return self._profiler
 
     def is_production(self) -> bool:
         return self.production

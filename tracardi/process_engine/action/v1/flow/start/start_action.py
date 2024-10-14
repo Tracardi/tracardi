@@ -10,7 +10,8 @@ from tracardi.service.plugin.runner import ActionRunner
 from .model.configuration import Configuration
 from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 from typing import Optional
-from tracardi.domain.event import Event, EventSession
+from tracardi.domain.event import Event
+from tracardi.domain.event_session import EventSession
 from tracardi.domain.entity import Entity
 
 from tracardi.service.storage.interface import profile_load_collector_dao

@@ -1,7 +1,7 @@
 import re
 from typing import Union
 
-from dotty_dict import dotty
+from dotty_dict import dotty, Dotty
 from pydantic import BaseModel
 
 dot_notation_regex = re.compile(
@@ -25,6 +25,8 @@ class DotAccessor:
             return dotty(data)
         elif isinstance(data, BaseModel):
             return dotty(data.model_dump(mode="json"))
+        elif isinstance(data, Dotty):
+            return data
         else:
             raise ValueError("Could not convert {} to dict. Expected: None, dict or BaseModel got {}.".format(
                 label, type(data)

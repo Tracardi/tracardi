@@ -30,6 +30,7 @@ def _str_to_bool(value):
     else:
         raise ValueError(f"Invalid value for boolean setting: {value}")
 
+
 def get_env_as_bool(env_key, default_value) -> bool:
     value = os.environ.get(env_key, default_value)
     return _str_to_bool(value)

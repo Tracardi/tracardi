@@ -9,17 +9,12 @@ import tracardi.config
 from pydantic import BaseModel, field_validator, PrivateAttr
 
 from ..api_instance import ApiInstance
-from ..entity import Entity, PrimaryEntity
-from ..enum.event_status import COLLECTED
-from ..event import Event, EventSession, Tags
-from ..event_metadata import EventMetadata
-from ..event_metadata import EventPayloadMetadata
-from ..metadata import Hit
+from ..entity import Entity
+from ..event import Event
+from tracardi.domain.event_session import EventSession
 from ..session import Session, SessionContext
 from ..time import Time
-from ..value_object.operation import RecordFlag
-from ...service.string_manager import capitalize_event_type_id
-from ...service.utils.getters import get_entity, get_entity_id, get_primary_entity
+from ...service.utils.getters import get_entity_id
 
 
 class ProcessStatus(BaseModel):
@@ -38,7 +33,6 @@ class EventPayload(BaseModel):
     tags: Optional[list] = []
     validation: Optional[ProcessStatus] = None
     reshaping: Optional[ProcessStatus] = None
-    merging: Optional[ProcessStatus] = None
     error: Optional[ProcessStatus] = None
 
     _source_id: str = PrivateAttr(None)
@@ -65,7 +59,7 @@ class EventPayload(BaseModel):
         if 'source_id' in self.options:
             if self.options['source_id'] == tracardi.config.tracardi.internal_source:
                 self._source_id = self.options['source_id']
-            del(self.options['source_id'])
+            del (self.options['source_id'])
 
     @field_validator("type")
     @classmethod
@@ -78,6 +72,18 @@ class EventPayload(BaseModel):
     @staticmethod
     def from_event(event: Event) -> 'EventPayload':
         return EventPayload(type=event.type, properties=event.properties, context=event.context)
+
+    def is_valid(self) -> bool:
+        if self.validation is None:
+            return True
+
+        return self.validation.error is False
+
+    def get_source_id(self) -> str:
+        return self._source_id
+
+    def has_source_id(self) -> bool:
+        return bool(self._source_id)
 
     def to_event_dict(self,
                       source: Entity,
@@ -104,7 +110,6 @@ class EventPayload(BaseModel):
 
         if self.time.create:
             event['metadata']['time']['create'] = self.time.create.replace(tzinfo=ZoneInfo("UTC"))
-
 
         # To prevent performance bottleneck do not create full event session
         # event["session"] = self._get_event_session(session)
@@ -139,87 +144,6 @@ class EventPayload(BaseModel):
             event["hit"]['url'] = url
             event["hit"]['referer'] = referer
             event["utm"] = session.utm
-
-        return event
-
-    def to_event(self,
-                 metadata: EventPayloadMetadata,
-                 source: Entity,
-                 session: Union[Optional[Entity], Optional[Session]],
-                 profile: Optional[PrimaryEntity],
-                 profile_less: bool) -> Event:
-
-        meta = EventMetadata(**metadata.model_dump())
-        meta.status = COLLECTED
-        meta.profile_less = profile_less
-        meta.instance = Entity(id=ApiInstance().id)
-
-        if self.time.insert:
-            meta.time.insert = self.time.insert
-
-        if self.time.create:
-            meta.time.create = self.time.create
-
-        if isinstance(session, Session):
-
-            hit = Hit()
-
-            if isinstance(self.context, dict) and 'page' in self.context:
-
-                try:
-                    hit.name = self.context['page']['title']
-                except (KeyError, TypeError):
-                    pass
-
-                try:
-                    hit.url = self.context['page']['url']
-                except (KeyError, TypeError):
-                    pass
-
-                try:
-                    hit.referer = self.context['page']['referer']['host']
-                except (KeyError, TypeError):
-                    pass
-
-            event_type = self.type.strip()
-            event = Event(
-                id=str(uuid4()) if not self.id else self.id,
-                name=capitalize_event_type_id(event_type),
-                metadata=meta,
-                session=self._get_event_session(session),
-                profile=get_primary_entity(profile),  # profile can be None when profile_less event.
-                type=event_type,
-
-                os=session.os.model_dump(exclude_unset=True),
-                app=session.app.model_dump(exclude_unset=True),
-                device=session.device.model_dump(exclude_unset=True),
-                hit=hit.model_dump(exclude_unset=True),
-
-                utm=session.utm,
-
-                properties=self.properties,
-                source=source if not self._source_id else Entity(id=self._source_id),  # Entity
-                config=self.options,
-                context=self.context,
-                operation=RecordFlag(new=True),
-                tags=Tags(values=tuple(self.tags), count=len(self.tags))
-            )
-
-        else:
-            event_type = self.type.strip()
-            event = Event(id=str(uuid4()) if not self.id else self.id,
-                          name=capitalize_event_type_id(event_type),
-                          metadata=meta,
-                          session=self._get_event_session(session),
-                          profile=get_primary_entity(profile),  # profile can be None when profile_less event.
-                          type=event_type,
-                          properties=self.properties,
-                          source=source if not self._source_id else Entity(id=self._source_id),  # Entity
-                          config=self.options,
-                          context=self.context,
-                          operation=RecordFlag(new=True),
-                          tags=Tags(values=tuple(self.tags), count=len(self.tags))
-                          )
 
         return event
 

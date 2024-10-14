@@ -15,6 +15,7 @@ class Collection:
     plugin_memory: str = "plugin-memory:"  # HASH
     profile_copy: str = "profile-copy:"  # HASH
     profile: str = "profile:"  # HASH
+    flat_profile: str = "fprl:"  # HASH
     session: str = "session:"  # HASH
     lock_tracker: str = "lock:tracker:"  # HASH
 

@@ -13,7 +13,6 @@ from tracardi.service.wf.domain.debug_info import FlowDebugInfo
 from tracardi.service.wf.domain.flow_history import FlowHistory
 from tracardi.service.wf.domain.work_flow import WorkFlow
 from .debugger import Debugger
-from ..context import get_context
 from ..domain import ExtraInfo
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow

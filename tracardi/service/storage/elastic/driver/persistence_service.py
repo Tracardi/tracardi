@@ -67,7 +67,8 @@ class SqlSearchQueryEngine:
         self.sorting_map = {
             'event': [{'metadata.time.insert': 'desc'}],
             'session': [{'metadata.time.insert': 'desc'}],
-            'profile': [{'metadata.time.update': 'desc'}, {'metadata.time.insert': 'desc'},
+            'profile': [{'metadata.time.update': 'desc'},
+                        {'metadata.time.insert': 'desc'},
                         {'metadata.time.create': 'desc'}],
             'log': [{'date': 'desc'}],
             'entity': [{'metadata.time.insert': 'desc'}],

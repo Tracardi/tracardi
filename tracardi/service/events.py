@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 from dotty_dict import dotty
 
 from tracardi.context import ServerContext, get_context
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.interface.gui import event as event_gui_dao
 from tracardi.service.license import License

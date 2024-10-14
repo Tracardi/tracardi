@@ -1,8 +1,8 @@
 from typing import Optional
 
 from dotty_dict import Dotty
-from tracardi.domain.profile import FlatProfile
 from tracardi.service.utils.date import now_in_utc
+from tracardi.domain.flat_profile import FlatProfile
 
 
 def _get_interest_and_value(event: Dotty):

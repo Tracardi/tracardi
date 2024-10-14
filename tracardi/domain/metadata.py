@@ -1,10 +1,11 @@
-from typing import Optional, Dict, Set
+from typing import Optional, Dict, Set, List, Tuple
 
 from pydantic import BaseModel
 
 from tracardi.domain.entity import Entity
 from tracardi.domain.geo import Geo
 from tracardi.domain.time import Time, ProfileTime
+from tracardi.service.utils.date import now_in_utc
 
 
 class Metadata(BaseModel):
@@ -31,12 +32,16 @@ class ProfileSystemMetadata(BaseModel):
     def get_auto_merge_fields(self):
         return self.aux.get('auto_merge', [])
 
+    def reset_auto_merge_fields(self):
+        self.aux['auto_merge'] = []
+        self.aux['merge_time'] = now_in_utc()
+
 
 class ProfileMetadata(BaseModel):
     time: ProfileTime
     aux: Optional[dict] = {}
     status: Optional[str] = None
-    fields: Optional[dict] = {}
+    fields: Optional[Dict['str', list]] = {}
     system: Optional[ProfileSystemMetadata] = ProfileSystemMetadata()
 
 

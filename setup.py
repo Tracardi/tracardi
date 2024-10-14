@@ -81,6 +81,7 @@ setup(
         'twilio==8.2.1',
         'pulsar-client==3.3.0',
         'aiokafka==0.8.1',
+        'tabulate',
         'numpy==1.26.4',
         # Telemetry
         'opentelemetry-distro==0.45b0',

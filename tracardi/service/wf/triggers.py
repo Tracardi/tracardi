@@ -5,14 +5,14 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.field_mappings_cache import add_new_field_mappings
+from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
-from tracardi.domain.event import Event
+from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
+from tracardi.domain.event import Event, flat_events_to_event
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
-
-from tracardi.service.storage.interface import profile_mutation_collector_dao
-from tracardi.service.storage.interface import profile_load_collector_dao
 
 logger = get_logger(__name__)
 
@@ -72,7 +72,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
     # Loads profile form cache
     # Profile needs to be loaded from cache. It may have changed during it was dispatched by event trigger
 
-    profile: Profile = await profile_load_collector_dao.load_profile(profile_id) if profile_id is not None else None
+    profile: Profile = await load_profile(profile_id) if profile_id is not None else None
 
     # Triggers workflow
 
@@ -97,7 +97,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
 
             # Profile is in mutex, no profile loading from cache necessary; Save it in db and cache
             # Synchronous save
-            await profile_mutation_collector_dao.save_profile_in_db_and_cache(profile)
+            await save_profile_in_db_and_cache(profile)
 
         if session and session.is_updated_in_workflow():
             logger.debug(f"Session {session.id} needs update after workflow.")
@@ -112,11 +112,13 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
     return profile, session, events, ux, response, changed_fields, is_wf_triggered
 
 
-async def exec_workflow(profile_id: Optional[str], session: Session, events: List[Event],
+async def exec_workflow(profile_id: Optional[str], session: Session, flat_events: List[FlatEvent],
                         tracker_payload: TrackerPayload) -> Optional[Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeLogger, bool]]:
     if not tracardi.enable_workflow:
         return None
+
+    events = flat_events_to_event(flat_events)
 
     if profile_id is None:
         # Profile less execution

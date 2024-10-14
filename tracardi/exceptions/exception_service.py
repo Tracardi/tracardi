@@ -1,4 +1,7 @@
-def get_traceback(ex):
+from typing import List
+
+
+def get_traceback(ex: object) -> List[dict]:
     trace = []
     tb = ex.__traceback__
     while tb is not None:

@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict, Union, Set
 
 from tracardi.domain.event import Event
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
@@ -21,6 +22,9 @@ async def flush():
 
 async def count(query: dict = None):
     return await raw_db.count('event', query)
+
+async def save(events: Union[List[FlatEvent], List[Event], Set[Event]], exclude=None):
+    return await storage_manager("event").upsert(events, exclude=exclude)
 
 
 async def _save_events(events: Union[List[Event], Set[Event]], exclude=None):

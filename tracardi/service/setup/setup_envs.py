@@ -56,44 +56,44 @@ system_settings = [
         **{
             "label": "EVENT_TO_PROFILE_COPY_CACHE_TTL",
             "value": memory_cache.event_to_profile_coping_ttl,
-            "desc": "Default: 2. Set caching time for the event to profile schema. Set 0 for no caching."
+            "desc": "Default: 15. Set caching time for the event to profile schema. Set 0 for no caching."
         }
     ),
     SystemSettings(
         **{
             "label": "SOURCE_CACHE_TTL",
             "value": memory_cache.source_ttl,
-            "desc": "Default: 2. Each resource read is cached for given seconds. That means that when you change any "
-                    "resource data, e.g. credentials it wil be available with max 2 seconds."
+            "desc": "Default: 30. Each event source read is cached for given seconds. That means that when you change any "
+                    "event source data, the change it wil be available with max 30 seconds."
         }
     ),
     SystemSettings(
         **{
             "label": "EVENT_VALIDATION_CACHE_TTL",
             "value": memory_cache.event_validation_cache_ttl,
-            "desc": "Default: 2. Set event validation schema caching time. Set 0 for no caching."
+            "desc": "Default: 15. Set event validation schema caching time. Set 0 for no caching."
         }
     ),
     SystemSettings(
         **{
             "label": "TRIGGER_RULE_CACHE_TTL",
             "value": memory_cache.trigger_rule_cache_ttl,
-            "desc": "Default: 5. Set cache time for workflow triggers. Set 0 for no caching."
+            "desc": "Default: 15. Set cache time for workflow triggers. Set 0 for no caching."
         }
     ),
     SystemSettings(
         **{
             "label": "DATA_COMPLIANCE_CACHE_TTL",
             "value": memory_cache.data_compliance_cache_ttl,
-            "desc": "Default: 2. Set cache time for data compliance rules Set 0 for no caching."
+            "desc": "Default: 30. Set cache time for data compliance rules Set 0 for no caching."
         }
     ),
 
     SystemSettings(
         **{
             "label": "EVENT_METADATA_CACHE_TTL",
-            "value": memory_cache.event_metadata_cache_ttl,
-            "desc": "Default: 2. Set cache time for event tagging, indexing, etc. configuration. Set 0 for no caching."
+            "value": memory_cache.event_mapping_cache_ttl,
+            "desc": "Default: 15. Set cache time for event tagging, indexing, etc. configuration. Set 0 for no caching."
         }
     ),
     SystemSettings(
@@ -439,6 +439,20 @@ system_settings = [
             "value": tracardi.is_apm_on(),
             "desc": "Default: tracardi. Merge profile automatically on change of defined profile fields. AUTO_PROFILE_MERGING value is used to salt the profile merging keys hashing. Set value to random value, min 20 letters.",
             "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "IDENTIFICATION_EVENT_TYPE",
+            "value": tracardi.identification_event_type,
+            "desc": "Default: None. Generate identification ids from hashed E-mail or phone only for defined event types. None means always treat e-mail or phone as identifier.",
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "IDENTIFICATION_EVENT_PROPERTY",
+            "value": tracardi.identification_event_property,
+            "desc": "Default: 'data.identifier.pk, data.identifier.id, data.contact.email.business, data.contact.email.main, data.contact.email.private, data.contact.phone.business, data.contact.phone.main, data.contact.phone.mobile, data.contact.phone.whatsapp'. Set PII data that needs to be hashed to profile.IDs if IDENTIFICATION_EVENT_TYPE is received. System will make a Hashed ID from profile properties if the IDENTIFICATION_EVENT_PROPERTY in profile is changed by event set in IDENTIFICATION_EVENT_TYPE.",
         }
     ),
     SystemSettings(

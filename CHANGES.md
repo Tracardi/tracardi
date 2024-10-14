@@ -1,6 +1,6 @@
 Version 2.0.1
 ----------------------------------------------------------
-[ ] New SQL compliant storage
+[ ] New SQL compliant data-warehouse
 
 Version: 1.1.0
 ----------------------------------------------------------

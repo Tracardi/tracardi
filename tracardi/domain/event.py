@@ -1,3 +1,5 @@
+import json
+
 from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
@@ -7,6 +9,8 @@ from .event_metadata import EventMetadata
 from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
 
+from .event_session import EventSession
+from .flat_event import FlatEvent
 from .marketing import UTM
 from .named_entity import NamedEntity
 from .profile_data import ProfileLoyalty, ProfileJob, ProfilePreference, ProfileMedia, \
@@ -38,12 +42,6 @@ class Tags(BaseModel):
             self.values += tag,
 
         self.count = len(self.values)
-
-
-class EventSession(Entity):
-    start: datetime = now_in_utc()
-    duration: float = 0
-    tz: Optional[str] = None
 
 
 class EventJourney(BaseModel):
@@ -180,6 +178,7 @@ class Event(NamedEntity):
     # journey: Optional[dict] = {}
 
     data: Optional[dict] = {}
+
     # data: Optional[EventData] = EventData.construct()
 
     def __init__(self, **data: Any):
@@ -380,3 +379,29 @@ class Event(NamedEntity):
                 "state": None
             }
         }
+
+
+class DottyEncoder(json.JSONEncoder):
+    """Helper class for encoding of nested Dotty dicts into standard dict
+    """
+
+    def default(self, obj):
+        """Return dict data of Dotty when possible or encode with standard format
+
+        :param object: Input object
+        :return: Serializable data
+        """
+        try:
+            if hasattr(obj, '_data'):
+                return obj._data
+            elif isinstance(obj, datetime):
+                # Convert datetime to an ISO formatted string
+                return obj.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            return str(obj)
+
+
+def flat_events_to_event(flat_events: List[FlatEvent]) -> List[Event]:
+    return [Event(**flat_event.to_dict()) for flat_event in flat_events]

@@ -2,22 +2,19 @@ import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Set, Tuple
 
-from dotty_dict import Dotty
 from pydantic import BaseModel, PrivateAttr
-from dateutil import parser
 
 from .entity import PrimaryEntity
 from .metadata import ProfileMetadata
-from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, \
-    FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
+from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..config import tracardi
-from ..service.change_monitoring.field_change_logger import FieldChangeLogger
 from ..service.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
+from ..service.tracking.profile_pii_hashing import get_allowed_piis_to_be_hashed_as_ids
 from ..service.license import License
 from ..service.utils.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
@@ -95,6 +92,7 @@ class Profile(PrimaryEntity):
     trash: Optional[dict] = None
 
     _updated_in_workflow: bool = PrivateAttr(False)
+    _list_of_pii_to_be_hashed_ids: Optional[str] = PrivateAttr(None)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -111,6 +109,9 @@ class Profile(PrimaryEntity):
 
     def is_segmented(self, flag):
         self.operation.segment = flag
+
+    def mark_as_merged(self):
+        self.metadata.system.reset_auto_merge_fields()
 
     def set_merge_key(self, merge_key):
         self.operation.merge = merge_key
@@ -145,57 +146,7 @@ class Profile(PrimaryEntity):
                 return True
         return False
 
-    def create_auto_merge_hashed_ids(self) -> Optional[set]:
-
-        if tracardi.is_apm_on():
-
-            new_ids = set()
-            update_fields = set()
-
-            if self.data.identifier.pk and not self.has_hashed_pk():
-                new_ids.add(hash_id(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
-                update_fields.add('data.identifier.pk')
-
-            if self.data.identifier.id and not self.has_hashed_id():
-                new_ids.add(hash_id(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
-                update_fields.add('data.identifier.id')
-
-            if self.data.contact.email.has_business() and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
-                new_ids.add(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
-                update_fields.add('data.contact.email.business')
-
-            if self.data.contact.email.has_main() and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
-                new_ids.add(hash_id(self.data.contact.email.main, PREFIX_EMAIL_MAIN))
-                update_fields.add('data.contact.email.main')
-
-            if self.data.contact.email.has_private() and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
-                new_ids.add(hash_id(self.data.contact.email.private, PREFIX_EMAIL_PRIVATE))
-                update_fields.add('data.contact.email.private')
-
-            if self.data.contact.phone.has_business() and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
-                new_ids.add(hash_id(self.data.contact.phone.business, PREFIX_PHONE_BUSINESS))
-                update_fields.add('data.contact.phone.business')
-
-            if self.data.contact.phone.has_main() and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
-                new_ids.add(hash_id(self.data.contact.phone.main, PREFIX_PHONE_MAIN))
-                update_fields.add('data.contact.phone.main')
-
-            if self.data.contact.phone.has_mobile() and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
-                new_ids.add(hash_id(self.data.contact.phone.mobile, PREFIX_PHONE_MOBILE))
-                update_fields.add('data.contact.phone.mobile')
-
-            if self.data.contact.phone.has_whatsapp() and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
-                new_ids.add(hash_id(self.data.contact.phone.whatsapp, PREFIX_PHONE_WHATSUP))
-                update_fields.add('data.contact.phone.whatsapp')
-
-            # Update if new data
-            if new_ids:
-                self.ids = list(set(self.ids) | new_ids)
-                return update_fields
-
-        return None
-
-    def add_auto_merge_hashed_id(self, flat_field) -> Optional[str]:
+    def _add_auto_merge_hashed_id(self, flat_field) -> Optional[str]:
         field_closure = FIELD_TO_PROPERTY_MAPPING.get(flat_field, None)
         if field_closure:
             value, prefix = field_closure(self)
@@ -226,7 +177,7 @@ class Profile(PrimaryEntity):
             self.metadata.fields[flat_field] = timestamp_data
             # If enabled hash emails and phone on field change
             if tracardi.is_apm_on():
-                added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
+                added_hashed_id = self._add_auto_merge_hashed_id(flat_field)
                 if added_hashed_id:
                     added_hashed_ids.add(added_hashed_id)
 
@@ -254,6 +205,14 @@ class Profile(PrimaryEntity):
     def is_updated_in_workflow(self) -> bool:
         return self._updated_in_workflow
 
+    def set_list_of_allowed_pii_to_be_hashed_ids(self, allow: str):
+        self._list_of_pii_to_be_hashed_ids = allow
+
+    def has_list_of_allowed_pii_to_be_hashed_ids(self) -> List[str]:
+        if not self._list_of_pii_to_be_hashed_ids:
+            return []
+        return self._list_of_pii_to_be_hashed_ids.split(',')
+
     def serialize(self):
         return {
             "profile": self.model_dump(),
@@ -265,9 +224,6 @@ class Profile(PrimaryEntity):
         self.metadata.time.update = now_in_utc()
         self.data.compute_anonymous_field()
         self.set_updated_in_workflow()
-        changed_fields = self.create_auto_merge_hashed_ids()
-        if changed_fields:
-            self.metadata.system.set_auto_merge_fields(changed_fields)
 
     def is_merged(self, profile_id) -> bool:
         return profile_id != self.id and profile_id in self.ids
@@ -315,7 +271,7 @@ class Profile(PrimaryEntity):
             self.operation.update = True
 
     def get_consent_ids(self) -> Set[str]:
-        return set([consent_id for consent_id, _ in self.consents.items()])
+        return set(self.consents.keys())
 
     def increase_visits(self, value=1):
         self.stats.visits += value
@@ -397,132 +353,80 @@ class Profile(PrimaryEntity):
         profile.set_new()
         return profile
 
+    # --------------- ID Hashing -----------------------
 
-class FlatProfile(Dotty):
+    def hash_all_allowed_pii_as_ids(self) -> bool:
 
-    def __init__(self, dictionary, *args, **kwargs):
-        super().__init__(dictionary)
-        self.log = FieldChangeLogger()
+        """ Used for creating hashed IDS """
 
-    def __setitem__(self, key, value):
-        old_value = self.get(key, None)
-        super().__setitem__(key, value)
-        # Ignore
-        ignore = ('metadata.fields', 'operation')
-        if not key.startswith(ignore):
-            self.log.log(key, old_value)
+        # Check for missing hash IDS, and create missing, Mark for update
+        changed_fields = self._create_auto_merge_hashed_ids()
+        if changed_fields:
+            # Add missing fields to auto_merge
+            self.metadata.system.set_auto_merge_fields(changed_fields)
+            return True
 
-    def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
-        field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
-        if field_closure:
-            value, prefix = field_closure(self)
+        return False
 
-            value = value.strip().lower()
+    def _create_auto_merge_hashed_ids(self) -> Optional[set]:
 
-            if 'ids' not in self or self['ids'] is None:
-                self['ids'] = []
+        """
+        It will update missing hashes if the APM is ON and there is no defined identification event type.
+        If the identification event type is defined only that event type can create ID hashes from emails, etc.
+        """
 
-            if value:
-                # Add new
-                # Can not simply append. Must reassign
-                _hash_id = hash_id(value, prefix)
+        if tracardi.is_apm_on():
 
-                # Do not add value if exists
-                if has_hash_id(_hash_id, self['ids']):
-                    return None
+            new_ids = set()
+            update_fields = set()
+            allowed_piis = get_allowed_piis_to_be_hashed_as_ids()
 
-                ids = self['ids']
-                ids.append(_hash_id)
-                # Assign to replace value
-                self['ids'] = list(set(ids))
+            if 'data.identifier.pk' in allowed_piis and self.data.identifier.pk and not self.has_hashed_pk():
+                new_ids.add(hash_id(self.data.identifier.pk, PREFIX_IDENTIFIER_PK))
+                update_fields.add('data.identifier.pk')
 
-                return flat_field
+            if 'data.identifier.id' in allowed_piis and self.data.identifier.id and not self.has_hashed_id():
+                new_ids.add(hash_id(self.data.identifier.id, PREFIX_IDENTIFIER_ID))
+                update_fields.add('data.identifier.id')
+
+            if 'data.contact.email.business' in allowed_piis and self.data.contact.email.has_business() and not self.has_hashed_email_id(
+                    PREFIX_EMAIL_BUSINESS):
+                new_ids.add(hash_id(self.data.contact.email.business, PREFIX_EMAIL_BUSINESS))
+                update_fields.add('data.contact.email.business')
+
+            if 'data.contact.email.main' in allowed_piis and self.data.contact.email.has_main() and not self.has_hashed_email_id(
+                    PREFIX_EMAIL_MAIN):
+                new_ids.add(hash_id(self.data.contact.email.main, PREFIX_EMAIL_MAIN))
+                update_fields.add('data.contact.email.main')
+
+            if 'data.contact.email.private' in allowed_piis and self.data.contact.email.has_private() and not self.has_hashed_email_id(
+                    PREFIX_EMAIL_PRIVATE):
+                new_ids.add(hash_id(self.data.contact.email.private, PREFIX_EMAIL_PRIVATE))
+                update_fields.add('data.contact.email.private')
+
+            if 'data.contact.phone.business' in allowed_piis and self.data.contact.phone.has_business() and not self.has_hashed_phone_id(
+                    PREFIX_PHONE_BUSINESS):
+                new_ids.add(hash_id(self.data.contact.phone.business, PREFIX_PHONE_BUSINESS))
+                update_fields.add('data.contact.phone.business')
+
+            if 'data.contact.phone.main' in allowed_piis and self.data.contact.phone.has_main() and not self.has_hashed_phone_id(
+                    PREFIX_PHONE_MAIN):
+                new_ids.add(hash_id(self.data.contact.phone.main, PREFIX_PHONE_MAIN))
+                update_fields.add('data.contact.phone.main')
+
+            if 'data.contact.phone.mobile' in allowed_piis and self.data.contact.phone.has_mobile() and not self.has_hashed_phone_id(
+                    PREFIX_PHONE_MOBILE):
+                new_ids.add(hash_id(self.data.contact.phone.mobile, PREFIX_PHONE_MOBILE))
+                update_fields.add('data.contact.phone.mobile')
+
+            if 'data.contact.phone.whatsapp' in allowed_piis and self.data.contact.phone.has_whatsapp() and not self.has_hashed_phone_id(
+                    PREFIX_PHONE_WHATSUP):
+                new_ids.add(hash_id(self.data.contact.phone.whatsapp, PREFIX_PHONE_WHATSUP))
+                update_fields.add('data.contact.phone.whatsapp')
+
+            # Update if new data
+            if new_ids:
+                self.ids = list(set(self.ids) | new_ids)
+                return update_fields
 
         return None
-
-    def set_field_change(self, flat_field: str, timestamp_data):
-        self['metadata.fields'][flat_field] = timestamp_data
-
-    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeLogger) -> Set[str]:
-        added_ids = set()
-        # Iterate and set new values. Leave old intact.
-        for flat_field, timestamp_data in field_timestamp_manager.get_log().items():  # type: str, list
-            self['metadata.fields'][flat_field] = timestamp_data
-            # If enabled hash emails and phone on field change
-            if tracardi.is_apm_on():
-                # Adds hashed id for email, phone, etc.
-                added_hashed_id = self.add_auto_merge_hashed_id(flat_field)
-                if added_hashed_id:
-                    added_ids.add(added_hashed_id)
-        return added_ids
-
-    def get_interest(self, interest: str):
-
-        _existing_interest_value = self.get(interest, None)
-
-        if _existing_interest_value:
-            # Convert if string
-            if isinstance(_existing_interest_value, str) and _existing_interest_value.isnumeric():
-                _existing_interest_value = float(_existing_interest_value)
-        else:
-            _existing_interest_value = 0
-
-        return _existing_interest_value
-
-    def _update_interest_score(self) -> Tuple[Dict[str, List],Dict[str, float]]:
-        fields_timestamps = self.get('metadata.fields', {})
-        interests = self.get('interests', {})
-        return _update_interests_score(fields_timestamps, interests)
-
-    def increase_interest(self, interest, value=1):
-        interest_key = f'interests.{interest}'
-
-        _existing_interest_value = self.get_interest(interest_key)
-        if License.has_license() and com_tracardi_settings.interest_decay_time_unit_in_seconds > 0:
-            fields_timestamps, new_interests = self._update_interest_score()
-            self['interests'] = new_interests
-            self['metadata.fields'] = fields_timestamps
-            self[interest_key] += value
-        else:
-            if isinstance(_existing_interest_value, (int, float)):
-                self[interest_key] += value
-            else:
-                self[interest_key] = value
-
-    def decrease_interest(self, interest, value=1):
-
-        interest_key = f'interests.{interest}'
-
-        _existing_interest_value = self.get_interest(interest_key)
-
-        if License.has_license() and com_tracardi_settings.interest_decay_time_unit_in_seconds > 0:
-            fields_timestamps, new_interests = self._update_interest_score()
-            self['interests'] = new_interests
-            self['metadata.fields'] = fields_timestamps
-            self[interest_key] -= value
-        else:
-            if isinstance(_existing_interest_value, (int, float)):
-                self[interest_key] -= value
-            else:
-                self[interest_key] = -value
-
-    def reset_interest(self, interest, value=0):
-        interest_key = f'interests.{interest}'
-        self[interest_key] = value
-
-    def mark_for_update(self):
-        self['operation.update'] = True
-        self['metadata.time.update'] = now_in_utc()
-
-    def has_changed(self) -> bool:
-        return self.get('operation.update',False)
-
-    def is_new(self) -> bool:
-        return self['operation.new']
-
-    def mark_as_merged(self):
-        self['metadata.system.aux.auto_merge'] = []
-        self['metadata.aux.merge_time'] = now_in_utc()
-
-    def update_changed_fields(self, changed_fields):
-        self['metadata.fields'] = changed_fields

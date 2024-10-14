@@ -153,6 +153,8 @@ async def test_load_or_create_session_with_session_but_on_session_in_db():
 
         session, payload = await _check_loading(session_from_db, tracker_payload, 1)
 
+        # Nie ma sesji to przyjmij jaką podano, nie generuj
+
         assert session.id == 's123'
         assert session.profile.id == 'p123'
 
