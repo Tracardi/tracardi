@@ -7,6 +7,45 @@ from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile_data import PREFIX_EMAIL_MAIN, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 
 
+def test_init_1():
+    fp = FlatProfile({
+        "id": "1"
+    })
+
+    assert fp.ids == []
+    assert fp.is_new() is False
+    assert fp.get_consent_ids() == set()
+    assert fp.traits == {}
+    assert fp.get_all_ids() == {"1"}
+    assert fp.has_not_saved_changes() is False
+    assert fp.needs_update() is False
+    assert fp.instanceof("none", dict) is False
+
+    fp.increase_interest("test", 1)
+    assert fp['interests.test'] == 1
+    fp.decrease_interest("test", 1)
+    assert fp['interests.test'] == 0
+
+
+def test_init_2():
+    fp = FlatProfile({
+        "id": "1"
+    })
+
+    fp.mark_for_update()
+
+    assert fp.needs_update()
+
+
+def test_init_3():
+    fp = FlatProfile({
+        "id": "1"
+    })
+
+    fp.hash_all_allowed_pii_as_ids()
+    assert fp.ids == []
+
+
 def test_logger():
     fp = FlatProfile({
         "id": 1,

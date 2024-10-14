@@ -22,7 +22,8 @@ class FlatProfile(FlatEntity):
         self.log = FieldChangeLogger()
 
         # Set default values and basic validation
-
+        self.set_new(False)
+        self.set_updated(False)
         ids = self.get('ids', None)
         if ids is None:
             self['ids'] = []
@@ -100,7 +101,7 @@ class FlatProfile(FlatEntity):
         return self.is_new() or self.needs_update()
 
     def needs_update(self) -> bool:
-        return bool(self['operation.update'])
+        return bool(self.get('operation.update', False))
 
     def fill_meta_data(self):
         """
@@ -224,7 +225,7 @@ class FlatProfile(FlatEntity):
         self['metadata.time.update'] = now_in_utc()
 
     def is_new(self) -> bool:
-        return bool(self['operation.new'])
+        return bool(self.get('operation.new', False))
 
     def set_new(self, flag=True):
         self['operation.new'] = flag
@@ -277,6 +278,8 @@ class FlatProfile(FlatEntity):
     @staticmethod
     def from_es_storage_record(record: StorageRecord) -> 'FlatProfile':
         fp = FlatProfile(record)
+        fp.set_new(False)
+        fp.set_updated(False)
         fp.set_meta_data(record.get_meta_data())
         return fp
 

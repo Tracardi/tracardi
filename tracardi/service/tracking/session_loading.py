@@ -31,9 +31,13 @@ def _create_session(tracker_payload: TrackerPayload) -> Session:
     # But we may need an artificial session for workflow handling. We create
     # one but will not save it.
 
-    logger.warning(f"Tracker payload delivered with empty session ID. Session created on server side with random ID.")
+    session_id = tracker_payload.get_session_id()
+    if session_id is None:
+        logger.warning(
+            f"Tracker payload delivered with empty session ID. Session created on server side with random ID.")
+        session_id = str(uuid4())
 
-    session = Session.new(id=str(uuid4()))
+    session = Session.new(id=session_id)
     assert (session.operation.new is True)
 
     _copy_tracker_payload_session_metadata(tracker_payload, session)
@@ -46,10 +50,8 @@ def _create_session(tracker_payload: TrackerPayload) -> Session:
 
 async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Session, TrackerPayload]:
     session_id = get_entity_id(tracker_payload.session)
-    # orig_tracker_payload = tracker_payload.model_dump(mode='json')
 
     if session_id is None or session_id.strip() == "":
-
         session = _create_session(tracker_payload)
 
     else:

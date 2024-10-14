@@ -149,6 +149,9 @@ class TrackerPayload(BaseModel):
             return _user_agent.is_bot
         return False
 
+    def get_session_id(self) -> Optional[str]:
+        return get_entity_id(self.session)
+
     def get_origin_or_referer(self) -> Optional[ParseResult]:
         try:
 
@@ -590,19 +593,19 @@ class TrackerPayload(BaseModel):
             # Tracked Profile ID exists, start loading profile with tracker_payload.profile.id
             # And do the regular fallback
 
-            profile, session = await self._load_profile_by_payload_profile_id(session, static)
+            flat_profile, session = await self._load_profile_by_payload_profile_id(session, static)
 
         elif self._has_profile_id_in_session(session):
 
             # Fallback to loading from session with regular fallback
 
-            profile, session = await self._load_profile_by_session_profile_id(session, static)
+            flat_profile, session = await self._load_profile_by_session_profile_id(session, static)
 
         else:
 
-            profile, session = self._load_default_profile(session, static)
+            flat_profile, session = self._load_default_profile(session, static)
 
-        return profile, session
+        return flat_profile, session
 
     async def get_profile_and_session(
             self,
