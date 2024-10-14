@@ -100,5 +100,5 @@ async def save_merged_flat_profile(flat_profile: FlatProfile):
 
 async def save_marked_for_merge_profiles(flat_profiles: List[FlatProfile]):
     # Convert to profiles
-    profiles= [Profile(**flat_profile.to_dict()).set_meta_data(flat_profile.get_meta_data()) for flat_profile in flat_profiles]
+    profiles= [flat_profile.as_profile() for flat_profile in flat_profiles]
     await mutation_profile_db.save_profiles_in_db(profiles)

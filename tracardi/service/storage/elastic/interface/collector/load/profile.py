@@ -12,8 +12,7 @@ async def load_profile(profile_id: str, context: Optional[Context] = None, fallb
 
     flat_profile = await load_flat_profile(profile_id, context, fallback_to_db)
     if flat_profile:
-        profile: Optional[Profile] = Profile(**flat_profile.to_dict())
-        profile.set_meta_data(flat_profile.get_meta_data())
+        profile = flat_profile.as_profile()
     else:
         profile: Optional[Profile] = None
 

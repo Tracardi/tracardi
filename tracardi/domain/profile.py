@@ -1,8 +1,7 @@
 import uuid
-from datetime import datetime
 from typing import Optional, List, Dict, Any, Set
 
-from pydantic import BaseModel, PrivateAttr
+from pydantic import PrivateAttr
 
 from .entity import PrimaryEntity
 from .metadata import ProfileMetadata

@@ -286,6 +286,10 @@ class FlatProfile(FlatEntity):
         fp.set_meta_data(profile.get_meta_data())
         return fp
 
+
+    def as_profile(self) -> Profile:
+        return Profile(**self.to_dict()).set_meta_data(self.get_meta_data())
+
     # --------------- ID Hashing -----------------------
 
     def hash_all_allowed_pii_as_ids(self) -> bool:
