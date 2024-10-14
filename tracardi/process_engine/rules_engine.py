@@ -16,7 +16,7 @@ from .debugger import Debugger
 from ..domain import ExtraInfo
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from ..domain.flow import Flow
-from ..domain.flow_invoke_result import FlowInvokeResult
+from tracardi.service.wf.domain.flow_invoke_result import FlowInvokeResult
 from ..domain.payload.tracker_payload import TrackerPayload
 from ..domain.profile import Profile
 from ..domain.rule_invoke_result import RuleInvokeResult

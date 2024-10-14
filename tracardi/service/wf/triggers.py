@@ -12,7 +12,7 @@ from tracardi.domain.event import Event, flat_events_to_event
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult
+from tracardi.service.wf.workflow_manager_async import WorkflowManagerAsync, TrackerResult
 
 logger = get_logger(__name__)
 

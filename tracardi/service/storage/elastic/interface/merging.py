@@ -19,12 +19,12 @@ async def _load_profile_duplicates(profile_ids: Set[str]) -> StorageRecords:
                 "should": [
                     {
                         "terms": {
-                            "ids": profile_ids
+                            "ids": list(profile_ids)
                         }
                     },
                     {
                         "terms": {
-                            "id": profile_ids
+                            "id": list(profile_ids)
                         }
                     }
                 ],
@@ -93,14 +93,9 @@ async def delete_duplicated_profiles(
     return set([profile_id for profile_id, _ in records_to_delete])
 
 
-async def save_merged_profile(flat_profile: FlatProfile, metadata: RecordMetadata) -> Profile:
-    profile = Profile(**flat_profile.to_dict())
-    profile.set_meta_data(metadata)
-
+async def save_merged_flat_profile(flat_profile: FlatProfile):
     # Auto refresh db
     await mutation_profile_db.save_flat_profile(flat_profile, refresh=True)
-
-    return profile
 
 
 async def save_marked_for_merge_profiles(flat_profiles: List[FlatProfile]):

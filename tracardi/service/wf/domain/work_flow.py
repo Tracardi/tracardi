@@ -4,7 +4,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
-from tracardi.domain.flow_invoke_result import FlowInvokeResult
+from tracardi.service.wf.domain.flow_invoke_result import FlowInvokeResult
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from .debug_info import DebugInfo, FlowDebugInfo
 from .flow_history import FlowHistory

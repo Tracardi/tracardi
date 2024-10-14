@@ -94,4 +94,4 @@ def save_flat_profile_cache(flat_profile: Union[Optional[FlatProfile], List[Flat
             for _profile in flat_profile:
                 _save_single_flat_profile(_profile, context)
         else:
-            raise ValueError(f"Incorrect profile value. Expected Profile or list of Profiles. Got {type(profile)}")
+            raise ValueError(f"Incorrect profile value. Expected Profile or list of Profiles. Got {type(flat_profile)}")
