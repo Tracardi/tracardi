@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from tracardi.domain.destination import Destination
-from tracardi.domain.event import Event
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.resource import Resource
 from tracardi.domain.session import Session
@@ -18,7 +18,7 @@ class DestinationInterface:
                                changed_fields: List[dict] = None, metadata=None):
         pass
 
-    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], event: Event,
+    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent,
                              metadata=None):
         pass
 

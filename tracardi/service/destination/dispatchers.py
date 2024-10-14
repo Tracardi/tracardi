@@ -1,7 +1,6 @@
 from typing import Optional, List
 
 from tracardi.domain import ExtraInfo
-from tracardi.domain.event import Event
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.session import Session
@@ -26,16 +25,16 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
     for flat_event in flat_events:
 
         # Convert to Event destination needs it
-        event = Event(**flat_event.to_dict())
+        # event = Event(**flat_event.to_dict())
 
         try:
             # Reads from cache
             destinations: List[Destination] = await load_event_destinations(
-                event.type,
-                event.source.id
+                flat_event.type,
+                flat_event.get('source.id')
             )
 
-            dot.set_storage("event", event)
+            dot.set_storage("event", flat_event)
 
             async for destination_instance, reshaped_data in get_dispatch_destination_and_data(
                     dot,
@@ -44,7 +43,7 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
                 await destination_instance.dispatch_event(reshaped_data,
                                                           flat_profile=flat_profile,
                                                           session=session,
-                                                          event=event,
+                                                          event=flat_event,
                                                           metadata=metadata)
         except Exception as e:
             logger.error(
@@ -52,7 +51,7 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
                 extra=ExtraInfo.exact(
                     flow_id=None,
                     node_id=None,
-                    event_id=get_entity_id(event),
+                    event_id=get_entity_id(flat_event),
                     profile_id=get_entity_id(flat_profile),
                     origin='profile-destination',
                     package=__name__,

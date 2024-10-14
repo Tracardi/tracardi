@@ -1,12 +1,9 @@
-from typing import Tuple, List, Optional
-
-from dotty_dict import Dotty
+from typing import Tuple, List
 
 from tracardi.domain import ExtraInfo
-from tracardi.domain.event import Event
 from tracardi.domain.event_compute import EventCompute
 from tracardi.domain.event_to_profile import EventToProfile
-from tracardi.domain.profile import Profile
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
@@ -85,7 +82,7 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 
 async def map_event_to_profile(
         custom_mapping_schemas: List[EventToProfile],
-        flat_event: Dotty,
+        flat_event: FlatEvent,
         flat_profile: FlatProfile,
         session: Session,
         field_change_logger: FieldChangeLogger
@@ -115,7 +112,7 @@ async def map_event_to_profile(
                 if_statement = custom_mapping_schema.config['condition']
                 try:
                     # Todo converting to Profile and event may be not performant, maybe extend dot accessor to take dotty
-                    dot = DotAccessor(event=Event(**flat_event.to_dict()), profile=Profile(**flat_profile.to_dict()),
+                    dot = DotAccessor(event=flat_event, profile=flat_profile,
                                       session=session)
                     result = await _check_mapping_condition_if_met(if_statement, dot)
                     if result is False:

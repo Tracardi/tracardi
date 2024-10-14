@@ -9,7 +9,7 @@ from uuid import uuid4
 from tracardi.domain.api_instance import ApiInstance
 from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.enum.event_status import COLLECTED
-from tracardi.domain.event import EventSession
+from tracardi.domain.event_session import EventSession
 from tracardi.domain.flat_event import EventDict
 
 from tracardi.domain.event_metadata import EventMetadata

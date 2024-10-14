@@ -12,7 +12,7 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from .destination_interface import DestinationInterface
 from ...domain import ExtraInfo
-from ...domain.event import Event
+from ...domain.flat_event import FlatEvent
 
 logger = get_logger(__name__)
 
@@ -30,7 +30,7 @@ class TracardiApiCredentials(BaseModel):
 
 class TracardiConnector(DestinationInterface):
 
-    async def _dispatch(self, flat_profile: Optional[FlatProfile], session: Optional[Session], event: Event, metadata, context):
+    async def _dispatch(self, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent, metadata, context):
         try:
             credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
             credentials = TracardiApiCredentials(**credentials)
@@ -56,10 +56,10 @@ class TracardiConnector(DestinationInterface):
                     "properties": {},
                     "events": [
                         {
-                            "type": event.type,
-                            "properties": event.properties,
+                            "type": flat_event.type,
+                            "properties": flat_event.properties,
                             "options": {},
-                            "context": event.context
+                            "context": flat_event.context
                         }
                     ],
                     "options": {}
@@ -112,6 +112,6 @@ class TracardiConnector(DestinationInterface):
             profile_id=flat_profile.id
         ))
 
-    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], event: Event,
+    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent,
                              metadata=None):
-        await self._dispatch(flat_profile, session, event, metadata, context=data)
+        await self._dispatch(flat_profile, session, flat_event, metadata, context=data)

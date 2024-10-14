@@ -66,6 +66,10 @@ class FlatEvent(FlatEntity):
     def properties(self) -> dict:
         return self.get('properties', {})
 
+    @property
+    def context(self) -> Optional[str]:
+        return self.get('context', {})
+
     def is_async(self) -> bool:
         return 'config' in self and self['config'].get('async', True)
 

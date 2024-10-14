@@ -10,7 +10,8 @@ from pydantic import BaseModel, field_validator, PrivateAttr
 
 from ..api_instance import ApiInstance
 from ..entity import Entity
-from ..event import Event, EventSession
+from ..event import Event
+from tracardi.domain.event_session import EventSession
 from ..session import Session, SessionContext
 from ..time import Time
 from ...service.utils.getters import get_entity_id

@@ -6,7 +6,7 @@ from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from .destination_interface import DestinationInterface
-from ...domain.event import Event
+from ...domain.flat_event import FlatEvent
 
 logger = get_logger(__name__)
 
@@ -35,5 +35,5 @@ class GhostConnector(DestinationInterface):
                                metadata=None):
         self._dispatch(payload=mapped_data)
 
-    async def dispatch_event(self, mapped_data, flat_profile: Optional[FlatProfile],  session: Session, event: Event, metadata=None):
+    async def dispatch_event(self, mapped_data, flat_profile: Optional[FlatProfile],  session: Session, flat_event: FlatEvent, metadata=None):
         self._dispatch(payload=mapped_data)

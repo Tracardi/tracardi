@@ -4,9 +4,10 @@ from tracardi.domain.profile_data import ProfileMedia, ProfilePII, ProfileLangua
     ProfileLoyaltyCard
 
 from tracardi.domain.entity import Entity, PrimaryEntity
-from tracardi.domain.event import Event, EventSession, EventData, EventEc, EventProduct, EventProductVariant, \
+from tracardi.domain.event import Event, EventData, EventEc, EventProduct, EventProductVariant, \
     EventCheckout, EventOrder, Money, EventMessage, EventPayment, EventCreditCard, EventMarketing, EventPromotion, \
     EventJourney, Tags
+from tracardi.domain.event_session import EventSession
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.geo import Geo, Country
 from tracardi.domain.marketing import UTM

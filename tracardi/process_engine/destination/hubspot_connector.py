@@ -5,6 +5,7 @@ from ..action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientEx
 from ...domain.destination import Destination
 from ...domain.event import Event
 from tracardi.domain.flat_profile import FlatProfile
+from ...domain.flat_event import FlatEvent
 from ...domain.resource import Resource
 from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
@@ -125,5 +126,5 @@ class HubSpotConnector(DestinationInterface):
         if flat_profile:
             await self._dispatch(data, flat_profile)
 
-    async def dispatch_event(self, data: dict, flat_profile: Optional[FlatProfile], session: Session, event: Event, metadata=None):
+    async def dispatch_event(self, data: dict, flat_profile: Optional[FlatProfile], session: Session, flat_event: FlatEvent, metadata=None):
         await self._dispatch(data, flat_profile)

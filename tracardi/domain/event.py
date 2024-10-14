@@ -9,6 +9,7 @@ from .event_metadata import EventMetadata
 from pydantic import model_validator, ConfigDict, BaseModel
 from typing import Tuple
 
+from .event_session import EventSession
 from .flat_event import FlatEvent
 from .marketing import UTM
 from .named_entity import NamedEntity
@@ -41,12 +42,6 @@ class Tags(BaseModel):
             self.values += tag,
 
         self.count = len(self.values)
-
-
-class EventSession(Entity):
-    start: datetime = now_in_utc()
-    duration: float = 0
-    tz: Optional[str] = None
 
 
 class EventJourney(BaseModel):

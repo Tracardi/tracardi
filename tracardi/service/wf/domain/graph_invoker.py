@@ -11,7 +11,8 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.enum.event_status import PROCESSED
 from tracardi.exceptions.log_handler import get_logger
 
-from tracardi.domain.event import Event, EventSession
+from tracardi.domain.event import Event
+from tracardi.domain.event_session import EventSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
