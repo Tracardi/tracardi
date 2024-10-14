@@ -263,12 +263,10 @@ class FlatProfile(FlatEntity):
         if field not in self or not isinstance(self[field], instance):
             self[field] = value
 
-    def set_visit_time(self, field_change_logger):
+    def set_visit_time(self):
         if self.has('metadata.time.visit.current'):
             self['metadata.time.visit.last'] = self['metadata.time.visit.current']
-            field_change_logger.log('metadata.time.visit.last')
         self['metadata.time.visit.current'] = now_in_utc()
-        field_change_logger.log('metadata.time.visit.current')
 
     def get_consent_ids(self) -> Set[str]:
         if not self.instanceof('consents', dict):

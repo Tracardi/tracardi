@@ -60,33 +60,30 @@ def _auto_index_default_event_type(flat_event: FlatEvent, flat_profile: Optional
 
     return flat_event
 
+def set_profile_changed_fields(flat_profile: FlatProfile):
+    # Add fields timestamps
+    flat_profile.set_if_not_instance('metadata.fields', {}, instance=dict)
+
+    # field_change_logger = field_change_logger.merge(flat_profile.log)
+
+    # Append field changes fo metadata.fields
+    auto_merge_ids = flat_profile.set_metadata_fields_timestamps(flat_profile.log)
+
+    return flat_profile, auto_merge_ids
 
 async def event_properties_to_profile(flat_event: FlatEvent,
                                       flat_profile: FlatProfile,
-                                      session: Session,
-                                      field_change_logger: FieldChangeLogger) -> Tuple[
-    FlatProfile, Set[str], FieldChangeLogger]:
+                                      session: Session) -> FlatProfile:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Map event data to profile
     custom_event_to_profile_mapping_schemas = await load_event_to_profile(event_type_id=flat_event['type'])
-    flat_profile, field_change_logger = await map_event_to_profile(
+    return await map_event_to_profile(
         custom_event_to_profile_mapping_schemas,
         flat_event,
         flat_profile,
-        session,
-        field_change_logger
+        session
     )
-
-    # Add fields timestamps
-    flat_profile.set_if_not_instance('metadata.fields', {}, instance=dict)
-
-    field_change_logger = field_change_logger.merge(flat_profile.log)
-
-    # Append field changes fo metadata.fields
-    auto_merge_ids = flat_profile.set_metadata_fields_timestamps(field_change_logger)
-
-    return flat_profile, auto_merge_ids, field_change_logger
 
 
 async def event_to_traits(flat_event: FlatEvent,
@@ -194,9 +191,8 @@ async def compute_events(events: List[EventPayload],
                          session: Session,
                          flat_profile: Optional[FlatProfile],
                          profile_less: bool,
-                         tracker_payload: TrackerPayload,
-                         field_change_logger: FieldChangeLogger
-                         ) -> Tuple[List[FlatEvent], Session, Optional[FlatProfile], FieldChangeLogger]:
+                         tracker_payload: TrackerPayload
+                         ) -> Tuple[List[FlatEvent], Session, Optional[FlatProfile]]:
     event_objects = []
 
     auto_merge_ids = set()
@@ -219,25 +215,21 @@ async def compute_events(events: List[EventPayload],
 
         flat_event = FlatEvent(event_dict)
 
-        if flat_event.get('metadata.valid', True) is True:
+        if flat_event.is_valid():
             # Run mappings for valid event. Maps properties to traits, and adds traits
             flat_event = await event_to_traits(flat_event, flat_profile)
 
             # Skip mapping to profile if none
             if flat_profile:
 
-                flat_profile, _auto_merge_ids, field_change_logger = await event_properties_to_profile(
+                flat_profile, _auto_merge_ids = await event_properties_to_profile(
                     flat_event,
                     flat_profile,
-                    session,
-                    field_change_logger
+                    session
                 )
-                # flat_event, flat_profile, _auto_merge_ids, field_change_logger = await event_to_traits_and_profile_mapping(
-                #     flat_event,
-                #     flat_profile,
-                #     session,
-                #     field_change_logger
-                # )
+
+                # TODo may be not needed as all change will be in flat_profile
+                flat_profile, _auto_merge_ids = set_profile_changed_fields(flat_profile)
 
                 # Combine all auto merge ids
 
@@ -307,4 +299,4 @@ async def compute_events(events: List[EventPayload],
     #         if not tracardi.skip_errors_on_profile_mapping:
     #             raise e
 
-    return event_objects, session, flat_profile, field_change_logger
+    return event_objects, session, flat_profile

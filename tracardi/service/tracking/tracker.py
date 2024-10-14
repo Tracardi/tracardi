@@ -50,8 +50,7 @@ async def os_tracker(
             flat_profile,
             session,
             tracker_payload,
-            source,
-            field_change_logger
+            source
         )
 
         # Recreate Profile from flat_profile, that was changed

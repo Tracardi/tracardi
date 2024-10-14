@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import List
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.event_compute import EventCompute
@@ -9,7 +9,6 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.tracking.utils.function_call import default_event_call_function
@@ -25,54 +24,46 @@ APPEND = 2
 logger = get_logger(__name__)
 
 
-def update_profile_last_geo(session: Session, flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
-    FlatProfile, FieldChangeLogger]:
+def update_profile_last_geo(session: Session, flat_profile: FlatProfile) -> FlatProfile:
     if not session.device.geo.is_empty():
         _geo = session.device.geo.model_dump(mode="json")
         if not flat_profile.has('data.devices.last.geo', equal=_geo):
             flat_profile['data.devices.last.geo'] = _geo
-            field_change_logger.log('data.devices.last.geo')
             flat_profile.set_updated()
-    return flat_profile, field_change_logger
+    return flat_profile
 
 
-def update_profile_email_type(flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
-    FlatProfile, FieldChangeLogger]:
+def update_profile_email_type(flat_profile: FlatProfile) -> FlatProfile:
     if flat_profile.has_not_empty('data.contact.email.main') and not flat_profile.has('aux.email.free'):
         email_parts = flat_profile['data.contact.email.main'].split('@')
         if len(email_parts) > 1:
             email_domain = email_parts[1]
 
             flat_profile['aux.email.free'] = email_domain in free_email_domains
-            field_change_logger.log('aux.email.free')
             flat_profile.set_updated()
-    return flat_profile, field_change_logger
+    return flat_profile
 
 
-def update_profile_visits(session: Session, flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
-    FlatProfile, FieldChangeLogger]:
+def update_profile_visits(session: Session, flat_profile: FlatProfile) -> FlatProfile:
     # Calculate only on first click in visit
 
     if session.is_new():
-        flat_profile.set_visit_time(field_change_logger)
+        flat_profile.set_visit_time()
         flat_profile.set_if_none('metadata.time.visit.count', 0)
         flat_profile['metadata.time.visit.count'] += 1
-        field_change_logger.log('metadata.time.visit.count')
         flat_profile.set_updated()
 
-    return flat_profile, field_change_logger
+    return flat_profile
 
 
-def update_profile_time(session: Session, flat_profile: FlatProfile, field_change_logger: FieldChangeLogger) -> Tuple[
-    FlatProfile, FieldChangeLogger]:
+def update_profile_time(session: Session, flat_profile: FlatProfile) -> FlatProfile:
     # Set time zone form session
     if session.context:
         try:
             flat_profile['metadata.time.visit.tz'] = session.context['time']['tz']
-            field_change_logger.log('metadata.time.visit.tz')
         except KeyError:
             pass
-    return flat_profile, field_change_logger
+    return flat_profile
 
 
 async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
@@ -85,8 +76,7 @@ async def map_event_to_profile(
         flat_event: FlatEvent,
         flat_profile: FlatProfile,
         session: Session,
-        field_change_logger: FieldChangeLogger
-) -> Tuple[FlatProfile, FieldChangeLogger]:
+) -> FlatProfile:
     # Default event types mappings
 
     default_mapping_schema = get_default_mappings_for(flat_event['type'], 'profile')
@@ -247,7 +237,7 @@ async def map_event_to_profile(
         # Run only on change but there was no change
         if compute_schema.run_on_profile_change() and profile_updated_flag is False:
             # Terminate earlier
-            return flat_profile, field_change_logger
+            return flat_profile
 
         # Compute values
 
@@ -267,12 +257,10 @@ async def map_event_to_profile(
     if profile_updated_flag is True:
         flat_profile.mark_for_update()
 
-    return flat_profile, field_change_logger
+    return flat_profile
 
 
-def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_payload,
-                                    field_change_logger: FieldChangeLogger) -> Tuple[
-    FlatProfile, FieldChangeLogger]:
+def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_payload) -> FlatProfile:
     if 'language' in session.context:
         if flat_profile.instanceof('data.pii.language.spoken', list) and isinstance(session.context['language'],
                                                                                     list):
@@ -280,7 +268,6 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_
                 set(flat_profile['data.pii.language.spoken'] + session.context['language']))
         else:
             flat_profile['data.pii.language.spoken'] = session.context['language']
-        field_change_logger.log('data.pii.language.spoken')
 
     if not flat_profile.has('aux.geo'):
         flat_profile['aux.geo'] = {}
@@ -294,14 +281,12 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_
                 markets += language_countries_dict[lang_code]
 
     if markets:
-        field_change_logger.log('aux.geo.markets')
         flat_profile['aux.geo.markets'] = markets
 
     # Continent
 
     continent = get_continent(tracker_payload)
     if continent:
-        field_change_logger.log('aux.geo.continent')
         flat_profile['aux.geo.continent'] = continent
 
-    return flat_profile, field_change_logger
+    return flat_profile
