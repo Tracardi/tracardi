@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from tracardi.domain.destination import Destination
 from tracardi.domain.event import Event
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.resource import Resource
 from tracardi.domain.session import Session
 

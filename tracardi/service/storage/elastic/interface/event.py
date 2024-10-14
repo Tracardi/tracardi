@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict
 
-from tracardi.domain.event import Event, FlatEvent, flat_events_to_event
+from tracardi.domain.event import Event
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.driver.elastic import event as event_db
 

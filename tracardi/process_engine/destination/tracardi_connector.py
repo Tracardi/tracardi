@@ -7,7 +7,7 @@ from typing import Optional, List
 from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
 
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from .destination_interface import DestinationInterface

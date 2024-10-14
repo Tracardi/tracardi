@@ -8,7 +8,8 @@ from tracardi.domain.entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.profile import Profile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.tracker_config import TrackerConfig

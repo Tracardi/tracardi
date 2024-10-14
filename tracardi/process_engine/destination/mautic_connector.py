@@ -4,7 +4,7 @@ from tracardi.service.domain import resource as resource_db
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
 from ...domain.event import Event
-from ...domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from ...domain.session import Session
 
 

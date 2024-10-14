@@ -3,7 +3,7 @@ from uuid import uuid4
 import pytest
 
 from tracardi.context import ServerContext, Context
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile_data import PREFIX_EMAIL_MAIN, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 
 

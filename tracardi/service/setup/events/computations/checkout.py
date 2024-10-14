@@ -1,6 +1,6 @@
 from typing import Optional
 from dotty_dict import Dotty
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 
 
 def compute_ltcop(event: Dotty, profile: Optional[FlatProfile]):

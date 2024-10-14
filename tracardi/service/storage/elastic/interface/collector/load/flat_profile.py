@@ -2,7 +2,7 @@ from typing import Optional
 
 from tracardi.service.tracking.cache.flat_profile_cache import save_flat_profile_cache, load_flat_profile_cache
 from tracardi.context import Context, get_context
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.storage.elastic.interface import profile as profile_db
 
 

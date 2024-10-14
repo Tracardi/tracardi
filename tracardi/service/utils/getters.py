@@ -1,7 +1,6 @@
 from typing import Optional, Union
 
 from tracardi.domain.entity import Entity, PrimaryEntity, FlatEntity
-from tracardi.domain.profile import FlatProfile
 
 
 def get_entity_id(entity: Union[Optional[Entity],Optional[FlatEntity]]) -> Optional[str]:

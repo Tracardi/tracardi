@@ -1,4 +1,4 @@
-from tracardi.domain.event import FlatEvent
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.service.utils.date import now_in_utc
 
 

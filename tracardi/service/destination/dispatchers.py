@@ -1,8 +1,9 @@
 from typing import Optional, List
 
 from tracardi.domain import ExtraInfo
-from tracardi.domain.event import Event, FlatEvent
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.event import Event
+from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from tracardi.context import ServerContext, Context
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.tracker_payload import TrackerPayload

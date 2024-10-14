@@ -4,7 +4,7 @@ from .destination_interface import DestinationInterface
 from ..action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
 from ...domain.destination import Destination
 from ...domain.event import Event
-from ...domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from ...domain.resource import Resource
 from ...domain.session import Session
 from ...exceptions.log_handler import get_logger

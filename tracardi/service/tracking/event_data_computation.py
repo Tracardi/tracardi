@@ -1,5 +1,3 @@
-from dotty_dict import Dotty
-
 from typing import List, Tuple, Optional, Set
 
 from tracardi.domain import ExtraInfo
@@ -12,9 +10,9 @@ from tracardi.service.tracking.profile_data_computation import map_event_to_prof
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
-from tracardi.domain.event import Event, EventDict, FlatEvent
+from tracardi.domain.flat_event import EventDict, FlatEvent
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
 

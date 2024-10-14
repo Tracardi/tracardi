@@ -1,7 +1,8 @@
 import asyncio
 from typing import List, Tuple, Optional, Set
 
-from tracardi.domain.profile import FlatProfile, Profile
+from tracardi.domain.profile import Profile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.storage_record import RecordMetadata, StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.interface import raw as raw_db

@@ -28,7 +28,7 @@ from ..payload.event_payload import EventPayload
 from ..session import Session
 from ..time import Time
 from ..entity import Entity, PrimaryEntity, DefaultEntity
-from ..profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from ...service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
 
 from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point

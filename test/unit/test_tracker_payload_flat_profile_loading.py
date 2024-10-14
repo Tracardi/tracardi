@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.time import Time
 

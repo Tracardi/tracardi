@@ -1,4 +1,4 @@
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 

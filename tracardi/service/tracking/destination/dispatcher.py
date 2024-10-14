@@ -2,8 +2,8 @@ import logging
 from typing import Optional, List
 
 from tracardi.config import tracardi
-from tracardi.domain.event import FlatEvent
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_event import FlatEvent
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.destination.dispatchers import profile_destination_dispatch, event_destination_dispatch

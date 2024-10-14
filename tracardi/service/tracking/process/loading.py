@@ -1,6 +1,6 @@
 from typing import Tuple, Optional
 
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 from tracardi.service.tracking.session_loading import load_or_create_session

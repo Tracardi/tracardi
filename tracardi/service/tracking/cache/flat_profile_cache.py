@@ -9,7 +9,7 @@ from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis.driver.redis_client import RedisClient
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 
 logger = get_logger(__name__)
 redis_cache = RedisCache(ttl=tracardi.keep_profile_in_cache_for)

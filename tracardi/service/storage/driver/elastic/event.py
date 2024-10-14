@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from tracardi.service.storage.elastic.driver.agg_result import AggResult
-from tracardi.domain.event import Event, FlatEvent
+from tracardi.domain.event import Event
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.named_entity import NamedEntity
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult

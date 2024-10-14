@@ -6,7 +6,8 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.event import Event
 from tracardi.domain.event_compute import EventCompute
 from tracardi.domain.event_to_profile import EventToProfile
-from tracardi.domain.profile import Profile, FlatProfile
+from tracardi.domain.profile import Profile
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger

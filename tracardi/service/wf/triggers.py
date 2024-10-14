@@ -8,7 +8,8 @@ from tracardi.service.field_mappings_cache import add_new_field_mappings
 from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
-from tracardi.domain.event import Event, flat_events_to_event, FlatEvent
+from tracardi.domain.event import Event, flat_events_to_event
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.tracking.workflow_manager_async import WorkflowManagerAsync, TrackerResult

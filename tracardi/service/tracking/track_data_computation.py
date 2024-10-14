@@ -2,8 +2,8 @@ from typing import Tuple, List, Optional
 
 from tracardi.config import tracardi
 from tracardi.context import get_context
-from tracardi.domain.event import Event, FlatEvent
-from tracardi.domain.profile import FlatProfile
+from tracardi.domain.flat_event import FlatEvent
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data

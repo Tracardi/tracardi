@@ -3,7 +3,7 @@ from typing import Optional, List
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.civi_crm.client import CiviCRMClient, CiviClientCredentials
 from ...domain.event import Event
-from ...domain.profile import FlatProfile
+from tracardi.domain.flat_profile import FlatProfile
 from ...domain.session import Session
 
 
