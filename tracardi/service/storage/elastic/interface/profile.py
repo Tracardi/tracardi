@@ -43,7 +43,7 @@ async def get_profiles_by_field_and_value(field: str, email: str) -> AsyncGenera
         }
     }
     async for profile_record in storage_manager('profile').scan(query, batch=1000):
-        yield FlatProfile(profile_record)
+        yield FlatProfile.from_es_storage_record(profile_record)
 
 
 async def get_duplicated_profiles_by_field(field):
@@ -162,6 +162,4 @@ async def load_flat_profile_by_id(profile_id: str) -> Optional[FlatProfile]:
     record = await profile_db.load_by_id(profile_id)
     if record is None:
         return None
-    flat_profile = FlatProfile(dict(record))
-    flat_profile.set_meta_data(record.get_meta_data())
-    return flat_profile
+    return FlatProfile.from_es_storage_record(record)

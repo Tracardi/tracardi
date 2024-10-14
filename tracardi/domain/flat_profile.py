@@ -1,8 +1,9 @@
 import uuid
 from typing import Optional, List, Dict, Any, Set
 from .entity import PrimaryEntity, Entity, FlatEntity
+from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
-from .storage_record import RecordMetadata
+from .storage_record import RecordMetadata, StorageRecord
 from ..config import tracardi
 from ..service.change_monitoring.field_change_logger import FieldChangeLogger
 
@@ -272,6 +273,18 @@ class FlatProfile(FlatEntity):
         if not self.instanceof('consents', dict):
             return set()
         return set(self['consents'].keys())
+
+    @staticmethod
+    def from_es_storage_record(record: StorageRecord) -> 'FlatProfile':
+        fp = FlatProfile(record)
+        fp.set_meta_data(record.get_meta_data())
+        return fp
+
+    @staticmethod
+    def from_profile(profile: Profile) -> 'FlatProfile':
+        fp = FlatProfile(profile.model_dump(mode="json"))
+        fp.set_meta_data(profile.get_meta_data())
+        return fp
 
     # --------------- ID Hashing -----------------------
 

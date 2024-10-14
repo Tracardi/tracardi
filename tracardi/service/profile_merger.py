@@ -342,7 +342,7 @@ class ProfileMerger:
             merged_profile.metadata.system.remove_merging_data()
 
             # Auto refresh db
-            merged_flat_profile = FlatProfile(merged_profile.model_dump(mode="json"))
+            merged_flat_profile = FlatProfile.from_profile(merged_profile)
             await mutation_profile_db.save_flat_profile(merged_flat_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
