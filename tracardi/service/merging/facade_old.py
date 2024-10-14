@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
 from tracardi.service.profile_merger import ProfileMerger
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
@@ -45,7 +46,8 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
             first_profile.mark_for_update()
             # Removed not needed to always hash IDS. Hash only on update.
             # first_profile.hash_all_allowed_pii_as_ids()
-            await mutation_profile_db.save_profile(first_profile, refresh=True)
+            first_flat_profile = FlatProfile(first_profile.model_dump(mode="json"))
+            await mutation_profile_db.save_flat_profile(first_flat_profile, refresh=True)
 
         # If 1 then there is no duplication
         return first_profile

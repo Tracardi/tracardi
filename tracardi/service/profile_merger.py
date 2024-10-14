@@ -9,6 +9,7 @@ from tracardi.service.storage.elastic.interface.collector.load.session import re
 
 from ..context import get_context
 from ..domain import ExtraInfo
+from ..domain.flat_profile import FlatProfile
 from ..domain.storage_record import RecordMetadata
 from tracardi.service.storage.elastic.interface import profile as profile_db
 from tracardi.service.storage.elastic.interface import raw as raw_db
@@ -132,9 +133,8 @@ class ProfileMerger:
                     updated_mapping[k] = v
         return updated_mapping
 
-    def _merge_traits_and_data(self, profiles, merging_strategy: MergingStrategy):
-        _traits = [profile.traits for profile in profiles]
-        _data = [profile.data.model_dump(mode='json') for profile in profiles]
+    def _merge_traits_and_data(self, _traits, _data, merging_strategy: MergingStrategy) -> Tuple[
+        dict, ProfileData, dict]:
 
         old_value = {
             'traits': _traits,
@@ -189,7 +189,9 @@ class ProfileMerger:
 
         # Merge traits and piis
 
-        traits, data, conflicts_aux = self._merge_traits_and_data(all_profiles, merging_strategy)
+        _traits = [profile.traits for profile in all_profiles]
+        _data = [profile.model_dump(mode="json") for profile in all_profiles]
+        traits, data, conflicts_aux = self._merge_traits_and_data(_traits, _data, merging_strategy)
 
         # Merge stats, consents, segments, etc.
 
@@ -340,7 +342,8 @@ class ProfileMerger:
             merged_profile.metadata.system.remove_merging_data()
 
             # Auto refresh db
-            await mutation_profile_db.save_profile(merged_profile, refresh=True)
+            merged_flat_profile = FlatProfile(merged_profile.model_dump(mode="json"))
+            await mutation_profile_db.save_flat_profile(merged_flat_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
             await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)

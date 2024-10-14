@@ -57,6 +57,10 @@ class FlatProfile(FlatEntity):
 
         return self['ids']
 
+    @property
+    def traits(self) -> {}:
+        return self.get('traits', {})
+
     @ids.setter
     def ids(self, value: List[str]):
         """Setter method"""
