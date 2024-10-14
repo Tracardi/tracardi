@@ -1,4 +1,4 @@
-from tracardi.service.segmentation.profile_segmentation_services import add_segment_to_profile
+from tracardi.process_engine.action.v1.segmentation.service.profile_segmentation_services import add_segment_to_profile
 from tracardi.service.utils.date import now_in_utc
 
 from typing import List, Union

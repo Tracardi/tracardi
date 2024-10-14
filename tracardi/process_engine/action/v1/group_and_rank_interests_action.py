@@ -6,7 +6,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.domain.profile import Profile
-from tracardi.service.segmentation.profile_segmentation_services import add_segment_to_profile
+from tracardi.process_engine.action.v1.segmentation.service.profile_segmentation_services import add_segment_to_profile
 
 
 class Configuration(PluginConfig):
