@@ -4,7 +4,7 @@ from tracardi.config import tracardi
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
-from tracardi.service.field_mappings_cache import add_new_field_mappings
+from tracardi.service.wf.field_mappings_cache import add_new_field_mappings
 from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile

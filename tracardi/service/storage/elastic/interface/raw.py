@@ -3,7 +3,7 @@ from elasticsearch import NotFoundError
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.cache.field_mapping import load_fields
-from tracardi.service.field_mappings_cache import FieldMapper
+from tracardi.service.wf.field_mappings_cache import FieldMapper
 from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.elastic.driver.factory import storage_manager

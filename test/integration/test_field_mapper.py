@@ -4,7 +4,7 @@ from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.time import EventTime
-from tracardi.service.field_mappings_cache import FieldMapper
+from tracardi.service.wf.field_mappings_cache import FieldMapper
 
 
 def test_field_mapper():
