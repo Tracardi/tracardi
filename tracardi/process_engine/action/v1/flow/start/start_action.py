@@ -75,10 +75,9 @@ class StartAction(ActionRunner):
         # Replace event
 
         if self.config.event_id:
-            loaded_event = await load_event_from_db(self.config.event_id)
-            if loaded_event is None:
+            event: Optional[Event] = await load_event_from_db(self.config.event_id)
+            if event is None:
                 raise ValueError(f"Can not load event with id {self.config.event_id}")
-            event = loaded_event.to_entity(Event)
 
         event.profile = profile
 
