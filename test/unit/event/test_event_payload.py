@@ -22,7 +22,8 @@ def test_event_payload_time_fallback():
             create="2001-01-01 00:00:00"
         )
     )
-    event = event_payload_to_event(
+    event, _ = event_payload_to_event(
+        {},
         ep,
         epm,
         source=EventSource(id="1", name="test", type=["rest"], bridge=NamedEntity(id="1", name="rest")),
@@ -31,9 +32,8 @@ def test_event_payload_time_fallback():
         profile_less=False
     )
 
-    assert event.metadata.time.insert != datetime.datetime(2002, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(
-        key='UTC'))  # Must be now - can not be overridden
-    assert event.metadata.time.create == datetime.datetime(2001, 1, 1, 0, 0, tzinfo=zoneinfo.ZoneInfo(key='UTC'))
+    assert event['metadata']['time']['insert'] != "2002-01-01T00:00:00Z"  # Must be now - can not be overridden
+    assert event['metadata']['time']['create'] == "2001-01-01T00:00:00Z"
 
 
 def test_event_payload_should_have_tags():
@@ -45,7 +45,8 @@ def test_event_payload_should_have_tags():
             create=datetime.datetime(2002, 1, 1, 0, 0)
         )
     )
-    event = event_payload_to_event(ep,
+    event, _ = event_payload_to_event({},
+                                   ep,
                                    epm,
                                    source=EventSource(id="1", name="test", type=["rest"], bridge=NamedEntity(id="1", name="rest")),
                                    session=Session(id="1", metadata=SessionMetadata()),
@@ -53,5 +54,5 @@ def test_event_payload_should_have_tags():
                                    profile_less=False
                                    )
 
-    assert event.tags.values == ('tag1', 'tag2', 'tag3')
-    assert event.tags.count == 3
+    assert event['tags']['values'] == ('tag1', 'tag2', 'tag3')
+    assert event['tags']['count'] == 3

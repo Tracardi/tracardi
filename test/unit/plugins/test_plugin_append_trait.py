@@ -2,7 +2,8 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.time import EventTime
 from tracardi.domain.session import Session, SessionMetadata
-from tracardi.domain.event import Event, EventSession
+from tracardi.domain.event import Event
+from tracardi.domain.event_session import EventSession
 from tracardi.domain.profile import Profile
 from tracardi.process_engine.action.v1.traits.append_trait_action import AppendTraitAction
 from tracardi.service.plugin.service.plugin_runner import run_plugin

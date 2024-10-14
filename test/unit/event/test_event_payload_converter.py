@@ -3,6 +3,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from tracardi.domain.event_metadata import EventPayloadMetadata
+from tracardi.domain.flat_event import EventDict
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.event_source import EventSource
@@ -50,21 +51,21 @@ def test_event_payload_to_event():
     )
 
     # Call the function under test
-    event = event_payload_to_event(event_payload, metadata, source, session, profile, profile_less=False)
+    event, is_valid = event_payload_to_event({"test": 1}, event_payload, metadata, source, session, profile, profile_less=False)
 
     # Validate the result
-    assert isinstance(event, Event)
-    assert event.type == "test-event"
-    assert event.name == "Test Event"
-    assert event.properties == {"key": "value"}
-    assert event.metadata.status == "collected"
-    assert event.session.id == session.id
-    assert event.profile.id == profile.id
-    assert event.profile.primary_id == profile.primary_id
-    assert event.tags.values == ("test", "event")
-    assert event.hit['name'] == "Test Page"
-    assert event.hit['url'] == "https://test.com"
-    assert event.hit['referer'] == "test.com"
+    assert isinstance(event, EventDict)
+    assert event['type'] == "test-event"
+    assert event['name'] == "Test Event"
+    assert event['properties'] == {"key": "value"}
+    assert event['metadata']['status'] == "collected"
+    assert event['session']['id'] == session.id
+    assert event['profile']['id'] == profile.id
+    assert event['tags']['values'] == ("test", "event")
+    assert event['hit']['name'] == "Test Page"
+    assert event['hit']['url'] == "https://test.com"
+    assert event['hit']['referer'] == "test.com"
+    assert event['request'] == {"test": 1}
 
 
 def test_event_payload_to_event_no_session():
@@ -97,14 +98,13 @@ def test_event_payload_to_event_no_session():
     )
 
     # Call the function under test
-    event = event_payload_to_event(event_payload, metadata, source, None, profile, profile_less=False)
+    event, is_valid = event_payload_to_event({}, event_payload, metadata, source, None, profile, profile_less=False)
 
     # Validate the result
-    assert isinstance(event, Event)
-    assert event.type == "test-event"
-    assert event.name == "Test Event"
-    assert event.properties == {"key": "value"}
-    assert event.metadata.status == "collected"
-    assert event.session is None
-    assert event.profile.primary_id == profile.primary_id
-    assert event.tags.values == ("test", "event")
+    assert isinstance(event, EventDict)
+    assert event['type'] == "test-event"
+    assert event['name'] == "Test Event"
+    assert event['properties'] == {"key": "value"}
+    assert event['metadata']['status'] == "collected"
+    assert event['session'] is None
+    assert event['tags']['values'] == ("test", "event")
