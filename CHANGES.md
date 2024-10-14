@@ -6,6 +6,7 @@ Version: 1.1.0
 ----------------------------------------------------------
 [ ] - Queueing of the tracker payloads
 [ ] - Bulk event payloads.
+[*] - Removed inject event plugin form workflow
 
 Version: 1.0.2
 ----------------------------------------------------------
