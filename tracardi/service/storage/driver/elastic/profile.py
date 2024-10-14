@@ -1,5 +1,6 @@
 from typing import Union, Tuple
 
+from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import *
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
@@ -231,17 +232,7 @@ async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]]
     return await storage_manager('profile').load_all(start, limit, sort)
 
 
-# async def load_profiles_to_merge(merge_key_values: List[tuple],
-#                                  condition: str = 'must',
-#                                  limit=1000) -> List[Profile]:
-#     profiles = await storage_manager('profile').load_by_values(
-#         merge_key_values,
-#         condition=condition,
-#         limit=limit)
-#     return [profile.to_entity(Profile) for profile in profiles]
-
-
-async def save(profile: Union[Profile, List[Profile], Set[Profile]], refresh_after_save=False):
+async def save(profile: Union[FlatProfile, Profile, List[Profile], Set[Profile]], refresh_after_save=False):
     if isinstance(profile, (list, set)):
         for _profile in profile:
             if isinstance(_profile, Profile):

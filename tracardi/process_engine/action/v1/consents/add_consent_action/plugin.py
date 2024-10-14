@@ -7,7 +7,7 @@ from tracardi.service.storage.mysql.service.consent_type_service import ConsentT
 from .model.payload import Configuration
 from pytimeparse import parse
 from datetime import datetime
-from tracardi.domain.profile import ConsentRevoke
+from tracardi.domain.consent_revoke import ConsentRevoke
 
 
 def validate(config: dict):

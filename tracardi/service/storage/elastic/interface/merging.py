@@ -98,7 +98,7 @@ async def save_merged_profile(flat_profile: FlatProfile, metadata: RecordMetadat
     profile.set_meta_data(metadata)
 
     # Auto refresh db
-    await mutation_profile_db.save_profile(profile, refresh=True)
+    await mutation_profile_db.save_flat_profile(flat_profile, refresh=True)
 
     return profile
 

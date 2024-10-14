@@ -34,7 +34,7 @@ async def load_profiles_for_auto_merge() -> AsyncGenerator[Profile, Any]:
         yield profile_record.to_entity(Profile)
 
 
-async def get_profiles_by_field_and_value(field: str, email: str) -> AsyncGenerator[Profile, Any]:
+async def get_profiles_by_field_and_value(field: str, email: str) -> AsyncGenerator[FlatProfile, Any]:
     query = {
         "query": {
             "term": {
@@ -43,7 +43,7 @@ async def get_profiles_by_field_and_value(field: str, email: str) -> AsyncGenera
         }
     }
     async for profile_record in storage_manager('profile').scan(query, batch=1000):
-        yield profile_record.to_entity(Profile)
+        yield FlatProfile(profile_record)
 
 
 async def get_duplicated_profiles_by_field(field):

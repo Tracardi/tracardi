@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import json
+
 from dotty_dict import Dotty
 from typing import Optional, TypeVar, Type, Set, List
 from uuid import uuid4
@@ -121,6 +125,28 @@ class PrimaryEntity(Entity):
     ids: Optional[List[str]] = None
 
 
+class DottyEncoder(json.JSONEncoder):
+    """Helper class for encoding of nested Dotty dicts into standard dict
+    """
+
+    def default(self, obj):
+        """Return dict data of Dotty when possible or encode with standard format
+
+        :param object: Input object
+        :return: Serializable data
+        """
+        try:
+            if hasattr(obj, '_data'):
+                return obj._data
+            elif isinstance(obj, datetime):
+                # Convert datetime to an ISO formatted string
+                return obj.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            return str(obj)
+
+
 class FlatEntity(Dotty):
 
     def __init__(self, dictionary):
@@ -137,6 +163,13 @@ class FlatEntity(Dotty):
         # Here, you should call the base class' setstate, not getstate.
         super().__setstate__(state)
         self._metadata = state.get('_metadata', None)
+
+    def to_json(self):
+        """Return wrapped dictionary as json string.
+        This method does not copy wrapped dictionary.
+        :return str: Wrapped dictionary as json string
+        """
+        return json.dumps(self._data, cls=DottyEncoder)
 
     @property
     def id(self) -> Optional[str]:

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from tracardi.domain.profile import ConsentRevoke
+from tracardi.domain.consent_revoke import ConsentRevoke
 from tracardi.service.merging.merger import (merge as dict_merge, list_merge, get_conflicted_values,
                                              get_added_values, get_changed_values, MergingStrategy)
 

@@ -102,8 +102,11 @@ class Session(Entity):
     def freeze(self):
         self._is_frozen = True
 
+    def unfreeze(self):
+        self._is_frozen = False
+
     def __setattr__(self, key, value):
-        if getattr(self, "_is_frozen", False):
+        if getattr(self, "_is_frozen", False) and key != '_is_frozen':
             raise TypeError(f"Cannot modify frozen instance: attribute '{key}' is read-only")
         super().__setattr__(key, value)
 
@@ -133,6 +136,7 @@ class Session(Entity):
 
     def replace(self, session):
         if isinstance(session, Session):
+            self.unfreeze()
             self.id = session.id
             self.metadata = session.metadata
             self.operation = session.operation
@@ -144,6 +148,7 @@ class Session(Entity):
             self.device = session.device
             self.os = session.os
             self.app = session.app
+            self.freeze()
 
     def is_reopened(self) -> bool:
         return self.operation.new or self.metadata.status == 'ended'

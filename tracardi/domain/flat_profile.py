@@ -87,6 +87,8 @@ class FlatProfile(FlatEntity):
         flat_profile.fill_meta_data()
         flat_profile.set_new()
         flat_profile.set_updated()
+        flat_profile['active'] = True
+
         return flat_profile
 
     def has_not_saved_changes(self) -> bool:
@@ -255,6 +257,33 @@ class FlatProfile(FlatEntity):
         if field not in self or not isinstance(self[field], instance):
             self[field] = value
 
+    def set_visit_time(self, field_change_logger):
+        if self.has('metadata.time.visit.current'):
+            self['metadata.time.visit.last'] = self['metadata.time.visit.current']
+            field_change_logger.log('metadata.time.visit.last')
+        self['metadata.time.visit.current'] = now_in_utc()
+        field_change_logger.log('metadata.time.visit.current')
+
+    def get_consent_ids(self) -> Set[str]:
+        if not self.instanceof('consents', dict):
+            return set()
+        return set(self['consents'].keys())
+
+    # --------------- ID Hashing -----------------------
+
+    def hash_all_allowed_pii_as_ids(self) -> bool:
+
+        """ Used for creating hashed IDS """
+
+        # Check for missing hash IDS, and create missing, Mark for update
+        changed_fields = self.create_auto_merge_hashed_ids()
+        if changed_fields:
+            # Add missing fields to auto_merge
+            self.set_auto_merge_fields(changed_fields)
+            return True
+
+        return False
+
     def has_hashed_phone_id(self, type: str = None) -> bool:
 
         if type is None:
@@ -338,15 +367,3 @@ class FlatProfile(FlatEntity):
                 return update_fields
 
         return None
-
-    def set_visit_time(self, field_change_logger):
-        if self.has('metadata.time.visit.current'):
-            self['metadata.time.visit.last'] = self['metadata.time.visit.current']
-            field_change_logger.log('metadata.time.visit.last')
-        self['metadata.time.visit.current'] = now_in_utc()
-        field_change_logger.log('metadata.time.visit.current')
-
-    def get_consent_ids(self) -> Set[str]:
-        if not self.instanceof('consents', dict):
-            return set()
-        return set(self['consents'].keys())

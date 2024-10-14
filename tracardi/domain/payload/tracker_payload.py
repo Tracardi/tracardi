@@ -114,7 +114,7 @@ class TrackerPayload(BaseModel):
         self._is_frozen = True
 
     def __setattr__(self, key, value):
-        if getattr(self, "_is_frozen", False):
+        if getattr(self, "_is_frozen", False) and key != '_is_frozen':
             raise TypeError(f"Cannot modify frozen instance of {type(self)}: attribute '{key}' is read-only")
         super().__setattr__(key, value)
 

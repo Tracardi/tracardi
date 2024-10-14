@@ -72,7 +72,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
     # Loads profile form cache
     # Profile needs to be loaded from cache. It may have changed during it was dispatched by event trigger
 
-    profile: Profile = await load_profile(profile_id) if profile_id is not None else None
+    profile: Profile = await load_profile(profile_id)
 
     # Triggers workflow
 
