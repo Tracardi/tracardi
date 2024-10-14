@@ -35,6 +35,7 @@ async def save_flat_profile(profiles: Union[FlatProfile, List[FlatProfile], Set[
 async def save_profile_in_db_and_cache(profile: Profile):
 
     flat_profile = FlatProfile(profile.model_dump(mode="json"))
+    flat_profile.set_meta_data(profile.get_meta_data())
 
     save_flat_profile_cache(flat_profile)
     # Save to database - do not defer
