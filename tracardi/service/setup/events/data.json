@@ -231,7 +231,7 @@
       ],
       "data.pii.language.spoken": [
         "data.pii.language.spoken",
-        "equal"
+        "append"
       ],
       "data.pii.gender": [
         "data.pii.gender",
