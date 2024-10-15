@@ -54,3 +54,6 @@ class FieldUpdateLogger:
 
     def has_changes(self) -> bool:
         return self._changes.has_changes()
+
+    def get_logged_changes(self) -> FieldChanges:
+        return  self._changes

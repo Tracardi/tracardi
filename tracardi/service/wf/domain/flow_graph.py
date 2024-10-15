@@ -4,7 +4,7 @@ from .flow_response import FlowResponse
 from .named_entity import NamedEntity
 from pydantic import PrivateAttr
 
-from ...change_monitoring.field_change_logger import FieldChangeLogger
+from ...change_monitoring.field_update_logger import FieldUpdateLogger
 
 
 class FlowGraph(NamedEntity):
@@ -20,10 +20,10 @@ class FlowGraph(NamedEntity):
         super().__init__(**data)
         # This is local fields timestamp monitor per one WF.
         # It is merged with other top WorkflowAsyncManager to get global status of changed fields.
-        self._field_change_logger = FieldChangeLogger()
+        self._field_changes = FieldUpdateLogger()
 
-    def set_change(self, key, old_value):
-        self._field_change_logger.log(key, old_value)
+    def record_change(self, field, value, old_value):
+        self._field_changes.add(field, value, old_value)
 
-    def get_change_log(self) -> FieldChangeLogger:
-        return self._field_change_logger
+    def get_changed_fields(self) -> FieldUpdateLogger:
+        return self._field_changes

@@ -26,7 +26,6 @@ async def trigger_workflows(profile: Profile,
 
     ux = []
     response = {}
-    auto_merge_ids = set()
     tracker_result = None
 
     if tracardi.enable_workflow:
@@ -46,21 +45,11 @@ async def trigger_workflows(profile: Profile,
         ux = tracker_result.ux
         response = tracker_result.response
 
-        # Set fields timestamps
-
-        if profile:
-            _auto_merge_ids = profile.set_metadata_fields_timestamps(tracker_result.changed_field_timestamps)
-            if _auto_merge_ids:
-                auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
-
     is_wf_triggered = isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered
 
     if is_wf_triggered:
         # Add new fields to field mapping. New fields can be created in workflow.
         add_new_field_mappings(profile, session)
-
-    if auto_merge_ids:
-        profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
 
     return profile, session, events, ux, response, tracker_result.changed_field_timestamps, is_wf_triggered
 
@@ -94,6 +83,10 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
 
         if profile and profile.is_updated_in_workflow():
             logger.debug(f"Profile {profile.id} needs update after workflow.")
+
+            # Apply change log to flat_profile
+            auto_merge_ids = profile.set_metadata_fields_timestamps(changed_fields)
+            profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
 
             # Profile is in mutex, no profile loading from cache necessary; Save it in db and cache
             # Synchronous save

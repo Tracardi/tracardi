@@ -162,7 +162,7 @@ class WorkflowManagerAsync:
                     post_invoke_events = rule_invoke_result.post_invoke_events
                     invoked_rules = rule_invoke_result.invoked_rules
                     flow_responses = FlowResponses(rule_invoke_result.flow_responses)
-                    self.field_timestamps.update(rule_invoke_result.changes_timestamps)
+                    self.field_timestamps.update(rule_invoke_result.changed_fields)
 
                     # Profile and session can change inside workflow
                     # Check if it should not be replaced.

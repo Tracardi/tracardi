@@ -220,7 +220,7 @@ class RulesEngine:
                     log_list = flow_invoke_result.log_list
                     post_invoke_event = flow_invoke_result.event
 
-                    changed_field_timestamps.update(flow_invoke_result.flow.get_change_log().get_log())
+                    changed_field_timestamps.update(flow_invoke_result.flow.get_changed_fields().get_logged_changes())
 
                     flow_responses.append(flow_invoke_result.flow.response)
                     post_invoke_events[post_invoke_event.id] = post_invoke_event

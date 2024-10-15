@@ -50,9 +50,10 @@ class CopyTraitAction(ActionRunner):
             old_value = dot[destination] if destination in dot else None
             dot[destination] = value
             if self.profile and destination.startswith('profile@'):
-                flow.set_change(
-                    destination[8:],  # field, remove profile@
-                    old_value
+                flow.record_change(
+                    field=destination[8:],
+                    value=value,
+                    old_value=old_value
                 )
 
         self.flow = flow

@@ -4,7 +4,6 @@ import time
 
 from tracardi.config import tracardi
 from tracardi.context import get_context
-from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
@@ -120,14 +119,12 @@ async def os_tracker(
 
             profile, session, events, ux, response, changed_fields, is_wf_triggered = workflow_result
 
-            wf_changed_fields = FieldChangeLogger(changed_fields)
-            if is_wf_triggered and not wf_changed_fields.empty():
+            if is_wf_triggered and bool(changed_fields):
 
-                _changed_fields = wf_changed_fields.convert_to_list({
-                    "profile_id": profile.id,
-                    "session_id": session.id,
-                    "request_id": get_context().id
-                })
+                _changed_fields: List[dict] = [
+                    {"field": field, "timestamp": timestamp, "old_value": old_value}
+                    for field, (timestamp, old_value)
+                    in changed_fields.items()]
 
                 # Save changes to field log
                 if tracardi.enable_field_update_log:
