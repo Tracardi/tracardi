@@ -20,6 +20,7 @@ def test_init_1():
     assert fp.has_not_saved_changes() is False
     assert fp.needs_update() is False
     assert fp.instanceof("none", dict) is False
+    assert fp.instanceof("id", str)
 
     fp.increase_interest("test", 1)
     assert fp['interests.test'] == 1
@@ -45,25 +46,6 @@ def test_init_3():
     fp.hash_all_allowed_pii_as_ids()
     assert fp.ids == []
 
-
-def test_logger():
-    fp = FlatProfile({
-        "id": 1,
-        "prop": {
-            "a": 1
-        }
-    })
-
-    assert fp['prop.a'] == 1
-    assert 'prop.a' not in fp.log.get_log()
-
-    fp['prop.a'] = 2
-    assert 'prop.a' in fp.log.get_log().keys()
-    assert fp['prop.a'] == 2
-
-    # do not update change log
-    fp['metadata.fields.xxx'] = 2
-    assert 'metadata.fields.xxx' not in fp.log.get_log().keys()
 
 
 def test_id():
@@ -180,16 +162,6 @@ def test_flat_profile_increase_interest():
     # Test reset of interest
     profile.reset_interest(interest_key, 0)
     assert profile[f'interests.{interest_key}'] == 0
-
-
-def test_flat_profile_metadata_fields():
-    # Test adding metadata timestamps
-    profile_data = {}
-    profile = FlatProfile(profile_data)
-    field_change_logger = profile.log
-    field_change_logger.log('test_field')
-    profile.set_metadata_fields_timestamps(field_change_logger)
-    assert 'metadata.fields' in profile
 
 
 def test_flat_profile_new():

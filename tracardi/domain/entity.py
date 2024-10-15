@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from datetime import datetime
 
 import json
@@ -13,6 +15,7 @@ from tracardi.domain.time import Time
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.protocol.operational import Operational
+from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 from tracardi.service.dot_notation_converter import dotter
 from tracardi.service.storage.index import Resource
 
@@ -152,6 +155,14 @@ class FlatEntity(Dotty):
     def __init__(self, dictionary):
         super().__init__(dictionary)
         self._metadata = None
+        # Keeps current changes
+        self._changes: Optional[FieldUpdateLogger] = None
+
+    def monitor_changes(self, flag: bool):
+        if flag:
+            self._changes = FieldUpdateLogger()
+        else:
+            self._changes = None
 
     def __getstate__(self):
         # Here, you should retrieve the state, not set it.
@@ -163,6 +174,18 @@ class FlatEntity(Dotty):
         # Here, you should call the base class' setstate, not getstate.
         super().__setstate__(state)
         self._metadata = state.get('_metadata', None)
+
+    def __setitem__(self, key, value):
+        if self._changes:
+            old_value = self.get(key, None)
+            self._changes.add(key, value, old_value, ignore=('metadata.fields', 'operation'))
+        super().__setitem__(key, value)
+
+    def get_change_logger(self) -> FieldUpdateLogger:
+        return self._changes if self._changes is not None else FieldUpdateLogger()
+
+    def has_changes(self) -> bool:
+        return self._changes and self._changes.has_changes()
 
     def to_json(self):
         """Return wrapped dictionary as json string.
@@ -210,3 +233,10 @@ class FlatEntity(Dotty):
             record.set_meta_data(self._metadata)
 
         return record
+
+
+@contextmanager
+def change_monitor(flat_entity: FlatEntity):
+    flat_entity.monitor_changes(True)
+    yield
+    flat_entity.monitor_changes(False)

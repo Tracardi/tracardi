@@ -107,22 +107,33 @@ def get_default_event_type_schema(event_type) -> Optional[dict]:
 
 
 def _append_value(values, value):
-    # Append list to list
-    if isinstance(values, list):
-        values += value
+
+    if not isinstance(values, list):
+        return [values]
+
+    # Append list
+    if isinstance(value, list):
+        # Do this not to mutate
+        _values = values + value
         # make it unique
-        values = list(set(values))
-    else:
-        # Add value if not exists
-        if value not in values:
-            values.append(value)
+        return list(set(_values))
+
+    if isinstance(value, set):
+        # Do this not to mutate
+        _values = values + list(value)
+        # make it unique
+        return list(set(_values))
+
+    # Append Value
+    if value not in values:
+        # Do this not to mutate
+        _values = values + [value]
+        return list(set(_values))
 
     return values
 
 
-def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, flat_event: dotty) -> Tuple[
-    FlatProfile, bool]:
-    profile_updated_flag = False
+def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, flat_event: dotty) -> FlatProfile:
 
     if copy_schema is not None:
 
@@ -131,7 +142,7 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
             # Skip none existing event properties.
             if isinstance(event_path, str):
                 if event_path in flat_event:
-                    profile_updated_flag = True
+
                     if operation == 'append':
 
                         # Make sure the value is list
@@ -235,11 +246,9 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
                             else:
                                 flat_profile[profile_path] = flat_profile[profile_path] - float(event_path)
 
-                            profile_updated_flag = True
-
                         except Exception:
                             raise AssertionError(
                                 f"Can not add increment/decrement {flat_event[event_path]} "
                                 f"to {flat_profile[profile_path]} at profile@{profile_path}")
 
-    return flat_profile, profile_updated_flag
+    return flat_profile

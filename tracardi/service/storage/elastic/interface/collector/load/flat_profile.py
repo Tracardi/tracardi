@@ -13,6 +13,7 @@ Optional[FlatProfile]:
 
     cached_profile = load_flat_profile_cache(profile_id, context)
     if cached_profile is not None and cached_profile.has_meta_data():
+        cached_profile.monitor_changes(True)
         return cached_profile
 
     if not fallback_to_db:
@@ -21,5 +22,9 @@ Optional[FlatProfile]:
     # This load is acceptable
     flat_profile = await profile_db.load_flat_profile_by_id(profile_id)
     save_flat_profile_cache(flat_profile, context)
+
+    # Monitor change in flat profile
+    if flat_profile:
+        flat_profile.monitor_changes(True)
 
     return flat_profile

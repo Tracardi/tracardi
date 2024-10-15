@@ -1,12 +1,10 @@
 import uuid
-from typing import Optional, List, Dict, Any, Set
+from typing import Optional, List, Set
 from .entity import PrimaryEntity, Entity, FlatEntity
 from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 from .storage_record import RecordMetadata, StorageRecord
 from ..config import tracardi
-from ..service.change_monitoring.field_change_logger import FieldChangeLogger
-
 from ..service.tracking.profile_pii_hashing import get_allowed_piis_to_be_hashed_as_ids
 from ..service.utils.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
@@ -19,7 +17,6 @@ class FlatProfile(FlatEntity):
 
     def __init__(self, dictionary):
         super().__init__(dictionary)
-        self.log = FieldChangeLogger()
 
         # Set default values and basic validation
         self.set_new(False)
@@ -29,15 +26,6 @@ class FlatProfile(FlatEntity):
             self['ids'] = []
         elif not isinstance(ids, list):
             raise ValueError("IDS value must be a list.")
-
-    def __setitem__(self, key, value):
-        old_value = self.get(key, None)
-        super().__setitem__(key, value)
-
-        # Ignore
-        ignore = ('metadata.fields', 'operation')
-        if not key.startswith(ignore):
-            self.log.log(key, old_value)
 
     @staticmethod
     def as_primary_entity(flat_profile: 'FlatProfile'):
@@ -74,6 +62,7 @@ class FlatProfile(FlatEntity):
     def add_to_ids(self, id: str):
         ids = self.get('ids', [])
         ids.append(id)
+        # This should register changes in change logger
         self['ids'] = list(set(ids))
 
     def get_all_ids(self) -> Set[str]:
@@ -118,7 +107,9 @@ class FlatProfile(FlatEntity):
         return dump
 
     def instanceof(self, field: str, instance: type) -> bool:
-        return field in self and isinstance(field, instance)
+        if field not in self:
+            return False
+        return isinstance(self.get(field, None), instance)
 
     def _fill_meta_data(self, index_type: str):
         """
@@ -158,31 +149,22 @@ class FlatProfile(FlatEntity):
 
         return None
 
-    def set_metadata_fields_timestamps(self, field_timestamp_manager: FieldChangeLogger):
-
-        if not self.instanceof('metadata.fields', dict):
-            self['metadata.fields'] = {}
-
-        # Iterate and set new values. Leave old intact.
-        for flat_field, timestamp_data in field_timestamp_manager.get_log().items():  # type: str, list
-            self['metadata.fields'][flat_field] = timestamp_data
-
-    def get_profile_pii_as_hashed_ids(self, field_timestamp_manager: FieldChangeLogger) -> Set[str]:
-        added_ids = set()
-        if not tracardi.is_apm_on():
-            return added_ids
-
-        allowed_piis = get_allowed_piis_to_be_hashed_as_ids()
-
-        # Iterate changed values
-        for flat_field, timestamp_data in field_timestamp_manager.get_log().items():  # type: str, list
-            # Adds hashed id for email, phone, etc.
-            if flat_field in allowed_piis:
-                added_hashed_id = self._add_auto_merge_hashed_id(flat_field)
-                if added_hashed_id:
-                    added_ids.add(added_hashed_id)
-
-        return added_ids
+    # def get_profile_pii_as_hashed_ids(self) -> Set[str]:
+    #     added_ids = set()
+    #     if not tracardi.is_apm_on():
+    #         return added_ids
+    #
+    #     allowed_piis = get_allowed_piis_to_be_hashed_as_ids()
+    #
+    #     # Iterate changed values
+    #     for flat_field, timestamp_data in self.get_change_logger().changes():  # type: str, list
+    #         # Adds hashed id for email, phone, etc.
+    #         if flat_field in allowed_piis:
+    #             added_hashed_id = self._add_auto_merge_hashed_id(flat_field)
+    #             if added_hashed_id:
+    #                 added_ids.add(added_hashed_id)
+    #
+    #     return added_ids
 
     def increase_interest(self, interest, value=1):
 
@@ -240,6 +222,7 @@ class FlatProfile(FlatEntity):
     def update_changed_fields(self, changed_fields):
         self['metadata.fields'] = changed_fields
 
+    # ToDO refactor
     def set_auto_merge_fields(self, auto_merge_ids: set):
         if 'metadata.system.aux.auto_merge' not in self or not isinstance(self['metadata.system.aux.auto_merge'], list):
             self['metadata.system.aux.auto_merge'] = list(auto_merge_ids)
@@ -286,7 +269,6 @@ class FlatProfile(FlatEntity):
         fp = FlatProfile(profile.model_dump(mode="json"))
         fp.set_meta_data(profile.get_meta_data())
         return fp
-
 
     def as_profile(self) -> Profile:
         return Profile(**self.to_dict()).set_meta_data(self.get_meta_data())
@@ -389,3 +371,14 @@ class FlatProfile(FlatEntity):
                 return update_fields
 
         return None
+
+    def fill_changed_fields(self):
+        if not self.has_changes():
+            return
+
+        # Make sure that the dict is in metadata.fields
+        self.set_if_not_instance('metadata.fields', {}, instance=dict)
+
+        # Iterate and set new values. Leave old intact.
+        for flat_field, change_data in self.get_change_logger().changes():  # type: str, list
+            self['metadata.fields'][flat_field] = change_data

@@ -60,16 +60,6 @@ def _auto_index_default_event_type(flat_event: FlatEvent, flat_profile: Optional
 
     return flat_event
 
-def set_profile_changed_fields(flat_profile: FlatProfile):
-    # Add fields timestamps
-    flat_profile.set_if_not_instance('metadata.fields', {}, instance=dict)
-
-    # field_change_logger = field_change_logger.merge(flat_profile.log)
-
-    # Append field changes fo metadata.fields
-    auto_merge_ids = flat_profile.set_metadata_fields_timestamps(flat_profile.log)
-
-    return flat_profile, auto_merge_ids
 
 async def event_properties_to_profile(flat_event: FlatEvent,
                                       flat_profile: FlatProfile,
@@ -195,7 +185,6 @@ async def compute_events(events: List[EventPayload],
                          ) -> Tuple[List[FlatEvent], Session, Optional[FlatProfile]]:
     event_objects = []
 
-    auto_merge_ids = set()
     # Data that is not needed for any mapping or compliance
     for event_payload in events:
 
@@ -222,19 +211,11 @@ async def compute_events(events: List[EventPayload],
             # Skip mapping to profile if none
             if flat_profile:
 
-                flat_profile, _auto_merge_ids = await event_properties_to_profile(
+                flat_profile = await event_properties_to_profile(
                     flat_event,
                     flat_profile,
                     session
                 )
-
-                # TODo may be not needed as all change will be in flat_profile
-                flat_profile, _auto_merge_ids = set_profile_changed_fields(flat_profile)
-
-                # Combine all auto merge ids
-
-                if _auto_merge_ids:
-                    auto_merge_ids = auto_merge_ids.union(_auto_merge_ids)
 
         # Convert to event
 
@@ -263,40 +244,5 @@ async def compute_events(events: List[EventPayload],
         # Collect event objects
 
         event_objects.append(flat_event)
-
-    flat_profile.set_auto_merge_fields(auto_merge_ids)
-
-    # Recreate Profile from flat_profile, that was changed
-
-    # if flat_profile:
-    #     try:
-    #
-    #         profile = Profile(**flat_profile.to_dict())
-    #         profile.set_meta_data(profile_metadata)
-    #         if auto_merge_ids:
-    #             profile.metadata.system.set_auto_merge_fields(auto_merge_ids)
-    #     except Exception as e:
-    #         message = f"It seems that there was an error when trying to add or update some information to " \
-    #                   f"your profile. The error occurred because you tried to add a value that is not " \
-    #                   f"allowed by the type of data that the profile can accept.  For instance, you may " \
-    #                   f"have tried to add a name to a field in your profile that only accepts a single string, " \
-    #                   f"but you provided a list of strings instead. No changes were made to your profile, and " \
-    #                   f"the original data you sent was not copied because it did not meet the " \
-    #                   f"requirements of the profile. " \
-    #                   f"Details: {repr(e)}."
-    #         logger.error(
-    #             message,
-    #             extra=ExtraInfo.exact(
-    #                 flow_id=None,
-    #                 node_id=None,
-    #                 event_id=None,
-    #                 profile_id=flat_profile.get('id', None),
-    #                 origin='event-computation',
-    #                 traceback=get_traceback(e)
-    #             )
-    #         )
-    #
-    #         if not tracardi.skip_errors_on_profile_mapping:
-    #             raise e
 
     return event_objects, session, flat_profile

@@ -353,6 +353,7 @@ class TrackerPayload(BaseModel):
             profile_id = str(uuid4())
 
         flat_profile = FlatProfile.new(id=profile_id)
+        flat_profile.monitor_changes(True)
 
         # Copy metadata to new profile
         self._fill_flat_profile_metadata(flat_profile)

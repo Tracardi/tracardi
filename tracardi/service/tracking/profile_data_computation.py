@@ -81,11 +81,9 @@ async def map_event_to_profile(
 
     default_mapping_schema = get_default_mappings_for(flat_event['type'], 'profile')
 
-    profile_updated_flag = False
-
     if default_mapping_schema is not None:
         # Copy default
-        flat_profile, profile_updated_flag = copy_default_event_to_profile(
+        flat_profile = copy_default_event_to_profile(
             default_mapping_schema,
             flat_profile,
             flat_event
@@ -205,8 +203,6 @@ async def map_event_to_profile(
                         else:
                             flat_profile[profile_ref] = flat_event[event_ref]
 
-                        profile_updated_flag = True
-
                     except KeyError as e:
                         if event_ref.startswith(("properties", "traits")):
                             message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
@@ -230,6 +226,8 @@ async def map_event_to_profile(
                             )
                         )
 
+    profile_updated_flag = flat_profile.has_changes()
+    print(3, profile_updated_flag)
     compute_schema = get_default_mappings_for(flat_event['type'], "compute")
     if compute_schema:
         compute_schema = EventCompute(**compute_schema)
@@ -264,10 +262,11 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_
     if 'language' in session.context:
         if flat_profile.instanceof('data.pii.language.spoken', list) and isinstance(session.context['language'],
                                                                                     list):
-            flat_profile['data.pii.language.spoken'] = list(
-                set(flat_profile['data.pii.language.spoken'] + session.context['language']))
+
+            unique_values = set(flat_profile['data.pii.language.spoken'] + session.context['language'])
+            flat_profile['data.pii.language.spoken'] = list(unique_values)
         else:
-            flat_profile['data.pii.language.spoken'] = session.context['language']
+            flat_profile['data.pii.language.spoken'] = list(set(session.context['language']))
 
     if not flat_profile.has('aux.geo'):
         flat_profile['aux.geo'] = {}
