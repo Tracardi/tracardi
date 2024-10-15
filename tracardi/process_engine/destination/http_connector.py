@@ -14,7 +14,6 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
 from .destination_interface import DestinationInterface
-from ...domain.event import Event
 from ...domain.flat_event import FlatEvent
 
 logger = get_logger(__name__)
@@ -74,7 +73,7 @@ class HttpConnector(DestinationInterface):
                     "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
                                                                                name))
 
-    async def _dispatch(self, data, changed_fields):
+    async def _dispatch(self, data, changed_fields: List[dict]):
         try:
             credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
             credentials = HttpCredentials(**credentials)

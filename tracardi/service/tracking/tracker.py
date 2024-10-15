@@ -4,7 +4,6 @@ import time
 
 from tracardi.config import tracardi
 from tracardi.context import get_context
-from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
@@ -29,8 +28,6 @@ async def os_tracker(
         tracking_start: float
 ):
     try:
-
-        field_change_logger = FieldChangeLogger()
 
         if not tracker_payload.events:
             logger.warning(f"No events have been sent in tracker payload.")
@@ -87,14 +84,14 @@ async def os_tracker(
             tracker_payload.debug)
 
         # Dispatch outbound profile SYNCHRONOUSLY
-        timestamp_log: List[dict] = field_change_logger.convert_to_list(
-            dict(
-                profile_id=get_entity_id(flat_profile),
-                source_id=source.id,
-                session_id=get_entity_id(session),
-                request_id=get_context().id
-            )
-        )
+        timestamp_log: List[dict] = [
+            {
+                "field": field,
+                "timestamp": timestamp,
+                "old_value": old_value,
+            }
+            for field, (timestamp, old_value)
+            in flat_profile.get_change_logger().changes()]
 
         await sync_profile_destination(
             flat_profile,

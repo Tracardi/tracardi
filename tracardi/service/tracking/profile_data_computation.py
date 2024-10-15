@@ -227,7 +227,7 @@ async def map_event_to_profile(
                         )
 
     profile_updated_flag = flat_profile.has_changes()
-    print(3, profile_updated_flag)
+
     compute_schema = get_default_mappings_for(flat_event['type'], "compute")
     if compute_schema:
         compute_schema = EventCompute(**compute_schema)
@@ -253,6 +253,7 @@ async def map_event_to_profile(
                 profile_updated_flag = True
 
     if profile_updated_flag is True:
+        logger.info(f"Profile {flat_profile.id} marked for update")
         flat_profile.mark_for_update()
 
     return flat_profile

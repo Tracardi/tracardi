@@ -158,11 +158,12 @@ class FlatEntity(Dotty):
         # Keeps current changes
         self._changes: Optional[FieldUpdateLogger] = None
 
-    def monitor_changes(self, flag: bool):
+    def monitor_changes(self, flag: bool) -> 'FlatEntity':
         if flag:
             self._changes = FieldUpdateLogger()
         else:
             self._changes = None
+        return self
 
     def __getstate__(self):
         # Here, you should retrieve the state, not set it.
