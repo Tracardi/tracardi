@@ -253,7 +253,6 @@ async def map_event_to_profile(
                 profile_updated_flag = True
 
     if profile_updated_flag is True:
-        logger.info(f"Profile {flat_profile.id} marked for update")
         flat_profile.mark_for_update()
 
     return flat_profile
