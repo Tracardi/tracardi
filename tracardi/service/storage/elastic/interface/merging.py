@@ -4,16 +4,20 @@ from typing import List, Tuple, Optional, Set
 from tracardi.domain.profile import Profile
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.storage_record import RecordMetadata, StorageRecords
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.elastic.interface import raw as raw_db
 from tracardi.service.storage.driver.elastic import event as event_db
 from tracardi.service.storage.driver.elastic import session as session_db
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 
+logger = get_logger(__name__)
+_max_load_chunk = 1000
+
 
 async def _load_profile_duplicates(profile_ids: Set[str]) -> StorageRecords:
     return await storage_manager('profile').query({
-        "size": 10000,
+        "size": _max_load_chunk,
         "query": {
             "bool": {
                 "should": [
@@ -41,7 +45,7 @@ async def _load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str
     return await storage_manager('profile').load_by_values(
         merge_by,
         condition='must',
-        limit=10000)
+        limit=_max_load_chunk)
 
 
 async def load_duplicated_profiles(profile_ids: Set[str], merge_by: Optional[List[Tuple[str, str]]] = None) -> List[
@@ -53,6 +57,10 @@ async def load_duplicated_profiles(profile_ids: Set[str], merge_by: Optional[Lis
     else:
         # merge by merge keys
         duplicated_profiles = await _load_duplicated_profiles_with_merge_key(merge_by)
+
+    _size_of_ids = len(profile_ids) if profile_ids else 0
+    logger.info(
+        f"Loaded in memory {len(duplicated_profiles)} from {duplicated_profiles.total}. Size of merged profile IDS: {_size_of_ids}")
 
     return [
         (FlatProfile(profile_record), profile_record.get_meta_data())
@@ -101,5 +109,5 @@ async def save_merged_flat_profile(flat_profile: FlatProfile):
 async def save_marked_for_merge_profiles(flat_profiles: List[FlatProfile]):
     # Convert to profiles
     # TODO EOFP - End of FlatProfile
-    profiles= [flat_profile.as_profile() for flat_profile in flat_profiles]
+    profiles = [flat_profile.as_profile() for flat_profile in flat_profiles]
     await mutation_profile_db.save_profiles_in_db(profiles)
