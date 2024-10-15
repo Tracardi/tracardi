@@ -31,10 +31,8 @@ async def load_profile_and_session(
     # Check if necessary hashed ID are present and add missing
     if flat_profile is not None:
 
-        changed_fields = flat_profile.create_auto_merge_hashed_ids()
-        if changed_fields:
+        if flat_profile.hash_all_allowed_pii_as_ids():
             flat_profile.mark_for_update()
-            flat_profile.set_auto_merge_fields(changed_fields)
 
         # Add Ids from payload
         if isinstance(tracker_payload.profile, PrimaryEntity) and tracker_payload.profile.ids:

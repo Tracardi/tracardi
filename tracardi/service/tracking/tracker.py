@@ -56,6 +56,10 @@ async def os_tracker(
 
             # Save profile
             if flat_profile and flat_profile.has_not_saved_changes():
+
+                # Apply APM Hashing
+                flat_profile.hash_all_allowed_pii_as_ids()
+
                 # Sync save
                 await mutation_profile_db.save_flat_profile(flat_profile)
 

@@ -236,7 +236,7 @@ class FlatProfile(FlatEntity):
         return value in self and self[value] == equal
 
     def has_not_empty(self, value) -> bool:
-        return value in self and self[value] is not None
+        return value in self and bool(self[value])
 
     def set_if_none(self, field, value):
         if field not in self:
@@ -275,12 +275,12 @@ class FlatProfile(FlatEntity):
 
     # --------------- ID Hashing -----------------------
 
-    def hash_all_allowed_pii_as_ids(self) -> bool:
+    def hash_all_allowed_pii_as_ids(self, allowed:List[str]=None) -> bool:
 
         """ Used for creating hashed IDS """
 
         # Check for missing hash IDS, and create missing, Mark for update
-        changed_fields = self.create_auto_merge_hashed_ids()
+        changed_fields = self._create_auto_merge_hashed_ids(allowed)
         if changed_fields:
             # Add missing fields to auto_merge
             self.set_auto_merge_fields(changed_fields)
@@ -322,46 +322,56 @@ class FlatProfile(FlatEntity):
                 return True
         return False
 
-    def create_auto_merge_hashed_ids(self) -> Optional[set]:
+    def _create_auto_merge_hashed_ids(self, allowed: List[str] = None) -> Optional[set]:
 
         if tracardi.is_apm_on():
 
             new_ids = set()
             update_fields = set()
+            allowed_piis: List[str] = get_allowed_piis_to_be_hashed_as_ids() if allowed is None else allowed
 
-            if self.has('data.identifier.pk') and not self.has_hashed_pk():
+            if 'data.identifier.pk' in allowed_piis and self.has_not_empty(
+                    'data.identifier.pk') and not self.has_hashed_pk():
                 new_ids.add(hash_id(self['data.identifier.pk'], PREFIX_IDENTIFIER_PK))
                 update_fields.add('data.identifier.pk')
 
-            if self.has('data.identifier.id') and not self.has_hashed_id():
+            if 'data.identifier.id' in allowed_piis and self.has_not_empty(
+                    'data.identifier.id') and not self.has_hashed_id():
                 new_ids.add(hash_id(self['data.identifier.id'], PREFIX_IDENTIFIER_ID))
                 update_fields.add('data.identifier.id')
 
-            if self.has('data.contact.email.business') and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
+            if 'data.contact.email.business' in allowed_piis and self.has_not_empty(
+                    'data.contact.email.business') and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
                 new_ids.add(hash_id(self['data.contact.email.business'], PREFIX_EMAIL_BUSINESS))
                 update_fields.add('data.contact.email.business')
 
-            if self.has('data.contact.email.main') and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
+            if 'data.contact.email.main' in allowed_piis and self.has_not_empty(
+                    'data.contact.email.main') and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
                 new_ids.add(hash_id(self['data.contact.email.main'], PREFIX_EMAIL_MAIN))
                 update_fields.add('data.contact.email.main')
 
-            if self.has('data.contact.email.private') and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
+            if 'data.contact.email.private' in allowed_piis and self.has_not_empty(
+                    'data.contact.email.private') and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
                 new_ids.add(hash_id(self['data.contact.email.private'], PREFIX_EMAIL_PRIVATE))
                 update_fields.add('data.contact.email.private')
 
-            if self.has('data.contact.phone.business') and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
+            if 'data.contact.phone.business' in allowed_piis and self.has_not_empty(
+                    'data.contact.phone.business') and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
                 new_ids.add(hash_id(self['data.contact.phone.business'], PREFIX_PHONE_BUSINESS))
                 update_fields.add('data.contact.phone.business')
 
-            if self.has('data.contact.phone.main') and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
+            if 'data.contact.phone.main' in allowed_piis and self.has_not_empty(
+                    'data.contact.phone.main') and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
                 new_ids.add(hash_id(self['data.contact.phone.main'], PREFIX_PHONE_MAIN))
                 update_fields.add('data.contact.phone.main')
 
-            if self.has('data.contact.phone.mobile') and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
+            if 'data.contact.phone.mobile' in allowed_piis and self.has_not_empty(
+                    'data.contact.phone.mobile') and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
                 new_ids.add(hash_id(self['data.contact.phone.mobile'], PREFIX_PHONE_MOBILE))
                 update_fields.add('data.contact.phone.mobile')
 
-            if self.has('data.contact.phone.whatsapp') and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
+            if 'data.contact.phone.whatsapp' in allowed_piis and self.has_not_empty(
+                    'data.contact.phone.whatsapp') and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
                 new_ids.add(hash_id(self['data.contact.phone.whatsapp'], PREFIX_PHONE_WHATSUP))
                 update_fields.add('data.contact.phone.whatsapp')
 
@@ -372,7 +382,7 @@ class FlatProfile(FlatEntity):
 
         return None
 
-    def fill_changed_fields(self, custom_changes: Dict[str, List]=None):
+    def fill_changed_fields(self, custom_changes: Dict[str, List] = None):
         if not self.has_changes():
             return
 
