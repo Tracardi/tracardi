@@ -3,10 +3,11 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from uuid import uuid4
 
-from com_tracardi.service.tracking.tracker_profiler import TrackerProfiler
+
 from tracardi.config import tracardi
 from tracardi.domain.user import User
 from tracardi.service.singleton import Singleton
+from tracardi.service.tracking.tracker_profiler import TrackerProfiler
 
 ctx_id: ContextVar[str] = ContextVar("request_id", default="")
 
