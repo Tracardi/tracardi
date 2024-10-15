@@ -1,4 +1,4 @@
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict
 from .flow_graph_data import FlowGraphData
 from .flow_response import FlowResponse
 from .named_entity import NamedEntity

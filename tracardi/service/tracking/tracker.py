@@ -4,6 +4,7 @@ import time
 
 from tracardi.config import tracardi
 from tracardi.context import get_context
+from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.storage.elastic.interface.event import save_events_in_db
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
@@ -117,8 +118,9 @@ async def os_tracker(
 
         if workflow_result is not None:  # Workflow feature enabled
 
-            profile, session, events, ux, response, wf_changed_fields, is_wf_triggered = workflow_result
+            profile, session, events, ux, response, changed_fields, is_wf_triggered = workflow_result
 
+            wf_changed_fields = FieldChangeLogger(changed_fields)
             if is_wf_triggered and not wf_changed_fields.empty():
 
                 _changed_fields = wf_changed_fields.convert_to_list({

@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, List, Set
+from typing import Optional, List, Set, Dict
 from .entity import PrimaryEntity, Entity, FlatEntity
 from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
@@ -372,13 +372,17 @@ class FlatProfile(FlatEntity):
 
         return None
 
-    def fill_changed_fields(self):
+    def fill_changed_fields(self, custom_changes: Dict[str, List]=None):
         if not self.has_changes():
             return
 
         # Make sure that the dict is in metadata.fields
         self.set_if_not_instance('metadata.fields', {}, instance=dict)
 
-        # Iterate and set new values. Leave old intact.
-        for flat_field, change_data in self.get_change_logger().changes():  # type: str, list
-            self['metadata.fields'][flat_field] = change_data
+        if custom_changes:
+            for flat_field, change_data in custom_changes.items():  # type: str, list
+                self['metadata.fields'][flat_field] = change_data
+        else:
+            # Iterate and set new values. Leave old intact.
+            for flat_field, change_data in self.get_change_logger().changes():  # type: str, list
+                self['metadata.fields'][flat_field] = change_data

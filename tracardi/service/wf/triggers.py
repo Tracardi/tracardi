@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple, Dict
 from tracardi.config import tracardi
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.wf.field_mappings_cache import add_new_field_mappings
 from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
@@ -68,7 +67,7 @@ async def trigger_workflows(profile: Profile,
 
 async def _exec_workflow(profile_id: Optional[str], session: Session, events: List[Event],
                          tracker_payload: TrackerPayload) -> Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeLogger, bool]:
+    Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]:
     # Loads profile form cache
     # Profile needs to be loaded from cache. It may have changed during it was dispatched by event trigger
 
@@ -108,14 +107,12 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
             # Synchronous save
             await save_session_to_db_and_cache(session)
 
-        changed_fields = FieldChangeLogger(changed_fields)
-
     return profile, session, events, ux, response, changed_fields, is_wf_triggered
 
 
 async def exec_workflow(profile_id: Optional[str], session: Session, flat_events: List[FlatEvent],
                         tracker_payload: TrackerPayload) -> Optional[Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], FieldChangeLogger, bool]]:
+    Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
     if not tracardi.enable_workflow:
         return None
 
@@ -127,8 +124,8 @@ async def exec_workflow(profile_id: Optional[str], session: Session, flat_events
             profile_id, session, events, tracker_payload
         )
 
-    profile, session, events, ux, response, workflow_field_timestamp_log, is_wf_triggered = await _exec_workflow(
+    profile, session, events, ux, response, changed_fields, is_wf_triggered = await _exec_workflow(
         profile_id, session, events, tracker_payload
     )
 
-    return profile, session, events, ux, response, workflow_field_timestamp_log, is_wf_triggered
+    return profile, session, events, ux, response, changed_fields, is_wf_triggered

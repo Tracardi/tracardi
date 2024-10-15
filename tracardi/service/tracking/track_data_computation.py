@@ -5,7 +5,6 @@ from tracardi.context import get_context
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
-from tracardi.service.change_monitoring.field_change_logger import FieldChangeLogger
 from tracardi.service.tracking.ephemerals import remove_ephemeral_data
 from tracardi.service.tracking.event_data_computation import compute_events
 from tracardi.service.tracking.profile_data_computation import update_profile_last_geo, update_profile_email_type, \
