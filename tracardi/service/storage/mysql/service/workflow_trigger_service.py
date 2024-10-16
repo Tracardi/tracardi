@@ -1,7 +1,8 @@
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Set
 
 from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.rule import Rule
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache.trigger import load_trigger_rule
@@ -71,12 +72,8 @@ class WorkflowTriggerService(TableService):
     def _get_cache_key(source_id, event_type):
         return f"rules-{source_id}-{event_type}"
 
-    async def _get_rules_for_source_and_event_type(self, source: Entity, events: List[Event]) -> Tuple[
+    async def _get_rules_for_source_and_event_type(self, source: Entity, event_types: Set[str]) -> Tuple[
         Dict[str, List[Rule]], bool]:
-
-        # Get event types for valid events
-
-        event_types = {event.type for event in events if event.metadata.valid}
 
         # Cache rules per event types
 
@@ -100,9 +97,21 @@ class WorkflowTriggerService(TableService):
 
         return rules[event_type_id]
 
+    async def has_rules_for_events(self, source: Entity, events: List[FlatEvent]) -> bool:
+        # Get event types for valid events
+        event_types = {event.type for event in events if event.is_valid()}
+
+        _, has_routing_rules = await self._get_rules_for_source_and_event_type(source, event_types)
+
+        return has_routing_rules
+
     async def load_by_source_and_events(self, source: Entity, events: List[Event]) -> Optional[
         List[Tuple[List[Rule], Event]]]:
-        rules, has_routing_rules = await self._get_rules_for_source_and_event_type(source, events)
+
+        # Get event types for valid events
+        event_types = {event.type for event in events if event.metadata.valid}
+
+        rules, has_routing_rules = await self._get_rules_for_source_and_event_type(source, event_types)
 
         if not has_routing_rules:
             return None
