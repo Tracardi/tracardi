@@ -1,17 +1,10 @@
-import logging
-
-from tracardi.config import tracardi
 from tracardi.domain.configuration import Configuration
-from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.configuration_mapping import map_to_configuration_table
 from tracardi.service.storage.mysql.schema.table import ConfigurationTable
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.service.storage.mysql.service.table_filtering import where_with_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
 
 # --------------------------------------------------------
 # This Service Runs in Production and None-Production Mode

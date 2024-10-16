@@ -1,16 +1,12 @@
-from tracardi.config import tracardi
 from tracardi.context import Context, ServerContext
-from tracardi.exceptions.log_handler import log_handler
+from tracardi.exceptions.log_handler import get_logger
 from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.task_progress import task_create, task_status, task_finish, task_progress
 from time import sleep
 from tracardi.worker.service.worker.migration_workers.utils.migration_error import MigrationError
-import logging
 from tracardi.worker.service.worker.migration_workers.utils.client import ElasticClient
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
+logger = get_logger(__name__)
 
 
 async def reindex(schema: MigrationSchema, url: str, context: Context):

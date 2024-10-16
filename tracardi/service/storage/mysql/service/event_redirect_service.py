@@ -1,18 +1,10 @@
-import logging
 from typing import Tuple, Optional
-
-from tracardi.config import tracardi
 from tracardi.domain.event_redirect import EventRedirect
-from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.event_redirect_mapping import map_to_event_redirect_table, \
     map_to_event_redirect
 from tracardi.service.storage.mysql.schema.table import EventRedirectTable
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
-
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
 
 
 class EventRedirectService(TableService):

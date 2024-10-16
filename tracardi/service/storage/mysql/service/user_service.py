@@ -1,11 +1,6 @@
 from typing import Optional, List, Tuple
-
-import logging
-
 from tracardi.domain.user_payload import UserPayload
-from tracardi.config import tracardi
 from tracardi.domain.user import User
-from tracardi.exceptions.log_handler import log_handler
 from tracardi.service.storage.mysql.mapping.user_mapping import map_to_user_table, map_to_user
 from tracardi.service.storage.mysql.schema.table import UserTable
 from tracardi.service.storage.mysql.service.table_service import TableService
@@ -13,9 +8,6 @@ from tracardi.service.storage.mysql.service.table_filtering import sql_functions
     where_with_context
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
-logger = logging.getLogger(__name__)
-logger.setLevel(tracardi.logging_level)
-logger.addHandler(log_handler)
 
 # --------------------------------------------------------
 # This Service Runs in Production and None-Production Mode
@@ -28,6 +20,7 @@ def _where_with_context(*clause):
         False,
         *clause
     )
+
 
 class UserService(TableService):
 
@@ -45,7 +38,6 @@ class UserService(TableService):
                                         limit=limit,
                                         offset=offset)
 
-
     async def load_by_id(self, user_id: str) -> SelectResult:
         return await self._load_by_id(UserTable, primary_id=user_id, server_context=False)
 
@@ -57,11 +49,10 @@ class UserService(TableService):
     async def upsert(self, user: User):
         return await self._replace(UserTable, map_to_user_table(user))
 
-
     # Custom
 
     async def load_by_credentials(self, email: str, password: str) -> Optional[User]:
-        where = _where_with_context( # tenant only mode
+        where = _where_with_context(  # tenant only mode
             UserTable.email == email,
             UserTable.password == User.encode_password(password),
             UserTable.enabled == True
@@ -74,9 +65,8 @@ class UserService(TableService):
 
         return records.map_first_to_object(map_to_user)
 
-
     async def load_by_role(self, role: str) -> List[User]:
-        where = _where_with_context( # tenant only mode
+        where = _where_with_context(  # tenant only mode
             sql_functions().find_in_set(role, UserTable.roles) > 0
         )
 
@@ -87,8 +77,8 @@ class UserService(TableService):
 
         return list(records.map_to_objects(map_to_user))
 
-    async def load_by_name(self, name: str, start:int, limit: int) -> List[User]:
-        where = _where_with_context( # tenant only mode
+    async def load_by_name(self, name: str, start: int, limit: int) -> List[User]:
+        where = _where_with_context(  # tenant only mode
             UserTable.name.like(name)
         )
 
@@ -99,7 +89,7 @@ class UserService(TableService):
         return users
 
     async def check_if_exists(self, email: str) -> bool:
-        where = _where_with_context( # tenant only mode
+        where = _where_with_context(  # tenant only mode
             UserTable.email == email
         )
 
@@ -116,7 +106,7 @@ class UserService(TableService):
             )
         return None
 
-    async def update_if_exist(self, user_id:str, user_payload: UserPayload) -> Tuple[bool, User]:
+    async def update_if_exist(self, user_id: str, user_payload: UserPayload) -> Tuple[bool, User]:
 
         user_record = await self.load_by_id(user_id)
 
@@ -127,7 +117,8 @@ class UserService(TableService):
 
         user = User(
             id=user_id,
-            password=User.encode_password(user_payload.password) if user_payload.password is not None else existing_user.password,
+            password=User.encode_password(
+                user_payload.password) if user_payload.password is not None else existing_user.password,
             name=user_payload.name if user_payload.name is not None else existing_user.name,
             email=user_payload.email if user_payload.email is not None else existing_user.email,
             roles=user_payload.roles if user_payload.roles is not None else existing_user.roles,
